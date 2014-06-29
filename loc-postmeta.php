@@ -44,6 +44,7 @@ function showPosition(position)
   {
 	document.getElementById("geo_latitude").value = position.coords.latitude;
      	document.getElementById("geo_longitude").value = position.coords.longitude;
+	document.getElementById("geo_address").value = json.address.road + ',' + json.address.city;
 
   }
   </script>
@@ -51,7 +52,7 @@ function showPosition(position)
 
   <p>
     <label for="geo_public"><?php _e( "Public", 'simple-location' ); ?></label>
-    <input type="checkbox" name="geo_public" id="geo_public" value="1" />
+    <input type="checkbox" name="geo_public" id="geo_public" <?php checked(get_post_meta( $object->ID, 'geo_public', true ), "1" ); ?>" />
     <br />
     <label for="geo_latitude"><?php _e( "Latitude", 'simple-location' ); ?></label>
     <input type="text" name="geo_latitude" id="geo_latitude" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_latitude', true ) ); ?>" size="30" />
@@ -62,6 +63,10 @@ function showPosition(position)
     <label for="geo_address"><?php _e( "Human-Readable Address (Optional)", 'simple-location' ); ?></label>
     <br />
     <input type="text" name="geo_address" id="geo_address" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_address', true ) ); ?>" size="70" />   
+    <br />
+    <label for="geo_venue"><?php _e( "Venue - Name of the Location(Example: Home, John's Pizza, Wordpress University, etc (Optional)", 'simple-location' ); ?></label>
+    <br />
+    <input type="text" name="geo_venue" id="geo_venue" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_venue', true ) ); ?>" size="70" />   
      <button type="button" onclick="getLocation();return false;">Retrieve Location</button>
  </p>
 
@@ -114,13 +119,17 @@ function locationbox_save_post_meta( $post_id ) {
 	if( isset( $_POST[ 'geo_address' ] ) ) {
         update_post_meta( $post_id, 'geo_address', esc_attr( $_POST[ 'geo_address' ] ) );
     }
-	if( isset( $_POST[ 'geo_public' ] ) ) {
-        update_post_meta( $post_id, 'geo_public', esc_attr( $_POST[ 'geo_public' ] ) );
+	// Unlike the other fields, venue is not part of Geodata, but is essentially a title for the address
+	if( isset( $_POST[ 'geo_venue' ] ) ) {
+        update_post_meta( $post_id, 'geo_venue', esc_attr( $_POST[ 'geo_venue' ] ) );
     }
-
+	$public= $_POST[ 'geo_public' ];
+	if($public)
+	  		update_post_meta($post_id, 'geo_public', 1);
+	  	else
+	  		update_post_meta($post_id, 'geo_public', 0);
 }
 
 add_action( 'save_post', 'locationbox_save_post_meta' );
 
 ?>
-

@@ -12,3 +12,6 @@
 // Add Location Post Meta
 require_once( plugin_dir_path( __FILE__ ) . '/loc-postmeta.php');
 
+// Add Location Display Functions
+require_once( plugin_dir_path( __FILE__ ) . '/location-view.php');
+
