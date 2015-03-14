@@ -1,0 +1,62 @@
+# Copyright (C) 2015 David Shanske
+# This file is distributed under the CC0.
+msgid ""
+msgstr ""
+"Project-Id-Version: Simple Location 0.01\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/simple-location\n"
+"POT-Creation-Date: 2015-03-14 19:27:48+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: grunt-wp-i18n 0.4.9\n"
+
+#: loc-postmeta.php:23
+msgid "Location"
+msgstr ""
+
+#: loc-postmeta.php:55
+msgid "Public"
+msgstr ""
+
+#: loc-postmeta.php:58
+msgid "Latitude"
+msgstr ""
+
+#: loc-postmeta.php:61
+msgid "Longitude"
+msgstr ""
+
+#: loc-postmeta.php:64
+msgid "Human-Readable Address (Optional)"
+msgstr ""
+
+#: loc-postmeta.php:68
+msgid ""
+"Venue - Name or URL of the Location(Example: Home, John's Pizza, Wordpress "
+"University, etc (Optional)"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "Simple Location"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://tiny.n9n.us"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Adds Geodata to Wordpress Posts. Designed to be simple, with few bells and "
+"whistles"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "David Shanske"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://david.shanske.com"
+msgstr ""

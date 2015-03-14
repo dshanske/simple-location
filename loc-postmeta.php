@@ -6,6 +6,7 @@
 add_action('load-post.php', 'locbox_setup');
 add_action('load-post-new.php', 'locbox_setup');
 
+
 /* Meta box setup function. */
 function locbox_setup() {
 
@@ -15,17 +16,17 @@ function locbox_setup() {
 
 /* Create one or more meta boxes to be displayed on the post editor screen. */
 function locbox_add_postmeta_boxes() {
-
-  add_meta_box(
-    'locationbox-meta',      // Unique ID
-    esc_html__( 'Location', 'simple-location' ),    // Title
-    'location_metabox',   // Callback function
-    'post',         // Admin page (or post type)
-    'normal',         // Context
-    'default'         // Priority
-  );
-
-
+  $screens = array( 'post', 'page' );
+  foreach ( $screens as $screen ) {
+    add_meta_box(
+      'locationbox-meta',      // Unique ID
+      esc_html__( 'Location', 'simple-location' ),    // Title
+      'location_metabox',   // Callback function
+      $screen,         // Admin page (or post type)
+      'normal',         // Context
+      'default'         // Priority
+    );
+  }  
 }
 
 function location_metabox( $object, $box ) { ?>
@@ -62,9 +63,9 @@ function showPosition(position)
     <br />
     <label for="geo_address"><?php _e( "Human-Readable Address (Optional)", 'simple-location' ); ?></label>
     <br />
-    <input type="text" name="geo_address" id="geo_address" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_address', true ) ); ?>" size="70" />   
+    <textarea name="geo_address" id="geo_address" cols="70"><?php echo esc_attr( get_post_meta( $object->ID, 'geo_address', true ) ); ?></textarea>   
     <br />
-    <label for="geo_venue"><?php _e( "Venue - Name of the Location(Example: Home, John's Pizza, Wordpress University, etc (Optional)", 'simple-location' ); ?></label>
+    <label for="geo_venue"><?php _e( "Venue - Name or URL of the Location(Example: Home, John's Pizza, Wordpress University, etc (Optional)", 'simple-location' ); ?></label>
     <br />
     <input type="text" name="geo_venue" id="geo_venue" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_venue', true ) ); ?>" size="70" />   
      <button type="button" onclick="getLocation();return false;">Retrieve Location</button>

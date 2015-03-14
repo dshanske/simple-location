@@ -2,10 +2,10 @@
 /**
  * Plugin Name: Simple Location
  * Plugin URI: http://tiny.n9n.us
- * Description: Adds Geodata to Wordpress Posts. Designed to be simple, with few bells and whistles
+ * Description: Adds Location to Wordpress Pages and Posts. 
  * Version: 0.01
  * Author: David Shanske
- * Author URI: http://david.shanske.com
+ * Author URI: https://david.shanske.com
  * License: CC0
  */
 
