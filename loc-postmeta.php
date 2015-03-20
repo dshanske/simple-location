@@ -30,36 +30,16 @@ function locbox_add_postmeta_boxes() {
 }
 
 function location_metabox( $object, $box ) { ?>
-
   <?php wp_nonce_field( 'location_metabox', 'location_metabox_nonce' ); ?>
-   <script language="javascript">
-	function getLocation()
-  	   {
-  		if (navigator.geolocation)
-			{
-		      navigator.geolocation.getCurrentPosition(showPosition);
-	   }
-  		else{alert("Geolocation is not supported by this browser.");}
-  }
-function showPosition(position)
-  {
-	document.getElementById("geo_latitude").value = position.coords.latitude;
-     	document.getElementById("geo_longitude").value = position.coords.longitude;
-	document.getElementById("geo_address").value = json.address.road + ',' + json.address.city;
-
-  }
-  </script>
-
-
   <p>
     <label for="geo_public"><?php _e( "Public", 'simple-location' ); ?></label>
     <input type="checkbox" name="geo_public" id="geo_public" <?php checked(get_post_meta( $object->ID, 'geo_public', true ), "1" ); ?>" />
     <br />
     <label for="geo_latitude"><?php _e( "Latitude", 'simple-location' ); ?></label>
-    <input type="text" name="geo_latitude" id="geo_latitude" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_latitude', true ) ); ?>" size="30" />
+    <input type="text" name="geo_latitude" id="geo_latitude" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_latitude', true ) ); ?>" size="10" />
     <br />
     <label for="geo_longitude"><?php _e( "Longitude", 'simple-location' ); ?></label>
-    <input type="text" name="geo_longitude" id="geo_longitude" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_longitude', true ) ); ?>" size="30" />
+    <input type="text" name="geo_longitude" id="geo_longitude" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_longitude', true ) ); ?>" size="10" />
     <br />
     <label for="geo_address"><?php _e( "Human-Readable Address (Optional)", 'simple-location' ); ?></label>
     <br />
@@ -112,10 +92,10 @@ function locationbox_save_post_meta( $post_id ) {
 
 	/* OK, its safe for us to save the data now. */
 	if( isset( $_POST[ 'geo_latitude' ] ) ) {
-        update_post_meta( $post_id, 'geo_latitude', esc_attr( $_POST[ 'geo_latitude' ] ) );
+        update_post_meta( $post_id, 'geo_latitude', esc_attr( clean_coordinate($_POST[ 'geo_latitude' ]) ) );
 	}
 	if( isset( $_POST[ 'geo_longitude' ] ) ) {
-        update_post_meta( $post_id, 'geo_longitude', esc_attr( $_POST[ 'geo_longitude' ] ) );
+        update_post_meta( $post_id, 'geo_longitude', esc_attr( clean_coordinate($_POST[ 'geo_longitude' ]) ) );
     }
 	if( isset( $_POST[ 'geo_address' ] ) ) {
         update_post_meta( $post_id, 'geo_address', esc_attr( $_POST[ 'geo_address' ] ) );
