@@ -25,8 +25,6 @@ It allows pages to act as venues, which is a page for a specific location.
 [WordPress Geodata](http://codex.wordpress.org/Geodata) is an existing standard
 used to store geodata about a post.
 
-It consists of four fields: latitude, longitude, public, and address. For 
-Indieweb Compatibility, there is a 5th parameter, venue.
+It consists of four fields: latitude, longitude, public, and address.
 
-Venue would identify the location's name or would optionally be a URL for a 
-Venue elsewhere on the site.
+

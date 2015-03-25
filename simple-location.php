@@ -15,6 +15,9 @@ require_once( plugin_dir_path( __FILE__ ) . '/loc-postmeta.php');
 // Add Location Display Functions
 require_once( plugin_dir_path( __FILE__ ) . '/location-view.php');
 
+// Nominatim Functions 
+require_once( plugin_dir_path( __FILE__ ) . '/nominatim.php');
+
 // Add Tags to Pages to support Venues
 function simloc_init() {
   register_taxonomy_for_object_type('post_tag', 'page');
