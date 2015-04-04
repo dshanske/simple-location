@@ -12,7 +12,7 @@ function reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
        }
   $street = $address['house_number'] . ' ' . $address['road'];
   $addr = array(
-        'name' => $address['attraction'] ?: $address['building'] ?: $address['highway'] ?: null,
+        'name' => $address['attraction'] ?: $address['building'] ?: $address['hotel'] ?: $address['highway'] ?: null,
         'street-address' => $street,
         'extended-address' => $address['boro'] ?: $address['neighbourhood'] ?: $address['suburb'] ?: null,
         'locality' => $address['hamlet'] ?: $address['village'] ?: $address['town'] ?: $address['city'] ?: null,
@@ -22,9 +22,9 @@ function reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
         'country-code' => $address['country_code'] ?: null,
         'latitude' => clean_coordinate($lat),
         'longitude' => clean_coordinate($lon),
-        'altitude' => $alt
+        'altitude' => $alt,
+        'raw' => $address
   );
-//  $addr['name'] = nameForLocation($addr);
   return array_filter($addr);
 }
 

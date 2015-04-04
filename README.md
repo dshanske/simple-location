@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** dshanske  
 **Tags:** location, indieweb  
-**Stable tag:** 0.1.0  
+**Stable tag:** 1.0.0  
 **Requires at least:** 4.0  
 **Tested up to:** 4.1  
 **License:** GPLv2 or later  
@@ -18,7 +18,7 @@ It does this using the HTML5 geolocation API. As it stores the GeoData in a
 WordPress standard format, GeoData can be also be stored by the mobile 
 WordPress apps.
 
-It allows pages to act as venues, which is a page for a specific location.
+It also adds location data to pages, allowing you to create a page about a location.
 
 ## WordPress GeoData ##
 

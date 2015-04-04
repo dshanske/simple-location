@@ -1,6 +1,11 @@
 <?php
 // Adds Post Meta Box for Location
 
+if (!function_exists('ifset') ) {
+  function ifset(&$var, $default = false) {
+      return isset($var) ? $var : $default;
+  }
+}
 
 // Add meta box to new post/post pages only 
 add_action('load-post.php', 'locbox_setup');
@@ -11,6 +16,7 @@ add_action('load-post-new.php', 'locbox_setup');
 function locbox_setup() {
 
   /* Add meta boxes on the 'add_meta_boxes' hook. */
+  add_action( 'add_meta_boxes', 'venuebox_add_postmeta_boxes' );
   add_action( 'add_meta_boxes', 'locbox_add_postmeta_boxes' );
   add_action( 'add_meta_boxes', 'adrbox_add_postmeta_boxes' );
 }
@@ -45,6 +51,30 @@ function adrbox_add_postmeta_boxes() {
   }
 }
 
+/* Create a venue meta boxes to only be displayed on the page editor screen. */
+function venuebox_add_postmeta_boxes() {
+  $screens = array( 'page' );
+  foreach ( $screens as $screen ) {
+    add_meta_box(
+      'venuebox-meta',      // Unique ID
+      esc_html__( 'Venue', 'simple-location' ),    // Title
+      'venue_metabox',   // Callback function
+      $screen,         // Admin page (or post type)
+      'normal',         // Context
+      'default'         // Priority
+    );
+  }
+}
+
+function venue_metabox( $object, $box ) { ?>
+  <?php wp_nonce_field( 'venue_metabox', 'venue_metabox_nonce' ); ?>
+  <p>
+    <label for="is_venue"><?php _e( "Set Page as Venue", 'simple-location' ); ?></label>
+      <input type="checkbox" name="is_venue" id="is_venue" <?php checked(get_post_meta( $object->ID, 'is_venue', true ), "1" ); ?>" />
+    <br />
+
+<?php }
+
 
 function location_metabox( $object, $box ) { ?>
   <?php wp_nonce_field( 'location_metabox', 'location_metabox_nonce' ); ?>
@@ -69,9 +99,6 @@ function location_metabox( $object, $box ) { ?>
     <label for="geo_altitude"><?php _e( "Altitude", 'simple-location' ); ?></label>
     <input type="text" name="geo_altitude" id="geo_altitude" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_altitude', true ) ); ?>" size="10" />
     <br />
-    <label for="geo_venue"><?php _e( "Venue - Name or URL of the Location(Example: Home, John's Pizza, Wordpress University, etc (Optional)", 'simple-location' ); ?></label>
-    <br />
-    <input type="text" name="geo_venue" id="geo_venue" value="<?php echo esc_attr( get_post_meta( $object->ID, 'geo_venue', true ) ); ?>" size="70" />   
      <button type="button" onclick="getLocation();return false;">Retrieve Location</button>
  </p>
 
@@ -95,32 +122,27 @@ function address_metabox( $object, $box ) { ?>
   <p>
     <label for="street-address"><?php _e( "Street Address", 'simple-location' ); ?></label>
     <br />
-    <input type="text" name="street-address" id="street-address" value="<?php echo $address['street-address']; ?>" size="70" />
+    <input type="text" name="street-address" id="street-address" value="<?php echo ifset($address['street-address'], ""); ?>" size="70" />
   </p>
   <p>
    <label for="extended-address"><?php _e( "Extended Address", 'simple-location' ); ?></label>
     <br /> 
-    <input type="text" name="extended-address" id="extended-address" value="<?php echo $address['extended-address']; ?>" size="70" />
+    <input type="text" name="extended-address" id="extended-address" value="<?php echo ifset($address['extended-address'], ""); ?>" size="70" />
  </p>
   <p> 
-   <label for="locality"><?php _e( "Locality", 'simple-location' ); ?></label>
+   <label for="locality"><?php _e( "City/Town/Village", 'simple-location' ); ?></label>
     <br />
-    <input type="text" name="locality" id="locality" value="<?php echo $address['locality']; ?>" size="70" />
+    <input type="text" name="locality" id="locality" value="<?php echo ifset($address['locality'], ""); ?>" size="70" />
  </p>
   <p>
-   <label for="region"><?php _e( "Region", 'simple-location' ); ?></label>
+   <label for="region"><?php _e( "State/County/Province", 'simple-location' ); ?></label>
     <br />
-    <input type="text" name="region" id="region" value="<?php echo $address['region']; ?>" size="70" />
+    <input type="text" name="region" id="region" value="<?php echo ifset($address['region'], ""); ?>" size="70" />
  </p>
 
- <label for="country-name"><?php _e( "Country Name", 'simple-location' ); ?></label>
+ <label for="country-name"><?php _e( "Country", 'simple-location' ); ?></label>
     <br />
-    <input type="text" name="country-name" id="country-name" value="<?php echo $address['country-name']; ?>" size="70" />
- </p>
-
- <label for="postal-code"><?php _e( "Postal Code", 'simple-location' ); ?></label>
-    <br />
-    <input type="text" name="postal-code" id="postal-code" value="<?php echo $address['postal-code']; ?>" size="10" />
+    <input type="text" name="country-name" id="country-name" value="<?php echo ifset($address['country-name'], ""); ?>" size="70" />
  </p>
 
 
@@ -195,9 +217,49 @@ function locationbox_save_post_meta( $post_id ) {
         update_post_meta($post_id, 'geo_map', 0);
 }
 
+/* Save the meta box's post metadata. */
+function venuebox_save_post_meta( $post_id ) {
+  /*
+   * We need to verify this came from our screen and with proper authorization,
+   * because the save_post action can be triggered at other times.
+   */
 
+  // Check if our nonce is set.
+  if ( ! isset( $_POST['location_metabox_nonce'] ) ) {
+    return;
+  }
+  // Verify that the nonce is valid.
+  if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
+    return;
+  }
+  // If this is an autosave, our form has not been submitted, so we don't want to do anything.
+  if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+    return;
+  }
+  // Check the user's permissions.
+  if ( isset( $_POST['post_type'] ) && 'page' == $_POST['post_type'] ) {
+    if ( ! current_user_can( 'edit_page', $post_id ) ) {
+      return;
+    }
+  } else {
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+      return;
+    }
+  }
+ $isvenue= $_POST[ 'is_venue' ];
+  if($isvenue)
+        update_post_meta($post_id, 'isvenue', 1);
+      else
+        update_post_meta($post_id, 'isvenue', 0);
+
+
+
+}
 
 add_action( 'save_post', 'locationbox_save_post_meta' );
+
+add_action( 'save_post', 'venuebox_save_post_meta' );
+
 
 function addressbox_save_post_meta( $post_id ) {
   /*
@@ -229,39 +291,37 @@ function addressbox_save_post_meta( $post_id ) {
   }
   $lookup= $_POST[ 'geo_lookup' ];
   $adr = array();
-  $reverse_adr = array();
   if($lookup) {
     if ( !empty( $_POST[ 'geo_latitude' ] ) && !empty( $_POST[ 'geo_longitude' ] ) ) {
-        $reverse_adr = reverse_lookup($_POST['geo_latitude'], $_POST['geo_longitude'], $_POST['geo_altitude']);
+        $reverse_adr = reverse_lookup($_POST['geo_latitude'], $_POST['geo_longitude']);
+        update_post_meta( $post_id, 'mf2_adr', $reverse_adr );
     }
+   update_post_meta($post_id, 'geo_lookup', 0);
   }
-  update_post_meta($post_id, 'geo_lookup', 0);
-  if( !empty( $_POST[ 'geo_address' ] ) ) {
-     update_post_meta($post_id, 'geo_address', $_POST[ 'geo_address'] );
-    } 
   else {
-    update_post_meta($post_id, 'geo_address', nameForLocation($reverse_adr) );
-  }
+    if( !empty( $_POST[ 'geo_address' ] ) ) {
+      update_post_meta($post_id, 'geo_address', $_POST[ 'geo_address'] );
+    } 
+    else {
+    update_post_meta($post_id, 'geo_address', $reverse_adr['name'] );
+    }
    if( !empty( $_POST[ 'street-address' ] ) ) {
      $adr['street-address'] = $_POST[ 'street-address' ];
-    }
- if( !empty( $_POST[ 'extended-address' ] ) ) {
-     $adr['extended-address'] = $_POST[ 'extended-address' ];
-    }
- if( !empty( $_POST[ 'locality' ] ) ) {
-     $adr['locality'] = $_POST[ 'locality' ];
-    }
- if( !empty( $_POST[ 'region' ] ) ) {
-     $adr['region'] = $_POST[ 'region' ];
-    }
- if( !empty( $_POST[ 'country-name' ] ) ) {
-     $adr['country-name'] = $_POST[ 'country-name' ];
-    }
- if( !empty( $_POST[ 'postal-code' ] ) ) {
-     $adr['postal-code'] = $_POST[ 'postal-code' ];
-    }
-  $adr = array_merge($reverse_adr, $adr);
+   }
+   if( !empty( $_POST[ 'extended-address' ] ) ) {
+    $adr['extended-address'] = $_POST[ 'extended-address' ];
+   }
+   if( !empty( $_POST[ 'locality' ] ) ) {
+    $adr['locality'] = $_POST[ 'locality' ];
+   }
+   if( !empty( $_POST[ 'region' ] ) ) {
+    $adr['region'] = $_POST[ 'region' ];
+   }
+   if( !empty( $_POST[ 'country-name' ] ) ) {
+    $adr['country-name'] = $_POST[ 'country-name' ];
+   }
   update_post_meta( $post_id, 'mf2_adr', $adr );
+  }
 }
 
 add_action( 'save_post', 'addressbox_save_post_meta' );
