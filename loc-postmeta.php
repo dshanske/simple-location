@@ -8,26 +8,26 @@ if (!function_exists('ifset') ) {
 }
 
 // Add meta box to new post/post pages only 
-add_action('load-post.php', 'locbox_setup');
-add_action('load-post-new.php', 'locbox_setup');
+add_action('load-post.php', 'slocbox_setup');
+add_action('load-post-new.php', 'slocbox_setup');
 
 
 /* Meta box setup function. */
-function locbox_setup() {
+function slocbox_setup() {
 
   /* Add meta boxes on the 'add_meta_boxes' hook. */
-  add_action( 'add_meta_boxes', 'locbox_add_postmeta_boxes' );
-  add_action( 'add_meta_boxes', 'adrbox_add_postmeta_boxes' );
+  add_action( 'add_meta_boxes', 'sloc_locbox_add_postmeta_boxes' );
+  add_action( 'add_meta_boxes', 'sloc_adrbox_add_postmeta_boxes' );
 }
 
 /* Create location meta boxes to be displayed on the post editor screen. */
-function locbox_add_postmeta_boxes() {
+function sloc_locbox_add_postmeta_boxes() {
   $screens = array( 'post', 'page' );
   foreach ( $screens as $screen ) {
     add_meta_box(
       'locationbox-meta',      // Unique ID
       esc_html__( 'Location', 'simple-location' ),    // Title
-      'location_metabox',   // Callback function
+      'sloc_location_metabox',   // Callback function
       $screen,         // Admin page (or post type)
       'normal',         // Context
       'default'         // Priority
@@ -36,13 +36,13 @@ function locbox_add_postmeta_boxes() {
 }
 
 /* Create address meta boxes to be displayed on the post editor screen. */
-function adrbox_add_postmeta_boxes() {
+function sloc_adrbox_add_postmeta_boxes() {
   $screens = array( 'post', 'page' );
   foreach ( $screens as $screen ) {
     add_meta_box(
       'addressbox-meta',      // Unique ID
       esc_html__( 'Address', 'simple-location' ),    // Title
-      'address_metabox',   // Callback function
+      'sloc_address_metabox',   // Callback function
       $screen,         // Admin page (or post type)
       'normal',         // Context
       'default'         // Priority
@@ -50,7 +50,7 @@ function adrbox_add_postmeta_boxes() {
   }
 }
 
-function location_metabox( $object, $box ) { ?>
+function sloc_location_metabox( $object, $box ) { ?>
   <?php wp_nonce_field( 'location_metabox', 'location_metabox_nonce' ); ?>
   <p>
     <label for="geo_public"><?php _e( "Display Location", 'simple-location' ); ?></label>
@@ -78,7 +78,7 @@ function location_metabox( $object, $box ) { ?>
 
 <?php }
 
-function address_metabox( $object, $box ) { ?>
+function sloc_address_metabox( $object, $box ) { ?>
   <?php 
     wp_nonce_field( 'address_metabox', 'address_metabox_nonce' ); 
     $address = get_post_meta( $object->ID, 'mf2_adr');
@@ -127,7 +127,7 @@ function address_metabox( $object, $box ) { ?>
 
 
 /* Save the meta box's post metadata. */
-function locationbox_save_post_meta( $post_id ) {
+function sloc_locationbox_save_post_meta( $post_id ) {
 	/*
 	 * We need to verify this came from our screen and with proper authorization,
 	 * because the save_post action can be triggered at other times.
@@ -187,9 +187,9 @@ function locationbox_save_post_meta( $post_id ) {
         update_post_meta($post_id, 'geo_map', 0);
 }
 
-add_action( 'save_post', 'locationbox_save_post_meta' );
+add_action( 'save_post', 'sloc_locationbox_save_post_meta' );
 
-function addressbox_save_post_meta( $post_id ) {
+function sloc_addressbox_save_post_meta( $post_id ) {
   /*
    * We need to verify this came from our screen and with proper authorization,
    * because the save_post action can be triggered at other times.
@@ -252,6 +252,6 @@ function addressbox_save_post_meta( $post_id ) {
   }
 }
 
-add_action( 'save_post', 'addressbox_save_post_meta' );
+add_action( 'save_post', 'sloc_addressbox_save_post_meta' );
 
 ?>

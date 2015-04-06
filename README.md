@@ -24,7 +24,12 @@ It also adds location data to pages, allowing you to create a page about a locat
 
 Simple Location uses Nominatim and the OpenStreetMap project by default for geodata. The plugin may retrieve resources from these services.
 
-To generate maps, the plugin is currently using [Static Map Lite](https://github.com/dfacts/staticmaplite) by Gerhard Koch. Future versions of the plugin may switch to alternative map generation options or offer a choice of service providers.
+To generate maps, the plugin is currently using [Static Map Lite](https://github.com/dfacts/staticmaplite) by Gerhard Koch. This code optionally retrieves tiles for the static maps from three different OSM servers. The OSM tile CDN offered 
+by MapQuest, OSMs own tile server, and the OpenCycleMap tile server which is 
+also part of the OSM project. By default, the plugin is only using the OSM tile
+server.
+
+Future versions of the plugin may switch to alternative map generation options or offer a choice of service providers.
 
 ## WordPress GeoData ##
 
