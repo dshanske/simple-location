@@ -8,6 +8,9 @@
  * Author URI: https://david.shanske.com
  */
 
+// Configuration Functions
+require_once( plugin_dir_path( __FILE__ ) . '/location-config.php');
+
 // Add Location Post Meta
 require_once( plugin_dir_path( __FILE__ ) . '/loc-postmeta.php');
 
