@@ -107,7 +107,10 @@ function location_metabox( $object, $box ) { ?>
 function address_metabox( $object, $box ) { ?>
   <?php 
     wp_nonce_field( 'address_metabox', 'address_metabox_nonce' ); 
-    $address = array_pop( get_post_meta( $object->ID, 'mf2_adr') );
+    $address = get_post_meta( $object->ID, 'mf2_adr');
+    if ($address!=false) {
+      $address = array_pop($address);
+    }
   ?>
  <p> <?php _e('This data is automatically imported from the location coordinates when available on save/publish if the below is checked', 'simple-location'); ?></p>
     <label for="geo_lookup"><?php _e("Address Lookup", 'simple-location' ); ?></label>
@@ -192,13 +195,6 @@ function locationbox_save_post_meta( $post_id ) {
   else {
           delete_post_meta( $post_id, 'geo_longitude');
   }
-	// Unlike the other fields, venue is not part of Geodata, but is essentially a title for the address
-	if( !empty( $_POST[ 'geo_venue' ] ) ) {
-        update_post_meta( $post_id, 'geo_venue', esc_attr( $_POST[ 'geo_venue' ] ) );
-    }
-  else {
-          delete_post_meta( $post_id, 'geo_venue');
-       }
 	$public= $_POST[ 'geo_public' ];
 	if($public)
 	  		update_post_meta($post_id, 'geo_public', 1);
@@ -246,14 +242,6 @@ function venuebox_save_post_meta( $post_id ) {
       return;
     }
   }
- $isvenue= $_POST[ 'is_venue' ];
-  if($isvenue)
-        update_post_meta($post_id, 'isvenue', 1);
-      else
-        update_post_meta($post_id, 'isvenue', 0);
-
-
-
 }
 
 add_action( 'save_post', 'locationbox_save_post_meta' );
@@ -300,25 +288,25 @@ function addressbox_save_post_meta( $post_id ) {
   }
   else {
     if( !empty( $_POST[ 'geo_address' ] ) ) {
-      update_post_meta($post_id, 'geo_address', $_POST[ 'geo_address'] );
+      update_post_meta($post_id, 'geo_address', sanitize_text_field($_POST[ 'geo_address']) );
     } 
     else {
     update_post_meta($post_id, 'geo_address', $reverse_adr['name'] );
     }
    if( !empty( $_POST[ 'street-address' ] ) ) {
-     $adr['street-address'] = $_POST[ 'street-address' ];
+     $adr['street-address'] = sanitize_text_field($_POST[ 'street-address' ]);
    }
    if( !empty( $_POST[ 'extended-address' ] ) ) {
-    $adr['extended-address'] = $_POST[ 'extended-address' ];
+    $adr['extended-address'] = sanitize_text_field($_POST[ 'extended-address' ]);
    }
    if( !empty( $_POST[ 'locality' ] ) ) {
-    $adr['locality'] = $_POST[ 'locality' ];
+    $adr['locality'] = sanitize_text_field($_POST[ 'locality' ]);
    }
    if( !empty( $_POST[ 'region' ] ) ) {
-    $adr['region'] = $_POST[ 'region' ];
+    $adr['region'] = sanitize_text_field($_POST[ 'region' ]);
    }
    if( !empty( $_POST[ 'country-name' ] ) ) {
-    $adr['country-name'] = $_POST[ 'country-name' ];
+    $adr['country-name'] = sanitize_text_field($_POST[ 'country-name' ]);
    }
   update_post_meta( $post_id, 'mf2_adr', $adr );
   }
