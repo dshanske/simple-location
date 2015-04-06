@@ -82,10 +82,10 @@ function location_metabox( $object, $box ) { ?>
     <label for="geo_public"><?php _e( "Display Location", 'simple-location' ); ?></label>
     <input type="checkbox" name="geo_public" id="geo_public" <?php checked(get_post_meta( $object->ID, 'geo_public', true ), "1" ); ?>" />
 
-    <label for="geo_round"><?php _e( "Round Coordinates", 'simple-location' ); ?></label>
-    <input type="checkbox" name="geo_round" id="geo_round" <?php checked(get_post_meta( $object->ID, 'geo_round', true ), "1" ); ?>" />
+    <label for="geo_full"><?php _e( "Display Full Address", 'simple-location' ); ?></label>
+    <input type="checkbox" name="geo_full" id="geo_full" <?php checked(get_post_meta( $object->ID, 'geo_full', true ), "1" ); ?>" />
 
-    <label for="geo_map"><?php _e( "Display Map", 'simple-location' ); ?></label>
+    <label for="geo_map"><?php _e( "Display Map and Coordinates", 'simple-location' ); ?></label>
     <input type="checkbox" name="geo_map" id="geo_map" <?php checked(get_post_meta( $object->ID, 'geo_map', true ), "1" ); ?>" />
     <br />
     <br />
@@ -205,11 +205,11 @@ function locationbox_save_post_meta( $post_id ) {
 	  	else
 	  		update_post_meta($post_id, 'geo_public', 0);
 
-  $round= $_POST[ 'geo_round' ];
-  if($round)
-        update_post_meta($post_id, 'geo_round', 1);
+  $full= $_POST[ 'geo_full' ];
+  if($full)
+        update_post_meta($post_id, 'geo_full', 1);
       else
-        update_post_meta($post_id, 'geo_round', 0);
+        update_post_meta($post_id, 'geo_full', 0);
   $map= $_POST[ 'geo_map' ];
   if($map)
         update_post_meta($post_id, 'geo_map', 1);

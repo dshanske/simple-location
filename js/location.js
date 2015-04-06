@@ -9,8 +9,7 @@
 function showPosition(position)
   {
   document.getElementById("geo_latitude").value = position.coords.latitude;
-      document.getElementById("geo_longitude").value = position.coords.longitude;
-  document.getElementById("geo_address").value = json.address.road + ',' + json.address.city;
-
+  document.getElementById("geo_longitude").value = position.coords.longitude;
+  document.getElementById("geo_altitude").value = position.coords.altitude;
   }
 

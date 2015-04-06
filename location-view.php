@@ -11,6 +11,8 @@ function get_the_geodata($id = false) {
   $loc['altitude'] = get_post_meta( $id, 'geo_altitude' , true );
   $loc['public'] = get_post_meta( $id, 'geo_public', true  );
   $loc['address'] = get_post_meta( $id, 'geo_address', true );
+  $loc['map'] = get_post_meta( $id, 'geo_map', true );
+  $loc['full'] = get_post_meta( $id, 'geo_full', true );
   $loc['adr'] = array_pop(get_post_meta( $id, 'mf2_adr'));
 	return $loc;
    } 
@@ -20,28 +22,26 @@ function get_simple_location($id = false) {
   if($loc['public']!='1') {
       return "";
   }
-  return sloc_get_the_adr($loc['adr']);
+  if($loc['full']!='1') {
+    return sloc_get_the_adr($loc['adr']);
+  }
+  else{
+    return sloc_get_the_full_adr($loc['adr']);
+  }
 }
 
 function get_simple_map($id = false) {
   $loc = get_the_geodata($id);
-  if($loc['public']!='1') {
+  $config = get_option('sloc_options');
+  if(($loc['map']!='1')||($loc['public']!='1')) {
       return "";
   }
-  return sloc_get_the_map($loc['latitude'], $loc['longitude']);
-}
-
-// Return code for map linked to OSM
-function sloc_get_the_map($lat, $lon) {
-  $link = 'http://www.openstreetmap.org/#map=15/' . $lat . '/' . $lon;
-  $map = plugin_dir_url( __FILE__ ) . 'staticmap.php?center=' . $lat . ',' . $lon . '&zoom=14&size=300x300&markers=' . $lat . ',' . $lon;
-  $c = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
-  return $c;
+  return sloc_get_the_geo($loc['latitude'], $loc['longitude']) . sloc_get_the_map($loc['latitude'], $loc['longitude'], $config['height'], $config['width'], $config['zoom']);
 }
 
 // Return marked up coordinates
 function sloc_get_the_geo($lat, $lon) {
-  $c .= '<p class="h-geo geo location">';
+  $c = '<p class="h-geo geo location">';
   $c .= '<data class="p-latitude latitude" value="' . $lat . '"></data>';
   $c .= '<data class="p-longitude longitude" value="' . $lon . '"></data>';
   $c .= '</p>';
@@ -94,7 +94,7 @@ function sloc_get_the_adr($loc) {
 function location_content($content) {
     $loc = get_simple_location();
     if(!empty($loc)) {
-      $content .= '<p><sub>Location: ' . $loc . '</sub></p>';
+      $content .= '<p><sub>' . _x('Location:', 'simple-location') . ' ' . $loc . '</sub></p>';
     }
     return $content;
 }

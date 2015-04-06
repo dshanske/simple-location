@@ -28,11 +28,10 @@ function reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
   return array_filter($addr);
 }
 
-function nameForLocation(array $location, $fallback='Unknown Location') {
-  if (isset($location['name'])) return $location['name'];
-  if (isset($location['street-address']) and isset($location['region']) and isset($location['region']))
-    return $location['street-address'] . " , " . $location['locality'] . " , " . $location['region'];
-  if (isset($location['latitude']) and isset($location['longitude']))
-    return round($location['latitude'], 2) . ', ' . round($location['longitude'], 2);
-  return $fallback;
+// Return code for map linked to OSM
+function sloc_get_the_map($lat, $lon, $height=300, $width=300, $zoom=14) {
+  $link = 'http://www.openstreetmap.org/#map=15/' . $lat . '/' . $lon;
+  $map = plugin_dir_url( __FILE__ ) . 'staticmap.php?center=' . $lat . ',' . $lon . '&zoom=' . $zoom . '&size=' . $height . 'x' . $width . '&markers=' . $lat . ',' . $lon;
+  $c = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
+  return $c;
 }

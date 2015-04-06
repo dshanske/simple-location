@@ -16,9 +16,10 @@ collection and basic display of location data.
 
 It does this using the HTML5 geolocation API. As it stores the GeoData in a 
 WordPress standard format, GeoData can be also be stored by the mobile 
-WordPress apps.
+WordPress apps. It also stores address data which can be optionally retrieved from OpenStreetMap.
 
 It also adds location data to pages, allowing you to create a page about a location.
+
 
 ## WordPress GeoData ##
 
@@ -27,4 +28,7 @@ used to store geodata about a post.
 
 **It consists of four fields:** latitude, longitude, public, and address.  
 
+## Changelog ##
+
+* Version 1.0  - Initial Release
 
