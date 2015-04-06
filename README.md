@@ -20,13 +20,18 @@ WordPress apps. It also stores address data which can be optionally retrieved fr
 
 It also adds location data to pages, allowing you to create a page about a location.
 
+## Other Notes ##
+
+Simple Location uses Nominatim and the OpenStreetMap project by default for geodata. The plugin may retrieve resources from these services.
+
+To generate maps, the plugin is currently using [Static Map Lite](https://github.com/dfacts/staticmaplite) by Gerhard Koch. Future versions of the plugin may switch to alternative map generation options or offer a choice of service providers.
 
 ## WordPress GeoData ##
 
 [WordPress Geodata](http://codex.wordpress.org/Geodata) is an existing standard
 used to store geodata about a post.
 
-**It consists of four fields:** latitude, longitude, public, and address.  
+**It consists of four fields:** latitude, longitude, public, and address. Altitude has been added as part of the HTML5 geolocation spec, but is not currently in use.  
 
 ## Changelog ##
 

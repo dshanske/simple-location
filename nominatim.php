@@ -1,6 +1,6 @@
 <?php
 
-function reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
+function sloc_reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
   $response = wp_remote_get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' . clean_coordinate($lat) . '&lon=' . clean_coordinate($lon) . '&zoom=' . $zoom);
   $json = json_decode($response['body'], true);
   $address = $json['address'];

@@ -16,7 +16,6 @@ add_action('load-post-new.php', 'locbox_setup');
 function locbox_setup() {
 
   /* Add meta boxes on the 'add_meta_boxes' hook. */
-  add_action( 'add_meta_boxes', 'venuebox_add_postmeta_boxes' );
   add_action( 'add_meta_boxes', 'locbox_add_postmeta_boxes' );
   add_action( 'add_meta_boxes', 'adrbox_add_postmeta_boxes' );
 }
@@ -50,31 +49,6 @@ function adrbox_add_postmeta_boxes() {
     );
   }
 }
-
-/* Create a venue meta boxes to only be displayed on the page editor screen. */
-function venuebox_add_postmeta_boxes() {
-  $screens = array( 'page' );
-  foreach ( $screens as $screen ) {
-    add_meta_box(
-      'venuebox-meta',      // Unique ID
-      esc_html__( 'Venue', 'simple-location' ),    // Title
-      'venue_metabox',   // Callback function
-      $screen,         // Admin page (or post type)
-      'normal',         // Context
-      'default'         // Priority
-    );
-  }
-}
-
-function venue_metabox( $object, $box ) { ?>
-  <?php wp_nonce_field( 'venue_metabox', 'venue_metabox_nonce' ); ?>
-  <p>
-    <label for="is_venue"><?php _e( "Set Page as Venue", 'simple-location' ); ?></label>
-      <input type="checkbox" name="is_venue" id="is_venue" <?php checked(get_post_meta( $object->ID, 'is_venue', true ), "1" ); ?>" />
-    <br />
-
-<?php }
-
 
 function location_metabox( $object, $box ) { ?>
   <?php wp_nonce_field( 'location_metabox', 'location_metabox_nonce' ); ?>
@@ -213,41 +187,7 @@ function locationbox_save_post_meta( $post_id ) {
         update_post_meta($post_id, 'geo_map', 0);
 }
 
-/* Save the meta box's post metadata. */
-function venuebox_save_post_meta( $post_id ) {
-  /*
-   * We need to verify this came from our screen and with proper authorization,
-   * because the save_post action can be triggered at other times.
-   */
-
-  // Check if our nonce is set.
-  if ( ! isset( $_POST['location_metabox_nonce'] ) ) {
-    return;
-  }
-  // Verify that the nonce is valid.
-  if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
-    return;
-  }
-  // If this is an autosave, our form has not been submitted, so we don't want to do anything.
-  if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-    return;
-  }
-  // Check the user's permissions.
-  if ( isset( $_POST['post_type'] ) && 'page' == $_POST['post_type'] ) {
-    if ( ! current_user_can( 'edit_page', $post_id ) ) {
-      return;
-    }
-  } else {
-    if ( ! current_user_can( 'edit_post', $post_id ) ) {
-      return;
-    }
-  }
-}
-
 add_action( 'save_post', 'locationbox_save_post_meta' );
-
-add_action( 'save_post', 'venuebox_save_post_meta' );
-
 
 function addressbox_save_post_meta( $post_id ) {
   /*
@@ -281,7 +221,7 @@ function addressbox_save_post_meta( $post_id ) {
   $adr = array();
   if($lookup) {
     if ( !empty( $_POST[ 'geo_latitude' ] ) && !empty( $_POST[ 'geo_longitude' ] ) ) {
-        $reverse_adr = reverse_lookup($_POST['geo_latitude'], $_POST['geo_longitude']);
+        $reverse_adr = sloc_reverse_lookup($_POST['geo_latitude'], $_POST['geo_longitude']);
         update_post_meta( $post_id, 'mf2_adr', $reverse_adr );
     }
    update_post_meta($post_id, 'geo_lookup', 0);
