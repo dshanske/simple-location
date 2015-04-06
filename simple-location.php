@@ -37,7 +37,7 @@ function sloc_clean_coordinate($coordinate) {
 // If the Theme Has Not Declared Location Support
 // Add the Location Display to the Content Filter
 function sloc_content_location() {
-  add_filter( 'the_content', 'simple_embed_map', 20);
+  add_filter( 'the_content', 'sloc_content_map', 20);
   if (!current_theme_supports('simple-location')) {
     add_filter( 'the_content', 'sloc_location_content', 20 );
   }

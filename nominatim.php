@@ -31,7 +31,7 @@ function sloc_reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
 // Return code for map linked to OSM
 function sloc_get_the_map($lat, $lon, $height=300, $width=300, $zoom=14) {
   $link = 'http://www.openstreetmap.org/#map=15/' . $lat . '/' . $lon;
-  $map = plugin_dir_url( __FILE__ ) . 'staticmap.php?center=' . $lat . ',' . $lon . '&zoom=' . $zoom . '&size=' . $width . 'x' . $height . '&markers=' . $lat . ',' . $lon;
+  $map = plugin_dir_url( __FILE__ ) . 'staticmap.php?center=' . $lat . ',' . $lon . '&zoom=' . $zoom . '&size=' . $width . 'x' . $height . '&markers=' . $lat . ',' . $lon . '&maptype=mapnik';
   $c = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
   return $c;
 }

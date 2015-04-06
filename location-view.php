@@ -109,7 +109,7 @@ function sloc_location_content($content) {
     return $content;
 }
 
-function simple_embed_map($content) {
+function sloc_content_map($content) {
   if (is_single() ) {
     $content .= simple_get_map();
   }
