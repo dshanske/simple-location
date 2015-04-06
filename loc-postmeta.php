@@ -158,13 +158,13 @@ function locationbox_save_post_meta( $post_id ) {
 
 	/* OK, its safe for us to save the data now. */
 	if( !empty( $_POST[ 'geo_latitude' ] ) ) {
-    update_post_meta( $post_id, 'geo_latitude', esc_attr( clean_coordinate($_POST[ 'geo_latitude' ]) ) );
+    update_post_meta( $post_id, 'geo_latitude', esc_attr( sloc_clean_coordinate($_POST[ 'geo_latitude' ]) ) );
 	}
   else {
     delete_post_meta( $post_id, 'geo_latitude');
   }
 	if( !empty( $_POST[ 'geo_longitude' ] ) ) {
-    update_post_meta( $post_id, 'geo_longitude', esc_attr( clean_coordinate($_POST[ 'geo_longitude' ]) ) );
+    update_post_meta( $post_id, 'geo_longitude', esc_attr( sloc_clean_coordinate($_POST[ 'geo_longitude' ]) ) );
     }
   else {
           delete_post_meta( $post_id, 'geo_longitude');
