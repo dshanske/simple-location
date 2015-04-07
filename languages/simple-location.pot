@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Simple Location package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 1.0.0\n"
+"Project-Id-Version: Simple Location 1.0.1\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/simple-location\n"
-"POT-Creation-Date: 2015-04-06 21:05:52+00:00\n"
+"POT-Creation-Date: 2015-04-07 19:54:09+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,78 +13,78 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: grunt-wp-i18n 0.4.9\n"
 
-#: build/trunk/loc-postmeta.php:30 loc-postmeta.php:29
+#: build/trunk/loc-postmeta.php:29 loc-postmeta.php:29
 msgid "Location"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:45 loc-postmeta.php:44
+#: build/trunk/loc-postmeta.php:44 loc-postmeta.php:44
 msgid "Address"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:60
-msgid "Venue"
-msgstr ""
-
-#: build/trunk/loc-postmeta.php:72
-msgid "Set Page as Venue"
-msgstr ""
-
-#: build/trunk/loc-postmeta.php:82 loc-postmeta.php:56
+#: build/trunk/loc-postmeta.php:56
 msgid "Display Location"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:85 loc-postmeta.php:59
+#: build/trunk/loc-postmeta.php:59
 msgid "Display Full Address"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:88 loc-postmeta.php:62
+#: build/trunk/loc-postmeta.php:62 loc-postmeta.php:62
 msgid "Display Map and Coordinates"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:93 loc-postmeta.php:67
+#: build/trunk/loc-postmeta.php:67 loc-postmeta.php:67
 msgid "Latitude"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:96 loc-postmeta.php:70
+#: build/trunk/loc-postmeta.php:70 loc-postmeta.php:70
 msgid "Longitude"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:99 loc-postmeta.php:73
+#: build/trunk/loc-postmeta.php:73 loc-postmeta.php:73
 msgid "Altitude"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:112 loc-postmeta.php:89
+#: build/trunk/loc-postmeta.php:89 loc-postmeta.php:89
 msgid ""
 "This data is automatically imported from the location coordinates when "
 "available on save/publish if the below is checked"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:113 loc-postmeta.php:90
+#: build/trunk/loc-postmeta.php:90 loc-postmeta.php:90
 msgid "Address Lookup"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:116 loc-postmeta.php:93
+#: build/trunk/loc-postmeta.php:93 loc-postmeta.php:93
 msgid "Display Name"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:123 loc-postmeta.php:100
+#: build/trunk/loc-postmeta.php:100 loc-postmeta.php:100
 msgid "Street Address"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:128 loc-postmeta.php:105
+#: build/trunk/loc-postmeta.php:105 loc-postmeta.php:105
 msgid "Extended Address"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:133 loc-postmeta.php:110
+#: build/trunk/loc-postmeta.php:110 loc-postmeta.php:110
 msgid "City/Town/Village"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:138 loc-postmeta.php:115
+#: build/trunk/loc-postmeta.php:115 loc-postmeta.php:115
 msgid "State/County/Province"
 msgstr ""
 
-#: build/trunk/loc-postmeta.php:143 loc-postmeta.php:120
+#: build/trunk/loc-postmeta.php:120 loc-postmeta.php:120
 msgid "Country"
+msgstr ""
+
+#: loc-postmeta.php:56
+msgid "Display Text Location"
+msgstr ""
+
+#: loc-postmeta.php:59
+msgid "Full Address"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
@@ -92,7 +92,7 @@ msgid "Simple Location"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "https://www.github.com/dshanske/simple-location"
+msgid "https://wordpress.org/plugins/simple-location/"
 msgstr ""
 
 #. Description of the plugin/theme
@@ -107,7 +107,7 @@ msgstr ""
 msgid "https://david.shanske.com"
 msgstr ""
 
-#: build/trunk/location-view.php:97 location-view.php:107
+#: build/trunk/location-view.php:107 location-view.php:107
 msgctxt "simple-location"
 msgid "Location:"
 msgstr ""

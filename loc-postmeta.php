@@ -53,10 +53,10 @@ function sloc_adrbox_add_postmeta_boxes() {
 function sloc_location_metabox( $object, $box ) { ?>
   <?php wp_nonce_field( 'location_metabox', 'location_metabox_nonce' ); ?>
   <p>
-    <label for="geo_public"><?php _e( "Display Location", 'simple-location' ); ?></label>
+    <label for="geo_public"><?php _e( "Display Text Location", 'simple-location' ); ?></label>
     <input type="checkbox" name="geo_public" id="geo_public" <?php checked(get_post_meta( $object->ID, 'geo_public', true ), "1" ); ?>" />
 
-    <label for="geo_full"><?php _e( "Display Full Address", 'simple-location' ); ?></label>
+    <label for="geo_full"><?php _e( "Full Address", 'simple-location' ); ?></label>
     <input type="checkbox" name="geo_full" id="geo_full" <?php checked(get_post_meta( $object->ID, 'geo_full', true ), "1" ); ?>" />
 
     <label for="geo_map"><?php _e( "Display Map and Coordinates", 'simple-location' ); ?></label>
