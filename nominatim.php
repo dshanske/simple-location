@@ -1,7 +1,7 @@
 <?php
 
 function sloc_reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
-  $response = wp_remote_get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' . clean_coordinate($lat) . '&lon=' . clean_coordinate($lon) . '&zoom=' . $zoom);
+  $response = wp_remote_get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' . sloc_clean_coordinate($lat) . '&lon=' . sloc_clean_coordinate($lon) . '&zoom=' . $zoom);
   $json = json_decode($response['body'], true);
   $address = $json['address'];
   if ($address['country_code'] == 'us') {
@@ -20,8 +20,8 @@ function sloc_reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
         'country-name' => $address['country'] ?: null,
         'postal-code' => $address['postcode'] ?: null,
         'country-code' => $address['country_code'] ?: null,
-        'latitude' => clean_coordinate($lat),
-        'longitude' => clean_coordinate($lon),
+        'latitude' => sloc_clean_coordinate($lat),
+        'longitude' => sloc_clean_coordinate($lon),
         'altitude' => $alt,
         'raw' => $address
   );
