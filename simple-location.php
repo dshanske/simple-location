@@ -3,45 +3,31 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to Wordpress Pages and Posts. 
- * Version: 1.0.2
+ * Version: 2.0.0
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  */
 
+define ("SIMPLE_LOCATION_VERSION", "2.0.0");
+
+// Map Provider Interface
+require_once( plugin_dir_path( __FILE__ ) . 'includes/interface-map-provider.php');
+
+// Map Providers
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-osm-static.php');
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-google-map-static.php');
+
 // Configuration Functions
-require_once( plugin_dir_path( __FILE__ ) . '/location-config.php');
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-config.php');
 
 // Add Location Post Meta
-require_once( plugin_dir_path( __FILE__ ) . '/loc-postmeta.php');
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-postmeta.php');
 
 // Add Location Display Functions
-require_once( plugin_dir_path( __FILE__ ) . '/location-view.php');
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-view.php');
 
-// Nominatim Functions 
-require_once( plugin_dir_path( __FILE__ ) . '/nominatim.php');
-
-function sloc_enqueue() {
-  wp_register_script( 'simple-location', plugins_url( 'js/location.js', __FILE__ ) );
-  wp_enqueue_script('simple-location');
-}
-
-add_action('admin_init', 'sloc_enqueue');
-
-
-function sloc_clean_coordinate($coordinate) {
-  $pattern = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
-  preg_match($pattern, $coordinate, $matches);
-  return $matches[0];
-}
-
-// If the Theme Has Not Declared Location Support
-// Add the Location Display to the Content Filter
-function sloc_content_location() {
-  add_filter( 'the_content', 'sloc_content_map', 20);
-  if (!current_theme_supports('simple-location')) {
-    add_filter( 'the_content', 'sloc_location_content', 20 );
+if (!function_exists('ifset') ) {
+  function ifset(&$var, $default = false) {
+      return isset($var) ? $var : $default;
   }
 }
-
-add_action('init', 'sloc_content_location');
-
