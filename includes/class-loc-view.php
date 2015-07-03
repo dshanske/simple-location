@@ -104,7 +104,7 @@ class loc_view {
 	}
 
 	public static function location_content($content) {
-		$loc = simple_get_location();
+		$loc = self::get_location();
 		if(!empty($loc)) {
 			$content .= '<p><sub>' . _x('Location:', 'simple-location') . ' ' . $loc . '</sub></p>';
 		}

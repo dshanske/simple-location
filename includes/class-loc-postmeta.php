@@ -223,7 +223,7 @@ class loc_postmeta {
 		$adr = array();
 		if($lookup) {
 			if ( !empty( $_POST[ 'geo_latitude' ] ) && !empty( $_POST[ 'geo_longitude' ] ) ) {
-				$reverse_adr = sloc_reverse_lookup($_POST['geo_latitude'], $_POST['geo_longitude']);
+				$reverse_adr = osm_static::reverse_lookup($_POST['geo_latitude'], $_POST['geo_longitude']);
 				update_post_meta( $post_id, 'mf2_adr', $reverse_adr );
 			}
 			update_post_meta($post_id, 'geo_lookup', 0);

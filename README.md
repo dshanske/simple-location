@@ -16,11 +16,15 @@ Completely rewritten from the initial version. Supports the collection and basic
 It supports retrieving location using the HTML5 geolocation API. As it stores the GeoData in a 
 WordPress standard format, GeoData can be also be stored by the mobile WordPress apps.
 
-To get more information about the location and to display maps, Simple Location supports various map providers. A API key may be required for some.
-
 It also adds location data to pages, allowing you to create a page about a location.
 
 ## Other Notes ##
+
+As of Version 2.0.0, there is the start of support for multiple map providers.
+
+The option to select your choice of provider is not yet there. Until then,
+Google is the static maps provider and Nominatim(OpenStreetMap) is the reverse
+geocoder.
 
 The Development Version as well as support can be found on [Github](https://github.com/dshanske/simple-location).
 
@@ -36,8 +40,8 @@ used to store geodata about a post.
 
 ### Version 2.0 ###
 	* Complete Rewrite with improved scoping
-	* Offer Google Maps as a provider
-	*  
+	* Google Maps is now a provider of static maps
+	* Maps providers are built with a common interface to allow multiple providers
 
 ### Version 1.0.1 ###
 	* Some refinements to the presentation
