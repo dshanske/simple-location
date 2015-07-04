@@ -89,6 +89,25 @@ class loc_postmeta {
 			<button type="button" onclick="getLocation();return false;">Retrieve Location</button>
 		</p>
 		<?php 
+		$tzlist = DateTimeZone::listIdentifiers();
+		?>
+		<p>
+	   <label for="override_timezone"><?php _e("Override Default Timezone", 'simple-location' ); ?></label>
+      <input type="checkbox" name="override_timezone" id="override_timezone" <?php if(get_post_meta( $object->ID, '_timezone', true )) echo 'checked="checked'; ?>" />
+      <br />
+		<select name="timezone">
+			<?php
+				$timezone = get_post_meta( $object->ID, '_timezone', true );
+				foreach ( $tzlist as $tz ) {
+					echo '<option value="' . $tz . '"';
+					if ($timezone==$tz) {
+						echo ' selected';
+					}
+					echo '>' . $tz . '</option>';
+				}
+			?>
+		</select>
+	<?php
 	}
 
 	public static function address_metabox( $object, $box ) { 
@@ -190,6 +209,12 @@ class loc_postmeta {
 			update_post_meta($post_id, 'geo_map', 1);
 		else
 			update_post_meta($post_id, 'geo_map', 0);
+		if($_POST[ 'override_timezone' ]) {
+			update_post_meta($post_id, '_timezone', $_POST['timezone']);
+		}
+		else {
+			delete_post_meta($post_id, '_timezone');
+		}
 	}
 
 	public static function addressbox_save_post_meta( $post_id ) {

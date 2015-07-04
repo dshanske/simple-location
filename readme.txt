@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: location, indieweb
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 Requires at least: 4.0
-Tested up to: 4.1
+Tested up to: 4.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,12 +11,12 @@ Adds geographic location support to pages and posts.
 
 == Description == 
 
-Completely rewritten from the initial version. Supports the collection and basic display of location data. 
+Completely rewritten from the initial version. Supports the collection and basic display of location data for both posts and pages. 
 
 It supports retrieving location using the HTML5 geolocation API. As it stores the GeoData in a 
 WordPress standard format, GeoData can be also be stored by the mobile WordPress apps.
 
-It also adds location data to pages, allowing you to create a page about a location.
+Offers the opportunity to change the timezone on a per-post basis.
 
 == Other Notes == 
 
@@ -37,6 +37,10 @@ used to store geodata about a post.
 It consists of four fields: latitude, longitude, public, and address. Altitude has been added as part of the HTML5 geolocation spec, but have yet to get a return from it on any browser.
 
 == Changelog ==
+
+= Version 2.0.1 = 
+	* Option to override the displayed timezone on a per post basis for posts
+		made at a location other than the default
 
 = Version 2.0 =
 	* Complete Rewrite with improved scoping

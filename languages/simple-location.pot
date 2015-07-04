@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Simple Location 2.0.0\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/simple-location\n"
-"POT-Creation-Date: 2015-07-03 22:01:48+00:00\n"
+"POT-Creation-Date: 2015-07-04 04:36:41+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -54,45 +54,49 @@ msgid "Altitude"
 msgstr ""
 
 #: build/trunk/includes/class-loc-postmeta.php:101
-#: includes/class-loc-postmeta.php:101
+#: includes/class-loc-postmeta.php:120
 msgid ""
 "This data is automatically imported from the location coordinates when "
 "available on save/publish if the below is checked"
 msgstr ""
 
 #: build/trunk/includes/class-loc-postmeta.php:102
-#: includes/class-loc-postmeta.php:102
+#: includes/class-loc-postmeta.php:121
 msgid "Address Lookup"
 msgstr ""
 
 #: build/trunk/includes/class-loc-postmeta.php:105
-#: includes/class-loc-postmeta.php:105
+#: includes/class-loc-postmeta.php:124
 msgid "Display Name"
 msgstr ""
 
 #: build/trunk/includes/class-loc-postmeta.php:111
-#: includes/class-loc-postmeta.php:111
+#: includes/class-loc-postmeta.php:130
 msgid "Street Address"
 msgstr ""
 
 #: build/trunk/includes/class-loc-postmeta.php:116
-#: includes/class-loc-postmeta.php:116
+#: includes/class-loc-postmeta.php:135
 msgid "Extended Address"
 msgstr ""
 
 #: build/trunk/includes/class-loc-postmeta.php:121
-#: includes/class-loc-postmeta.php:121
+#: includes/class-loc-postmeta.php:140
 msgid "City/Town/Village"
 msgstr ""
 
 #: build/trunk/includes/class-loc-postmeta.php:126
-#: includes/class-loc-postmeta.php:126
+#: includes/class-loc-postmeta.php:145
 msgid "State/County/Province"
 msgstr ""
 
 #: build/trunk/includes/class-loc-postmeta.php:131
-#: includes/class-loc-postmeta.php:131
+#: includes/class-loc-postmeta.php:150
 msgid "Country"
+msgstr ""
+
+#: includes/class-loc-postmeta.php:95
+msgid "Override Default Timezone"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
@@ -115,8 +119,7 @@ msgstr ""
 msgid "https://david.shanske.com"
 msgstr ""
 
-#: build/trunk/includes/class-loc-view.php:107
-#: build/trunk/location-view.php:107 includes/class-loc-view.php:109
+#: build/trunk/includes/class-loc-view.php:109 includes/class-loc-view.php:109
 msgctxt "simple-location"
 msgid "Location:"
 msgstr ""
