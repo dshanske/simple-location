@@ -2,7 +2,7 @@
 // OSM Static Map Provider
 class osm_static implements map_provider {
 	public function reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
-	  $response = wp_remote_get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' . $lat . '&lon=' . $lon . '&zoom=' . $zoom);
+	  $response = wp_remote_get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' . $lat . '&lon=' . $lon . '&zoom=' . $zoom . '&accept-language=' . get_bloginfo('language') );
 	  $json = json_decode($response['body'], true);
 	  $address = $json['address'];
 	  if ($address['country_code'] == 'us') {
