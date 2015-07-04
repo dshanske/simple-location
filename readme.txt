@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: location, indieweb
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 Requires at least: 4.0
 Tested up to: 4.2
 License: GPLv2 or later
@@ -37,6 +37,10 @@ used to store geodata about a post.
 It consists of four fields: latitude, longitude, public, and address. Altitude has been added as part of the HTML5 geolocation spec, but have yet to get a return from it on any browser.
 
 == Changelog ==
+
+= Version 2.0.2 =
+	* Fixed formatting on timezone feature as it was not displaying the proper
+		date formatting and falling back to default
 
 = Version 2.0.1 = 
 	* Option to override the displayed timezone on a per post basis for posts

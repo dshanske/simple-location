@@ -3,12 +3,12 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to Wordpress Pages and Posts. 
- * Version: 2.0.1
+ * Version: 2.0.2
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  */
 
-define ("SIMPLE_LOCATION_VERSION", "2.0.1");
+define ("SIMPLE_LOCATION_VERSION", "2.0.2");
 
 // Map Provider Interface
 require_once( plugin_dir_path( __FILE__ ) . 'includes/interface-map-provider.php');
