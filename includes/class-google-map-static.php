@@ -24,8 +24,9 @@ class google_map_static implements map_provider {
 
 	// Return code for map
 	public function get_the_map($lat, $lon, $height=300, $width=300, $zoom=14) {
+		$link = 'http://maps.google.com/maps?q=loc:' . $lat . ',' . $lon;
 		$map = self::get_the_map_url($lat, $lon, $height, $width, $zoom);
-		$c = '<img src="' . $map . '" />';
+		$c = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
 		return $c;
 	}
 	
