@@ -1,7 +1,7 @@
 <?php
 // Google Map Provider
 class google_map_static implements map_provider {
-	public function reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
+	public static function reverse_lookup($lat, $lon, $zoom=18, $alt = NULL) {
 	  $response = wp_remote_get('https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $lat . ',' . $lon);
 	  $json = json_decode($response['body'], true);
 	  $address = $json['results'][0]['address_components'];
@@ -16,21 +16,24 @@ class google_map_static implements map_provider {
 	}
 
   // Return code for map
-  public function get_the_map_url($lat, $lon, $height=300, $width=300, $zoom=14) {
+  public static function get_the_map_url($lat, $lon, $height=300, $width=300, $zoom=14) {
     $map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $lat . ',' . $lon . '&size=' . $height . 'x' . $width;
     return $map;
   }
 
+  public static function get_the_map_link($lat, $lon) {
+    return 'http://maps.google.com/maps?q=loc:' . $lat . ',' . $lon;
+	}
 
 	// Return code for map
-	public function get_the_map($lat, $lon, $height=300, $width=300, $zoom=14) {
-		$link = 'http://maps.google.com/maps?q=loc:' . $lat . ',' . $lon;
+	public static function get_the_map($lat, $lon, $height=300, $width=300, $zoom=14) {
+		$link = self::get_the_map_link($lat, $lon);
 		$map = self::get_the_map_url($lat, $lon, $height, $width, $zoom);
 		$c = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
 		return $c;
 	}
 	
-  public function the_map($lat, $lon, $height=300, $width=300, $zoom=14) {
+  public static function the_map($lat, $lon, $height=300, $width=300, $zoom=14) {
 		echo self::get_the_map($lat, $lon, $height, $width, $zoom);
 	}
 }

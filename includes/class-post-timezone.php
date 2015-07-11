@@ -15,6 +15,9 @@ class post_timezone {
 
 	public static function get_the_date($the_date, $d = '' , $post = null) {
 		$post = get_post( $post );
+		if (!$post) {
+			return $the_date;
+		}
 	  $timezone = get_post_meta( $post->ID, '_timezone', true );
 		if ( !$timezone ) {
 			return $the_date;
@@ -29,6 +32,9 @@ class post_timezone {
 
   public static function get_the_time($the_time, $d = '' , $post = null) {
 		$post = get_post( $post );
+		if (!$post) {
+			return $the_time;
+		}
     $timezone = get_post_meta( $post->ID, '_timezone', true );
     if ( !$timezone ) {
       return $the_time;

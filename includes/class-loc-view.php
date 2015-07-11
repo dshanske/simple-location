@@ -17,7 +17,6 @@ class loc_view {
 		$loc['public'] = get_post_meta( $id, 'geo_public', true  );
 		$loc['address'] = get_post_meta( $id, 'geo_address', true );
 		$loc['map'] = get_post_meta( $id, 'geo_map', true );
-		$loc['full'] = get_post_meta( $id, 'geo_full', true );
 		if ($address!=false) {
 			$loc['adr'] = array_pop($address);
 		}
@@ -25,15 +24,52 @@ class loc_view {
 	} 
 	public static function get_location($id = false) {
 		$loc = self::get_the_geodata($id);
-		if($loc['public']!='1') {
+		$map = new google_map_static();
+		if( isset ($loc['adr']) ) {
+			$adr = $loc['adr'];
+		}
+		else {
+			$adr = array();
+		}
+		$final = array();
+		if($loc['public']==0) {
 			return "";
 		}
-		if($loc['full']!='1') {
-			return self::get_the_adr($loc['adr']);
+    $c = '<span class="h-adr adr">';
+    if( isset($adr['name']) ) {
+      $final[] =  '<span class="p-name name">' . $adr['name'] . '</span>';
+    }
+		if ($loc['public']==3) {
+    	if( isset($adr['street-address']) ) {
+      	$final[] = '<span class="p-street-address street-address">' . $adr['street-address'] . '</span>';
+    	}
+    	if( isset($adr['extended-address']) ) {
+      	$final[] = '<span class="p-extended-address extended-address">' . $adr['extended-address'] . '</span>';
+    	}
 		}
-		else{
-			return self::get_the_full_adr($loc['adr']);
+		if ($loc['public']>=2) {
+	    if( isset($adr['locality']) ) {
+ 	     $final[] = '<span class="p-locality locality">'. $adr['locality'] . '</span>';
+ 	    }
 		}
+    if( isset($adr['region']) ) {
+      $final[] = '<span class="p-region region">' . $adr['region'] . '</span>';
+    }
+    if( isset($adr['country-name']) ) {
+      	$final[] = '<span class="p-country-name country-name">' . $adr['country-name'] . '</span>';
+		}
+		$c .= implode(", ", $final);
+    if ($loc['public']==3) {
+			$c .= self::get_the_geo($loc['latitude'], $loc['longitude']); 
+			$c = '<a href="' . $map->get_the_map_link($loc['latitude'], $loc['longitude']) . '">' . $c . '</span></a>';
+		}
+		else {
+    	$c .= '</span>';
+		}
+		return $c;
+
+
+
 	}
 
 	public static function get_map($id = false) {
@@ -46,10 +82,10 @@ class loc_view {
                 'zoom' => '14'
     );
 		}  
-  	if(($loc['map']!='1')||($loc['public']!='1')) {
+  	if(($loc['map']!='1')||($loc['public']!=3)) {
 			return "";
 		}
-		return self::get_the_geo($loc['latitude'], $loc['longitude']) . google_map_static::get_the_map($loc['latitude'], $loc['longitude'], $config['height'], $config['width'], $config['zoom']);
+		return google_map_static::get_the_map($loc['latitude'], $loc['longitude'], $config['height'], $config['width'], $config['zoom']);
 	}
 
 	// Return marked up coordinates
@@ -58,48 +94,6 @@ class loc_view {
 		$c .= '<data class="p-latitude latitude" value="' . $lat . '"></data>';
 		$c .= '<data class="p-longitude longitude" value="' . $lon . '"></data>';
 		$c .= '</p>';
-		return $c;
-	}
-
-	public static function get_the_full_adr($loc) {
-		$c = '<span class="h-adr adr">';
-		if( isset($loc['name']) ) {
-			$c .= '<span class="p-name name">' . $loc['name'] . '</span>, ';
-		}
-		if( isset($loc['street-address']) ) {
-			$c .= '<span class="p-street-address street-address">' . $loc['street-address'] . '</span>, ';
-		}
-		if( isset($loc['extended-address']) ) {
-			$c .= '<span class="p-extended-address extended-address">' . $loc['extended-address'] . '</span>, '; 
-		}
-		if( isset($loc['locality']) ) {
-			$c .= '<span class="p-locality locality">'. $loc['locality'] . '</span>, '; 
-		} 
-		if( isset($loc['region']) ) {
-			$c .= '<span class="p-region region">' . $loc['region'] . '</span>, ';
-		} 
-		if( isset($loc['country-name']) ) {
-			$c .= '<span class="p-country-name country-name">' . $loc['country-name'] . '</span>';
-		} 
-		$c .= '</span>';
-		return $c;
-	}
-
-	public static function get_the_adr($loc) {
-		$c = '<span class="h-adr adr">';
-		if( isset($loc['name']) ) {
-			$c .= '<span class="p-name name">' . $loc['name'] . '</span>, ';
-		}  
-		if( isset($loc['locality']) ) { 
-			$c .= '<span class="p-locality locality">'. $loc['locality'] . '</span>, ';
-		} 
-		if( isset($loc['region']) ) { 
-			$c .= '<span class="p-region region">' . $loc['region'] . '</span>, ';
-		} 
-		if( isset($loc['country-name']) ) {
-			$c .= '<span class="p-country-name country-name">' . $loc['country-name'] . '</span>';
-		} 
-		$c .= '</span>';
 		return $c;
 	}
 

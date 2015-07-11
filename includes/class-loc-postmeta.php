@@ -67,12 +67,15 @@ class loc_postmeta {
 		?>
 		<p>
 			<label for="geo_public"><?php _e( "Display Text Location", 'simple-location' ); ?></label>
-			<input type="checkbox" name="geo_public" id="geo_public" <?php checked(get_post_meta( $object->ID, 'geo_public', true ), "1" ); ?>" />
+			<?php $public = get_post_meta( $object->ID, 'geo_public', true ); ?>
+			<select name="geo_public">
+				<option value="0" <?php selected($public, 0 ); ?>>Don't Display</option>
+				<option value="1" <?php selected($public, 1 ); ?>>Show Region</option>
+				<option value="2" <?php selected($public, 2 ); ?>>Show Locality</option>
+				<option value="3" <?php selected($public, 3 ); ?>>Show Address</option>
+			</select>
 
-			<label for="geo_full"><?php _e( "Full Address", 'simple-location' ); ?></label>
-			<input type="checkbox" name="geo_full" id="geo_full" <?php checked(get_post_meta( $object->ID, 'geo_full', true ), "1" ); ?>" />
-
-			<label for="geo_map"><?php _e( "Display Map and Coordinates", 'simple-location' ); ?></label>
+			<label for="geo_map"><?php _e( "Display Map if Showing Address", 'simple-location' ); ?></label>
 			<input type="checkbox" name="geo_map" id="geo_map" <?php checked(get_post_meta( $object->ID, 'geo_map', true ), "1" ); ?>" />
 			<br />
 			<br />
@@ -121,35 +124,22 @@ class loc_postmeta {
 			<label for="geo_lookup"><?php _e("Address Lookup", 'simple-location' ); ?></label>
 			<input type="checkbox" name="geo_lookup" id="geo_lookup" <?php checked(get_post_meta( $object->ID, 'geo_lookup', true ), "1" ); ?>" />
 			<br />
-			<label for="geo_address"><?php _e( "Display Name", 'simple-location' ); ?></label>
-			<br />
-			<input type="text" name="geo_address" id="geo_address" value="<?php echo get_post_meta( $object->ID, 'geo_address', true); ?>" size="70" />
-		</p>
-
-		<p>
-			<label for="street-address"><?php _e( "Street Address", 'simple-location' ); ?></label>
-			<br />
-			<input type="text" name="street-address" id="street-address" value="<?php echo ifset($address['street-address'], ""); ?>" size="70" />
+			<label for="name"><?php _e( "Location Name", 'simple-location' ); ?></label>
+			<input type="text" name="name" id="name" value="<?php echo ifset($address['name'], ""); ?>" size="30" />
+			<label for="street-address"><?php _e( "Address", 'simple-location' ); ?></label>
+			<input type="text" name="street-address" id="street-address" value="<?php echo ifset($address['street-address'], ""); ?>" size="30" />
 		</p>
 		<p>
-			<label for="extended-address"><?php _e( "Extended Address", 'simple-location' ); ?></label>
-			<br /> 
-			<input type="text" name="extended-address" id="extended-address" value="<?php echo ifset($address['extended-address'], ""); ?>" size="70" />
-		</p>
-		<p> 
+			<label for="extended-address"><?php _e( "Neighborhood/Suburb", 'simple-location' ); ?></label>
+			<input type="text" name="extended-address" id="extended-address" value="<?php echo ifset($address['extended-address'], ""); ?>" size="30" />
 			<label for="locality"><?php _e( "City/Town/Village", 'simple-location' ); ?></label>
-			<br />
-			<input type="text" name="locality" id="locality" value="<?php echo ifset($address['locality'], ""); ?>" size="70" />
+			<input type="text" name="locality" id="locality" value="<?php echo ifset($address['locality'], ""); ?>" size="30" />
 		</p>
 		<p>
 			<label for="region"><?php _e( "State/County/Province", 'simple-location' ); ?></label>
-			<br />
-			<input type="text" name="region" id="region" value="<?php echo ifset($address['region'], ""); ?>" size="70" />
-		</p>
-		<p>
+			<input type="text" name="region" id="region" value="<?php echo ifset($address['region'], ""); ?>" size="30" />
 			<label for="country-name"><?php _e( "Country", 'simple-location' ); ?></label>
-			<br />
-			<input type="text" name="country-name" id="country-name" value="<?php echo ifset($address['country-name'], ""); ?>" size="70" />
+			<input type="text" name="country-name" id="country-name" value="<?php echo ifset($address['country-name'], ""); ?>" size="30" />
  		</p>
 		<?php 
 	}
@@ -194,16 +184,7 @@ class loc_postmeta {
 		else {
 			delete_post_meta( $post_id, 'geo_longitude');
 		}
-		$public= $_POST[ 'geo_public' ];
-		if($public)
-			update_post_meta($post_id, 'geo_public', 1);
-		else
-			update_post_meta($post_id, 'geo_public', 0);
-		$full= $_POST[ 'geo_full' ];
-		if($full)
-			update_post_meta($post_id, 'geo_full', 1);
-		else
-			update_post_meta($post_id, 'geo_full', 0);
+		update_post_meta($post_id, 'geo_public', $_POST[ 'geo_public' ]);
 		$map= $_POST[ 'geo_map' ];
 		if($map)
 			update_post_meta($post_id, 'geo_map', 1);
@@ -223,6 +204,7 @@ class loc_postmeta {
 		 * because the save_post action can be triggered at other times.
 		 */
 		// Check if our nonce is set.
+		$reverse = new osm_static();
 		if ( ! isset( $_POST['address_metabox_nonce'] ) ) {
 			return;
 		}
@@ -248,7 +230,7 @@ class loc_postmeta {
 		$adr = array();
 		if($lookup) {
 			if ( !empty( $_POST[ 'geo_latitude' ] ) && !empty( $_POST[ 'geo_longitude' ] ) ) {
-				$reverse_adr = osm_static::reverse_lookup($_POST['geo_latitude'], $_POST['geo_longitude']);
+				$reverse_adr = $reverse->reverse_lookup($_POST['geo_latitude'], $_POST['geo_longitude']);
 				update_post_meta( $post_id, 'mf2_adr', $reverse_adr );
 			}
 			update_post_meta($post_id, 'geo_lookup', 0);
