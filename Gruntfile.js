@@ -10,21 +10,21 @@ module.exports = function(grunt) {
       }
     },
 
-    sass: {                              // Task
-      dev: {                            // Target
-        options: {                       // Target options
+    sass: {
+      dev: {
+        options: {
           style: 'expanded'
         },
-        files: {                         // Dictionary of files
-          'css/location.css': 'sass/main.scss'       // 'destination': 'source'
+        files: {
+          'css/location.css': 'sass/main.scss'
         }
       },
-      dist: {                            // Target
-        options: {                       // Target options
+      dist: {
+        options: {
           style: 'compressed'
         },
-        files: {                         // Dictionary of files
-          'css/location.min.css': 'sass/main.scss'       // 'destination': 'source'
+        files: {
+          'css/location.min.css': 'sass/main.scss'
         }
       }
     },
@@ -53,16 +53,17 @@ module.exports = function(grunt) {
     makepot: {
       target: {
         options: {
-	  mainFile: 'simple-location.php', // Main project file.
-          domainPath: '/languages',                   // Where to save the POT file.
+	  mainFile: 'simple-location.php',
+          domainPath: '/languages',
           potFilename: 'simple-location.pot',
-          type: 'wp-plugin',                // Type of project (wp-plugin or wp-theme).
-          updateTimestamp: true             // Whether the POT-Creation-Date should be updated without other changes.
+          type: 'wp-plugin',
+          updateTimestamp: true
         }
       }
     }
   });
 
+  // Load plugins.
   grunt.loadNpmTasks('grunt-wp-readme-to-markdown');
   grunt.loadNpmTasks('grunt-wp-i18n');
   grunt.loadNpmTasks('grunt-contrib-sass');
