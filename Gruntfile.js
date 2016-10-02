@@ -43,8 +43,6 @@ module.exports = function(grunt) {
           '!package.json',
           '!.gitignore',
           '!sass/.sass-cache/**',
-          '!syn.css.map',
-          '!syn.min.css.map'
         ],
         dest: 'build/trunk/'
       }
