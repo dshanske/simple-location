@@ -77,7 +77,7 @@ class loc_metabox {
 			<br /><br />
 
 			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
-			<input type="text" name="name" id="name" value="" size="50" />
+			<input type="text" name="location-name" id="name" value="" size="50" />
 			<br /></br />
 		
 			<label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label>
