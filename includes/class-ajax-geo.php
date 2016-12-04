@@ -1,8 +1,8 @@
 <?php
 /**
- * Venue Taxonomy Class
+ * Reverse Geolocation Backend
  *
- * Registers the taxonomy and sets its behavior.
+ * 
  *
  * @package Simple Location
  */
