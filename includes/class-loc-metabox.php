@@ -22,12 +22,6 @@ class loc_metabox {
 		}
 	}
 
-	public static function clean_coordinate($coordinate) {
-		$pattern = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
-		preg_match( $pattern, $coordinate, $matches );
-		return $matches[0];
-	}
-
 	/* Meta box setup function. */
 	public static function slocbox_setup() {
 		/* Add meta boxes on the 'add_meta_boxes' hook. */
@@ -61,8 +55,8 @@ class loc_metabox {
 	  <input type="text" name="longitude" id="longitude" value="" size="6" />
 	<button type="button" class="button" onclick="getLocation();return false;"><?php _e( '^', 'Simple Location' ); ?></button>
 		</p>  
-		<a href="#TB_inline?width=600&height=550&inlineId=venue-popup" class="thickbox"><button class="button-primary"><?php _e( 'Venues', 'Simple Location' ); ?></button></a> 
-			<a href="#TB_inline?width=600&height=550&inlineId=new-venue-popup" class="thickbox"><button class="button-primary"><?php _e( 'Add New', 'Simple Location' ); ?></button></a>
+		<a href="#TB_inline?width=600&height=550&inlineId=address-popup" class="thickbox"><button class="button-primary"><?php _e( 'Address', 'Simple Location' ); ?></button></a> 
+			<a href="#TB_inline?width=600&height=550&inlineId=venue-popup" class="thickbox"><button class="button-primary"><?php _e( 'Venues', 'Simple Location' ); ?></button></a>
 
 		<div id="venue-popup" style="display:none">
 			<h2>Existing Venues</h2>
@@ -70,10 +64,10 @@ class loc_metabox {
 
 		</div>
 
-		<div id="new-venue-popup" style="display:none">
-			<h2>Add New Venue</h2>
+		<div id="address-popup" style="display:none">
+			<h2>Address</h2>
 			<p>
-		  <button type="button" class="venue-address-button button-primary">Reverse Lookup</button>
+		  <button type="button" class="lookup-address-button button-primary">Reverse Lookup</button>
 			<br /><br />
 
 			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
@@ -105,8 +99,10 @@ class loc_metabox {
 			<input type="text" name="country-name" id="country-name" value="" size="30" />
 			</p>
 	 	<br />
-	 	<br />
-	 	<button type="button" class="save-venue-button button-primary">Save Venue</button>
+		<br />
+		<div class="button-group">
+		<button type="button" class="save-venue-button button-secondary" disabled>Save as Venue</button>
+		</div>>
 	</div>
 	<?php
 	}
@@ -138,65 +134,27 @@ class loc_metabox {
 				return;
 			}
 		}
+		if ( ! empty( wp_get_post_terms( $post_id, 'venue', array( 'fields' => 'ids' ) ) ) ) {
+			return;
+		}
 		/* OK, its safe for us to save the data now. */
 		if ( ! empty( $_POST['geo_latitude'] ) ) {
-			update_post_meta( $post_id, 'geo_latitude', esc_attr( self::clean_coordinate( $_POST['geo_latitude'] ) ) );
+			update_post_meta( $post_id, 'geo_latitude', $_POST['latitude'] );
 		} else {
 			delete_post_meta( $post_id, 'geo_latitude' );
 		}
 		if ( ! empty( $_POST['geo_longitude'] ) ) {
-			update_post_meta( $post_id, 'geo_longitude', esc_attr( self::clean_coordinate( $_POST['geo_longitude'] ) ) );
+			update_post_meta( $post_id, 'geo_longitude', $_POST['longitude'] );
 		} else {
 			delete_post_meta( $post_id, 'geo_longitude' );
 		}
-		update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
+
 		$map = $_POST['geo_map'];
 		if ( $map ) {
 			update_post_meta( $post_id, 'geo_map', 1 );
-		} else { 			update_post_meta( $post_id, 'geo_map', 0 ); }
-	}
-
-	public static function addressbox_save_post_meta( $post_id ) {
-		/*
-		 * We need to verify this came from our screen and with proper authorization,
-		 * because the save_post action can be triggered at other times.
-		 */
-		// Check if our nonce is set.
-		$reverse = new osm_static();
-		if ( ! isset( $_POST['address_metabox_nonce'] ) ) {
-			return;
-		}
-		// Verify that the nonce is valid.
-		if ( ! wp_verify_nonce( $_POST['address_metabox_nonce'], 'address_metabox' ) ) {
-			return;
-		}
-		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-		// Check the user's permissions.
-		if ( isset( $_POST['post_type'] ) && 'page' == $_POST['post_type'] ) {
-			if ( ! current_user_can( 'edit_page', $post_id ) ) {
-				return;
-			}
-		} else {
-			if ( ! current_user_can( 'edit_post', $post_id ) ) {
-				return;
-			}
-		}
-		$lookup = $_POST['geo_lookup'];
-		$adr = array();
-		if ( $lookup ) {
-			if ( ! empty( $_POST['geo_latitude'] ) && ! empty( $_POST['geo_longitude'] ) ) {
-				$reverse_adr = $reverse->reverse_lookup( $_POST['geo_latitude'], $_POST['geo_longitude'] );
-				update_post_meta( $post_id, 'mf2_adr', $reverse_adr );
-			}
-			update_post_meta( $post_id, 'geo_lookup', 0 );
 		} else {
 			if ( ! empty( $_POST['geo_address'] ) ) {
-				update_post_meta( $post_id, 'geo_address', sanitize_text_field( $_POST['geo_address'] ) );
-			} else {
-				update_post_meta( $post_id, 'geo_address', $reverse_adr['name'] );
+				update_post_meta( $post_id, 'geo_address', $_POST['geo_address'] );
 			}
 			if ( ! empty( $_POST['street-address'] ) ) {
 				$adr['street-address'] = sanitize_text_field( $_POST['street-address'] );

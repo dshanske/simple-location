@@ -60,7 +60,7 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_public', $args );
 
 		$args = array(
-		//		'sanitize_callback' => '',
+				'sanitize_callback' => 'wp_kses_data',
 				'type' => 'string',
 				'description' => 'Geodata Address',
 				'single' => true,
