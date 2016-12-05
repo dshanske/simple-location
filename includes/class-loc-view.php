@@ -4,6 +4,12 @@ add_action( 'init', array( 'loc_view', 'content_location' ) );
 
 // Location Display
 class loc_view {
+	public static function get_icon( $kind ) {
+		// Substitute another svg sprite file
+		$sprite = plugin_dir_url( __FILE__ ) . 'location.svg';
+		return '<svg class="icon-location" aria-hidden="true"><use xlink:href="' . $sprite . '"></use></svg>';
+	}
+
 	// Return geodata as an array
 	public static function get_the_geodata($id = false) {
 		if ( $id === false ) {
