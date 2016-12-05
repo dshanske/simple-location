@@ -17,7 +17,7 @@ class Ajax_Geo {
 	public static function get_address_data() {
 		global $wpdb;
 		if ( empty( $_POST['longitude'] ) || empty( $_POST['latitude'] ) ) {
-				wp_send_json_error( new WP_Error( 'nogeo', __( 'You must specify coordinates' ) ) );
+				wp_send_json_error( new WP_Error( 'nogeo', __( 'You must specify coordinates', 'simple-location' ) ) );
 		}
 		$reverse = new osm_static();
 		$reverse_adr = $reverse->reverse_lookup( $_POST['latitude'], $_POST['longitude'] );

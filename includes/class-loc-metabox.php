@@ -53,14 +53,14 @@ class loc_metabox {
 	  <input type="text" name="latitude" id="latitude" value="" size="6" />
 	  <label for="longitude"><?php _e( 'Lon:', 'simple-location' ); ?></label>
 	  <input type="text" name="longitude" id="longitude" value="" size="6" />
-	<button type="button" class="button" onclick="getLocation();return false;"><?php _e( '^', 'Simple Location' ); ?></button>
+	<button type="button" class="button" onclick="getLocation();return false;"><?php _e( '^', 'simple-location' ); ?></button>
 		</p>  
-		<a href="#TB_inline?width=600&height=550&inlineId=address-popup" class="thickbox"><button class="button-primary"><?php _e( 'Address', 'Simple Location' ); ?></button></a> 
-			<a href="#TB_inline?width=600&height=550&inlineId=venue-popup" class="thickbox"><button class="button-primary"><?php _e( 'Venues', 'Simple Location' ); ?></button></a>
+		<a href="#TB_inline?width=600&height=550&inlineId=address-popup" class="thickbox"><button class="button-primary"><?php _e( 'Address', 'simple-location' ); ?></button></a> 
+			<a href="#TB_inline?width=600&height=550&inlineId=venue-popup" class="thickbox"><button class="button-primary"><?php _e( 'Venues', 'simple-location' ); ?></button></a>
 
 		<div id="venue-popup" style="display:none">
 			<h2>Existing Venues</h2>
-			<button type="button" class="button-primary"><?php _e( 'Set as Venue', 'Simple Location' ); ?></button>
+			<button type="button" class="button-primary"><?php _e( 'Set as Venue', 'simple-location' ); ?></button>
 
 		</div>
 
@@ -101,7 +101,7 @@ class loc_metabox {
 	 	<br />
 		<br />
 		<div class="button-group">
-		<button type="button" class="save-venue-button button-secondary" disabled>Save as Venue</button>
+		<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ) ?> </button>
 		</div>>
 	</div>
 	<?php
