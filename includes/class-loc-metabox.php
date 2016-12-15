@@ -47,31 +47,42 @@ class loc_metabox {
 	public static function location_metabox( $object, $box ) {
 		wp_nonce_field( 'location_metabox', 'location_metabox_nonce' );
 		add_thickbox();
-		?>
-		<p class="latlong">
-	  <label for="latitude"><?php _e( 'Lat:', 'simple-location' ); ?></label>
-	  <input type="text" name="latitude" id="latitude" value="" size="6" />
-	  <label for="longitude"><?php _e( 'Lon:', 'simple-location' ); ?></label>
-	  <input type="text" name="longitude" id="longitude" value="" size="6" />
-	<button type="button" class="button" onclick="getLocation();return false;"><?php _e( '^', 'simple-location' ); ?></button>
-		</p>  
-		<a href="#TB_inline?width=600&height=550&inlineId=address-popup" class="thickbox"><button class="button-primary"><?php _e( 'Address', 'simple-location' ); ?></button></a> 
-			<a href="#TB_inline?width=600&height=550&inlineId=venue-popup" class="thickbox"><button class="button-primary"><?php _e( 'Venues', 'simple-location' ); ?></button></a>
+		$public = 0;
+	?>
+		<label for="geo_public"><?php _e( 'Display:', 'simple-location' ); ?></label>
+		<select name="geo_public">
+			<option value="0" <?php selected( $public, 0 ); ?>>Hide</option>
+			<option value="1" <?php selected( $public, 1 ); ?>>Show Region</option>
+			<option value="2" <?php selected( $public, 2 ); ?>>Show Locality</option>
+			<option value="3" <?php selected( $public, 3 ); ?>>Show Full Address</option>
+		</select><br /><br />
+		<a href="#TB_inline?width=600&height=550&inlineId=location-popup" class="thickbox"><button class="button-primary"><?php _e( 'New Location', 'simple-location' ); ?></button></a> 
+			<a href="#TB_inline?width=600&height=550&inlineId=venue-popup" class="thickbox"><button class="button-primary" disabled><?php _e( 'Use Venue', 'simple-location' ); ?></button></a>
 
 		<div id="venue-popup" style="display:none">
 			<h2>Existing Venues</h2>
-			<button type="button" class="button-primary"><?php _e( 'Set as Venue', 'simple-location' ); ?></button>
+			<button type="button" class="button-primary" disabled><?php _e( 'Set as Venue', 'simple-location' ); ?></button>
 
 		</div>
 
-		<div id="address-popup" style="display:none">
-			<h2>Address</h2>
-			<p>
-		  <button type="button" class="lookup-address-button button-primary">Reverse Lookup</button>
+		<div id="location-popup" style="display:none">
+			<h2>Location</h2>
+			<label for="address"><?php _e( 'Location Description: ', 'simple-location' ); ?></label>
+			<input type="text" name="address" id="address" value="" size="60" />
+			<p class="latlong">
+	  			<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
+	  			<input type="text" name="latitude" id="latitude" value="" size="6" />
+	  			<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
+	  			<input type="text" name="longitude" id="longitude" value="" size="6" />
+				<button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'simple-location' ); ?></button> 
 			<br /><br />
 
+		<h3>Location Data</h3>
+		<p> <?php _e( "Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.", "simple-location" ); ?></p>
+			<button type="button" class="lookup-address-button button-secondary"><?php _e( 'Lookup from Coordinates', 'simple-location' ); ?></button>
+			<br /><br />
 			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
-			<input type="text" name="location-name" id="name" value="" size="50" />
+			<input type="text" name="location-name" id="location-name" value="" size="50" />
 			<br /></br />
 		
 			<label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label>
@@ -83,12 +94,9 @@ class loc_metabox {
 			<br /><br />
 		<label for="region"><?php _e( 'State/County/Province', 'simple-location' ); ?></label>
 		<input type="text" name="region" id="region" value="" size="30" />
-
 		<label for="country-code"><?php _e( 'Country', 'simple-location' ); ?></label>
 		<input type="text" name="country-code" id="country-code" value="" size="2" />
-	
-			<h3>Additional Information</h3>
-
+		<br /><br />
 	   	<label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
 			<input type="text" name="extended-address" id="extended-address" value="" size="30" />
 			<br />
@@ -101,7 +109,8 @@ class loc_metabox {
 	 	<br />
 		<br />
 		<div class="button-group">
-		<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ) ?> </button>
+		<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
+		<button type="button" class="clear-location-button button-primary" onclick="clearLocation();return false;"><?php _e( 'Clear', 'simple-location' ); ?></button> 
 		</div>>
 	</div>
 	<?php
@@ -147,31 +156,6 @@ class loc_metabox {
 			update_post_meta( $post_id, 'geo_longitude', $_POST['longitude'] );
 		} else {
 			delete_post_meta( $post_id, 'geo_longitude' );
-		}
-
-		$map = $_POST['geo_map'];
-		if ( $map ) {
-			update_post_meta( $post_id, 'geo_map', 1 );
-		} else {
-			if ( ! empty( $_POST['geo_address'] ) ) {
-				update_post_meta( $post_id, 'geo_address', $_POST['geo_address'] );
-			}
-			if ( ! empty( $_POST['street-address'] ) ) {
-				$adr['street-address'] = sanitize_text_field( $_POST['street-address'] );
-			}
-			if ( ! empty( $_POST['extended-address'] ) ) {
-				$adr['extended-address'] = sanitize_text_field( $_POST['extended-address'] );
-			}
-			if ( ! empty( $_POST['locality'] ) ) {
-					$adr['locality'] = sanitize_text_field( $_POST['locality'] );
-			}
-			if ( ! empty( $_POST['region'] ) ) {
-				$adr['region'] = sanitize_text_field( $_POST['region'] );
-			}
-			if ( ! empty( $_POST['country-name'] ) ) {
-				$adr['country-name'] = sanitize_text_field( $_POST['country-name'] );
-			}
-			update_post_meta( $post_id, 'mf2_adr', $adr );
 		}
 	}
 }

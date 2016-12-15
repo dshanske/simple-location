@@ -16,6 +16,12 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 				}
 				else {
 					if ( typeof response['data'] != 'undefined' ) {
+						if ( ( 'display-name' in response['data'] ) && ( jQuery('#address').val() === '' ) ) {
+							jQuery("#address").val(response['data']['display-name']) ;
+						}
+						if ( 'name' in response['data'] ) {
+							jQuery("#location-name").val(response['data']['name']) ;
+						}
 						if ( 'street-address' in response['data'] ) {
 							jQuery("#street-address").val(response['data']['street-address']) ;
 
@@ -81,6 +87,18 @@ jQuery( document ).on( 'click', '.save-venue-button', function($) {
 	});
 })
 
+function clearLocation() {
+  document.getElementById("latitude").value = "";
+  document.getElementById("longitude").value = "";
+  document.getElementById("street-address").value = "";
+  document.getElementById("extended-address").value = "";
+  document.getElementById("locality").value = "";
+  document.getElementById("region").value = "";
+  document.getElementById("postal-code").value = "";
+  document.getElementById("country-name").value = "";
+  document.getElementById("country-code").value = "";
+  document.getElementById("address").value = "";
+}	
 
 function getLocation()
        {
