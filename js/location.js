@@ -44,6 +44,9 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 						if ( 'country-code' in response['data'] ) {
 							jQuery("#country-code").val(response['data']['country-code']) ;
 						}
+						if ( 'timezone' in response['data'] ) {
+							jQuery("#timezone").val(response['data']['timezone']) ;
+						}
 						console.log(response);
 					}
 				}

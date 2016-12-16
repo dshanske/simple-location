@@ -2,7 +2,7 @@
 /**
  * Reverse Geolocation Backend
  *
- * 
+ *
  *
  * @package Simple Location
  */
@@ -21,9 +21,37 @@ class Ajax_Geo {
 		}
 		$reverse = new osm_static();
 		$reverse_adr = $reverse->reverse_lookup( $_POST['latitude'], $_POST['longitude'] );
+		$reverse_adr = self::display_name( $reverse_adr );
+		$reverse_adr = self::timezone( $_POST['latitude'], $_POST['longitude'], $reverse_adr );
 		if ( is_wp_error( $reverse_adr ) ) {
 			wp_send_json_error( $response );
 		}
 		wp_send_json_success( $reverse_adr );
+	}
+	public static function timezone( $lat, $lng, $reverse ) {
+		if ( ! is_array( $reverse ) ) {
+			return $reverse;
+		}
+		$timezone = Loc_Timezone::timezone_for_location( $lat, $lng );
+		if ( $timezone ) {
+			$reverse['timezone'] = $timezone->name;
+			$reverse['offset'] = $timezone->offset;
+			$reverse['seconds'] = $timezone->seconds;
+		}
+		return $reverse;
+	}
+
+	public static function display_name( $reverse ) {
+		if ( ! is_array( $reverse ) ) {
+			return $reverse;
+		}
+		$text = array();
+		$text[] = ifset( $reverse['name'] );
+		$text[] = ifset( $reverse['locality'] );
+		$text[] = ifset( $reverse['region'] );
+		$text[] = ifset( $reverse['country-name'] );
+		$text = array_filter( $text );
+		$reverse['display-name'] = join( ', ', $text );
+		return $reverse;
 	}
 }
