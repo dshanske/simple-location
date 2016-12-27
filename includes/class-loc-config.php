@@ -24,7 +24,33 @@ class loc_config {
 	public static function admin_init() {
 		register_setting(
 			'writing', // settings page
-			'sloc_options' // option name
+			'sloc_height', // option name
+			array( 
+				'type' => 'number',
+				'description' => 'Simple Location Map Height',
+				'show_in_rest' => true,
+				'default' => 350
+			)
+		);
+		register_setting(
+			'writing', // settings page
+			'sloc_width', // option name
+			array( 
+				'type' => 'number',
+				'description' => 'Simple Location Map Width',
+				'show_in_rest' => true,
+				'default' => 350
+			)
+		);
+		register_setting(
+			'writing', // settings page
+			'sloc_zoom', // option name
+			array( 
+				'type' => 'number',
+				'description' => 'Simple Location Map Zoom',
+				'show_in_rest' => true,
+				'default' => 14
+			)
 		);
 		add_settings_field(
 			'height', // id
@@ -32,7 +58,7 @@ class loc_config {
 			array( 'loc_config', 'number_callback' ), // display callback
 			'writing', // settings page
 			'default', // settings section
-			array( 'name' => 'height' )
+			array( 'name' => 'sloc_height' )
 		);
 		add_settings_field(
 			'width', // id
@@ -40,7 +66,7 @@ class loc_config {
 			array( 'loc_config', 'number_callback' ), // display callback
 			'writing', // settings page
 			'default', // settings section
-			array( 'name' => 'width' )
+			array( 'name' => 'sloc_width' )
 		);
 		add_settings_field(
 			'zoom', // id
@@ -48,22 +74,20 @@ class loc_config {
 			array( 'loc_config', 'number_callback' ), // display callback
 			'writing', // settings page
 			'default', // settings section
-			array( 'name' => 'zoom' )
+			array( 'name' => 'sloc_zoom' )
 		);
 	}
 
 	public static function checkbox_callback(array $args) {
-		$options = get_option( 'sloc_options' );
 		$name = $args['name'];
-		$checked = $options[ $name ];
-		echo "<input name='sloc_options[$name]' type='hidden' value='0' />";
-		echo "<input name='sloc_options[$name]' type='checkbox' value='1' " . checked( 1, $checked, false ) . ' /> ';
+		$checked = get_option( $name);
+		echo "<input name='" . $name . "' type='hidden' value='0' />";
+		echo "<input name='" . $name . "' type='checkbox' value='1' " . checked( 1, $checked, false ) . ' /> ';
 	}
 
 	public static function number_callback(array $args) {
-		$options = get_option( 'sloc_options' );
 		$name = $args['name'];
-		$text = $options[ $name ];
-		echo "<input name='sloc_options[$name]' type='number' value='" . $text . "' /> ";
+		$text = get_option( $name );
+		echo "<input name='" . $name . "' type='number' value='" . $text . "' /> ";
 	}
 }
