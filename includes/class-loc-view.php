@@ -4,68 +4,18 @@ add_action( 'init', array( 'loc_view', 'content_location' ) );
 
 // Location Display
 class loc_view {
-	public static function get_icon( $kind ) {
+	public static function get_icon( ) {
 		// Substitute another svg sprite file
 		$sprite = plugin_dir_url( __FILE__ ) . 'location.svg';
 		return '<svg class="icon-location" aria-hidden="true"><use xlink:href="' . $sprite . '"></use></svg>';
 	}
 
-	// Return geodata as an array
-	public static function get_the_geodata($id = false) {
-		if ( $id === false ) {
-			$id = get_the_ID();
-		}
-		$address = get_post_meta( $id, 'mf2_adr' );
-		$loc = array();
-		$loc['latitude'] = get_post_meta( $id, 'geo_latitude', true );
-		$loc['longitude'] = get_post_meta( $id, 'geo_longitude' , true );
-		$loc['altitude'] = get_post_meta( $id, 'geo_altitude' , true );
-		$loc['public'] = get_post_meta( $id, 'geo_public', true );
-		$loc['address'] = get_post_meta( $id, 'geo_address', true );
-		$loc['map'] = get_post_meta( $id, 'geo_map', true );
-		if ( $address != false ) {
-			$loc['adr'] = array_pop( $address );
-		}
-		return $loc;
-	}
 	public static function get_location($id = false) {
-		$loc = self::get_the_geodata( $id );
+		$loc = WP_Geo_Data::get_geodata( $id );
 		$map = new google_map_static();
-		if ( isset( $loc['adr'] ) ) {
-			$adr = $loc['adr'];
-		} else {
-			$adr = array();
-		}
-		$final = array();
-		if ( $loc['public'] == 0 ) {
-			return '';
-		}
-		$c = '<span class="h-adr adr">';
-		if ( isset( $adr['name'] ) ) {
-			$final[] = '<span class="p-name name">' . $adr['name'] . '</span>';
-		}
-		if ( $loc['public'] == 3 ) {
-			if ( isset( $adr['street-address'] ) ) {
-				$final[] = '<span class="p-street-address street-address">' . $adr['street-address'] . '</span>';
-			}
-			if ( isset( $adr['extended-address'] ) ) {
-				$final[] = '<span class="p-extended-address extended-address">' . $adr['extended-address'] . '</span>';
-			}
-		}
-		if ( $loc['public'] >= 2 ) {
-			if ( isset( $adr['locality'] ) ) {
-				 $final[] = '<span class="p-locality locality">'. $adr['locality'] . '</span>';
-			}
-		}
-		if ( isset( $adr['region'] ) ) {
-			$final[] = '<span class="p-region region">' . $adr['region'] . '</span>';
-		}
-		if ( isset( $adr['country-name'] ) ) {
-			$final[] = '<span class="p-country-name country-name">' . $adr['country-name'] . '</span>';
-		}
-		$c .= implode( ', ', $final );
-		if ( $loc['public'] == 3 ) {
-			$c .= self::get_the_geo( $loc['latitude'], $loc['longitude'] );
+		$c = '';
+		if ( $loc['public'] == 1 ) {
+			$c .= self::get_the_geo( $loc['latitude'], $loc['longitude'], $loc['address'] );
 			$c = '<a href="' . $map->get_the_map_link( $loc['latitude'], $loc['longitude'] ) . '">' . $c . '</span></a>';
 		} else {
 			$c .= '</span>';
@@ -75,26 +25,24 @@ class loc_view {
 	}
 
 	public static function get_map($id = false) {
-		$loc = self::get_the_geodata( $id );
-		$config = get_option( 'sloc_options' );
-		if ( $config == false ) {
-			$config = array(
-				'height' => '350',
-			'width' => '350',
-				'zoom' => '14',
-			);
-		}
-		if ( ($loc['map'] != '1')||($loc['public'] != 3) ) {
+		$loc = WP_Geo_Data::get_geodata( $id );
+
+		if ( $loc['public'] !== 1 ) {
 			return '';
 		}
-		return google_map_static::get_the_map( $loc['latitude'], $loc['longitude'], $config['height'], $config['width'], $config['zoom'] );
+		return google_map_static::get_the_map( $loc['latitude'], $loc['longitude'] );
 	}
 
 	// Return marked up coordinates
-	public static function get_the_geo($lat, $lon) {
-		$c = '<p class="h-geo geo location">';
-		$c .= '<data class="p-latitude latitude" value="' . $lat . '"></data>';
-		$c .= '<data class="p-longitude longitude" value="' . $lon . '"></data>';
+	public static function get_the_geo($lat, $lon, $address = null) {
+		$c = '<p class="p-location">';
+		if ( is_string( $address ) ){
+			$c .= $address;
+		}	
+		$c .= '<span class="h-geo">';
+		$c .= '<data class="p-latitude" value="' . $lat . '"></data>';
+		$c .= '<data class="p-longitude" value="' . $lon . '"></data>';
+		$c .= '</span>';
 		$c .= '</p>';
 		return $c;
 	}
@@ -102,7 +50,7 @@ class loc_view {
 	public static function location_content($content) {
 		$loc = self::get_location();
 		if ( ! empty( $loc ) ) {
-			$content .= '<p><sub>' . _x( 'Location:', 'simple-location' ) . ' ' . $loc . '</sub></p>';
+			$content .= '<p>' . self::get_icon() . ' ' . $loc . '</p>';
 		}
 		return $content;
 	}

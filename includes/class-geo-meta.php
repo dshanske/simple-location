@@ -20,9 +20,26 @@ class WP_Geo_Data {
 		return $matches[0];
 	}
 
-	public static function get_geodata( $post_ID ) {
+        public static function display_name( $reverse ) {
+		if ( ! is_array( $reverse ) ) {
+			return $reverse;
+		}
+		$text = array();
+		$text[] = ifset( $reverse['name'] );
+		if ( ! array_key_exists( 'address', $reverse ) ) {
+			$text[] = ifset( $reverse['extended-address'] );
+		}
+		$text[] = ifset( $reverse['locality'] );
+		$text[] = ifset( $reverse['region'] );
+		$text[] = ifset( $reverse['country-name'] );
+		$text = array_filter( $text );
+		$reverse['display-name'] = join( ', ', $text );
+		return $reverse;
+	}
+
+	public static function get_geodata( $post_ID = false ) {
 		if ( ! $post_ID ) {
-			return false;
+			$post_ID = get_the_ID();
 		}
 		$geodata = array();
 		$geodata['longitude'] = get_post_meta( $post_ID, 'geo_longitude', true );
@@ -31,12 +48,29 @@ class WP_Geo_Data {
 		$geodata['public'] = get_post_meta( $post_ID, 'geo_public', true );
 		$geodata['ID'] = $post_ID;
 
+		$adr = get_post_meta( $post_ID, 'mf2_adr', true );
+
+		// This indicates an old Simple Location storage format
+		if ( is_array( $adr ) ) {
+			$adr = self::display_name( $adr );
+			$geodata['adr'] = $adr;
+			if ( array_key_exists( 'display-name', $adr ) ) {
+				$geodata['address'] = $adr['display-name'];
+				update_post_meta( $post_ID, 'geo_address', $geodata['address'] );
+				// Remove Old Metadata
+				delete_post_meta( $post_ID, 'mf2_adr' );
+				delete_post_meta( $post_ID, 'geo_map' );
+				delete_post_meta( $post_ID, 'geo_full' );
+				delete_post_meta( $post_ID, 'geo_lookup' );
+			}
+		}
+
 		// Assume the absence of a public is the same as public
 		if ( ! $geodata['public'] ) {
 			$geodata['public'] = 1;
 		}
 
-		
+		error_log( 'Geodata: ' . print_r( $geodata, true ) );
 		if ( ( ! $geodata['address'] ) || ( ! $geodata['latitude'] ) ) {
 			return false;
 		}
