@@ -20,6 +20,31 @@ class WP_Geo_Data {
 		return $matches[0];
 	}
 
+	public static function get_geodata( $post_ID ) {
+		if ( ! $post_ID ) {
+			return false;
+		}
+		$geodata = array();
+		$geodata['longitude'] = get_post_meta( $post_ID, 'geo_longitude', true );
+		$geodata['latitude'] = get_post_meta( $post_ID, 'geo_latitude', true );
+		$geodata['address'] = get_post_meta( $post_ID, 'geo_address', true );
+		$geodata['public'] = get_post_meta( $post_ID, 'geo_public', true );
+		$geodata['ID'] = $post_ID;
+
+		// Assume the absence of a public is the same as public
+		if ( ! $geodata['public'] ) {
+			$geodata['public'] = 1;
+		}
+
+		
+		if ( ( ! $geodata['address'] ) || ( ! $geodata['latitude'] ) ) {
+			return false;
+		}
+
+
+
+		return $geodata;
+	}
 
 	public static function register_meta() {
 		$args = array(

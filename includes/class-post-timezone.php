@@ -24,7 +24,7 @@ class post_timezone {
 			<label for="override_timezone"><?php _e( 'Override Default Timezone', 'simple-location' ); ?></label>
 		<input type="checkbox" name="override_timezone" id="override_timezone" <?php if ( get_post_meta( $post->ID, '_timezone', true ) ) { echo 'checked="checked'; } ?>" />
 		 <br />
-		<select name="timezone" width="90%">
+		<select name="timezone" id="timezone" width="90%">
 			<?php
 			$timezone = get_post_meta( $post->ID, '_timezone', true );
 			if ( ! $timezone ) {

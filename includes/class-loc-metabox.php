@@ -47,17 +47,16 @@ class loc_metabox {
 	public static function location_metabox( $object, $box ) {
 		wp_nonce_field( 'location_metabox', 'location_metabox_nonce' );
 		add_thickbox();
-		$public = 0;
+		$geodata = WP_Geo_Data::get_geodata( $object->ID );
 	?>
 		<label for="geo_public"><?php _e( 'Display:', 'simple-location' ); ?></label>
 		<select name="geo_public">
-			<option value="0" <?php selected( $public, 0 ); ?>>Hide</option>
-			<option value="1" <?php selected( $public, 1 ); ?>>Show Region</option>
-			<option value="2" <?php selected( $public, 2 ); ?>>Show Locality</option>
-			<option value="3" <?php selected( $public, 3 ); ?>>Show Full Address</option>
+			<option value="0" <?php selected( $geodata['public'], 0 ); ?>>Hide</option>
+			<option value="1" <?php selected( $geodata['public'], 1 ); ?>>Show Text and Map</option>
+			<option value="2" <?php selected( $geodata['public'], 2 ); ?>>Show Text Only</option>
 		</select><br /><br />
-		<a href="#TB_inline?width=600&height=550&inlineId=location-popup" class="thickbox"><button class="button-primary"><?php _e( 'New Location', 'simple-location' ); ?></button></a> 
-			<a href="#TB_inline?width=600&height=550&inlineId=venue-popup" class="thickbox"><button class="button-primary" disabled><?php _e( 'Use Venue', 'simple-location' ); ?></button></a>
+		<a href="#TB_inline?width=600&height=550&inlineId=location-popup" class="thickbox"><button class="button-primary"><?php _e( 'Location', 'simple-location' ); ?></button></a> 
+			<a href="#TB_inline?width=600&height=550&inlineId=venue-popup" class="thickbox"><button class="button-primary" disabled><?php _e( 'Venue', 'simple-location' ); ?></button></a>
 
 		<div id="venue-popup" style="display:none">
 			<h2>Existing Venues</h2>
@@ -68,12 +67,12 @@ class loc_metabox {
 		<div id="location-popup" style="display:none">
 			<h2>Location</h2>
 			<label for="address"><?php _e( 'Location Description: ', 'simple-location' ); ?></label>
-			<input type="text" name="address" id="address" value="" size="60" />
+			<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'], '' ); ?> " size="60" />
 			<p class="latlong">
 	  			<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
-	  			<input type="text" name="latitude" id="latitude" value="" size="6" />
+				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" size="6" />
 	  			<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
-	  			<input type="text" name="longitude" id="longitude" value="" size="6" />
+				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="6" />
 				<button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'simple-location' ); ?></button> 
 			<br /><br />
 
@@ -147,16 +146,26 @@ class loc_metabox {
 			return;
 		}
 		/* OK, its safe for us to save the data now. */
-		if ( ! empty( $_POST['geo_latitude'] ) ) {
+		if ( ! empty( $_POST['latitude'] ) ) {
 			update_post_meta( $post_id, 'geo_latitude', $_POST['latitude'] );
 		} else {
 			delete_post_meta( $post_id, 'geo_latitude' );
 		}
-		if ( ! empty( $_POST['geo_longitude'] ) ) {
+		if ( ! empty( $_POST['longitude'] ) ) {
 			update_post_meta( $post_id, 'geo_longitude', $_POST['longitude'] );
 		} else {
 			delete_post_meta( $post_id, 'geo_longitude' );
 		}
+                if ( ! empty( $_POST['address'] ) ) {
+			update_post_meta( $post_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
+		} else {
+			delete_post_meta( $post_id, 'geo_address' );
+		}
+		if ( ! empty( $_POST['geo_public'] ) ) {
+			update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
+		}
+
+
 	}
 }
 ?>
