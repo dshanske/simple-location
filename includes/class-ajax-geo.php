@@ -19,25 +19,12 @@ class Ajax_Geo {
 		if ( empty( $_POST['longitude'] ) || empty( $_POST['latitude'] ) ) {
 				wp_send_json_error( new WP_Error( 'nogeo', __( 'You must specify coordinates', 'simple-location' ) ) );
 		}
-		$reverse = new osm_static();
-		$reverse_adr = $reverse->reverse_lookup( $_POST['latitude'], $_POST['longitude'] );
-		$reverse_adr = WP_Geo_Data::display_name( $reverse_adr );
-		$reverse_adr = self::timezone( $_POST['latitude'], $_POST['longitude'], $reverse_adr );
+		$reverse = new Geo_Provider_OSM();
+		$reverse->set( $_POST['latitude'], $_POST['longitude'] );
+		$reverse_adr = $reverse->reverse_lookup();
 		if ( is_wp_error( $reverse_adr ) ) {
 			wp_send_json_error( $response );
 		}
 		wp_send_json_success( $reverse_adr );
-	}
-	public static function timezone( $lat, $lng, $reverse ) {
-		if ( ! is_array( $reverse ) ) {
-			return $reverse;
-		}
-		$timezone = Loc_Timezone::timezone_for_location( $lat, $lng );
-		if ( $timezone ) {
-			$reverse['timezone'] = $timezone->name;
-			$reverse['offset'] = $timezone->offset;
-			$reverse['seconds'] = $timezone->seconds;
-		}
-		return $reverse;
 	}
 }

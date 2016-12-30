@@ -19,12 +19,12 @@ require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-meta.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'includes/class-venue-taxonomy.php' );
 
 
-// Map Provider Interface
-require_once( plugin_dir_path( __FILE__ ) . 'includes/interface-map-provider.php' );
+// Map Provider Class
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider.php' );
 
 // Map Providers
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-osm-static.php' );
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-google-map-static.php' );
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-osm.php' );
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-google.php' );
 
 // Handlers
 require_once( plugin_dir_path( __FILE__ ) . 'includes/class-ajax-geo.php' );
@@ -40,7 +40,9 @@ require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-metabox.php' );
 // Add Location Display Functions
 require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-view.php' );
 
-// Timezone Display Functions
+// Timezone Functions
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-timezone-result.php' );
+require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-timezone.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'includes/class-post-timezone.php' );
 
 function sloc_init() {
