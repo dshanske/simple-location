@@ -54,9 +54,9 @@ class loc_metabox {
 	?>
 		<label for="geo_public"><?php _e( 'Display:', 'simple-location' ); ?></label>
 		<select name="geo_public">
-			<option value="0" <?php selected( $geodata['public'], 0 ); ?>>Hide</option>
-			<option value="1" <?php selected( $geodata['public'], 1 ); ?>>Show Text and Map</option>
-			<option value="2" <?php selected( $geodata['public'], 2 ); ?>>Show Text Only</option>
+		<option value="0" <?php selected( $geodata['public'], 0 ); ?>><?php _e( 'Hide', 'simple-location' ); ?></option>
+		<option value="1" <?php selected( $geodata['public'], 1 ); ?>><?php _e( 'Show Text and Map', 'simple-location' ); ?></option>
+		<option value="2" <?php selected( $geodata['public'], 2 ); ?>><?php _e( 'Show Text Only', 'simple-location' ); ?></option>
 		</select><br /><br />
 		<a href="#TB_inline?width=600&height=550&inlineId=location-popup" class="thickbox"><button class="button-primary"><?php _e( 'Location', 'simple-location' ); ?></button></a> 
 			<a href="#TB_inline?width=600&height=550&inlineId=venue-popup" class="thickbox"><button class="button-primary" disabled><?php _e( 'Venue', 'simple-location' ); ?></button></a>
