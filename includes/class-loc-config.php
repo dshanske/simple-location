@@ -24,6 +24,26 @@ class loc_config {
 	public static function admin_init() {
 		register_setting(
 			'writing', // settings page
+			'sloc_google_api', // option name
+			array( 
+				'type' => 'string',
+				'description' => 'Google Maps API Key',
+				'show_in_rest' => false,
+				'default' => ''
+			)
+		);
+		register_setting(
+			'writing', // settings page
+			'sloc_mapbox_api', // option name
+			array( 
+				'type' => 'string',
+				'description' => 'Mapbox Static Maps API Key',
+				'show_in_rest' => false,
+				'default' => ''
+			)
+		);
+		register_setting(
+			'writing', // settings page
 			'sloc_height', // option name
 			array( 
 				'type' => 'number',
@@ -51,6 +71,22 @@ class loc_config {
 				'show_in_rest' => true,
 				'default' => 14
 			)
+		);
+		add_settings_field(
+			'googleapi', // id
+			'Google Maps API Key', // setting title
+			array( 'loc_config', 'string_callback' ), // display callback
+			'writing', // settings page
+			'default', // settings section
+			array( 'name' => 'sloc_google_api' )
+		);
+		add_settings_field(
+			'mapboxapi', // id
+			'Mapbox API Key', // setting title
+			array( 'loc_config', 'string_callback' ), // display callback
+			'writing', // settings page
+			'default', // settings section
+			array( 'name' => 'sloc_mapbox_api' )
 		);
 		add_settings_field(
 			'height', // id
@@ -89,5 +125,11 @@ class loc_config {
 		$name = $args['name'];
 		$text = get_option( $name );
 		echo "<input name='" . $name . "' type='number' value='" . $text . "' /> ";
+	}
+
+	public static function string_callback(array $args) {
+		$name = $args['name'];
+		$text = get_option( $name );
+		echo "<input name='" . $name . "' type='string' value='" . $text . "' /> ";
 	}
 }

@@ -48,6 +48,9 @@ class loc_metabox {
 		wp_nonce_field( 'location_metabox', 'location_metabox_nonce' );
 		add_thickbox();
 		$geodata = WP_Geo_Data::get_geodata( $object->ID );
+		if ( ! $geodata ) {
+			$geodata = array( 'public' => 1 );
+		}
 	?>
 		<label for="geo_public"><?php _e( 'Display:', 'simple-location' ); ?></label>
 		<select name="geo_public">
@@ -88,6 +91,10 @@ class loc_metabox {
 			<input type="text" name="street-address" id="street-address" value="" size="50" />
 		
 			<br /><br />
+			<label for="extended-address"><?php _e( 'Extended Address', 'simple-location' ); ?></label>
+                          <input type="text" name="extended-address" id="extended-address" value="" size="50" />  
+                          <br /><br />
+
 		<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
 		<input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" size="30" />
 			<br /><br />

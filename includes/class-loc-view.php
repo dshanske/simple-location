@@ -7,16 +7,17 @@ class loc_view {
 	public static function get_icon( ) {
 		// Substitute another svg sprite file
 		$sprite = plugin_dir_url( __FILE__ ) . 'location.svg';
-		return '<svg class="icon-location" aria-hidden="true"><use xlink:href="' . $sprite . '"></use></svg>';
+		return '<img class="icon-location" aria-hidden="true" src="' . $sprite . '" />';
 	}
 
 	public static function get_location($id = false) {
 		$loc = WP_Geo_Data::get_geodata( $id );
-		$map = new google_map_static();
+		$map = new Geo_Provider_OSM();
+		$map->set( $loc['latitude'], $loc['longitude'] );
 		$c = '';
 		if ( $loc['public'] == 1 ) {
 			$c .= self::get_the_geo( $loc['latitude'], $loc['longitude'], $loc['address'] );
-			$c = '<a href="' . $map->get_the_map_link( $loc['latitude'], $loc['longitude'] ) . '">' . $c . '</span></a>';
+			$c = '<a href="' . $map->get_the_map_url( $loc['latitude'], $loc['longitude'] ) . '">' . $c . '</span></a>';
 		} else {
 			$c .= '</span>';
 		}
@@ -25,17 +26,23 @@ class loc_view {
 	}
 
 	public static function get_map($id = false) {
+		if ( ! $id ) {
+			$id = get_the_ID();
+		}
 		$loc = WP_Geo_Data::get_geodata( $id );
 
-		if ( $loc['public'] !== 1 ) {
+		if ( $loc['public'] != 1 ) {
 			return '';
 		}
-		return google_map_static::get_the_map( $loc['latitude'], $loc['longitude'] );
+		$map = new Geo_Provider_Google();
+		$map->set( $loc['latitude'], $loc['longitude'] );
+
+		return $map->get_the_map();
 	}
 
 	// Return marked up coordinates
 	public static function get_the_geo($lat, $lon, $address = null) {
-		$c = '<p class="p-location">';
+		$c = '<span class="p-location">';
 		if ( is_string( $address ) ){
 			$c .= $address;
 		}	
@@ -43,7 +50,7 @@ class loc_view {
 		$c .= '<data class="p-latitude" value="' . $lat . '"></data>';
 		$c .= '<data class="p-longitude" value="' . $lon . '"></data>';
 		$c .= '</span>';
-		$c .= '</p>';
+		$c .= '</span>';
 		return $c;
 	}
 

@@ -2,18 +2,26 @@
 // Google Map Provider
 class Geo_Provider_Google extends Geo_Provider {
 
+
+	public function __construct() {
+		parent::__construct();
+		if ( ! $this->api ) {
+			$this->api = get_option('sloc_google_api');
+		}
+	}
+
 	public function reverse_lookup( ) {
-		$response = wp_remote_get( 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $this->latitude . ',' . $this->longitude );
+		$response = wp_remote_get( 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $this->latitude . ',' . $this->longitude . '&key=' . $this->api );
 		$json = json_decode( $response['body'], true );
-		$address = $json['results'][0]['address_components'];
+		//$address = $json['results'][0]['address_components'];
 		$addr = array(
-			'name' => $json['results'][0]['formatted_address'],
+		//	'name' => $json['results'][0]['formatted_address'],
 			'latitude' => $this->latitude,
 			'longitude' => $this->longitude,
-			'raw' => $address,
+			'raw' => $json,
 		);
 		$addr = array_filter( $addr );
-		$addr['display-name'] = $this->display_name( $addr );
+		// $addr['display-name'] = $this->display_name( $addr );
 		$tz = $this->timezone( $this->latitude, $this->longitude );
 		$addr = array_merge( $addr, $tz );
 		return $addr;
@@ -21,7 +29,7 @@ class Geo_Provider_Google extends Geo_Provider {
 
 	// Return code for map
 	public function get_the_static_map( ) {
-		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->height . 'x' . $this->width;
+		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->height . 'x' . $this->width . '&language=' . get_bloginfo( 'language' ) . '&key=' . $this->api;
 		return $map;
 	}
 
@@ -31,8 +39,8 @@ class Geo_Provider_Google extends Geo_Provider {
 
 	// Return code for map
 	public function get_the_map( $static = true) {
-		$link = $this->get_the_static_map( );
-		$map = $this->get_the_map_url( );
+		$map = $this->get_the_static_map( );
+		$link = $this->get_the_map_url( );
 		$c = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
 		return $c;
 	}

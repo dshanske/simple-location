@@ -1,6 +1,13 @@
 <?php
 // OSM Static Map Provider
 class Geo_Provider_OSM extends Geo_Provider {
+
+	public function __construct() {
+		parent::__construct();
+		$this->api = get_option( 'sloc_mapbox_api' );
+		$this->map_zoom = 18;
+	}
+
 	public function reverse_lookup() {
 		$response = wp_remote_get( 'http://nominatim.openstreetmap.org/reverse?format=json&lat=' . $this->latitude . '&lon=' . $this->longitude . '&zoom=' . $this->reverse_zoom . '&accept-language=' . get_bloginfo( 'language' ) );
 		if ( is_wp_error( $response ) ) {
@@ -44,12 +51,18 @@ class Geo_Provider_OSM extends Geo_Provider {
 		return 'http://www.openstreetmap.org/#map=14/' . $this->latitude . '/' . $this->longitude;
 	}
 
-	public function get_the_map( $static = false ) {
-		return '';
+	public function get_the_map( $static = true ) {
+		$map = $this->get_the_static_map( );
+		$link = $this->get_the_map_url( );
+		$c = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
+		return $c;
+
 	}
 
 	public function get_the_static_map( ) {
-		return '';
+		$map = 'https://api.mapbox.com/styles/v1/mapbox/streets-v8/static/' . $this->longitude . ',' . $this->latitude. ',' . $this->map_zoom . ',0,0/'     . $this->height . 'x' . $this->width . '?access_token=' . $this->api;
+		return $map;
+
 	}
 
 }
