@@ -1,6 +1,7 @@
 <?php
 
 add_filter( 'admin_init', array( 'loc_config', 'admin_init' ), 10, 4 );
+add_action( 'after_micropub', array( 'loc_config', 'micropub_display' ), 10, 2);
 
 class loc_config {
 
@@ -165,6 +166,18 @@ class loc_config {
 	public static function sloc_settings() {
 		_e ( 'Default Settings for Map Generation for the Simple Location plugin. API keys are required for map display services.', 'simple-location' );
 	}
+
+	public static function micropub_display( $input, $args ) {
+		$id = $args['ID'];
+		$loc = WP_Geo_Data::get_geodata( $id );
+		if ( ( ( ! is_null( $loc ) ) ) && ( ! array_key_exists( 'address', $loc ) ) ) {
+			$reverse = self::default_reverse_provider();
+			$reverse->set( $loc['latitude'], $loc['longitude']);
+			$display = $reverse->reverse_lookup();
+			update_post_meta( $id, 'geo_address', $display);
+		}
+	}
+
 
 	public static function default_map_provider() {
 		$option = get_option( 'sloc_default_map_provider' );
