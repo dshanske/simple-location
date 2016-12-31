@@ -1,19 +1,5 @@
 <?php
 
-// On Activation, add terms
-register_activation_hook( __FILE__, 'sloc_defaults' );
-
-function sloc_defaults() {
-	if ( ! get_option( 'sloc_options' ) ) {
-		$option = array(
-		'height' => '350',
-		'width' => '350',
-		'zoom' => '14',
-		);
-		update_option( 'sloc_options', $option );
-	}
-}
-
 add_filter( 'admin_init', array( 'loc_config', 'admin_init' ), 10, 4 );
 
 class loc_config {
@@ -23,7 +9,27 @@ class loc_config {
 	 */
 	public static function admin_init() {
 		register_setting(
-			'writing', // settings page
+			'media', // settings page
+			'sloc_default_map_provider', // option name
+			array( 
+				'type' => 'string',
+				'description' => 'Default Map Provider',
+				'show_in_rest' => false,
+				'default' => 'OSM'
+			)
+		);
+		register_setting(
+			'media', // settings page
+			'sloc_default_reverse_provider', // option name
+			array( 
+				'type' => 'string',
+				'description' => 'Default Map Provider',
+				'show_in_rest' => false,
+				'default' => 'OSM'
+			)
+		);
+		register_setting(
+			'media', // settings page
 			'sloc_google_api', // option name
 			array( 
 				'type' => 'string',
@@ -33,7 +39,7 @@ class loc_config {
 			)
 		);
 		register_setting(
-			'writing', // settings page
+			'media', // settings page
 			'sloc_mapbox_api', // option name
 			array( 
 				'type' => 'string',
@@ -43,7 +49,7 @@ class loc_config {
 			)
 		);
 		register_setting(
-			'writing', // settings page
+			'media', // settings page
 			'sloc_height', // option name
 			array( 
 				'type' => 'number',
@@ -53,7 +59,7 @@ class loc_config {
 			)
 		);
 		register_setting(
-			'writing', // settings page
+			'media', // settings page
 			'sloc_width', // option name
 			array( 
 				'type' => 'number',
@@ -63,7 +69,7 @@ class loc_config {
 			)
 		);
 		register_setting(
-			'writing', // settings page
+			'media', // settings page
 			'sloc_zoom', // option name
 			array( 
 				'type' => 'number',
@@ -72,44 +78,58 @@ class loc_config {
 				'default' => 14
 			)
 		);
+		add_settings_section( 
+			'sloc',
+			'Simple Location Map Settings',
+			array( 'loc_config', 'sloc_settings' ),
+			'media'
+		);
+		add_settings_field(
+			'sloc_default_map_provider', // id
+			'Default Map Provider', // setting title
+			array( 'loc_config', 'map_provider_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array( 'name' => 'sloc_default_map_provider' )
+		);
 		add_settings_field(
 			'googleapi', // id
 			'Google Maps API Key', // setting title
 			array( 'loc_config', 'string_callback' ), // display callback
-			'writing', // settings page
-			'default', // settings section
+			'media', // settings page
+			'sloc', // settings section
 			array( 'name' => 'sloc_google_api' )
 		);
 		add_settings_field(
 			'mapboxapi', // id
 			'Mapbox API Key', // setting title
 			array( 'loc_config', 'string_callback' ), // display callback
-			'writing', // settings page
-			'default', // settings section
+			'media', // settings page
+			'sloc', // settings section
 			array( 'name' => 'sloc_mapbox_api' )
 		);
 		add_settings_field(
 			'height', // id
 			'Map Height', // setting title
 			array( 'loc_config', 'number_callback' ), // display callback
-			'writing', // settings page
-			'default', // settings section
+			'media', // settings page
+			'sloc', // settings section
 			array( 'name' => 'sloc_height' )
 		);
 		add_settings_field(
 			'width', // id
 			'Map Width', // setting title
 			array( 'loc_config', 'number_callback' ), // display callback
-			'writing', // settings page
-			'default', // settings section
+			'media', // settings page
+			'sloc', // settings section
 			array( 'name' => 'sloc_width' )
 		);
 		add_settings_field(
 			'zoom', // id
 			'Map Zoom', // setting title
 			array( 'loc_config', 'number_callback' ), // display callback
-			'writing', // settings page
-			'default', // settings section
+			'media', // settings page
+			'sloc', // settings section
 			array( 'name' => 'sloc_zoom' )
 		);
 	}
@@ -124,12 +144,50 @@ class loc_config {
 	public static function number_callback(array $args) {
 		$name = $args['name'];
 		$text = get_option( $name );
-		echo "<input name='" . $name . "' type='number' value='" . $text . "' /> ";
+		echo "<input name='" . $name . "' type='number' min='0' step='1' size='4' class='small-text' value='" . $text . "' /> ";
 	}
 
 	public static function string_callback(array $args) {
 		$name = $args['name'];
 		$text = get_option( $name );
-		echo "<input name='" . $name . "' type='string' value='" . $text . "' /> ";
+		echo "<input name='" . $name . "' size='50' class='regular-text' type='string' value='" . $text . "' /> ";
+	}
+
+	public static function map_provider_callback(array $args) {
+		$name = $args['name'];
+		$text = get_option( $name );
+		echo '<select name="' . $name . '">';
+		echo '<option value="OSM" '  . selected( $text, 'OSM' ) .  '>' . __( 'OpenStreetMap/MapBox', 'simple-location' ) . '</option>';
+		echo '<option value="Google" '  . selected( $text, 'Google' ) .  '>' . __( 'Google Maps', 'simple-location' ) . '</option>';
+		echo '</select><br /><br />';
+	}
+
+	public static function sloc_settings() {
+		_e ( 'Default Settings for Map Generation for the Simple Location plugin. API keys are required for map display services.', 'simple-location' );
+	}
+
+	public static function default_map_provider() {
+		$option = get_option( 'sloc_default_map_provider' );
+		switch ( $option ) {
+			case 'Google':
+				$map = new Geo_Provider_Google();
+				break;
+			default:
+				$map = new Geo_Provider_OSM();
+		}
+
+		return apply_filters( 'sloc_default_map_provider', $map );
+	}
+
+	public static function default_reverse_provider() {
+		$option = get_option( 'sloc_default_reverse_provider' );
+		switch ( $option ) {
+			case 'Google':
+				$map = new Geo_Provider_Google();
+				break;
+			default:
+				$map = new Geo_Provider_OSM();
+		}
+		return apply_filters( 'sloc_default_reverse_provider', $map );
 	}
 }
