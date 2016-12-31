@@ -25,9 +25,12 @@ class WP_Geo_Data {
 			$post_ID = get_the_ID();
 		}
 		$geodata = array();
+		
 		$geodata['longitude'] = get_post_meta( $post_ID, 'geo_longitude', true );
-		$geodata['latitude'] = get_post_meta( $post_ID, 'geo_latitude', true );
-		$geodata['address'] = get_post_meta( $post_ID, 'geo_address', true );
+		// Sets Latitude and Address but if either is not set returns a failure	
+		if ( ( ! $geodata['latitude'] = get_post_meta( $post_ID, 'geo_latitude', true ) ) || ( ! $geodata['address'] = get_post_meta( $post_ID, 'geo_address', true ) ) ) {
+			return null;
+		}
 		$geodata['public'] = get_post_meta( $post_ID, 'geo_public', true );
 		$geodata['ID'] = $post_ID;
 
@@ -52,12 +55,8 @@ class WP_Geo_Data {
 		}
 
 		// Assume the absence of a public is the same as public
-		if ( ! $geodata['public'] ) {
+		if ( ! array_key_exists( 'public', $geodata ) ) {
 			$geodata['public'] = 1;
-		}
-
-		if ( ( ! $geodata['address'] ) || ( ! $geodata['latitude'] ) ) {
-			return false;
 		}
 
 		return $geodata;

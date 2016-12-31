@@ -11,18 +11,25 @@ class loc_view {
 	}
 
 	public static function get_location($id = false) {
-		$loc = WP_Geo_Data::get_geodata( $id );
-		$map = new Geo_Provider_OSM();
-		$map->set( $loc['latitude'], $loc['longitude'] );
-		$c = '';
-		if ( $loc['public'] == 1 ) {
-			$c .= self::get_the_geo( $loc['latitude'], $loc['longitude'], $loc['address'] );
-			$c = '<a href="' . $map->get_the_map_url( $loc['latitude'], $loc['longitude'] ) . '">' . $c . '</span></a>';
-		} else {
-			$c .= '</span>';
+		if ( ! $id ) {
+			$id = get_the_ID();
 		}
-		return $c;
-
+		$loc = WP_Geo_Data::get_geodata( $id );
+		// 0 is private
+		if ( ! empty( $loc['public'] ) ) {
+			$map = loc_config::default_map_provider();
+			$map->set( $loc['latitude'], $loc['longitude'] );
+			$c = '';
+			// 1 is full public
+			if ( 1 == $loc['public'] ) {
+				$c .= self::get_the_geo( $loc['latitude'], $loc['longitude'], $loc['address'] );
+				$c = '<a href="' . $map->get_the_map_url( $loc['latitude'], $loc['longitude'] ) . '">' . $c . '</span></a>';
+			} else {
+				$c = self::get_the_geo( null, null, $loc['address']);
+			}
+			return $c;
+		}
+		return '';
 	}
 
 	public static function get_map($id = false) {
@@ -30,14 +37,12 @@ class loc_view {
 			$id = get_the_ID();
 		}
 		$loc = WP_Geo_Data::get_geodata( $id );
-
-		if ( $loc['public'] != 1 ) {
-			return '';
+		if ( '1' == $loc['public'] ) {
+			$map = loc_config::default_map_provider();
+			$map->set( $loc['latitude'], $loc['longitude'] );
+			return $map->get_the_map();
 		}
-		$map = new Geo_Provider_Google();
-		$map->set( $loc['latitude'], $loc['longitude'] );
-
-		return $map->get_the_map();
+		return '';
 	}
 
 	// Return marked up coordinates
@@ -45,11 +50,13 @@ class loc_view {
 		$c = '<span class="p-location">';
 		if ( is_string( $address ) ){
 			$c .= $address;
-		}	
-		$c .= '<span class="h-geo">';
-		$c .= '<data class="p-latitude" value="' . $lat . '"></data>';
-		$c .= '<data class="p-longitude" value="' . $lon . '"></data>';
-		$c .= '</span>';
+		}
+		if ( $lat && $lon ) {	
+			$c .= '<span class="h-geo">';
+			$c .= '<data class="p-latitude" value="' . $lat . '"></data>';
+			$c .= '<data class="p-longitude" value="' . $lon . '"></data>';
+			$c .= '</span>';
+		}
 		$c .= '</span>';
 		return $c;
 	}
