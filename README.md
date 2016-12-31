@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** dshanske  
-**Tags:** location, indieweb  
+**Tags:** geolocation, geo, maps, location, indieweb  
 **Stable tag:** 3.0.0  
-**Requires at least:** 4.6  
-**Tested up to:** 4.6  
+**Requires at least:** 4.7  
+**Tested up to:** 4.7  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -16,15 +16,11 @@ Completely rewritten...again. Supports adding geo coordinates to a post, and wil
 It supports retrieving location using the HTML5 geolocation API. As it stores the GeoData in a 
 WordPress standard format, Geodata can also be added from other plugins.
 
-Offers the opportunity to change the timezone on a per-post basis for those posts from far off locations.
+Offers the opportunity to change the timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location.
 
 ## Other Notes ##
 
-As of Version 2.0.0, there is the start of support for multiple map providers.
-
-The option to select your choice of provider is not yet there. Until then,
-Google is the static maps provider and Nominatim(OpenStreetMap) is the reverse
-geocoder.
+API Keys are required to use Google Static Maps or Mapbox Static Maps. If not provided there will be no map displayed regardless of setting.
 
 The Development Version as well as support can be found on [Github](https://github.com/dshanske/simple-location).
 
@@ -36,15 +32,29 @@ have the advantage of supporting an archive page of all posts from that location
 ## WordPress GeoData ##
 
 [WordPress Geodata](http://codex.wordpress.org/Geodata) is an existing standard
-used to store geodata about a post.
+used to store geodata about a post, user, comment, or term.
 
 **It consists of four fields:** latitude, longitude, public, and address.  
+
+## Upgrade Notice ##
+
+Recommend backup before upgrade to Version 3.0.0 due to the start of venue support. Full location data will not be saved in the post and old posts will be converted. The display name will be saved if set, otherwise a display name will be set from the coordinates. An API key
+will now be required to show maps for services that require API keys.
 
 ## Changelog ##
  
 ### Version 3.0.0 ###
 	* New Version Takes Advantage of new WordPress Term Metadata to create Venues
 	* The most Javascript I've ever used in a WordPress plugin.
+	* Timezone Override is set by location lookup.
+	* Google Map Services will now require an API key to be provided.
+	* MapBox is now the static map provider if you are using OSM maps and an API key must be provided
+	* You Can Now Choose Map Providers but not reverse lookup providers which may come in future
+	* Full Address data is no longer stored in the post. You will have the choice of either a textual description and coordinates in the post
+	or assigning a venue which can have full data.
+	* Warnings no longer showing in debug logs.
+	* Displayed name and timezone are now set if Micropub plugin provides geo coordinates
+
 
 ### Version 2.1.0 ###
 	* Revamp in Text Display Parameters, now offering three levels of Detail

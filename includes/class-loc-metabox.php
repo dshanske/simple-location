@@ -114,6 +114,7 @@ class loc_metabox {
 			</p>
 	 	<br />
 		<br />
+		<p> <?php _e( 'Venue functionality is not yet available. To save your location in the post you may just close this popup.', 'simple-location'); ?></p>
 		<div class="button-group">
 		<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
 		<button type="button" class="clear-location-button button-primary" onclick="clearLocation();return false;"><?php _e( 'Clear', 'simple-location' ); ?></button> 
