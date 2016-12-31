@@ -173,8 +173,9 @@ class loc_config {
 		if ( ( ( ! is_null( $loc ) ) ) && ( ! array_key_exists( 'address', $loc ) ) ) {
 			$reverse = self::default_reverse_provider();
 			$reverse->set( $loc['latitude'], $loc['longitude']);
-			$display = $reverse->reverse_lookup();
-			update_post_meta( $id, 'geo_address', $display);
+			$lookup = $reverse->reverse_lookup();
+			update_post_meta( $id, 'geo_address', $lookup['display-name'] );
+			update_post_meta( $id, '_timezone', $lookup['timezone'] );
 		}
 	}
 

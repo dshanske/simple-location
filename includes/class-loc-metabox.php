@@ -168,11 +168,15 @@ class loc_metabox {
 		} else {
 			delete_post_meta( $post_id, 'geo_address' );
 		}
-		if ( isset( $_POST['geo_public'] ) ) {
-			update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
+
+		if ( empty( $_POST['latitude'] ) || empty( $_POST['address'] ) ) {
+			if ( isset( $_POST['geo_public'] ) ) {
+				update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
+			}
+			else {
+				delete_post_meta( $post_id, 'geo_public' );
+			}
 		}
-
-
 	}
 }
 ?>
