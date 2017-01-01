@@ -18,32 +18,28 @@ class Venue_Taxonomy {
 		// Remove Meta Box
 		add_action( 'admin_menu', array( 'Venue_Taxonomy', 'remove_meta_box' ) );
 
-		add_action( 'admin_enqueue_scripts', array( 'Venue_Taxonomy', 'enqueue_admin_scripts' ) );
+		add_action( 'admin_print_scripts-term.php', array( 'Venue_Taxonomy', 'enqueue_term_scripts' ) );
+		add_action( 'admin_print_scripts-edit-tags.php', array( 'Venue_Taxonomy', 'enqueue_term_scripts' ) );
 
-		// add_action( 'created_term', array( 'Venue_Taxonomy', 'save_venue_meta' ), 10, 2 );
-		// add_action( 'edited_term', array( 'Venue_Taxonomy', 'save_venue_meta' ), 10, 2 );
-		register_meta( 'term', 'latitude', array( 'Venue_Taxonomy', 'clean_coordinate' ) );
-		register_meta( 'term', 'longitude', array( 'Venue_Taxonomy', 'clean_coordinate' ) );
+		if ( is_admin() ) {
+			add_action( 'venue_add_form_fields',  array( 'Venue_Taxonomy', 'create_screen_fields' ), 10, 1 );
+			add_action( 'venue_edit_form_fields', array( 'Venue_Taxonomy', 'edit_screen_fields' ),  10, 2 );
 
+			add_action( 'created_venue', array( 'Venue_Taxonomy', 'save_data' ), 10, 1 );
+			add_action( 'edited_venue',  array( 'Venue_Taxonomy', 'save_data' ), 10, 1 );
+		}
 	}
 
-	public static function enqueue_admin_scripts() {
-		if ( 'venue' === get_current_screen()->taxonomy ) {
+	public static function enqueue_term_scripts() {
+		if ( 'venue' === $_GET['taxonomy'] ) {
 			wp_enqueue_script(
-				'venue-get',
-				plugins_url( 'simple-location/includes/retrieve.js' ),
+				'location',
+				plugins_url( 'simple-location/js/location.js' ),
 				array( 'jquery' ),
 				SIMPLE_LOCATION_VERSION
 			);
 		}
 	}
-
-	public static function clean_coordinate($coordinate) {
-		$pattern = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
-		preg_match( $pattern, $coordinate, $matches );
-		return $matches[0];
-	}
-
 
 	/**
 	 * Register the custom taxonomy for venues.
@@ -89,39 +85,55 @@ class Venue_Taxonomy {
 		remove_meta_box( 'tagsdiv-venue', 'post', 'normal' );
 	}
 
-	public static function get_venue_meta($term_id, $key) {
-		$value = get_term_meta( $term_id, $key, true );
-		if ( ! $value ) {
-			return false;
-		}
-		return sanitize_text_field( $value );
+	public static function create_screen_fields( $taxonomy ) {
+?>
+	<div class="form-field">
+		<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
+		<input type="text" name="latitude" id="latitude" value="" size="6" />                                                                           
+		<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
+		<input type="text" name="longitude" id="longitude" value="" size="6" />  
+
+		<button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'Simple Location' ); ?></button>
+	</div>
+<?php
 	}
 
-	public static function set_meta($term_id = 0, $key = '') {
-		// No meta_key, so delete
-		if ( empty( $_POST[$key] ) ) {
-			delete_term_meta( $term_id, $key );
-			// Update meta_key value
-		} else {
-			update_term_meta( $term_id, $key, $_POST[$key] );
-		}
+	public static function edit_screen_fields( $term, $taxonomy ) {
+?>
+	<tr class="form-field">
+		<tr>
+		<th><label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label></th>
+		<td><input type="text" name="latitude" id="latitude" value="" size="6" /></td></tr>   
+		<tr>									
+		<th><label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label></th>
+		<td><input type="text" name="longitude" id="longitude" value="" size="6" />  </td>
+		</tr>
+
+		<tr><td><button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'Simple Location' ); ?></button></td></tr>
+
+		<tr><th><label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label></th>
+		<td><input type="text" name="street-address" id="street-address" value="" size="50" /></td></tr>
+
+		<tr><th><label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label></th>
+		<td><input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" size="30" /></td></tr>    
+
+		<tr><th><label for="region"><?php _e( 'State/County/Province', 'simple-location' ); ?></label></th>
+		<td><input type="text" name="region" id="region" value="" size="30" /> </td></tr>
+
+		<tr><th><label for="country-code"><?php _e( 'Country Code', 'simple-location' ); ?></label></th>
+		<td><input type="text" name="country-code" id="country-code" value="" size="2" /></td></tr>                                             
+
+		<tr><th><label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label></th>
+		<td><input type="text" name="extended-address" id="extended-address" value="" size="30" /></td></tr>                                                                                              
+		<tr><th><label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label></th>                                   
+		<td><input type="text" name="postal-code" id="postal-code" value="" size="10" /></td></tr>                                              
+
+		<tr><th><label for="country-name"><?php _e( 'Country Name', 'simple-location' ); ?></label></th>
+		<td><input type="text" name="country-name" id="country-name" value="" size="30" /></td></tr>
+	</tr>
+<?php
 	}
 
-	public static function save_venue_meta( $term_id, $tt_id ) {
-		if ( ! isset( $_POST['venue_taxonomy_nonce'] ) || ! wp_verify_nonce( $_POST['venue_taxonomy_nonce'], basename( __FILE__ ) ) ) {
-			return;
-		}
-			error_log( 'Trip Save' );
-			self::set_meta( $term_id, 'latitude' );
-		self::set_meta( $term_id, 'longitude' );
-		self::set_meta( $term_id, 'uid' );
-		self::set_meta( $term_id, 'street-address' );
-		self::set_meta( $term_id, 'extended-address' );
-		self::set_meta( $term_id, 'locality' );
-		self::set_meta( $term_id, 'region' );
-		self::set_meta( $term_id, 'postal-code' );
-		self::set_meta( $term_id, 'country-name' );
-			self::set_meta( $term_id, 'country-code' );
+	public static function save_data( $term_id ) {
 	}
-
 }

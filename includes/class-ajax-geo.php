@@ -19,7 +19,7 @@ class Ajax_Geo {
 		if ( empty( $_POST['longitude'] ) || empty( $_POST['latitude'] ) ) {
 				wp_send_json_error( new WP_Error( 'nogeo', __( 'You must specify coordinates', 'simple-location' ) ) );
 		}
-		$reverse = new Geo_Provider_OSM();
+		$reverse = loc_config::default_reverse_provider();
 		$reverse->set( $_POST['latitude'], $_POST['longitude'] );
 		$reverse_adr = $reverse->reverse_lookup();
 		if ( is_wp_error( $reverse_adr ) ) {
