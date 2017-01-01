@@ -11,12 +11,12 @@ Adds geographic location support to pages and posts.
 
 ## Description ##
 
-Completely rewritten...again. Supports adding geo coordinates to a post, and will be supporting saving a location as a venue for reuse.
+Supports adding geo coordinates or textual description to a post, and will be supporting saving a location as a venue for reuse. Offers choice of map displays.
 
 It supports retrieving location using the HTML5 geolocation API. As it stores the GeoData in a 
 WordPress standard format, Geodata can also be added from other plugins.
 
-Offers the opportunity to change the timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location.
+Offers the opportunity to change the displayed timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location.
 
 ## Other Notes ##
 
@@ -27,7 +27,7 @@ The Development Version as well as support can be found on [Github](https://gith
 ## Venues ##
 
 Venues are locations stored as a custom taxonomy in WordPress using the Term Metadata functionality added in Version 4.4 of WordPress. Venues as taxonomies
-have the advantage of supporting an archive page of all posts from that location and giving the location a permalink on your site. To add anything more than a basic location you will have to create a venue.
+have the advantage of supporting an archive page of all posts from that location and giving the location a permalink on your site. To add anything more than a basic location you will have to create a venue unlike in earlier versions of the plugin.
 
 ## WordPress GeoData ##
 
@@ -44,14 +44,14 @@ will now be required to show maps for services that require API keys.
 ## Changelog ##
  
 ### Version 3.0.0 ###
-	* New Version Takes Advantage of new WordPress Term Metadata to create Venues
-	* The most Javascript I've ever used in a WordPress plugin.
+	* New Version Takes Advantage of new WordPress Term Metadata to create Venues (Feature disabled until future release)
+	* The most Javascript I've ever used in a WordPress plugin. Retrieving location information is now done without page refresh.
 	* Timezone Override is set by location lookup.
 	* Google Map Services will now require an API key to be provided.
 	* MapBox is now the static map provider if you are using OSM maps and an API key must be provided
 	* You Can Now Choose Map Providers but not reverse lookup providers which may come in future
 	* Full Address data is no longer stored in the post. You will have the choice of either a textual description and coordinates in the post
-	or assigning a venue which can have full data.
+	or assigning a venue which can have full data. Venue support in future version and is disabled here.
 	* Warnings no longer showing in debug logs.
 	* Displayed name and timezone are now set if Micropub plugin provides geo coordinates
 
