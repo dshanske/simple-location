@@ -30,30 +30,28 @@ class WP_Geo_Data {
 
 		$geodata['latitude'] = get_post_meta( $post_ID, 'geo_latitude', true );
 		$geodata['address'] = get_post_meta( $post_ID, 'geo_address', true );
-		if ( is_string( $geodata['address'] ) ) {
-			$geodata['address'] = trim( $geodata['address'] );
-		}
 		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 			return null;
 		}
 		$geodata['public'] = get_post_meta( $post_ID, 'geo_public', true );
 		$geodata['ID'] = $post_ID;
 
-		$adr = get_post_meta( $post_ID, 'mf2_adr', true );
-
-		// This indicates an old Simple Location storage format
-		if ( is_array( $adr ) ) {
-			if ( empty( $geodata['address'] ) ) {
-				$map = loc_config::default_reverse_provider();
-				$map->set( $geodata['latitude'], $geodata['longitude'] );
-				$geodata['adr'] = $map->reverse_lookup();
-				if ( array_key_exists( 'display-name', $adr ) ) {
-					$geodata['address'] = $adr['display-name'];
+		if ( empty( $geodata['address'] ) ) {
+			if ( empty( $geodata['longitude'] ) ) {
+				return null;
+			}
+			$map = loc_config::default_reverse_provider();
+			$map->set( $geodata['latitude'], $geodata['longitude'] );
+			$adr = $map->reverse_lookup();
+			if ( array_key_exists( 'display-name', $adr ) ) {
+				$geodata['address'] = trim( $adr['display-name'] );
+				if ( ! empty( $geodata['address'] ) ) {
 					update_post_meta( $post_ID, 'geo_address', $geodata['address'] );
+					update_post_meta( $id, '_timezone', $adr['timezone'] );
 				}
 			}
+			$geodata['adr'] = $adr;
 			// Remove Old Metadata
-			delete_post_meta( $post_ID, 'mf2_adr' );
 			delete_post_meta( $post_ID, 'geo_map' );
 			delete_post_meta( $post_ID, 'geo_full' );
 			delete_post_meta( $post_ID, 'geo_lookup' );
@@ -111,7 +109,7 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_public', $args );
 
 		$args = array(
-				'sanitize_callback' => 'wp_kses_data',
+				'sanitize_callback' => array( 'WP_Geo_Data', 'sanitize_address'),
 				'type' => 'string',
 				'description' => 'Geodata Address',
 				'single' => true,
@@ -121,6 +119,15 @@ class WP_Geo_Data {
 		register_meta( 'comment', 'geo_address', $args );
 		register_meta( 'user', 'geo_address', $args );
 		register_meta( 'term', 'geo_address', $args );
+	}
+
+	public static function sanitize_address( $data ) {
+		$data = wp_kses_post( $data );
+		$data = trim( $data );
+		if ( empty( $data ) ) {
+			$data = null;
+		}
+		return $data;
 	}
 
 

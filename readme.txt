@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, indieweb
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 Requires at least: 4.7
 Tested up to: 4.7
 License: GPLv2 or later
@@ -42,7 +42,12 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
- 
+
+= Version 3.0.1 =
+	* Some quick fixes on the release. Due to issues with the removal of the old location data, it will no longer be removed. Instead only the extra display metadata will be removed.
+	* If there is no geo_address set and there are coordinates a geo_address will be automatically set along with timezone
+	
+
 = Version 3.0.0 =
 	* New Version Takes Advantage of new WordPress Term Metadata to create Venues (Feature disabled until future release)
 	* The most Javascript I've ever used in a WordPress plugin. Retrieving location information is now done without page refresh.

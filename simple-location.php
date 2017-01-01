@@ -3,14 +3,14 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to Wordpress Pages and Posts.
- * Version: 3.0.0
+ * Version: 3.0.1
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
  * Domain Path:  /languages
  */
 
-define( 'SIMPLE_LOCATION_VERSION', '3.0.0' );
+define( 'SIMPLE_LOCATION_VERSION', '3.0.1' );
 
 // Register Metadata Functions
 require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-meta.php' );
