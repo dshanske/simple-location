@@ -51,6 +51,9 @@ class loc_metabox {
 		if ( is_null ($geodata) ) {
 			$geodata = array( 'public' => 1 );
 		}
+		if ( 2 < $geodata['public'] ) {
+			$geodata['public'] = 2;
+		}
 	?>
 		<label for="geo_public"><?php _e( 'Display:', 'simple-location' ); ?></label>
 		<select name="geo_public">

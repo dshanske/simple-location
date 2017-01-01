@@ -44,7 +44,7 @@ class WP_Geo_Data {
 		// This indicates an old Simple Location storage format
 		if ( is_array( $adr ) ) {
 			if ( empty( $geodata['address'] ) ) {
-				$map = new Geo_Provider_OSM();
+				$map = loc_config::default_reverse_provider();
 				$map->set( $geodata['latitude'], $geodata['longitude'] );
 				$geodata['adr'] = $map->reverse_lookup();
 				if ( array_key_exists( 'display-name', $adr ) ) {
@@ -62,6 +62,11 @@ class WP_Geo_Data {
 		// Assume the absence of a public is the same as public
 		if ( ! array_key_exists( 'public', $geodata ) ) {
 			$geodata['public'] = 1;
+		}
+		else {
+			if ( 3 == $geodata['public'] ) {
+				$geodata['public'] = 2;
+			}
 		}
 
 		return $geodata;
