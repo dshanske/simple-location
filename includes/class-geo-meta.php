@@ -27,8 +27,13 @@ class WP_Geo_Data {
 		$geodata = array();
 		
 		$geodata['longitude'] = get_post_meta( $post_ID, 'geo_longitude', true );
-		// Sets Latitude and Address but if either is not set returns a failure	
-		if ( ( ! $geodata['latitude'] = get_post_meta( $post_ID, 'geo_latitude', true ) ) || ( ! $geodata['address'] = get_post_meta( $post_ID, 'geo_address', true ) ) ) {
+
+		$geodata['latitude'] = get_post_meta( $post_ID, 'geo_latitude', true );
+		$geodata['address'] = get_post_meta( $post_ID, 'geo_address', true );
+		if ( is_string( $geodata['address'] ) ) {
+			$geodata['address'] = trim( $geodata['address'] );
+		}
+		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 			return null;
 		}
 		$geodata['public'] = get_post_meta( $post_ID, 'geo_public', true );
@@ -38,7 +43,7 @@ class WP_Geo_Data {
 
 		// This indicates an old Simple Location storage format
 		if ( is_array( $adr ) ) {
-			if ( ! $geodata['address'] ) {
+			if ( empty( $geodata['address'] ) ) {
 				$map = new Geo_Provider_OSM();
 				$map->set( $geodata['latitude'], $geodata['longitude'] );
 				$geodata['adr'] = $map->reverse_lookup();
