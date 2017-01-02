@@ -8,7 +8,7 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 				longitude: jQuery("#longitude").val(),
 				accuracy: jQuery("#accuracy").val(),
 				altitude: jQuery("#altitude").val(),
-				altitude-accuracy: jQuery("#altitude-accuracy").val(),
+				altitude_accuracy: jQuery("#altitude-accuracy").val(),
 				speed: jQuery("#speed").val(),
 				heading: jQuery("#heading").val()
 			},
