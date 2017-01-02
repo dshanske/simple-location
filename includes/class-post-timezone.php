@@ -108,7 +108,7 @@ class Post_Timezone {
 		if ( ! $post ) {
 			return $the_time;
 		}
-		$timezone = get_post_meta( $post->ID, '_timezone', true );
+		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
 		if ( ! $timezone ) {
 			if ( ! $timezone = get_post_meta( $post->ID, '_timezone', true ) ) {
 				return $the_time;
