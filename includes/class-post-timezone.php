@@ -19,14 +19,21 @@ class post_timezone {
 			echo '<div class="misc-pub-section misc-pub-section-last">';
 			wp_nonce_field( 'timezone_override_metabox', 'timezone_override_nonce' );
 			$tzlist = DateTimeZone::listIdentifiers();
+			$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
+			if ( ! $timezone ) {
+				$timezone = get_post_meta( $post->ID, '_timezone', true );
+				if ( $timezone ) {
+					update_post_meta( $post->ID, 'geo_timezone', true );
+					delete_post_meta( $post->ID, '_timezone' );
+				}
+			}
+
 			?>
-			<p>
-			<label for="override_timezone"><?php _e( 'Override Default Timezone', 'simple-location' ); ?></label>
-		<input type="checkbox" name="override_timezone" id="override_timezone" <?php if ( get_post_meta( $post->ID, '_timezone', true ) ) { echo 'checked="checked'; } ?>" />
+			<label for="override_timezone"><?php _e( 'Change Displayed Timezone', 'simple-location' ); ?></label>
+		<input type="checkbox" name="override_timezone" id="override_timezone" onclick='toggle_timezone();' <?php if ( $timezone ) { echo 'checked="checked'; } ?>" />
 		 <br />
-		<select name="timezone" id="timezone" width="90%">
-			<?php
-			$timezone = get_post_meta( $post->ID, '_timezone', true );
+		 <select name="timezone" id="timezone" width="90%" <?php if ( ! $timezone ) { echo 'hidden'; }?>>
+<?php
 			if ( ! $timezone ) {
 				$timezone = get_option( 'timezone_string' );
 			}
@@ -72,9 +79,9 @@ class post_timezone {
 			}
 		}
 		if ( $_POST['override_timezone'] ) {
-			update_post_meta( $post_id, '_timezone', $_POST['timezone'] );
+			update_post_meta( $post_id, 'geo_timezone', $_POST['timezone'] );
 		} else {
-			delete_post_meta( $post_id, '_timezone' );
+			delete_post_meta( $post_id, 'geo_timezone' );
 		}
 	}
 
@@ -84,9 +91,11 @@ class post_timezone {
 		if ( ! $post ) {
 			return $the_date;
 		}
-		$timezone = get_post_meta( $post->ID, '_timezone', true );
+		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
 		if ( ! $timezone ) {
-			return $the_date;
+			if ( ! $timezone = get_post_meta( $post->ID, '_timezone', true ) ) {
+				return $the_date;
+			}
 		}
 		if ( '' == $d ) {
 			$d = get_option( 'date_format' );
@@ -103,7 +112,9 @@ class post_timezone {
 		}
 		$timezone = get_post_meta( $post->ID, '_timezone', true );
 		if ( ! $timezone ) {
-			return $the_time;
+			if ( ! $timezone = get_post_meta( $post->ID, '_timezone', true ) ) {
+				return $the_time;
+			}
 		}
 		if ( '' == $d ) {
 			$d = get_option( 'time_format' );

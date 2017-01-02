@@ -101,6 +101,7 @@ function clearLocation() {
   document.getElementById("country-name").value = "";
   document.getElementById("country-code").value = "";
   document.getElementById("address").value = "";
+  document.getElementById("location-name").value = "";
 }	
 
 function getLocation()
@@ -116,3 +117,13 @@ function showPosition(position)
   document.getElementById("latitude").value = position.coords.latitude;
   document.getElementById("longitude").value = position.coords.longitude;
   }
+
+function toggle_timezone() {
+	var e = document.getElementById("timezone");
+	if ( document.getElementById("override_timezone").checked ) {
+		e.removeAttribute( "hidden" ); 
+	}
+	else { 
+		e.setAttribute( "hidden", true );
+	}
+}
