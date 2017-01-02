@@ -1,9 +1,9 @@
 <?php
 
-add_action( 'init', array( 'loc_view', 'content_location' ) );
+add_action( 'init', array( 'Loc_View', 'content_location' ) );
 
 // Location Display
-class loc_view {
+class Loc_View {
 	public static function get_icon( ) {
 		// Substitute another svg sprite file
 		$sprite = plugin_dir_url( __FILE__ ) . 'location.svg';
@@ -16,16 +16,16 @@ class loc_view {
 		}
 		$loc = WP_Geo_Data::get_geodata( $id );
 		// 0 is private
-		if ( ! empty( $loc['public'] ) ) {
-			$map = loc_config::default_map_provider();
+		if (  isset( $loc ) ) {
+			$map = Loc_Config::default_map_provider();
 			$map->set( $loc['latitude'], $loc['longitude'] );
 			$c = '';
 			// 1 is full public
-			if ( 1 == $loc['public'] ) {
+			if ( '1' === $loc['public'] ) {
 				$c .= self::get_the_geo( $loc['latitude'], $loc['longitude'], $loc['address'] );
 				$c = '<a href="' . $map->get_the_map_url( $loc['latitude'], $loc['longitude'] ) . '">' . $c . '</span></a>';
 			} else {
-				$c = self::get_the_geo( null, null, $loc['address']);
+				$c = self::get_the_geo( null, null, $loc['address'] );
 			}
 			return $c;
 		}
@@ -37,8 +37,8 @@ class loc_view {
 			$id = get_the_ID();
 		}
 		$loc = WP_Geo_Data::get_geodata( $id );
-		if ( '1' == $loc['public'] ) {
-			$map = loc_config::default_map_provider();
+		if ( '1' === $loc['public'] ) {
+			$map = Loc_Config::default_map_provider();
 			$map->set( $loc['latitude'], $loc['longitude'] );
 			return $map->get_the_map();
 		}
@@ -48,10 +48,10 @@ class loc_view {
 	// Return marked up coordinates
 	public static function get_the_geo($lat, $lon, $address = null) {
 		$c = '<span class="p-location">';
-		if ( is_string( $address ) ){
+		if ( is_string( $address ) ) {
 			$c .= $address;
 		}
-		if ( $lat && $lon ) {	
+		if ( $lat && $lon ) {
 			$c .= '<span class="h-geo">';
 			$c .= '<data class="p-latitude" value="' . $lat . '"></data>';
 			$c .= '<data class="p-longitude" value="' . $lon . '"></data>';
@@ -79,9 +79,9 @@ class loc_view {
 	// If the Theme Has Not Declared Location Support
 	// Add the Location Display to the Content Filter
 	public static function content_location() {
-		add_filter( 'the_content', array( 'loc_view', 'content_map' ), 11 );
+		add_filter( 'the_content', array( 'Loc_View', 'content_map' ), 11 );
 		if ( ! current_theme_supports( 'simple-location' ) ) {
-			add_filter( 'the_content', array( 'loc_view', 'location_content' ), 12 );
+			add_filter( 'the_content', array( 'Loc_View', 'location_content' ), 12 );
 		}
 	}
 

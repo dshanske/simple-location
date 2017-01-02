@@ -15,7 +15,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 		}
 		$json = json_decode( $response['body'], true );
 		$address = $json['address'];
-		if ( $address['country_code'] == 'us' ) {
+		if ( 'us' === $address['country_code'] ) {
 			$region = ifset( $address['state'] ) ?: ifset( $address['county'] );
 		} else {
 			$region = ifset( $address['county'] ) ?: ifset( $address['state'] );
@@ -28,7 +28,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 			'locality' => ifset( $address['hamlet'] ) ?: ifset( $address['village'] ) ?: ifset( $address['town'] ) ?: ifset( $address['city'] ) ?: null,
 			'region' => $region,
 			'country-name' => ifset( $address['country'], null ),
-			'postal-code' => ifset( $address['postcode'], null ), 
+			'postal-code' => ifset( $address['postcode'], null ),
 			'country-code' => strtoupper( $address['country_code'] ) ?: null,
 			'latitude' => $this->latitude,
 			'longitude' => $this->longitude,
@@ -38,7 +38,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 			$codes = json_decode( wp_remote_retrieve_body( wp_remote_get( 'http://country.io/names.json' ) ), true );
 			$addr['country-name'] = $codes[ $addr['country-code'] ];
 		}
-                $addr = array_filter( $addr );
+				$addr = array_filter( $addr );
 		$addr['display-name'] = $this->display_name( $addr );
 		$tz = $this->timezone();
 		if ( $tz ) {

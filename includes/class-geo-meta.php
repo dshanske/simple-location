@@ -25,7 +25,7 @@ class WP_Geo_Data {
 			$post_ID = get_the_ID();
 		}
 		$geodata = array();
-		
+
 		$geodata['longitude'] = get_post_meta( $post_ID, 'geo_longitude', true );
 
 		$geodata['latitude'] = get_post_meta( $post_ID, 'geo_latitude', true );
@@ -60,9 +60,8 @@ class WP_Geo_Data {
 		// Behavior Based on the Absence of the geo_public flag
 		if ( ! array_key_exists( 'public', $geodata ) ) {
 			$geodata['public'] = apply_filters( 'geo_public_default', SLOC_PUBLIC );
-		}
-		else {
-			if ( 3 == $geodata['public'] ) {
+		} else {
+			if ( 3 === $geodata['public'] ) {
 				$geodata['public'] = 2;
 			}
 		}
@@ -121,7 +120,7 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_public', $args );
 
 		$args = array(
-				'sanitize_callback' => array( 'WP_Geo_Data', 'sanitize_address'),
+				'sanitize_callback' => array( 'WP_Geo_Data', 'sanitize_address' ),
 				'type' => 'string',
 				'description' => 'Geodata Address',
 				'single' => true,

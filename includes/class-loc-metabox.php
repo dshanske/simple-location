@@ -1,8 +1,8 @@
 <?php
 // Adds Post Meta Box for Location
-add_action( 'init' , array( 'loc_metabox', 'init' ) );
+add_action( 'init' , array( 'Loc_Metabox', 'init' ) );
 
-class loc_metabox {
+class Loc_Metabox {
 	public static function init() {
 		add_action( 'admin_enqueue_scripts', array( 'loc_metabox', 'enqueue' ) );
 		// Add meta box to new post/post pages only
@@ -47,10 +47,10 @@ class loc_metabox {
 	public static function location_metabox( $object, $box ) {
 		wp_nonce_field( 'location_metabox', 'location_metabox_nonce' );
 		add_thickbox();
-	//	$thickbox = '#TB_inline?width=400&height=550&inlineId=';
+		//	$thickbox = '#TB_inline?width=400&height=550&inlineId=';
 		$thickbox = '#TB_inline?inlineId=';
 		$geodata = WP_Geo_Data::get_geodata( $object->ID );
-		if ( is_null ($geodata) ) {
+		if ( is_null( $geodata ) ) {
 			$geodata = array( 'public' => 1 );
 		}
 	?>
@@ -71,7 +71,7 @@ class loc_metabox {
 
 		<div id="location-popup" style="display:none">
 			<h2>Location</h2>
-			<p> <?php _e( "The below will be displayed in the post.", "simple-location" ); ?></p>
+			<p> <?php _e( 'The below will be displayed in the post.', 'simple-location' ); ?></p>
 			<label for="address"><?php _e( 'Display', 'simple-location' ); ?></label>
 
 			<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" size="60" />
@@ -86,17 +86,17 @@ class loc_metabox {
 				<p> <?php _e( 'The geolocation API has the below additional properties not currently used but are displayed below to show the available information your device has. May be used in future', 'simple-location' ); ?> </p>
 
 				<label for="altitude"><?php _e( 'Altitude:', 'simple-location' ); ?></label>
-                                <input type="text" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" size="6" disabled />
+								<input type="text" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" size="6" disabled />
 				<br />
 
 				<label for="altitude-accuracy"><?php _e( 'Altitude Accuracy:', 'simple-location' ); ?></label>
-                                <input type="text" name="altitude-accuracy" id="altitude-accuracy" value="<?php echo ifset( $geodata['altitude-accuracy'], '' ); ?>" size="6" disabled />
+								<input type="text" name="altitude-accuracy" id="altitude-accuracy" value="<?php echo ifset( $geodata['altitude-accuracy'], '' ); ?>" size="6" disabled />
 				<br />
 				<label for="heading"><?php _e( 'Heading:', 'simple-location' ); ?></label>
 				<input type="text" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" size="6" disabled />
 
 				<label for="speed"><?php _e( 'Speed:', 'simple-location' ); ?></label>
-                                <input type="text" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" size="6" disabled />
+								<input type="text" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" size="6" disabled />
 
 
 
@@ -106,7 +106,7 @@ class loc_metabox {
 			<br /><br />
 
 		<h3>Location Data</h3>
-		<p> <?php _e( "Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.", "simple-location" ); ?></p>
+		<p> <?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
 			<button type="button" class="lookup-address-button button-secondary"><?php _e( 'Lookup from Coordinates', 'simple-location' ); ?></button>
 			<br /><br />
 			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
@@ -118,8 +118,8 @@ class loc_metabox {
 		
 			<br /><br />
 			<label for="extended-address"><?php _e( 'Extended Address', 'simple-location' ); ?></label>
-                          <input type="text" name="extended-address" id="extended-address" value="" size="50" />  
-                          <br /><br />
+						  <input type="text" name="extended-address" id="extended-address" value="" size="50" />  
+						  <br /><br />
 
 		<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
 		<input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" size="30" />
@@ -140,7 +140,7 @@ class loc_metabox {
 			</p>
 	 	<br />
 		<br />
-		<p> <?php _e( 'Venue functionality is not yet available. To save your location in the post you may just close this popup.', 'simple-location'); ?></p>
+		<p> <?php _e( 'Venue functionality is not yet available. To save your location in the post you may just close this popup.', 'simple-location' ); ?></p>
 		<div class="button-group">
 		<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
 		<button type="button" class="clear-location-button button-primary" onclick="clearLocation();return false;"><?php _e( 'Clear', 'simple-location' ); ?></button> 
@@ -167,7 +167,7 @@ class loc_metabox {
 			return;
 		}
 		// Check the user's permissions.
-		if ( isset( $_POST['post_type'] ) && 'page' == $_POST['post_type'] ) {
+		if ( isset( $_POST['post_type'] ) && 'page' === $_POST['post_type'] ) {
 			if ( ! current_user_can( 'edit_page', $post_id ) ) {
 				return;
 			}
@@ -190,7 +190,7 @@ class loc_metabox {
 		} else {
 			delete_post_meta( $post_id, 'geo_longitude' );
 		}
-                if ( ! empty( $_POST['address'] ) ) {
+		if ( ! empty( $_POST['address'] ) ) {
 			update_post_meta( $post_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
 		} else {
 			delete_post_meta( $post_id, 'geo_address' );
@@ -199,9 +199,8 @@ class loc_metabox {
 		if ( ! empty( $_POST['address'] ) ) {
 			if ( isset( $_POST['geo_public'] ) ) {
 				update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
-			}
-			else {
-				delete_post_meta( $post_id, 'geo_public' );
+			} else {
+						delete_post_meta( $post_id, 'geo_public' );
 			}
 		}
 	}

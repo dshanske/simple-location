@@ -6,7 +6,7 @@ class Geo_Provider_Google extends Geo_Provider {
 	public function __construct() {
 		parent::__construct();
 		if ( ! $this->api ) {
-			$this->api = get_option('sloc_google_api');
+			$this->api = get_option( 'sloc_google_api' );
 		}
 	}
 

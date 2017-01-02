@@ -1,8 +1,8 @@
 <?php
 
-add_filter( 'admin_init', array( 'loc_config', 'admin_init' ), 10, 4 );
+add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10, 4 );
 
-class loc_config {
+class Loc_Config {
 
 	/**
 	 * Add Settings to the Discussions Page
@@ -11,74 +11,74 @@ class loc_config {
 		register_setting(
 			'media', // settings page
 			'sloc_default_map_provider', // option name
-			array( 
+			array(
 				'type' => 'string',
 				'description' => 'Default Map Provider',
 				'show_in_rest' => false,
-				'default' => 'OSM'
+				'default' => 'OSM',
 			)
 		);
 		register_setting(
 			'media', // settings page
 			'sloc_default_reverse_provider', // option name
-			array( 
+			array(
 				'type' => 'string',
 				'description' => 'Default Map Provider',
 				'show_in_rest' => false,
-				'default' => 'OSM'
+				'default' => 'OSM',
 			)
 		);
 		register_setting(
 			'media', // settings page
 			'sloc_google_api', // option name
-			array( 
+			array(
 				'type' => 'string',
 				'description' => 'Google Maps API Key',
 				'show_in_rest' => false,
-				'default' => ''
+				'default' => '',
 			)
 		);
 		register_setting(
 			'media', // settings page
 			'sloc_mapbox_api', // option name
-			array( 
+			array(
 				'type' => 'string',
 				'description' => 'Mapbox Static Maps API Key',
 				'show_in_rest' => false,
-				'default' => ''
+				'default' => '',
 			)
 		);
 		register_setting(
 			'media', // settings page
 			'sloc_height', // option name
-			array( 
+			array(
 				'type' => 'number',
 				'description' => 'Simple Location Map Height',
 				'show_in_rest' => true,
-				'default' => 350
+				'default' => 350,
 			)
 		);
 		register_setting(
 			'media', // settings page
 			'sloc_width', // option name
-			array( 
+			array(
 				'type' => 'number',
 				'description' => 'Simple Location Map Width',
 				'show_in_rest' => true,
-				'default' => 350
+				'default' => 350,
 			)
 		);
 		register_setting(
 			'media', // settings page
 			'sloc_zoom', // option name
-			array( 
+			array(
 				'type' => 'number',
 				'description' => 'Simple Location Map Zoom',
 				'show_in_rest' => true,
-				'default' => 14
+				'default' => 14,
 			)
 		);
-		add_settings_section( 
+		add_settings_section(
 			'sloc',
 			'Simple Location Map Settings',
 			array( 'loc_config', 'sloc_settings' ),
@@ -136,7 +136,7 @@ class loc_config {
 
 	public static function checkbox_callback(array $args) {
 		$name = $args['name'];
-		$checked = get_option( $name);
+		$checked = get_option( $name );
 		echo "<input name='" . $name . "' type='hidden' value='0' />";
 		echo "<input name='" . $name . "' type='checkbox' value='1' " . checked( 1, $checked, false ) . ' /> ';
 	}
@@ -163,7 +163,7 @@ class loc_config {
 	}
 
 	public static function sloc_settings() {
-		_e ( 'Default Settings for Map Generation for the Simple Location plugin. API keys are required for map display services.', 'simple-location' );
+		_e( 'Default Settings for Map Generation for the Simple Location plugin. API keys are required for map display services.', 'simple-location' );
 	}
 
 	public static function default_map_provider() {
