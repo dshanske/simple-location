@@ -84,7 +84,7 @@ abstract class Geo_Provider {
 		}
 		$text = array();
 		$text[] = ifset( $reverse['name'] );
-		if ( ! array_key_exists( 'address', $reverse ) ) {
+		if ( ! array_key_exists( 'street-address', $reverse ) ) {
 			$text[] = ifset( $reverse['extended-address'] );
 		}
 		$text[] = ifset( $reverse['locality'] );

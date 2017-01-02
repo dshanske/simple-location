@@ -47,8 +47,7 @@ class Loc_Metabox {
 	public static function location_metabox( $object, $box ) {
 		wp_nonce_field( 'location_metabox', 'location_metabox_nonce' );
 		add_thickbox();
-		//	$thickbox = '#TB_inline?width=400&height=550&inlineId=';
-		$thickbox = '#TB_inline?inlineId=';
+		$thickbox = '#TB_inline?width=400&height=550&inlineId=';
 		$geodata = WP_Geo_Data::get_geodata( $object->ID );
 		if ( is_null( $geodata ) ) {
 			$geodata = array( 'public' => 1 );

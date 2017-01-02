@@ -20,15 +20,16 @@ class Geo_Provider_OSM extends Geo_Provider {
 		} else {
 			$region = ifset( $address['county'] ) ?: ifset( $address['state'] );
 		}
-		$street = ifset( $address['house_number'], '' ) . ' ' . ifset( $address['road'], '' );
+		$street = ifset( $address['house_number'], '' ) . ' ';
+		$street .= ifset( $address['road'] ) ?: ifset( $address['highway'] ) ?: ifset( $address['footway'] ) ?: '';
 		$addr = array(
-			'name' => ifset( $address['attraction'] ) ?: ifset( $address['building'] ) ?: ifset( $address['hotel'] ) ?: ifset( $address['highway'] ) ?: null,
+			'name' => ifset( $address['attraction'] ) ?: ifset( $address['building'] ) ?: ifset( $address['hotel'] ) ?: null,
 			'street-address' => $street,
 			'extended-address' => ifset( $address['boro'] ) ?: ifset( $address['neighbourhood'] ) ?: ifset( $address['suburb'] ) ?: null,
 			'locality' => ifset( $address['hamlet'] ) ?: ifset( $address['village'] ) ?: ifset( $address['town'] ) ?: ifset( $address['city'] ) ?: null,
 			'region' => $region,
-			'country-name' => ifset( $address['country'], null ),
-			'postal-code' => ifset( $address['postcode'], null ),
+			'country-name' => ifset( $address['country'] ) ?: null,
+			'postal-code' => ifset( $address['postcode'] ) ?: null,
 			'country-code' => strtoupper( $address['country_code'] ) ?: null,
 			'latitude' => $this->latitude,
 			'longitude' => $this->longitude,
