@@ -3,54 +3,80 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to Wordpress Pages and Posts.
- * Version: 3.0.1
+ * Version: 3.1.0
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
  * Domain Path:  /languages
  */
 
-define( 'SIMPLE_LOCATION_VERSION', '3.0.1' );
 
-// Register Metadata Functions
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-meta.php' );
+add_action( 'plugins_loaded', array( 'Simple_Location_Plugin', 'init' ) );
 
-// Venue Taxonomy
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-venue-taxonomy.php' );
+class Simple_Location_Plugin {
+	public static $version = '3.1.0';
+	public static function init() {
 
+		load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
-// Map Provider Class
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider.php' );
+		// Load stylesheets.
+		add_action( 'wp_enqueue_scripts', array( 'Simple_Location_Plugin', 'style_load' ) );
 
-// Map Providers
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-osm.php' );
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-google.php' );
+		// Settings Link
+		add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( 'Simple_Location_Plugin', 'settings_link' ) );
 
-// Handlers
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-ajax-geo.php' );
-// API Endpoint under construction
-// require_once( plugin_dir_path( __FILE__ ) . 'includes/class-location-controller.php' );
+		// Register Metadata Functions
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-meta.php' );
+		
+		// Venue Taxonomy
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-venue-taxonomy.php' );
 
-// Configuration Functions
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-config.php' );
+		// Map Provider Class
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider.php' );
 
-// Add Location Post Meta
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-metabox.php' );
+		// Map Providers
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-osm.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-google.php' );
 
-// Add Location Display Functions
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-view.php' );
+		// Handlers
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-ajax-geo.php' );
+		// API Endpoint under construction
+		// require_once( plugin_dir_path( __FILE__ ) . 'includes/class-location-controller.php' );
 
-// Timezone Functions
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-timezone-result.php' );
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-timezone.php' );
-require_once( plugin_dir_path( __FILE__ ) . 'includes/class-post-timezone.php' );
+		// Configuration Functions
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-config.php' );
 
-function sloc_init() {
-	load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+		// Add Location Post Meta
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-metabox.php' );
+
+		// Add Location Display Functions
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-view.php' );
+
+		// Timezone Functions
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-timezone-result.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-timezone.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-post-timezone.php' );
+
+	}
+		
+	/** Adds link to Plugin Page for Options Page.
+	 *
+	 * @param array $links Array of Existing Links.
+	 * @return array Modified Links.
+	 */
+	public static function settings_link( $links ) {
+		$settings_link = '<a href="options-media.php">' . __( 'Map Settings', 'simple-location' ) . '</a>';
+		$links[] = $settings_link;
+		return $links;
+		}
+
+	/**
+	 * Loads the Stylesheet for the Plugin.
+	 */
+	public static function style_load() {
+		wp_enqueue_style( 'simple-location', plugin_dir_url( __FILE__ ) . 'css/location.min.css', array(), self::$version );
+	}
 }
-
-add_action( 'plugins_loaded', 'sloc_init' );
-
 
 
 if ( ! function_exists( 'ifset' ) ) {

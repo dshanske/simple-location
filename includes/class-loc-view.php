@@ -64,7 +64,7 @@ class loc_view {
 	public static function location_content($content) {
 		$loc = self::get_location();
 		if ( ! empty( $loc ) ) {
-			$content .= '<p>' . self::get_icon() . ' ' . $loc . '</p>';
+			$content .= '<p class="sloc-display">' . self::get_icon() . ' ' . $loc . '</p>';
 		}
 		return $content;
 	}

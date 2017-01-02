@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": ";;AACQ,4BAAe;EACP,IAAI,EAAE,YAAY;EAClB,YAAY,EAAE,GAAG;EACjB,aAAa,EAAE,GAAG;EAClB,KAAK,EAAE,IAAI;EACX,MAAM,EAAE,IAAI;EACZ,cAAc,EAAE,MAAM;EACtB,GAAG,EAAE,SAAS;EACd,KAAK,EAAE,KAAK",
+"sources": ["../sass/_icon.scss"],
+"names": [],
+"file": "location.css"
+}
