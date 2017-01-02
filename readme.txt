@@ -20,7 +20,8 @@ Offers the opportunity to change the displayed timezone on a per-post basis for 
 
 == Other Notes == 
 
-API Keys are required to use Google Static Maps or Mapbox Static Maps. If not provided there will be no map displayed regardless of setting.
+API Keys are required to use [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key) or [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/). 
+If not provided there will be no map displayed regardless of setting. The appropriate API keys should be entered in Settings>>Media or within the admin interface at /wp-admin/options-media.php.
 
 The Development Version as well as support can be found on [Github](https://github.com/dshanske/simple-location).
 
