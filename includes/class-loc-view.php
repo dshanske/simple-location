@@ -79,9 +79,9 @@ class loc_view {
 	// If the Theme Has Not Declared Location Support
 	// Add the Location Display to the Content Filter
 	public static function content_location() {
-		add_filter( 'the_content', array( 'loc_view', 'content_map' ), 20 );
+		add_filter( 'the_content', array( 'loc_view', 'content_map' ), 11 );
 		if ( ! current_theme_supports( 'simple-location' ) ) {
-			add_filter( 'the_content', array( 'loc_view', 'location_content' ), 20 );
+			add_filter( 'the_content', array( 'loc_view', 'location_content' ), 12 );
 		}
 	}
 

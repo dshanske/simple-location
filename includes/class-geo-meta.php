@@ -47,7 +47,7 @@ class WP_Geo_Data {
 				$geodata['address'] = trim( $adr['display-name'] );
 				if ( ! empty( $geodata['address'] ) ) {
 					update_post_meta( $post_ID, 'geo_address', $geodata['address'] );
-					update_post_meta( $id, '_timezone', $adr['timezone'] );
+					update_post_meta( $post_ID, 'geo_timezone', $adr['timezone'] );
 				}
 			}
 			$geodata['adr'] = $adr;
@@ -57,9 +57,9 @@ class WP_Geo_Data {
 			delete_post_meta( $post_ID, 'geo_lookup' );
 		}
 
-		// Assume the absence of a public is the same as public
+		// Behavior Based on the Absence of the geo_public flag
 		if ( ! array_key_exists( 'public', $geodata ) ) {
-			$geodata['public'] = 1;
+			$geodata['public'] = apply_filters( 'geo_public_default', SLOC_PUBLIC );
 		}
 		else {
 			if ( 3 == $geodata['public'] ) {
@@ -82,6 +82,7 @@ class WP_Geo_Data {
 		register_meta( 'comment', 'geo_latitude', $args );
 		register_meta( 'user', 'geo_latitude', $args );
 		register_meta( 'term', 'geo_latitude', $args );
+
 		$args = array(
 				'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
 				'type' => 'float',
@@ -93,6 +94,17 @@ class WP_Geo_Data {
 		register_meta( 'comment', 'geo_longitude', $args );
 		register_meta( 'user', 'geo_longitude', $args );
 		register_meta( 'term', 'geo_longitude', $args );
+
+		$args = array(
+				'type' => 'string',
+				'description' => 'Timezone of Location',
+				'single' => true,
+				'show_in_rest' => false,
+		);
+		register_meta( 'post', 'geo_timezone', $args );
+		register_meta( 'comment', 'geo_timezone', $args );
+		register_meta( 'user', 'geo_timezone', $args );
+		register_meta( 'term', 'geo_timezone', $args );
 
 		$args = array(
 		//		'sanitize_callback' => '',

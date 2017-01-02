@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** dshanske  
 **Tags:** geolocation, geo, maps, location, indieweb  
-**Stable tag:** 3.0.1  
+**Stable tag:** 3.1.0  
 **Requires at least:** 4.7  
 **Tested up to:** 4.7  
 **License:** GPLv2 or later  
@@ -42,6 +42,15 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### Version 3.1.0 ###
+	* Continuing to iterate based on initial feedback to 3.0.0
+	* Timezone box now hidden until checked
+	* Timezone now stored in geo_timezone in interest of consistency
+	* Icon Size for some fixed
+	* Priority of location and map box increased
+	* Text added to Location box to explain how to complete
+	* Constant SLOC_PUBLIC and filter geo_public_default allow the default to be changed from public(1) to private(0) if no geo_public is set
 
 ### Version 3.0.1 ###
 	* Some quick fixes on the release. Due to issues with the removal of the old location data, it will no longer be removed. Instead only the extra display metadata will be removed.
