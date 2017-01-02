@@ -5,7 +5,12 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 			data: {
 				action: 'get_sloc_address_data',
 				latitude: jQuery("#latitude").val(),
-				longitude: jQuery("#longitude").val()
+				longitude: jQuery("#longitude").val(),
+				accuracy: jQuery("#accuracy").val(),
+				altitude: jQuery("#altitude").val(),
+				altitude-accuracy: jQuery("#altitude-accuracy").val(),
+				speed: jQuery("#speed").val(),
+				heading: jQuery("#heading").val()
 			},
 		success : function( response ) {
 			if ( typeof response == 'undefined' ) {
@@ -104,19 +109,31 @@ function clearLocation() {
   document.getElementById("location-name").value = "";
 }	
 
-function getLocation()
-       {
-      if (navigator.geolocation)
-      {
-          navigator.geolocation.getCurrentPosition(showPosition);
-     }
+function getLocation() {
+	var options = {
+		enableHighAccuracy: true,
+		maximumAge: 600000
+	};
+      if (navigator.geolocation) {
+	      navigator.geolocation.getCurrentPosition(showPosition, error, options);
+      }
       else{alert("Geolocation is not supported by this browser.");}
   }
 function showPosition(position)
   {
   document.getElementById("latitude").value = position.coords.latitude;
   document.getElementById("longitude").value = position.coords.longitude;
+  document.getElementById("altitude").value = position.coords.altitude;
+  document.getElementById("accuracy").value = position.coords.accuracy;
+  document.getElementById("altitude-accuracy").value = position.coords.altitudeAccuracy;
+  document.getElementById("heading").value = position.coords.heading;
+  document.getElementById("speed").value = position.coords.speed;
+
   }
+
+function error(err) {
+	  alert( err.message );
+};
 
 function toggle_timezone() {
 	var e = document.getElementById("timezone");

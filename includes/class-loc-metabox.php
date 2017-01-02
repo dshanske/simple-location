@@ -47,7 +47,8 @@ class loc_metabox {
 	public static function location_metabox( $object, $box ) {
 		wp_nonce_field( 'location_metabox', 'location_metabox_nonce' );
 		add_thickbox();
-		$thickbox = '#TB_inline?width=400&height=550&inlineId=';
+	//	$thickbox = '#TB_inline?width=400&height=550&inlineId=';
+		$thickbox = '#TB_inline?inlineId=';
 		$geodata = WP_Geo_Data::get_geodata( $object->ID );
 		if ( is_null ($geodata) ) {
 			$geodata = array( 'public' => 1 );
@@ -79,6 +80,27 @@ class loc_metabox {
 				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" size="6" />
 	  			<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
 				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="6" />
+
+				<label for="accuracy"><?php _e( 'Accuracy:', 'simple-location' ); ?></label>
+				<input type="text" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" size="6" disabled />
+				<p> <?php _e( 'The geolocation API has the below additional properties not currently used but are displayed below to show the available information your device has. May be used in future', 'simple-location' ); ?> </p>
+
+				<label for="altitude"><?php _e( 'Altitude:', 'simple-location' ); ?></label>
+                                <input type="text" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" size="6" disabled />
+				<br />
+
+				<label for="altitude-accuracy"><?php _e( 'Altitude Accuracy:', 'simple-location' ); ?></label>
+                                <input type="text" name="altitude-accuracy" id="altitude-accuracy" value="<?php echo ifset( $geodata['altitude-accuracy'], '' ); ?>" size="6" disabled />
+				<br />
+				<label for="heading"><?php _e( 'Heading:', 'simple-location' ); ?></label>
+				<input type="text" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" size="6" disabled />
+
+				<label for="speed"><?php _e( 'Speed:', 'simple-location' ); ?></label>
+                                <input type="text" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" size="6" disabled />
+
+
+
+				
 				<button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'simple-location' ); ?></button> 
 			<br /><br />
 
