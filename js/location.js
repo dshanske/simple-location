@@ -135,6 +135,10 @@ function error(err) {
 	  alert( err.message );
 };
 
+function closeWindow( ) {
+	jQuery('#closeTBWindow').click(tb_remove);
+};
+
 function toggle_timezone() {
 	var e = document.getElementById("timezone");
 	if ( document.getElementById("override_timezone").checked ) {

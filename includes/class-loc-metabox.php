@@ -74,14 +74,14 @@ class loc_metabox {
 			<p> <?php _e( "The below will be displayed in the post.", "simple-location" ); ?></p>
 			<label for="address"><?php _e( 'Display', 'simple-location' ); ?></label>
 
-			<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'], '' ); ?> " size="60" />
+			<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" size="60" />
 			<p class="latlong">
 	  			<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
 				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" size="6" />
 	  			<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
 				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="6" />
 
-				<label for="accuracy"><?php _e( 'Accuracy:', 'simple-location' ); ?></label>
+				<label for="accuracy"><?php _e( 'Accuracy (in meters):', 'simple-location' ); ?></label>
 				<input type="text" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" size="6" disabled />
 				<p> <?php _e( 'The geolocation API has the below additional properties not currently used but are displayed below to show the available information your device has. May be used in future', 'simple-location' ); ?> </p>
 
@@ -102,6 +102,7 @@ class loc_metabox {
 
 				
 				<button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'simple-location' ); ?></button> 
+				<button type="button" class="button" onclick="closeWindow();return false;" id="closeTBWindow"><?php _e( 'Save Location', 'simple-location' ); ?></button>
 			<br /><br />
 
 		<h3>Location Data</h3>
