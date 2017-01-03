@@ -23,6 +23,8 @@ Offers the opportunity to change the displayed timezone on a per-post basis for 
 API Keys are required to use [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key) or [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/). 
 If not provided there will be no map displayed regardless of setting. The appropriate API keys should be entered in Settings>>Media or within the admin interface at /wp-admin/options-media.php.
 
+You can filter any query or archive by adding ?geo={all|public|text} to it to show only posts with location. Adding /geo/all to the homepage or archive pages should also work
+
 The Development Version as well as support can be found on [Github](https://github.com/dshanske/simple-location).
 
 ## Venues ##

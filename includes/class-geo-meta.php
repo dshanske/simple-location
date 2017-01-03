@@ -12,6 +12,50 @@ add_action( 'init', array( 'WP_Geo_Data', 'init' ), 1 );
 class WP_Geo_Data {
 	public static function init() {
 		self::register_meta();
+		add_filter( 'query_vars', array( 'WP_Geo_Data', 'query_var' ) );
+		add_action( 'pre_get_posts', array( 'WP_Geo_Data', 'pre_get_posts' ) );
+		self::rewrite();
+	}
+
+	public static function rewrite() {
+ 		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES | EP_ROOT );
+	}
+
+	public static function query_var( $vars ) {
+		$vars[] = 'geo';
+		return $vars;
+	}
+
+	public static function pre_get_posts( $query ) {
+		if ( ! array_key_exists( 'geo', $query->query_vars ) ) {
+			return;
+		}
+
+		$geo = $query->get( 'geo' );
+		$args =    array(
+			'key'     => 'geo_public',
+			'type'    => 'numeric',
+			);
+
+		switch ( $geo ) {
+		case 'all' :
+			$args['compare'] = '>';
+			$args['value'] = (int) 0;
+			$query->set('meta_query', array( $args ) );
+			break;
+		case 'public':
+			$args['compare'] = '=';
+			$args['value'] = (int) 1;
+			$query->set('meta_query', array( $args ) );
+			break;
+		case 'text':
+			$args['compare'] = '=';
+			$args['value'] = (int) 2;
+			$query->set('meta_query', array( $args ) );
+			break;
+		default:
+			return;
+		}
 	}
 
 	public static function clean_coordinate( $coordinate ) {
@@ -40,7 +84,7 @@ class WP_Geo_Data {
 			if ( empty( $geodata['longitude'] ) ) {
 				return null;
 			}
-			$map = loc_config::default_reverse_provider();
+			$map = Loc_Config::default_reverse_provider();
 			$map->set( $geodata['latitude'], $geodata['longitude'] );
 			$adr = $map->reverse_lookup();
 			if ( array_key_exists( 'display-name', $adr ) ) {

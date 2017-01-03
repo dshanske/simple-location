@@ -23,7 +23,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 		$street = ifset( $address['house_number'], '' ) . ' ';
 		$street .= ifset( $address['road'] ) ?: ifset( $address['highway'] ) ?: ifset( $address['footway'] ) ?: '';
 		$addr = array(
-			'name' => ifset( $address['attraction'] ) ?: ifset( $address['building'] ) ?: ifset( $address['hotel'] ) ?: null,
+			'name' => ifset( $address['attraction'] ) ?: ifset( $address['building'] ) ?: ifset( $address['hotel'] ) ifset( $address['address29'] ) ?: ifset( $address['address26'] ) ?: null,
 			'street-address' => $street,
 			'extended-address' => ifset( $address['boro'] ) ?: ifset( $address['neighbourhood'] ) ?: ifset( $address['suburb'] ) ?: null,
 			'locality' => ifset( $address['hamlet'] ) ?: ifset( $address['village'] ) ?: ifset( $address['town'] ) ?: ifset( $address['city'] ) ?: null,
