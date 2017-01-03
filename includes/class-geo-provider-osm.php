@@ -9,7 +9,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 	}
 
 	public function reverse_lookup() {
-		$response = wp_remote_get( 'http://nominatim.openstreetmap.org/reverse?format=json&lat=' . $this->latitude . '&lon=' . $this->longitude . '&zoom=' . $this->reverse_zoom . '&accept-language=' . get_bloginfo( 'language' ) );
+		$response = wp_remote_get( 'http://nominatim.openstreetmap.org/reverse?format=json&extratags=1&addressdetails=1&lat=' . $this->latitude . '&lon=' . $this->longitude . '&zoom=' . $this->reverse_zoom . '&accept-language=' . get_bloginfo( 'language' ) );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
