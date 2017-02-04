@@ -36,13 +36,8 @@ class Post_Timezone {
 			if ( ! $timezone ) {
 				$timezone = get_option( 'timezone_string' );
 			}
-			foreach ( $tzlist as $tz ) {
-				echo '<option value="' . $tz . '"';
-				if ( $timezone === $tz ) {
-					echo ' selected';
-				}
-				echo '>' . $tz . '</option>';
-			}
+
+			echo wp_timezone_choice( $timezone );
 			echo '</select>';
 			echo '</div>';
 		}
@@ -76,7 +71,7 @@ class Post_Timezone {
 				return;
 			}
 		}
-		if ( $_POST['override_timezone'] ) {
+		if ( isset( $_POST['override_timezone'] ) ) {
 			update_post_meta( $post_id, 'geo_timezone', $_POST['timezone'] );
 		} else {
 			delete_post_meta( $post_id, 'geo_timezone' );
