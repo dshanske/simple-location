@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to Wordpress Pages and Posts.
- * Version: 3.1.0
+ * Version: 3.0.3
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -14,8 +14,23 @@ define( "SLOC_PUBLIC", 1 );
 
 add_action( 'plugins_loaded', array( 'Simple_Location_Plugin', 'init' ) );
 
+// Activation and Deactivation Hooks
+register_activation_hook( __FILE__, array( 'Simple_Location_Plugin', 'activate') );
+register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactivate') );
+
+
 class Simple_Location_Plugin {
-	public static $version = '3.1.0';
+	public static $version = '3.0.3';
+
+	public static function activate() {
+		WP_Geo_Meta::rewrite();
+		flush_rewrite_rules();
+	}
+
+	public static function deactivate() {
+		flush_rewrite_rules();
+	}
+
 	public static function init() {
 
 		load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );

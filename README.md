@@ -3,7 +3,7 @@
 **Tags:** geolocation, geo, maps, location, indieweb  
 **Stable tag:** 3.0.2  
 **Requires at least:** 4.7  
-**Tested up to:** 4.7  
+**Tested up to:** 4.7.2  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -20,12 +20,15 @@ Offers the opportunity to change the displayed timezone on a per-post basis for 
 
 ## Other Notes ##
 
-API Keys are required to use [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key) or [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/). 
+* API Keys are required to use [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key) or [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/). 
 If not provided there will be no map displayed regardless of setting. The appropriate API keys should be entered in Settings>>Media or within the admin interface at /wp-admin/options-media.php.
 
-You can filter any query or archive by adding ?geo={all|public|text} to it to show only posts with location. Adding /geo/all to the homepage or archive pages should also work
+* You can filter any query or archive by adding `?geo={all|public|text}` to it to show only public posts with location. Adding /geo/all to the homepage or archive pages should also work
 
-The Development Version as well as support can be found on [Github](https://github.com/dshanske/simple-location).
+* Chrome Users: The button that retrieves the location using the HTML5 geolocation API will not work on Chrome if your website is secure(https). This is a Chrome decision to ensure safe control of personal
+data.
+
+* The Development Version as well as support can be found on [Github](https://github.com/dshanske/simple-location).
 
 ## Venues ##
 
@@ -45,6 +48,12 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### Version 3.0.3 ###
+	* Add support for queries and permalinks to show location enabled posts
+	* Use built-in WP timezone list generation code
+	* Fix error with private setting
+	* Put in check for improperly timezone setting to avoid exception error
 
 ### Version 3.0.2 ###
 	* Continuing to iterate based on initial feedback to 3.0.0

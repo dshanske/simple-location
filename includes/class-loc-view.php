@@ -17,6 +17,9 @@ class Loc_View {
 		$loc = WP_Geo_Data::get_geodata( $id );
 		// 0 is private
 		if (  isset( $loc ) ) {
+			if ( '0' === $loc['public'] ) {
+				return '';
+			}
 			$map = Loc_Config::default_map_provider();
 			$map->set( $loc['latitude'], $loc['longitude'] );
 			$c = '';

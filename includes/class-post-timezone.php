@@ -7,7 +7,7 @@ class Post_Timezone {
 		add_filter( 'get_the_date', array( 'Post_Timezone', 'get_the_date' ), 12, 2 );
 		add_filter( 'get_the_time', array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
 		add_filter( 'get_the_modified_date' , array( 'Post_Timezone', 'get_the_date' ), 12, 2 );
-		add_filter( 'get_the_modified_time' , array( 'Post_Timezone', 'get_the_time'), 12, 2);
+		add_filter( 'get_the_modified_time' , array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
 		add_action( 'post_submitbox_misc_actions', array( 'Post_Timezone', 'post_submitbox' ) );
 		add_action( 'save_post', array( 'Post_Timezone', 'postbox_save_post_meta' ) );
 	}
@@ -17,7 +17,6 @@ class Post_Timezone {
 		if ( 'post' === get_post_type( $post ) ) {
 			echo '<div class="misc-pub-section misc-pub-section-last">';
 			wp_nonce_field( 'timezone_override_metabox', 'timezone_override_nonce' );
-			$tzlist = DateTimeZone::listIdentifiers();
 			$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
 			if ( ! $timezone ) {
 				$timezone = get_post_meta( $post->ID, '_timezone', true );
@@ -33,9 +32,13 @@ class Post_Timezone {
 		 <br />
 		 <select name="timezone" id="timezone" width="90%" <?php if ( ! $timezone ) { echo 'hidden'; }?>>
 		<?php
-			if ( ! $timezone ) {
-				$timezone = get_option( 'timezone_string' );
+		if ( ! $timezone ) {
+			if ( ! $timezone = get_option( 'timezone_string' ) ) {
+				if ( 0 === get_option( 'gmt_offset', 0 ) ) {
+					$timezone = UTC;
+				}
 			}
+		}
 
 			echo wp_timezone_choice( $timezone );
 			echo '</select>';
@@ -72,7 +75,13 @@ class Post_Timezone {
 			}
 		}
 		if ( isset( $_POST['override_timezone'] ) ) {
-			update_post_meta( $post_id, 'geo_timezone', $_POST['timezone'] );
+			$tzlist = DateTimeZone::listIdentifiers();
+			// For now protect against non-standard timezones
+			if ( in_array( $_POST['timezone' ], $tzlist ) ) {
+				update_post_meta( $post_id, 'geo_timezone', $_POST['timezone'] );
+			} else {
+				error_log( 'SLOC Timezone Set Error: ' . $_POST['timezone'] . ' not supported' );
+			}
 		} else {
 			delete_post_meta( $post_id, 'geo_timezone' );
 		}
@@ -90,6 +99,12 @@ class Post_Timezone {
 				return $the_date;
 			}
 		}
+		if ( 1 === strlen( $timezone ) ) {
+			// Something Got Set Wrong
+			delete_post_meta( $post->ID, 'geo_timezone' );
+			return $the_time;
+		}
+
 		if ( '' === $d ) {
 			$d = get_option( 'date_format' );
 		}
@@ -108,6 +123,11 @@ class Post_Timezone {
 			if ( ! $timezone = get_post_meta( $post->ID, '_timezone', true ) ) {
 				return $the_time;
 			}
+		}
+		if ( 1 === strlen( $timezone ) ) {
+			// Something Got Set Wrong
+			delete_post_meta( $post->ID, 'geo_timezone' );
+			return $the_time;
 		}
 		if ( '' === $d ) {
 			$d = get_option( 'time_format' );

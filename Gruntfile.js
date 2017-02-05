@@ -55,6 +55,9 @@ module.exports = function(grunt) {
           domainPath: '/languages',
           potFilename: 'simple-location.pot',
           type: 'wp-plugin',
+	  exclude: [
+	  	'build/.*'
+		],
           updateTimestamp: true
         }
       }
@@ -68,5 +71,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task(s).
-  grunt.registerTask('default', ['wp_readme_to_markdown', 'makepot']);
+  grunt.registerTask('default', ['wp_readme_to_markdown', 'makepot', 'sass']);
 };

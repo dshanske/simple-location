@@ -18,7 +18,7 @@ class WP_Geo_Data {
 	}
 
 	public static function rewrite() {
- 		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES | EP_ROOT );
+		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES | EP_ROOT );
 	}
 
 	public static function query_var( $vars ) {

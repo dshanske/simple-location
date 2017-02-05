@@ -81,13 +81,13 @@ class Loc_Config {
 		add_settings_section(
 			'sloc',
 			'Simple Location Map Settings',
-			array( 'loc_config', 'sloc_settings' ),
+			array( 'Loc_Config', 'sloc_settings' ),
 			'media'
 		);
 		add_settings_field(
 			'sloc_default_map_provider', // id
 			'Default Map Provider', // setting title
-			array( 'loc_config', 'map_provider_callback' ), // display callback
+			array( 'Loc_Config', 'map_provider_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_default_map_provider' )
@@ -95,7 +95,7 @@ class Loc_Config {
 		add_settings_field(
 			'googleapi', // id
 			'Google Maps API Key', // setting title
-			array( 'loc_config', 'string_callback' ), // display callback
+			array( 'Loc_Config', 'string_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_google_api' )
@@ -103,7 +103,7 @@ class Loc_Config {
 		add_settings_field(
 			'mapboxapi', // id
 			'Mapbox API Key', // setting title
-			array( 'loc_config', 'string_callback' ), // display callback
+			array( 'Loc_Config', 'string_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_mapbox_api' )
@@ -111,7 +111,7 @@ class Loc_Config {
 		add_settings_field(
 			'height', // id
 			'Map Height', // setting title
-			array( 'loc_config', 'number_callback' ), // display callback
+			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_height' )
@@ -119,7 +119,7 @@ class Loc_Config {
 		add_settings_field(
 			'width', // id
 			'Map Width', // setting title
-			array( 'loc_config', 'number_callback' ), // display callback
+			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_width' )
@@ -127,7 +127,7 @@ class Loc_Config {
 		add_settings_field(
 			'zoom', // id
 			'Map Zoom', // setting title
-			array( 'loc_config', 'number_callback' ), // display callback
+			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_zoom' )
