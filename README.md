@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** dshanske  
 **Tags:** geolocation, geo, maps, location, indieweb  
-**Stable tag:** 3.0.2  
+**Stable tag:** 3.0.3  
 **Requires at least:** 4.7  
 **Tested up to:** 4.7.2  
 **License:** GPLv2 or later  
