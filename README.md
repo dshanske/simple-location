@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** dshanske  
 **Tags:** geolocation, geo, maps, location, indieweb  
-**Stable tag:** 3.0.3  
+**Stable tag:** 3.0.4  
 **Requires at least:** 4.7  
-**Tested up to:** 4.7.2  
+**Tested up to:** 4.7.4  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -49,6 +49,8 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
+### Version 3.0.4 ###
+	* Fix Activation Issue
 ### Version 3.0.3 ###
 	* Add support for queries and permalinks to show location enabled posts
 	* Use built-in WP timezone list generation code
