@@ -1,9 +1,13 @@
 jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 	jQuery.ajax({ 
-			type: 'POST',
-			url: ajaxurl,
+			type: 'GET',
+		        // Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
+			url: sloc.api_url + 'reverse/',
+			beforeSend: function ( xhr ) {
+				// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
+				xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+			},
 			data: {
-				action: 'get_sloc_address_data',
 				latitude: jQuery("#latitude").val(),
 				longitude: jQuery("#longitude").val(),
 				accuracy: jQuery("#accuracy").val(),
@@ -16,45 +20,38 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 			if ( typeof response == 'undefined' ) {
 			}
 			else {
-				if ( response['success'] == 'false' ) {
-					alert( response['data'][0]["message"] );
-				}
-				else {
-					if ( typeof response['data'] != 'undefined' ) {
-						if ( ( 'display-name' in response['data'] ) && ( jQuery('#address').val() === '' ) ) {
-							jQuery("#address").val(response['data']['display-name']) ;
+				if ( ( 'display-name' in response ) && ( jQuery('#address').val() === '' ) ) {
+							jQuery("#address").val(response['display-name']) ;
 						}
-						if ( 'name' in response['data'] ) {
-							jQuery("#location-name").val(response['data']['name']) ;
+						if ( 'name' in response ) {
+							jQuery("#location-name").val(response['name']) ;
 						}
-						if ( 'street-address' in response['data'] ) {
-							jQuery("#street-address").val(response['data']['street-address']) ;
+						if ( 'street-address' in response ) {
+							jQuery("#street-address").val(response['street-address']) ;
 
 						}
-						if ( 'extended-address' in response['data'] ) {
-							jQuery("#extended-address").val(response['data']['extended-address']) ;
+						if ( 'extended-address' in response ) {
+							jQuery("#extended-address").val(response['extended-address']) ;
 						}
-						if ( 'locality' in response['data'] ) {
-							jQuery("#locality").val(response['data']['locality']) ;
+						if ( 'locality' in response ) {
+							jQuery("#locality").val(response['locality']) ;
 						}
-						if ( 'region' in response['data'] ) {
-							jQuery("#region").val(response['data']['region']) ;
+						if ( 'region' in response ) {
+							jQuery("#region").val(response['region']) ;
 						}
-						if ( 'postal-code' in response['data'] ) {
-							jQuery("#postal-code").val(response['data']['postal-code']) ;
+						if ( 'postal-code' in response ) {
+							jQuery("#postal-code").val(response['postal-code']) ;
 						}
-						if ( 'country-name' in response['data'] ) {
-							jQuery("#country-name").val(response['data']['country-name']) ;
+						if ( 'country-name' in response ) {
+							jQuery("#country-name").val(response['country-name']) ;
 						}
-						if ( 'country-code' in response['data'] ) {
-							jQuery("#country-code").val(response['data']['country-code']) ;
+						if ( 'country-code' in response ) {
+							jQuery("#country-code").val(response['country-code']) ;
 						}
-						if ( 'timezone' in response['data'] ) {
-							jQuery("#timezone").val(response['data']['timezone']) ;
+						if ( 'timezone' in response ) {
+							jQuery("#timezone").val(response['timezone']) ;
 						}
 						console.log(response);
-					}
-				}
 			}
 		},
 	  error: function(request, status, error){
@@ -82,7 +79,7 @@ jQuery( document ).on( 'click', '.save-venue-button', function($) {
 			},
 		success : function( response ) {
       if ( typeof response !== 'undefined' ) {
-				if ( typeof response['data'] !== 'undefined' ) {
+				if ( typeof response !== 'undefined' ) {
 
 				}
 			}

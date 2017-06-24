@@ -36,7 +36,7 @@ class Venue_Taxonomy {
 				'location',
 				plugins_url( 'simple-location/js/location.js' ),
 				array( 'jquery' ),
-				SIMPLE_LOCATION_VERSION
+				Simple_Location_Plugin::$version
 			);
 		}
 	}
@@ -67,7 +67,8 @@ class Venue_Taxonomy {
 			'labels' => $labels,
 			'public' => true,
 			'show_in_nav_menus' => true,
-			'show_ui' => WP_DEBUG,
+			'show_ui' => true,
+			'show_in_menu' => WP_DEBUG,
 			'show_tagcloud' => true,
 			'show_admin_column' => true,
 			'hierarchical' => false,

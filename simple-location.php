@@ -44,7 +44,7 @@ class Simple_Location_Plugin {
 
 		// Register Metadata Functions
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php' );
-		
+
 		// Venue Taxonomy
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-venue-taxonomy.php' );
 
@@ -55,10 +55,9 @@ class Simple_Location_Plugin {
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-osm.php' );
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-google.php' );
 
-		// Handlers
-		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-ajax-geo.php' );
 		// API Endpoint under construction
-		// require_once( plugin_dir_path( __FILE__ ) . 'includes/class-location-controller.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-rest-geo.php' );
+		$geo_api = new REST_Geo();
 
 		// Configuration Functions
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-config.php' );

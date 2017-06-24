@@ -14,7 +14,7 @@ class Loc_Metabox {
 	public static function enqueue() {
 		if ( 'post' === get_current_screen()->id ) {
 			wp_enqueue_script(
-				'venue-get',
+				'sloc_location',
 				plugins_url( 'simple-location/js/location.js' ),
 				array( 'jquery' ),
 				Simple_Location_Plugin::$version
@@ -32,16 +32,14 @@ class Loc_Metabox {
 	public static function locbox_add_postmeta_boxes() {
 		$screens = array( 'post' );
 		$screens = apply_filters( 'sloc_post_types', $screens );
-		foreach ( $screens as $screen ) {
-			add_meta_box(
-				'locationbox-meta',      // Unique ID
-				esc_html__( 'Location', 'simple-location' ),    // Title
-				array( 'loc_metabox', 'location_metabox' ),   // Callback function
-				$screen,         // Admin page (or post type)
-				'side',         // Context
-				'default'         // Priority
-			);
-		}
+		add_meta_box(
+			'locationbox-meta',      // Unique ID
+			esc_html__( 'Location', 'simple-location' ),    // Title
+			array( 'loc_metabox', 'location_metabox' ),   // Callback function
+			$screens,         // Admin page (or post type)
+			'side',         // Context
+			'default'         // Priority
+		);
 	}
 
 	public static function location_metabox( $object, $box ) {
