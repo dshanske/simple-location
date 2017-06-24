@@ -1,13 +1,14 @@
 <?php
 
-add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10, 4 );
+add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10 );
+add_filter( 'init', array( 'Loc_Config', 'init' ), 10 );
 
 class Loc_Config {
 
 	/**
 	 * Add Settings to the Discussions Page
 	 */
-	public static function admin_init() {
+	public static function init() {
 		register_setting(
 			'media', // settings page
 			'sloc_default_map_provider', // option name
@@ -78,6 +79,9 @@ class Loc_Config {
 				'default' => 14,
 			)
 		);
+	}
+
+	public static function admin_init() {
 		add_settings_section(
 			'sloc',
 			'Simple Location Map Settings',
