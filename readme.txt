@@ -52,6 +52,7 @@ will now be required to show maps for services that require API keys.
 = Version 3.1.0 =
 	* `get_geodata` function now supports WP_Post, WP_Comment, and WP_Term objects
 	* Fix registration of default settings
+	* Add global setting for public or private by default
 
 = Version 3.0.4 =
 	* Fix Activation Issue

@@ -131,9 +131,9 @@ class WP_Geo_Data {
 			$geodata['adr'] = $adr;
 		}
 
-		// Behavior Based on the Absence of the geo_public flag
+		// Set using global default
 		if ( ! array_key_exists( 'public', $geodata ) ) {
-			$geodata['public'] = apply_filters( 'geo_public_default', SLOC_PUBLIC );
+			$geodata['public'] = get_option( 'geo_public' );
 		} else {
 			if ( 3 === $geodata['public'] ) {
 				$geodata['public'] = 2;

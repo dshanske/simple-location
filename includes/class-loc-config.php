@@ -79,6 +79,17 @@ class Loc_Config {
 				'default' => 14,
 			)
 		);
+		register_setting(
+			'media', // settings page
+			'geo_public', // option name
+			array(
+				'type' => 'boolean',
+				'description' => 'Default Setting for Geodata',
+				'show_in_rest' => true,
+				'default' => SLOC_PUBLIC,
+				// WordPress Geodata defaults to public but this allows a global override for new posts
+			)
+		);
 	}
 
 	public static function admin_init() {
@@ -95,6 +106,14 @@ class Loc_Config {
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_default_map_provider' )
+		);
+		add_settings_field(
+			'geo_public', // id
+			'Public By Default', // setting title
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array( 'name' => 'geo_public' )
 		);
 		add_settings_field(
 			'googleapi', // id
