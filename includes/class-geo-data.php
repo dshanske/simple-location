@@ -32,28 +32,28 @@ class WP_Geo_Data {
 		}
 
 		$geo = $query->get( 'geo' );
-		$args =    array(
+		$args = array(
 			'key'     => 'geo_public',
 			'type'    => 'numeric',
 			);
 
 		switch ( $geo ) {
-		case 'all' :
-			$args['compare'] = '>';
-			$args['value'] = (int) 0;
-			$query->set('meta_query', array( $args ) );
+			case 'all' :
+				$args['compare'] = '>';
+				$args['value'] = (int) 0;
+				$query->set( 'meta_query', array( $args ) );
 			break;
-		case 'public':
-			$args['compare'] = '=';
-			$args['value'] = (int) 1;
-			$query->set('meta_query', array( $args ) );
+			case 'public':
+				$args['compare'] = '=';
+				$args['value'] = (int) 1;
+				$query->set( 'meta_query', array( $args ) );
 			break;
-		case 'text':
-			$args['compare'] = '=';
-			$args['value'] = (int) 2;
-			$query->set('meta_query', array( $args ) );
+			case 'text':
+				$args['compare'] = '=';
+				$args['value'] = (int) 2;
+				$query->set( 'meta_query', array( $args ) );
 			break;
-		default:
+			default:
 			return;
 		}
 	}
@@ -97,7 +97,7 @@ class WP_Geo_Data {
 			}
 			$geodata['public'] = get_comment_meta( $object->comment_ID, 'geo_public', true );
 			$geodata['comment_ID'] = $object->comment_ID;
-		}       
+		}
 		if ( $object instanceof WP_Term ) {
 			$geodata['longitude'] = get_term_meta( $object->term_id, 'geo_longitude', true );
 			$geodata['latitude'] = get_term_meta( $object->term_id, 'geo_latitude', true );
@@ -107,7 +107,18 @@ class WP_Geo_Data {
 			}
 			$geodata['public'] = get_term_meta( $object->term_id, 'geo_public', true );
 			$geodata['term_id'] = $object->term_id;
-		}       
+		}
+		if ( $object instanceof WP_User ) {
+			$geodata['longitude'] = get_user_meta( $object->ID, 'geo_longitude', true );
+			$geodata['latitude'] = get_user_meta( $object->ID, 'geo_latitude', true );
+			$geodata['address'] = get_user_meta( $object->ID, 'geo_address', true );
+			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+				return null;
+			}
+			$geodata['public'] = get_user_meta( $object->ID, 'geo_public', true );
+			$geodata['user_ID'] = $object->ID;
+		}
+
 		if ( empty( $geodata['address'] ) ) {
 			if ( empty( $geodata['longitude'] ) ) {
 				return null;
