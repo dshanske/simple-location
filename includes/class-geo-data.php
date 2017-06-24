@@ -64,22 +64,50 @@ class WP_Geo_Data {
 		return $matches[0];
 	}
 
-	public static function get_geodata( $post_ID = false ) {
-		if ( ! $post_ID ) {
-			$post_ID = get_the_ID();
-		}
+	public static function get_geodata( $object = null ) {
 		$geodata = array();
-
-		$geodata['longitude'] = get_post_meta( $post_ID, 'geo_longitude', true );
-
-		$geodata['latitude'] = get_post_meta( $post_ID, 'geo_latitude', true );
-		$geodata['address'] = get_post_meta( $post_ID, 'geo_address', true );
-		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
-			return null;
+		if ( ! $object ) {
+			$object = get_post();
 		}
-		$geodata['public'] = get_post_meta( $post_ID, 'geo_public', true );
-		$geodata['ID'] = $post_ID;
+		// If numeric assume post_ID
+		if ( is_numeric( $object ) ) {
+			$object = get_post( $object );
+		}
+		if ( $object instanceof WP_Post ) {
+			$geodata['longitude'] = get_post_meta( $object->ID, 'geo_longitude', true );
+			$geodata['latitude'] = get_post_meta( $object->ID, 'geo_latitude', true );
+			$geodata['address'] = get_post_meta( $object->ID, 'geo_address', true );
+			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+				return null;
+			}
+			$geodata['public'] = get_post_meta( $object->ID, 'geo_public', true );
+			$geodata['ID'] = $object->ID;
+			// Remove Old Metadata
+			delete_post_meta( $object->ID, 'geo_map' );
+			delete_post_meta( $object->ID, 'geo_full' );
+			delete_post_meta( $object->ID, 'geo_lookup' );
+		}
 
+		if ( $object instanceof WP_Comment ) {
+			$geodata['longitude'] = get_comment_meta( $object->comment_ID, 'geo_longitude', true );
+			$geodata['latitude'] = get_comment_meta( $object->comment_ID, 'geo_latitude', true );
+			$geodata['address'] = get_comment_meta( $object->comment_ID, 'geo_address', true );
+			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+				return null;
+			}
+			$geodata['public'] = get_comment_meta( $object->comment_ID, 'geo_public', true );
+			$geodata['comment_ID'] = $object->comment_ID;
+		}       
+		if ( $object instanceof WP_Term ) {
+			$geodata['longitude'] = get_term_meta( $object->term_id, 'geo_longitude', true );
+			$geodata['latitude'] = get_term_meta( $object->term_id, 'geo_latitude', true );
+			$geodata['address'] = get_term_meta( $object->term_id, 'geo_address', true );
+			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+				return null;
+			}
+			$geodata['public'] = get_term_meta( $object->term_id, 'geo_public', true );
+			$geodata['term_id'] = $object->term_id;
+		}       
 		if ( empty( $geodata['address'] ) ) {
 			if ( empty( $geodata['longitude'] ) ) {
 				return null;
@@ -90,15 +118,17 @@ class WP_Geo_Data {
 			if ( array_key_exists( 'display-name', $adr ) ) {
 				$geodata['address'] = trim( $adr['display-name'] );
 				if ( ! empty( $geodata['address'] ) ) {
-					update_post_meta( $post_ID, 'geo_address', $geodata['address'] );
-					update_post_meta( $post_ID, 'geo_timezone', $adr['timezone'] );
+					if ( $object instanceof WP_Comment ) {
+						update_post_meta( $object->comment_ID, 'geo_address', $geodata['address'] );
+						update_post_meta( $object->comment_ID, 'geo_timezone', $adr['timezone'] );
+					}
+					if ( $object instanceof WP_Post ) {
+						update_post_meta( $object->ID, 'geo_address', $geodata['address'] );
+						update_post_meta( $object->ID, 'geo_timezone', $adr['timezone'] );
+					}
 				}
 			}
 			$geodata['adr'] = $adr;
-			// Remove Old Metadata
-			delete_post_meta( $post_ID, 'geo_map' );
-			delete_post_meta( $post_ID, 'geo_full' );
-			delete_post_meta( $post_ID, 'geo_lookup' );
 		}
 
 		// Behavior Based on the Absence of the geo_public flag
@@ -109,7 +139,6 @@ class WP_Geo_Data {
 				$geodata['public'] = 2;
 			}
 		}
-
 		return $geodata;
 	}
 
