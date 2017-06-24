@@ -145,3 +145,25 @@ function toggle_timezone() {
 		e.setAttribute( "hidden", true );
 	}
 }
+
+jQuery(document).ready( function($) {
+	$postTimezoneSelect = $('#post-timezone-select'),
+	$postTimezoneSelect.siblings('a.edit-post-timezone').click( function( event ) {
+		event.preventDefault();
+		if ( $postTimezoneSelect.is(':hidden') ) {
+			$postTimezoneSelect.slideDown( 'fast', function() {
+				$postTimezoneSelect.find( 'select' ).focus(); } );
+			$(this).hide();
+		}
+	});
+	$postTimezoneSelect.find('.save-post-timezone').click( function( event ) {
+		$postTimezoneSelect.slideUp( 'fast' ).siblings( 'a.edit-post-timezone' ).show().focus();
+		$('#post-timezone-label').text( $('#post-timezone').val() );
+		event.preventDefault();
+	});
+	$postTimezoneSelect.find('.cancel-post-timezone').click( function( event ) {
+		$postTimezoneSelect.slideUp( 'fast' ).siblings( 'a.edit-post-timezone' ).show().focus();
+		$('#post_timezone').val( $('#hidden_post_timezone').val() );
+		event.preventDefault();
+	});
+});
