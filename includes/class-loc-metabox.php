@@ -50,7 +50,7 @@ class Loc_Metabox {
 		$thickbox = '#TB_inline?width=400&height=550&inlineId=';
 		$geodata = WP_Geo_Data::get_geodata( $object->ID );
 		if ( is_null( $geodata ) ) {
-			$geodata = array( 'public' => 1 );
+			$geodata = array( 'public' => get_option( 'geo_public' ) );
 		}
 	?>
 		<label for="geo_public"><?php _e( 'Display:', 'simple-location' ); ?></label>
