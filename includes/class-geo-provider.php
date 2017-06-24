@@ -22,11 +22,19 @@ abstract class Geo_Provider {
 	 *
 	 * @param string $key API Key if Needed
 	 */
-	public function __construct( $api = null ) {
-		$this->height = get_option( 'sloc_height' );
-		$this->width = get_option( 'sloc_width' );
-		$this->map_zoom = get_option( 'sloc_zoom' );
-		$this->api = $api;
+	public function __construct( $args = array() ) {
+		$defaults = array(
+			'height' => get_option( 'sloc_height' ),
+			'width' => get_option( 'sloc_width' ),
+			'map_zoom' => get_option( 'sloc_zoom' ),
+			'api' => null
+		);
+		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
+		$r = wp_parse_args( $args, $defaults );
+		$this->height = $r['height'];
+		$this->width = $r['width'];
+		$this->map_zoom = $r['map_zoom'];
+		$this->api = $r['api'];
 	}
 
 	/**

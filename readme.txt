@@ -53,6 +53,10 @@ will now be required to show maps for services that require API keys.
 	* `get_geodata` function now supports WP_Post, WP_Comment, and WP_Term objects
 	* Fix registration of default settings
 	* Add global setting for public or private by default
+	* Switch from admin ajax to REST Route API for simple endpoints
+	* Add map endpoint to retrieve a URL for a map based on coordinates
+	* Add reverse endpoint to retrieve an address object based on coordinates
+	* Allow arguments to be passed to map provider
 
 = Version 3.0.4 =
 	* Fix Activation Issue
