@@ -1,6 +1,6 @@
 <?php
 /**
- * 
+ *
  *
  * Passes and Returns Geodata
  */
@@ -52,6 +52,10 @@ class REST_Geo {
 					'latitude' => array(
 						'required' => true,
 					),
+					// If url exists return URL
+					'url' => array(),
+					// If map exists return image src
+					'map' => array(),
 				),
 			),
 		) );
@@ -78,6 +82,12 @@ class REST_Geo {
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$map = Loc_Config::default_map_provider();
 			$map->set( $params['latitude'], $params['longitude'] );
+			if ( ! empty( $params['url'] ) ) {
+				return $map->get_the_map_url();
+			}
+			if ( ! empty( $params['map'] ) ) {
+				return $map->get_the_static_map();
+			}
 			return $map->get_the_map();
 		}
 		return new WP_Error( 'missing_geo' , __( 'Missing Coordinates for Reverse Lookup' , 'simple-location' ), array( 'status' => 400 ) );
