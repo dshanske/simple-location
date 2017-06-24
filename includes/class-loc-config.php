@@ -189,28 +189,28 @@ class Loc_Config {
 		_e( 'Default Settings for Map Generation for the Simple Location plugin. API keys are required for map display services.', 'simple-location' );
 	}
 
-	public static function default_map_provider() {
+	public static function default_map_provider( $args = array() ) {
 		$option = get_option( 'sloc_default_map_provider' );
 		switch ( $option ) {
 			case 'Google':
-				$map = new Geo_Provider_Google();
+				$map = new Geo_Provider_Google( $args );
 				break;
 			default:
-				$map = new Geo_Provider_OSM();
+				$map = new Geo_Provider_OSM( $args );
 		}
 
-		return apply_filters( 'sloc_default_map_provider', $map );
+		return apply_filters( 'sloc_default_map_provider', $map, $args );
 	}
 
-	public static function default_reverse_provider() {
+	public static function default_reverse_provider( $args = array() ) {
 		$option = get_option( 'sloc_default_reverse_provider' );
 		switch ( $option ) {
 			case 'Google':
-				$map = new Geo_Provider_Google();
+				$map = new Geo_Provider_Google( $args );
 				break;
 			default:
-				$map = new Geo_Provider_OSM();
+				$map = new Geo_Provider_OSM( $args );
 		}
-		return apply_filters( 'sloc_default_reverse_provider', $map );
+		return apply_filters( 'sloc_default_reverse_provider', $map, $args );
 	}
 }
