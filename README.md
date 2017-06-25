@@ -57,6 +57,8 @@ will now be required to show maps for services that require API keys.
 	* Add map endpoint to retrieve a URL for a map based on coordinates
 	* Add reverse endpoint to retrieve an address object based on coordinates
 	* Allow arguments to be passed to map provider
+	* Remove popup location metabox and replace with slidedown metabox
+	* Combine geolocation and reverse lookup buttons
 
 ### Version 3.0.4 ###
 	* Fix Activation Issue

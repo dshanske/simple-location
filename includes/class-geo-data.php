@@ -44,11 +44,13 @@ class WP_Geo_Data {
 				$query->set( 'meta_query', array( $args ) );
 			break;
 			case 'public':
+			case 'map':
 				$args['compare'] = '=';
 				$args['value'] = (int) 1;
 				$query->set( 'meta_query', array( $args ) );
 			break;
 			case 'text':
+			case 'description':
 				$args['compare'] = '=';
 				$args['value'] = (int) 2;
 				$query->set( 'meta_query', array( $args ) );

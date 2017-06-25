@@ -1,4 +1,21 @@
-jQuery( document ).on( 'click', '.lookup-address-button', function($) {
+function getFullLocation() {
+	var options = {
+		enableHighAccuracy: true,
+		maximumAge: 600000
+	};
+      if (navigator.geolocation) {
+	      navigator.geolocation.getCurrentPosition(reverseLookup, error, options);
+      }
+      else{alert("Geolocation is not supported by this browser.");}
+  }
+
+function reverseLookup(position) {
+	if ( jQuery('#longitude').val() === '' ) {
+		jQuery("#longitude").val( position.coords.longitude) ;
+	}
+	if ( jQuery('#latitude').val() === '' ) {
+		jQuery("#latitude").val( position.coords.latitude ) ;
+	}    
 	jQuery.ajax({ 
 			type: 'GET',
 		        // Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
@@ -8,13 +25,8 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 				xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
 			},
 			data: {
-				latitude: jQuery("#latitude").val(),
-				longitude: jQuery("#longitude").val(),
-				accuracy: jQuery("#accuracy").val(),
-				altitude: jQuery("#altitude").val(),
-				altitude_accuracy: jQuery("#altitude-accuracy").val(),
-				speed: jQuery("#speed").val(),
-				heading: jQuery("#heading").val()
+				latitude: jQuery('#latitude').val(),
+				longitude: jQuery('#longitude').val(),
 			},
 		success : function( response ) {
 			if ( typeof response == 'undefined' ) {
@@ -25,6 +37,12 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 						}
 						if ( 'name' in response ) {
 							jQuery("#location-name").val(response['name']) ;
+						}
+						if ( 'latitude' in response ) {
+							jQuery("#latitude").val(response['latitude']) ;
+						}
+						if ( 'longitude' in response ) {
+							jQuery("#longitude").val(response['longitude']) ;
 						}
 						if ( 'street-address' in response ) {
 							jQuery("#street-address").val(response['street-address']) ;
@@ -49,7 +67,8 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 							jQuery("#country-code").val(response['country-code']) ;
 						}
 						if ( 'timezone' in response ) {
-							jQuery("#timezone").val(response['timezone']) ;
+							jQuery("#post-timezone").val(response['timezone']) ;
+							jQuery('#post-timezone-label').text( response['timezone']);
 						}
 						console.log(response);
 			}
@@ -58,6 +77,10 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 			alert(request.responseText);
 		}
 	});
+}
+
+jQuery( document ).on( 'click', '.lookup-address-button', function($) {
+	getFullLocation();
 })
 
 jQuery( document ).on( 'click', '.save-venue-button', function($) {
@@ -106,48 +129,13 @@ function clearLocation() {
   document.getElementById("location-name").value = "";
 }	
 
-function getLocation() {
-	var options = {
-		enableHighAccuracy: true,
-		maximumAge: 600000
-	};
-      if (navigator.geolocation) {
-	      navigator.geolocation.getCurrentPosition(showPosition, error, options);
-      }
-      else{alert("Geolocation is not supported by this browser.");}
-  }
-function showPosition(position)
-  {
-  document.getElementById("latitude").value = position.coords.latitude;
-  document.getElementById("longitude").value = position.coords.longitude;
-  document.getElementById("altitude").value = position.coords.altitude;
-  document.getElementById("accuracy").value = position.coords.accuracy;
-  document.getElementById("altitude-accuracy").value = position.coords.altitudeAccuracy;
-  document.getElementById("heading").value = position.coords.heading;
-  document.getElementById("speed").value = position.coords.speed;
-
-  }
-
 function error(err) {
 	  alert( err.message );
 };
 
-function closeWindow( ) {
-	jQuery('#closeTBWindow').click(tb_remove);
-};
-
-function toggle_timezone() {
-	var e = document.getElementById("timezone");
-	if ( document.getElementById("override_timezone").checked ) {
-		e.removeAttribute( "hidden" ); 
-	}
-	else { 
-		e.setAttribute( "hidden", true );
-	}
-}
-
 jQuery(document).ready( function($) {
-	$postTimezoneSelect = $('#post-timezone-select'),
+	$postTimezoneSelect = $('#post-timezone-select');
+	$locationDetail = $('#location-detail');
 	$postTimezoneSelect.siblings('a.edit-post-timezone').click( function( event ) {
 		event.preventDefault();
 		if ( $postTimezoneSelect.is(':hidden') ) {
@@ -166,4 +154,15 @@ jQuery(document).ready( function($) {
 		$('#post_timezone').val( $('#hidden_post_timezone').val() );
 		event.preventDefault();
 	});
+	$locationDetail.siblings('a.show-location-details').click( function( event ) {
+		event.preventDefault();
+		if ( $locationDetail.is(':hidden') ) {
+			$locationDetail.slideDown( 'fast' ).siblings( 'a.hide-location-details' ).show().focus();
+		}
+		else {
+			$locationDetail.slideUp( 'fast' ).siblings( 'a.show-location-details' ).focus();
+		}
+
+	});
+
 });
