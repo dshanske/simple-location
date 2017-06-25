@@ -59,6 +59,7 @@ will now be required to show maps for services that require API keys.
 	* Allow arguments to be passed to map provider
 	* Remove popup location metabox and replace with slidedown metabox
 	* Combine geolocation and reverse lookup buttons
+	* Set public/private to system default if post is published outside of Post UI
 
 = Version 3.0.4 =
 	* Fix Activation Issue

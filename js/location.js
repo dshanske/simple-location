@@ -85,8 +85,13 @@ jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 
 jQuery( document ).on( 'click', '.save-venue-button', function($) {
 	jQuery.ajax({ 
-			type: 'POST',
-			url: ajaxurl,
+		type: 'POST',
+		// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
+		url: sloc.api_url + 'reverse/',
+		beforeSend: function ( xhr ) {
+			// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
+			xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+		},
 			data: {
 				action: 'save_venue_data',
 				latitude: jQuery("#latitude").val(),
