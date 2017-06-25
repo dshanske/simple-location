@@ -27,7 +27,7 @@ abstract class Geo_Provider {
 			'height' => get_option( 'sloc_height' ),
 			'width' => get_option( 'sloc_width' ),
 			'map_zoom' => get_option( 'sloc_zoom' ),
-			'api' => null
+			'api' => null,
 		);
 		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
 		$r = wp_parse_args( $args, $defaults );

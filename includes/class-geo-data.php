@@ -14,7 +14,16 @@ class WP_Geo_Data {
 		self::register_meta();
 		add_filter( 'query_vars', array( 'WP_Geo_Data', 'query_var' ) );
 		add_action( 'pre_get_posts', array( 'WP_Geo_Data', 'pre_get_posts' ) );
+		add_action( 'save_post', array( 'WP_Geo_Data', 'public_post' ), 99, 2 );
 		self::rewrite();
+	}
+
+	// Set Posts Added by Means other than the Post UI to the system default if not set
+	public static function public_post( $post_id, $post ) {
+		$public = get_post_meta( $post_id, 'geo_public' );
+		if ( ! $public ) {
+			add_post_meta( $post_id, 'geo_public', get_option( 'geo_public' ) );
+		}
 	}
 
 	public static function rewrite() {

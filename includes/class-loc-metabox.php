@@ -62,20 +62,21 @@ class Loc_Metabox {
 		}
 ?>
 		<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label><br />
-		<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" size="60" data-role="none" class="widefat" />
+		<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" size="95%" data-role="none" />
+			<a class="hide-if-no-js lookup-address-button"><span class="dashicons dashicons-location"></span></a><br />
+
 			<p class="latlong">
 				<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
 				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" size="10" />
-	  			<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
+				  <label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
 				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="10" />
 </p>
 		<?php self::geo_public( $geodata['public'] ); ?>
-
-			<a class="button-primary hide-if-no-js lookup-address-button"><?php _e( 'Locate', 'simple-location' ); ?></button>
-			<a href="#location_detail" class="show-location-details button hide-if-no-js"><?php _e( 'Details', 'simple-location' ); ?></a>
-			<button type="button" class="clear-location-button button-primary hide-if-no-js" onclick="clearLocation();return false;"><?php _e( 'Clear', 'sim    ple-location' ); ?></button>
-
+		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'bridgy-publish' ); ?></span></a>
 			<div id="location-detail" class="hide-if-js">
+			<br />
+			<a class="clear-location-button button-link hide-if-no-js" onclick="clearLocation();return false;"><?php _e( 'Clear Location', 'sim    ple-location' ); ?></a>
+
 		<p> <?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
 			<br />
 			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
@@ -98,7 +99,7 @@ class Loc_Metabox {
 		<label for="country-code"><?php _e( 'Country Code', 'simple-location' ); ?></label>
 		<input type="text" name="country-code" id="country-code" value="" size="2" />
 		<br /><br />
-	   	<label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
+		   <label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
 			<input type="text" name="extended-address" id="extended-address" value="" size="30" />
 			<br />
 	  <label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label>
@@ -107,7 +108,7 @@ class Loc_Metabox {
 			<label for="country-name"><?php _e( 'Country Name', 'simple-location' ); ?></label>
 			<input type="text" name="country-name" id="country-name" value="" size="30" />
 			</p>
-	 	<br />
+		 <br />
 		<br />
 		<div class="button-group">
 		<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
@@ -166,9 +167,7 @@ class Loc_Metabox {
 		if ( ! empty( $_POST['address'] ) ) {
 			if ( isset( $_POST['geo_public'] ) ) {
 				update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
-			} else {
-						delete_post_meta( $post_id, 'geo_public' );
-			}
+			} 
 		}
 	}
 }

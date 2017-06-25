@@ -136,5 +136,21 @@ class Venue_Taxonomy {
 	}
 
 	public static function save_data( $term_id ) {
+		/* OK, its safe for us to save the data now. */
+		if ( ! empty( $_POST['latitude'] ) ) {
+			update_term_meta( $term_id, 'geo_latitude', $_POST['latitude'] );
+		} else {
+			delete_term_meta( $term_id, 'geo_latitude' );
+		}
+		if ( ! empty( $_POST['longitude'] ) ) {
+			update_post_meta( $post_id, 'geo_longitude', $_POST['longitude'] );
+		} else {
+			delete_post_meta( $post_id, 'geo_longitude' );
+		}
+		if ( ! empty( $_POST['address'] ) ) {
+			update_post_meta( $post_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
+		} else {
+			delete_post_meta( $post_id, 'geo_address' );
+		}
 	}
 }
