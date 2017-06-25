@@ -65,12 +65,10 @@ class Loc_Metabox {
 		<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" size="60" data-role="none" class="widefat" />
 			<p class="latlong">
 				<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
-				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" size="6" />
+				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" size="10" />
 	  			<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
-				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="6" />
-
-				<label for="accuracy"><?php _e( 'Accuracy (in meters):', 'simple-location' ); ?></label>
-				<input type="text" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" size="6" disabled /></p>
+				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="10" />
+</p>
 		<?php self::geo_public( $geodata['public'] ); ?>
 
 			<a class="button-primary hide-if-no-js lookup-address-button"><?php _e( 'Locate', 'simple-location' ); ?></button>
@@ -79,7 +77,7 @@ class Loc_Metabox {
 
 			<div id="location-detail" class="hide-if-js">
 		<p> <?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
-			<br /><br />
+			<br />
 			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
 			<input type="text" name="location-name" id="location-name" value="" size="50" />
 			<br /></br />

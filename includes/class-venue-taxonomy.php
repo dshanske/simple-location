@@ -90,11 +90,11 @@ class Venue_Taxonomy {
 ?>
 	<div class="form-field">
 		<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
-		<input type="text" name="latitude" id="latitude" value="" size="6" />                                                                           
+		<input type="text" name="latitude" id="latitude" value="" size="10" />                                                                           
 		<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
-		<input type="text" name="longitude" id="longitude" value="" size="6" />  
+		<input type="text" name="longitude" id="longitude" value="" size="10" />  
 
-		<button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'Simple Location' ); ?></button>
+		<button type="button" class="button lookup-address-button"><?php _e( 'Get Location', 'Simple Location' ); ?></button>
 	</div>
 <?php
 	}
@@ -104,13 +104,13 @@ class Venue_Taxonomy {
 	<tr class="form-field">
 		<tr>
 		<th><label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="latitude" id="latitude" value="" size="6" /></td></tr>   
+		<td><input type="text" name="latitude" id="latitude" value="" size="10" /></td></tr>   
 		<tr>									
 		<th><label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="longitude" id="longitude" value="" size="6" />  </td>
+		<td><input type="text" name="longitude" id="longitude" value="" size="10" />  </td>
 		</tr>
 
-		<tr><td><button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'Simple Location' ); ?></button></td></tr>
+		<tr><td><button type="button" class="button lookup-address-button"><?php _e( 'Get Location', 'Simple Location' ); ?></button></td></tr>
 
 		<tr><th><label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="street-address" id="street-address" value="" size="50" /></td></tr>
