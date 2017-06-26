@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** dshanske  
 **Tags:** geolocation, geo, maps, location, indieweb  
-**Stable tag:** 3.0.4  
+**Stable tag:** 3.1.0  
 **Requires at least:** 4.7  
-**Tested up to:** 4.7.4  
+**Tested up to:** 4.8  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -48,6 +48,19 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### Version 3.1.0 ###
+	* New release with more functionality coming soon
+	* `get_geodata` function now supports WP_Post, WP_Comment, and WP_Term objects
+	* Fix registration of default settings
+	* Add global setting for public or private by default
+	* Switch from admin ajax to REST Route API for simple endpoints
+	* Add map endpoint to retrieve a URL for a map based on coordinates
+	* Add reverse endpoint to retrieve an address object based on coordinates
+	* Allow arguments to be passed to map provider
+	* Remove popup location metabox and replace with slidedown metabox
+	* Combine geolocation and reverse lookup buttons
+	* Set public/private to system default if post is published outside of Post UI
 
 ### Version 3.0.4 ###
 	* Fix Activation Issue

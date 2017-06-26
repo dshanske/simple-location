@@ -2,10 +2,14 @@
 // OSM Static Map Provider
 class Geo_Provider_OSM extends Geo_Provider {
 
-	public function __construct() {
-		parent::__construct();
-		$this->api = get_option( 'sloc_mapbox_api' );
-		$this->map_zoom = 18;
+	public function __construct( $args = array() ) {
+		if ( ! isset( $args['api'] ) ) {
+			$args['api'] = get_option( 'sloc_mapbox_api' );
+		}
+		if ( ! isset( $args['map_zoom'] ) ) {
+			$args['map_zoom'] = 18;
+		}
+		parent::__construct( $args );
 	}
 
 	public function reverse_lookup() {

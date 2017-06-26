@@ -10,11 +10,8 @@ class Loc_View {
 		return '<img class="icon-location" aria-hidden="true" src="' . $sprite . '" />';
 	}
 
-	public static function get_location($id = false) {
-		if ( ! $id ) {
-			$id = get_the_ID();
-		}
-		$loc = WP_Geo_Data::get_geodata( $id );
+	public static function get_location($object = null) {
+		$loc = WP_Geo_Data::get_geodata( $object );
 		// 0 is private
 		if (  isset( $loc ) ) {
 			if ( '0' === $loc['public'] ) {
@@ -35,12 +32,9 @@ class Loc_View {
 		return '';
 	}
 
-	public static function get_map($id = false) {
-		if ( ! $id ) {
-			$id = get_the_ID();
-		}
-		$loc = WP_Geo_Data::get_geodata( $id );
-		if ( '1' === $loc['public'] ) {
+	public static function get_map($object = null) {
+		$loc = WP_Geo_Data::get_geodata( $object );
+		if ( isset( $loc ) && ( '1' === $loc['public'] ) ) {
 			$map = Loc_Config::default_map_provider();
 			$map->set( $loc['latitude'], $loc['longitude'] );
 			return $map->get_the_map();

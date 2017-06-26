@@ -36,7 +36,7 @@ class Venue_Taxonomy {
 				'location',
 				plugins_url( 'simple-location/js/location.js' ),
 				array( 'jquery' ),
-				SIMPLE_LOCATION_VERSION
+				Simple_Location_Plugin::$version
 			);
 		}
 	}
@@ -67,7 +67,8 @@ class Venue_Taxonomy {
 			'labels' => $labels,
 			'public' => true,
 			'show_in_nav_menus' => true,
-			'show_ui' => WP_DEBUG,
+			'show_ui' => true,
+			'show_in_menu' => WP_DEBUG,
 			'show_tagcloud' => true,
 			'show_admin_column' => true,
 			'hierarchical' => false,
@@ -89,11 +90,11 @@ class Venue_Taxonomy {
 ?>
 	<div class="form-field">
 		<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
-		<input type="text" name="latitude" id="latitude" value="" size="6" />                                                                           
+		<input type="text" name="latitude" id="latitude" value="" size="10" />                                                                           
 		<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
-		<input type="text" name="longitude" id="longitude" value="" size="6" />  
+		<input type="text" name="longitude" id="longitude" value="" size="10" />  
 
-		<button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'Simple Location' ); ?></button>
+		<button type="button" class="button lookup-address-button"><?php _e( 'Get Location', 'Simple Location' ); ?></button>
 	</div>
 <?php
 	}
@@ -103,13 +104,13 @@ class Venue_Taxonomy {
 	<tr class="form-field">
 		<tr>
 		<th><label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="latitude" id="latitude" value="" size="6" /></td></tr>   
+		<td><input type="text" name="latitude" id="latitude" value="" size="10" /></td></tr>   
 		<tr>									
 		<th><label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="longitude" id="longitude" value="" size="6" />  </td>
+		<td><input type="text" name="longitude" id="longitude" value="" size="10" />  </td>
 		</tr>
 
-		<tr><td><button type="button" class="button" onclick="getLocation();return false;"><?php _e( 'Get Location', 'Simple Location' ); ?></button></td></tr>
+		<tr><td><button type="button" class="button lookup-address-button"><?php _e( 'Get Location', 'Simple Location' ); ?></button></td></tr>
 
 		<tr><th><label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="street-address" id="street-address" value="" size="50" /></td></tr>
@@ -135,5 +136,21 @@ class Venue_Taxonomy {
 	}
 
 	public static function save_data( $term_id ) {
+		/* OK, its safe for us to save the data now. */
+		if ( ! empty( $_POST['latitude'] ) ) {
+			update_term_meta( $term_id, 'geo_latitude', $_POST['latitude'] );
+		} else {
+			delete_term_meta( $term_id, 'geo_latitude' );
+		}
+		if ( ! empty( $_POST['longitude'] ) ) {
+			update_post_meta( $post_id, 'geo_longitude', $_POST['longitude'] );
+		} else {
+			delete_post_meta( $post_id, 'geo_longitude' );
+		}
+		if ( ! empty( $_POST['address'] ) ) {
+			update_post_meta( $post_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
+		} else {
+			delete_post_meta( $post_id, 'geo_address' );
+		}
 	}
 }

@@ -3,11 +3,11 @@
 class Geo_Provider_Google extends Geo_Provider {
 
 
-	public function __construct() {
-		parent::__construct();
-		if ( ! $this->api ) {
-			$this->api = get_option( 'sloc_google_api' );
+	public function __construct( $args = array() ) {
+		if ( ! isset( $args['api'] ) ) {
+			$args['api'] = get_option( 'sloc_google_api' );
 		}
+		parent::__construct( $args );
 	}
 
 	public function reverse_lookup( ) {

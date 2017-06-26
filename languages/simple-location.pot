@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Simple Location package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 3.0.4\n"
+"Project-Id-Version: Simple Location 3.1.0\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/simple-location\n"
-"POT-Creation-Date: 2017-05-10 03:54:53+00:00\n"
+"POT-Creation-Date: 2017-06-26 16:29:33+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,171 +13,121 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: grunt-wp-i18n 0.4.9\n"
 
-#: includes/class-ajax-geo.php:20
-msgid "You must specify coordinates"
-msgstr ""
-
-#: includes/class-loc-config.php:160
+#: includes/class-loc-config.php:183
 msgid "OpenStreetMap/MapBox"
 msgstr ""
 
-#: includes/class-loc-config.php:161
+#: includes/class-loc-config.php:184
 msgid "Google Maps"
 msgstr ""
 
-#: includes/class-loc-config.php:166
+#: includes/class-loc-config.php:189
 msgid ""
 "Default Settings for Map Generation for the Simple Location plugin. API "
 "keys are required for map display services."
 msgstr ""
 
-#: includes/class-loc-metabox.php:38 includes/class-loc-metabox.php:62
+#: includes/class-loc-metabox.php:38
 msgid "Location"
 msgstr ""
 
-#: includes/class-loc-metabox.php:56
-msgid "Display:"
+#: includes/class-loc-metabox.php:48
+msgid "Show:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:58
-msgid "Private"
+#: includes/class-loc-metabox.php:50
+msgid "Hide"
 msgstr ""
 
-#: includes/class-loc-metabox.php:59
-msgid "Public"
+#: includes/class-loc-metabox.php:51
+msgid "Show Map and Description"
 msgstr ""
 
-#: includes/class-loc-metabox.php:60
-msgid "Text Only"
+#: includes/class-loc-metabox.php:52
+msgid "Description Only"
 msgstr ""
 
-#: includes/class-loc-metabox.php:63
-msgid "Venue"
+#: includes/class-loc-metabox.php:64
+msgid "Location:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:67
-msgid "Set as Venue"
-msgstr ""
-
-#: includes/class-loc-metabox.php:73
-msgid "The below will be displayed in the post."
-msgstr ""
-
-#: includes/class-loc-metabox.php:74
-msgid "Display"
-msgstr ""
-
-#: includes/class-loc-metabox.php:78 includes/class-venue-taxonomy.php:91
-#: includes/class-venue-taxonomy.php:105
+#: includes/class-loc-metabox.php:69 includes/class-venue-taxonomy.php:92
+#: includes/class-venue-taxonomy.php:106
 msgid "Latitude:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:80 includes/class-venue-taxonomy.php:93
-#: includes/class-venue-taxonomy.php:108
+#: includes/class-loc-metabox.php:71 includes/class-venue-taxonomy.php:94
+#: includes/class-venue-taxonomy.php:109
 msgid "Longitude:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:83
-msgid "Accuracy (in meters):"
+#: includes/class-loc-metabox.php:75
+msgid "Show Detail"
 msgstr ""
 
-#: includes/class-loc-metabox.php:85
-msgid ""
-"The geolocation API has the below additional properties not currently used "
-"but are displayed below to show the available information your device has. "
-"May be used in future"
+#: includes/class-loc-metabox.php:78
+msgid "Clear Location"
 msgstr ""
 
-#: includes/class-loc-metabox.php:87
-msgid "Altitude:"
-msgstr ""
-
-#: includes/class-loc-metabox.php:91
-msgid "Altitude Accuracy:"
-msgstr ""
-
-#: includes/class-loc-metabox.php:94
-msgid "Heading:"
-msgstr ""
-
-#: includes/class-loc-metabox.php:97
-msgid "Speed:"
-msgstr ""
-
-#: includes/class-loc-metabox.php:103 includes/class-venue-taxonomy.php:96
-#: includes/class-venue-taxonomy.php:112
-msgid "Get Location"
-msgstr ""
-
-#: includes/class-loc-metabox.php:104
-msgid "Save Location"
-msgstr ""
-
-#: includes/class-loc-metabox.php:108
+#: includes/class-loc-metabox.php:80
 msgid ""
 "Location Data below can be used to complete the location description, which "
 "will be displayed, or saved as a venue."
 msgstr ""
 
-#: includes/class-loc-metabox.php:109
-msgid "Lookup from Coordinates"
-msgstr ""
-
-#: includes/class-loc-metabox.php:111
+#: includes/class-loc-metabox.php:82
 msgid "Location Name"
 msgstr ""
 
-#: includes/class-loc-metabox.php:115 includes/class-venue-taxonomy.php:114
+#: includes/class-loc-metabox.php:86 includes/class-venue-taxonomy.php:115
 msgid "Address"
 msgstr ""
 
-#: includes/class-loc-metabox.php:119
+#: includes/class-loc-metabox.php:90
 msgid "Extended Address"
 msgstr ""
 
-#: includes/class-loc-metabox.php:123 includes/class-venue-taxonomy.php:117
+#: includes/class-loc-metabox.php:94 includes/class-venue-taxonomy.php:118
 msgid "City/Town/Village"
 msgstr ""
 
-#: includes/class-loc-metabox.php:126 includes/class-venue-taxonomy.php:120
+#: includes/class-loc-metabox.php:97 includes/class-venue-taxonomy.php:121
 msgid "State/County/Province"
 msgstr ""
 
-#: includes/class-loc-metabox.php:128 includes/class-venue-taxonomy.php:123
+#: includes/class-loc-metabox.php:99 includes/class-venue-taxonomy.php:124
 msgid "Country Code"
 msgstr ""
 
-#: includes/class-loc-metabox.php:131 includes/class-venue-taxonomy.php:126
+#: includes/class-loc-metabox.php:102 includes/class-venue-taxonomy.php:127
 msgid "Neighborhood/Suburb"
 msgstr ""
 
-#: includes/class-loc-metabox.php:134 includes/class-venue-taxonomy.php:128
+#: includes/class-loc-metabox.php:105 includes/class-venue-taxonomy.php:129
 msgid "Postal Code"
 msgstr ""
 
-#: includes/class-loc-metabox.php:137 includes/class-venue-taxonomy.php:131
+#: includes/class-loc-metabox.php:108 includes/class-venue-taxonomy.php:132
 msgid "Country Name"
 msgstr ""
 
-#: includes/class-loc-metabox.php:142
-msgid ""
-"Venue functionality is not yet available. To save your location in the post "
-"you may just close this popup(which is what Save Location does)."
-msgstr ""
-
-#: includes/class-loc-metabox.php:144
+#: includes/class-loc-metabox.php:114
 msgid "Save as Venue"
 msgstr ""
 
-#: includes/class-loc-metabox.php:145
-msgid "Clear"
+#: includes/class-post-timezone.php:34
+msgid "Timezone:"
 msgstr ""
 
-#: includes/class-post-timezone.php:30
-msgid "Change Displayed Timezone"
+#: includes/class-rest-geo.php:93 includes/class-rest-geo.php:110
+msgid "Missing Coordinates for Reverse Lookup"
 msgstr ""
 
-#: simple-location.php:85
+#: includes/class-venue-taxonomy.php:97 includes/class-venue-taxonomy.php:113
+msgid "Get Location"
+msgstr ""
+
+#: simple-location.php:84
 msgid "Map Settings"
 msgstr ""
 

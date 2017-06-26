@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to Wordpress Pages and Posts.
- * Version: 3.0.4
+ * Version: 3.1.0
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -20,7 +20,7 @@ register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactiva
 
 
 class Simple_Location_Plugin {
-	public static $version = '3.0.3';
+	public static $version = '3.1.0';
 
 	public static function activate() {
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-meta.php' );
@@ -43,8 +43,8 @@ class Simple_Location_Plugin {
 		add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( 'Simple_Location_Plugin', 'settings_link' ) );
 
 		// Register Metadata Functions
-		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-meta.php' );
-		
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php' );
+
 		// Venue Taxonomy
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-venue-taxonomy.php' );
 
@@ -55,10 +55,9 @@ class Simple_Location_Plugin {
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-osm.php' );
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-google.php' );
 
-		// Handlers
-		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-ajax-geo.php' );
 		// API Endpoint under construction
-		// require_once( plugin_dir_path( __FILE__ ) . 'includes/class-location-controller.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-rest-geo.php' );
+		$geo_api = new REST_Geo();
 
 		// Configuration Functions
 		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-loc-config.php' );

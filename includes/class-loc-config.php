@@ -1,13 +1,14 @@
 <?php
 
-add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10, 4 );
+add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10 );
+add_filter( 'init', array( 'Loc_Config', 'init' ), 10 );
 
 class Loc_Config {
 
 	/**
 	 * Add Settings to the Discussions Page
 	 */
-	public static function admin_init() {
+	public static function init() {
 		register_setting(
 			'media', // settings page
 			'sloc_default_map_provider', // option name
@@ -78,6 +79,20 @@ class Loc_Config {
 				'default' => 14,
 			)
 		);
+		register_setting(
+			'media', // settings page
+			'geo_public', // option name
+			array(
+				'type' => 'boolean',
+				'description' => 'Default Setting for Geodata',
+				'show_in_rest' => true,
+				'default' => SLOC_PUBLIC,
+				// WordPress Geodata defaults to public but this allows a global override for new posts
+			)
+		);
+	}
+
+	public static function admin_init() {
 		add_settings_section(
 			'sloc',
 			'Simple Location Map Settings',
@@ -91,6 +106,14 @@ class Loc_Config {
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_default_map_provider' )
+		);
+		add_settings_field(
+			'geo_public', // id
+			'Public By Default', // setting title
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array( 'name' => 'geo_public' )
 		);
 		add_settings_field(
 			'googleapi', // id
@@ -166,28 +189,28 @@ class Loc_Config {
 		_e( 'Default Settings for Map Generation for the Simple Location plugin. API keys are required for map display services.', 'simple-location' );
 	}
 
-	public static function default_map_provider() {
+	public static function default_map_provider( $args = array() ) {
 		$option = get_option( 'sloc_default_map_provider' );
 		switch ( $option ) {
 			case 'Google':
-				$map = new Geo_Provider_Google();
+				$map = new Geo_Provider_Google( $args );
 				break;
 			default:
-				$map = new Geo_Provider_OSM();
+				$map = new Geo_Provider_OSM( $args );
 		}
 
-		return apply_filters( 'sloc_default_map_provider', $map );
+		return apply_filters( 'sloc_default_map_provider', $map, $args );
 	}
 
-	public static function default_reverse_provider() {
+	public static function default_reverse_provider( $args = array() ) {
 		$option = get_option( 'sloc_default_reverse_provider' );
 		switch ( $option ) {
 			case 'Google':
-				$map = new Geo_Provider_Google();
+				$map = new Geo_Provider_Google( $args );
 				break;
 			default:
-				$map = new Geo_Provider_OSM();
+				$map = new Geo_Provider_OSM( $args );
 		}
-		return apply_filters( 'sloc_default_reverse_provider', $map );
+		return apply_filters( 'sloc_default_reverse_provider', $map, $args );
 	}
 }

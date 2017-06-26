@@ -14,37 +14,40 @@ class Post_Timezone {
 
 	public static function post_submitbox() {
 		global $post;
-		if ( 'post' === get_post_type( $post ) ) {
-			echo '<div class="misc-pub-section misc-pub-section-last">';
-			wp_nonce_field( 'timezone_override_metabox', 'timezone_override_nonce' );
+		wp_nonce_field( 'timezone_override_metabox', 'timezone_override_nonce' );
 			$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
-			if ( ! $timezone ) {
-				$timezone = get_post_meta( $post->ID, '_timezone', true );
-				if ( $timezone ) {
-					update_post_meta( $post->ID, 'geo_timezone', true );
-					delete_post_meta( $post->ID, '_timezone' );
-				}
-			}
-
-			?>
-			<label for="override_timezone"><?php _e( 'Change Displayed Timezone', 'simple-location' ); ?></label>
-		<input type="checkbox" name="override_timezone" id="override_timezone" onclick='toggle_timezone();' <?php if ( $timezone ) { echo 'checked="checked"'; } ?> />
-		 <br />
-		 <select name="timezone" id="timezone" width="90%" <?php if ( ! $timezone ) { echo 'hidden'; }?>>
-		<?php
 		if ( ! $timezone ) {
+			$timezone = get_post_meta( $post->ID, '_timezone', true );
+			if ( $timezone ) {
+				update_post_meta( $post->ID, 'geo_timezone', true );
+				delete_post_meta( $post->ID, '_timezone' );
+			}
 			if ( ! $timezone = get_option( 'timezone_string' ) ) {
 				if ( 0 === get_option( 'gmt_offset', 0 ) ) {
 					$timezone = UTC;
 				}
 			}
 		}
-
+?>
+		<div class="misc-pub-section misc-pub-timezone">
+		<span class="dashicons dashicons-clock"></span>
+			<label for="post-timezone"><?php _e( 'Timezone:', 'simple-location' ); ?></label> 
+			<span id="post-timezone-label"><?php if ( $timezone ) { echo $timezone; } ?></span>
+			<a href="#post_timezone" class="edit-post-timezone hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Override Timezone</span></a>
+		 <br />
+<div id="post-timezone-select" class="hide-if-js">
+		<input type="hidden" name="hidden_post_timezone" id="hidden_post_timezone" value=<?php echo $timezone; ?> />
+		<input type="hidden" name="timezone_default" id="timezone_default" value=<?php echo get_option( 'timezone_string' ); ?>" />
+		 <select name="post_timezone" id="post-timezone" width="90%">
+		<?php
 			echo wp_timezone_choice( $timezone );
 			echo '</select>';
-			echo '</div>';
-		}
-
+?><br />
+		 <a href="#post_timezone" class="save-post-timezone hide-if-no-js button">OK</a>
+		 <a href="#post_timezone" class="cancel-post-timezone hide-if-no-js button-cancel">Cancel</a>
+</div> 
+</div>
+<?php
 	}
 
 	/* Save the post timezone metadata. */
@@ -74,16 +77,20 @@ class Post_Timezone {
 				return;
 			}
 		}
-		if ( isset( $_POST['override_timezone'] ) ) {
+		if ( isset( $_POST['post_timezone'] ) ) {
 			$tzlist = DateTimeZone::listIdentifiers();
-			// For now protect against non-standard timezones
-			if ( in_array( $_POST['timezone' ], $tzlist ) ) {
-				update_post_meta( $post_id, 'geo_timezone', $_POST['timezone'] );
+			if ( $_POST['post_timezone'] !== get_option( 'timezone_string' ) ) {
+				// For now protect against non-standard timezones
+				if ( in_array( $_POST['post_timezone' ], $tzlist ) ) {
+					update_post_meta( $post_id, 'geo_timezone', $_POST['post_timezone'] );
+
+				} else {
+					error_log( 'SLOC Timezone Set Error: ' . $_POST['post_timezone'] . ' not supported' );
+				}
+				return;
 			} else {
-				error_log( 'SLOC Timezone Set Error: ' . $_POST['timezone'] . ' not supported' );
+				delete_post_meta( $post_id, 'geo_timezone' );
 			}
-		} else {
-			delete_post_meta( $post_id, 'geo_timezone' );
 		}
 	}
 
