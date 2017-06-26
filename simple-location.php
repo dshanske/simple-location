@@ -23,7 +23,7 @@ class Simple_Location_Plugin {
 	public static $version = '3.1.0';
 
 	public static function activate() {
-		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-meta.php' );
+		require_once( plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php' );
 		WP_Geo_Data::rewrite();
 		flush_rewrite_rules();
 	}
