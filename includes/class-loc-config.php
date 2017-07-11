@@ -132,20 +132,20 @@ class Loc_Config {
 			array( 'name' => 'sloc_mapbox_api' )
 		);
 		add_settings_field(
-			'height', // id
-			'Map Height', // setting title
-			array( 'Loc_Config', 'number_callback' ), // display callback
-			'media', // settings page
-			'sloc', // settings section
-			array( 'name' => 'sloc_height' )
-		);
-		add_settings_field(
 			'width', // id
 			'Map Width', // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_width' )
+		);
+		add_settings_field(
+			'height', // id
+			'Map Height', // setting title
+			array( 'Loc_Config', 'number_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array( 'name' => 'sloc_height' )
 		);
 		add_settings_field(
 			'zoom', // id
