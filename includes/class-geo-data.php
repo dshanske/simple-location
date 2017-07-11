@@ -203,6 +203,18 @@ class WP_Geo_Data {
 		$args = array(
 		//		'sanitize_callback' => '',
 				'type' => 'integer',
+				'description' => 'Geodata Zoom for Map Display',
+				'single' => true,
+				'show_in_rest' => false,
+		);
+		register_meta( 'post', 'geo_zoom', $args );
+		register_meta( 'comment', 'geo_zoom', $args );
+		register_meta( 'user', 'geo_zoom', $args );
+		register_meta( 'term', 'geo_zoom', $args );
+
+		$args = array(
+		//		'sanitize_callback' => '',
+				'type' => 'integer',
 				'description' => 'Geodata Public',
 				'single' => true,
 				'show_in_rest' => false,
@@ -213,6 +225,7 @@ class WP_Geo_Data {
 		register_meta( 'comment', 'geo_public', $args );
 		register_meta( 'user', 'geo_public', $args );
 		register_meta( 'term', 'geo_public', $args );
+
 
 		$args = array(
 				'sanitize_callback' => array( 'WP_Geo_Data', 'sanitize_address' ),
