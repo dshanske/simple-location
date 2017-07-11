@@ -6,9 +6,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_mapbox_api' );
 		}
-		if ( ! isset( $args['map_zoom'] ) ) {
-			$args['map_zoom'] = 18;
-		}
+
 		parent::__construct( $args );
 	}
 
