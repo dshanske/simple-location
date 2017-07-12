@@ -51,6 +51,16 @@ class Loc_Config {
 		);
 		register_setting(
 			'media', // settings page
+			'sloc_bing_api', // option name
+			array(
+				'type' => 'string',
+				'description' => 'Bing Maps API Key',
+				'show_in_rest' => false,
+				'default' => '',
+			)
+		);
+		register_setting(
+			'media', // settings page
 			'sloc_height', // option name
 			array(
 				'type' => 'number',
@@ -132,6 +142,14 @@ class Loc_Config {
 			array( 'name' => 'sloc_mapbox_api' )
 		);
 		add_settings_field(
+			'bingapi', // id
+			'Bing API Key', // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array( 'name' => 'sloc_bing_api' )
+		);
+		add_settings_field(
 			'width', // id
 			'Map Width', // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
@@ -182,6 +200,7 @@ class Loc_Config {
 		echo '<select name="' . $name . '">';
 		echo '<option value="OSM" '  . selected( $text, 'OSM' ) .  '>' . __( 'OpenStreetMap/MapBox', 'simple-location' ) . '</option>';
 		echo '<option value="Google" '  . selected( $text, 'Google' ) .  '>' . __( 'Google Maps', 'simple-location' ) . '</option>';
+		echo '<option value="Bing" '  . selected( $text, 'Bing' ) .  '>' . __( 'Bing Maps', 'simple-location' ) . '</option>';	
 		echo '</select><br /><br />';
 	}
 
@@ -194,6 +213,9 @@ class Loc_Config {
 		switch ( $option ) {
 			case 'Google':
 				$map = new Geo_Provider_Google( $args );
+				break;
+			case 'Bing':
+				$map = new Geo_Provider_Bing( $args );
 				break;
 			default:
 				$map = new Geo_Provider_OSM( $args );
