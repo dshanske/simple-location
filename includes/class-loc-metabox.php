@@ -70,6 +70,9 @@ class Loc_Metabox {
 				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" size="10" />
 				  <label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
 				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="10" />
+				  <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
+				<input type="text" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['zoom'], '' ); ?>" size="10" />
+				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" size="10" />
 </p>
 		<?php self::geo_public( $geodata['public'] ); ?>
 		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'bridgy-publish' ); ?></span></a>
@@ -163,6 +166,13 @@ class Loc_Metabox {
 		} else {
 			delete_post_meta( $post_id, 'geo_address' );
 		}
+
+		if ( ! empty( $_POST['map_zoom'] ) ) {
+			update_post_meta( $post_id, 'geo_zoom', sanitize_text_field( $_POST['map_zoom'] ) );
+		} else {
+			delete_post_meta( $post_id, 'geo_zoom' );
+		}
+
 
 		if ( ! empty( $_POST['address'] ) ) {
 			if ( isset( $_POST['geo_public'] ) ) {

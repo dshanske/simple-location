@@ -88,7 +88,7 @@ class WP_Geo_Data {
 			$geodata['longitude'] = get_post_meta( $object->ID, 'geo_longitude', true );
 			$geodata['latitude'] = get_post_meta( $object->ID, 'geo_latitude', true );
 			$geodata['address'] = get_post_meta( $object->ID, 'geo_address', true );
-			$geodata['zoom'] = get_post_meta( $object->ID, 'geo_zoom', true );
+			$geodata['map_zoom'] = get_post_meta( $object->ID, 'geo_zoom', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
@@ -104,7 +104,7 @@ class WP_Geo_Data {
 			$geodata['longitude'] = get_comment_meta( $object->comment_ID, 'geo_longitude', true );
 			$geodata['latitude'] = get_comment_meta( $object->comment_ID, 'geo_latitude', true );
 			$geodata['address'] = get_comment_meta( $object->comment_ID, 'geo_address', true );
-			$geodata['zoom'] = get_comment_meta( $object->comment_ID, 'geo_zoom', true );
+			$geodata['map_zoom'] = get_comment_meta( $object->comment_ID, 'geo_zoom', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
@@ -115,7 +115,7 @@ class WP_Geo_Data {
 			$geodata['longitude'] = get_term_meta( $object->term_id, 'geo_longitude', true );
 			$geodata['latitude'] = get_term_meta( $object->term_id, 'geo_latitude', true );
 			$geodata['address'] = get_term_meta( $object->term_id, 'geo_address', true );
-			$geodata['zoom'] = get_term_meta( $object->term_id, 'geo_zoom', true );
+			$geodata['map_zoom'] = get_term_meta( $object->term_id, 'geo_zoom', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
@@ -126,7 +126,7 @@ class WP_Geo_Data {
 			$geodata['longitude'] = get_user_meta( $object->ID, 'geo_longitude', true );
 			$geodata['latitude'] = get_user_meta( $object->ID, 'geo_latitude', true );
 			$geodata['address'] = get_user_meta( $object->ID, 'geo_address', true );
-			$geodata['zoom'] = get_user_meta( $object->ID, 'geo_zoom', true );
+			$geodata['map_zoom'] = get_user_meta( $object->ID, 'geo_zoom', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}

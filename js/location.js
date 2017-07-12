@@ -16,6 +16,8 @@ function reverseLookup(position) {
 	if ( jQuery('#latitude').val() === '' ) {
 		jQuery("#latitude").val( position.coords.latitude ) ;
 	}    
+	jQuery('#accuracy').val( position.coords.accuracy ) ;
+	jQuery('#map_zoom').val( parseInt(Math.log2(591657550.5 / (position.coords.accuracy * 45))) + 1 );
 	jQuery.ajax({ 
 			type: 'GET',
 		        // Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
@@ -27,6 +29,8 @@ function reverseLookup(position) {
 			data: {
 				latitude: jQuery('#latitude').val(),
 				longitude: jQuery('#longitude').val(),
+				altitude: jQuery('#altitude').val(),
+				map_zoom: jQuery('#map_zoom').val()
 			},
 		success : function( response ) {
 			if ( typeof response == 'undefined' ) {
