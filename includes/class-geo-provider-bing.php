@@ -29,7 +29,7 @@ class Geo_Provider_Bing extends Geo_Provider {
 
 	// Return code for map
 	public function get_the_static_map( ) {
-		$map = 'http://dev.virtualearth.net/REST/v1/Imagery/Map/imagerySet/' . $this->latitude . ',' . $this->longitude . '/' . $this->map_zoom . '?mapSize=' . $this->width . ',' . $this->height . '&key=' . $this->api;
+		$map = 'http://dev.virtualearth.net/REST/v1/Imagery/Map/CanvasLight/' . $this->latitude . ',' . $this->longitude . '/' . $this->map_zoom . '?mapSize=' . $this->width . ',' . $this->height . '&key=' . $this->api;
 		return $map;
 	}
 
