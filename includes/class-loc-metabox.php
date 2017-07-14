@@ -9,7 +9,7 @@ class Loc_Metabox {
 		add_action( 'load-post.php', array( 'loc_metabox', 'slocbox_setup' ) );
 		add_action( 'load-post-new.php', array( 'loc_metabox', 'slocbox_setup' ) );
 		add_action( 'save_post', array( 'loc_metabox', 'locationbox_save_post_meta' ) );
-
+		add_action( 'edit_attachment', array( 'loc_metabox', 'locationbox_save_post_meta' ) );
 	}
 
 	public static function enqueue() {
@@ -31,7 +31,7 @@ class Loc_Metabox {
 
 	/* Create location meta boxes to be displayed on the post editor screen. */
 	public static function locbox_add_postmeta_boxes() {
-		$screens = array( 'post' );
+		$screens = array( 'post', 'comment', 'attachment' );
 		$screens = apply_filters( 'sloc_post_types', $screens );
 		add_meta_box(
 			'locationbox-meta',      // Unique ID
@@ -71,7 +71,7 @@ class Loc_Metabox {
 				  <label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
 				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="10" />
 				  <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
-				<input type="text" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['zoom'], '' ); ?>" size="10" />
+				<input type="text" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" size="10" />
 				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" size="10" />
 </p>
 		<?php self::geo_public( $geodata['public'] ); ?>
