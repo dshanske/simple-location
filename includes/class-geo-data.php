@@ -15,7 +15,87 @@ class WP_Geo_Data {
 		add_filter( 'query_vars', array( 'WP_Geo_Data', 'query_var' ) );
 		add_action( 'pre_get_posts', array( 'WP_Geo_Data', 'pre_get_posts' ) );
 		add_action( 'save_post', array( 'WP_Geo_Data', 'public_post' ), 99, 2 );
+
+		// Grab geo data from EXIF, if it's available
+		add_action( 'wp_read_image_metadata', array( 'WP_Geo_Data', 'exif_data' ), 10, 3 );
+		add_action( 'wp_update_attachment_metadata', array( 'WP_Geo_Data', 'attachment' ), 10, 2 );
 		self::rewrite();
+	}
+
+	public static function attachment( $meta, $post_id ) {
+		$current_user = wp_get_current_user();
+		if ( isset( $meta['image_meta'] ) && isset( $meta['image_meta']['latitude'] ) && isset( $meta['image_meta']['longitude'] ) ) {
+			update_post_meta( $post_id, 'geo_latitude', $meta['image_meta']['latitude'] );
+			update_post_meta( $post_id, 'geo_longitude', $meta['image_meta']['longitude'] );
+		}
+		return $meta;
+	}
+
+	public static function DECtoDMS( $latitude, $longitude ) {
+			$latitudeDirection = $latitude < 0 ? 'S': 'N';
+				$longitudeDirection = $longitude < 0 ? 'W': 'E';
+
+				$latitudeNotation = $latitude < 0 ? '-': '';
+				$longitudeNotation = $longitude < 0 ? '-': '';
+
+				$latitudeInDegrees = floor( abs( $latitude ) );
+					$longitudeInDegrees = floor( abs( $longitude ) );
+
+					$latitudeDecimal = abs( $latitude ) -$latitudeInDegrees;
+					$longitudeDecimal = abs( $longitude ) -$longitudeInDegrees;
+
+					$_precision = 3;
+						$latitudeMinutes = round( $latitudeDecimal * 60,$_precision );
+						$longitudeMinutes = round( $longitudeDecimal * 60,$_precision );
+
+						return sprintf('%s%s° %s %s %s%s° %s %s',
+							$latitudeNotation,
+							$latitudeInDegrees,
+							$latitudeMinutes,
+							$latitudeDirection,
+							$longitudeNotation,
+							$longitudeInDegrees,
+							$longitudeMinutes,
+							$longitudeDirection
+						);
+
+	}
+
+	public static function gps($coordinate, $hemisphere) {
+		for ( $i = 0; $i < 3; $i++ ) {
+			  $part = explode( '/', $coordinate[$i] );
+			if ( count( $part ) == 1 ) {
+				$coordinate[$i] = $part[0];
+			} else if ( count( $part ) == 2 ) {
+				$coordinate[$i] = floatval( $part[0] ) / floatval( $part[1] );
+			} else {
+				$coordinate[$i] = 0;
+			}
+		}
+			list($degrees, $minutes, $seconds) = $coordinate;
+			$sign = ($hemisphere == 'W' || $hemisphere == 'S') ? -1 : 1;
+			  return $sign * ($degrees + $minutes / 60 + $seconds / 3600);
+	}
+
+	public static function exif_data( $meta, $file, $file_type ) {
+		if ( in_array( $file_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ) ) ) {
+			// If there is invalid EXIF data this will emit a warning, even
+			// when using the @ operator.  A correct approach would be to
+			// validate the EXIF data before attempting to use it.  For now,
+			// just avoiding spewing warnings.
+			$old_level = error_reporting( E_ERROR );
+			$exif = exif_read_data( $file );
+			error_reporting( $old_level );
+
+			if ( ! empty( $exif['GPSLatitude'] ) ) {
+				$meta['latitude'] = self::gps( $exif['GPSLatitude'], $exif['GPSLatitudeRef'] );
+			}
+
+			if ( ! empty( $exif['GPSLongitude'] ) ) {
+				$meta['longitude'] = self::gps( $exif['GPSLongitude'], $exif['GPSLongitudeRef'] );
+			}
+		}
+		return $meta;
 	}
 
 	// Set Posts Added by Means other than the Post UI to the system default if not set
@@ -73,6 +153,46 @@ class WP_Geo_Data {
 		$pattern = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
 		preg_match( $pattern, $coordinate, $matches );
 		return $matches[0];
+	}
+
+	public static function set_geodata( $object = null, $geodata ) {
+		if ( ! is_array( $geodata ) ) {
+			return false;
+		}
+		$geodata = wp_array_slice_assoc( $geodata, 'latitude', 'longitude', 'address', 'map_zoom' );
+		if ( isset( $geodata['map_zoom'] ) ) {
+			$geodata['zoom'] = $geodata['map_zoom'];
+			unset( $geodata['map_zoom'] );
+		}
+
+		if ( ! $object ) {
+			$object = get_post();
+		}
+		// If numeric assume post_ID
+		if ( is_numeric( $object ) ) {
+			$object = get_post( $object );
+		}
+		if ( $object instanceof WP_Post ) {
+			foreach ( $geodata as $key => $value ) {
+				update_post_meta( $object->ID, 'geo_' . $key, $value );
+			}
+		}
+
+		if ( $object instanceof WP_Comment ) {
+			foreach ( $geodata as $key => $value ) {
+				update_comment_meta( $object->comment_ID, 'geo_' . $key, $value );
+			}
+		}
+		if ( $object instanceof WP_Term ) {
+			foreach ( $geodata as $key => $value ) {
+				update_term_meta( $object->term_id, 'geo_' . $key, $value );
+			}
+		}
+		if ( $object instanceof WP_User ) {
+			foreach ( $geodata as $key => $value ) {
+				update_user_meta( $object->ID, 'geo_' . $key, $value );
+			}
+		}
 	}
 
 	public static function get_geodata( $object = null ) {
@@ -229,7 +349,6 @@ class WP_Geo_Data {
 		register_meta( 'comment', 'geo_public', $args );
 		register_meta( 'user', 'geo_public', $args );
 		register_meta( 'term', 'geo_public', $args );
-
 
 		$args = array(
 				'sanitize_callback' => array( 'WP_Geo_Data', 'sanitize_address' ),
