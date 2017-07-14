@@ -105,13 +105,13 @@ class Loc_Config {
 	public static function admin_init() {
 		add_settings_section(
 			'sloc',
-			'Simple Location Map Settings',
+			__( 'Simple Location Map Settings', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_settings' ),
 			'media'
 		);
 		add_settings_field(
 			'sloc_default_map_provider', // id
-			'Default Map Provider', // setting title
+			__( 'Default Map Provider', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'map_provider_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -119,7 +119,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'geo_public', // id
-			'Public By Default', // setting title
+			__( 'Show Location By Default', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'checkbox_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -127,7 +127,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'googleapi', // id
-			'Google Maps API Key', // setting title
+			__( 'Google Maps API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -135,7 +135,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'mapboxapi', // id
-			'Mapbox API Key', // setting title
+			__( 'Mapbox API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -143,7 +143,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'bingapi', // id
-			'Bing API Key', // setting title
+			__( 'Bing API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -151,7 +151,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'width', // id
-			'Map Width', // setting title
+			__( 'Default Map Width', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -159,7 +159,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'height', // id
-			'Map Height', // setting title
+			__( 'Default Map Height', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -167,7 +167,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'zoom', // id
-			'Map Zoom', // setting title
+			__( 'Default Map Zoom', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
