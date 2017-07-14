@@ -253,13 +253,13 @@ class WP_Geo_Data {
 			$geodata['public'] = get_user_meta( $object->ID, 'geo_public', true );
 			$geodata['user_ID'] = $object->ID;
 		}
+		$geodata = array_filter( $geodata );
 
 		if ( empty( $geodata['address'] ) ) {
 			if ( empty( $geodata['longitude'] ) ) {
 				return null;
 			}
-			$map = Loc_Config::default_reverse_provider();
-			$map->set( $geodata['latitude'], $geodata['longitude'] );
+			$map = Loc_Config::default_reverse_provider( $geodata );
 			$adr = $map->reverse_lookup();
 			if ( array_key_exists( 'display-name', $adr ) ) {
 				$geodata['address'] = trim( $adr['display-name'] );
@@ -285,7 +285,7 @@ class WP_Geo_Data {
 				$geodata['public'] = 2;
 			}
 		}
-		return array_filter( $geodata );
+		return $geodata;
 	}
 
 	public static function register_meta() {
