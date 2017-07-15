@@ -1,9 +1,18 @@
 <?php
 
-add_action( 'init', array( 'Loc_View', 'content_location' ) );
+add_action( 'init', array( 'Loc_View', 'init' ) );
 
 // Location Display
 class Loc_View {
+
+	public static function init() {
+		add_filter( 'comment_text', array( 'Loc_View', 'location_comment' ), 12, 2 );
+		add_filter( 'the_content', array( 'Loc_View', 'content_map' ), 11 );
+		if ( ! current_theme_supports( 'simple-location' ) ) {
+			add_filter( 'the_content', array( 'Loc_View', 'location_content' ), 12 );
+		}
+	}
+
 	public static function get_icon( ) {
 		// Substitute another svg sprite file
 		$sprite = plugin_dir_url( __FILE__ ) . 'location.svg';
@@ -82,20 +91,19 @@ class Loc_View {
 		return $content;
 	}
 
+	public static function location_comment( $comment_text, $comment ) {
+		$loc = self::get_location( $comment, array( 'text' => false, 'icon' => false ) );
+		if ( ! empty( $loc ) ) {
+			$comment_text .= $loc;
+		}
+		return $comment_text;
+	}
+
 	public static function content_map($content) {
 		if ( is_single() ) {
 			$content .= self::get_map();
 		}
 		return $content;
-	}
-
-	// If the Theme Has Not Declared Location Support
-	// Add the Location Display to the Content Filter
-	public static function content_location() {
-		add_filter( 'the_content', array( 'Loc_View', 'content_map' ), 11 );
-		if ( ! current_theme_supports( 'simple-location' ) ) {
-			add_filter( 'the_content', array( 'Loc_View', 'location_content' ), 12 );
-		}
 	}
 
 } // Class Ends
