@@ -100,6 +100,10 @@ class WP_Geo_Data {
 
 	// Set Posts Added by Means other than the Post UI to the system default if not set
 	public static function public_post( $post_id, $post ) {
+		$lat = get_post_meta( $post_id, 'geo_latitude' );
+		if ( ! $lat ) {
+			return;
+		}
 		$public = get_post_meta( $post_id, 'geo_public' );
 		if ( ! $public ) {
 			add_post_meta( $post_id, 'geo_public', get_option( 'geo_public' ) );
