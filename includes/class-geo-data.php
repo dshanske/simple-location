@@ -19,7 +19,39 @@ class WP_Geo_Data {
 		// Grab geo data from EXIF, if it's available
 		add_action( 'wp_read_image_metadata', array( 'WP_Geo_Data', 'exif_data' ), 10, 3 );
 		add_action( 'wp_update_attachment_metadata', array( 'WP_Geo_Data', 'attachment' ), 10, 2 );
+
 		self::rewrite();
+
+		add_action( 'rss2_ns', array( 'WP_Geo_Data', 'georss_namespace' ) );
+		add_action( 'atom_ns', array( 'WP_Geo_Data', 'georss_namespace' ) );
+		add_action( 'rdf_ns', array( 'WP_Geo_Data', 'georss_namespace' ) );
+		
+		add_action( 'rss_item', array( 'WP_Geo_Data', 'georss_item' ) );
+		add_action( 'rss2_item', array( 'WP_Geo_Data', 'georss_item' ) );
+		add_action( 'atom_entry', array( 'WP_Geo_Data', 'georss_item' ) );
+		add_action( 'rdf_item', array( 'WP_Geo_Data', 'georss_item' ) );
+	}
+
+	public static function georss_namespace() {
+		echo 'xmlns:georss="http://www.georss.org/georss" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" ';
+	}
+
+	public static function georss_item() {
+		$geo = self::get_geodata();
+		if ( ! $geo ) {
+			return;
+		}
+
+		if ( empty( $geo['public'] ) || '0' === $geo['public'] ) {
+			return;
+		}
+
+		$geo = array_map( 'esc_html', $geo );
+		$geo = array_map( 'ent2ncr', $geo );
+
+		echo "\t<georss:point>{$geo['latitude']} {$geo['longitude']}</georss:point>\n";
+		echo "\t\t<geo:lat>{$geo['latitude']}</geo:lat>\n";
+		echo "\t\t<geo:long>{$geo['longitude']}</geo:long>";
 	}
 
 	public static function attachment( $meta, $post_id ) {
@@ -101,7 +133,8 @@ class WP_Geo_Data {
 	// Set Posts Added by Means other than the Post UI to the system default if not set
 	public static function public_post( $post_id, $post ) {
 		$lat = get_post_meta( $post_id, 'geo_latitude' );
-		if ( ! $lat ) {
+		$add = get_post_meta( $post_id, 'geo_address' );
+		if ( ! $lat || ! $add ) {
 			return;
 		}
 		$public = get_post_meta( $post_id, 'geo_public' );
