@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Simple Location package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 3.1.0\n"
+"Project-Id-Version: Simple Location 3.2.0\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/simple-location\n"
-"POT-Creation-Date: 2017-06-26 16:29:33+00:00\n"
+"POT-Creation-Date: 2017-07-15 01:31:14+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,113 +13,161 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: grunt-wp-i18n 0.4.9\n"
 
-#: includes/class-loc-config.php:183
+#: includes/class-loc-config.php:108
+msgid "Simple Location Map Settings"
+msgstr ""
+
+#: includes/class-loc-config.php:114
+msgid "Default Map Provider"
+msgstr ""
+
+#: includes/class-loc-config.php:122
+msgid "Show Location By Default"
+msgstr ""
+
+#: includes/class-loc-config.php:130
+msgid "Google Maps API Key"
+msgstr ""
+
+#: includes/class-loc-config.php:138
+msgid "Mapbox API Key"
+msgstr ""
+
+#: includes/class-loc-config.php:146
+msgid "Bing API Key"
+msgstr ""
+
+#: includes/class-loc-config.php:154
+msgid "Default Map Width"
+msgstr ""
+
+#: includes/class-loc-config.php:162
+msgid "Default Map Height"
+msgstr ""
+
+#: includes/class-loc-config.php:170
+msgid "Default Map Zoom"
+msgstr ""
+
+#: includes/class-loc-config.php:201
 msgid "OpenStreetMap/MapBox"
 msgstr ""
 
-#: includes/class-loc-config.php:184
+#: includes/class-loc-config.php:202
 msgid "Google Maps"
 msgstr ""
 
-#: includes/class-loc-config.php:189
+#: includes/class-loc-config.php:203
+msgid "Bing Maps"
+msgstr ""
+
+#: includes/class-loc-config.php:208
 msgid ""
 "Default Settings for Map Generation for the Simple Location plugin. API "
 "keys are required for map display services."
 msgstr ""
 
-#: includes/class-loc-metabox.php:38
+#: includes/class-loc-metabox.php:40
 msgid "Location"
 msgstr ""
 
-#: includes/class-loc-metabox.php:48
+#: includes/class-loc-metabox.php:50
 msgid "Show:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:50
+#: includes/class-loc-metabox.php:52
 msgid "Hide"
 msgstr ""
 
-#: includes/class-loc-metabox.php:51
+#: includes/class-loc-metabox.php:53
 msgid "Show Map and Description"
 msgstr ""
 
-#: includes/class-loc-metabox.php:52
+#: includes/class-loc-metabox.php:54
 msgid "Description Only"
 msgstr ""
 
-#: includes/class-loc-metabox.php:64
+#: includes/class-loc-metabox.php:66
 msgid "Location:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:69 includes/class-venue-taxonomy.php:92
+#: includes/class-loc-metabox.php:71 includes/class-venue-taxonomy.php:92
 #: includes/class-venue-taxonomy.php:106
 msgid "Latitude:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:71 includes/class-venue-taxonomy.php:94
+#: includes/class-loc-metabox.php:73 includes/class-venue-taxonomy.php:94
 #: includes/class-venue-taxonomy.php:109
 msgid "Longitude:"
 msgstr ""
 
 #: includes/class-loc-metabox.php:75
-msgid "Show Detail"
-msgstr ""
-
-#: includes/class-loc-metabox.php:78
-msgid "Clear Location"
+msgid "Map Zoom:"
 msgstr ""
 
 #: includes/class-loc-metabox.php:80
+msgid "Show Detail"
+msgstr ""
+
+#: includes/class-loc-metabox.php:83
+msgid "Clear Location"
+msgstr ""
+
+#: includes/class-loc-metabox.php:85
 msgid ""
 "Location Data below can be used to complete the location description, which "
 "will be displayed, or saved as a venue."
 msgstr ""
 
-#: includes/class-loc-metabox.php:82
+#: includes/class-loc-metabox.php:87
 msgid "Location Name"
 msgstr ""
 
-#: includes/class-loc-metabox.php:86 includes/class-venue-taxonomy.php:115
+#: includes/class-loc-metabox.php:91 includes/class-venue-taxonomy.php:115
 msgid "Address"
 msgstr ""
 
-#: includes/class-loc-metabox.php:90
+#: includes/class-loc-metabox.php:95
 msgid "Extended Address"
 msgstr ""
 
-#: includes/class-loc-metabox.php:94 includes/class-venue-taxonomy.php:118
+#: includes/class-loc-metabox.php:99 includes/class-venue-taxonomy.php:118
 msgid "City/Town/Village"
 msgstr ""
 
-#: includes/class-loc-metabox.php:97 includes/class-venue-taxonomy.php:121
+#: includes/class-loc-metabox.php:102 includes/class-venue-taxonomy.php:121
 msgid "State/County/Province"
 msgstr ""
 
-#: includes/class-loc-metabox.php:99 includes/class-venue-taxonomy.php:124
+#: includes/class-loc-metabox.php:104 includes/class-venue-taxonomy.php:124
 msgid "Country Code"
 msgstr ""
 
-#: includes/class-loc-metabox.php:102 includes/class-venue-taxonomy.php:127
+#: includes/class-loc-metabox.php:107 includes/class-venue-taxonomy.php:127
 msgid "Neighborhood/Suburb"
 msgstr ""
 
-#: includes/class-loc-metabox.php:105 includes/class-venue-taxonomy.php:129
+#: includes/class-loc-metabox.php:110 includes/class-venue-taxonomy.php:129
 msgid "Postal Code"
 msgstr ""
 
-#: includes/class-loc-metabox.php:108 includes/class-venue-taxonomy.php:132
+#: includes/class-loc-metabox.php:113 includes/class-venue-taxonomy.php:132
 msgid "Country Name"
 msgstr ""
 
-#: includes/class-loc-metabox.php:114
+#: includes/class-loc-metabox.php:119
 msgid "Save as Venue"
+msgstr ""
+
+#: includes/class-loc-view.php:19 includes/class-loc-view.php:34
+msgid "Location: "
 msgstr ""
 
 #: includes/class-post-timezone.php:34
 msgid "Timezone:"
 msgstr ""
 
-#: includes/class-rest-geo.php:93 includes/class-rest-geo.php:110
+#: includes/class-rest-geo.php:109 includes/class-rest-geo.php:126
 msgid "Missing Coordinates for Reverse Lookup"
 msgstr ""
 
@@ -127,7 +175,7 @@ msgstr ""
 msgid "Get Location"
 msgstr ""
 
-#: simple-location.php:84
+#: simple-location.php:85
 msgid "Map Settings"
 msgstr ""
 
@@ -140,7 +188,7 @@ msgid "https://wordpress.org/plugins/simple-location/"
 msgstr ""
 
 #. Description of the plugin/theme
-msgid "Adds Location to Wordpress Pages and Posts."
+msgid "Adds Location to Wordpress"
 msgstr ""
 
 #. Author of the plugin/theme

@@ -1,17 +1,18 @@
 # Simple Location #
 **Contributors:** dshanske  
 **Tags:** geolocation, geo, maps, location, indieweb  
-**Stable tag:** 3.1.0  
+**Stable tag:** 3.2.0  
 **Requires at least:** 4.7  
 **Tested up to:** 4.8  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
-Adds geographic location support to pages and posts.
+Adds geographic location support to WordPress.
 
 ## Description ##
 
-Supports adding geo coordinates or textual description to a post, and will be supporting saving a location as a venue for reuse. Offers choice of map displays.
+Supports adding geo coordinates or textual description to a post, comment, user, or attachment. Will be supporting saving a 
+location as a venue for reuse. Offers choice of map displays.
 
 It supports retrieving location using the HTML5 geolocation API. As it stores the GeoData in a 
 WordPress standard format, Geodata can also be added from other plugins.
@@ -20,12 +21,12 @@ Offers the opportunity to change the displayed timezone on a per-post basis for 
 
 ## Other Notes ##
 
-* API Keys are required to use [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key) or [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/). 
+* API Keys are required to use [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key), [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/), or [Bing Maps](https://www.bingmapsportal.com/). 
 If not provided there will be no map displayed regardless of setting. The appropriate API keys should be entered in Settings>>Media or within the admin interface at /wp-admin/options-media.php.
 
 * You can filter any query or archive by adding `?geo={all|public|text}` to it to show only public posts with location. Adding /geo/all to the homepage or archive pages should also work
 
-* Chrome Users: The button that retrieves the location using the HTML5 geolocation API will not work on Chrome if your website is secure(https). This is a Chrome decision to ensure safe control of personal
+* Chrome Users: The button that retrieves the location using the HTML5 geolocation API will not work on Chrome if your website is not secure(https). This is a Chrome decision to ensure safe control of personal
 data.
 
 * The Development Version as well as support can be found on [Github](https://github.com/dshanske/simple-location).
@@ -40,7 +41,7 @@ have the advantage of supporting an archive page of all posts from that location
 [WordPress Geodata](http://codex.wordpress.org/Geodata) is an existing standard
 used to store geodata about a post, user, comment, or term.
 
-**It consists of four fields:** latitude, longitude, public, and address.  
+**It consists of four fields:** latitude, longitude, public, and address. The plugin also saves zoom which is for the purpose of map display.  
 
 ## Upgrade Notice ##
 
@@ -48,6 +49,17 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### Version 3.2.0 ###
+	* Allow passing of coordinates directly in constructor for map provider
+	* Switch to argument array instead of individual properties for most display and data functions
+	* Support per post zoom settings
+	* Set initial map zoom based on geolocation accuracy
+	* Quick and dirty Bing Maps support
+	* Set location metadata for attachments if in EXIF data
+	* Add location metabox to attachments
+	* Add arguments for marking up location
+	* Add GEORSS support from defunct project
 
 ### Version 3.1.0 ###
 	* New release with more functionality coming soon
