@@ -1,17 +1,17 @@
 <?php
-// Google Map Provider
-class Geo_Provider_Google extends Geo_Provider {
+// Bing Map Provider
+class Geo_Provider_Bing extends Geo_Provider {
 
 
 	public function __construct( $args = array() ) {
 		if ( ! isset( $args['api'] ) ) {
-			$args['api'] = get_option( 'sloc_google_api' );
+			$args['api'] = get_option( 'sloc_bing_api' );
 		}
 		parent::__construct( $args );
 	}
 
 	public function reverse_lookup( ) {
-		$response = wp_remote_get( 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $this->latitude . ',' . $this->longitude . '&key=' . $this->api );
+		$response = wp_remote_get( 'http://dev.virtualearth.net/REST/v1/Locations/' . $this->latitude . ',' . $this->longitude . '&key=' . $this->api );
 		$json = json_decode( $response['body'], true );
 		//$address = $json['results'][0]['address_components'];
 		$addr = array(
@@ -29,12 +29,12 @@ class Geo_Provider_Google extends Geo_Provider {
 
 	// Return code for map
 	public function get_the_static_map( ) {
-		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->width . 'x' . $this->height . '&language=' . get_bloginfo( 'language' ) . '&key=' . $this->api;
+		$map = 'http://dev.virtualearth.net/REST/v1/Imagery/Map/CanvasLight/' . $this->latitude . ',' . $this->longitude . '/' . $this->map_zoom . '?mapSize=' . $this->width . ',' . $this->height . '&key=' . $this->api;
 		return $map;
 	}
 
 	public function get_the_map_url() {
-		return 'http://maps.google.com/maps?q=loc:' . $this->latitude . ',' . $this->longitude;
+		return 'http://bing.com/maps/default.aspx?cp=' . $this->latitude . ',' . $this->longitude . '&lvl=' . $this->map_zoom;
 	}
 
 	// Return code for map

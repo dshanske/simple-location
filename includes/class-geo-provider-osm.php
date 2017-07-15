@@ -6,9 +6,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_mapbox_api' );
 		}
-		if ( ! isset( $args['map_zoom'] ) ) {
-			$args['map_zoom'] = 18;
-		}
+
 		parent::__construct( $args );
 	}
 
@@ -65,7 +63,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 	}
 
 	public function get_the_static_map( ) {
-		$map = 'https://api.mapbox.com/styles/v1/mapbox/streets-v8/static/' . $this->longitude . ',' . $this->latitude. ',' . $this->map_zoom . ',0,0/'     . $this->height . 'x' . $this->width . '?access_token=' . $this->api;
+		$map = 'https://api.mapbox.com/styles/v1/mapbox/streets-v8/static/' . $this->longitude . ',' . $this->latitude. ',' . $this->map_zoom . ',0,0/'     . $this->width . 'x' . $this->height . '?access_token=' . $this->api;
 		return $map;
 
 	}

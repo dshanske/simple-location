@@ -52,6 +52,9 @@ class REST_Geo {
 					'latitude' => array(
 						'required' => true,
 					),
+					'height' => array(),
+					'width' => array(),
+					'zoom' => array(),
 					// If url exists return URL
 					'url' => array(),
 					// If map exists return image src
@@ -80,8 +83,21 @@ class REST_Geo {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
 		$params = $request->get_params();
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
-			$map = Loc_Config::default_map_provider();
-			$map->set( $params['latitude'], $params['longitude'] );
+			$args = array(
+				'latitude' => $params['latitude'],
+				'longitude' => $param['longitude']
+			);
+			if ( ! empty( $params['zoom'] ) ) {
+				$args['map_zoom'] = $params['zoom'];
+			}
+			if ( ! empty( $params['height'] ) ) {
+				$args['height'] = $params['height'];
+		 	}
+			if ( ! empty( $params['width'] ) ) {
+				$args['width'] = $params['width'];
+			}
+
+			$map = Loc_Config::default_map_provider( $args );
 			if ( ! empty( $params['url'] ) ) {
 				return $map->get_the_map_url();
 			}

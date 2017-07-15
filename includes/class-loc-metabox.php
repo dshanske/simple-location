@@ -1,19 +1,29 @@
 <?php
 // Adds Post Meta Box for Location
 add_action( 'init' , array( 'Loc_Metabox', 'init' ) );
+add_action( 'admin_init', array( 'Loc_Metabox', 'admin_init' ) );
 
 class Loc_Metabox {
-	public static function init() {
-		add_action( 'admin_enqueue_scripts', array( 'loc_metabox', 'enqueue' ) );
-		// Add meta box to new post/post pages only
-		add_action( 'load-post.php', array( 'loc_metabox', 'slocbox_setup' ) );
-		add_action( 'load-post-new.php', array( 'loc_metabox', 'slocbox_setup' ) );
-		add_action( 'save_post', array( 'loc_metabox', 'locationbox_save_post_meta' ) );
+	public static function admin_init() {
+		/* Add meta boxes on the 'add_meta_boxes' hook. */
+		add_action( 'add_meta_boxes', array( 'Loc_Metabox', 'locbox_add_postmeta_boxes' ) );
+	}
 
+	public static function init() {
+		add_action( 'admin_enqueue_scripts', array( 'Loc_Metabox', 'enqueue' ) );
+		add_action( 'save_post', array( 'Loc_Metabox', 'locationbox_save_post_meta' ) );
+		add_action( 'edit_attachment', array( 'Loc_Metabox', 'locationbox_save_post_meta' ) );
+		add_action( 'edit_comment', array( 'Loc_Metabox', 'locationbox_save_comment_meta' ) );
+	}
+
+	public static function location_screens() {
+		$screens = array( 'post', 'comment', 'attachment' );
+		return apply_filters( 'sloc_post_types', $screens );
 	}
 
 	public static function enqueue() {
-		if ( 'post' === get_current_screen()->id ) {
+		$screens = self::location_screens();
+		if ( in_array( get_current_screen()->id, $screens ) ) {
 			wp_enqueue_script(
 				'sloc_location',
 				plugins_url( 'simple-location/js/location.js' ),
@@ -23,21 +33,13 @@ class Loc_Metabox {
 		}
 	}
 
-	/* Meta box setup function. */
-	public static function slocbox_setup() {
-		/* Add meta boxes on the 'add_meta_boxes' hook. */
-		add_action( 'add_meta_boxes', array( 'loc_metabox', 'locbox_add_postmeta_boxes' ) );
-	}
-
 	/* Create location meta boxes to be displayed on the post editor screen. */
 	public static function locbox_add_postmeta_boxes() {
-		$screens = array( 'post' );
-		$screens = apply_filters( 'sloc_post_types', $screens );
 		add_meta_box(
 			'locationbox-meta',      // Unique ID
 			esc_html__( 'Location', 'simple-location' ),    // Title
-			array( 'loc_metabox', 'location_metabox' ),   // Callback function
-			$screens,         // Admin page (or post type)
+			array( 'Loc_Metabox', 'location_metabox' ),   // Callback function
+			self::location_screens(),         // Admin page (or post type)
 			'normal',         // Context
 			'default'         // Priority
 		);
@@ -70,6 +72,9 @@ class Loc_Metabox {
 				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" size="10" />
 				  <label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
 				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="10" />
+				  <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
+				<input type="text" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" size="10" />
+				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" size="10" />
 </p>
 		<?php self::geo_public( $geodata['public'] ); ?>
 		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'bridgy-publish' ); ?></span></a>
@@ -164,11 +169,72 @@ class Loc_Metabox {
 			delete_post_meta( $post_id, 'geo_address' );
 		}
 
+		if ( ! empty( $_POST['map_zoom'] ) ) {
+			update_post_meta( $post_id, 'geo_zoom', sanitize_text_field( $_POST['map_zoom'] ) );
+		} else {
+			delete_post_meta( $post_id, 'geo_zoom' );
+		}
+
+
 		if ( ! empty( $_POST['address'] ) ) {
 			if ( isset( $_POST['geo_public'] ) ) {
 				update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
 			} 
 		}
 	}
+
+	/* Save the meta box's comment metadata. */
+	public static function locationbox_save_comment_meta( $comment_id ) {
+		/*
+		 * We need to verify this came from our screen and with proper authorization,
+		 * because the save_post action can be triggered at other times.
+		 */
+		if ( ! isset( $_POST['location_metabox_nonce'] ) ) {
+			return;
+		}
+		// Verify that the nonce is valid.
+		if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
+			return;
+		}
+		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+		// Check the user's permissions.
+		if ( ! current_user_can( 'edit_comment', $comment_id ) ) {
+			return;
+		}
+		/* OK, its safe for us to save the data now. */
+		if ( ! empty( $_POST['latitude'] ) ) {
+			update_comment_meta( $comment_id, 'geo_latitude', $_POST['latitude'] );
+		} else {
+			delete_comment_meta( $comment_id, 'geo_latitude' );
+		}
+		if ( ! empty( $_POST['longitude'] ) ) {
+			update_comment_meta( $comment_id, 'geo_longitude', $_POST['longitude'] );
+		} else {
+			delete_comment_meta( $comment_id, 'geo_longitude' );
+		}
+		if ( ! empty( $_POST['address'] ) ) {
+			update_post_meta( $post_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
+		} else {
+			delete_post_meta( $post_id, 'geo_address' );
+		}
+
+		if ( ! empty( $_POST['map_zoom'] ) ) {
+			update_comment_meta( $post_id, 'geo_zoom', sanitize_text_field( $_POST['map_zoom'] ) );
+		} else {
+			delete_comment_meta( $post_id, 'geo_zoom' );
+		}
+
+
+		if ( ! empty( $_POST['address'] ) ) {
+			if ( isset( $_POST['geo_public'] ) ) {
+				update_comment_meta( $comment_id, 'geo_public', $_POST['geo_public'] );
+			} 
+		}
+	}
+
+
 }
 ?>

@@ -28,6 +28,9 @@ abstract class Geo_Provider {
 			'width' => get_option( 'sloc_width' ),
 			'map_zoom' => get_option( 'sloc_zoom' ),
 			'api' => null,
+			'latitude' => null,
+			'longitude' => null,
+			'reverse_zoom' => 18,
 		);
 		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
 		$r = wp_parse_args( $args, $defaults );
@@ -35,6 +38,7 @@ abstract class Geo_Provider {
 		$this->width = $r['width'];
 		$this->map_zoom = $r['map_zoom'];
 		$this->api = $r['api'];
+		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
 	/**
@@ -42,17 +46,15 @@ abstract class Geo_Provider {
 	 *
 	 * @param $lat Latitude
 	 * @param $lng Longitude
-	 * @param $zoom Reverse Zoom Precision
 	 * @return boolean Return False if Validation Failed
 	 */
-	public function set( $lat, $lng, $zoom = 18 ) {
+	public function set( $lat, $lng ) {
 		// Validate inputs
 		if ( ( ! is_numeric( $lat ) ) && ( ! is_numeric( $lng ) ) ) {
 			return false;
 		}
 		$this->latitude = $lat;
 		$this->longitude = $lng;
-		$this->reverse_zoom = $zoom;
 	}
 
 	/**

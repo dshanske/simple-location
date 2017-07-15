@@ -51,6 +51,16 @@ class Loc_Config {
 		);
 		register_setting(
 			'media', // settings page
+			'sloc_bing_api', // option name
+			array(
+				'type' => 'string',
+				'description' => 'Bing Maps API Key',
+				'show_in_rest' => false,
+				'default' => '',
+			)
+		);
+		register_setting(
+			'media', // settings page
 			'sloc_height', // option name
 			array(
 				'type' => 'number',
@@ -95,13 +105,13 @@ class Loc_Config {
 	public static function admin_init() {
 		add_settings_section(
 			'sloc',
-			'Simple Location Map Settings',
+			__( 'Simple Location Map Settings', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_settings' ),
 			'media'
 		);
 		add_settings_field(
 			'sloc_default_map_provider', // id
-			'Default Map Provider', // setting title
+			__( 'Default Map Provider', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'map_provider_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -109,7 +119,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'geo_public', // id
-			'Public By Default', // setting title
+			__( 'Show Location By Default', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'checkbox_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -117,7 +127,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'googleapi', // id
-			'Google Maps API Key', // setting title
+			__( 'Google Maps API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -125,31 +135,39 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'mapboxapi', // id
-			'Mapbox API Key', // setting title
+			__( 'Mapbox API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_mapbox_api' )
 		);
 		add_settings_field(
-			'height', // id
-			'Map Height', // setting title
-			array( 'Loc_Config', 'number_callback' ), // display callback
+			'bingapi', // id
+			__( 'Bing API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
-			array( 'name' => 'sloc_height' )
+			array( 'name' => 'sloc_bing_api' )
 		);
 		add_settings_field(
 			'width', // id
-			'Map Width', // setting title
+			__( 'Default Map Width', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
 			array( 'name' => 'sloc_width' )
 		);
 		add_settings_field(
+			'height', // id
+			__( 'Default Map Height', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'number_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array( 'name' => 'sloc_height' )
+		);
+		add_settings_field(
 			'zoom', // id
-			'Map Zoom', // setting title
+			__( 'Default Map Zoom', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
@@ -182,6 +200,7 @@ class Loc_Config {
 		echo '<select name="' . $name . '">';
 		echo '<option value="OSM" '  . selected( $text, 'OSM' ) .  '>' . __( 'OpenStreetMap/MapBox', 'simple-location' ) . '</option>';
 		echo '<option value="Google" '  . selected( $text, 'Google' ) .  '>' . __( 'Google Maps', 'simple-location' ) . '</option>';
+		echo '<option value="Bing" '  . selected( $text, 'Bing' ) .  '>' . __( 'Bing Maps', 'simple-location' ) . '</option>';	
 		echo '</select><br /><br />';
 	}
 
@@ -194,6 +213,9 @@ class Loc_Config {
 		switch ( $option ) {
 			case 'Google':
 				$map = new Geo_Provider_Google( $args );
+				break;
+			case 'Bing':
+				$map = new Geo_Provider_Bing( $args );
 				break;
 			default:
 				$map = new Geo_Provider_OSM( $args );
