@@ -61,7 +61,17 @@ class Loc_Config {
 		);
 		register_setting(
 			'media',
-			'sloc_mapboxstyle',
+			'sloc_mapbox_user',
+			array(
+				'type' => 'string',
+				'description' => 'Mapbox User',
+				'show_in_rest' => false,
+				'default' => 'mapbox',
+			)
+		);
+		register_setting(
+			'media',
+			'sloc_mapbox_style',
 			array(
 				'type' => 'string',
 				'description' => 'Mapbox Style',
@@ -144,14 +154,6 @@ class Loc_Config {
 			array( 'name' => 'sloc_google_api' )
 		);
 		add_settings_field(
-			'mapboxapi', // id
-			__( 'Mapbox API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'media', // settings page
-			'sloc', // settings section
-			array( 'name' => 'sloc_mapbox_api' )
-		);
-		add_settings_field(
 			'bingapi', // id
 			__( 'Bing API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
@@ -160,12 +162,28 @@ class Loc_Config {
 			array( 'name' => 'sloc_bing_api' )
 		);
 		add_settings_field(
+			'mapboxapi', // id
+			__( 'Mapbox API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array( 'name' => 'sloc_mapbox_api' )
+		);
+		add_settings_field(
+			'mapboxuser', // id
+			__( 'Mapbox User', 'simple-location' ),
+			array( 'Loc_Config', 'string_callback' ),
+			'media',
+			'sloc',
+			array( 'name' => 'sloc_mapbox_user' )
+		);
+		add_settings_field(
 			'mapboxstyle', // id
 			__( 'Mapbox Style', 'simple-location' ),
 			array( 'Loc_Config', 'string_callback' ),
 			'media',
 			'sloc',
-			array( 'name' => 'sloc_mapboxstyle' )
+			array( 'name' => 'sloc_mapbox_style' )
 		);
 		add_settings_field(
 			'width', // id
@@ -220,6 +238,10 @@ class Loc_Config {
 		echo '<option value="Google" '  . selected( $text, 'Google' ) .  '>' . __( 'Google Maps', 'simple-location' ) . '</option>';
 		echo '<option value="Bing" '  . selected( $text, 'Bing' ) .  '>' . __( 'Bing Maps', 'simple-location' ) . '</option>';
 		echo '</select><br /><br />';
+	}
+
+	public static function style_callback ( array $args ) {
+		//
 	}
 
 	public static function sloc_settings() {

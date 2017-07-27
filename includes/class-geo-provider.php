@@ -7,6 +7,8 @@ abstract class Geo_Provider {
 	protected $height;
 	protected $width;
 	protected $api;
+	protected $mapboxstyle;
+	protected $mapboxuser;
 	protected $latitude;
 	protected $longitude;
 	protected $address;
@@ -27,7 +29,8 @@ abstract class Geo_Provider {
 			'height' => get_option( 'sloc_height' ),
 			'width' => get_option( 'sloc_width' ),
 			'map_zoom' => get_option( 'sloc_zoom' ),
-			'mapboxstyle' => get_option( 'sloc_mapboxstyle' ),
+			'mapboxstyle' => get_option( 'sloc_mapbox_style' ),
+			'mapboxuser' => get_option( 'sloc_mapbox_user' ),
 			'api' => null,
 			'latitude' => null,
 			'longitude' => null,
@@ -39,6 +42,7 @@ abstract class Geo_Provider {
 		$this->width = $r['width'];
 		$this->map_zoom = $r['map_zoom'];
 		$this->mapboxstyle = $r['mapboxstyle'];
+		$this->mapboxuser = $r['mapboxuser'];
 		$this->api = $r['api'];
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
