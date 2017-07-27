@@ -60,6 +60,16 @@ class Loc_Config {
 			)
 		);
 		register_setting(
+			'media',
+			'sloc_mapboxstyle',
+			array(
+				'type' => 'string',
+				'description' => 'Mapbox Style',
+				'show_in_rest' => false,
+				'default' => '',
+			)
+		);
+		register_setting(
 			'media', // settings page
 			'sloc_height', // option name
 			array(
@@ -150,6 +160,14 @@ class Loc_Config {
 			array( 'name' => 'sloc_bing_api' )
 		);
 		add_settings_field(
+			'mapboxstyle', // id
+			__( 'Mapbox Style', 'simple-location' ),
+			array( 'Loc_Config', 'string_callback' ),
+			'media',
+			'sloc',
+			array( 'name' => 'sloc_mapboxstyle' )
+		);
+		add_settings_field(
 			'width', // id
 			__( 'Default Map Width', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
@@ -200,7 +218,7 @@ class Loc_Config {
 		echo '<select name="' . $name . '">';
 		echo '<option value="OSM" '  . selected( $text, 'OSM' ) .  '>' . __( 'OpenStreetMap/MapBox', 'simple-location' ) . '</option>';
 		echo '<option value="Google" '  . selected( $text, 'Google' ) .  '>' . __( 'Google Maps', 'simple-location' ) . '</option>';
-		echo '<option value="Bing" '  . selected( $text, 'Bing' ) .  '>' . __( 'Bing Maps', 'simple-location' ) . '</option>';	
+		echo '<option value="Bing" '  . selected( $text, 'Bing' ) .  '>' . __( 'Bing Maps', 'simple-location' ) . '</option>';
 		echo '</select><br /><br />';
 	}
 

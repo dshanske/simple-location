@@ -63,7 +63,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 	}
 
 	public function get_the_static_map( ) {
-		$map = 'https://api.mapbox.com/styles/v1/mapbox/streets-v8/static/' . $this->longitude . ',' . $this->latitude. ',' . $this->map_zoom . ',0,0/'     . $this->width . 'x' . $this->height . '?access_token=' . $this->api;
+		$map = 'https://api.mapbox.com/styles/v1/mapbox/' . $this->mapboxstyle . '/static/' . $this->longitude . ',' . $this->latitude. ',' . $this->map_zoom . ',0,0/'     . $this->width . 'x' . $this->height . '?access_token=' . $this->api;
 		return $map;
 
 	}
