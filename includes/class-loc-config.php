@@ -180,7 +180,7 @@ class Loc_Config {
 		add_settings_field(
 			'mapboxstyle', // id
 			__( 'Mapbox Style', 'simple-location' ),
-			array( 'Loc_Config', 'string_callback' ),
+			array( 'Loc_Config', 'mapbbox_style_callback' ),
 			'media',
 			'sloc',
 			array( 'name' => 'sloc_mapbox_style' )
@@ -240,8 +240,34 @@ class Loc_Config {
 		echo '</select><br /><br />';
 	}
 
-	public static function style_callback ( array $args ) {
-		//
+	public static function mapbbox_style_callback ( array $args ) {
+		$name = $args['name'];
+		$text = get_option( $name );
+		$mapboxuser = get_option( 'sloc_mapbox_user' );
+		$api = get_option( 'sloc_mapbox_api' );
+		$url = 'https://api.mapbox.com/styles/v1/' . $mapboxuser . '?access_token=' . $api;
+		$request = wp_remote_get( $url );
+
+		if ( is_wp_error( $request ) ) {
+			return false; // Bail early.
+		}
+		$body = wp_remote_retrieve_body( $request );
+
+		$data = json_decode( $body );
+
+		echo '<select name="' . $name . '">';
+		echo '<option value="streets-v10"' . selected( $text, 'streets-v10' ) . '>Mapbox Streets</option>';
+		echo '<option value="outdoors-v10"' . selected( $text, 'outdoors-v10' ) . '>Mapbox Outdoors</option>';
+		echo '<option value="light-v9"' . selected( $text, 'light-v9' ) . '>Mapbox Light</option>';
+		echo '<option value="dark-v9"' . selected( $text, 'dark-v9' ) . '>Mapbox Dark</option>';
+		echo '<option value="satellite-v9"' . selected( $text, 'satellite-v9' ) . '>Mapbox Satellite</option>';
+		echo '<option value="satellite-streets-v10"' . selected( $text, 'satellite-streets-v10' ) . '>Mapbox Satellite Streets</option>';
+		echo '<option value="traffic-day-v2"' . selected( $text, 'traffic-day-v2' ) . '>Mapbox Traffic Day</option>';
+		echo '<option value="traffic-night-v2"' . selected( $text, 'traffic-night-v2' ) . '>Mapbox Traffic Night</option>';
+		foreach ( $data as $style ) {
+			echo '<option value="' . $style->id . '" '  . selected( $text, $style->id ) .'>' . $style->name . '</option>';
+		}
+		echo '</select><br /><br />';
 	}
 
 	public static function sloc_settings() {
