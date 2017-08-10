@@ -28,6 +28,8 @@ class Loc_View {
 			'height' => null,
 			'width' => null,
 			'map_zoom' => null,
+			'mapboxstyle' => null,
+			'mapboxuser' => null,
 			'public' => get_option( 'geo_public' ),
 			'icon' => true, // Show Location Icon
 			'text' => false, // Show Description
