@@ -60,6 +60,47 @@ class Loc_Config {
 			)
 		);
 		register_setting(
+			'media',
+			'sloc_mapbox_user',
+			array(
+				'type' => 'string',
+				'description' => 'Mapbox User',
+				'show_in_rest' => false,
+				'default' => 'mapbox',
+			)
+		);
+		register_setting(
+			'media',
+			'sloc_mapbox_style',
+			array(
+				'type' => 'string',
+				'description' => 'Mapbox Style',
+				'show_in_rest' => false,
+				'default' => 'streets-v10',
+			)
+		);
+		register_setting(
+			'media',
+			'sloc_bing_style',
+			array(
+				'type' => 'string',
+				'description' => 'Bing Map Style',
+				'show_in_rest' => false,
+				'default' => 'CanvasLight',
+			)
+		);
+		register_setting(
+			'media',
+			'sloc_google_style',
+			array(
+				'type' => 'string',
+				'description' => 'Google Map Style',
+				'show_in_rest' => false,
+				'default' => 'roadmap',
+			)
+		);
+
+		register_setting(
 			'media', // settings page
 			'sloc_height', // option name
 			array(
@@ -115,7 +156,9 @@ class Loc_Config {
 			array( 'Loc_Config', 'map_provider_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
-			array( 'name' => 'sloc_default_map_provider' )
+			array(
+				'label_for' => 'sloc_default_map_provider',
+			)
 		);
 		add_settings_field(
 			'geo_public', // id
@@ -123,31 +166,9 @@ class Loc_Config {
 			array( 'Loc_Config', 'checkbox_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
-			array( 'name' => 'geo_public' )
-		);
-		add_settings_field(
-			'googleapi', // id
-			__( 'Google Maps API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'media', // settings page
-			'sloc', // settings section
-			array( 'name' => 'sloc_google_api' )
-		);
-		add_settings_field(
-			'mapboxapi', // id
-			__( 'Mapbox API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'media', // settings page
-			'sloc', // settings section
-			array( 'name' => 'sloc_mapbox_api' )
-		);
-		add_settings_field(
-			'bingapi', // id
-			__( 'Bing API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'media', // settings page
-			'sloc', // settings section
-			array( 'name' => 'sloc_bing_api' )
+			array(
+				'label_for' => 'geo_public',
+			)
 		);
 		add_settings_field(
 			'width', // id
@@ -155,7 +176,9 @@ class Loc_Config {
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
-			array( 'name' => 'sloc_width' )
+			array(
+				'label_for' => 'sloc_width',
+			)
 		);
 		add_settings_field(
 			'height', // id
@@ -163,7 +186,9 @@ class Loc_Config {
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
-			array( 'name' => 'sloc_height' )
+			array(
+				'label_for' => 'sloc_height',
+			)
 		);
 		add_settings_field(
 			'zoom', // id
@@ -171,36 +196,142 @@ class Loc_Config {
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'media', // settings page
 			'sloc', // settings section
-			array( 'name' => 'sloc_zoom' )
+			array(
+				'label_for' => 'sloc_zoom',
+			)
+		);
+
+		$provider = get_option( 'sloc_default_map_provider' );
+
+		add_settings_field(
+			'googleapi', // id
+			__( 'Google Maps API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array(
+					'label_for' => 'sloc_google_api',
+					'class' => ( 'Google' === $provider ) ? '' : 'hidden',
+				)
+		);
+		add_settings_field(
+			'googlestyle', // id
+			__( 'Google Style', 'simple-location' ),
+			array( 'Loc_Config', 'style_callback' ),
+			'media',
+			'sloc',
+			array(
+				'label_for' => 'sloc_google_style',
+				'provider' => new Geo_Provider_Google(),
+				'class' => ( 'Google' === $provider ) ? '' : 'hidden',
+				   )
+		);
+		add_settings_field(
+			'bingapi', // id
+			__( 'Bing API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array(
+				'label_for' => 'sloc_bing_api',
+				'class' => ( 'Bing' === $provider ) ? '' : 'hidden',
+
+			)
+		);
+		add_settings_field(
+			'bingstyle', // id
+			__( 'Bing Style', 'simple-location' ),
+			array( 'Loc_Config', 'style_callback' ),
+			'media',
+			'sloc',
+			array(
+				'label_for' => 'sloc_bing_style',
+				'provider' => new Geo_Provider_Bing(),
+				'class' => ( 'Bing' === $provider ) ? '' : 'hidden',
+				  )
+		);
+		add_settings_field(
+			'mapboxapi', // id
+			__( 'Mapbox API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'media', // settings page
+			'sloc', // settings section
+			array(
+				'label_for' => 'sloc_mapbox_api',
+				'class' => ( 'OSM' === $provider ) ? '' : 'hidden',
+
+			)
+		);
+		add_settings_field(
+			'mapboxuser', // id
+			__( 'Mapbox User', 'simple-location' ),
+			array( 'Loc_Config', 'string_callback' ),
+			'media',
+			'sloc',
+			array(
+				'label_for' => 'sloc_mapbox_user',
+				'class' => ( 'OSM' === $provider ) ? '' : 'hidden',
+
+			)
+		);
+		add_settings_field(
+			'mapboxstyle', // id
+			__( 'Mapbox Style', 'simple-location' ),
+			array( 'Loc_Config', 'style_callback' ),
+			'media',
+			'sloc',
+			array(
+				'label_for' => 'sloc_mapbox_style',
+				'provider' => new Geo_Provider_OSM(),
+				'class' => ( 'OSM' === $provider ) ? '' : 'hidden',
+
+				   )
 		);
 	}
 
 	public static function checkbox_callback(array $args) {
-		$name = $args['name'];
+		$name = $args['label_for'];
 		$checked = get_option( $name );
 		echo "<input name='" . $name . "' type='hidden' value='0' />";
 		echo "<input name='" . $name . "' type='checkbox' value='1' " . checked( 1, $checked, false ) . ' /> ';
 	}
 
 	public static function number_callback(array $args) {
-		$name = $args['name'];
+		$name = $args['label_for'];
 		$text = get_option( $name );
 		echo "<input name='" . $name . "' type='number' min='0' step='1' size='4' class='small-text' value='" . $text . "' /> ";
 	}
 
 	public static function string_callback(array $args) {
-		$name = $args['name'];
+		$name = $args['label_for'];
 		$text = get_option( $name );
 		echo "<input name='" . $name . "' size='50' class='regular-text' type='string' value='" . $text . "' /> ";
 	}
 
 	public static function map_provider_callback(array $args) {
-		$name = $args['name'];
+		$name = $args['label_for'];
 		$text = get_option( $name );
 		echo '<select name="' . $name . '">';
 		echo '<option value="OSM" '  . selected( $text, 'OSM' ) .  '>' . __( 'OpenStreetMap/MapBox', 'simple-location' ) . '</option>';
 		echo '<option value="Google" '  . selected( $text, 'Google' ) .  '>' . __( 'Google Maps', 'simple-location' ) . '</option>';
-		echo '<option value="Bing" '  . selected( $text, 'Bing' ) .  '>' . __( 'Bing Maps', 'simple-location' ) . '</option>';	
+		echo '<option value="Bing" '  . selected( $text, 'Bing' ) .  '>' . __( 'Bing Maps', 'simple-location' ) . '</option>';
+		echo '</select><br /><br />';
+	}
+
+	public static function style_callback ( array $args ) {
+		$name = $args['label_for'];
+		$provider = $args['provider'];
+		$styles = $provider->get_styles();
+		if ( is_wp_error( $styles ) ) {
+			echo $styles->get_error_message();
+			return;
+		}
+		$text = get_option( $name );
+
+		echo '<select name="' . $name . '">';
+		foreach ( $styles as $key => $value ) {
+			echo '<option value="' . $key . '" '  . selected( $text, $key ) .'>' . $value . '</option>';
+		}
 		echo '</select><br /><br />';
 	}
 
