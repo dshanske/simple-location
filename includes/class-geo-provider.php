@@ -34,7 +34,7 @@ abstract class Geo_Provider {
 			'longitude' => null,
 			'reverse_zoom' => 18,
 			'user' => '',
-			'style' => ''
+			'style' => '',
 		);
 		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
 		$r = wp_parse_args( $args, $defaults );

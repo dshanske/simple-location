@@ -67,7 +67,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 			'satellite-v9' => 'Mapbox Satellite',
 			'satellite-streets-v10' => 'Mapbox Satellite Streets',
 			'traffic-day-v2' => 'Mapbox Traffic Day',
-			'traffic-night-v2' => 'Mapbox Traffic Night'
+			'traffic-night-v2' => 'Mapbox Traffic Night',
 		);
 	}
 

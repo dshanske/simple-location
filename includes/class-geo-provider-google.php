@@ -7,6 +7,9 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
 		}
+		if ( ! isset( $args['style' ] ) ) {
+			$args['style'] = get_option( 'sloc_google_style' );
+		}
 		parent::__construct( $args );
 	}
 
@@ -28,12 +31,17 @@ class Geo_Provider_Google extends Geo_Provider {
 	}
 
 	public function get_styles() {
-		return array();
+		return array(
+			'roadmap' => __( 'Roadmap', 'simple-location' ),
+			'satellite' => __( 'Satellite', 'simple-location' ),
+			'terrain' => __( 'Terrain', 'simple-location' ),
+			'hybrid' => __( 'Satellite and Roadmap Hybrid', 'simple-location' ),
+		);
 	}
 
 	// Return code for map
 	public function get_the_static_map( ) {
-		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->width . 'x' . $this->height . '&language=' . get_bloginfo( 'language' ) . '&key=' . $this->api;
+		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->width . 'x' . $this->height . '&maptype=' . $this->style . '&language=' . get_bloginfo( 'language' ) . '&key=' . $this->api;
 		return $map;
 	}
 
