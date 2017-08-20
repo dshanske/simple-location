@@ -7,6 +7,14 @@ class Geo_Provider_OSM extends Geo_Provider {
 			$args['api'] = get_option( 'sloc_mapbox_api' );
 		}
 
+		if ( ! isset( $args['user'] ) ) {
+			$args['user'] = get_option( 'sloc_mapbox_user' );
+		}
+
+		if ( ! isset( $args['style'] ) ) {
+			$args['style'] = get_option( 'sloc_mapbox_style' );
+		}
+
 		parent::__construct( $args );
 	}
 
@@ -50,6 +58,46 @@ class Geo_Provider_OSM extends Geo_Provider {
 		return $addr;
 	}
 
+	public function default_styles() {
+		return array(
+			'streets-v10' => 'Mapbox Streets',
+			'outdoors-v10' => 'Mapbox Outdoor',
+			'light-v9' => 'Mapbox Light',
+			'dark-v9' => 'Mapbox Dark',
+			'satellite-v9' => 'Mapbox Satellite',
+			'satellite-streets-v10' => 'Mapbox Satellite Streets',
+			'traffic-day-v2' => 'Mapbox Traffic Day',
+			'traffic-night-v2' => 'Mapbox Traffic Night'
+		);
+	}
+
+	public function get_styles() {
+		if ( empty( $this->user ) ) {
+			return array();
+		}
+		$return = $this->default_styles();
+		if ( 'mapbox' === $this->user ) {
+			return $return;
+		}
+		$url = 'https://api.mapbox.com/styles/v1/' . $this->user . '?access_token=' . $this->api;
+		$request = wp_remote_get( $url );
+		if ( is_wp_error( $request ) ) {
+			return $request; // Bail early.
+		}
+		$body = wp_remote_retrieve_body( $request );
+		$data = json_decode( $body );
+		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
+			return new WP_Error( '403', $data->message );
+		}
+		foreach ( $data as $style ) {
+			if ( is_object( $style ) ) {
+				$return[ $style->id ] = $style->name;
+			}
+		}
+		return $return;
+	}
+
+
 	public function get_the_map_url() {
 		return 'http://www.openstreetmap.org/#map=14/' . $this->latitude . '/' . $this->longitude;
 	}
@@ -63,7 +111,11 @@ class Geo_Provider_OSM extends Geo_Provider {
 	}
 
 	public function get_the_static_map( ) {
-		$map = 'https://api.mapbox.com/styles/v1/' . $this->mapboxuser . '/' . $this->mapboxstyle . '/static/' . $this->longitude . ',' . $this->latitude. ',' . $this->map_zoom . ',0,0/'     . $this->width . 'x' . $this->height . '?access_token=' . $this->api;
+		$user = $this->user;
+		if ( array_key_exists( $this->style, $this->default_styles() ) ) {
+			$user = 'mapbox';
+		}
+		$map = 'https://api.mapbox.com/styles/v1/' . $user . '/' . $this->style . '/static/' . $this->longitude . ',' . $this->latitude. ',' . $this->map_zoom . ',0,0/'     . $this->width . 'x' . $this->height . '?access_token=' . $this->api;
 		return $map;
 
 	}

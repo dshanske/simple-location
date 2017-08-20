@@ -7,8 +7,8 @@ abstract class Geo_Provider {
 	protected $height;
 	protected $width;
 	protected $api;
-	protected $mapboxstyle;
-	protected $mapboxuser;
+	protected $style;
+	protected $user;
 	protected $latitude;
 	protected $longitude;
 	protected $address;
@@ -29,20 +29,20 @@ abstract class Geo_Provider {
 			'height' => get_option( 'sloc_height' ),
 			'width' => get_option( 'sloc_width' ),
 			'map_zoom' => get_option( 'sloc_zoom' ),
-			'mapboxstyle' => get_option( 'sloc_mapbox_style' ),
-			'mapboxuser' => get_option( 'sloc_mapbox_user' ),
 			'api' => null,
 			'latitude' => null,
 			'longitude' => null,
 			'reverse_zoom' => 18,
+			'user' => '',
+			'style' => ''
 		);
 		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
 		$r = wp_parse_args( $args, $defaults );
 		$this->height = $r['height'];
 		$this->width = $r['width'];
 		$this->map_zoom = $r['map_zoom'];
-		$this->mapboxstyle = $r['mapboxstyle'];
-		$this->mapboxuser = $r['mapboxuser'];
+		$this->user = $r['user'];
+		$this->style = $r['style'];
 		$this->api = $r['api'];
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
@@ -87,6 +87,12 @@ abstract class Geo_Provider {
 	 */
 	abstract public function reverse_lookup();
 
+	/**
+	 * Return an array of styles with key being id and value being display name
+	 *
+	 * @return array
+	 */
+	abstract public function get_styles();
 
 	/**
 	 * Generate Display Name for a Reverse Address Lookup

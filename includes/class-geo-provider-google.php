@@ -27,6 +27,10 @@ class Geo_Provider_Google extends Geo_Provider {
 		return $addr;
 	}
 
+	public function get_styles() {
+		return array();
+	}
+
 	// Return code for map
 	public function get_the_static_map( ) {
 		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->width . 'x' . $this->height . '&language=' . get_bloginfo( 'language' ) . '&key=' . $this->api;
