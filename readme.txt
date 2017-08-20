@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, indieweb
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 Requires at least: 4.7
-Tested up to: 4.8
+Tested up to: 4.8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= Version 3.2.1 =
+	* Show settings for current default map provider only
+	* Add style settings for each map provider ( props @miklb )
 
 = Version 3.2.0 =
 	* Allow passing of coordinates directly in constructor for map provider
