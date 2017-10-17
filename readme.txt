@@ -1,9 +1,10 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, indieweb
-Stable tag: 3.2.1
+Stable tag: 3.2.2
 Requires at least: 4.7
-Tested up to: 4.8.1
+Tested up to: 4.8.2
+Requires PHP: 5.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +50,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= Version 3.2.2 =
+	* Allow setting timezone from Micropub posts(requires update to Micropub plugin)
 
 = Version 3.2.1 =
 	* Show settings for current default map provider only

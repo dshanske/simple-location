@@ -10,6 +10,13 @@ class Post_Timezone {
 		add_filter( 'get_the_modified_time' , array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
 		add_action( 'post_submitbox_misc_actions', array( 'Post_Timezone', 'post_submitbox' ) );
 		add_action( 'save_post', array( 'Post_Timezone', 'postbox_save_post_meta' ) );
+                add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
+	}
+
+	public static function after_micropub( $input, $args ) {
+		if ( array_key_exists( 'timezone', $args ) ) {
+			update_post_meta( $args['ID'], 'geo_timezone', $args['timezone'] );
+		}
 	}
 
 	public static function post_submitbox() {
