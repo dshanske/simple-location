@@ -149,7 +149,7 @@ class Loc_Metabox {
 				return;
 			}
 		}
-		if ( ! empty( wp_get_post_terms( $post_id, 'venue', array( 'fields' => 'ids' ) ) ) ) {
+		if ( has_term( '', 'venue' ) ) {
 			return;
 		}
 		/* OK, its safe for us to save the data now. */
