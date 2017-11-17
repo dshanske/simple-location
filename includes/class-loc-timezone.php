@@ -7,41 +7,32 @@ class Loc_Timezone {
 
 		$tzfile = self::tz_data();
 
-		// header("Content-type: text/plain");
-
-		// echo "Loaded file in " . ((microtime(true)-$start)*1000) . "ms\n";
-		// $start = microtime(true);
-
-		$timezones = [];
+		$timezones = array();
 		foreach ( $tzfile as $line ) {
 			$tz = explode( ' ', trim( $line ) );
 			$distance = self::gc_distance( (float) $tz[0], (float) $tz[1], $lat, $lng );
 			if ( $distance < 200000 ) {
-				$timezones[] = array_merge( $tz, [ $distance ] );
+				$timezones[] = array_merge( $tz, array( $distance ) );
 			}
 		}
 
-		// echo "Found distances in " . ((microtime(true)-$start)*1000) . "ms\n";
-		// $start = microtime(true);
-
-		usort($timezones, function($a,$b) {
+		usort( $timezones, function( $a, $b ) {
 			return $a[3] < $b[3] ? -1 : 1;
 		});
 
-		// echo "Sorted in " . ((microtime(true)-$start)*1000). "ms\n";
-
 		if ( count( $timezones ) > 0 ) {
 			return new Timezone_Result( $timezones[0][2], $date );
-		} else { return null;
+		} else { 
+			return null;
 		}
 	}
 
-	public static function gc_distance($lat1, $lng1, $lat2, $lng2) {
+	public static function gc_distance( $lat1, $lng1, $lat2, $lng2 ) {
 		return ( 6378100 * acos( cos( deg2rad( $lat1 ) ) * cos( deg2rad( $lat2 ) ) * cos( deg2rad( $lng2 ) - deg2rad( $lng1 ) ) + sin( deg2rad( $lat1 ) ) * sin( deg2rad( $lat2 ) ) ) );
 	}
 
 	private static function tz_data() {
-		return explode("\n",'42.50729 1.53414 Europe/Andorra
+		return explode("\n", '42.50729 1.53414 Europe/Andorra
 42.50779 1.52109 Europe/Andorra
 25.56473 55.55517 Asia/Dubai
 25.78953 55.9432 Asia/Dubai

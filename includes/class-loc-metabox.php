@@ -1,6 +1,6 @@
 <?php
 // Adds Post Meta Box for Location
-add_action( 'init' , array( 'Loc_Metabox', 'init' ) );
+add_action( 'init', array( 'Loc_Metabox', 'init' ) );
 add_action( 'admin_init', array( 'Loc_Metabox', 'admin_init' ) );
 
 class Loc_Metabox {
@@ -77,10 +77,10 @@ class Loc_Metabox {
 				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" size="10" />
 </p>
 		<?php self::geo_public( $geodata['public'] ); ?>
-		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'bridgy-publish' ); ?></span></a>
+		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'simple-location' ); ?></span></a>
 			<div id="location-detail" class="hide-if-js">
 			<br />
-			<a class="clear-location-button button-link hide-if-no-js" onclick="clearLocation();return false;"><?php _e( 'Clear Location', 'sim    ple-location' ); ?></a>
+			<a class="clear-location-button button-link hide-if-no-js" onclick="clearLocation();return false;"><?php _e( 'Clear Location', 'simple-location' ); ?></a>
 
 		<p> <?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
 			<br />
@@ -175,11 +175,10 @@ class Loc_Metabox {
 			delete_post_meta( $post_id, 'geo_zoom' );
 		}
 
-
 		if ( ! empty( $_POST['address'] ) ) {
 			if ( isset( $_POST['geo_public'] ) ) {
 				update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
-			} 
+			}
 		}
 	}
 
@@ -227,11 +226,10 @@ class Loc_Metabox {
 			delete_comment_meta( $post_id, 'geo_zoom' );
 		}
 
-
 		if ( ! empty( $_POST['address'] ) ) {
 			if ( isset( $_POST['geo_public'] ) ) {
 				update_comment_meta( $comment_id, 'geo_public', $_POST['geo_public'] );
-			} 
+			}
 		}
 	}
 

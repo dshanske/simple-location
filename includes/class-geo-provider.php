@@ -25,25 +25,25 @@ abstract class Geo_Provider {
 	 * @param string $key API Key if Needed
 	 */
 	public function __construct( $args = array() ) {
-		$defaults = array(
-			'height' => get_option( 'sloc_height' ),
-			'width' => get_option( 'sloc_width' ),
-			'map_zoom' => get_option( 'sloc_zoom' ),
-			'api' => null,
-			'latitude' => null,
-			'longitude' => null,
+		$defaults       = array(
+			'height'       => get_option( 'sloc_height' ),
+			'width'        => get_option( 'sloc_width' ),
+			'map_zoom'     => get_option( 'sloc_zoom' ),
+			'api'          => null,
+			'latitude'     => null,
+			'longitude'    => null,
 			'reverse_zoom' => 18,
-			'user' => '',
-			'style' => '',
+			'user'         => '',
+			'style'        => '',
 		);
-		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
-		$r = wp_parse_args( $args, $defaults );
-		$this->height = $r['height'];
-		$this->width = $r['width'];
+		$defaults       = apply_filters( 'sloc_geo_provider_defaults', $defaults );
+		$r              = wp_parse_args( $args, $defaults );
+		$this->height   = $r['height'];
+		$this->width    = $r['width'];
 		$this->map_zoom = $r['map_zoom'];
-		$this->user = $r['user'];
-		$this->style = $r['style'];
-		$this->api = $r['api'];
+		$this->user     = $r['user'];
+		$this->style    = $r['style'];
+		$this->api      = $r['api'];
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
@@ -59,7 +59,7 @@ abstract class Geo_Provider {
 		if ( ( ! is_numeric( $lat ) ) && ( ! is_numeric( $lng ) ) ) {
 			return false;
 		}
-		$this->latitude = $lat;
+		$this->latitude  = $lat;
 		$this->longitude = $lng;
 	}
 
@@ -69,10 +69,10 @@ abstract class Geo_Provider {
 	 * @return array|boolean Array with Latitude and Longitude false if null
 	 */
 	public function get() {
-		$return = array();
-		$return['latitude'] = $this->latitude;
+		$return              = array();
+		$return['latitude']  = $this->latitude;
 		$return['longitude'] = $this->longitude;
-		$return = array_filter( $return );
+		$return              = array_filter( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
 		}
@@ -104,7 +104,7 @@ abstract class Geo_Provider {
 		if ( ! is_array( $reverse ) ) {
 			return false;
 		}
-		$text = array();
+		$text   = array();
 		$text[] = ifset( $reverse['name'] );
 		if ( ! array_key_exists( 'street-address', $reverse ) ) {
 			$text[] = ifset( $reverse['extended-address'] );
@@ -112,7 +112,7 @@ abstract class Geo_Provider {
 		$text[] = ifset( $reverse['locality'] );
 		$text[] = ifset( $reverse['region'] );
 		$text[] = ifset( $reverse['country-name'] );
-		$text = array_filter( $text );
+		$text   = array_filter( $text );
 		$return = join( ', ', $text );
 		return apply_filters( 'location_display_name', $return, $reverse );
 	}
@@ -126,10 +126,10 @@ abstract class Geo_Provider {
 	protected function timezone() {
 		$timezone = Loc_Timezone::timezone_for_location( $this->latitude, $this->longitude );
 		if ( $timezone ) {
-			$return = array();
+			$return             = array();
 			$return['timezone'] = $timezone->name;
-			$return['offset']  = $timezone->offset;
-			$return['seconds'] = $timezone->seconds;
+			$return['offset']   = $timezone->offset;
+			$return['seconds']  = $timezone->seconds;
 			return $return;
 		}
 		return false;

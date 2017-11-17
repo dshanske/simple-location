@@ -1,16 +1,16 @@
 <?php
 // Overrides Timezone for a Post
-add_action( 'init' , array( 'Post_Timezone', 'init' ) );
+add_action( 'init', array( 'Post_Timezone', 'init' ) );
 
 class Post_Timezone {
 	public static function init() {
 		add_filter( 'get_the_date', array( 'Post_Timezone', 'get_the_date' ), 12, 2 );
 		add_filter( 'get_the_time', array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
-		add_filter( 'get_the_modified_date' , array( 'Post_Timezone', 'get_the_date' ), 12, 2 );
-		add_filter( 'get_the_modified_time' , array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
+		add_filter( 'get_the_modified_date', array( 'Post_Timezone', 'get_the_date' ), 12, 2 );
+		add_filter( 'get_the_modified_time', array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
 		add_action( 'post_submitbox_misc_actions', array( 'Post_Timezone', 'post_submitbox' ) );
 		add_action( 'save_post', array( 'Post_Timezone', 'postbox_save_post_meta' ) );
-                add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
+				add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
 	}
 
 	public static function after_micropub( $input, $args ) {
@@ -39,7 +39,12 @@ class Post_Timezone {
 		<div class="misc-pub-section misc-pub-timezone">
 		<span class="dashicons dashicons-clock"></span>
 			<label for="post-timezone"><?php _e( 'Timezone:', 'simple-location' ); ?></label> 
-			<span id="post-timezone-label"><?php if ( $timezone ) { echo $timezone; } ?></span>
+			<span id="post-timezone-label">
+			<?php
+			if ( $timezone ) {
+				echo $timezone; }
+?>
+</span>
 			<a href="#post_timezone" class="edit-post-timezone hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Override Timezone</span></a>
 		 <br />
 <div id="post-timezone-select" class="hide-if-js">
@@ -49,7 +54,8 @@ class Post_Timezone {
 		<?php
 			echo wp_timezone_choice( $timezone );
 			echo '</select>';
-?><br />
+?>
+<br />
 		 <a href="#post_timezone" class="save-post-timezone hide-if-no-js button">OK</a>
 		 <a href="#post_timezone" class="cancel-post-timezone hide-if-no-js button-cancel">Cancel</a>
 </div> 
@@ -88,7 +94,7 @@ class Post_Timezone {
 			$tzlist = DateTimeZone::listIdentifiers();
 			if ( $_POST['post_timezone'] !== get_option( 'timezone_string' ) ) {
 				// For now protect against non-standard timezones
-				if ( in_array( $_POST['post_timezone' ], $tzlist ) ) {
+				if ( in_array( $_POST['post_timezone'], $tzlist ) ) {
 					update_post_meta( $post_id, 'geo_timezone', $_POST['post_timezone'] );
 
 				} else {
@@ -102,7 +108,7 @@ class Post_Timezone {
 	}
 
 
-	public static function get_the_date($the_date, $d = '' , $post = null) {
+	public static function get_the_date( $the_date, $d = '', $post = null ) {
 		$post = get_post( $post );
 		if ( ! $post ) {
 			return $the_date;
@@ -127,7 +133,7 @@ class Post_Timezone {
 		return $datetime->format( $d );
 	}
 
-	public static function get_the_time($the_time, $d = '' , $post = null) {
+	public static function get_the_time( $the_time, $d = '', $post = null ) {
 		$post = get_post( $post );
 		if ( ! $post ) {
 			return $the_time;

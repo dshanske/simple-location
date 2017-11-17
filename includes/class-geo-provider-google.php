@@ -7,40 +7,40 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
 		}
-		if ( ! isset( $args['style' ] ) ) {
+		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_google_style' );
 		}
 		parent::__construct( $args );
 	}
 
-	public function reverse_lookup( ) {
+	public function reverse_lookup() {
 		$response = wp_remote_get( 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $this->latitude . ',' . $this->longitude . '&key=' . $this->api );
-		$json = json_decode( $response['body'], true );
+		$json     = json_decode( $response['body'], true );
 		//$address = $json['results'][0]['address_components'];
 		$addr = array(
-		//	'name' => $json['results'][0]['formatted_address'],
-			'latitude' => $this->latitude,
-			'longitude' => $this->longitude,
-			'raw' => $json,
+			//	'name' => $json['results'][0]['formatted_address'],
+				'latitude' => $this->latitude,
+			'longitude'    => $this->longitude,
+			'raw'          => $json,
 		);
 		$addr = array_filter( $addr );
 		// $addr['display-name'] = $this->display_name( $addr );
-		$tz = $this->timezone( $this->latitude, $this->longitude );
+		$tz   = $this->timezone( $this->latitude, $this->longitude );
 		$addr = array_merge( $addr, $tz );
 		return $addr;
 	}
 
 	public function get_styles() {
 		return array(
-			'roadmap' => __( 'Roadmap', 'simple-location' ),
+			'roadmap'   => __( 'Roadmap', 'simple-location' ),
 			'satellite' => __( 'Satellite', 'simple-location' ),
-			'terrain' => __( 'Terrain', 'simple-location' ),
-			'hybrid' => __( 'Satellite and Roadmap Hybrid', 'simple-location' ),
+			'terrain'   => __( 'Terrain', 'simple-location' ),
+			'hybrid'    => __( 'Satellite and Roadmap Hybrid', 'simple-location' ),
 		);
 	}
 
 	// Return code for map
-	public function get_the_static_map( ) {
+	public function get_the_static_map() {
 		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->width . 'x' . $this->height . '&maptype=' . $this->style . '&language=' . get_bloginfo( 'language' ) . '&key=' . $this->api;
 		return $map;
 	}
@@ -50,10 +50,10 @@ class Geo_Provider_Google extends Geo_Provider {
 	}
 
 	// Return code for map
-	public function get_the_map( $static = true) {
-		$map = $this->get_the_static_map( );
-		$link = $this->get_the_map_url( );
-		$c = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
+	public function get_the_map( $static = true ) {
+		$map  = $this->get_the_static_map();
+		$link = $this->get_the_map_url();
+		$c    = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
 		return $c;
 	}
 

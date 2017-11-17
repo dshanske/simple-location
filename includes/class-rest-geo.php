@@ -15,7 +15,8 @@ class REST_Geo {
 	public function localize_script() {
 		// Provide a global object to our JS file containing our REST API endpoint, and API nonce
 		// Nonce must be 'wp_rest'
-		wp_localize_script( 'sloc_location', 'sloc',
+		wp_localize_script(
+			'sloc_location', 'sloc',
 			array(
 				'api_nonce' => wp_create_nonce( 'wp_rest' ),
 				'api_url'   => rest_url( '/sloc_geo/1.0/' ),
@@ -27,41 +28,45 @@ class REST_Geo {
 	 * Register the Route.
 	 */
 	public function register_routes() {
-		register_rest_route( 'sloc_geo/1.0', '/reverse', array(
-			array(
-				'methods' => WP_REST_Server::READABLE,
-				'callback' => array( $this, 'reverse' ),
-				'args'  => array(
-					'longitude'  => array(
-						'required' => true,
-					),
-					'latitude' => array(
-						'required' => true,
+		register_rest_route(
+			'sloc_geo/1.0', '/reverse', array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'reverse' ),
+					'args'     => array(
+						'longitude' => array(
+							'required' => true,
+						),
+						'latitude'  => array(
+							'required' => true,
+						),
 					),
 				),
-			),
-		) );
-		register_rest_route( 'sloc_geo/1.0', '/map', array(
-			array(
-				'methods' => WP_REST_Server::READABLE,
-				'callback' => array( $this, 'map' ),
-				'args'  => array(
-					'longitude'  => array(
-						'required' => true,
+			)
+		);
+		register_rest_route(
+			'sloc_geo/1.0', '/map', array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'map' ),
+					'args'     => array(
+						'longitude' => array(
+							'required' => true,
+						),
+						'latitude'  => array(
+							'required' => true,
+						),
+						'height'    => array(),
+						'width'     => array(),
+						'zoom'      => array(),
+						// If url exists return URL
+						'url'       => array(),
+						// If map exists return image src
+						'map'       => array(),
 					),
-					'latitude' => array(
-						'required' => true,
-					),
-					'height' => array(),
-					'width' => array(),
-					'zoom' => array(),
-					// If url exists return URL
-					'url' => array(),
-					// If map exists return image src
-					'map' => array(),
 				),
-			),
-		) );
+			)
+		);
 	}
 
 	/**
@@ -71,7 +76,7 @@ class REST_Geo {
 	 *
 	 * @return boolean
 	 */
-	public static function is_valid_url($url, $request, $key) {
+	public static function is_valid_url( $url, $request, $key ) {
 		if ( ! is_string( $url ) || empty( $url ) ) {
 			return false;
 		}
@@ -84,15 +89,15 @@ class REST_Geo {
 		$params = $request->get_params();
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$args = array(
-				'latitude' => $params['latitude'],
-				'longitude' => $param['longitude']
+				'latitude'  => $params['latitude'],
+				'longitude' => $param['longitude'],
 			);
 			if ( ! empty( $params['zoom'] ) ) {
 				$args['map_zoom'] = $params['zoom'];
 			}
 			if ( ! empty( $params['height'] ) ) {
 				$args['height'] = $params['height'];
-		 	}
+			}
 			if ( ! empty( $params['width'] ) ) {
 				$args['width'] = $params['width'];
 			}
@@ -106,7 +111,7 @@ class REST_Geo {
 			}
 			return $map->get_the_map();
 		}
-		return new WP_Error( 'missing_geo' , __( 'Missing Coordinates for Reverse Lookup' , 'simple-location' ), array( 'status' => 400 ) );
+		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
 
@@ -123,8 +128,8 @@ class REST_Geo {
 			}
 			return array_filter( $reverse_adr );
 		}
-		return new WP_Error( 'missing_geo' , __( 'Missing Coordinates for Reverse Lookup' , 'simple-location' ), array( 'status' => 400 ) );
+		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
 }
-?>
+

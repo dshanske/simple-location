@@ -9,22 +9,23 @@ class Timezone_Result {
 	public function __construct( $timezone, $date = false ) {
 		if ( $date ) {
 			$this->_now = new DateTime( $date );
-		} else { $this->_now = new DateTime();
+		} else {
+			$this->_now = new DateTime();
 		}
 		$this->_now->setTimeZone( new DateTimeZone( $timezone ) );
 		$this->_name = $timezone;
 	}
 
-	public function __get($key) {
+	public function __get( $key ) {
 		switch ( $key ) {
 			case 'offset':
-			  return $this->_now->format( 'P' );
+				return $this->_now->format( 'P' );
 			case 'seconds':
-			  return (int) $this->_now->format( 'Z' );
+				return (int) $this->_now->format( 'Z' );
 			case 'localtime':
-			  return $this->_now->format( 'c' );
+				return $this->_now->format( 'c' );
 			case 'name':
-			  return $this->_name;
+				return $this->_name;
 		}
 	}
 

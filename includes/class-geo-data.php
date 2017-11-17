@@ -25,7 +25,7 @@ class WP_Geo_Data {
 		add_action( 'rss2_ns', array( 'WP_Geo_Data', 'georss_namespace' ) );
 		add_action( 'atom_ns', array( 'WP_Geo_Data', 'georss_namespace' ) );
 		add_action( 'rdf_ns', array( 'WP_Geo_Data', 'georss_namespace' ) );
-		
+
 		add_action( 'rss_item', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'rss2_item', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'atom_entry', array( 'WP_Geo_Data', 'georss_item' ) );
@@ -64,23 +64,24 @@ class WP_Geo_Data {
 	}
 
 	public static function DECtoDMS( $latitude, $longitude ) {
-			$latitudeDirection = $latitude < 0 ? 'S': 'N';
-				$longitudeDirection = $longitude < 0 ? 'W': 'E';
+			$latitudeDirection      = $latitude < 0 ? 'S' : 'N';
+				$longitudeDirection = $longitude < 0 ? 'W' : 'E';
 
-				$latitudeNotation = $latitude < 0 ? '-': '';
-				$longitudeNotation = $longitude < 0 ? '-': '';
+				$latitudeNotation  = $latitude < 0 ? '-' : '';
+				$longitudeNotation = $longitude < 0 ? '-' : '';
 
-				$latitudeInDegrees = floor( abs( $latitude ) );
+				$latitudeInDegrees      = floor( abs( $latitude ) );
 					$longitudeInDegrees = floor( abs( $longitude ) );
 
-					$latitudeDecimal = abs( $latitude ) -$latitudeInDegrees;
-					$longitudeDecimal = abs( $longitude ) -$longitudeInDegrees;
+					$latitudeDecimal  = abs( $latitude ) - $latitudeInDegrees;
+					$longitudeDecimal = abs( $longitude ) - $longitudeInDegrees;
 
-					$_precision = 3;
-						$latitudeMinutes = round( $latitudeDecimal * 60,$_precision );
-						$longitudeMinutes = round( $longitudeDecimal * 60,$_precision );
+					$_precision           = 3;
+						$latitudeMinutes  = round( $latitudeDecimal * 60, $_precision );
+						$longitudeMinutes = round( $longitudeDecimal * 60, $_precision );
 
-						return sprintf('%s%s° %s %s %s%s° %s %s',
+						return sprintf(
+							'%s%s° %s %s %s%s° %s %s',
 							$latitudeNotation,
 							$latitudeInDegrees,
 							$latitudeMinutes,
@@ -93,20 +94,20 @@ class WP_Geo_Data {
 
 	}
 
-	public static function gps($coordinate, $hemisphere) {
+	public static function gps( $coordinate, $hemisphere ) {
 		for ( $i = 0; $i < 3; $i++ ) {
-			  $part = explode( '/', $coordinate[$i] );
+			  $part = explode( '/', $coordinate[ $i ] );
 			if ( count( $part ) == 1 ) {
-				$coordinate[$i] = $part[0];
-			} else if ( count( $part ) == 2 ) {
-				$coordinate[$i] = floatval( $part[0] ) / floatval( $part[1] );
+				$coordinate[ $i ] = $part[0];
+			} elseif ( count( $part ) == 2 ) {
+				$coordinate[ $i ] = floatval( $part[0] ) / floatval( $part[1] );
 			} else {
-				$coordinate[$i] = 0;
+				$coordinate[ $i ] = 0;
 			}
 		}
 			list($degrees, $minutes, $seconds) = $coordinate;
-			$sign = ($hemisphere == 'W' || $hemisphere == 'S') ? -1 : 1;
-			  return $sign * ($degrees + $minutes / 60 + $seconds / 3600);
+			$sign                              = ( $hemisphere == 'W' || $hemisphere == 'S' ) ? -1 : 1;
+			  return $sign * ( $degrees + $minutes / 60 + $seconds / 3600 );
 	}
 
 	public static function exif_data( $meta, $file, $file_type ) {
@@ -116,7 +117,7 @@ class WP_Geo_Data {
 			// validate the EXIF data before attempting to use it.  For now,
 			// just avoiding spewing warnings.
 			$old_level = error_reporting( E_ERROR );
-			$exif = exif_read_data( $file );
+			$exif      = exif_read_data( $file );
 			error_reporting( $old_level );
 
 			if ( ! empty( $exif['GPSLatitude'] ) ) {
@@ -157,32 +158,32 @@ class WP_Geo_Data {
 			return;
 		}
 
-		$geo = $query->get( 'geo' );
+		$geo  = $query->get( 'geo' );
 		$args = array(
-			'key'     => 'geo_public',
-			'type'    => 'numeric',
-			);
+			'key'  => 'geo_public',
+			'type' => 'numeric',
+		);
 
 		switch ( $geo ) {
-			case 'all' :
+			case 'all':
 				$args['compare'] = '>';
-				$args['value'] = (int) 0;
+				$args['value']   = (int) 0;
 				$query->set( 'meta_query', array( $args ) );
-			break;
+				break;
 			case 'public':
 			case 'map':
 				$args['compare'] = '=';
-				$args['value'] = (int) 1;
+				$args['value']   = (int) 1;
 				$query->set( 'meta_query', array( $args ) );
-			break;
+				break;
 			case 'text':
 			case 'description':
 				$args['compare'] = '=';
-				$args['value'] = (int) 2;
+				$args['value']   = (int) 2;
 				$query->set( 'meta_query', array( $args ) );
-			break;
+				break;
 			default:
-			return;
+				return;
 		}
 	}
 
@@ -243,14 +244,14 @@ class WP_Geo_Data {
 		}
 		if ( $object instanceof WP_Post ) {
 			$geodata['longitude'] = get_post_meta( $object->ID, 'geo_longitude', true );
-			$geodata['latitude'] = get_post_meta( $object->ID, 'geo_latitude', true );
-			$geodata['address'] = get_post_meta( $object->ID, 'geo_address', true );
-			$geodata['map_zoom'] = get_post_meta( $object->ID, 'geo_zoom', true );
+			$geodata['latitude']  = get_post_meta( $object->ID, 'geo_latitude', true );
+			$geodata['address']   = get_post_meta( $object->ID, 'geo_address', true );
+			$geodata['map_zoom']  = get_post_meta( $object->ID, 'geo_zoom', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
 			$geodata['public'] = get_post_meta( $object->ID, 'geo_public', true );
-			$geodata['ID'] = $object->ID;
+			$geodata['ID']     = $object->ID;
 			// Remove Old Metadata
 			delete_post_meta( $object->ID, 'geo_map' );
 			delete_post_meta( $object->ID, 'geo_full' );
@@ -259,35 +260,35 @@ class WP_Geo_Data {
 
 		if ( $object instanceof WP_Comment ) {
 			$geodata['longitude'] = get_comment_meta( $object->comment_ID, 'geo_longitude', true );
-			$geodata['latitude'] = get_comment_meta( $object->comment_ID, 'geo_latitude', true );
-			$geodata['address'] = get_comment_meta( $object->comment_ID, 'geo_address', true );
-			$geodata['map_zoom'] = get_comment_meta( $object->comment_ID, 'geo_zoom', true );
+			$geodata['latitude']  = get_comment_meta( $object->comment_ID, 'geo_latitude', true );
+			$geodata['address']   = get_comment_meta( $object->comment_ID, 'geo_address', true );
+			$geodata['map_zoom']  = get_comment_meta( $object->comment_ID, 'geo_zoom', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
-			$geodata['public'] = get_comment_meta( $object->comment_ID, 'geo_public', true );
+			$geodata['public']     = get_comment_meta( $object->comment_ID, 'geo_public', true );
 			$geodata['comment_ID'] = $object->comment_ID;
 		}
 		if ( $object instanceof WP_Term ) {
 			$geodata['longitude'] = get_term_meta( $object->term_id, 'geo_longitude', true );
-			$geodata['latitude'] = get_term_meta( $object->term_id, 'geo_latitude', true );
-			$geodata['address'] = get_term_meta( $object->term_id, 'geo_address', true );
-			$geodata['map_zoom'] = get_term_meta( $object->term_id, 'geo_zoom', true );
+			$geodata['latitude']  = get_term_meta( $object->term_id, 'geo_latitude', true );
+			$geodata['address']   = get_term_meta( $object->term_id, 'geo_address', true );
+			$geodata['map_zoom']  = get_term_meta( $object->term_id, 'geo_zoom', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
-			$geodata['public'] = get_term_meta( $object->term_id, 'geo_public', true );
+			$geodata['public']  = get_term_meta( $object->term_id, 'geo_public', true );
 			$geodata['term_id'] = $object->term_id;
 		}
 		if ( $object instanceof WP_User ) {
 			$geodata['longitude'] = get_user_meta( $object->ID, 'geo_longitude', true );
-			$geodata['latitude'] = get_user_meta( $object->ID, 'geo_latitude', true );
-			$geodata['address'] = get_user_meta( $object->ID, 'geo_address', true );
-			$geodata['map_zoom'] = get_user_meta( $object->ID, 'geo_zoom', true );
+			$geodata['latitude']  = get_user_meta( $object->ID, 'geo_latitude', true );
+			$geodata['address']   = get_user_meta( $object->ID, 'geo_address', true );
+			$geodata['map_zoom']  = get_user_meta( $object->ID, 'geo_zoom', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
-			$geodata['public'] = get_user_meta( $object->ID, 'geo_public', true );
+			$geodata['public']  = get_user_meta( $object->ID, 'geo_public', true );
 			$geodata['user_ID'] = $object->ID;
 		}
 		$geodata = array_filter( $geodata );
@@ -327,11 +328,11 @@ class WP_Geo_Data {
 
 	public static function register_meta() {
 		$args = array(
-				'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
-				'type' => 'float',
-				'description' => 'Latitude',
-				'single' => true,
-				'show_in_rest' => false,
+			'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
+			'type'              => 'float',
+			'description'       => 'Latitude',
+			'single'            => true,
+			'show_in_rest'      => false,
 		);
 		register_meta( 'post', 'geo_latitude', $args );
 		register_meta( 'comment', 'geo_latitude', $args );
@@ -339,11 +340,11 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_latitude', $args );
 
 		$args = array(
-				'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
-				'type' => 'float',
-				'description' => 'Longitude',
-				'single' => true,
-				'show_in_rest' => false,
+			'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
+			'type'              => 'float',
+			'description'       => 'Longitude',
+			'single'            => true,
+			'show_in_rest'      => false,
 		);
 		register_meta( 'post', 'geo_longitude', $args );
 		register_meta( 'comment', 'geo_longitude', $args );
@@ -351,10 +352,10 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_longitude', $args );
 
 		$args = array(
-				'type' => 'string',
-				'description' => 'Timezone of Location',
-				'single' => true,
-				'show_in_rest' => false,
+			'type'         => 'string',
+			'description'  => 'Timezone of Location',
+			'single'       => true,
+			'show_in_rest' => false,
 		);
 		register_meta( 'post', 'geo_timezone', $args );
 		register_meta( 'comment', 'geo_timezone', $args );
@@ -362,11 +363,11 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_timezone', $args );
 
 		$args = array(
-		//		'sanitize_callback' => '',
-				'type' => 'integer',
-				'description' => 'Geodata Zoom for Map Display',
-				'single' => true,
-				'show_in_rest' => false,
+			//		'sanitize_callback' => '',
+					'type' => 'integer',
+			'description'  => 'Geodata Zoom for Map Display',
+			'single'       => true,
+			'show_in_rest' => false,
 		);
 		register_meta( 'post', 'geo_zoom', $args );
 		register_meta( 'comment', 'geo_zoom', $args );
@@ -374,11 +375,11 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_zoom', $args );
 
 		$args = array(
-		//		'sanitize_callback' => '',
-				'type' => 'integer',
-				'description' => 'Geodata Public',
-				'single' => true,
-				'show_in_rest' => false,
+			//		'sanitize_callback' => '',
+					'type' => 'integer',
+			'description'  => 'Geodata Public',
+			'single'       => true,
+			'show_in_rest' => false,
 		);
 		// Officially 0 is private 1 is public and absence or non-zero is assumed public.
 		// Therefore any non-zero number could be used to specify different display options.
@@ -388,11 +389,11 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_public', $args );
 
 		$args = array(
-				'sanitize_callback' => array( 'WP_Geo_Data', 'sanitize_address' ),
-				'type' => 'string',
-				'description' => 'Geodata Address',
-				'single' => true,
-				'show_in_rest' => false,
+			'sanitize_callback' => array( 'WP_Geo_Data', 'sanitize_address' ),
+			'type'              => 'string',
+			'description'       => 'Geodata Address',
+			'single'            => true,
+			'show_in_rest'      => false,
 		);
 		register_meta( 'post', 'geo_address', $args );
 		register_meta( 'comment', 'geo_address', $args );
