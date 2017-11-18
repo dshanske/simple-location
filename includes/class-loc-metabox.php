@@ -23,7 +23,7 @@ class Loc_Metabox {
 
 	public static function enqueue() {
 		$screens = self::location_screens();
-		if ( in_array( get_current_screen()->id, $screens ) ) {
+		if ( in_array( get_current_screen()->id, $screens, true ) ) {
 			wp_enqueue_script(
 				'sloc_location',
 				plugins_url( 'simple-location/js/location.js' ),
@@ -70,9 +70,9 @@ class Loc_Metabox {
 			<p class="latlong">
 				<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
 				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" size="10" />
-				  <label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
+				<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
 				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" size="10" />
-				  <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
+				<label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
 				<input type="text" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" size="10" />
 				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" size="10" />
 </p>
@@ -87,14 +87,14 @@ class Loc_Metabox {
 			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
 			<input type="text" name="location-name" id="location-name" value="" size="50" />
 			<br /></br />
-		
+
 			<label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label>
 			<input type="text" name="street-address" id="street-address" value="" size="50" />
-		
+
 			<br /><br />
 			<label for="extended-address"><?php _e( 'Extended Address', 'simple-location' ); ?></label>
-						  <input type="text" name="extended-address" id="extended-address" value="" size="50" />  
-						  <br /><br />
+			<input type="text" name="extended-address" id="extended-address" value="" size="50" />  
+			<br /><br />
 
 		<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
 		<input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" size="30" />
@@ -104,16 +104,16 @@ class Loc_Metabox {
 		<label for="country-code"><?php _e( 'Country Code', 'simple-location' ); ?></label>
 		<input type="text" name="country-code" id="country-code" value="" size="2" />
 		<br /><br />
-		   <label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
+			<label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
 			<input type="text" name="extended-address" id="extended-address" value="" size="30" />
 			<br />
-	  <label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label>
-	  <input type="text" name="postal-code" id="postal-code" value="" size="10" />
+		<label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label>
+		<input type="text" name="postal-code" id="postal-code" value="" size="10" />
 			<br />
 			<label for="country-name"><?php _e( 'Country Name', 'simple-location' ); ?></label>
 			<input type="text" name="country-name" id="country-name" value="" size="30" />
 			</p>
-		 <br />
+		<br />
 		<br />
 		<div class="button-group">
 		<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>

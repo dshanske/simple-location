@@ -63,62 +63,55 @@ class WP_Geo_Data {
 		return $meta;
 	}
 
-	public static function DECtoDMS( $latitude, $longitude ) {
-			$latitudeDirection      = $latitude < 0 ? 'S' : 'N';
-				$longitudeDirection = $longitude < 0 ? 'W' : 'E';
+	public static function dec_to_dms( $latitude, $longitude ) {
+		$latitudedirection  = $latitude < 0 ? 'S' : 'N';
+		$longitudedirection = $longitude < 0 ? 'W' : 'E';
 
-				$latitudeNotation  = $latitude < 0 ? '-' : '';
-				$longitudeNotation = $longitude < 0 ? '-' : '';
+		$latitudenotation  = $latitude < 0 ? '-' : '';
+		$longitudenotation = $longitude < 0 ? '-' : '';
 
-				$latitudeInDegrees      = floor( abs( $latitude ) );
-					$longitudeInDegrees = floor( abs( $longitude ) );
+		$latitudeindegrees  = floor( abs( $latitude ) );
+		$longitudeindegrees = floor( abs( $longitude ) );
 
-					$latitudeDecimal  = abs( $latitude ) - $latitudeInDegrees;
-					$longitudeDecimal = abs( $longitude ) - $longitudeInDegrees;
+		$latitudedecimal  = abs( $latitude ) - $latitudeindegrees;
+		$longitudedecimal = abs( $longitude ) - $longitudeindegrees;
 
-					$_precision           = 3;
-						$latitudeMinutes  = round( $latitudeDecimal * 60, $_precision );
-						$longitudeMinutes = round( $longitudeDecimal * 60, $_precision );
+		$_precision       = 3;
+		$latitudeminutes  = round( $latitudedecimal * 60, $_precision );
+		$longitudeminutes = round( $longitudedecimal * 60, $_precision );
 
-						return sprintf(
-							'%s%s° %s %s %s%s° %s %s',
-							$latitudeNotation,
-							$latitudeInDegrees,
-							$latitudeMinutes,
-							$latitudeDirection,
-							$longitudeNotation,
-							$longitudeInDegrees,
-							$longitudeMinutes,
-							$longitudeDirection
-						);
-
+		return sprintf(
+			'%s%s° %s %s %s%s° %s %s',
+			$latitudenotation,
+			$latitudeindegrees,
+			$latitudeminutes,
+			$latitudedirection,
+			$longitudenotation,
+			$longitudeindegrees,
+			$longitudeminutes,
+			$longitudedirection
+		);
 	}
 
 	public static function gps( $coordinate, $hemisphere ) {
 		for ( $i = 0; $i < 3; $i++ ) {
-			  $part = explode( '/', $coordinate[ $i ] );
-			if ( count( $part ) == 1 ) {
+			$part = explode( '/', $coordinate[ $i ] );
+			if ( 1 === count( $part ) ) {
 				$coordinate[ $i ] = $part[0];
-			} elseif ( count( $part ) == 2 ) {
+			} elseif ( 2 === count( $part ) ) {
 				$coordinate[ $i ] = floatval( $part[0] ) / floatval( $part[1] );
 			} else {
 				$coordinate[ $i ] = 0;
 			}
 		}
 			list($degrees, $minutes, $seconds) = $coordinate;
-			$sign                              = ( $hemisphere == 'W' || $hemisphere == 'S' ) ? -1 : 1;
-			  return $sign * ( $degrees + $minutes / 60 + $seconds / 3600 );
+			$sign                              = ( 'W' === $hemisphere || 'S' === $hemisphere ) ? -1 : 1;
+			return $sign * ( $degrees + $minutes / 60 + $seconds / 3600 );
 	}
 
 	public static function exif_data( $meta, $file, $file_type ) {
-		if ( in_array( $file_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ) ) ) {
-			// If there is invalid EXIF data this will emit a warning, even
-			// when using the @ operator.  A correct approach would be to
-			// validate the EXIF data before attempting to use it.  For now,
-			// just avoiding spewing warnings.
-			$old_level = error_reporting( E_ERROR );
-			$exif      = exif_read_data( $file );
-			error_reporting( $old_level );
+		if ( is_callable( 'exif_read_data' ) && in_array( $file_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ) ) ) {
+			$exif = @exif_read_data( $file );
 
 			if ( ! empty( $exif['GPSLatitude'] ) ) {
 				$meta['latitude'] = self::gps( $exif['GPSLatitude'], $exif['GPSLatitudeRef'] );
@@ -363,8 +356,7 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_timezone', $args );
 
 		$args = array(
-			//		'sanitize_callback' => '',
-					'type' => 'integer',
+			'type'         => 'integer',
 			'description'  => 'Geodata Zoom for Map Display',
 			'single'       => true,
 			'show_in_rest' => false,
@@ -375,8 +367,7 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_zoom', $args );
 
 		$args = array(
-			//		'sanitize_callback' => '',
-					'type' => 'integer',
+			'type'         => 'integer',
 			'description'  => 'Geodata Public',
 			'single'       => true,
 			'show_in_rest' => false,

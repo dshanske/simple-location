@@ -9,7 +9,7 @@ class Loc_Timezone {
 
 		$timezones = array();
 		foreach ( $tzfile as $line ) {
-			$tz = explode( ' ', trim( $line ) );
+			$tz       = explode( ' ', trim( $line ) );
 			$distance = self::gc_distance( (float) $tz[0], (float) $tz[1], $lat, $lng );
 			if ( $distance < 200000 ) {
 				$timezones[] = array_merge( $tz, array( $distance ) );
@@ -22,7 +22,7 @@ class Loc_Timezone {
 
 		if ( count( $timezones ) > 0 ) {
 			return new Timezone_Result( $timezones[0][2], $date );
-		} else { 
+		} else {
 			return null;
 		}
 	}
