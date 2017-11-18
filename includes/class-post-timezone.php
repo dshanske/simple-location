@@ -16,7 +16,7 @@ class Post_Timezone {
 	}
 
 	public static function enqueue() {
-		wp_enqueue_script( 
+		wp_enqueue_script(
 			'jstz',
 			plugins_url( 'simple-location/js/jstz.min.js' ),
 			array(),
