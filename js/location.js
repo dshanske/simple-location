@@ -145,6 +145,7 @@ function error(err) {
 jQuery(document).ready( function($) {
 	$postTimezoneSelect = $('#post-timezone-select');
 	$locationDetail = $('#location-detail');
+	$labelDetail = $('#timezone-browser');
 	$postTimezoneSelect.siblings('a.edit-post-timezone').click( function( event ) {
 		event.preventDefault();
 		if ( $postTimezoneSelect.is(':hidden') ) {
@@ -172,6 +173,11 @@ jQuery(document).ready( function($) {
 			$locationDetail.slideUp( 'fast' ).siblings( 'a.show-location-details' ).focus();
 		}
 
+	});
+	$labelDetail.click( function( event ) {
+		$('#post-timezone').val( jstz.determine().name() );
+		$('#post-timezone-label').text( jstz.determine().name() );
+		event.preventDefault();
 	});
 
 });

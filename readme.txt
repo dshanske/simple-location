@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, indieweb
-Stable tag: 3.2.2
+Stable tag: 3.2.3
 Requires at least: 4.7
 Tested up to: 4.9
 Requires PHP: 5.3
@@ -18,7 +18,7 @@ location as a venue for reuse. Offers choice of map displays.
 It supports retrieving location using the HTML5 geolocation API. As it stores the GeoData in a 
 WordPress standard format, Geodata can also be added from other plugins.
 
-Offers the opportunity to change the displayed timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location.
+Offers the opportunity to change the displayed timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location. Clicking the clock icon next to the timezone will set to the browser timezone.
 
 == Other Notes == 
 
@@ -50,7 +50,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
-
+= Version 3.2.3 =
+	* Restore PHP 5.3 and 5.4 compatibility
+	* Fix issues raised by automated testing
+	* If you click the clock next to the word timezone it will set the timezone based on browser time
 = Version 3.2.2 =
 	* Allow setting timezone from Micropub posts(requires update to Micropub plugin)
 

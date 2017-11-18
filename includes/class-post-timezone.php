@@ -10,8 +10,20 @@ class Post_Timezone {
 		add_filter( 'get_the_modified_time', array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
 		add_action( 'post_submitbox_misc_actions', array( 'Post_Timezone', 'post_submitbox' ) );
 		add_action( 'save_post', array( 'Post_Timezone', 'postbox_save_post_meta' ) );
-				add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
+		add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
+		add_action( 'admin_enqueue_scripts', array( 'Post_Timezone', 'enqueue' ) );
+
 	}
+
+	public static function enqueue() {
+		wp_enqueue_script( 
+			'jstz',
+			plugins_url( 'simple-location/js/jstz.min.js' ),
+			array(),
+			Simple_Location_Plugin::$version
+		);
+	}
+
 
 	public static function after_micropub( $input, $args ) {
 		if ( array_key_exists( 'timezone', $args ) ) {
@@ -39,7 +51,7 @@ class Post_Timezone {
 		}
 ?>
 		<div class="misc-pub-section misc-pub-timezone">
-		<span class="dashicons dashicons-clock"></span>
+		<span class="dashicons dashicons-clock" id="timezone-browser"></span>
 			<label for="post-timezone"><?php _e( 'Timezone:', 'simple-location' ); ?></label> 
 			<span id="post-timezone-label">
 			<?php
