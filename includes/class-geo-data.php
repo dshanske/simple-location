@@ -110,7 +110,7 @@ class WP_Geo_Data {
 	}
 
 	public static function exif_data( $meta, $file, $file_type ) {
-		if ( is_callable( 'exif_read_data' ) && in_array( $file_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ) ) ) {
+		if ( is_callable( 'exif_read_data' ) && in_array( $file_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ), true ) ) {
 			$exif = @exif_read_data( $file );
 
 			if ( ! empty( $exif['GPSLatitude'] ) ) {

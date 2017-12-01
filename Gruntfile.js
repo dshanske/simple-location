@@ -78,10 +78,21 @@ module.exports = function(grunt) {
           '!Gruntfile.js',
           '!package.json',
           '!.gitignore',
+	  '!vendor/**',
           '!sass/.sass-cache/**',
         ],
         dest: 'build/trunk/'
-      }
+      },
+            assets: {
+               options: {
+                   mode: true
+               },
+               src: [
+                 'assets/*'
+               ],
+               dest: 'build/'
+            }
+
     },
 
     makepot: {
