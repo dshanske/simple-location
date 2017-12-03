@@ -34,7 +34,7 @@ class Loc_View {
 			'icon'          => true, // Show Location Icon
 			'text'          => false, // Show Description
 			'description'   => __( 'Location: ', 'simple-location' ),
-			'wrapper-class' => 'sloc-display', // Class to wrap the entire location in
+			'wrapper-class' => array( 'sloc-display' ), // Class or classes to wrap the entire location in
 			'wrapper-type'  => 'p', // HTML type to wrap the entire location in
 		);
 		$default  = apply_filters( 'simple_location_display_defaults', $defaults );
@@ -42,21 +42,24 @@ class Loc_View {
 		$args     = array_merge( $loc, $args );
 		$map      = Loc_Config::default_map_provider( $args );
 		$wrap     = '<%1$s class="%2$s">%3$s</%1$s>';
-		$c        = '';
-		if ( $args['icon'] ) {
-			$c .= self::get_icon();
-		}
+		$class    = is_array( $args['wrapper-class'] ) ? implode( ' ', $args['wrapper-class'] ) : $args['wrapper-class'];
+		$c        = '<span class="p-location">';
+
 		if ( $args['text'] ) {
 			$c .= $args['description'];
 		}
 		// 1 is full public
 		if ( '1' === $loc['public'] ) {
 			$c .= self::get_the_geo( $loc );
-			$c .= '<a href="' . $map->get_the_map_url() . '">' . $loc['address'] . '</span></a>';
+			$c .= '<a href="' . $map->get_the_map_url() . '">' . $loc['address'] . '</a>';
 		} else {
 			$c = $loc['address'];
 		}
-		return sprintf( $wrap, $args['wrapper-type'], $args['wrapper-class'], $c );
+		$c .= '</span>';
+		if ( $args['icon'] ) {
+			$c = self::get_icon() . $c;
+		}
+		return sprintf( $wrap, $args['wrapper-type'], $class, $c );
 	}
 
 	public static function get_map( $object = null, $args = array() ) {
@@ -73,15 +76,13 @@ class Loc_View {
 		if ( isset( $loc['latitude'] ) && isset( $loc['longitude'] ) ) {
 			if ( $display ) {
 				return sprintf(
-					'<span class="h-geo">
-					<span class="p-latitude">%1$f</span>,
-					<span class="p-longitude">%2$f</span></span>', $loc['latitude'], $loc['longitude']
+					'<span class="p-latitude">%1$f</span>,
+					<span class="p-longitude">%2$f</span>', $loc['latitude'], $loc['longitude']
 				);
 			} else {
 				return sprintf(
-					'<span class="h-geo">
-					<data class="p-latitude" value="%1$f"></data>
-					<data class="p-latitude" value="%2$f"></data></span>', $loc['latitude'], $loc['longitude']
+					'<data class="p-latitude" value="%1$f"></data>
+					<data class="p-latitude" value="%2$f"></data>', $loc['latitude'], $loc['longitude']
 				);
 			}
 		}
