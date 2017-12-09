@@ -44,7 +44,7 @@ module.exports = function(grunt) {
 	  screenshot_url: '/assets/{screenshot}.png'
 	},
         files: {
-          'README.md': 'readme.txt'
+          'readme.md': 'readme.txt'
         }
       }
     },

@@ -15,7 +15,7 @@ class Loc_View {
 
 	public static function get_icon() {
 		// Substitute another svg sprite file
-		$sprite = plugin_dir_url( __FILE__ ) . 'location.svg';
+		$sprite = plugins_url( 'location.svg', dirname( __FILE__ ) );
 		return '<img class="icon-location" aria-label=' . __( 'Location: ', 'simple-location' ) . 'aria-hidden="true" src="' . $sprite . '" />';
 	}
 
