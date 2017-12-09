@@ -141,6 +141,10 @@ class Post_Timezone {
 		if ( '' === $d ) {
 			$d = get_option( 'date_format' );
 		}
+		// For now disable functionality if manual offset
+		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
+			return $the_date;
+		}
 		$datetime = new DateTime( $post->post_date_gmt, new DateTimeZone( 'GMT' ) );
 		$datetime->setTimezone( new DateTimeZone( $timezone ) );
 		return $datetime->format( $d );
@@ -152,6 +156,10 @@ class Post_Timezone {
 			return $the_time;
 		}
 		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
+		// For now disable with manual offset
+		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
+			return $the_time;
+		}
 		if ( ! $timezone ) {
 			$timezone = get_post_meta( $post->ID, '_timezone', true );
 			if ( ! $timezone ) {
