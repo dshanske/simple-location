@@ -5,6 +5,7 @@
 	<file>./simple-location.php</file>
 	<file>./includes/</file>
 	<exclude-pattern>*/includes/*\.(inc|css|js|svg)</exclude-pattern>
+	<exclude-pattern>*/includes/class-loc-timezone.php</exclude-pattern>
 	<rule ref="PHPCompatibility"/>
 	<config name="testVersion" value="5.3-"/>
 	<rule ref="WordPress-Core" />	
