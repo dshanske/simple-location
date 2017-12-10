@@ -2,6 +2,7 @@
 
 add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10 );
 add_filter( 'init', array( 'Loc_Config', 'init' ), 10 );
+add_action( 'admin_menu', array( 'Loc_Config', 'admin_menu' ), 10 );
 
 class Loc_Config {
 
@@ -10,7 +11,7 @@ class Loc_Config {
 	 */
 	public static function init() {
 		register_setting(
-			'media', // settings page
+			'simloc', // settings page
 			'sloc_default_map_provider', // option name
 			array(
 				'type'         => 'string',
@@ -20,7 +21,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media', // settings page
+			'simloc', // settings page
 			'sloc_default_reverse_provider', // option name
 			array(
 				'type'         => 'string',
@@ -30,7 +31,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media', // settings page
+			'simloc', // settings page
 			'sloc_google_api', // option name
 			array(
 				'type'         => 'string',
@@ -40,7 +41,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media', // settings page
+			'simloc', // settings page
 			'sloc_mapbox_api', // option name
 			array(
 				'type'         => 'string',
@@ -50,7 +51,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media', // settings page
+			'simloc', // settings page
 			'sloc_bing_api', // option name
 			array(
 				'type'         => 'string',
@@ -60,7 +61,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media',
+			'simloc',
 			'sloc_mapbox_user',
 			array(
 				'type'         => 'string',
@@ -70,7 +71,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media',
+			'simloc',
 			'sloc_mapbox_style',
 			array(
 				'type'         => 'string',
@@ -80,7 +81,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media',
+			'simloc',
 			'sloc_bing_style',
 			array(
 				'type'         => 'string',
@@ -90,7 +91,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media',
+			'simloc',
 			'sloc_google_style',
 			array(
 				'type'         => 'string',
@@ -101,7 +102,7 @@ class Loc_Config {
 		);
 
 		register_setting(
-			'media', // settings page
+			'simloc', // settings page
 			'sloc_height', // option name
 			array(
 				'type'         => 'number',
@@ -111,7 +112,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media', // settings page
+			'simloc', // settings page
 			'sloc_width', // option name
 			array(
 				'type'         => 'number',
@@ -121,7 +122,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media', // settings page
+			'simloc', // settings page
 			'sloc_zoom', // option name
 			array(
 				'type'         => 'number',
@@ -131,7 +132,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'media', // settings page
+			'simloc', // settings page
 			'geo_public', // option name
 			array(
 				'type'         => 'boolean',
@@ -143,18 +144,53 @@ class Loc_Config {
 		);
 	}
 
+	public static function admin_menu() {
+		// If the IndieWeb Plugin is installed use its menu.
+		if ( class_exists( 'IndieWeb_Plugin' ) ) {
+			add_submenu_page(
+				'indieweb',
+				__( 'Simple Location', 'simple-location' ), // page title
+				__( 'Location', 'simple-location' ), // menu title
+				'manage_options', // access capability
+				'simloc',
+				array( 'Loc_Config', 'simloc_options' )
+			);
+		} else {
+			add_options_page(
+				'',
+				'Simple Location',
+				'manage_options',
+				'simloc',
+				array( 'Loc_Config', 'simloc_options' )
+			);
+		}
+	}
+
+	public static function simloc_options() {
+		echo '<div class="wrap">';
+		echo '<h2>' . __( 'Simple Location', 'simple-location' ) . '</h2>';
+		echo '<p>';
+		esc_html_e( 'API Keys and Settings for Simple Location', 'simple-location' );
+		echo '</p><hr />';
+		echo '<form method="post" action="options.php">';
+		settings_fields( 'simloc' );
+		do_settings_sections( 'simloc' );
+		submit_button();
+		echo '</form></div>';
+	}
+
 	public static function admin_init() {
 		add_settings_section(
 			'sloc',
 			__( 'Simple Location Map Settings', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_settings' ),
-			'media'
+			'simloc'
 		);
 		add_settings_field(
 			'sloc_default_map_provider', // id
 			__( 'Default Map Provider', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'map_provider_callback' ), // display callback
-			'media', // settings page
+			'simloc', // settings page
 			'sloc', // settings section
 			array(
 				'label_for' => 'sloc_default_map_provider',
@@ -164,7 +200,7 @@ class Loc_Config {
 			'geo_public', // id
 			__( 'Show Location By Default', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'checkbox_callback' ), // display callback
-			'media', // settings page
+			'simloc', // settings page
 			'sloc', // settings section
 			array(
 				'label_for' => 'geo_public',
@@ -174,7 +210,7 @@ class Loc_Config {
 			'width', // id
 			__( 'Default Map Width', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
-			'media', // settings page
+			'simloc', // settings page
 			'sloc', // settings section
 			array(
 				'label_for' => 'sloc_width',
@@ -184,7 +220,7 @@ class Loc_Config {
 			'height', // id
 			__( 'Default Map Height', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
-			'media', // settings page
+			'simloc', // settings page
 			'sloc', // settings section
 			array(
 				'label_for' => 'sloc_height',
@@ -194,7 +230,7 @@ class Loc_Config {
 			'zoom', // id
 			__( 'Default Map Zoom', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
-			'media', // settings page
+			'simloc', // settings page
 			'sloc', // settings section
 			array(
 				'label_for' => 'sloc_zoom',
@@ -207,7 +243,7 @@ class Loc_Config {
 			'googleapi', // id
 			__( 'Google Maps API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
-			'media', // settings page
+			'simloc', // settings page
 			'sloc', // settings section
 			array(
 				'label_for' => 'sloc_google_api',
@@ -218,7 +254,7 @@ class Loc_Config {
 			'googlestyle', // id
 			__( 'Google Style', 'simple-location' ),
 			array( 'Loc_Config', 'style_callback' ),
-			'media',
+			'simloc',
 			'sloc',
 			array(
 				'label_for' => 'sloc_google_style',
@@ -230,7 +266,7 @@ class Loc_Config {
 			'bingapi', // id
 			__( 'Bing API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
-			'media', // settings page
+			'simloc', // settings page
 			'sloc', // settings section
 			array(
 				'label_for' => 'sloc_bing_api',
@@ -242,7 +278,7 @@ class Loc_Config {
 			'bingstyle', // id
 			__( 'Bing Style', 'simple-location' ),
 			array( 'Loc_Config', 'style_callback' ),
-			'media',
+			'simloc',
 			'sloc',
 			array(
 				'label_for' => 'sloc_bing_style',
@@ -254,7 +290,7 @@ class Loc_Config {
 			'mapboxapi', // id
 			__( 'Mapbox API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
-			'media', // settings page
+			'simloc', // settings page
 			'sloc', // settings section
 			array(
 				'label_for' => 'sloc_mapbox_api',
@@ -266,7 +302,7 @@ class Loc_Config {
 			'mapboxuser', // id
 			__( 'Mapbox User', 'simple-location' ),
 			array( 'Loc_Config', 'string_callback' ),
-			'media',
+			'simloc',
 			'sloc',
 			array(
 				'label_for' => 'sloc_mapbox_user',
@@ -278,7 +314,7 @@ class Loc_Config {
 			'mapboxstyle', // id
 			__( 'Mapbox Style', 'simple-location' ),
 			array( 'Loc_Config', 'style_callback' ),
-			'media',
+			'simloc',
 			'sloc',
 			array(
 				'label_for' => 'sloc_mapbox_style',

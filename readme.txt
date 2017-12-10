@@ -41,7 +41,8 @@ It consists of four fields: latitude, longitude, public, and address. The plugin
 = What are the requirements to use this plugin? =
 
 API Keys are required to use [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key), [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/), or [Bing Maps](https://www.bingmapsportal.com/). 
-If not provided there will be no map displayed regardless of setting. The appropriate API keys should be entered in Settings>>Media or within the admin interface at /wp-admin/options-media.php.
+If not provided there will be no map displayed regardless of setting. The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin
+if installed.
 
 = Is this compatible with the WordPress mobile apps? =
 
@@ -71,6 +72,7 @@ will now be required to show maps for services that require API keys.
 * Disable timezone override for now when manual offset is used as not a valid timezone string
 * Add p-location and change markup to accommodate
 * Update location icon
+* Add settings page and move settings out of media
 = 3.2.3 =
 * Restore PHP 5.3 and 5.4 compatibility
 * Fix issues raised by automated testing
