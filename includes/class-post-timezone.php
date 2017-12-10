@@ -35,7 +35,6 @@ class Post_Timezone {
 		global $post;
 		wp_nonce_field( 'timezone_override_metabox', 'timezone_override_nonce' );
 		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
-
 		if ( ! $timezone ) {
 			$timezone = get_post_meta( $post->ID, '_timezone', true );
 			if ( $timezone ) {
@@ -44,8 +43,13 @@ class Post_Timezone {
 			}
 			if ( ! $timezone ) {
 				$timezone = get_option( 'timezone_string' );
-				if ( 0 === get_option( 'gmt_offset', 0 ) ) {
-					$timezone = UTC;
+				if ( ! $timezone ) {
+					$timezone = get_option( 'gmt_offset', 0 );
+					if ( 0 < (int) $timezone ) {
+						$timezone = 'UTC+' . $timezone;
+					} else {
+						$timezone = 'UTC' . $timezone;
+					}
 				}
 			}
 		}
@@ -62,8 +66,8 @@ class Post_Timezone {
 			<a href="#post_timezone" class="edit-post-timezone hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Override Timezone</span></a>
 		<br />
 <div id="post-timezone-select" class="hide-if-js">
-		<input type="hidden" name="hidden_post_timezone" id="hidden_post_timezone" value=<?php echo $timezone; ?> />
-		<input type="hidden" name="timezone_default" id="timezone_default" value=<?php echo get_option( 'timezone_string' ); ?>" />
+		<input type="hidden" name="hidden_post_timezone" id="hidden_post_timezone" value="<?php echo $timezone; ?>" />
+		<input type="hidden" name="timezone_default" id="timezone_default" value="<?php echo get_option( 'timezone_string' ); ?>" />
 		<select name="post_timezone" id="post-timezone" width="90%">
 		<?php
 			echo wp_timezone_choice( $timezone );
