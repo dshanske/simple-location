@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, indieweb  
-**Stable tag:** 3.2.3  
+**Stable tag:** 3.2.4  
 **Requires at least:** 4.7  
 **Tested up to:** 4.9  
 **Requires PHP:** 5.3  
@@ -67,7 +67,7 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
-### 3.2.4 ( 2017-12-?? ) ###
+### 3.2.4 ( 2017-12-09 ) ###
 * Fix issue with rendering of timezone select when manual offset
 * Disable timezone override for now when manual offset is used as not a valid timezone string
 * Add p-location and change markup to accommodate
