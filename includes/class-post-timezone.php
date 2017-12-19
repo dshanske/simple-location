@@ -26,7 +26,7 @@ class Post_Timezone {
 
 
 	public static function after_micropub( $input, $args ) {
-		if ( array_key_exists( 'timezone', $args ) ) {
+		if ( $args && array_key_exists( 'timezone', $args ) ) {
 			update_post_meta( $args['ID'], 'geo_timezone', $args['timezone'] );
 		}
 	}
