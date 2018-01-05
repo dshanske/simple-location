@@ -2,6 +2,21 @@ module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
+       svgstore: {
+                options: {
+                        prefix : '', // Unused by us, but svgstore demands this variable
+                        cleanup : ['style', 'fill', 'id'],
+                        svg: { // will add and overide the the default xmlns="http://www.w3.org/2000/svg" attribute to the resulting SVG
+                                viewBox : '0 0 24 24',
+                                xmlns: 'http://www.w3.org/2000/svg'
+                        },
+                },
+                dist: {
+                                files: {
+                                        'weather-icons.svg': ['vendor/weather-icons/svg/*.svg' ]
+                                }
+                }
+        },
                 checktextdomain: {
                         options:{
                                 text_domain: 'simple-location',
@@ -119,6 +134,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-wp-i18n');
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-svgstore');
   grunt.loadNpmTasks('grunt-checktextdomain');
 
   // Default task(s).

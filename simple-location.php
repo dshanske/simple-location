@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 3.2.4
+ * Version: 3.3.0
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -20,7 +20,7 @@ register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactiva
 
 
 class Simple_Location_Plugin {
-	public static $version = '3.2.4';
+	public static $version = '3.3.0';
 
 	public static function activate() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
@@ -51,6 +51,16 @@ class Simple_Location_Plugin {
 		// Map Provider Class
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider.php';
 
+		// Weather Provider Class
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-weather-provider.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-weather-provider-openweathermap.php';
+
+		// Weather Widget
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-sloc-weather-widget.php';
+		// For now only show the widget for debugging until its ready
+		if ( WP_DEBUG ) {
+			add_action( 'widgets_init', array( 'Simple_Location_Plugin', 'widgets_init' ) );
+		}
 		// Map Providers
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-osm.php';
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-google.php';
@@ -74,6 +84,10 @@ class Simple_Location_Plugin {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-loc-timezone.php';
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-post-timezone.php';
 
+	}
+
+	public static function widgets_init() {
+		register_widget( 'Sloc_Weather_Widget' );
 	}
 
 	/** Adds link to Plugin Page for Options Page.

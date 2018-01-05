@@ -1,14 +1,14 @@
-# Copyright (C) 2017 David Shanske
+# Copyright (C) 2018 David Shanske
 # This file is distributed under the same license as the Simple Location package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 3.2.4\n"
+"Project-Id-Version: Simple Location 3.3.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
-"POT-Creation-Date: 2017-12-10 03:41:32+00:00\n"
+"POT-Creation-Date: 2018-01-08 02:22:28+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2017-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2018-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: grunt-wp-i18n 0.5.4\n"
@@ -59,82 +59,104 @@ msgstr ""
 msgid "Simple Location"
 msgstr ""
 
-#: includes/class-loc-config.php:153 includes/class-loc-metabox.php:40
+#: includes/class-loc-config.php:183 includes/class-loc-metabox.php:40
 msgid "Location"
 msgstr ""
 
-#: includes/class-loc-config.php:173
+#: includes/class-loc-config.php:203
 msgid "API Keys and Settings for Simple Location"
 msgstr ""
 
-#: includes/class-loc-config.php:185
-msgid "Simple Location Map Settings"
-msgstr ""
-
-#: includes/class-loc-config.php:191
-msgid "Default Map Provider"
-msgstr ""
-
-#: includes/class-loc-config.php:201
-msgid "Show Location By Default"
-msgstr ""
-
-#: includes/class-loc-config.php:211
-msgid "Default Map Width"
+#: includes/class-loc-config.php:215
+msgid "Map Settings"
 msgstr ""
 
 #: includes/class-loc-config.php:221
-msgid "Default Map Height"
+msgid "Default Map Provider"
 msgstr ""
 
 #: includes/class-loc-config.php:231
+msgid "Show Location By Default"
+msgstr ""
+
+#: includes/class-loc-config.php:241
+msgid "Default Map Width"
+msgstr ""
+
+#: includes/class-loc-config.php:251
+msgid "Default Map Height"
+msgstr ""
+
+#: includes/class-loc-config.php:261
 msgid "Default Map Zoom"
 msgstr ""
 
-#: includes/class-loc-config.php:244
+#: includes/class-loc-config.php:275
 msgid "Google Maps API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:255
+#: includes/class-loc-config.php:286
 msgid "Google Style"
 msgstr ""
 
-#: includes/class-loc-config.php:267
+#: includes/class-loc-config.php:298
 msgid "Bing API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:279
+#: includes/class-loc-config.php:310
 msgid "Bing Style"
 msgstr ""
 
-#: includes/class-loc-config.php:291
+#: includes/class-loc-config.php:322
 msgid "Mapbox API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:303
+#: includes/class-loc-config.php:334
 msgid "Mapbox User"
 msgstr ""
 
-#: includes/class-loc-config.php:315
+#: includes/class-loc-config.php:346
 msgid "Mapbox Style"
 msgstr ""
 
-#: includes/class-loc-config.php:351
-msgid "OpenStreetMap/MapBox"
+#: includes/class-loc-config.php:359
+msgid "Weather Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:352
-msgid "Google Maps"
-msgstr ""
-
-#: includes/class-loc-config.php:353
-msgid "Bing Maps"
+#: includes/class-loc-config.php:365
+msgid "Default Weather Provider"
 msgstr ""
 
 #: includes/class-loc-config.php:375
-msgid ""
-"Default Settings for Map Generation for the Simple Location plugin. API "
-"keys are required for map display services."
+msgid "OpenWeatherMap API Key"
+msgstr ""
+
+#: includes/class-loc-config.php:387
+msgid "OpenWeatherMap Station ID"
+msgstr ""
+
+#: includes/class-loc-config.php:423
+msgid "OpenStreetMap/MapBox"
+msgstr ""
+
+#: includes/class-loc-config.php:424
+msgid "Google Maps"
+msgstr ""
+
+#: includes/class-loc-config.php:425
+msgid "Bing Maps"
+msgstr ""
+
+#: includes/class-loc-config.php:434
+msgid "OpenWeatherMap"
+msgstr ""
+
+#: includes/class-loc-config.php:457
+msgid "API keys are required for map display services."
+msgstr ""
+
+#: includes/class-loc-config.php:461
+msgid "API keys are required for most weather services."
 msgstr ""
 
 #: includes/class-loc-metabox.php:50
@@ -153,75 +175,87 @@ msgstr ""
 msgid "Description Only"
 msgstr ""
 
-#: includes/class-loc-metabox.php:66
+#: includes/class-loc-metabox.php:68
 msgid "Location:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:71 includes/class-venue-taxonomy.php:92
+#: includes/class-loc-metabox.php:71
+msgid "Location Lookup"
+msgstr ""
+
+#: includes/class-loc-metabox.php:73
+msgid "Weather Lookup"
+msgstr ""
+
+#: includes/class-loc-metabox.php:77 includes/class-venue-taxonomy.php:92
 #: includes/class-venue-taxonomy.php:106
 msgid "Latitude:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:73 includes/class-venue-taxonomy.php:94
+#: includes/class-loc-metabox.php:79 includes/class-venue-taxonomy.php:94
 #: includes/class-venue-taxonomy.php:109
 msgid "Longitude:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:75
+#: includes/class-loc-metabox.php:81
 msgid "Map Zoom:"
 msgstr ""
 
-#: includes/class-loc-metabox.php:80
+#: includes/class-loc-metabox.php:86
+msgid "Temperature: "
+msgstr ""
+
+#: includes/class-loc-metabox.php:95
 msgid "Show Detail"
 msgstr ""
 
-#: includes/class-loc-metabox.php:83
+#: includes/class-loc-metabox.php:98
 msgid "Clear Location"
 msgstr ""
 
-#: includes/class-loc-metabox.php:85
+#: includes/class-loc-metabox.php:100
 msgid ""
 "Location Data below can be used to complete the location description, which "
 "will be displayed, or saved as a venue."
 msgstr ""
 
-#: includes/class-loc-metabox.php:87
+#: includes/class-loc-metabox.php:102
 msgid "Location Name"
 msgstr ""
 
-#: includes/class-loc-metabox.php:91 includes/class-venue-taxonomy.php:115
+#: includes/class-loc-metabox.php:106 includes/class-venue-taxonomy.php:115
 msgid "Address"
 msgstr ""
 
-#: includes/class-loc-metabox.php:95
+#: includes/class-loc-metabox.php:110
 msgid "Extended Address"
 msgstr ""
 
-#: includes/class-loc-metabox.php:99 includes/class-venue-taxonomy.php:118
+#: includes/class-loc-metabox.php:114 includes/class-venue-taxonomy.php:118
 msgid "City/Town/Village"
 msgstr ""
 
-#: includes/class-loc-metabox.php:102 includes/class-venue-taxonomy.php:121
+#: includes/class-loc-metabox.php:117 includes/class-venue-taxonomy.php:121
 msgid "State/County/Province"
 msgstr ""
 
-#: includes/class-loc-metabox.php:104 includes/class-venue-taxonomy.php:124
+#: includes/class-loc-metabox.php:119 includes/class-venue-taxonomy.php:124
 msgid "Country Code"
 msgstr ""
 
-#: includes/class-loc-metabox.php:107 includes/class-venue-taxonomy.php:127
+#: includes/class-loc-metabox.php:122 includes/class-venue-taxonomy.php:127
 msgid "Neighborhood/Suburb"
 msgstr ""
 
-#: includes/class-loc-metabox.php:110 includes/class-venue-taxonomy.php:129
+#: includes/class-loc-metabox.php:125 includes/class-venue-taxonomy.php:129
 msgid "Postal Code"
 msgstr ""
 
-#: includes/class-loc-metabox.php:113 includes/class-venue-taxonomy.php:132
+#: includes/class-loc-metabox.php:128 includes/class-venue-taxonomy.php:132
 msgid "Country Name"
 msgstr ""
 
-#: includes/class-loc-metabox.php:119
+#: includes/class-loc-metabox.php:134
 msgid "Save as Venue"
 msgstr ""
 
@@ -233,8 +267,24 @@ msgstr ""
 msgid "Timezone:"
 msgstr ""
 
-#: includes/class-rest-geo.php:114 includes/class-rest-geo.php:131
+#: includes/class-rest-geo.php:127 includes/class-rest-geo.php:144
 msgid "Missing Coordinates for Reverse Lookup"
+msgstr ""
+
+#: includes/class-rest-geo.php:168
+msgid "Missing Coordinates or Station for Weather Lookup"
+msgstr ""
+
+#: includes/class-sloc-weather-widget.php:14
+msgid "Weather"
+msgstr ""
+
+#: includes/class-sloc-weather-widget.php:16
+msgid "Adds current weather conditions"
+msgstr ""
+
+#: includes/class-sloc-weather-widget.php:56
+msgid "Displays current weather"
 msgstr ""
 
 #: includes/class-venue-taxonomy.php:49 includes/class-venue-taxonomy.php:63
@@ -297,7 +347,7 @@ msgstr ""
 msgid "Get Location"
 msgstr ""
 
-#: simple-location.php:85
+#: simple-location.php:99
 msgid "Settings"
 msgstr ""
 

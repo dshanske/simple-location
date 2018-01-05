@@ -45,6 +45,19 @@ class REST_Geo {
 			)
 		);
 		register_rest_route(
+			'sloc_geo/1.0', '/weather', array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'weather' ),
+					'args'     => array(
+						'longitude' => array(),
+						'latitude'  => array(),
+						'units'     => array(),
+					),
+				),
+			)
+		);
+		register_rest_route(
 			'sloc_geo/1.0', '/map', array(
 				array(
 					'methods'  => WP_REST_Server::READABLE,
@@ -130,6 +143,35 @@ class REST_Geo {
 		}
 		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
 	}
+
+	// Callback Handler for Weather
+	public static function weather( $request ) {
+		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
+		$params = $request->get_params();
+		$args   = array(
+			'cache_key'  => 'slocw',
+			'cache_time' => 600,
+		);
+		if ( isset( $params['units'] ) ) {
+			$args['temp_units'] = $params['units'];
+		}
+		$return  = array();
+		$weather = Loc_Config::default_weather_provider( $args );
+		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+			$weather->set_location( $params['latitude'], $params['longitude'] );
+			$return = array(
+				'latitude'  => $params['latitude'],
+				'longitude' => $params['longitude'],
+			);
+		} elseif ( ! $weather->get_station() ) {
+				return new WP_Error( 'missing_geo', __( 'Missing Coordinates or Station for Weather Lookup', 'simple-location' ), array( 'status' => 400 ) );
+		}
+		$conditions = $weather->get_conditions();
+		$return     = array_filter( $return );
+		return array_merge( $conditions, $return );
+	}
+
+
 
 }
 
