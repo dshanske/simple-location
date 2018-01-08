@@ -56,6 +56,10 @@ class Loc_View {
 			$c = $loc['address'];
 		}
 		$c .= '</span>';
+		if ( $loc['weather'] ) {
+			$c .= '<br />' . Weather_Provider::get_icon( $loc['weather']['icon'], $loc['weather']['summary'] );
+			$c .= '<span class="p-temperature">' . round( $loc['weather']['temperature'] ) . '&deg;</span>';
+		}
 		if ( $args['icon'] ) {
 			$c = self::get_icon() . $c;
 		}

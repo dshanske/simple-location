@@ -93,6 +93,12 @@ class WP_Geo_Data {
 		);
 	}
 
+	/* Calculates the distance in meters between two coordinates */
+
+	public static function gc_distance( $lat1, $lng1, $lat2, $lng2 ) {
+		return ( 6378100 * acos( cos( deg2rad( $lat1 ) ) * cos( deg2rad( $lat2 ) ) * cos( deg2rad( $lng2 ) - deg2rad( $lng1 ) ) + sin( deg2rad( $lat1 ) ) * sin( deg2rad( $lat2 ) ) ) );
+	}
+
 	public static function gps( $coordinate, $hemisphere ) {
 		for ( $i = 0; $i < 3; $i++ ) {
 			$part = explode( '/', $coordinate[ $i ] );
@@ -180,6 +186,10 @@ class WP_Geo_Data {
 		}
 	}
 
+	public static function sanitize_float( $input ) {
+		return filter_var( $input, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION );
+	}
+
 	public static function clean_coordinate( $coordinate ) {
 		$pattern = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
 		preg_match( $pattern, $coordinate, $matches );
@@ -190,7 +200,7 @@ class WP_Geo_Data {
 		if ( ! is_array( $geodata ) ) {
 			return false;
 		}
-		$geodata = wp_array_slice_assoc( $geodata, 'latitude', 'longitude', 'address', 'map_zoom' );
+		$geodata = wp_array_slice_assoc( $geodata, 'latitude', 'longitude', 'address', 'map_zoom', 'weather' );
 		if ( isset( $geodata['map_zoom'] ) ) {
 			$geodata['zoom'] = $geodata['map_zoom'];
 			unset( $geodata['map_zoom'] );
@@ -240,6 +250,7 @@ class WP_Geo_Data {
 			$geodata['latitude']  = get_post_meta( $object->ID, 'geo_latitude', true );
 			$geodata['address']   = get_post_meta( $object->ID, 'geo_address', true );
 			$geodata['map_zoom']  = get_post_meta( $object->ID, 'geo_zoom', true );
+			$geodata['weather']   = get_post_meta( $object->ID, 'geo_weather', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
@@ -256,6 +267,8 @@ class WP_Geo_Data {
 			$geodata['latitude']  = get_comment_meta( $object->comment_ID, 'geo_latitude', true );
 			$geodata['address']   = get_comment_meta( $object->comment_ID, 'geo_address', true );
 			$geodata['map_zoom']  = get_comment_meta( $object->comment_ID, 'geo_zoom', true );
+			$geodata['weather']   = get_comment_meta( $object->comment_ID, 'weather', true );
+
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
@@ -267,6 +280,7 @@ class WP_Geo_Data {
 			$geodata['latitude']  = get_term_meta( $object->term_id, 'geo_latitude', true );
 			$geodata['address']   = get_term_meta( $object->term_id, 'geo_address', true );
 			$geodata['map_zoom']  = get_term_meta( $object->term_id, 'geo_zoom', true );
+			$geodata['weather']   = get_term_meta( $object->term_id, 'geo_weather', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
@@ -278,6 +292,7 @@ class WP_Geo_Data {
 			$geodata['latitude']  = get_user_meta( $object->ID, 'geo_latitude', true );
 			$geodata['address']   = get_user_meta( $object->ID, 'geo_address', true );
 			$geodata['map_zoom']  = get_user_meta( $object->ID, 'geo_zoom', true );
+			$geodata['weather']   = get_user_meta( $object->ID, 'geo_weather', true );
 			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 				return null;
 			}
@@ -343,6 +358,17 @@ class WP_Geo_Data {
 		register_meta( 'comment', 'geo_longitude', $args );
 		register_meta( 'user', 'geo_longitude', $args );
 		register_meta( 'term', 'geo_longitude', $args );
+
+		$args = array(
+			'type'         => 'array',
+			'description'  => 'Weather Data',
+			'single'       => true,
+			'show_in_rest' => false,
+		);
+		register_meta( 'post', 'geo_weather', $args );
+		register_meta( 'comment', 'geo_weather', $args );
+		register_meta( 'user', 'geo_weather', $args );
+		register_meta( 'term', 'geo_weather', $args );
 
 		$args = array(
 			'type'         => 'string',

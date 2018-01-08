@@ -83,6 +83,50 @@ function reverseLookup(position) {
 	});
 }
 
+function getWeather() {
+	jQuery.ajax({ 
+			type: 'GET',
+		        // Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
+			url: sloc.api_url + 'weather/',
+			beforeSend: function ( xhr ) {
+				// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
+				xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+			},
+			data: {
+				latitude: jQuery('#latitude').val(),
+				longitude: jQuery('#longitude').val(),
+			},
+		success : function( response ) {
+			if ( typeof response == 'undefined' ) {
+			}
+			else {
+				if ( ( 'temperature' in response ) && ( jQuery('#temperature').val() === '' ) ) {
+					jQuery("#temperature").val(response['temperature']) ;
+				}
+				if ( ( 'icon' in response ) && ( jQuery('#weather_icon').val() === '' ) ) {
+					jQuery("#weather_icon").val(response['icon']) ;
+				}
+				if ( ( 'summary' in response ) && ( jQuery('#weather_summary').val() === '' ) ) {
+					jQuery("#weather_summary").val(response['summary']) ;
+				}
+				if ( ( 'pressure' in response ) && ( jQuery('#pressure').val() === '' ) ) {
+					jQuery("#pressure").val(response['pressure']) ;
+				}
+				console.log(response);
+			}
+		},
+	  error: function(request, status, error){
+			alert(request.responseText);
+		}
+	});
+}
+
+
+jQuery( document ).on( 'click', '.lookup-weather-button', function($) {
+	getWeather();
+})
+
+
 jQuery( document ).on( 'click', '.lookup-address-button', function($) {
 	getFullLocation();
 })

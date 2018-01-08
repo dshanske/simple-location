@@ -1,18 +1,18 @@
 === Simple Location ===
 Contributors: dshanske
-Tags: geolocation, geo, maps, location, indieweb
-Stable tag: 3.2.4
+Tags: geolocation, geo, maps, location, weather, indieweb
+Stable tag: 3.3.0
 Requires at least: 4.7
-Tested up to: 4.9
+Tested up to: 4.9.1
 Requires PHP: 5.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Adds geographic location support to WordPress.
+Adds geographic location and weather support to WordPress.
 
 == Description == 
 
-Supports adding geo coordinates or textual description to a post, comment, user, or attachment. Will be supporting saving a 
+Supports adding geo coordinates or textual description to a post, comment, user, or attachment. Supports adding weather data to a post. Will be supporting saving a 
 location as a venue for reuse. Offers choice of map displays.
 
 It supports retrieving location using the HTML5 geolocation API. As it stores the GeoData in a WordPress standard format, Geodata can also be added from other plugins.
@@ -34,14 +34,23 @@ To add anything more than a basic location you will have to create a venue. This
 [WordPress Geodata](http://codex.wordpress.org/Geodata) is an existing standard
 used to store geodata about a post, user, comment, or term.
 
-It consists of four fields: latitude, longitude, public, and address. The plugin also saves zoom which is for the purpose of map display.
+It consists of four fields: latitude, longitude, public, and address. This matches up with the HTML5 Geolocation fields. The plugin also saves zoom which is for the purpose of map display.
+
+== Weather ==
+
+Weather consists of at minimum the current conditions and temperature but may include future parameters for use such as pressure, wind speed, wind direction degree, etc.
 
 == Frequently Asked Questions ==
 
 = What are the requirements to use this plugin? =
 
-API Keys are required to use [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key), [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/), or [Bing Maps](https://www.bingmapsportal.com/). 
-If not provided there will be no map displayed regardless of setting. The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin
+API Keys are required to use certain services.
+* [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key)
+* [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/)
+* [Bing Maps](https://www.bingmapsportal.com/)
+* [OpenWeatherMap](http://openweathermap.com/api)
+
+If not provided there will be no map displayed regardless of setting. Without a weather provider this service will not work. The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin
 if installed.
 
 = Is this compatible with the WordPress mobile apps? =
@@ -67,6 +76,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+= 3.3.0 ( 2018-01-xx ) =
+* Introduce Weather Icons, licensed under SIL OFL 1.1
+* Add support for weather providers
+* Initial display for temperature
 = 3.2.4 ( 2017-12-09 ) =
 * Fix issue with rendering of timezone select when manual offset
 * Disable timezone override for now when manual offset is used as not a valid timezone string
