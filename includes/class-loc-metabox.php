@@ -69,25 +69,29 @@ class Loc_Metabox {
 		<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" style="width:90%" data-role="none" />
 		<a class="hide-if-no-js lookup-address-button">
 		<span class="dashicons dashicons-location" aria-label="<?php __( 'Location Lookup', 'simple-location' ); ?>" title="<?php __( 'Location Lookup', 'simple-location' ); ?>"></span></a>
-				 <a class="hide-if-no-js lookup-weather-button">
-				  <span class="dashicons dashicons-palmtree" aria-label="<?php __( 'Weather Lookup', 'simple-location' ); ?>" title="<?php __( 'Weather Lookup', 'simple-location' ); ?>"></span></a><br />
-
 
 			<p class="latlong">
 				<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
-				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" style="width:25%" />
+				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" style="width:10%" />
 				<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
-				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" style="width:25%" />
+				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" style="width:10%" />
 				<label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
-				<input type="text" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" style="width:25%" />
+				<input type="text" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" style="width:5%" />
+				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" style="width:10%" />
+				<input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" style="width:10%" />
+				<input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" style="width:10%" />
+				<input type="hidden" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" style="width:10%" />
+
 			</p>
 			<p class="weather-data">
+				<a class="hide-if-no-js lookup-weather-button">
+				<span class="dashicons dashicons-palmtree" aria-label="<?php __( 'Weather Lookup', 'simple-location' ); ?>" title="<?php __( 'Weather Lookup', 'simple-location' ); ?>"></span></a>
 				<label for="temperature"><?php _e( 'Temperature: ', 'simple-location' ); ?></label>
 				<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" style="width:20%" />
 				<input type="hidden" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" style="width:25%" />
 				<input type="hidden" name="weather_icon" id="weather_icon" value="<?php echo ifset( $weather['icon'], '' ); ?>" style="width:25%" />
 				<input type="hidden" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" style="width:25%" />
+				<input type="hidden" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" style="width:25%" />
 				<input type="hidden" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" style="width:25%" />
 				<input type="hidden" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" style="width:25%" />
 			</p>
@@ -189,6 +193,25 @@ class Loc_Metabox {
 		} else {
 			delete_post_meta( $post_id, 'geo_zoom' );
 		}
+
+		if ( ! empty( $_POST['altitude'] ) ) {
+			update_post_meta( $post_id, 'geo_altitude', sanitize_text_field( $_POST['altitude'] ) );
+		} else {
+			delete_post_meta( $post_id, 'geo_altitude' );
+		}
+
+		if ( ! empty( $_POST['speed'] ) ) {
+			update_post_meta( $post_id, 'geo_speed', sanitize_text_field( $_POST['speed'] ) );
+		} else {
+			delete_post_meta( $post_id, 'geo_speed' );
+		}
+
+		if ( ! empty( $_POST['heading'] ) ) {
+			update_post_meta( $post_id, 'geo_heading', sanitize_text_field( $_POST['heading'] ) );
+		} else {
+			delete_post_meta( $post_id, 'geo_heading' );
+		}
+
 		$weather = array();
 
 		if ( ! empty( $_POST['temperature'] ) ) {
@@ -203,6 +226,10 @@ class Loc_Metabox {
 		if ( ! empty( $_POST['weather_icon'] ) ) {
 			$weather['icon'] = sanitize_text_field( $_POST['weather_icon'] );
 		}
+		if ( ! empty( $_POST['visibility'] ) ) {
+			$weather['visibility'] = sanitize_text_field( $_POST['visibility'] );
+		}
+
 		if ( ! empty( $weather ) ) {
 			update_post_meta( $post_id, 'geo_weather', $weather );
 		} else {
