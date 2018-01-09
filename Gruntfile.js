@@ -2,6 +2,11 @@ module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
+       eslint: {
+         location: {
+		src: ['js/location.js'] 
+	 }
+       },
        svgstore: {
                 options: {
                         prefix : '', // Unused by us, but svgstore demands this variable
@@ -135,8 +140,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-svgstore');
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-checktextdomain');
 
   // Default task(s).
-  grunt.registerTask('default', ['wp_readme_to_markdown', 'makepot', 'sass', 'checktextdomain']);
+  grunt.registerTask('default', ['wp_readme_to_markdown', 'makepot', 'eslint', 'sass', 'checktextdomain']);
 };

@@ -9,10 +9,12 @@
     "url": "https://github.com/dshanske/simple-location/issues"
   },
   "devDependencies": {
+    "eslint-config-wordpress": "^2.0.0",
     "grunt": "~1.0.1",
     "grunt-checktextdomain": "^1.0.1",
     "grunt-contrib-copy": "~1.0.0",
     "grunt-contrib-sass": "~1.0.0",
+    "grunt-eslint": "^20.1.0",
     "grunt-svgstore": "^1.0.0",
     "grunt-wp-i18n": "~0.5.4",
     "grunt-wp-readme-to-markdown": "~2.0.1"
