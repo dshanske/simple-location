@@ -56,9 +56,8 @@ class Loc_View {
 			$c = $loc['address'];
 		}
 		$c .= '</span>';
-		if ( $loc['weather'] ) {
-			$c .= '<br />' . Weather_Provider::get_icon( $loc['weather']['icon'], $loc['weather']['summary'] );
-			$c .= '<span class="p-temperature">' . round( $loc['weather']['temperature'] ) . '&deg;</span>';
+		if ( isset( $loc['weather'] ) ) {
+			$c .= self::get_the_weather( $loc['weather'] );
 		}
 		if ( $args['icon'] ) {
 			$c = self::get_icon() . $c;
@@ -73,6 +72,18 @@ class Loc_View {
 			return $map->get_the_map();
 		}
 		return '';
+	}
+
+	public static function get_the_weather( $weather ) {
+		if ( ! is_array( $weather ) || empty( $weather ) ) {
+			return '';
+		}
+		if ( ! isset( $weather['icon'] ) ) {
+			$weather['icon'] = 'wi-thermometer';
+		}
+		$c  = '<br />' . Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'], '' ) );
+		$c .= '<span class="p-temperature">' . round( $weather['temperature'] ) . '&deg;</span>';
+		return $c;
 	}
 
 	// Return marked up coordinates

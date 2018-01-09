@@ -119,10 +119,10 @@ abstract class Weather_Provider {
 		 * @return string Summary of Current conditions
 		 */
 	public function get_current_condition() {
-			$return                  = '';
-			$conditions              = $this->get_conditions();
-							$return  = '<div class="sloc-weather">';
-							$return .= $this->get_icon( $conditions['icon'], $conditions['summary'] );
+		$return     = '';
+		$conditions = $this->get_conditions();
+		$return     = '<div class="sloc-weather">';
+		$return    .= $this->get_icon( ifset( $conditions['icon'] ), ifset( $conditions['summary'] ) );
 		if ( isset( $conditions['temperature'] ) ) {
 						$return .= round( $conditions['temperature'] ) . '&deg;' . $this->temp_units();
 		}
