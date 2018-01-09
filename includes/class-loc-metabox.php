@@ -87,7 +87,9 @@ class Loc_Metabox {
 				<a class="hide-if-no-js lookup-weather-button">
 				<span class="dashicons dashicons-palmtree" aria-label="<?php __( 'Weather Lookup', 'simple-location' ); ?>" title="<?php __( 'Weather Lookup', 'simple-location' ); ?>"></span></a>
 				<label for="temperature"><?php _e( 'Temperature: ', 'simple-location' ); ?></label>
-				<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" style="width:20%" />
+				<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" style="width:10%" />
+				<label for="humidity"><?php _e( 'Humidity: ', 'simple-location' ); ?></label>
+				<input type="text" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" style="width:10%" />
 				<input type="hidden" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" style="width:25%" />
 				<input type="hidden" name="weather_icon" id="weather_icon" value="<?php echo ifset( $weather['icon'], '' ); ?>" style="width:25%" />
 				<input type="hidden" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" style="width:25%" />
@@ -217,6 +219,9 @@ class Loc_Metabox {
 		if ( ! empty( $_POST['temperature'] ) ) {
 			$weather['temperature'] = sanitize_text_field( $_POST['temperature'] );
 		}
+		if ( ! empty( $_POST['humidity'] ) ) {
+			$weather['humidity'] = sanitize_text_field( $_POST['humidity'] );
+		}
 		if ( ! empty( $_POST['pressure'] ) ) {
 			$weather['pressure'] = sanitize_text_field( $_POST['pressure'] );
 		}
@@ -228,6 +233,17 @@ class Loc_Metabox {
 		}
 		if ( ! empty( $_POST['visibility'] ) ) {
 			$weather['visibility'] = sanitize_text_field( $_POST['visibility'] );
+		}
+
+		$wind = array();		
+		if ( ! empty( $_POST['wind_speed'] ) ) {
+			$wind['speed'] = sanitize_text_field( $_POST['wind_speed'] );
+		}
+		if ( ! empty( $_POST['wind_degree'] ) ) {
+			$wind['degree'] = sanitize_text_field( $_POST['wind_degree'] );
+		}
+		if ( ! empty( $wind ) ) {
+			$weather['wind'] = $wind;
 		}
 
 		if ( ! empty( $weather ) ) {

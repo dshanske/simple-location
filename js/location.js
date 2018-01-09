@@ -109,6 +109,9 @@ function getWeather() {
 				if ( ( 'temperature' in response ) && ( '' === jQuery( '#temperature' ).val() ) ) {
 					jQuery( '#temperature' ).val( response.temperature ) ;
 				}
+				if ( ( 'humidity' in response ) && ( '' === jQuery( '#humidity' ).val() ) ) {
+					jQuery( '#humidity' ).val( response.humidity ) ;
+				}
 				if ( ( 'icon' in response ) && ( '' === jQuery( '#weather_icon' ).val() ) ) {
 					jQuery( '#weather_icon' ).val( response.icon ) ;
 				}
@@ -120,6 +123,14 @@ function getWeather() {
 				}
 				if ( ( 'visibility' in response ) && ( '' === jQuery( '#visibility' ).val() ) ) {
 					jQuery( '#visibility' ).val( response.visibility ) ;
+				}
+				if ( 'wind' in response ) {
+					if ( 'speed' in response.wind ) {
+						jQuery( '#wind_speed' ).val( response.wind.speed ) ;
+					}
+					if ( 'degree' in response.wind ) {
+						jQuery( '#wind_degree' ).val( response.wind.degree ) ;
+					}
 				}
 				console.log( response );
 			}
