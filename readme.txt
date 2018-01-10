@@ -80,6 +80,9 @@ will now be required to show maps for services that require API keys.
 * Introduce Weather Icons, licensed under SIL OFL 1.1
 * Add support for weather providers
 * Initial display for temperature
+* Add user profile settings for location
+* Add setting to set if user location is updated when a new post with location is made by that user
+* Add weather widget that can be set based on coordinates, user last reported location, or station ID
 = 3.2.4 ( 2017-12-09 ) =
 * Fix issue with rendering of timezone select when manual offset
 * Disable timezone override for now when manual offset is used as not a valid timezone string
