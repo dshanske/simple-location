@@ -172,6 +172,17 @@ class Loc_Config {
 				// WordPress Geodata defaults to public but this allows a global override for new posts
 			)
 		);
+		register_setting(
+			'simloc', // settings page
+			'sloc_last_report', // option name
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Update Authors Last Reported Location on New Post',
+				'show_in_rest' => true,
+				'default'      => true,
+				// If this is true then each time a post is made with location properties it will update the user location
+			)
+		);
 	}
 
 	public static function admin_menu() {
@@ -234,6 +245,16 @@ class Loc_Config {
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'geo_public',
+			)
+		);
+		add_settings_field(
+			'sloc_last_report', // id
+			__( 'Update Author Last Reported Location on New Post', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_map', // settings section
+			array(
+				'label_for' => 'sloc_last_report',
 			)
 		);
 		add_settings_field(
