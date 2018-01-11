@@ -12,6 +12,7 @@ class Loc_Metabox {
 	public static function init() {
 		add_action( 'admin_enqueue_scripts', array( 'Loc_Metabox', 'enqueue' ) );
 		add_action( 'save_post', array( 'Loc_Metabox', 'save_post_meta' ) );
+		add_action( 'save_post', array( 'Loc_Metabox', 'last_seen' ), 20, 2 );
 		add_action( 'edit_attachment', array( 'Loc_Metabox', 'save_post_meta' ) );
 		add_action( 'edit_comment', array( 'Loc_Metabox', 'save_comment_meta' ) );
 		add_action( 'show_user_profile', array( 'Loc_Metabox', 'user_profile' ), 12 );
@@ -195,6 +196,21 @@ class Loc_Metabox {
 	<?php
 	}
 
+
+	public static function last_seen( $post_id, $post ) {
+		if ( 0 === (int) get_option( 'sloc_last_report' ) ) {
+			return;
+		}
+		if ( 'publish' !== $post->post_status ) {
+			return;
+		}
+		if ( $post->post_date !== $post->post_modified ) {
+			return;
+		}
+		$geodata = WP_Geo_Data::get_geodata( $post );
+		$author  = new WP_User( $post->post_author );
+		WP_Geo_Data::set_geodata( $author, $geodata );
+	}
 
 	/* Save the meta box's post metadata. */
 	public static function save_post_meta( $post_id ) {

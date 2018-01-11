@@ -20,7 +20,7 @@ function reverseLookup( position ) {
 	jQuery( '#accuracy' ).val( position.coords.accuracy );
 	jQuery( '#heading' ).val( position.coords.heading );
 	jQuery( '#speed' ).val( position.coords.speed );
-	jquery( '#altitude' ).val( position.coords.altitude );
+	jQuery( '#altitude' ).val( position.coords.altitude );
 	jQuery( '#map_zoom' ).val( parseInt( Math.log2( 591657550.5 / ( position.coords.accuracy * 45 ) ) ) + 1 );
 	jQuery.ajax({
 			type: 'GET',
