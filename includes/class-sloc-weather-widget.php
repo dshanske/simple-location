@@ -1,7 +1,7 @@
 <?php
 
 /**
- * adds widget to display rel-me links for indieauth with per-user profile support
+ * adds widget to display weather with per-user profile support
  */
 class Sloc_Weather_Widget extends WP_Widget {
 

@@ -12,7 +12,7 @@ Adds geographic location and weather support to WordPress.
 
 ## Description ##
 
-Supports adding geo coordinates or textual description to a post, comment, user, or attachment. Supports adding weather data to a post. Will be supporting saving a 
+Supports adding geo coordinates or textual description to a post, comment, user, or attachment. Supports adding weather data to a post or to a widget. Will be supporting saving a 
 location as a venue for reuse. Offers choice of map displays.
 
 It supports retrieving location using the HTML5 geolocation API. As it stores the GeoData in a WordPress standard format, Geodata can also be added from other plugins.
@@ -38,7 +38,10 @@ It consists of four fields: latitude, longitude, public, and address. This match
 
 ## Weather ##
 
-Weather consists of at minimum the current conditions and temperature but may include future parameters for use such as pressure, wind speed, wind direction degree, etc.
+Weather consists of at minimum the current conditions and temperature but may include future parameters for use such as pressure, wind speed, wind direction degree, etc. A weather widget
+is available that can be set to a specific location, a user, or a station ID.
+
+Station ID is available from supported providers for weather stations, for example from a Personal Weather Station(PWS).
 
 ## Frequently Asked Questions ##
 
@@ -76,13 +79,15 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
-### 3.3.0 ( 2018-01-xx ) ###
+### 3.3.0 ( 2018-01-11 ) ###
 * Introduce Weather Icons, licensed under SIL OFL 1.1
 * Add support for weather providers
 * Initial display for temperature
 * Add user profile settings for location
-* Add setting to set if user location is updated when a new post with location is made by that user
+* Add setting to set if user location is updated when a new post with location is published by that user
 * Add weather widget that can be set based on coordinates, user last reported location, or station ID
+* Allow filtering post admin and comment admin by location
+* Add last seen widget
 ### 3.2.4 ( 2017-12-09 ) ###
 * Fix issue with rendering of timezone select when manual offset
 * Disable timezone override for now when manual offset is used as not a valid timezone string

@@ -57,10 +57,9 @@ class Simple_Location_Plugin {
 
 		// Weather Widget
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-sloc-weather-widget.php';
-		// For now only show the widget for debugging until its ready
-		if ( WP_DEBUG ) {
-			add_action( 'widgets_init', array( 'Simple_Location_Plugin', 'widgets_init' ) );
-		}
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-sloc-lastseen-widget.php';
+		add_action( 'widgets_init', array( 'Simple_Location_Plugin', 'widgets_init' ) );
+
 		// Map Providers
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-osm.php';
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-google.php';
@@ -88,6 +87,7 @@ class Simple_Location_Plugin {
 
 	public static function widgets_init() {
 		register_widget( 'Sloc_Weather_Widget' );
+		register_widget( 'Sloc_Lastseen_Widget' );
 	}
 
 	/** Adds link to Plugin Page for Options Page.
