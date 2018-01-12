@@ -31,6 +31,7 @@ class Loc_View {
 			'mapboxstyle'   => null,
 			'mapboxuser'    => null,
 			'public'        => get_option( 'geo_public' ),
+			'weather'       => true,
 			'icon'          => true, // Show Location Icon
 			'text'          => false, // Show Description
 			'description'   => __( 'Location: ', 'simple-location' ),
@@ -56,7 +57,7 @@ class Loc_View {
 			$c = $loc['address'];
 		}
 		$c .= '</span>';
-		if ( isset( $loc['weather'] ) ) {
+		if ( isset( $loc['weather'] ) && $args['weather'] ) {
 			$c .= self::get_the_weather( $loc['weather'] );
 		}
 		if ( $args['icon'] ) {
