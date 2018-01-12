@@ -14,6 +14,7 @@ class WP_Geo_Data {
 		self::register_meta();
 		add_filter( 'query_vars', array( 'WP_Geo_Data', 'query_var' ) );
 		add_action( 'pre_get_posts', array( 'WP_Geo_Data', 'pre_get_posts' ) );
+		add_action( 'pre_get_comments', array( 'WP_Geo_Data', 'pre_get_comments' ) );
 		add_action( 'save_post', array( 'WP_Geo_Data', 'public_post' ), 99, 2 );
 
 		// Grab geo data from EXIF, if it's available
@@ -30,7 +31,50 @@ class WP_Geo_Data {
 		add_action( 'rss2_item', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'atom_entry', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'rdf_item', array( 'WP_Geo_Data', 'georss_item' ) );
+
+		// Add Dropdown
+		add_action( 'restrict_manage_posts', array( 'WP_Geo_Data', 'geo_posts_dropdown' ), 12, 2 );
+		add_action( 'restrict_manage_comments', array( 'WP_Geo_Data', 'geo_comments_dropdown' ), 12, 2 );
+
 	}
+
+	public static function geo_posts_dropdown( $post_type, $which ) {
+		if ( 'post' !== $post_type ) {
+			return;
+		}
+			$selected = 'none';
+		if ( isset( $_REQUEST['geo'] ) ) {
+			$selected = $_REQUEST['geo'];
+		}
+			$list = array(
+				'none' => __( 'All Posts', 'simple-location' ),
+				'all'  => __( 'With Location', 'simple-location' ),
+			);
+		echo '<select id="geo" name="geo">';
+		foreach ( $list as $key => $value ) {
+			$select = ( $key === $selected ) ? ' selected="selected"' : '';
+			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>';
+		}
+		echo '</select>';
+	}
+
+	public static function geo_comments_dropdown() {
+			$selected = 'none';
+		if ( isset( $_REQUEST['geo'] ) ) {
+			$selected = $_REQUEST['geo'];
+		}
+			$list = array(
+				'none' => __( 'All Comments', 'simple-location' ),
+				'all'  => __( 'With Location', 'simple-location' ),
+			);
+		echo '<select id="geo" name="geo">';
+		foreach ( $list as $key => $value ) {
+			$select = ( $key === $selected ) ? ' selected="selected"' : '';
+			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>';
+		}
+		echo '</select>';
+	}
+
 
 	public static function georss_namespace() {
 		echo 'xmlns:georss="http://www.georss.org/georss" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" ';
@@ -185,6 +229,40 @@ class WP_Geo_Data {
 				return;
 		}
 	}
+
+	public static function pre_get_comments( $query ) {
+		if ( ! isset( $_REQUEST['geo'] ) ) {
+			return;
+		}
+		$geo  = $_REQUEST['geo'];
+		$args = array(
+			'key'  => 'geo_public',
+			'type' => 'numeric',
+		);
+
+		switch ( $geo ) {
+			case 'all':
+				$args['compare'] = '>';
+				$args['value']   = (int) 0;
+				break;
+			case 'public':
+			case 'map':
+				$args['compare'] = '=';
+				$args['value']   = (int) 1;
+				break;
+			case 'text':
+			case 'description':
+				$args['compare'] = '=';
+				$args['value']   = (int) 2;
+				break;
+			default:
+				return;
+		}
+		$query->query_vars['meta_query'] = array( $args );
+		$query->meta_query->parse_query_vars( $query->query_vars );
+	}
+
+
 
 	public static function sanitize_float( $input ) {
 		return filter_var( $input, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION );
