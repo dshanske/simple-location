@@ -271,13 +271,13 @@ class Loc_Metabox {
 			delete_post_meta( $post_id, 'geo_altitude' );
 		}
 
-		if ( ! empty( $_POST['speed'] ) ) {
+		if ( ! empty( $_POST['speed'] ) && 'NaN' !== $_POST['speed'] ) {
 			update_post_meta( $post_id, 'geo_speed', sanitize_text_field( $_POST['speed'] ) );
 		} else {
 			delete_post_meta( $post_id, 'geo_speed' );
 		}
 
-		if ( ! empty( $_POST['heading'] ) ) {
+		if ( ! empty( $_POST['heading'] && 'NaN' !== $_POST['heading'] ) ) {
 			update_post_meta( $post_id, 'geo_heading', sanitize_text_field( $_POST['heading'] ) );
 		} else {
 			delete_post_meta( $post_id, 'geo_heading' );
