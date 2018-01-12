@@ -102,7 +102,7 @@ abstract class Weather_Provider {
 	 */
 	public static function get_icon( $icon, $summary ) {
 		$sprite = plugins_url( 'weather-icons.svg', dirname( __FILE__ ) );
-		return '<span aria-label=' . $summary . '" title=' . $summary . '" ><svg class="svg-icon svg-' . $icon . '" aria-hidden="true"><use xlink:href="' . $sprite . '#' . $icon . '"></use></svg></span>';
+		return '<span aria-label="' . $summary . '" title="' . $summary . '" ><svg class="svg-icon svg-' . $icon . '" aria-hidden="true"><use xlink:href="' . $sprite . '#' . $icon . '"></use></svg></span>';
 	}
 
 
