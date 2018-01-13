@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.3.0
+Stable tag: 3.3.1
 Requires at least: 4.7
 Tested up to: 4.9.1
 Requires PHP: 5.3
@@ -79,6 +79,11 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+= 3.3.1 ( 2018-01-13 ) =
+* Add configuration setting for both imperial and metric temperatures. Defaults to metric unless locale is `en_us`.
+* Store units in each new post in case the setting is switched
+* Minor bug fixes
+* Check for existence of property before trying to display it
 = 3.3.0 ( 2018-01-11 ) =
 * Introduce Weather Icons, licensed under SIL OFL 1.1
 * Add support for weather providers
