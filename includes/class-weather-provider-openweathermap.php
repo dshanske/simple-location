@@ -30,7 +30,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			'appid' => $this->api,
 			'units' => $this->temp_units,
 		);
-		$return = array();
+		$return = array( 'units' => $this->temp_unit() );
 		if ( $this->latitude && $this->longitude ) {
 			if ( $this->cache_key ) {
 				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );

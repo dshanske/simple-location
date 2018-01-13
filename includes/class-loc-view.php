@@ -82,8 +82,20 @@ class Loc_View {
 		if ( ! isset( $weather['icon'] ) ) {
 			$weather['icon'] = 'wi-thermometer';
 		}
-		$c  = '<br />' . Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'], '' ) );
-		$c .= '<span class="p-temperature">' . round( $weather['temperature'] ) . '&deg;</span>';
+		$units = ifset( $weather['units'] );
+		if ( ! $units ) {
+			switch ( get_option( 'sloc_measurements' ) ) {
+				case 'imperial':
+					$units = 'F';
+					break;
+				default:
+					$units = 'C';
+			}
+		}
+		$c = '<br />' . Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'], '' ) );
+		if ( isset( $weather['temperature'] ) ) {
+			$c .= '<span class="p-temperature">' . round( $weather['temperature'] ) . '&deg;' . $units . '</span>';
+		}
 		return $c;
 	}
 

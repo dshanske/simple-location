@@ -79,6 +79,15 @@ class Loc_Metabox {
 		<?php
 	}
 
+	public static function temp_unit() {
+		switch ( get_option( 'sloc_measurements' ) ) {
+			case 'imperial':
+				return 'F';
+			default:
+				return 'C';
+		}
+	}
+
 
 	public static function metabox( $object, $box ) {
 		wp_nonce_field( 'location_metabox', 'location_metabox_nonce' );
@@ -120,6 +129,7 @@ class Loc_Metabox {
 				<input type="hidden" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" style="width:25%" />
 				<input type="hidden" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" style="width:25%" />
 				<input type="hidden" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" style="width:25%" />
+				<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], self::temp_unit() ); ?>" style="width:25%" />
 			</p>
 		<?php self::geo_public( ifset( $geodata['public'] ) ); ?>
 		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'simple-location' ); ?></span></a>
@@ -277,7 +287,7 @@ class Loc_Metabox {
 			delete_post_meta( $post_id, 'geo_speed' );
 		}
 
-		if ( ! empty( $_POST['heading'] && 'NaN' !== $_POST['heading'] ) ) {
+		if ( ! empty( $_POST['heading'] ) && 'NaN' !== $_POST['heading'] ) {
 			update_post_meta( $post_id, 'geo_heading', sanitize_text_field( $_POST['heading'] ) );
 		} else {
 			delete_post_meta( $post_id, 'geo_heading' );
@@ -288,6 +298,11 @@ class Loc_Metabox {
 		if ( ! empty( $_POST['temperature'] ) ) {
 			$weather['temperature'] = sanitize_text_field( $_POST['temperature'] );
 		}
+
+		if ( ! empty( $_POST['units'] ) ) {
+			$weather['units'] = sanitize_text_field( $_POST['units'] );
+		}
+
 		if ( ! empty( $_POST['humidity'] ) ) {
 			$weather['humidity'] = sanitize_text_field( $_POST['humidity'] );
 		}

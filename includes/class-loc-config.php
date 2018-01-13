@@ -183,6 +183,25 @@ class Loc_Config {
 				// If this is true then each time a post is made with location properties it will update the user location
 			)
 		);
+
+		register_setting(
+			'simloc', // settings page
+			'sloc_measurements', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Units to Display',
+				'show_in_rest' => true,
+				'default'      => self::temp_unit_default(),
+			)
+		);
+	}
+
+	public static function temp_unit_default() {
+		// I cannot foresee every need for imperial but can cover US
+		if ( 'en_US' === get_locale() ) {
+			return 'imperial';
+		}
+		return 'metric';
 	}
 
 	public static function admin_menu() {
@@ -382,6 +401,16 @@ class Loc_Config {
 			'simloc'
 		);
 		add_settings_field(
+			'sloc_measurements', // id
+			__( 'Unit of Measure', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'measure_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_weather', // settings section
+			array(
+				'label_for' => 'sloc_measurements',
+			)
+		);
+		add_settings_field(
 			'sloc_default_weather_provider', // id
 			__( 'Default Weather Provider', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'weather_provider_callback' ), // display callback
@@ -453,6 +482,15 @@ class Loc_Config {
 		$text = get_option( $name );
 		echo '<select name="' . $name . '">';
 		echo '<option value="OpenWeatherMap" ' . selected( $text, 'OpenWeatherMap' ) . '>' . __( 'OpenWeatherMap', 'simple-location' ) . '</option>';
+		echo '</select><br /><br />';
+	}
+
+	public static function measure_callback( array $args ) {
+		$name = $args['label_for'];
+		$text = get_option( $name );
+		echo '<select name="' . $name . '">';
+		echo '<option value="metric" ' . selected( $text, 'metric' ) . '>' . __( 'Metric', 'simple-location' ) . '</option>';
+		echo '<option value="imperial" ' . selected( $text, 'imperial' ) . '>' . __( 'Imperial', 'simple-location' ) . '</option>';
 		echo '</select><br /><br />';
 	}
 

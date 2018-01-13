@@ -26,7 +26,7 @@ abstract class Weather_Provider {
 			'station_id' => null,
 			'cache_key'  => 'slocw',
 			'cache_time' => 600,
-			'temp_units' => 'imperial',
+			'temp_units' => get_option( 'sloc_measurements' ),
 			'style'      => '',
 		);
 		$defaults         = apply_filters( 'sloc_weather_provider_defaults', $defaults );
@@ -68,7 +68,7 @@ abstract class Weather_Provider {
 		$this->longitude = $lng;
 	}
 
-	public function temp_units() {
+	public function temp_unit() {
 		switch ( $this->temp_units ) {
 			case 'imperial':
 				return 'F';
@@ -124,7 +124,7 @@ abstract class Weather_Provider {
 		$return     = '<div class="sloc-weather">';
 		$return    .= $this->get_icon( ifset( $conditions['icon'] ), ifset( $conditions['summary'] ) );
 		if ( isset( $conditions['temperature'] ) ) {
-						$return .= round( $conditions['temperature'] ) . '&deg;' . $this->temp_units();
+						$return .= round( $conditions['temperature'] ) . '&deg;' . $this->temp_unit();
 		}
 			return $return;
 	}
@@ -137,7 +137,7 @@ abstract class Weather_Provider {
 	public function get_current_temperature() {
 			$conditions = $this->get_conditions();
 		if ( isset( $conditions['temperature'] ) ) {
-				return $conditions['temperature'] . '&deg;' . $this->temp_units;
+				return $conditions['temperature'] . '&deg;' . $this->temp_unit();
 		}
 			return '';
 	}

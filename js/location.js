@@ -132,6 +132,9 @@ function getWeather() {
 						jQuery( '#wind_degree' ).val( response.wind.degree ) ;
 					}
 				}
+				if ( 'units' in response ) {
+					jQuery( '#units' ).val( response.units ) ;
+				}
 				console.log( response );
 			}
 		},
