@@ -81,7 +81,9 @@ jQuery( document ).ready( function( $ ) {
 							$( '#post-timezone' ).val( response.timezone ) ;
 							$( '#post-timezone-label' ).text( response.timezone );
 						}
-						console.log( response );
+						if ( window.console ) {
+							console.log( response );
+						}
 					}
 				},
 				error: function( request, status, error ) {
