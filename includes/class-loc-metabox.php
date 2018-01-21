@@ -107,13 +107,17 @@ class Loc_Metabox {
 		<div class="location hide-if-no-js">
 			<h3>Location</h3>
 			<p>
-				<a
+				<button
 					class="lookup-address-button button button-primary"
 					aria-label="<?php _e( 'Location Lookup', 'simple-location' ); ?>"
 					title="<?php _e( 'Location Lookup', 'simple-location' ); ?>
 				">
 					<?php _e( 'Use My Current Location', 'simple-location' ); ?>
-				</a>
+				</button>
+
+				<button class="clear-location-button button">
+					<?php _e( 'Clear Location', 'simple-location' ); ?>
+				</button>
 			</p>
 
 			<label for="address"><?php _e( 'Location Name:', 'simple-location' ); ?></label>
@@ -138,19 +142,66 @@ class Loc_Metabox {
 			</p>
 
 			<?php self::geo_public( ifset( $geodata['public'] ) ); ?>
+
+			<p>
+				<a href="#location-details" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'simple-location' ); ?></a>
+			</p>
+			<div id="location-details" class="hide-if-js">
+				<p> <?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
+					<br />
+					<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
+					<input type="text" name="location-name" id="location-name" value="" class="widefat" />
+					<br /></br />
+
+					<label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label>
+					<input type="text" name="street-address" id="street-address" value="" class="widefat" />
+
+					<p>
+						<label for="extended-address"><?php _e( 'Extended Address', 'simple-location' ); ?></label>
+						<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
+					</p>
+
+					<p>
+						<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
+						<input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" class="widefat" />
+					</p>
+					<p>
+						<label for="region"><?php _e( 'State/County/Province', 'simple-location' ); ?></label>
+						<input type="text" name="region" id="region" value="" class="widefat" style="width:75%" />
+						<label for="country-code"><?php _e( 'Country Code', 'simple-location' ); ?></label>
+						<input type="text" name="country-code" id="country-code" value="" size="2" />
+					</p>
+					<p>
+						<label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
+						<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
+					</p>
+					<p>
+						<label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label>
+						<input type="text" name="postal-code" id="postal-code" value="" class="widefat" style="width:25%" />
+
+						<br />
+
+						<label for="country-name"><?php _e( 'Country Name', 'simple-location' ); ?></label>
+						<input type="text" name="country-name" id="country-name" value="" class="widefat" style="width:40%" />
+					</p>
+
+				<div class="button-group">
+					<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
+				</div>
+			</div>
 		</div>
 
 		<div class="weather-data hide-if-no-js">
 			<h3>Weather</h3>
 
 			<p>
-				<a
+				<button
 					class="lookup-weather-button button button-primary"
 					aria-label="<?php _e( 'Weather Lookup', 'simple-location' ); ?>"
 					title="<?php _e( 'Weather Lookup', 'simple-location' ); ?>
 				">
 					<?php _e( 'Get the Weather', 'simple-location' ); ?>
-				</a>
+				</button>
 			</p>
 
 			<label for="temperature"><?php _e( 'Temperature: ', 'simple-location' ); ?></label>
@@ -165,54 +216,6 @@ class Loc_Metabox {
 			<input type="hidden" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" style="width:25%" />
 			<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], self::temp_unit() ); ?>" style="width:25%" />
 		</div>
-
-		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'simple-location' ); ?></span></a>
-			<div id="location-detail" class="hide-if-js">
-			<br />
-			<a class="clear-location-button button-link hide-if-no-js"><?php _e( 'Clear Location', 'simple-location' ); ?></a>
-
-		<p> <?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
-			<br />
-			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
-			<input type="text" name="location-name" id="location-name" value="" class="widefat" />
-			<br /></br />
-
-			<label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label>
-			<input type="text" name="street-address" id="street-address" value="" class="widefat" />
-
-			<p>
-				<label for="extended-address"><?php _e( 'Extended Address', 'simple-location' ); ?></label>
-				<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
-			</p>
-
-			<p>
-				<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
-				<input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" class="widefat" />
-			</p>
-			<p>
-				<label for="region"><?php _e( 'State/County/Province', 'simple-location' ); ?></label>
-				<input type="text" name="region" id="region" value="" class="widefat" style="width:75%" />
-				<label for="country-code"><?php _e( 'Country Code', 'simple-location' ); ?></label>
-				<input type="text" name="country-code" id="country-code" value="" size="2" />
-			</p>
-			<p>
-				<label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
-				<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
-			</p>
-			<p>
-				<label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label>
-				<input type="text" name="postal-code" id="postal-code" value="" class="widefat" style="width:25%" />
-
-				<br />
-
-				<label for="country-name"><?php _e( 'Country Name', 'simple-location' ); ?></label>
-				<input type="text" name="country-name" id="country-name" value="" class="widefat" style="width:40%" />
-			</p>
-
-		<div class="button-group">
-			<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
-		</div>
-	</div>
 	<?php
 	}
 

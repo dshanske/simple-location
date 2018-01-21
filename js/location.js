@@ -38,7 +38,7 @@ jQuery( document ).ready( function( $ ) {
 					latitude: $( '#latitude' ).val(),
 					longitude: $( '#longitude' ).val(),
 					altitude: $( '#altitude' ).val(),
-					map_zoom: $( '#map_zoom' ).val()
+					map_zoom: $( '#map_zoom' ).val() // eslint-disable-line camelcase
 				},
 				success: function( response ) {
 					if ( 'undefined' == typeof response ) {
@@ -109,38 +109,39 @@ jQuery( document ).ready( function( $ ) {
 			},
 			success: function( response ) {
 				if ( 'undefined' == typeof response ) {
-				} else {
-					if ( ( 'temperature' in response ) && ( '' === $( '#temperature' ).val() ) ) {
-						$( '#temperature' ).val( response.temperature ) ;
-					}
-					if ( ( 'humidity' in response ) && ( '' === $( '#humidity' ).val() ) ) {
-						$( '#humidity' ).val( response.humidity ) ;
-					}
-					if ( ( 'icon' in response ) && ( '' === $( '#weather_icon' ).val() ) ) {
-						$( '#weather_icon' ).val( response.icon ) ;
-					}
-					if ( ( 'summary' in response ) && ( '' === $( '#weather_summary' ).val() ) ) {
-						$( '#weather_summary' ).val( response.summary ) ;
-					}
-					if ( ( 'pressure' in response ) && ( '' === $( '#pressure' ).val() ) ) {
-						$( '#pressure' ).val( response.pressure ) ;
-					}
-					if ( ( 'visibility' in response ) && ( '' === $( '#visibility' ).val() ) ) {
-						$( '#visibility' ).val( response.visibility ) ;
-					}
-					if ( 'wind' in response ) {
-						if ( 'speed' in response.wind ) {
-							$( '#wind_speed' ).val( response.wind.speed ) ;
-						}
-						if ( 'degree' in response.wind ) {
-							$( '#wind_degree' ).val( response.wind.degree ) ;
-						}
-					}
-					if ( 'units' in response ) {
-						$( '#units' ).val( response.units ) ;
-					}
-					console.log( response );
+					return;
 				}
+
+				if ( ( 'temperature' in response ) && ( '' === $( '#temperature' ).val() ) ) {
+					$( '#temperature' ).val( response.temperature ) ;
+				}
+				if ( ( 'humidity' in response ) && ( '' === $( '#humidity' ).val() ) ) {
+					$( '#humidity' ).val( response.humidity ) ;
+				}
+				if ( ( 'icon' in response ) && ( '' === $( '#weather_icon' ).val() ) ) {
+					$( '#weather_icon' ).val( response.icon ) ;
+				}
+				if ( ( 'summary' in response ) && ( '' === $( '#weather_summary' ).val() ) ) {
+					$( '#weather_summary' ).val( response.summary ) ;
+				}
+				if ( ( 'pressure' in response ) && ( '' === $( '#pressure' ).val() ) ) {
+					$( '#pressure' ).val( response.pressure ) ;
+				}
+				if ( ( 'visibility' in response ) && ( '' === $( '#visibility' ).val() ) ) {
+					$( '#visibility' ).val( response.visibility ) ;
+				}
+				if ( 'wind' in response ) {
+					if ( 'speed' in response.wind ) {
+						$( '#wind_speed' ).val( response.wind.speed ) ;
+					}
+					if ( 'degree' in response.wind ) {
+						$( '#wind_degree' ).val( response.wind.degree ) ;
+					}
+				}
+				if ( 'units' in response ) {
+					$( '#units' ).val( response.units ) ;
+				}
+				console.log( response );
 			},
 			error: function( request, status, error ) {
 				alert( request.responseText );
@@ -173,14 +174,17 @@ jQuery( document ).ready( function( $ ) {
 
 
 	$( document )
-		.on( 'click', '.lookup-weather-button', function() {
+		.on( 'click', '.lookup-weather-button', function( event ) {
 			getWeather();
+			event.preventDefault();
 		})
-		.on( 'click', '.lookup-address-button', function() {
+		.on( 'click', '.lookup-address-button', function( event ) {
 			getFullLocation();
+			event.preventDefault();
 		})
-		.on( 'click', '.clear-location-button', function() {
+		.on( 'click', '.clear-location-button', function( event ) {
 			clearLocation();
+			event.preventDefault();
 		})
 		.on( 'click', '.save-venue-button', function() {
 			$.ajax({
@@ -220,7 +224,7 @@ jQuery( document ).ready( function( $ ) {
 	});
 
 	$postTimezoneSelect = $( '#post-timezone-select' );
-	$locationDetail = $( '#location-detail' );
+	$locationDetail = $( '#location-details' );
 	$labelDetail = $( '#timezone-browser' );
 
 	$postTimezoneSelect.siblings( 'a.edit-post-timezone' ).click( function( event ) {
@@ -245,7 +249,7 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
-	$locationDetail.siblings( 'a.show-location-details' ).click( function( event ) {
+	$( 'a.show-location-details' ).click( function( event ) {
 		if ( $locationDetail.is( ':hidden' ) ) {
 			$locationDetail.slideDown( 'fast' ).siblings( 'a.hide-location-details' ).show().focus();
 		} else {
