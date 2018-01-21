@@ -1,0 +1,20 @@
+.latlong {
+	overflow: auto;
+	height: 100%;
+}
+.latlong label {
+	float: left;
+	width: 46%;
+	margin: 0 1%;
+}
+.latlong label:first-of-type {
+	margin-left: 0;
+	width: 48%;
+}
+.latlong label:last-of-type {
+	margin-right: 0;
+	width: 49%;
+}
+.latlong input {
+	width: 100%;
+}
