@@ -31,7 +31,7 @@ class Loc_Metabox {
 		if ( in_array( get_current_screen()->id, $screens, true ) || 'profile.php' === $hook_suffix ) {
 			wp_enqueue_script(
 				'sloc_location',
-				plugins_url( 'js/location.js', dirname(__FILE__) ),
+				plugins_url( 'js/location.js', dirname( __FILE__ ) ),
 				array( 'jquery' ),
 				Simple_Location_Plugin::$version
 			);
@@ -196,12 +196,11 @@ class Loc_Metabox {
 	public static function profile_text_field( $user, $key, $title, $description ) {
 	?>
 	<tr>
-	 <th><label for="<?php echo esc_html( $key ); ?>"><?php echo esc_html( $title ); ?></label></th>
-
-	 <td>
-	  <input type="text" name="<?php echo esc_html( $key ); ?>" id="<?php echo esc_html( $key ); ?>" value="<?php echo esc_attr( get_the_author_meta( 'geo_' . $key, $user->ID ) ); ?>" class="regular-text" /><br />
-	  <span class="description"><?php echo esc_html( $description ); ?></span>
-	 </td>
+		<th><label for="<?php echo esc_html( $key ); ?>"><?php echo esc_html( $title ); ?></label></th>
+		<td>
+			<input type="text" name="<?php echo esc_html( $key ); ?>" id="<?php echo esc_html( $key ); ?>" value="<?php echo esc_attr( get_the_author_meta( 'geo_' . $key, $user->ID ) ); ?>" class="regular-text" /><br />
+			<span class="description"><?php echo esc_html( $description ); ?></span>
+		</td>
 	</tr>
 	<?php
 	}
