@@ -18,7 +18,7 @@ class Post_Timezone {
 	public static function enqueue() {
 		wp_enqueue_script(
 			'jstz',
-			plugins_url( 'simple-location/js/jstz.min.js' ),
+			plugins_url( 'js/jstz.min.js', dirname(__FILE__) ),
 			array(),
 			Simple_Location_Plugin::$version
 		);
@@ -56,7 +56,7 @@ class Post_Timezone {
 ?>
 		<div class="misc-pub-section misc-pub-timezone">
 		<span class="dashicons dashicons-clock" id="timezone-browser"></span>
-			<label for="post-timezone"><?php _e( 'Timezone:', 'simple-location' ); ?></label> 
+			<label for="post-timezone"><?php _e( 'Timezone:', 'simple-location' ); ?></label>
 			<span id="post-timezone-label">
 			<?php
 			if ( $timezone ) {
@@ -76,7 +76,7 @@ class Post_Timezone {
 <br />
 		<a href="#post_timezone" class="save-post-timezone hide-if-no-js button">OK</a>
 		<a href="#post_timezone" class="cancel-post-timezone hide-if-no-js button-cancel">Cancel</a>
-</div> 
+</div>
 </div>
 <?php
 	}
@@ -185,4 +185,3 @@ class Post_Timezone {
 	}
 
 } // End Class
-

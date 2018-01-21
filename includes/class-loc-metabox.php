@@ -31,7 +31,7 @@ class Loc_Metabox {
 		if ( in_array( get_current_screen()->id, $screens, true ) || 'profile.php' === $hook_suffix ) {
 			wp_enqueue_script(
 				'sloc_location',
-				plugins_url( 'simple-location/js/location.js' ),
+				plugins_url( 'js/location.js', dirname(__FILE__) ),
 				array( 'jquery' ),
 				Simple_Location_Plugin::$version
 			);
@@ -148,7 +148,7 @@ class Loc_Metabox {
 
 			<br /><br />
 			<label for="extended-address"><?php _e( 'Extended Address', 'simple-location' ); ?></label>
-			<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />  
+			<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
 			<br /><br />
 
 		<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
