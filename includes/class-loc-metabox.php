@@ -98,10 +98,18 @@ class Loc_Metabox {
 			$geodata = array( 'public' => get_option( 'geo_public' ) );
 		}
 ?>
-		<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label><br />
-		<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" style="width:90%" data-role="none" />
-		<a class="hide-if-no-js lookup-address-button">
-		<span class="dashicons dashicons-location" aria-label="<?php __( 'Location Lookup', 'simple-location' ); ?>" title="<?php __( 'Location Lookup', 'simple-location' ); ?>"></span></a>
+		<p class="hide-if-no-js">
+			<a
+				class="lookup-address-button button button-primary"
+				aria-label="<?php _e( 'Location Lookup', 'simple-location' ); ?>"
+				title="<?php _e( 'Location Lookup', 'simple-location' ); ?>
+			">
+				<?php _e( 'Use My Current Location', 'simple-location' ); ?>
+			</a>
+		</p>
+
+		<label for="address"><?php _e( 'Location Name:', 'simple-location' ); ?></label>
+		<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" data-role="none" />
 
 			<p class="latlong">
 				<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
