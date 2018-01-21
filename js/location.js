@@ -1,29 +1,164 @@
-function getFullLocation() {
-	var options = {
-		enableHighAccuracy: true,
-		maximumAge: 600000
-	};
-	if ( navigator.geolocation ) {
-		navigator.geolocation.getCurrentPosition( reverseLookup, error, options );
-	} else {
-		alert( 'Geolocation is not supported by this browser.' );
-	}
-}
+jQuery( document ).ready( function( $ ) {
 
-function reverseLookup( position ) {
-	if ( '' === jQuery( '#longitude' ).val() ) {
-		jQuery( '#longitude' ).val( position.coords.longitude ) ;
+	function getFullLocation() {
+		var options = {
+			enableHighAccuracy: true,
+			maximumAge: 600000
+		};
+		if ( navigator.geolocation ) {
+			navigator.geolocation.getCurrentPosition( reverseLookup, error, options );
+		} else {
+			alert( 'Geolocation is not supported by this browser.' );
+		}
 	}
-	if ( '' === jQuery( '#latitude' ).val() ) {
-		jQuery( '#latitude' ).val( position.coords.latitude ) ;
+
+	function reverseLookup( position ) {
+		if ( '' === $( '#longitude' ).val() ) {
+			$( '#longitude' ).val( position.coords.longitude ) ;
+		}
+		if ( '' === $( '#latitude' ).val() ) {
+			$( '#latitude' ).val( position.coords.latitude ) ;
+		}
+		$( '#accuracy' ).val( position.coords.accuracy );
+		$( '#heading' ).val( position.coords.heading );
+		$( '#speed' ).val( position.coords.speed );
+		$( '#altitude' ).val( position.coords.altitude );
+		$( '#map_zoom' ).val( parseInt( Math.log2( 591657550.5 / ( position.coords.accuracy * 45 ) ) ) + 1 );
+		$.ajax({
+				type: 'GET',
+
+				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
+				url: sloc.api_url + 'reverse/',
+				beforeSend: function( xhr ) {
+
+					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
+					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+				},
+				data: {
+					latitude: $( '#latitude' ).val(),
+					longitude: $( '#longitude' ).val(),
+					altitude: $( '#altitude' ).val(),
+					map_zoom: $( '#map_zoom' ).val()
+				},
+				success: function( response ) {
+					if ( 'undefined' == typeof response ) {
+					} else {
+						if ( ( 'display-name' in response ) && ( '' === $( '#address' ).val() ) ) {
+							$( '#address' ).val( response['display-name']) ;
+						}
+						if ( 'name' in response ) {
+							$( '#location-name' ).val( response.name ) ;
+						}
+						if ( 'latitude' in response ) {
+							$( '#latitude' ).val( response.latitude ) ;
+						}
+						if ( 'longitude' in response ) {
+							$( '#longitude' ).val( response.longitude ) ;
+						}
+						if ( 'street-address' in response ) {
+							$( '#street-address' ).val( response['street-address']) ;
+
+						}
+						if ( 'extended-address' in response ) {
+							$( '#extended-address' ).val( response['extended-address']) ;
+						}
+						if ( 'locality' in response ) {
+							$( '#locality' ).val( response.locality ) ;
+						}
+						if ( 'region' in response ) {
+							$( '#region' ).val( response.region ) ;
+						}
+						if ( 'postal-code' in response ) {
+							$( '#postal-code' ).val( response['postal-code']) ;
+						}
+						if ( 'country-name' in response ) {
+							$( '#country-name' ).val( response['country-name']) ;
+						}
+						if ( 'country-code' in response ) {
+							$( '#country-code' ).val( response['country-code']) ;
+						}
+						if ( 'timezone' in response ) {
+							$( '#post-timezone' ).val( response.timezone ) ;
+							$( '#post-timezone-label' ).text( response.timezone );
+						}
+						console.log( response );
+					}
+				},
+				error: function( request, status, error ) {
+					alert( request.responseText );
+				}
+			});
 	}
-	jQuery( '#accuracy' ).val( position.coords.accuracy );
-	jQuery( '#heading' ).val( position.coords.heading );
-	jQuery( '#speed' ).val( position.coords.speed );
-	jQuery( '#altitude' ).val( position.coords.altitude );
-	jQuery( '#map_zoom' ).val( parseInt( Math.log2( 591657550.5 / ( position.coords.accuracy * 45 ) ) ) + 1 );
-	jQuery.ajax({
+
+	function getWeather() {
+		$.ajax({
 			type: 'GET',
+
+			// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
+			url: sloc.api_url + 'weather/',
+			beforeSend: function( xhr ) {
+
+				// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
+				xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+			},
+			data: {
+				latitude: $( '#latitude' ).val(),
+				longitude: $( '#longitude' ).val()
+			},
+			success: function( response ) {
+				if ( 'undefined' == typeof response ) {
+				} else {
+					if ( ( 'temperature' in response ) && ( '' === $( '#temperature' ).val() ) ) {
+						$( '#temperature' ).val( response.temperature ) ;
+					}
+					if ( ( 'humidity' in response ) && ( '' === $( '#humidity' ).val() ) ) {
+						$( '#humidity' ).val( response.humidity ) ;
+					}
+					if ( ( 'icon' in response ) && ( '' === $( '#weather_icon' ).val() ) ) {
+						$( '#weather_icon' ).val( response.icon ) ;
+					}
+					if ( ( 'summary' in response ) && ( '' === $( '#weather_summary' ).val() ) ) {
+						$( '#weather_summary' ).val( response.summary ) ;
+					}
+					if ( ( 'pressure' in response ) && ( '' === $( '#pressure' ).val() ) ) {
+						$( '#pressure' ).val( response.pressure ) ;
+					}
+					if ( ( 'visibility' in response ) && ( '' === $( '#visibility' ).val() ) ) {
+						$( '#visibility' ).val( response.visibility ) ;
+					}
+					if ( 'wind' in response ) {
+						if ( 'speed' in response.wind ) {
+							$( '#wind_speed' ).val( response.wind.speed ) ;
+						}
+						if ( 'degree' in response.wind ) {
+							$( '#wind_degree' ).val( response.wind.degree ) ;
+						}
+					}
+					if ( 'units' in response ) {
+						$( '#units' ).val( response.units ) ;
+					}
+					console.log( response );
+				}
+			},
+			error: function( request, status, error ) {
+				alert( request.responseText );
+			}
+		});
+	}
+
+
+	$( document ).on( 'click', '.lookup-weather-button', function() {
+		getWeather();
+	});
+
+
+	$( document ).on( 'click', '.lookup-address-button', function() {
+		getFullLocation();
+	});
+
+	$( document ).on( 'click', '.save-venue-button', function() {
+		$.ajax({
+			type: 'POST',
 
 			// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
 			url: sloc.api_url + 'reverse/',
@@ -33,183 +168,49 @@ function reverseLookup( position ) {
 				xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
 			},
 			data: {
-				latitude: jQuery( '#latitude' ).val(),
-				longitude: jQuery( '#longitude' ).val(),
-				altitude: jQuery( '#altitude' ).val(),
-				map_zoom: jQuery( '#map_zoom' ).val()
+				action: 'save_venue_data',
+				latitude: $( '#latitude' ).val(),
+				longitude: $( '#longitude' ).val(),
+				location_name: $( '#location-name' ).val(),
+				street_address: $( '#street-address' ).val(),
+				extended_address: $( '#extended-address' ).val(),
+				locality: $( '#locality' ).val(),
+				region: $( '#region' ).val(),
+				postal_code: $( '#postal-code' ).val(),
+				country_name: $( '#country-name' ).val(),
+				country_code: $( '#country-code' ).val()
 			},
 			success: function( response ) {
-				if ( 'undefined' == typeof response ) {
-				} else {
-					if ( ( 'display-name' in response ) && ( '' === jQuery( '#address' ).val() ) ) {
-						jQuery( '#address' ).val( response['display-name']) ;
+				if ( 'undefined' !== typeof response ) {
+					if ( 'undefined' !== typeof response ) {
 					}
-					if ( 'name' in response ) {
-						jQuery( '#location-name' ).val( response.name ) ;
-					}
-					if ( 'latitude' in response ) {
-						jQuery( '#latitude' ).val( response.latitude ) ;
-					}
-					if ( 'longitude' in response ) {
-						jQuery( '#longitude' ).val( response.longitude ) ;
-					}
-					if ( 'street-address' in response ) {
-						jQuery( '#street-address' ).val( response['street-address']) ;
-
-					}
-					if ( 'extended-address' in response ) {
-						jQuery( '#extended-address' ).val( response['extended-address']) ;
-					}
-					if ( 'locality' in response ) {
-						jQuery( '#locality' ).val( response.locality ) ;
-					}
-					if ( 'region' in response ) {
-						jQuery( '#region' ).val( response.region ) ;
-					}
-					if ( 'postal-code' in response ) {
-						jQuery( '#postal-code' ).val( response['postal-code']) ;
-					}
-					if ( 'country-name' in response ) {
-						jQuery( '#country-name' ).val( response['country-name']) ;
-					}
-					if ( 'country-code' in response ) {
-						jQuery( '#country-code' ).val( response['country-code']) ;
-					}
-					if ( 'timezone' in response ) {
-						jQuery( '#post-timezone' ).val( response.timezone ) ;
-						jQuery( '#post-timezone-label' ).text( response.timezone );
-					}
-					console.log( response );
 				}
+				console.log( response );
 			},
 			error: function( request, status, error ) {
 				alert( request.responseText );
 			}
 		});
-}
-
-function getWeather() {
-	jQuery.ajax({
-		type: 'GET',
-
-		// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-		url: sloc.api_url + 'weather/',
-		beforeSend: function( xhr ) {
-
-			// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-			xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
-		},
-		data: {
-			latitude: jQuery( '#latitude' ).val(),
-			longitude: jQuery( '#longitude' ).val()
-		},
-		success: function( response ) {
-			if ( 'undefined' == typeof response ) {
-			} else {
-				if ( ( 'temperature' in response ) && ( '' === jQuery( '#temperature' ).val() ) ) {
-					jQuery( '#temperature' ).val( response.temperature ) ;
-				}
-				if ( ( 'humidity' in response ) && ( '' === jQuery( '#humidity' ).val() ) ) {
-					jQuery( '#humidity' ).val( response.humidity ) ;
-				}
-				if ( ( 'icon' in response ) && ( '' === jQuery( '#weather_icon' ).val() ) ) {
-					jQuery( '#weather_icon' ).val( response.icon ) ;
-				}
-				if ( ( 'summary' in response ) && ( '' === jQuery( '#weather_summary' ).val() ) ) {
-					jQuery( '#weather_summary' ).val( response.summary ) ;
-				}
-				if ( ( 'pressure' in response ) && ( '' === jQuery( '#pressure' ).val() ) ) {
-					jQuery( '#pressure' ).val( response.pressure ) ;
-				}
-				if ( ( 'visibility' in response ) && ( '' === jQuery( '#visibility' ).val() ) ) {
-					jQuery( '#visibility' ).val( response.visibility ) ;
-				}
-				if ( 'wind' in response ) {
-					if ( 'speed' in response.wind ) {
-						jQuery( '#wind_speed' ).val( response.wind.speed ) ;
-					}
-					if ( 'degree' in response.wind ) {
-						jQuery( '#wind_degree' ).val( response.wind.degree ) ;
-					}
-				}
-				if ( 'units' in response ) {
-					jQuery( '#units' ).val( response.units ) ;
-				}
-				console.log( response );
-			}
-		},
-		error: function( request, status, error ) {
-			alert( request.responseText );
-		}
 	});
-}
 
+	function clearLocation() {
+		document.getElementById( 'latitude' ).value = '';
+		document.getElementById( 'longitude' ).value = '';
+		document.getElementById( 'street-address' ).value = '';
+		document.getElementById( 'extended-address' ).value = '';
+		document.getElementById( 'locality' ).value = '';
+		document.getElementById( 'region' ).value = '';
+		document.getElementById( 'postal-code' ).value = '';
+		document.getElementById( 'country-name' ).value = '';
+		document.getElementById( 'country-code' ).value = '';
+		document.getElementById( 'address' ).value = '';
+		document.getElementById( 'location-name' ).value = '';
+	}
 
-jQuery( document ).on( 'click', '.lookup-weather-button', function( $ ) {
-	getWeather();
-});
+	function error( err ) {
+		alert( err.message );
+	}
 
-
-jQuery( document ).on( 'click', '.lookup-address-button', function( $ ) {
-	getFullLocation();
-});
-
-jQuery( document ).on( 'click', '.save-venue-button', function( $ ) {
-	jQuery.ajax({
-		type: 'POST',
-
-		// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-		url: sloc.api_url + 'reverse/',
-		beforeSend: function( xhr ) {
-
-			// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-			xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
-		},
-		data: {
-			action: 'save_venue_data',
-			latitude: jQuery( '#latitude' ).val(),
-			longitude: jQuery( '#longitude' ).val(),
-			location_name: jQuery( '#location-name' ).val(),
-			street_address: jQuery( '#street-address' ).val(),
-			extended_address: jQuery( '#extended-address' ).val(),
-			locality: jQuery( '#locality' ).val(),
-			region: jQuery( '#region' ).val(),
-			postal_code: jQuery( '#postal-code' ).val(),
-			country_name: jQuery( '#country-name' ).val(),
-			country_code: jQuery( '#country-code' ).val()
-		},
-		success: function( response ) {
-			if ( 'undefined' !== typeof response ) {
-				if ( 'undefined' !== typeof response ) {
-				}
-			}
-			console.log( response );
-		},
-		error: function( request, status, error ) {
-			alert( request.responseText );
-		}
-	});
-});
-
-function clearLocation() {
-	document.getElementById( 'latitude' ).value = '';
-	document.getElementById( 'longitude' ).value = '';
-	document.getElementById( 'street-address' ).value = '';
-	document.getElementById( 'extended-address' ).value = '';
-	document.getElementById( 'locality' ).value = '';
-	document.getElementById( 'region' ).value = '';
-	document.getElementById( 'postal-code' ).value = '';
-	document.getElementById( 'country-name' ).value = '';
-	document.getElementById( 'country-code' ).value = '';
-	document.getElementById( 'address' ).value = '';
-	document.getElementById( 'location-name' ).value = '';
-}
-
-function error( err ) {
-	alert( err.message );
-}
-
-jQuery( document ).ready( function( $ ) {
 	$postTimezoneSelect = $( '#post-timezone-select' );
 	$locationDetail = $( '#location-detail' );
 	$labelDetail = $( '#timezone-browser' );
