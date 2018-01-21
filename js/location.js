@@ -177,6 +177,9 @@ jQuery( document ).ready( function( $ ) {
 		.on( 'click', '.lookup-address-button', function() {
 			getFullLocation();
 		})
+		.on( 'click', '.clear-location-button', function() {
+			clearLocation();
+		})
 		.on( 'click', '.save-venue-button', function() {
 			$.ajax({
 				type: 'POST',

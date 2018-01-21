@@ -135,7 +135,7 @@ class Loc_Metabox {
 		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'simple-location' ); ?></span></a>
 			<div id="location-detail" class="hide-if-js">
 			<br />
-			<a class="clear-location-button button-link hide-if-no-js" onclick="clearLocation();return false;"><?php _e( 'Clear Location', 'simple-location' ); ?></a>
+			<a class="clear-location-button button-link hide-if-no-js"><?php _e( 'Clear Location', 'simple-location' ); ?></a>
 
 		<p> <?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
 			<br />
