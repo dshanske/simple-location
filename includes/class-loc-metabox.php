@@ -105,7 +105,9 @@ class Loc_Metabox {
 		}
 ?>
 		<div class="location hide-if-no-js">
-			<h3>Location</h3>
+			<h3>
+				Location
+			</h3>
 			<p>
 				<button
 					class="lookup-address-button button button-primary"
@@ -217,6 +219,10 @@ class Loc_Metabox {
 			<input type="hidden" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" style="width:25%" />
 			<input type="hidden" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" style="width:25%" />
 			<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], self::temp_unit() ); ?>" style="width:25%" />
+		</div>
+
+		<div class="loading">
+			<img src="<?php echo esc_url( includes_url( '/images/wpspin-2x.gif' ) ); ?>" class="loading-spinner">
 		</div>
 	<?php
 	}

@@ -88,7 +88,8 @@ jQuery( document ).ready( function( $ ) {
 				},
 				error: function( request, status, error ) {
 					alert( request.responseText );
-				}
+				},
+				always: hideLoadingSpinner()
 			});
 	}
 
@@ -141,11 +142,14 @@ jQuery( document ).ready( function( $ ) {
 				if ( 'units' in response ) {
 					$( '#units' ).val( response.units ) ;
 				}
-				console.log( response );
+				if ( console ) {
+					console.log( response );
+				}
 			},
 			error: function( request, status, error ) {
 				alert( request.responseText );
-			}
+			},
+			always: hideLoadingSpinner()
 		});
 	}
 
@@ -171,6 +175,14 @@ jQuery( document ).ready( function( $ ) {
 		});
 	}
 
+	function showLoadingSpinner() {
+		$( '#locationbox-meta' ).addClass( 'is-loading' );
+	}
+
+	function hideLoadingSpinner() {
+		$( '#locationbox-meta' ).removeClass( 'is-loading' );
+	}
+
 	function error( err ) {
 		alert( err.message );
 	}
@@ -178,10 +190,12 @@ jQuery( document ).ready( function( $ ) {
 
 	$( document )
 		.on( 'click', '.lookup-weather-button', function( event ) {
+			showLoadingSpinner();
 			getWeather();
 			event.preventDefault();
 		})
 		.on( 'click', '.lookup-address-button', function( event ) {
+			showLoadingSpinner();
 			getFullLocation();
 			event.preventDefault();
 		})
