@@ -147,17 +147,22 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function clearLocation() {
-		document.getElementById( 'latitude' ).value = '';
-		document.getElementById( 'longitude' ).value = '';
-		document.getElementById( 'street-address' ).value = '';
-		document.getElementById( 'extended-address' ).value = '';
-		document.getElementById( 'locality' ).value = '';
-		document.getElementById( 'region' ).value = '';
-		document.getElementById( 'postal-code' ).value = '';
-		document.getElementById( 'country-name' ).value = '';
-		document.getElementById( 'country-code' ).value = '';
-		document.getElementById( 'address' ).value = '';
-		document.getElementById( 'location-name' ).value = '';
+		var fieldIds = [
+			'latitude',
+			'longitude',
+			'street-address',
+			'extended-address',
+			'locality',
+			'region',
+			'postal-code',
+			'country-name',
+			'country-code',
+			'address',
+			'location-name'
+		];
+		$.each( fieldIds, function( count, val ) {
+			document.getElementById( val ).value = '';
+		});
 	}
 
 	function error( err ) {
