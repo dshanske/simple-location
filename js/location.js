@@ -146,53 +146,6 @@ jQuery( document ).ready( function( $ ) {
 		});
 	}
 
-
-	$( document ).on( 'click', '.lookup-weather-button', function() {
-		getWeather();
-	});
-
-
-	$( document ).on( 'click', '.lookup-address-button', function() {
-		getFullLocation();
-	});
-
-	$( document ).on( 'click', '.save-venue-button', function() {
-		$.ajax({
-			type: 'POST',
-
-			// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-			url: sloc.api_url + 'reverse/',
-			beforeSend: function( xhr ) {
-
-				// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-				xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
-			},
-			data: {
-				action: 'save_venue_data',
-				latitude: $( '#latitude' ).val(),
-				longitude: $( '#longitude' ).val(),
-				location_name: $( '#location-name' ).val(),
-				street_address: $( '#street-address' ).val(),
-				extended_address: $( '#extended-address' ).val(),
-				locality: $( '#locality' ).val(),
-				region: $( '#region' ).val(),
-				postal_code: $( '#postal-code' ).val(),
-				country_name: $( '#country-name' ).val(),
-				country_code: $( '#country-code' ).val()
-			},
-			success: function( response ) {
-				if ( 'undefined' !== typeof response ) {
-					if ( 'undefined' !== typeof response ) {
-					}
-				}
-				console.log( response );
-			},
-			error: function( request, status, error ) {
-				alert( request.responseText );
-			}
-		});
-	});
-
 	function clearLocation() {
 		document.getElementById( 'latitude' ).value = '';
 		document.getElementById( 'longitude' ).value = '';
@@ -210,6 +163,51 @@ jQuery( document ).ready( function( $ ) {
 	function error( err ) {
 		alert( err.message );
 	}
+
+
+	$( document )
+		.on( 'click', '.lookup-weather-button', function() {
+			getWeather();
+		})
+		.on( 'click', '.lookup-address-button', function() {
+			getFullLocation();
+		})
+		.on( 'click', '.save-venue-button', function() {
+			$.ajax({
+				type: 'POST',
+
+				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
+				url: sloc.api_url + 'reverse/',
+				beforeSend: function( xhr ) {
+
+					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
+					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+				},
+				data: {
+					action: 'save_venue_data',
+					latitude: $( '#latitude' ).val(),
+					longitude: $( '#longitude' ).val(),
+					location_name: $( '#location-name' ).val(), // eslint-disable-line camelcase
+					street_address: $( '#street-address' ).val(), // eslint-disable-line camelcase
+					extended_address: $( '#extended-address' ).val(), // eslint-disable-line camelcase
+					locality: $( '#locality' ).val(),
+					region: $( '#region' ).val(),
+					postal_code: $( '#postal-code' ).val(), // eslint-disable-line camelcase
+					country_name: $( '#country-name' ).val(), // eslint-disable-line camelcase
+					country_code: $( '#country-code' ).val() // eslint-disable-line camelcase
+				},
+				success: function( response ) {
+					if ( 'undefined' !== typeof response ) {
+						if ( 'undefined' !== typeof response ) {
+						}
+					}
+					console.log( response );
+				},
+				error: function( request, status, error ) {
+					alert( request.responseText );
+				}
+			});
+	});
 
 	$postTimezoneSelect = $( '#post-timezone-select' );
 	$locationDetail = $( '#location-detail' );
