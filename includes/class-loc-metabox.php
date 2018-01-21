@@ -125,13 +125,13 @@ class Loc_Metabox {
 			<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label>
 			<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" data-role="none" />
 
-			<p class="latlong">
-				<label for="latitude">
+			<p class="field-row">
+				<label for="latitude" class="half">
 					<?php _e( 'Latitude:', 'simple-location' ); ?>
 					<input type="text" name="latitude" id="latitude" class="widefat" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" />
 				</label>
 
-				<label for="longitude">
+				<label for="longitude" class="half">
 					<?php _e( 'Longitude:', 'simple-location' ); ?>
 					<input type="text" name="longitude" id="longitude" class="widefat" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" />
 				</label>
@@ -168,25 +168,31 @@ class Loc_Metabox {
 					<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
 					<input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" class="widefat" />
 				</p>
-				<p>
-					<label for="region"><?php _e( 'State/County/Province', 'simple-location' ); ?></label>
-					<input type="text" name="region" id="region" value="" class="widefat" style="width:75%" />
-
-					<label for="country-code"><?php _e( 'Country Code', 'simple-location' ); ?></label>
-					<input type="text" name="country-code" id="country-code" value="" size="2" />
-				</p>
+				<!--
 				<p>
 					<label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
 					<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
 				</p>
-				<p>
-					<label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label>
-					<input type="text" name="postal-code" id="postal-code" value="" class="widefat" style="width:25%" />
+				-->
+				<p class="field-row">
+					<label for="region" class="three-quarters">
+						<?php _e( 'State/County/Province', 'simple-location' ); ?>
+						<input type="text" name="region" id="region" value="" class="widefat" />
+					</label>
 
-					<br />
+					<label for="postal-code" class="quarter">
+						<?php _e( 'Postal Code', 'simple-location' ); ?>
+						<input type="text" name="postal-code" id="postal-code" value="" class="widefat" />
+					</label>
+				</p>
+				<p class="field-row">
+					<label for="country-name" class="three-quarters"><?php _e( 'Country Name', 'simple-location' ); ?>
+						<input type="text" name="country-name" id="country-name" value="" class="widefat" />
+					</label>
 
-					<label for="country-name"><?php _e( 'Country Name', 'simple-location' ); ?></label>
-					<input type="text" name="country-name" id="country-name" value="" class="widefat" style="width:40%" />
+					<label for="country-code" class="quarter"><?php _e( 'Country Code', 'simple-location' ); ?>
+						<input type="text" name="country-code" id="country-code" value="" class="widefat" />
+					</label>
 				</p>
 
 				<div class="button-group">
@@ -208,17 +214,25 @@ class Loc_Metabox {
 				</button>
 			</p>
 
-			<label for="temperature"><?php _e( 'Temperature: ', 'simple-location' ); ?></label>
-			<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" style="width:10%" />
-			<label for="humidity"><?php _e( 'Humidity: ', 'simple-location' ); ?></label>
-			<input type="text" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" style="width:10%" />
-			<input type="hidden" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" style="width:25%" />
-			<input type="hidden" name="weather_icon" id="weather_icon" value="<?php echo ifset( $weather['icon'], '' ); ?>" style="width:25%" />
-			<input type="hidden" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" style="width:25%" />
-			<input type="hidden" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" style="width:25%" />
-			<input type="hidden" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" style="width:25%" />
-			<input type="hidden" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" style="width:25%" />
-			<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], self::temp_unit() ); ?>" style="width:25%" />
+			<p class="field-row">
+				<label for="temperature" class="quarter">
+					<?php _e( 'Temperature: ', 'simple-location' ); ?>
+					<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
+				</label>
+
+				<label for="humidity" class="quarter">
+					<?php _e( 'Humidity: ', 'simple-location' ); ?>
+					<input type="text" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
+				</label>
+			</p>
+
+			<input type="hidden" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" />
+			<input type="hidden" name="weather_icon" id="weather_icon" value="<?php echo ifset( $weather['icon'], '' ); ?>" />
+			<input type="hidden" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
+			<input type="hidden" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
+			<input type="hidden" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" />
+			<input type="hidden" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" />
+			<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], self::temp_unit() ); ?>" />
 		</div>
 
 		<div class="loading">

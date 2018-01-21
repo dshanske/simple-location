@@ -1,19 +1,31 @@
-.latlong {
+#locationbox-meta label {
+	display: block;
+}
+#locationbox-meta .field-row {
 	overflow: auto;
 	height: 100%;
 }
-.latlong label {
+#locationbox-meta .half {
 	float: left;
 	width: 46%;
 	margin: 0 1%;
 }
-.latlong label:first-of-type {
+#locationbox-meta .half:first-of-type {
 	margin-left: 0;
 	width: 48%;
 }
-.latlong label:last-of-type {
+#locationbox-meta .half:last-of-type {
 	margin-right: 0;
 	width: 49%;
+}
+#locationbox-meta .quarter {
+	float: left;
+	margin-left: 2%;
+	width: 12%;
+}
+#locationbox-meta .three-quarters {
+	float: left;
+	width: 85%;
 }
 
 #locationbox-meta .is-loading {
