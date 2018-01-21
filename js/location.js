@@ -220,14 +220,15 @@ jQuery( document ).ready( function( $ ) {
 	$postTimezoneSelect = $( '#post-timezone-select' );
 	$locationDetail = $( '#location-detail' );
 	$labelDetail = $( '#timezone-browser' );
+
 	$postTimezoneSelect.siblings( 'a.edit-post-timezone' ).click( function( event ) {
-		event.preventDefault();
 		if ( $postTimezoneSelect.is( ':hidden' ) ) {
 			$postTimezoneSelect.slideDown( 'fast', function() {
 				$postTimezoneSelect.find( 'select' ).focus();
 			});
 			$( this ).hide();
 		}
+		event.preventDefault();
 	});
 
 	$postTimezoneSelect.find( '.save-post-timezone' ).click( function( event ) {
@@ -243,12 +244,12 @@ jQuery( document ).ready( function( $ ) {
 	});
 
 	$locationDetail.siblings( 'a.show-location-details' ).click( function( event ) {
-		event.preventDefault();
 		if ( $locationDetail.is( ':hidden' ) ) {
 			$locationDetail.slideDown( 'fast' ).siblings( 'a.hide-location-details' ).show().focus();
 		} else {
 			$locationDetail.slideUp( 'fast' ).siblings( 'a.show-location-details' ).focus();
 		}
+		event.preventDefault();
 	});
 
 	$labelDetail.click( function( event ) {
