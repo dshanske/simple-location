@@ -163,6 +163,9 @@ jQuery( document ).ready( function( $ ) {
 			'address',
 			'location-name'
 		];
+		if ( ! confirm( 'Are you sure you want to remove the location details?' ) ) {
+			return;
+		}
 		$.each( fieldIds, function( count, val ) {
 			document.getElementById( val ).value = '';
 		});
