@@ -135,13 +135,12 @@ class Loc_Metabox {
 					<?php _e( 'Longitude:', 'simple-location' ); ?>
 					<input type="text" name="longitude" id="longitude" class="widefat" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" />
 				</label>
-
-				<input type="hidden" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />
-				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
-				<input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
-				<input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />
-				<input type="hidden" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
 			</p>
+
+			<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
+			<input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
+			<input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />
+			<input type="hidden" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
 
 			<?php self::geo_public( ifset( $geodata['public'] ) ); ?>
 
@@ -150,6 +149,11 @@ class Loc_Metabox {
 			</p>
 			<div id="location-details" class="hide-if-js">
 				<p><?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
+
+				<p>
+					<label for="longitude"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
+					<input type="text" name="map_zoom" id="map_zoom" class="widefat" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />
+				</p>
 
 				<p>
 					<label for="location-name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
