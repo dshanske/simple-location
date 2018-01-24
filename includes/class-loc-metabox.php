@@ -31,8 +31,14 @@ class Loc_Metabox {
 		if ( in_array( get_current_screen()->id, $screens, true ) || 'profile.php' === $hook_suffix ) {
 			wp_enqueue_script(
 				'sloc_location',
-				plugins_url( 'simple-location/js/location.js' ),
+				plugins_url( 'js/location.js', dirname( __FILE__ ) ),
 				array( 'jquery' ),
+				Simple_Location_Plugin::$version
+			);
+			wp_enqueue_style(
+				'sloc_location',
+				plugins_url( 'css/location-admin-meta-box.css', dirname( __FILE__ ) ),
+				array(),
 				Simple_Location_Plugin::$version
 			);
 		}
@@ -98,82 +104,144 @@ class Loc_Metabox {
 			$geodata = array( 'public' => get_option( 'geo_public' ) );
 		}
 ?>
-		<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label><br />
-		<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" style="width:90%" data-role="none" />
-		<a class="hide-if-no-js lookup-address-button">
-		<span class="dashicons dashicons-location" aria-label="<?php __( 'Location Lookup', 'simple-location' ); ?>" title="<?php __( 'Location Lookup', 'simple-location' ); ?>"></span></a>
+		<div class="location hide-if-no-js">
+			<h3>
+				Location
+			</h3>
+			<p>
+				<button
+					class="lookup-address-button button button-primary"
+					aria-label="<?php _e( 'Location Lookup', 'simple-location' ); ?>"
+					title="<?php _e( 'Location Lookup', 'simple-location' ); ?>
+				">
+					<?php _e( 'Use My Current Location', 'simple-location' ); ?>
+				</button>
 
-			<p class="latlong">
-				<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
-				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" style="width:10%" />
-				<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
-				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" style="width:10%" />
-				<label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
-				<input type="text" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" style="width:5%" />
-				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" style="width:10%" />
-				<input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" style="width:10%" />
-				<input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" style="width:10%" />
-				<input type="hidden" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" style="width:10%" />
-
+				<button class="clear-location-button button">
+					<?php _e( 'Clear Location', 'simple-location' ); ?>
+				</button>
 			</p>
-			<p class="weather-data">
-				<a class="hide-if-no-js lookup-weather-button">
-				<span class="dashicons dashicons-palmtree" aria-label="<?php __( 'Weather Lookup', 'simple-location' ); ?>" title="<?php __( 'Weather Lookup', 'simple-location' ); ?>"></span></a>
-				<label for="temperature"><?php _e( 'Temperature: ', 'simple-location' ); ?></label>
-				<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" style="width:10%" />
-				<label for="humidity"><?php _e( 'Humidity: ', 'simple-location' ); ?></label>
-				<input type="text" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" style="width:10%" />
-				<input type="hidden" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="weather_icon" id="weather_icon" value="<?php echo ifset( $weather['icon'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], self::temp_unit() ); ?>" style="width:25%" />
+
+			<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label>
+			<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" data-role="none" />
+
+			<p class="field-row">
+				<label for="latitude" class="half">
+					<?php _e( 'Latitude:', 'simple-location' ); ?>
+					<input type="text" name="latitude" id="latitude" class="widefat" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" />
+				</label>
+
+				<label for="longitude" class="half">
+					<?php _e( 'Longitude:', 'simple-location' ); ?>
+					<input type="text" name="longitude" id="longitude" class="widefat" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" />
+				</label>
 			</p>
-		<?php self::geo_public( ifset( $geodata['public'] ) ); ?>
-		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'simple-location' ); ?></span></a>
-			<div id="location-detail" class="hide-if-js">
-			<br />
-			<a class="clear-location-button button-link hide-if-no-js" onclick="clearLocation();return false;"><?php _e( 'Clear Location', 'simple-location' ); ?></a>
 
-		<p> <?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
-			<br />
-			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
-			<input type="text" name="location-name" id="location-name" value="" class="widefat" />
-			<br /></br />
+			<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
+			<input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
+			<input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />
+			<input type="hidden" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
 
-			<label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label>
-			<input type="text" name="street-address" id="street-address" value="" class="widefat" />
+			<?php self::geo_public( ifset( $geodata['public'] ) ); ?>
 
-			<br /><br />
-			<label for="extended-address"><?php _e( 'Extended Address', 'simple-location' ); ?></label>
-			<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />  
-			<br /><br />
-
-		<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
-		<input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" class="widefat" />
-			<br /><br />
-		<label for="region"><?php _e( 'State/County/Province', 'simple-location' ); ?></label>
-		<input type="text" name="region" id="region" value="" class="widefat" style="width:75%" />
-		<label for="country-code"><?php _e( 'Country Code', 'simple-location' ); ?></label>
-		<input type="text" name="country-code" id="country-code" value="" size="2" />
-		<br /><br />
-			<label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
-			<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
-			<br />
-		<label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label>
-		<input type="text" name="postal-code" id="postal-code" value="" class="widefat" style="width:25%" />
-			<br />
-			<label for="country-name"><?php _e( 'Country Name', 'simple-location' ); ?></label>
-			<input type="text" name="country-name" id="country-name" value="" class="widefat" style="width:40%" />
+			<p>
+				<a href="#location-details" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'simple-location' ); ?></a>
 			</p>
-		<br />
-		<br />
-		<div class="button-group">
-		<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
+			<div id="location-details" class="hide-if-js">
+				<p><?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
+
+				<p>
+					<label for="longitude"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
+					<input type="text" name="map_zoom" id="map_zoom" class="widefat" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />
+				</p>
+
+				<p>
+					<label for="location-name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
+					<input type="text" name="location-name" id="location-name" value="" class="widefat" />
+				</p>
+				<p>
+					<label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label>
+					<input type="text" name="street-address" id="street-address" value="" class="widefat" />
+				</p>
+				<p>
+					<label for="extended-address"><?php _e( 'Extended Address', 'simple-location' ); ?></label>
+					<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
+				</p>
+
+				<p>
+					<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
+					<input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" class="widefat" />
+				</p>
+				<!--
+				<p>
+					<label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
+					<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
+				</p>
+				-->
+				<p class="field-row">
+					<label for="region" class="three-quarters">
+						<?php _e( 'State/County/Province', 'simple-location' ); ?>
+						<input type="text" name="region" id="region" value="" class="widefat" />
+					</label>
+
+					<label for="postal-code" class="quarter">
+						<?php _e( 'Postal Code', 'simple-location' ); ?>
+						<input type="text" name="postal-code" id="postal-code" value="" class="widefat" />
+					</label>
+				</p>
+				<p class="field-row">
+					<label for="country-name" class="three-quarters"><?php _e( 'Country Name', 'simple-location' ); ?>
+						<input type="text" name="country-name" id="country-name" value="" class="widefat" />
+					</label>
+
+					<label for="country-code" class="quarter"><?php _e( 'Country Code', 'simple-location' ); ?>
+						<input type="text" name="country-code" id="country-code" value="" class="widefat" />
+					</label>
+				</p>
+
+				<div class="button-group">
+					<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
+				</div>
+			</div>
 		</div>
-	</div>
+
+		<div class="weather-data hide-if-no-js">
+			<h3>Weather</h3>
+
+			<p>
+				<button
+					class="lookup-weather-button button button-primary"
+					aria-label="<?php _e( 'Weather Lookup', 'simple-location' ); ?>"
+					title="<?php _e( 'Weather Lookup', 'simple-location' ); ?>
+				">
+					<?php _e( 'Get the Weather', 'simple-location' ); ?>
+				</button>
+			</p>
+
+			<p class="field-row">
+				<label for="temperature" class="quarter">
+					<?php _e( 'Temperature: ', 'simple-location' ); ?>
+					<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
+				</label>
+
+				<label for="humidity" class="quarter">
+					<?php _e( 'Humidity: ', 'simple-location' ); ?>
+					<input type="text" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
+				</label>
+			</p>
+
+			<input type="hidden" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" />
+			<input type="hidden" name="weather_icon" id="weather_icon" value="<?php echo ifset( $weather['icon'], '' ); ?>" />
+			<input type="hidden" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
+			<input type="hidden" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
+			<input type="hidden" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" />
+			<input type="hidden" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" />
+			<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], self::temp_unit() ); ?>" />
+		</div>
+
+		<div class="loading">
+			<img src="<?php echo esc_url( includes_url( '/images/wpspin-2x.gif' ) ); ?>" class="loading-spinner">
+		</div>
 	<?php
 	}
 
@@ -196,12 +264,11 @@ class Loc_Metabox {
 	public static function profile_text_field( $user, $key, $title, $description ) {
 	?>
 	<tr>
-	 <th><label for="<?php echo esc_html( $key ); ?>"><?php echo esc_html( $title ); ?></label></th>
-
-	 <td>
-	  <input type="text" name="<?php echo esc_html( $key ); ?>" id="<?php echo esc_html( $key ); ?>" value="<?php echo esc_attr( get_the_author_meta( 'geo_' . $key, $user->ID ) ); ?>" class="regular-text" /><br />
-	  <span class="description"><?php echo esc_html( $description ); ?></span>
-	 </td>
+		<th><label for="<?php echo esc_html( $key ); ?>"><?php echo esc_html( $title ); ?></label></th>
+		<td>
+			<input type="text" name="<?php echo esc_html( $key ); ?>" id="<?php echo esc_html( $key ); ?>" value="<?php echo esc_attr( get_the_author_meta( 'geo_' . $key, $user->ID ) ); ?>" class="regular-text" /><br />
+			<span class="description"><?php echo esc_html( $description ); ?></span>
+		</td>
 	</tr>
 	<?php
 	}
