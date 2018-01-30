@@ -227,16 +227,21 @@ class Loc_Config {
 	}
 
 	public static function simloc_options() {
-		echo '<div class="wrap">';
-		echo '<h2>' . __( 'Simple Location', 'simple-location' ) . '</h2>';
-		echo '<p>';
-		esc_html_e( 'API Keys and Settings for Simple Location', 'simple-location' );
-		echo '</p><hr />';
-		echo '<form method="post" action="options.php">';
-		settings_fields( 'simloc' );
-		do_settings_sections( 'simloc' );
-		submit_button();
-		echo '</form></div>';
+?>
+		<div class="wrap">
+			<h2><?php _e( 'Simple Location', 'simple-location' );?> </h2>
+		<p>
+			<?php esc_html_e( 'API Keys and Settings for Simple Location', 'simple-location' ); ?>
+		</p><hr />
+		<form method="post" action="options.php">
+			<?php 
+				settings_fields( 'simloc' ); 
+				do_settings_sections( 'simloc' );
+				submit_button();
+			?>
+		</form>
+		</div>
+<?php
 	}
 
 	public static function admin_init() {
@@ -450,20 +455,18 @@ class Loc_Config {
 	public static function checkbox_callback( array $args ) {
 		$name    = $args['label_for'];
 		$checked = get_option( $name );
-		echo "<input name='" . $name . "' type='hidden' value='0' />";
-		echo "<input name='" . $name . "' type='checkbox' value='1' " . checked( 1, $checked, false ) . ' /> ';
+		printf( '<input name="%1s" type="hidden" value="0" />', $name );
+		printf( '<input name="%1s" type="checkbox" value="1" %2s />', $name, checked( 1, $checked, false ) );
 	}
 
 	public static function number_callback( array $args ) {
 		$name = $args['label_for'];
-		$text = get_option( $name );
-		echo "<input name='" . $name . "' type='number' min='0' step='1' size='4' class='small-text' value='" . $text . "' /> ";
+		printf( '<input name="%1s" type="number" min="0" step="1" size="4" class="small-text" value="%2s" />', $name, get_option( $name ) );
 	}
 
 	public static function string_callback( array $args ) {
 		$name = $args['label_for'];
-		$text = get_option( $name );
-		echo "<input name='" . $name . "' size='50' class='regular-text' type='string' value='" . $text . "' /> ";
+		printf( '<input name="%1s" size="50" class="regular-text" type="string" value="%2s" />', $name, get_option( $name ) );
 	}
 
 	public static function map_provider_callback( array $args ) {

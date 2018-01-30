@@ -242,7 +242,7 @@ jQuery( document ).ready( function( $ ) {
 
 	$postTimezoneSelect = $( '#post-timezone-select' );
 	$locationDetail = $( '#location-details' );
-	$labelDetail = $( '#timezone-browser' );
+	$TimezoneDetail = $( '#timezone-browser' );
 
 	$postTimezoneSelect.siblings( 'a.edit-post-timezone' ).click( function( event ) {
 		if ( $postTimezoneSelect.is( ':hidden' ) ) {
@@ -266,6 +266,39 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
+	$TimezoneDetail.click( function( event ) {
+		$( '#post-timezone' ).val( jstz.determine().name() );
+		$( '#post-timezone-label' ).text( jstz.determine().name() );
+		event.preventDefault();
+	});
+
+
+	$postLocationSelect = $( '#post-location-select' );
+	$LocationDetail = $( '#location-lookup' );
+
+	$postLocationSelect.siblings( 'a.edit-post-location' ).click( function( event ) {
+		if ( $postLocationSelect.is( ':hidden' ) ) {
+			$postLocationSelect.slideDown( 'fast', function() {
+				$postLocationSelect.find( 'select' ).focus();
+			});
+			$( this ).hide();
+		}
+		event.preventDefault();
+	});
+
+	$postLocationSelect.find( '.save-post-location' ).click( function( event ) {
+		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-post-location' ).show().focus();
+		$( '#post-location-label' ).text( geo_public_options[$( '#post-location' ).val()] );
+		event.preventDefault();
+	});
+
+	$postLocationSelect.find( '.cancel-post-location' ).click( function( event ) {
+		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-post-location' ).show().focus();
+		$( '#post_location' ).val( $( '#hidden_post_location' ).val() );
+		event.preventDefault();
+	});
+
+
 	$( 'a.show-location-details' ).click( function( event ) {
 		if ( $locationDetail.is( ':hidden' ) ) {
 			$locationDetail.slideDown( 'fast' ).siblings( 'a.hide-location-details' ).show().focus();
@@ -275,9 +308,9 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
-	$labelDetail.click( function( event ) {
-		$( '#post-timezone' ).val( jstz.determine().name() );
-		$( '#post-timezone-label' ).text( jstz.determine().name() );
+	$LocationDetail.click( function( event ) {
+		showLoadingSpinner();
+		getFullLocation();
 		event.preventDefault();
 	});
 });

@@ -13,10 +13,10 @@ if ( is_null( $geodata ) ) {
 ?>
 		<div class="location hide-if-no-js">
 			<?php wp_nonce_field( 'location_metabox', 'location_metabox_nonce' ); ?>
-			<h3>
-				Location
-			</h3>
 			<p>
+				<button class="clear-location-button button">
+					<?php _e( 'Clear Location', 'simple-location' ); ?>
+				</button>
 				<button
 					class="lookup-address-button button button-primary"
 					aria-label="<?php _e( 'Location Lookup', 'simple-location' ); ?>"
@@ -25,9 +25,6 @@ if ( is_null( $geodata ) ) {
 					<?php _e( 'Use My Current Location', 'simple-location' ); ?>
 				</button>
 
-				<button class="clear-location-button button">
-					<?php _e( 'Clear Location', 'simple-location' ); ?>
-				</button>
 			</p>
 
 			<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label>
@@ -50,7 +47,6 @@ if ( is_null( $geodata ) ) {
 			<input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />
 			<input type="hidden" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
 
-			<?php Loc_Metabox::geo_public( ifset( $geodata['public'] ) ); ?>
 
 			<p>
 				<a href="#location-details" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'simple-location' ); ?></a>

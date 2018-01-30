@@ -7,6 +7,7 @@ class Loc_Metabox {
 	public static function admin_init() {
 		/* Add meta boxes on the 'add_meta_boxes' hook. */
 		add_action( 'add_meta_boxes', array( 'Loc_Metabox', 'add_meta_boxes' ) );
+				add_action( 'post_submitbox_misc_actions', array( 'Loc_Metabox', 'post_submitbox' ) );
 	}
 
 	public static function init() {
@@ -20,6 +21,44 @@ class Loc_Metabox {
 		add_action( 'personal_options_update', array( 'Loc_Metabox', 'save_user_meta' ), 12 );
 		add_action( 'edit_user_profile_update', array( 'Loc_Metabox', 'save_user_meta' ), 12 );
 	}
+
+	public static function post_submitbox() {
+		$choices = self::geo_public();
+		  global $post;
+		$public = (int) get_post_meta( $post->ID, 'geo_public', true );
+		if ( ! $public ) {
+			$public = (int) get_option( 'geo_public' );
+		}
+				wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
+?>
+				<div class="misc-pub-section misc-pub-location">
+				<span class="dashicons dashicons-location" id="location-lookup" title="<?php _e( 'Lookup Location', 'simple-location');?>"></span>
+						<label for="post-location"><?php _e( 'Location:', 'simple-location' ); ?></label>
+						<span id="post-location-label">
+						<?php
+
+								echo $choices[ $public ];
+?>
+</span>
+						<a href="#post_location" class="edit-post-location hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Location Settings</span></a>
+				<br />
+<div id="post-location-select" class="hide-if-js">
+				<input type="hidden" name="hidden_post_location" id="hidden_post_location" value="<?php echo $public; ?>" />
+				<input type="hidden" name="location_default" id="location_default" value="<?php echo get_option( 'geo_public' ); ?>" />
+				<select name="post_location" id="post-location" width="90%">
+				<?php
+						echo self::geo_public_select( $public );
+						echo '</select>';
+?>
+<br />
+				<a href="#post_location" class="save-post-location hide-if-no-js button">OK</a>
+				<a href="#post_location" class="cancel-post-location hide-if-no-js button-cancel">Cancel</a>
+</div>
+</div>
+<?php
+	}
+
+
 
 	public static function screens() {
 		$screens = array( 'post', 'comment', 'attachment' );
@@ -41,6 +80,11 @@ class Loc_Metabox {
 				array(),
 				Simple_Location_Plugin::$version
 			);
+			wp_localize_script( 
+				'sloc_location',
+				'geo_public_options',
+				self::geo_public()
+			);
 		}
 	}
 
@@ -56,15 +100,21 @@ class Loc_Metabox {
 		);
 	}
 
-	public static function geo_public( $public ) {
-		?>
-		<label for="geo_public"><?php _e( 'Show:', 'simple-location' ); ?></label><br />
-		<select name="geo_public">
-		<option value=0 <?php selected( $public, 0 ); ?>><?php _e( 'Hide', 'simple-location' ); ?></option>
-		<option value=1 <?php selected( $public, 1 ); ?>><?php _e( 'Show Map and Description', 'simple-location' ); ?></option>
-		<option value=2 <?php selected( $public, 2 ); ?>><?php _e( 'Description Only', 'simple-location' ); ?></option>
-		</select><br /><br />
-		<?php
+	public static function geo_public() {
+		return array(
+			0 => __( 'Hide', 'simple-location' ),
+			1 => __( 'Show Map and Description', 'simple-location' ),
+			2 => __( 'Description Only', 'simple-location' ),
+		);
+	}
+
+	public static function geo_public_select( $public ) {
+		$choices = self::geo_public();
+		$return  = '';
+		foreach ( $choices as $value => $text ) {
+			$return .= sprintf( '<option value=%1s %2s>%3s</option>', $value, selected( $public, $value ), $text );
+		}
+		return $return;
 	}
 
 	public static function geo_public_user( $user ) {
@@ -77,9 +127,7 @@ class Loc_Metabox {
 		<tr>
 		<th><label for="geo_public"><?php _e( 'Show:', 'simple-location' ); ?></label></th>
 		<td><select name="geo_public">
-		<option value=0 <?php selected( $public, 0 ); ?>><?php _e( 'Hide', 'simple-location' ); ?></option>
-		<option value=1 <?php selected( $public, 1 ); ?>><?php _e( 'Show Map and Description', 'simple-location' ); ?></option>
-		<option value=2 <?php selected( $public, 2 ); ?>><?php _e( 'Description Only', 'simple-location' ); ?></option>
+		<?php self::geo_public_select( $public ); ?>
 		</select></td>
 		</tr>
 		<?php
@@ -101,16 +149,20 @@ class Loc_Metabox {
 	}
 
 	public static function user_profile( $user ) {
-		echo '<h3>' . esc_html__( 'Last Reported Location', 'simple-location' ) . '</h3>';
-		echo '<p>' . esc_html__( 'This allows you to set the last reported location for this author. See Simple Location settings for options.', 'simple-location' ) . '</p>';
-		echo '<a class="hide-if-no-js lookup-address-button">';
-				echo '<span class="dashicons dashicons-location" aria-label="' . __( 'Location Lookup', 'simple-location' ) . '" title="' . __( 'Location Lookup', 'simple-location' ) . '"></span></a>';
-		echo '<table class="form-table">';
+	?>
+		<h3> <?php esc_html_e( 'Last Reported Location', 'simple-location' ); ?></h3>
+		<p><?php esc_html_e( 'This allows you to set the last reported location for this author. See Simple Location settings for options.', 'simple-location' ); ?></p>
+		<a class="hide-if-no-js lookup-address-button">
+		<span class="dashicons dashicons-location" aria-label="<?php _e( 'Location Lookup', 'simple-location' ); ?>" title="<?php _e( 'Location Lookup', 'simple-location' ); ?>"></span></a>
+		<table class="form-table">
+		<?php
 		self::profile_text_field( $user, 'latitude', __( 'Latitude', 'simple-location' ), 'Description' );
 		self::profile_text_field( $user, 'longitude', __( 'Longitude', 'simple-location' ), 'Description' );
 		self::profile_text_field( $user, 'address', __( 'Address', 'simple-location' ), 'Description' );
 		self::geo_public_user( $user );
-		echo '</table>';
+		?>
+		</table>
+	<?php
 	}
 
 
@@ -144,75 +196,46 @@ class Loc_Metabox {
 		WP_Geo_Data::set_geodata( $author, $geodata );
 	}
 
-	/* Save the meta box's post metadata. */
-	public static function save_post_meta( $post_id ) {
-		/*
-		 * We need to verify this came from our screen and with proper authorization,
-		 * because the save_post action can be triggered at other times.
-		 */
-		if ( ! isset( $_POST['location_metabox_nonce'] ) ) {
-			return;
-		}
-		// Verify that the nonce is valid.
-		if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
-			return;
-		}
-		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-		// Check the user's permissions.
-		if ( isset( $_POST['post_type'] ) && 'page' === $_POST['post_type'] ) {
-			if ( ! current_user_can( 'edit_page', $post_id ) ) {
-				return;
-			}
-		} else {
-			if ( ! current_user_can( 'edit_post', $post_id ) ) {
-				return;
-			}
-		}
-		if ( has_term( '', 'venue' ) ) {
-			return;
-		}
+	public static function save_meta( $meta_type, $object_id ) {
 		/* OK, its safe for us to save the data now. */
 		if ( ! empty( $_POST['latitude'] ) ) {
-			update_post_meta( $post_id, 'geo_latitude', $_POST['latitude'] );
+			update_metadata( $meta_type, $object_id, 'geo_latitude', $_POST['latitude'] );
 		} else {
-			delete_post_meta( $post_id, 'geo_latitude' );
+			delete_metadata( $meta_type, $object_id, 'geo_latitude' );
 		}
 		if ( ! empty( $_POST['longitude'] ) ) {
-			update_post_meta( $post_id, 'geo_longitude', $_POST['longitude'] );
+			update_metadata( $meta_type, $object_id, 'geo_longitude', $_POST['longitude'] );
 		} else {
-			delete_post_meta( $post_id, 'geo_longitude' );
+			delete_metadata( $meta_type, $object_id, 'geo_longitude' );
 		}
 		if ( ! empty( $_POST['address'] ) ) {
-			update_post_meta( $post_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
+			update_metadata( $meta_type, $object_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
 		} else {
-			delete_post_meta( $post_id, 'geo_address' );
+			delete_metadata( $meta_type, $object_id, 'geo_address' );
 		}
 
 		if ( ! empty( $_POST['map_zoom'] ) ) {
-			update_post_meta( $post_id, 'geo_zoom', sanitize_text_field( $_POST['map_zoom'] ) );
+			update_metadata( $meta_type, $object_id, 'geo_zoom', sanitize_text_field( $_POST['map_zoom'] ) );
 		} else {
-			delete_post_meta( $post_id, 'geo_zoom' );
+			delete_metadata( $meta_type, $object_id, 'geo_zoom' );
 		}
 
 		if ( ! empty( $_POST['altitude'] ) ) {
-			update_post_meta( $post_id, 'geo_altitude', sanitize_text_field( $_POST['altitude'] ) );
+			update_metadata( $meta_type, $object_id, 'geo_altitude', sanitize_text_field( $_POST['altitude'] ) );
 		} else {
-			delete_post_meta( $post_id, 'geo_altitude' );
+			delete_metadata( $meta_type, $object_id, 'geo_altitude' );
 		}
 
 		if ( ! empty( $_POST['speed'] ) && 'NaN' !== $_POST['speed'] ) {
-			update_post_meta( $post_id, 'geo_speed', sanitize_text_field( $_POST['speed'] ) );
+			update_metadata( $meta_type, $object_id, 'geo_speed', sanitize_text_field( $_POST['speed'] ) );
 		} else {
-			delete_post_meta( $post_id, 'geo_speed' );
+			delete_metadata( $meta_type, $object_id, 'geo_speed' );
 		}
 
 		if ( ! empty( $_POST['heading'] ) && 'NaN' !== $_POST['heading'] ) {
-			update_post_meta( $post_id, 'geo_heading', sanitize_text_field( $_POST['heading'] ) );
+			update_metadata( $meta_type, $object_id, 'geo_heading', sanitize_text_field( $_POST['heading'] ) );
 		} else {
-			delete_post_meta( $post_id, 'geo_heading' );
+			delete_metadata( $meta_type, $object_id, 'geo_heading' );
 		}
 
 		$weather = array();
@@ -253,17 +276,51 @@ class Loc_Metabox {
 		}
 
 		if ( ! empty( $weather ) ) {
-			update_post_meta( $post_id, 'geo_weather', $weather );
+			update_metadata( $meta_type, $object_id, 'geo_weather', $weather );
 		} else {
-			delete_post_meta( $post_id, 'geo_weather' );
+			delete_metadata( $meta_type, $object_id, 'geo_weather' );
 		}
 
 		if ( ! empty( $_POST['address'] ) ) {
 			if ( isset( $_POST['geo_public'] ) ) {
-				update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
+				update_metadata( $meta_type, $object_id, 'geo_public', (int) $_POST['geo_public'] );
 			}
 		}
 	}
+
+	/* Save the meta box's post metadata. */
+	public static function save_post_meta( $post_id ) {
+		/*
+		 * We need to verify this came from our screen and with proper authorization,
+		 * because the save_post action can be triggered at other times.
+		 */
+		if ( ! isset( $_POST['location_metabox_nonce'] ) ) {
+			return;
+		}
+		// Verify that the nonce is valid.
+		if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
+			return;
+		}
+		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+		// Check the user's permissions.
+		if ( isset( $_POST['post_type'] ) && 'page' === $_POST['post_type'] ) {
+			if ( ! current_user_can( 'edit_page', $post_id ) ) {
+				return;
+			}
+		} else {
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				return;
+			}
+		}
+		if ( has_term( '', 'venue' ) ) {
+			return;
+		}
+		self::save_meta( 'post', $post_id );
+	}
+
 
 	/* Save the meta box's comment metadata. */
 	public static function save_comment_meta( $comment_id ) {
@@ -286,34 +343,7 @@ class Loc_Metabox {
 		if ( ! current_user_can( 'edit_comment', $comment_id ) ) {
 			return;
 		}
-		/* OK, its safe for us to save the data now. */
-		if ( ! empty( $_POST['latitude'] ) ) {
-			update_comment_meta( $comment_id, 'geo_latitude', $_POST['latitude'] );
-		} else {
-			delete_comment_meta( $comment_id, 'geo_latitude' );
-		}
-		if ( ! empty( $_POST['longitude'] ) ) {
-			update_comment_meta( $comment_id, 'geo_longitude', $_POST['longitude'] );
-		} else {
-			delete_comment_meta( $comment_id, 'geo_longitude' );
-		}
-		if ( ! empty( $_POST['address'] ) ) {
-			update_comment_meta( $comment_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
-		} else {
-			delete_comment_meta( $comment_id, 'geo_address' );
-		}
-
-		if ( ! empty( $_POST['map_zoom'] ) ) {
-			update_comment_meta( $comment_id, 'geo_zoom', sanitize_text_field( $_POST['map_zoom'] ) );
-		} else {
-			delete_comment_meta( $comment_id, 'geo_zoom' );
-		}
-
-		if ( ! empty( $_POST['address'] ) ) {
-			if ( isset( $_POST['geo_public'] ) ) {
-				update_comment_meta( $comment_id, 'geo_public', $_POST['geo_public'] );
-			}
-		}
+		self::save_meta( 'comment', $comment_id );
 	}
 
 
@@ -323,28 +353,7 @@ class Loc_Metabox {
 		if ( ! current_user_can( 'edit_user', $user_id ) ) {
 			return;
 		}
-		/* OK, its safe for us to save the data now. */
-		if ( ! empty( $_POST['latitude'] ) ) {
-			update_user_meta( $user_id, 'geo_latitude', $_POST['latitude'] );
-		} else {
-			delete_user_meta( $user_id, 'geo_latitude' );
-		}
-		if ( ! empty( $_POST['longitude'] ) ) {
-			update_user_meta( $user_id, 'geo_longitude', $_POST['longitude'] );
-		} else {
-			delete_user_meta( $user_id, 'geo_longitude' );
-		}
-
-		if ( ! empty( $_POST['address'] ) ) {
-			update_user_meta( $user_id, 'geo_address', $_POST['address'] );
-		} else {
-			delete_user_meta( $user_id, 'geo_address' );
-		}
-		if ( ! empty( $_POST['latitude'] ) && ! empty( $_POST['longitude'] ) ) {
-			if ( isset( $_POST['geo_public'] ) ) {
-				update_user_meta( $user_id, 'geo_public', $_POST['geo_public'] );
-			}
-		}
+		self::save_meta( 'user', $user_id );
 	}
 
 
