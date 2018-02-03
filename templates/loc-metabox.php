@@ -7,16 +7,13 @@ if ( 'comment' === $screen->id ) {
 }
 $weather = ifset( $geodata['weather'], array() );
 $wind    = ifset( $weather['wind'], array() );
-if ( is_null( $geodata ) ) {
-	$geodata = array( 'public' => get_option( 'geo_public' ) );
-}
 ?>
 		<div class="location hide-if-no-js">
 			<?php wp_nonce_field( 'location_metabox', 'location_metabox_nonce' ); ?>
 			<p>
 				<?php if ( 'comment' === $screen->id ) { ?>
 					<select name="geo_public">
-					<?php echo Loc_Metabox::geo_public_select( ifset( $geodata['public'] ) ); ?>
+					<?php echo Loc_Metabox::geo_public_select( ifset( $geodata['public'], get_option( 'geo_public' ) ) ); ?>
 					</select>
 				<?php } ?>
 				<button

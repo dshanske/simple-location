@@ -119,7 +119,7 @@ class Loc_Metabox {
 		$choices = self::geo_public();
 		$return  = '';
 		foreach ( $choices as $value => $text ) {
-			$return .= sprintf( '<option value=%1s %2s>%3s</option>', $value, selected( $public, $value ), $text );
+			$return .= sprintf( '<option value=%1s %2s>%3s</option>', $value, selected( $public, $value, false ), $text );
 		}
 		if ( ! $echo ) {
 			return $return;
@@ -128,12 +128,7 @@ class Loc_Metabox {
 
 	}
 
-	public static function geo_public_user( $user ) {
-		$public = get_the_author_meta( 'geo_public', $user->ID );
-		if ( ! $public ) {
-			$public = get_option( 'geo_public' );
-		}
-		$public = (int) $public;
+	public static function geo_public_user( $public ) {;
 ?>
 		<tr>
 		<th><label for="geo_public"><?php _e( 'Show:', 'simple-location' ); ?></label></th>
@@ -195,70 +190,21 @@ class Loc_Metabox {
 
 	public static function save_meta( $meta_type, $object_id ) {
 		/* OK, its safe for us to save the data now. */
-		if ( ! empty( $_POST['latitude'] ) ) {
-			update_metadata( $meta_type, $object_id, 'geo_latitude', $_POST['latitude'] );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_latitude' );
-		}
-		if ( ! empty( $_POST['longitude'] ) ) {
-			update_metadata( $meta_type, $object_id, 'geo_longitude', $_POST['longitude'] );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_longitude' );
-		}
-		if ( ! empty( $_POST['address'] ) ) {
-			update_metadata( $meta_type, $object_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_address' );
-		}
-
-		if ( ! empty( $_POST['map_zoom'] ) ) {
-			update_metadata( $meta_type, $object_id, 'geo_zoom', sanitize_text_field( $_POST['map_zoom'] ) );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_zoom' );
-		}
-
-		if ( ! empty( $_POST['altitude'] ) ) {
-			update_metadata( $meta_type, $object_id, 'geo_altitude', sanitize_text_field( $_POST['altitude'] ) );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_altitude' );
-		}
-
-		if ( ! empty( $_POST['speed'] ) && 'NaN' !== $_POST['speed'] ) {
-			update_metadata( $meta_type, $object_id, 'geo_speed', sanitize_text_field( $_POST['speed'] ) );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_speed' );
-		}
-
-		if ( ! empty( $_POST['heading'] ) && 'NaN' !== $_POST['heading'] ) {
-			update_metadata( $meta_type, $object_id, 'geo_heading', sanitize_text_field( $_POST['heading'] ) );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_heading' );
+		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading' );
+		foreach( $lon_params as $param ) {
+			if ( ! empty( $_POST[$param] ) && 'NaN' !== $_POST[$param] ) {
+				update_metadata( $meta_type, $object_id, 'geo_' . $param, $_POST[$param] );
+			} else {
+				delete_metadata( $meta_type, $object_id, 'geo_' . $param );
+			}
 		}
 
 		$weather = array();
-
-		if ( ! empty( $_POST['temperature'] ) ) {
-			$weather['temperature'] = sanitize_text_field( $_POST['temperature'] );
-		}
-
-		if ( ! empty( $_POST['units'] ) ) {
-			$weather['units'] = sanitize_text_field( $_POST['units'] );
-		}
-
-		if ( ! empty( $_POST['humidity'] ) ) {
-			$weather['humidity'] = sanitize_text_field( $_POST['humidity'] );
-		}
-		if ( ! empty( $_POST['pressure'] ) ) {
-			$weather['pressure'] = sanitize_text_field( $_POST['pressure'] );
-		}
-		if ( ! empty( $_POST['weather_summary'] ) ) {
-			$weather['summary'] = sanitize_text_field( $_POST['weather_summary'] );
-		}
-		if ( ! empty( $_POST['weather_icon'] ) ) {
-			$weather['icon'] = sanitize_text_field( $_POST['weather_icon'] );
-		}
-		if ( ! empty( $_POST['visibility'] ) ) {
-			$weather['visibility'] = sanitize_text_field( $_POST['visibility'] );
+		$wtr_params = array( 'temperature', 'units', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility' );
+		foreach( $wtr_params as $param ) {
+			if ( ! empty( $_POST[$param] ) ) {
+				$weather[$param] = $_POST[$param];
+			} 
 		}
 
 		$wind = array();
@@ -268,20 +214,21 @@ class Loc_Metabox {
 		if ( ! empty( $_POST['wind_degree'] ) ) {
 			$wind['degree'] = sanitize_text_field( $_POST['wind_degree'] );
 		}
+		$wind = array_filter( $wind );
 		if ( ! empty( $wind ) ) {
 			$weather['wind'] = $wind;
 		}
-
+		$weather = array_filter( $weather );
 		if ( ! empty( $weather ) ) {
 			update_metadata( $meta_type, $object_id, 'geo_weather', $weather );
 		} else {
 			delete_metadata( $meta_type, $object_id, 'geo_weather' );
 		}
-
-		if ( ! empty( $_POST['address'] ) ) {
-			if ( isset( $_POST['geo_public'] ) ) {
-				update_metadata( $meta_type, $object_id, 'geo_public', (int) $_POST['geo_public'] );
-			}
+		if ( isset( $_POST['geo_latitude'] ) || isset( $_POST['geo_longitude'] ) || isset( $_POST['geo_address'] ) ) {
+			update_metadata( $meta_type, $object_id, 'geo_public', (int) $_POST['geo_public'] );
+		}
+		else {
+			delete_metadata( $meta_type, $object_id, 'geo_public' );
 		}
 	}
 
