@@ -203,7 +203,7 @@ class Loc_Metabox {
 		} else {
 			delete_metadata( $meta_type, $object_id, 'geo_weather' );
 		}
-		if ( isset( $_POST['geo_latitude'] ) || isset( $_POST['geo_longitude'] ) || isset( $_POST['geo_address'] ) ) {
+		if ( isset( $_POST['latitude'] ) || isset( $_POST['longitude'] ) || isset( $_POST['address'] ) ) {
 			update_metadata( $meta_type, $object_id, 'geo_public', (int) $_POST['geo_public'] );
 		} else {
 			delete_metadata( $meta_type, $object_id, 'geo_public' );

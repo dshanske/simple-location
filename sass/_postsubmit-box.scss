@@ -1,5 +1,17 @@
-.misc_pub_location {
-	.dashicons-location {
-		color: #FF0000;
+.misc-pub-location {
+	#location-lookup {
+		color: grey;
+		&:hover {
+			color: red;
+		}
+	}
+}
+
+.misc-pub-timezone {
+	#timezone-browser {
+		color: grey;
+		&:hover {
+			color: red;
+		}
 	}
 }

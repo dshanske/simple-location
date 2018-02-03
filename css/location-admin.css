@@ -54,8 +54,19 @@
   top: 2em;
 }
 
-.misc_pub_location .dashicons-location {
-  color: #FF0000;
+.misc-pub-location #location-lookup {
+  color: grey;
+}
+.misc-pub-location #location-lookup:hover {
+  color: red;
+  size: 2em;
+}
+
+.misc-pub-timezone #timezone-browser {
+  color: grey;
+}
+.misc-pub-timezone #timezone-browser:hover {
+  color: red;
 }
 
 /*# sourceMappingURL=location-admin.css.map */
