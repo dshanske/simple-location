@@ -253,12 +253,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wimg/PHPCompatibility.git",
-                "reference": "4ac01e4fe8faaa4f8d3b3cd06ea92e5418ce472e"
+                "reference": "f0792c10e5ee37cdae7edc28f3984436deb9a1d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wimg/PHPCompatibility/zipball/4ac01e4fe8faaa4f8d3b3cd06ea92e5418ce472e",
-                "reference": "4ac01e4fe8faaa4f8d3b3cd06ea92e5418ce472e",
+                "url": "https://api.github.com/repos/wimg/PHPCompatibility/zipball/f0792c10e5ee37cdae7edc28f3984436deb9a1d3",
+                "reference": "f0792c10e5ee37cdae7edc28f3984436deb9a1d3",
                 "shasum": ""
             },
             "require": {
@@ -282,7 +282,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "LGPL-3.0"
+                "LGPL-3.0-or-later"
             ],
             "authors": [
                 {
@@ -297,7 +297,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2017-12-27T21:58:38+00:00"
+            "time": "2018-02-01T17:09:26+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
