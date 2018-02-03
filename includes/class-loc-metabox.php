@@ -23,7 +23,7 @@ class Loc_Metabox {
 	}
 
 	public static function post_submitbox() {
-		$choices = self::geo_public();
+		$choices = WP_Geo_Data::geo_public();
 		global $post;
 		$public = (int) get_post_meta( $post->ID, 'geo_public', true );
 		if ( ! $public ) {
@@ -47,7 +47,7 @@ class Loc_Metabox {
 				<input type="hidden" name="location_default" id="location_default" value="<?php echo get_option( 'geo_public' ); ?>" />
 				<select name="geo_public" id="post-location" width="90%">
 				<?php
-						echo self::geo_public_select( $public );
+						echo WP_Geo_Data::geo_public_select( $public );
 						echo '</select>';
 ?>
 <br />
@@ -83,7 +83,7 @@ class Loc_Metabox {
 			wp_localize_script(
 				'sloc_location',
 				'geo_public_options',
-				self::geo_public()
+				WP_Geo_Data::geo_public()
 			);
 			wp_localize_script(
 				'sloc_location',
@@ -107,33 +107,12 @@ class Loc_Metabox {
 		);
 	}
 
-	public static function geo_public() {
-		return array(
-			0 => __( 'Private', 'simple-location' ),
-			1 => __( 'Public', 'simple-location' ),
-			2 => __( 'Protected', 'simple-location' ),
-		);
-	}
-
-	public static function geo_public_select( $public, $echo = false ) {
-		$choices = self::geo_public();
-		$return  = '';
-		foreach ( $choices as $value => $text ) {
-			$return .= sprintf( '<option value=%1s %2s>%3s</option>', $value, selected( $public, $value, false ), $text );
-		}
-		if ( ! $echo ) {
-			return $return;
-		}
-		echo $return;
-
-	}
-
-	public static function geo_public_user( $public ) {;
+	public static function geo_public_user( $public ) {
 ?>
 		<tr>
 		<th><label for="geo_public"><?php _e( 'Show:', 'simple-location' ); ?></label></th>
 		<td><select name="geo_public">
-		<?php self::geo_public_select( $public, true ); ?>
+		<?php WP_Geo_Data::geo_public_select( $public, true ); ?>
 		</select></td>
 		</tr>
 		<?php
@@ -191,20 +170,20 @@ class Loc_Metabox {
 	public static function save_meta( $meta_type, $object_id ) {
 		/* OK, its safe for us to save the data now. */
 		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading' );
-		foreach( $lon_params as $param ) {
-			if ( ! empty( $_POST[$param] ) && 'NaN' !== $_POST[$param] ) {
-				update_metadata( $meta_type, $object_id, 'geo_' . $param, $_POST[$param] );
+		foreach ( $lon_params as $param ) {
+			if ( ! empty( $_POST[ $param ] ) && 'NaN' !== $_POST[ $param ] ) {
+				update_metadata( $meta_type, $object_id, 'geo_' . $param, $_POST[ $param ] );
 			} else {
 				delete_metadata( $meta_type, $object_id, 'geo_' . $param );
 			}
 		}
 
-		$weather = array();
+		$weather    = array();
 		$wtr_params = array( 'temperature', 'units', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility' );
-		foreach( $wtr_params as $param ) {
-			if ( ! empty( $_POST[$param] ) ) {
-				$weather[$param] = $_POST[$param];
-			} 
+		foreach ( $wtr_params as $param ) {
+			if ( ! empty( $_POST[ $param ] ) ) {
+				$weather[ $param ] = $_POST[ $param ];
+			}
 		}
 
 		$wind = array();
@@ -226,8 +205,7 @@ class Loc_Metabox {
 		}
 		if ( isset( $_POST['geo_latitude'] ) || isset( $_POST['geo_longitude'] ) || isset( $_POST['geo_address'] ) ) {
 			update_metadata( $meta_type, $object_id, 'geo_public', (int) $_POST['geo_public'] );
-		}
-		else {
+		} else {
 			delete_metadata( $meta_type, $object_id, 'geo_public' );
 		}
 	}

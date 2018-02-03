@@ -229,13 +229,13 @@ class Loc_Config {
 	public static function simloc_options() {
 ?>
 		<div class="wrap">
-			<h2><?php _e( 'Simple Location', 'simple-location' );?> </h2>
+			<h2><?php _e( 'Simple Location', 'simple-location' ); ?> </h2>
 		<p>
 			<?php esc_html_e( 'API Keys and Settings for Simple Location', 'simple-location' ); ?>
 		</p><hr />
 		<form method="post" action="options.php">
-			<?php 
-				settings_fields( 'simloc' ); 
+			<?php
+				settings_fields( 'simloc' );
 				do_settings_sections( 'simloc' );
 				submit_button();
 			?>

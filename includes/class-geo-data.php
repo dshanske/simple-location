@@ -38,6 +38,28 @@ class WP_Geo_Data {
 
 	}
 
+
+        public static function geo_public() {
+                return array(
+                        0 => __( 'Private', 'simple-location' ),
+                        1 => __( 'Public', 'simple-location' ),
+                        2 => __( 'Protected', 'simple-location' ),
+                );
+        }
+
+        public static function geo_public_select( $public, $echo = false ) {
+                $choices = self::geo_public();
+                $return  = '';
+                foreach ( $choices as $value => $text ) {
+                        $return .= sprintf( '<option value=%1s %2s>%3s</option>', $value, selected( $public, $value, false ), $text );
+                }
+                if ( ! $echo ) {
+                        return $return;
+                }
+                echo $return;
+
+        }
+
 	public static function geo_posts_dropdown( $post_type, $which ) {
 		if ( 'post' !== $post_type ) {
 			return;

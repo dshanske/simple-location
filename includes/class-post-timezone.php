@@ -55,7 +55,7 @@ class Post_Timezone {
 		}
 ?>
 		<div class="misc-pub-section misc-pub-timezone">
-		<span class="dashicons dashicons-clock" id="timezone-browser" title="<?php _e( 'Set Local Timezone', 'simple-location' );?>"></span>
+		<span class="dashicons dashicons-clock" id="timezone-browser" title="<?php _e( 'Set Local Timezone', 'simple-location' ); ?>"></span>
 			<label for="post-timezone"><?php _e( 'Timezone:', 'simple-location' ); ?></label>
 			<span id="post-timezone-label">
 			<?php
