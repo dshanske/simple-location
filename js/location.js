@@ -1,15 +1,45 @@
 jQuery( document ).ready( function( $ ) {
 
-	function getFullLocation() {
+	function lookupLocation() {
 		var options = {
 			enableHighAccuracy: true,
 			maximumAge: 600000
 		};
-		if ( navigator.geolocation ) {
+		if ( '0' === geo_options.lookup ) { // eslint-disable-line camelcase
+			if ( navigator.geolocation ) {
 			navigator.geolocation.getCurrentPosition( reverseLookup, error, options );
+			} else {
+				alert( 'Geolocation is not supported by this browser.' );
+			}
 		} else {
-			alert( 'Geolocation is not supported by this browser.' );
+			position = getCurrentPosition();
+			reverseLookup( position );
 		}
+	}
+
+	function getCurrentPosition( ) {
+		$.ajax({
+				type: 'GET',
+
+				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
+				url: sloc.api_url + 'lookup/',
+				beforeSend: function( xhr ) {
+
+					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
+					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+				},
+				data: {
+				},
+				success: function( response ) {
+					if ( 'undefined' == typeof response ) {
+					} else {
+					}
+				},
+				error: function( request, status, error ) {
+					alert( request.responseText );
+				}
+			});
+
 	}
 
 	function reverseLookup( position ) {
@@ -91,6 +121,7 @@ jQuery( document ).ready( function( $ ) {
 				},
 				always: hideLoadingSpinner()
 			});
+		getWeather();
 	}
 
 	function getWeather() {
@@ -165,7 +196,18 @@ jQuery( document ).ready( function( $ ) {
 			'country-name',
 			'country-code',
 			'address',
-			'location-name'
+			'location-name',
+			'temperature',
+			'humidity',
+			'speed',
+			'heading',
+			'weather_summary',
+			'weather_icon',
+			'wind_speed',
+			'wind_degree',
+			'visibility',
+			'pressure'
+
 		];
 		if ( ! confirm( 'Are you sure you want to remove the location details?' ) ) {
 			return;
@@ -189,14 +231,9 @@ jQuery( document ).ready( function( $ ) {
 
 
 	$( document )
-		.on( 'click', '.lookup-weather-button', function( event ) {
-			showLoadingSpinner();
-			getWeather();
-			event.preventDefault();
-		})
 		.on( 'click', '.lookup-address-button', function( event ) {
 			showLoadingSpinner();
-			getFullLocation();
+			lookupLocation();
 			event.preventDefault();
 		})
 		.on( 'click', '.clear-location-button', function( event ) {
@@ -288,7 +325,7 @@ jQuery( document ).ready( function( $ ) {
 
 	$postLocationSelect.find( '.save-post-location' ).click( function( event ) {
 		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-post-location' ).show().focus();
-		$( '#post-location-label' ).text( geo_public_options[$( '#post-location' ).val()] );
+		$( '#post-location-label' ).text( geo_public_options[$( '#post-location' ).val()]); // eslint-disable-line camelcase
 		event.preventDefault();
 	});
 
@@ -311,6 +348,7 @@ jQuery( document ).ready( function( $ ) {
 	$LocationDetail.click( function( event ) {
 		showLoadingSpinner();
 		getFullLocation();
+		getWeather();
 		event.preventDefault();
 	});
 });

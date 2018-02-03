@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.3.1  
+**Stable tag:** 3.3.2  
 **Requires at least:** 4.7  
-**Tested up to:** 4.9.1  
+**Tested up to:** 4.9.2  
 **Requires PHP:** 5.3  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -79,6 +79,16 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+### 3.3.2 ( 2018-01-?? ) ###
+* Simplify and refactor metadata saving functionality
+* Improvements to metaboxes ( props to @kingkool68 for contributions )
+* Refactored location JS
+* Add confirmation before clearing data
+* Added loading spinner while retrieving location information
+* Move location visibility and lookup to Publish Metabox
+* Rename visibility settings in an attempt at clarity
+* Auto-load weather when retrieving location
+* Add start of function to retrieve location optionally on backend
 ### 3.3.1 ( 2018-01-13 ) ###
 * Add configuration setting for both imperial and metric temperatures. Defaults to metric unless locale is `en_us`.
 * Store units in each new post in case the setting is switched

@@ -24,7 +24,7 @@ class Loc_Metabox {
 
 	public static function post_submitbox() {
 		$choices = self::geo_public();
-		  global $post;
+		global $post;
 		$public = (int) get_post_meta( $post->ID, 'geo_public', true );
 		if ( ! $public ) {
 			$public = (int) get_option( 'geo_public' );
@@ -32,7 +32,7 @@ class Loc_Metabox {
 				wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
 ?>
 				<div class="misc-pub-section misc-pub-location">
-				<span class="dashicons dashicons-location" id="location-lookup" title="<?php _e( 'Lookup Location', 'simple-location');?>"></span>
+				<span class="dashicons dashicons-location" id="location-lookup" title="<?php _e( 'Lookup Location', 'simple-location' ); ?>"></span>
 						<label for="post-location"><?php _e( 'Location:', 'simple-location' ); ?></label>
 						<span id="post-location-label">
 						<?php
@@ -45,7 +45,7 @@ class Loc_Metabox {
 <div id="post-location-select" class="hide-if-js">
 				<input type="hidden" name="hidden_post_location" id="hidden_post_location" value="<?php echo $public; ?>" />
 				<input type="hidden" name="location_default" id="location_default" value="<?php echo get_option( 'geo_public' ); ?>" />
-				<select name="post_location" id="post-location" width="90%">
+				<select name="geo_public" id="post-location" width="90%">
 				<?php
 						echo self::geo_public_select( $public );
 						echo '</select>';
@@ -76,14 +76,21 @@ class Loc_Metabox {
 			);
 			wp_enqueue_style(
 				'sloc_metabox',
-				plugins_url( 'css/location-admin-meta-box.css', dirname( __FILE__ ) ),
+				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),
 				array(),
 				Simple_Location_Plugin::$version
 			);
-			wp_localize_script( 
+			wp_localize_script(
 				'sloc_location',
 				'geo_public_options',
 				self::geo_public()
+			);
+			wp_localize_script(
+				'sloc_location',
+				'geo_options',
+				array(
+					'lookup' => '0',
+				)
 			);
 		}
 	}
@@ -102,19 +109,23 @@ class Loc_Metabox {
 
 	public static function geo_public() {
 		return array(
-			0 => __( 'Hide', 'simple-location' ),
-			1 => __( 'Show Map and Description', 'simple-location' ),
-			2 => __( 'Description Only', 'simple-location' ),
+			0 => __( 'Private', 'simple-location' ),
+			1 => __( 'Public', 'simple-location' ),
+			2 => __( 'Protected', 'simple-location' ),
 		);
 	}
 
-	public static function geo_public_select( $public ) {
+	public static function geo_public_select( $public, $echo = false ) {
 		$choices = self::geo_public();
 		$return  = '';
 		foreach ( $choices as $value => $text ) {
 			$return .= sprintf( '<option value=%1s %2s>%3s</option>', $value, selected( $public, $value ), $text );
 		}
-		return $return;
+		if ( ! $echo ) {
+			return $return;
+		}
+		echo $return;
+
 	}
 
 	public static function geo_public_user( $user ) {
@@ -127,7 +138,7 @@ class Loc_Metabox {
 		<tr>
 		<th><label for="geo_public"><?php _e( 'Show:', 'simple-location' ); ?></label></th>
 		<td><select name="geo_public">
-		<?php self::geo_public_select( $public ); ?>
+		<?php self::geo_public_select( $public, true ); ?>
 		</select></td>
 		</tr>
 		<?php
@@ -144,25 +155,11 @@ class Loc_Metabox {
 
 
 	public static function metabox( $object, $box ) {
-		$geodata = WP_Geo_Data::get_geodata( $object );
 		load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-metabox.php' );
 	}
 
 	public static function user_profile( $user ) {
-	?>
-		<h3> <?php esc_html_e( 'Last Reported Location', 'simple-location' ); ?></h3>
-		<p><?php esc_html_e( 'This allows you to set the last reported location for this author. See Simple Location settings for options.', 'simple-location' ); ?></p>
-		<a class="hide-if-no-js lookup-address-button">
-		<span class="dashicons dashicons-location" aria-label="<?php _e( 'Location Lookup', 'simple-location' ); ?>" title="<?php _e( 'Location Lookup', 'simple-location' ); ?>"></span></a>
-		<table class="form-table">
-		<?php
-		self::profile_text_field( $user, 'latitude', __( 'Latitude', 'simple-location' ), 'Description' );
-		self::profile_text_field( $user, 'longitude', __( 'Longitude', 'simple-location' ), 'Description' );
-		self::profile_text_field( $user, 'address', __( 'Address', 'simple-location' ), 'Description' );
-		self::geo_public_user( $user );
-		?>
-		</table>
-	<?php
+		load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-user-metabox.php' );
 	}
 
 
