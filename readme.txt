@@ -79,7 +79,7 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
-= 3.3.2 ( 2018-01-?? ) =
+= 3.3.2 ( 2018-02-03 ) =
 * Simplify and refactor metadata saving functionality
 * Improvements to metaboxes ( props to @kingkool68 for contributions )
 * Refactored location JS
