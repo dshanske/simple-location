@@ -89,6 +89,7 @@ will now be required to show maps for services that require API keys.
 * Rename visibility settings in an attempt at clarity
 * Auto-load weather when retrieving location
 * Add start of function to retrieve location optionally on backend
+* Icons change color when hovered over to indicate functionality
 ### 3.3.1 ( 2018-01-13 ) ###
 * Add configuration setting for both imperial and metric temperatures. Defaults to metric unless locale is `en_us`.
 * Store units in each new post in case the setting is switched

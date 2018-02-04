@@ -59,7 +59,6 @@
 }
 .misc-pub-location #location-lookup:hover {
   color: red;
-  size: 2em;
 }
 
 .misc-pub-timezone #timezone-browser {

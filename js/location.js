@@ -150,8 +150,8 @@ jQuery( document ).ready( function( $ ) {
 				if ( ( 'humidity' in response ) && ( '' === $( '#humidity' ).val() ) ) {
 					$( '#humidity' ).val( response.humidity ) ;
 				}
-				if ( ( 'icon' in response ) && ( '' === $( '#weather_icon' ).val() ) ) {
-					$( '#weather_icon' ).val( response.icon ) ;
+				if ( ( 'icon' in response ) && ( 'none' === $( '#weather_icon' ).val() ) ) {
+					$( '#weather_icon' ).val( response.icon ).change() ;
 				}
 				if ( ( 'summary' in response ) && ( '' === $( '#weather_summary' ).val() ) ) {
 					$( '#weather_summary' ).val( response.summary ) ;
@@ -188,6 +188,7 @@ jQuery( document ).ready( function( $ ) {
 		var fieldIds = [
 			'latitude',
 			'longitude',
+			'map_zoom',
 			'street-address',
 			'extended-address',
 			'locality',

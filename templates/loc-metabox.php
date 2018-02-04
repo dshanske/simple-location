@@ -54,7 +54,11 @@ $wind    = ifset( $weather['wind'], array() );
 					<?php _e( 'Humidity: ', 'simple-location' ); ?>
 					<input type="text" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
 				</label>
-
+			</p>
+			<p class="field-row">
+			<label for="humidity" class="half">
+				<?php _e( 'Weather Description: ', 'simple-location' ); ?>
+				<input type="text" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" />
 			</p>
 
 			<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
@@ -133,8 +137,13 @@ $wind    = ifset( $weather['wind'], array() );
 					<input type="text" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
 					</label>
 				</p>
-			<input type="hidden" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" />
-			<input type="hidden" name="weather_icon" id="weather_icon" value="<?php echo ifset( $weather['icon'], '' ); ?>" />
+			<p class="field-row">
+					<label for="weather_icon" class="quarter"><?php _e( 'Icon', 'simple-location' ); ?>
+					<select name="weather_icon" id="weather_icon">
+						<?php Weather_Provider::icon_select( ifset( $weather['icon'] ), true ); ?>" />
+					</select>
+			</p>
+
 			<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], Loc_Metabox::temp_unit() ); ?>" />
 
 
