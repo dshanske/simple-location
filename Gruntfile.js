@@ -75,7 +75,8 @@ module.exports = function(grunt) {
           style: 'expanded'
         },
         files: {
-          'css/location.css': 'sass/main.scss'
+          'css/location.css': 'sass/main.scss',
+	  'css/location-admin.css': 'sass/admin.scss'
         }
       },
       dist: {
@@ -83,7 +84,8 @@ module.exports = function(grunt) {
           style: 'compressed'
         },
         files: {
-          'css/location.min.css': 'sass/main.scss'
+          'css/location.min.css': 'sass/main.scss',
+	  'css/location-admin.min.css': 'sass/admin.scss'
         }
       }
     },

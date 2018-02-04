@@ -38,6 +38,28 @@ class WP_Geo_Data {
 
 	}
 
+
+	public static function geo_public() {
+			return array(
+				0 => __( 'Private', 'simple-location' ),
+				1 => __( 'Public', 'simple-location' ),
+				2 => __( 'Protected', 'simple-location' ),
+			);
+	}
+
+	public static function geo_public_select( $public, $echo = false ) {
+			$choices = self::geo_public();
+			$return  = '';
+		foreach ( $choices as $value => $text ) {
+				$return .= sprintf( '<option value=%1s %2s>%3s</option>', $value, selected( $public, $value, false ), $text );
+		}
+		if ( ! $echo ) {
+				return $return;
+		}
+			echo $return;
+
+	}
+
 	public static function geo_posts_dropdown( $post_type, $which ) {
 		if ( 'post' !== $post_type ) {
 			return;
@@ -278,7 +300,7 @@ class WP_Geo_Data {
 		if ( ! is_array( $geodata ) ) {
 			return false;
 		}
-		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading' ) );
+		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'public' ) );
 		if ( isset( $geodata['map_zoom'] ) ) {
 			$geodata['zoom'] = $geodata['map_zoom'];
 			unset( $geodata['map_zoom'] );
@@ -292,30 +314,46 @@ class WP_Geo_Data {
 			$object = get_post( $object );
 		}
 		if ( $object instanceof WP_Post ) {
-			foreach ( $geodata as $key => $value ) {
-				update_post_meta( $object->ID, 'geo_' . $key, $value );
-			}
+			$type = 'post';
+			$id   = $object->ID;
 		}
 
 		if ( $object instanceof WP_Comment ) {
-			foreach ( $geodata as $key => $value ) {
-				update_comment_meta( $object->comment_ID, 'geo_' . $key, $value );
-			}
+			$id   = $object->comment_ID;
+			$type = 'comment';
 		}
 		if ( $object instanceof WP_Term ) {
-			foreach ( $geodata as $key => $value ) {
-				update_term_meta( $object->term_id, 'geo_' . $key, $value );
-			}
+			$id   = $object->term_id;
+			$type = 'term';
 		}
 		if ( $object instanceof WP_User ) {
-			foreach ( $geodata as $key => $value ) {
-				update_user_meta( $object->ID, 'geo_' . $key, $value );
-			}
+			$id   = $object->ID;
+			$type = 'user';
+		}
+		foreach ( $geodata as $key => $value ) {
+			update_metadata( $type, $id, 'geo_' . $key, $value );
 		}
 	}
 
+	private static function get_geometadata( $type, $id ) {
+		$geodata              = array();
+		$geodata['longitude'] = get_metadata( $type, $id, 'geo_longitude', true );
+		$geodata['latitude']  = get_metadata( $type, $id, 'geo_latitude', true );
+		$geodata['address']   = get_metadata( $type, $id, 'geo_address', true );
+		$geodata['map_zoom']  = get_metadata( $type, $id, 'geo_zoom', true );
+		$geodata['weather']   = get_metadata( $type, $id, 'geo_weather', true );
+		$geodata              = array_filter( $geodata );
+		$geodata['public']    = get_metadata( $type, $id, 'geo_public', true );
+		if ( ! is_numeric( $geodata['public'] ) ) {
+			$geodata['public'] = get_option( 'geo_public' );
+		}
+		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+			return null;
+		}
+		return $geodata;
+	}
+
 	public static function get_geodata( $object = null ) {
-		$geodata = array();
 		if ( ! $object ) {
 			$object = get_post();
 		}
@@ -324,16 +362,11 @@ class WP_Geo_Data {
 			$object = get_post( $object );
 		}
 		if ( $object instanceof WP_Post ) {
-			$geodata['longitude'] = get_post_meta( $object->ID, 'geo_longitude', true );
-			$geodata['latitude']  = get_post_meta( $object->ID, 'geo_latitude', true );
-			$geodata['address']   = get_post_meta( $object->ID, 'geo_address', true );
-			$geodata['map_zoom']  = get_post_meta( $object->ID, 'geo_zoom', true );
-			$geodata['weather']   = get_post_meta( $object->ID, 'geo_weather', true );
-			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+			$geodata = self::get_geometadata( 'post', $object->ID );
+			if ( ! $geodata ) {
 				return null;
 			}
-			$geodata['public'] = get_post_meta( $object->ID, 'geo_public', true );
-			$geodata['ID']     = $object->ID;
+			$geodata['ID'] = $object->ID;
 			// Remove Old Metadata
 			delete_post_meta( $object->ID, 'geo_map' );
 			delete_post_meta( $object->ID, 'geo_full' );
@@ -341,43 +374,26 @@ class WP_Geo_Data {
 		}
 
 		if ( $object instanceof WP_Comment ) {
-			$geodata['longitude'] = get_comment_meta( $object->comment_ID, 'geo_longitude', true );
-			$geodata['latitude']  = get_comment_meta( $object->comment_ID, 'geo_latitude', true );
-			$geodata['address']   = get_comment_meta( $object->comment_ID, 'geo_address', true );
-			$geodata['map_zoom']  = get_comment_meta( $object->comment_ID, 'geo_zoom', true );
-			$geodata['weather']   = get_comment_meta( $object->comment_ID, 'weather', true );
-
-			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+			$geodata = self::get_geometadata( 'comment', $object->comment_ID );
+			if ( ! $geodata ) {
 				return null;
 			}
-			$geodata['public']     = get_comment_meta( $object->comment_ID, 'geo_public', true );
 			$geodata['comment_ID'] = $object->comment_ID;
 		}
 		if ( $object instanceof WP_Term ) {
-			$geodata['longitude'] = get_term_meta( $object->term_id, 'geo_longitude', true );
-			$geodata['latitude']  = get_term_meta( $object->term_id, 'geo_latitude', true );
-			$geodata['address']   = get_term_meta( $object->term_id, 'geo_address', true );
-			$geodata['map_zoom']  = get_term_meta( $object->term_id, 'geo_zoom', true );
-			$geodata['weather']   = get_term_meta( $object->term_id, 'geo_weather', true );
-			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+			$geodata = self::get_geometadata( 'term', $object->term_id );
+			if ( ! $geodata ) {
 				return null;
 			}
-			$geodata['public']  = get_term_meta( $object->term_id, 'geo_public', true );
 			$geodata['term_id'] = $object->term_id;
 		}
 		if ( $object instanceof WP_User ) {
-			$geodata['longitude'] = get_user_meta( $object->ID, 'geo_longitude', true );
-			$geodata['latitude']  = get_user_meta( $object->ID, 'geo_latitude', true );
-			$geodata['address']   = get_user_meta( $object->ID, 'geo_address', true );
-			$geodata['map_zoom']  = get_user_meta( $object->ID, 'geo_zoom', true );
-			$geodata['weather']   = get_user_meta( $object->ID, 'geo_weather', true );
-			if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+			$geodata = self::get_geometadata( 'user', $object->ID );
+			if ( ! $geodata ) {
 				return null;
 			}
-			$geodata['public']  = get_user_meta( $object->ID, 'geo_public', true );
 			$geodata['user_ID'] = $object->ID;
 		}
-		$geodata = array_filter( $geodata );
 
 		if ( empty( $geodata['address'] ) ) {
 			if ( empty( $geodata['longitude'] ) ) {
@@ -401,13 +417,8 @@ class WP_Geo_Data {
 			$geodata['adr'] = $adr;
 		}
 
-		// Set using global default
-		if ( ! array_key_exists( 'public', $geodata ) ) {
-			$geodata['public'] = get_option( 'geo_public' );
-		} else {
-			if ( 3 === $geodata['public'] ) {
-				$geodata['public'] = 2;
-			}
+		if ( 3 === $geodata['public'] ) {
+			$geodata['public'] = 2;
 		}
 		return $geodata;
 	}

@@ -7,6 +7,7 @@ class Loc_Metabox {
 	public static function admin_init() {
 		/* Add meta boxes on the 'add_meta_boxes' hook. */
 		add_action( 'add_meta_boxes', array( 'Loc_Metabox', 'add_meta_boxes' ) );
+				add_action( 'post_submitbox_misc_actions', array( 'Loc_Metabox', 'post_submitbox' ) );
 	}
 
 	public static function init() {
@@ -21,6 +22,44 @@ class Loc_Metabox {
 		add_action( 'edit_user_profile_update', array( 'Loc_Metabox', 'save_user_meta' ), 12 );
 	}
 
+	public static function post_submitbox() {
+		$choices = WP_Geo_Data::geo_public();
+		global $post;
+		$public = (int) get_post_meta( $post->ID, 'geo_public', true );
+		if ( ! $public ) {
+			$public = (int) get_option( 'geo_public' );
+		}
+				wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
+?>
+				<div class="misc-pub-section misc-pub-location">
+				<span class="dashicons dashicons-location" id="location-lookup" title="<?php _e( 'Lookup Location', 'simple-location' ); ?>"></span>
+						<label for="post-location"><?php _e( 'Location:', 'simple-location' ); ?></label>
+						<span id="post-location-label">
+						<?php
+
+								echo $choices[ $public ];
+?>
+</span>
+						<a href="#post_location" class="edit-post-location hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Location Settings</span></a>
+				<br />
+<div id="post-location-select" class="hide-if-js">
+				<input type="hidden" name="hidden_post_location" id="hidden_post_location" value="<?php echo $public; ?>" />
+				<input type="hidden" name="location_default" id="location_default" value="<?php echo get_option( 'geo_public' ); ?>" />
+				<select name="geo_public" id="post-location" width="90%">
+				<?php
+						echo WP_Geo_Data::geo_public_select( $public );
+						echo '</select>';
+?>
+<br />
+				<a href="#post_location" class="save-post-location hide-if-no-js button">OK</a>
+				<a href="#post_location" class="cancel-post-location hide-if-no-js button-cancel">Cancel</a>
+</div>
+</div>
+<?php
+	}
+
+
+
 	public static function screens() {
 		$screens = array( 'post', 'comment', 'attachment' );
 		return apply_filters( 'sloc_post_types', $screens );
@@ -31,9 +70,27 @@ class Loc_Metabox {
 		if ( in_array( get_current_screen()->id, $screens, true ) || 'profile.php' === $hook_suffix ) {
 			wp_enqueue_script(
 				'sloc_location',
-				plugins_url( 'simple-location/js/location.js' ),
+				plugins_url( 'js/location.js', dirname( __FILE__ ) ),
 				array( 'jquery' ),
 				Simple_Location_Plugin::$version
+			);
+			wp_enqueue_style(
+				'sloc_metabox',
+				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),
+				array(),
+				Simple_Location_Plugin::$version
+			);
+			wp_localize_script(
+				'sloc_location',
+				'geo_public_options',
+				WP_Geo_Data::geo_public()
+			);
+			wp_localize_script(
+				'sloc_location',
+				'geo_options',
+				array(
+					'lookup' => '0',
+				)
 			);
 		}
 	}
@@ -50,30 +107,12 @@ class Loc_Metabox {
 		);
 	}
 
-	public static function geo_public( $public ) {
-		?>
-		<label for="geo_public"><?php _e( 'Show:', 'simple-location' ); ?></label><br />
-		<select name="geo_public">
-		<option value=0 <?php selected( $public, 0 ); ?>><?php _e( 'Hide', 'simple-location' ); ?></option>
-		<option value=1 <?php selected( $public, 1 ); ?>><?php _e( 'Show Map and Description', 'simple-location' ); ?></option>
-		<option value=2 <?php selected( $public, 2 ); ?>><?php _e( 'Description Only', 'simple-location' ); ?></option>
-		</select><br /><br />
-		<?php
-	}
-
-	public static function geo_public_user( $user ) {
-		$public = get_the_author_meta( 'geo_public', $user->ID );
-		if ( ! $public ) {
-			$public = get_option( 'geo_public' );
-		}
-		$public = (int) $public;
+	public static function geo_public_user( $public ) {
 ?>
 		<tr>
 		<th><label for="geo_public"><?php _e( 'Show:', 'simple-location' ); ?></label></th>
 		<td><select name="geo_public">
-		<option value=0 <?php selected( $public, 0 ); ?>><?php _e( 'Hide', 'simple-location' ); ?></option>
-		<option value=1 <?php selected( $public, 1 ); ?>><?php _e( 'Show Map and Description', 'simple-location' ); ?></option>
-		<option value=2 <?php selected( $public, 2 ); ?>><?php _e( 'Description Only', 'simple-location' ); ?></option>
+		<?php WP_Geo_Data::geo_public_select( $public, true ); ?>
 		</select></td>
 		</tr>
 		<?php
@@ -90,104 +129,11 @@ class Loc_Metabox {
 
 
 	public static function metabox( $object, $box ) {
-		wp_nonce_field( 'location_metabox', 'location_metabox_nonce' );
-		$geodata = WP_Geo_Data::get_geodata( $object );
-		$weather = ifset( $geodata['weather'], array() );
-		$wind    = ifset( $weather['wind'], array() );
-		if ( is_null( $geodata ) ) {
-			$geodata = array( 'public' => get_option( 'geo_public' ) );
-		}
-?>
-		<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label><br />
-		<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" style="width:90%" data-role="none" />
-		<a class="hide-if-no-js lookup-address-button">
-		<span class="dashicons dashicons-location" aria-label="<?php __( 'Location Lookup', 'simple-location' ); ?>" title="<?php __( 'Location Lookup', 'simple-location' ); ?>"></span></a>
-
-			<p class="latlong">
-				<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
-				<input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" style="width:10%" />
-				<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
-				<input type="text" name="longitude" id="longitude" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" style="width:10%" />
-				<label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
-				<input type="text" name="map_zoom" id="map_zoom" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" style="width:5%" />
-				<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" style="width:10%" />
-				<input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" style="width:10%" />
-				<input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" style="width:10%" />
-				<input type="hidden" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" style="width:10%" />
-
-			</p>
-			<p class="weather-data">
-				<a class="hide-if-no-js lookup-weather-button">
-				<span class="dashicons dashicons-palmtree" aria-label="<?php __( 'Weather Lookup', 'simple-location' ); ?>" title="<?php __( 'Weather Lookup', 'simple-location' ); ?>"></span></a>
-				<label for="temperature"><?php _e( 'Temperature: ', 'simple-location' ); ?></label>
-				<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" style="width:10%" />
-				<label for="humidity"><?php _e( 'Humidity: ', 'simple-location' ); ?></label>
-				<input type="text" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" style="width:10%" />
-				<input type="hidden" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="weather_icon" id="weather_icon" value="<?php echo ifset( $weather['icon'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" style="width:25%" />
-				<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], self::temp_unit() ); ?>" style="width:25%" />
-			</p>
-		<?php self::geo_public( ifset( $geodata['public'] ) ); ?>
-		<a href="#location_detail" class="show-location-details hide-if-no-js"><?php _e( 'Show Detail', 'simple-location' ); ?></span></a>
-			<div id="location-detail" class="hide-if-js">
-			<br />
-			<a class="clear-location-button button-link hide-if-no-js" onclick="clearLocation();return false;"><?php _e( 'Clear Location', 'simple-location' ); ?></a>
-
-		<p> <?php _e( 'Location Data below can be used to complete the location description, which will be displayed, or saved as a venue.', 'simple-location' ); ?></p>
-			<br />
-			<label for="name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
-			<input type="text" name="location-name" id="location-name" value="" class="widefat" />
-			<br /></br />
-
-			<label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label>
-			<input type="text" name="street-address" id="street-address" value="" class="widefat" />
-
-			<br /><br />
-			<label for="extended-address"><?php _e( 'Extended Address', 'simple-location' ); ?></label>
-			<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />  
-			<br /><br />
-
-		<label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label>
-		<input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" class="widefat" />
-			<br /><br />
-		<label for="region"><?php _e( 'State/County/Province', 'simple-location' ); ?></label>
-		<input type="text" name="region" id="region" value="" class="widefat" style="width:75%" />
-		<label for="country-code"><?php _e( 'Country Code', 'simple-location' ); ?></label>
-		<input type="text" name="country-code" id="country-code" value="" size="2" />
-		<br /><br />
-			<label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label>
-			<input type="text" name="extended-address" id="extended-address" value="" class="widefat" />
-			<br />
-		<label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label>
-		<input type="text" name="postal-code" id="postal-code" value="" class="widefat" style="width:25%" />
-			<br />
-			<label for="country-name"><?php _e( 'Country Name', 'simple-location' ); ?></label>
-			<input type="text" name="country-name" id="country-name" value="" class="widefat" style="width:40%" />
-			</p>
-		<br />
-		<br />
-		<div class="button-group">
-		<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
-		</div>
-	</div>
-	<?php
+		load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-metabox.php' );
 	}
 
 	public static function user_profile( $user ) {
-		echo '<h3>' . esc_html__( 'Last Reported Location', 'simple-location' ) . '</h3>';
-		echo '<p>' . esc_html__( 'This allows you to set the last reported location for this author. See Simple Location settings for options.', 'simple-location' ) . '</p>';
-		echo '<a class="hide-if-no-js lookup-address-button">';
-				echo '<span class="dashicons dashicons-location" aria-label="' . __( 'Location Lookup', 'simple-location' ) . '" title="' . __( 'Location Lookup', 'simple-location' ) . '"></span></a>';
-		echo '<table class="form-table">';
-		self::profile_text_field( $user, 'latitude', __( 'Latitude', 'simple-location' ), 'Description' );
-		self::profile_text_field( $user, 'longitude', __( 'Longitude', 'simple-location' ), 'Description' );
-		self::profile_text_field( $user, 'address', __( 'Address', 'simple-location' ), 'Description' );
-		self::geo_public_user( $user );
-		echo '</table>';
+		load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-user-metabox.php' );
 	}
 
 
@@ -196,12 +142,11 @@ class Loc_Metabox {
 	public static function profile_text_field( $user, $key, $title, $description ) {
 	?>
 	<tr>
-	 <th><label for="<?php echo esc_html( $key ); ?>"><?php echo esc_html( $title ); ?></label></th>
-
-	 <td>
-	  <input type="text" name="<?php echo esc_html( $key ); ?>" id="<?php echo esc_html( $key ); ?>" value="<?php echo esc_attr( get_the_author_meta( 'geo_' . $key, $user->ID ) ); ?>" class="regular-text" /><br />
-	  <span class="description"><?php echo esc_html( $description ); ?></span>
-	 </td>
+		<th><label for="<?php echo esc_html( $key ); ?>"><?php echo esc_html( $title ); ?></label></th>
+		<td>
+			<input type="text" name="<?php echo esc_html( $key ); ?>" id="<?php echo esc_html( $key ); ?>" value="<?php echo esc_attr( get_the_author_meta( 'geo_' . $key, $user->ID ) ); ?>" class="regular-text" /><br />
+			<span class="description"><?php echo esc_html( $description ); ?></span>
+		</td>
 	</tr>
 	<?php
 	}
@@ -220,6 +165,49 @@ class Loc_Metabox {
 		$geodata = WP_Geo_Data::get_geodata( $post );
 		$author  = new WP_User( $post->post_author );
 		WP_Geo_Data::set_geodata( $author, $geodata );
+	}
+
+	public static function save_meta( $meta_type, $object_id ) {
+		/* OK, its safe for us to save the data now. */
+		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading' );
+		foreach ( $lon_params as $param ) {
+			if ( ! empty( $_POST[ $param ] ) && 'NaN' !== $_POST[ $param ] ) {
+				update_metadata( $meta_type, $object_id, 'geo_' . $param, $_POST[ $param ] );
+			} else {
+				delete_metadata( $meta_type, $object_id, 'geo_' . $param );
+			}
+		}
+
+		$weather    = array();
+		$wtr_params = array( 'temperature', 'units', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility' );
+		foreach ( $wtr_params as $param ) {
+			if ( ! empty( $_POST[ $param ] ) ) {
+				$weather[ str_replace( 'weather_', '', $param ) ] = $_POST[ $param ];
+			}
+		}
+
+		$wind = array();
+		if ( ! empty( $_POST['wind_speed'] ) ) {
+			$wind['speed'] = sanitize_text_field( $_POST['wind_speed'] );
+		}
+		if ( ! empty( $_POST['wind_degree'] ) ) {
+			$wind['degree'] = sanitize_text_field( $_POST['wind_degree'] );
+		}
+		$wind = array_filter( $wind );
+		if ( ! empty( $wind ) ) {
+			$weather['wind'] = $wind;
+		}
+		$weather = array_filter( $weather );
+		if ( ! empty( $weather ) ) {
+			update_metadata( $meta_type, $object_id, 'geo_weather', $weather );
+		} else {
+			delete_metadata( $meta_type, $object_id, 'geo_weather' );
+		}
+		if ( isset( $_POST['latitude'] ) || isset( $_POST['longitude'] ) || isset( $_POST['address'] ) ) {
+			update_metadata( $meta_type, $object_id, 'geo_public', (int) $_POST['geo_public'] );
+		} else {
+			delete_metadata( $meta_type, $object_id, 'geo_public' );
+		}
 	}
 
 	/* Save the meta box's post metadata. */
@@ -252,96 +240,9 @@ class Loc_Metabox {
 		if ( has_term( '', 'venue' ) ) {
 			return;
 		}
-		/* OK, its safe for us to save the data now. */
-		if ( ! empty( $_POST['latitude'] ) ) {
-			update_post_meta( $post_id, 'geo_latitude', $_POST['latitude'] );
-		} else {
-			delete_post_meta( $post_id, 'geo_latitude' );
-		}
-		if ( ! empty( $_POST['longitude'] ) ) {
-			update_post_meta( $post_id, 'geo_longitude', $_POST['longitude'] );
-		} else {
-			delete_post_meta( $post_id, 'geo_longitude' );
-		}
-		if ( ! empty( $_POST['address'] ) ) {
-			update_post_meta( $post_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
-		} else {
-			delete_post_meta( $post_id, 'geo_address' );
-		}
-
-		if ( ! empty( $_POST['map_zoom'] ) ) {
-			update_post_meta( $post_id, 'geo_zoom', sanitize_text_field( $_POST['map_zoom'] ) );
-		} else {
-			delete_post_meta( $post_id, 'geo_zoom' );
-		}
-
-		if ( ! empty( $_POST['altitude'] ) ) {
-			update_post_meta( $post_id, 'geo_altitude', sanitize_text_field( $_POST['altitude'] ) );
-		} else {
-			delete_post_meta( $post_id, 'geo_altitude' );
-		}
-
-		if ( ! empty( $_POST['speed'] ) && 'NaN' !== $_POST['speed'] ) {
-			update_post_meta( $post_id, 'geo_speed', sanitize_text_field( $_POST['speed'] ) );
-		} else {
-			delete_post_meta( $post_id, 'geo_speed' );
-		}
-
-		if ( ! empty( $_POST['heading'] ) && 'NaN' !== $_POST['heading'] ) {
-			update_post_meta( $post_id, 'geo_heading', sanitize_text_field( $_POST['heading'] ) );
-		} else {
-			delete_post_meta( $post_id, 'geo_heading' );
-		}
-
-		$weather = array();
-
-		if ( ! empty( $_POST['temperature'] ) ) {
-			$weather['temperature'] = sanitize_text_field( $_POST['temperature'] );
-		}
-
-		if ( ! empty( $_POST['units'] ) ) {
-			$weather['units'] = sanitize_text_field( $_POST['units'] );
-		}
-
-		if ( ! empty( $_POST['humidity'] ) ) {
-			$weather['humidity'] = sanitize_text_field( $_POST['humidity'] );
-		}
-		if ( ! empty( $_POST['pressure'] ) ) {
-			$weather['pressure'] = sanitize_text_field( $_POST['pressure'] );
-		}
-		if ( ! empty( $_POST['weather_summary'] ) ) {
-			$weather['summary'] = sanitize_text_field( $_POST['weather_summary'] );
-		}
-		if ( ! empty( $_POST['weather_icon'] ) ) {
-			$weather['icon'] = sanitize_text_field( $_POST['weather_icon'] );
-		}
-		if ( ! empty( $_POST['visibility'] ) ) {
-			$weather['visibility'] = sanitize_text_field( $_POST['visibility'] );
-		}
-
-		$wind = array();
-		if ( ! empty( $_POST['wind_speed'] ) ) {
-			$wind['speed'] = sanitize_text_field( $_POST['wind_speed'] );
-		}
-		if ( ! empty( $_POST['wind_degree'] ) ) {
-			$wind['degree'] = sanitize_text_field( $_POST['wind_degree'] );
-		}
-		if ( ! empty( $wind ) ) {
-			$weather['wind'] = $wind;
-		}
-
-		if ( ! empty( $weather ) ) {
-			update_post_meta( $post_id, 'geo_weather', $weather );
-		} else {
-			delete_post_meta( $post_id, 'geo_weather' );
-		}
-
-		if ( ! empty( $_POST['address'] ) ) {
-			if ( isset( $_POST['geo_public'] ) ) {
-				update_post_meta( $post_id, 'geo_public', $_POST['geo_public'] );
-			}
-		}
+		self::save_meta( 'post', $post_id );
 	}
+
 
 	/* Save the meta box's comment metadata. */
 	public static function save_comment_meta( $comment_id ) {
@@ -364,34 +265,7 @@ class Loc_Metabox {
 		if ( ! current_user_can( 'edit_comment', $comment_id ) ) {
 			return;
 		}
-		/* OK, its safe for us to save the data now. */
-		if ( ! empty( $_POST['latitude'] ) ) {
-			update_comment_meta( $comment_id, 'geo_latitude', $_POST['latitude'] );
-		} else {
-			delete_comment_meta( $comment_id, 'geo_latitude' );
-		}
-		if ( ! empty( $_POST['longitude'] ) ) {
-			update_comment_meta( $comment_id, 'geo_longitude', $_POST['longitude'] );
-		} else {
-			delete_comment_meta( $comment_id, 'geo_longitude' );
-		}
-		if ( ! empty( $_POST['address'] ) ) {
-			update_comment_meta( $comment_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
-		} else {
-			delete_comment_meta( $comment_id, 'geo_address' );
-		}
-
-		if ( ! empty( $_POST['map_zoom'] ) ) {
-			update_comment_meta( $comment_id, 'geo_zoom', sanitize_text_field( $_POST['map_zoom'] ) );
-		} else {
-			delete_comment_meta( $comment_id, 'geo_zoom' );
-		}
-
-		if ( ! empty( $_POST['address'] ) ) {
-			if ( isset( $_POST['geo_public'] ) ) {
-				update_comment_meta( $comment_id, 'geo_public', $_POST['geo_public'] );
-			}
-		}
+		self::save_meta( 'comment', $comment_id );
 	}
 
 
@@ -401,28 +275,7 @@ class Loc_Metabox {
 		if ( ! current_user_can( 'edit_user', $user_id ) ) {
 			return;
 		}
-		/* OK, its safe for us to save the data now. */
-		if ( ! empty( $_POST['latitude'] ) ) {
-			update_user_meta( $user_id, 'geo_latitude', $_POST['latitude'] );
-		} else {
-			delete_user_meta( $user_id, 'geo_latitude' );
-		}
-		if ( ! empty( $_POST['longitude'] ) ) {
-			update_user_meta( $user_id, 'geo_longitude', $_POST['longitude'] );
-		} else {
-			delete_user_meta( $user_id, 'geo_longitude' );
-		}
-
-		if ( ! empty( $_POST['address'] ) ) {
-			update_user_meta( $user_id, 'geo_address', $_POST['address'] );
-		} else {
-			delete_user_meta( $user_id, 'geo_address' );
-		}
-		if ( ! empty( $_POST['latitude'] ) && ! empty( $_POST['longitude'] ) ) {
-			if ( isset( $_POST['geo_public'] ) ) {
-				update_user_meta( $user_id, 'geo_public', $_POST['geo_public'] );
-			}
-		}
+		self::save_meta( 'user', $user_id );
 	}
 
 

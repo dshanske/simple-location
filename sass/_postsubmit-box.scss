@@ -1,0 +1,17 @@
+.misc-pub-location {
+	#location-lookup {
+		color: grey;
+		&:hover {
+			color: red;
+		}
+	}
+}
+
+.misc-pub-timezone {
+	#timezone-browser {
+		color: grey;
+		&:hover {
+			color: red;
+		}
+	}
+}
