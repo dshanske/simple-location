@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "eslint-config-wordpress": "^2.0.0",
-    "grunt": "~1.0.1",
+    "grunt": "^1.0.2",
     "grunt-checktextdomain": "^1.0.1",
     "grunt-contrib-copy": "~1.0.0",
     "grunt-contrib-sass": "~1.0.0",
