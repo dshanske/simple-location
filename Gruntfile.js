@@ -98,6 +98,7 @@ module.exports = function(grunt) {
         src: [
           '**',
           '!node_modules/**',
+	  'node_modules/jstz/dist/jstz.min.js',
           '!build/**',
           '!.git/**',
           '!Gruntfile.js',
