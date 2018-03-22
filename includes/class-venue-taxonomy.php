@@ -64,16 +64,18 @@ class Venue_Taxonomy {
 		);
 
 		$args = array(
-			'labels'            => $labels,
-			'public'            => true,
-			'show_in_nav_menus' => true,
-			'show_ui'           => true,
-			'show_in_menu'      => WP_DEBUG,
-			'show_tagcloud'     => true,
-			'show_admin_column' => true,
-			'hierarchical'      => false,
-			'rewrite'           => true,
-			'query_var'         => true,
+			'labels'             => $labels,
+			'description'        => __( 'Reflects a location', 'simple-location' ),
+			'public'             => true,
+			'show_in_nav_menus'  => false,
+			'show_ui'            => WP_DEBUG,
+			'show_in_menu'       => WP_DEBUG,
+			'show_tagcloud'      => true,
+			'show_admin_column'  => false,
+			'hierarchical'       => false,
+			'rewrite'            => true,
+			'query_var'          => true,
+			'show_in_quick_edit' => false,
 		);
 		register_taxonomy( 'venue', array( 'post' ), $args );
 	}
