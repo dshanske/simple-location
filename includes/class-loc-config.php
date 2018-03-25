@@ -469,14 +469,33 @@ class Loc_Config {
 		printf( '<input name="%1s" size="50" class="regular-text" type="string" value="%2s" />', $name, get_option( $name ) );
 	}
 
+	public static function map_providers() {
+		$return = array(
+			'OSM'    => __( 'OpenStreetMap/MapBox', 'simple-location' ),
+			'Google' => __( 'Google Maps', 'simple-location' ),
+			'Bing'   => __( 'Bing Maps', 'simple-location' ),
+		);
+		return apply_filters( 'map_providers', $return );
+	}
+
+
 	public static function map_provider_callback( array $args ) {
 		$name = $args['label_for'];
 		$text = get_option( $name );
 		echo '<select name="' . $name . '">';
-		echo '<option value="OSM" ' . selected( $text, 'OSM' ) . '>' . __( 'OpenStreetMap/MapBox', 'simple-location' ) . '</option>';
-		echo '<option value="Google" ' . selected( $text, 'Google' ) . '>' . __( 'Google Maps', 'simple-location' ) . '</option>';
-		echo '<option value="Bing" ' . selected( $text, 'Bing' ) . '>' . __( 'Bing Maps', 'simple-location' ) . '</option>';
+		$providers = Loc_Config::map_providers();
+		foreach ( $providers as $key => $value ) {
+			printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value );
+		}
 		echo '</select><br /><br />';
+	}
+
+
+	public static function weather_providers() {
+		$return = array(
+			'OpenWeatherMap' => __( 'OpenWeatherMap', 'simple-location' ),
+		);
+		return apply_filters( 'weather_providers', $return );
 	}
 
 
@@ -484,7 +503,10 @@ class Loc_Config {
 		$name = $args['label_for'];
 		$text = get_option( $name );
 		echo '<select name="' . $name . '">';
-		echo '<option value="OpenWeatherMap" ' . selected( $text, 'OpenWeatherMap' ) . '>' . __( 'OpenWeatherMap', 'simple-location' ) . '</option>';
+				$providers = Loc_Config::weather_providers();
+		foreach ( $providers as $key => $value ) {
+				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value );
+		}
 		echo '</select><br /><br />';
 	}
 
