@@ -527,39 +527,40 @@ class Loc_Config {
 
 	public static function default_map_provider( $args = array() ) {
 		$option = get_option( 'sloc_default_map_provider' );
-		switch ( $option ) {
-			case 'Google':
-				$map = new Geo_Provider_Google( $args );
-				break;
-			case 'Bing':
-				$map = new Geo_Provider_Bing( $args );
-				break;
-			default:
-				$map = new Geo_Provider_OSM( $args );
+		$option = apply_filters( 'sloc_default_map_provider', $option );
+		$option = 'Geo_Provider_' . $option;
+		try {
+			$map = new $option( $args );
+		} catch ( Exception $e ) {
+			$map = new Geo_Provider_OSM( $args );
 		}
-
-		return apply_filters( 'sloc_default_map_provider', $map, $args );
+		return $map;
 	}
 
 	public static function default_reverse_provider( $args = array() ) {
 		$option = get_option( 'sloc_default_reverse_provider' );
-		switch ( $option ) {
-			case 'Google':
-				$map = new Geo_Provider_Google( $args );
-				break;
-			default:
-				$map = new Geo_Provider_OSM( $args );
+		$option = apply_filters( 'sloc_default_reverse_provider', $option );
+		$option = 'Geo_Provider_' . $option;
+		try {
+			$map = new $option( $args );
+		} catch ( Exception $e ) {
+			$map = new Geo_Provider_OSM( $args );
 		}
-		return apply_filters( 'sloc_default_reverse_provider', $map, $args );
+				return $map;
+
 	}
 
 	public static function default_weather_provider( $args = array() ) {
-		$option = get_option( 'sloc_default_weather_provider' );
-		switch ( $option ) {
-			default:
-				$weather = new Weather_Provider_OpenWeatherMap( $args );
+		$option         = get_option( 'sloc_default_weather_provider' );
+				$option = apply_filters( 'sloc_default_weather_provider', $option );
+		$option         = 'Weather_Provider_' . $option;
+		try {
+			$map = new $option( $args );
+		} catch ( Exception $e ) {
+			$map = new Weather_Provider_OpenWeatherMap( $args );
 		}
-		return apply_filters( 'sloc_default_weather_provider', $weather, $args );
+				return $map;
+
 	}
 
 
