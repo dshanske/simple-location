@@ -89,7 +89,7 @@ class Loc_Metabox {
 				'sloc_location',
 				'geo_options',
 				array(
-					'lookup' => '0',
+					'lookup' => Loc_Config::default_geolocation_provider() ? 0 : 1,
 				)
 			);
 		}

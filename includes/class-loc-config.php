@@ -15,7 +15,7 @@ class Loc_Config {
 			'sloc_default_map_provider', // option name
 			array(
 				'type'         => 'string',
-				'description'  => 'Default Map Provider',
+				'description'  => 'Map Provider',
 				'show_in_rest' => false,
 				'default'      => 'OSM',
 			)
@@ -25,9 +25,19 @@ class Loc_Config {
 			'sloc_default_reverse_provider', // option name
 			array(
 				'type'         => 'string',
-				'description'  => 'Default Map Provider',
+				'description'  => 'Reverse Lookup Provider',
 				'show_in_rest' => false,
 				'default'      => 'OSM',
+			)
+		);
+		register_setting(
+			'simloc', // settings page
+			'sloc_default_geolocation_provider', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Geolocation Provider',
+				'show_in_rest' => false,
+				'default'      => 'HTML5',
 			)
 		);
 		register_setting(
@@ -35,7 +45,7 @@ class Loc_Config {
 			'sloc_default_weather_provider', // option name
 			array(
 				'type'         => 'string',
-				'description'  => 'Default Weather Provider',
+				'description'  => 'Weather Provider',
 				'show_in_rest' => false,
 				'default'      => 'OpenWeatherMap',
 			)
@@ -253,12 +263,35 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'sloc_default_map_provider', // id
-			__( 'Default Map Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'map_provider_callback' ), // display callback
+			__( 'Map Provider', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'provider_callback' ), // display callback
 			'simloc', // settings page
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'sloc_default_map_provider',
+				'providers' => self::map_providers(),
+			)
+		);
+		add_settings_field(
+			'sloc_default_reverse_provider', // id
+			__( 'Reverse Provider', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'provider_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_map', // settings section
+			array(
+				'label_for' => 'sloc_default_reverse_provider',
+				'providers' => self::reverse_providers(),
+			)
+		);
+		add_settings_field(
+			'sloc_default_geolocation_provider', // id
+			__( 'Geolocation Provider', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'provider_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_map', // settings section
+			array(
+				'label_for' => 'sloc_default_geolocation_provider',
+				'providers' => self::geolocation_providers(),
 			)
 		);
 		add_settings_field(
@@ -418,11 +451,12 @@ class Loc_Config {
 		add_settings_field(
 			'sloc_default_weather_provider', // id
 			__( 'Default Weather Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'weather_provider_callback' ), // display callback
+			array( 'Loc_Config', 'provider_callback' ), // display callback
 			'simloc', // settings page
 			'sloc_weather', // settings section
 			array(
 				'label_for' => 'sloc_default_weather_provider',
+				'providers' => self::weather_providers(),
 			)
 		);
 		add_settings_field(
@@ -469,6 +503,18 @@ class Loc_Config {
 		printf( '<input name="%1s" size="50" class="regular-text" type="string" value="%2s" />', $name, get_option( $name ) );
 	}
 
+	public static function provider_callback( $args ) {
+		$name      = $args['label_for'];
+		$text      = get_option( $name );
+		$providers = $args['providers'];
+				printf( '<select name="%1$s" %2$s>', $name, count( $providers ) == 1 ? 'disabled' : '' );
+		foreach ( $providers as $key => $value ) {
+				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value );
+		}
+				echo '</select><br /><br />';
+	}
+
+
 	public static function map_providers() {
 		$return = array(
 			'OSM'    => __( 'OpenStreetMap/MapBox', 'simple-location' ),
@@ -478,16 +524,18 @@ class Loc_Config {
 		return apply_filters( 'map_providers', $return );
 	}
 
+	public static function reverse_providers() {
+		$return = array(
+			'OSM' => __( 'OpenStreetMap/MapBox', 'simple-location' ),
+		);
+		return apply_filters( 'reverse_providers', $return );
+	}
 
-	public static function map_provider_callback( array $args ) {
-		$name = $args['label_for'];
-		$text = get_option( $name );
-		echo '<select name="' . $name . '">';
-		$providers = Loc_Config::map_providers();
-		foreach ( $providers as $key => $value ) {
-			printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value );
-		}
-		echo '</select><br /><br />';
+	public static function geolocation_providers() {
+		$return = array(
+			'HTML5' => __( 'HTML5 Browser Geolocation (requires HTTPS)', 'simple-location' ),
+		);
+		return apply_filters( 'geolocation_providers', $return );
 	}
 
 
@@ -496,18 +544,6 @@ class Loc_Config {
 			'OpenWeatherMap' => __( 'OpenWeatherMap', 'simple-location' ),
 		);
 		return apply_filters( 'weather_providers', $return );
-	}
-
-
-	public static function weather_provider_callback( array $args ) {
-		$name = $args['label_for'];
-		$text = get_option( $name );
-		echo '<select name="' . $name . '">';
-				$providers = Loc_Config::weather_providers();
-		foreach ( $providers as $key => $value ) {
-				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value );
-		}
-		echo '</select><br /><br />';
 	}
 
 	public static function measure_callback( array $args ) {
@@ -569,6 +605,22 @@ class Loc_Config {
 			$map = new Geo_Provider_OSM( $args );
 		}
 				return $map;
+
+	}
+
+	public static function default_geolocation_provider( $args = array() ) {
+		$option = get_option( 'sloc_default_geolocation_provider' );
+		if ( 'HTML5' === $option ) {
+			return 'null';
+		}
+		$option = apply_filters( 'sloc_default_geolocation_provider', $option );
+		$option = 'Geolocation_Provider_' . $option;
+		try {
+			$map = new $option( $args );
+		} catch ( Exception $e ) {
+			$map = null;
+		}
+		return $map;
 
 	}
 
