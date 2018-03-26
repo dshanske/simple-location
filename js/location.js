@@ -5,15 +5,15 @@ jQuery( document ).ready( function( $ ) {
 			enableHighAccuracy: true,
 			maximumAge: 600000
 		};
-		if ( '0' === geo_options.lookup ) { // eslint-disable-line camelcase
+		if ( 'HTML5' === geo_options.lookup ) { // eslint-disable-line camelcase
 			if ( navigator.geolocation ) {
 			navigator.geolocation.getCurrentPosition( reverseLookup, error, options );
 			} else {
 				alert( 'Geolocation is not supported by this browser.' );
+				getWeather();
 			}
 		} else {
-			position = getCurrentPosition();
-			reverseLookup( position );
+			getCurrentPosition();
 		}
 	}
 
@@ -29,11 +29,16 @@ jQuery( document ).ready( function( $ ) {
 					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
 				},
 				data: {
+					user: $( '#post_author_override' ).val()
 				},
 				success: function( response ) {
 					if ( 'undefined' == typeof response ) {
+						return null;
 					} else {
+						var position =  {timestamp:(new Date()).getTime(), coords:response};
+						reverseLookup( position );
 					}
+                                   
 				},
 				error: function( request, status, error ) {
 					alert( request.responseText );

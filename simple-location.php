@@ -65,6 +65,9 @@ class Simple_Location_Plugin {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-google.php';
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-bing.php';
 
+		// Location Provider
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-location-provider.php';
+
 		// API Endpoint under construction
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-rest-geo.php';
 		$geo_api = new REST_Geo();

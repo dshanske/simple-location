@@ -526,7 +526,7 @@ class Loc_Config {
 
 	public static function reverse_providers() {
 		$return = array(
-			'OSM' => __( 'OpenStreetMap/MapBox', 'simple-location' ),
+			'OSM' => __( 'OpenStreetMap/Nominatim', 'simple-location' ),
 		);
 		return apply_filters( 'reverse_providers', $return );
 	}
@@ -614,7 +614,7 @@ class Loc_Config {
 			return 'null';
 		}
 		$option = apply_filters( 'sloc_default_geolocation_provider', $option );
-		$option = 'Geolocation_Provider_' . $option;
+		$option = 'Location_Provider_' . $option;
 		try {
 			$map = new $option( $args );
 		} catch ( Exception $e ) {
@@ -625,9 +625,9 @@ class Loc_Config {
 	}
 
 	public static function default_weather_provider( $args = array() ) {
-		$option         = get_option( 'sloc_default_weather_provider' );
-				$option = apply_filters( 'sloc_default_weather_provider', $option );
-		$option         = 'Weather_Provider_' . $option;
+		$option = get_option( 'sloc_default_weather_provider' );
+		$option = apply_filters( 'sloc_default_weather_provider', $option );
+		$option = 'Weather_Provider_' . $option;
 		try {
 			$map = new $option( $args );
 		} catch ( Exception $e ) {

@@ -25,7 +25,7 @@ abstract class Geo_Provider {
 	 * @param string $key API Key if Needed
 	 */
 	public function __construct( $args = array() ) {
-		$defaults       = array(
+		$defaults           = array(
 			'height'       => get_option( 'sloc_height' ),
 			'width'        => get_option( 'sloc_width' ),
 			'map_zoom'     => get_option( 'sloc_zoom' ),
@@ -36,14 +36,15 @@ abstract class Geo_Provider {
 			'user'         => '',
 			'style'        => '',
 		);
-		$defaults       = apply_filters( 'sloc_geo_provider_defaults', $defaults );
-		$r              = wp_parse_args( $args, $defaults );
-		$this->height   = $r['height'];
-		$this->width    = $r['width'];
-		$this->map_zoom = $r['map_zoom'];
-		$this->user     = $r['user'];
-		$this->style    = $r['style'];
-		$this->api      = $r['api'];
+		$defaults           = apply_filters( 'sloc_geo_provider_defaults', $defaults );
+		$r                  = wp_parse_args( $args, $defaults );
+		$this->height       = $r['height'];
+		$this->width        = $r['width'];
+		$this->map_zoom     = $r['map_zoom'];
+		$this->reverse_zoom = $r['reverse_zoom'];
+		$this->user         = $r['user'];
+		$this->style        = $r['style'];
+		$this->api          = $r['api'];
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
