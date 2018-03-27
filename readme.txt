@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.3.2
+Stable tag: 3.3.3
 Requires at least: 4.7
-Tested up to: 4.9.2
+Tested up to: 4.9.4
 Requires PHP: 5.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -12,10 +12,10 @@ Adds geographic location and weather support to WordPress.
 
 == Description == 
 
-Supports adding geo coordinates or textual description to a post, comment, user, or attachment. Supports adding weather data to a post or to a widget. Will be supporting saving a 
-location as a venue for reuse. Offers choice of map displays.
+Supports adding geo coordinates or textual description to a post, comment, user, or attachment. Supports adding weather data to a post or to a widget based on location.
+Offers choice of map displays. It supports retrieving location using the HTML5 geolocation API by default. Clicking the location icon or 'Lookup Location' will retrieve the location. 
 
-It supports retrieving location using the HTML5 geolocation API. As it stores the GeoData in a WordPress standard format, Geodata can also be added from other plugins.
+As it stores the GeoData in a WordPress standard format, Geodata can also be added from other plugins.
 
 Offers the opportunity to change the displayed timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location. 
 Clicking the clock icon next to the timezone will set to the browser timezone.
@@ -79,6 +79,14 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+= 3.3.3 ( 2018-03-26 ) =
+* Add markers to static map and map link for Mapbox
+* Clean up URL generation code for static maps
+* Update jstz dependency and set up scripted update for future
+* Remove hard-coded options for provider selection and make code more dynamic to allow third-party additions
+* Add support for alternative geolocation providers in the backend. Currently defaults to the HTML5 browser option in the frontend
+* Weather now supported for non-SSL sites
+
 = 3.3.2 ( 2018-02-03 ) =
 * Simplify and refactor metadata saving functionality
 * Improvements to metaboxes ( props to @kingkool68 for contributions )

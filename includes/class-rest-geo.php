@@ -31,9 +31,9 @@ class REST_Geo {
 		register_rest_route(
 			'sloc_geo/1.0', '/reverse', array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'reverse' ),
-					'args'     => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'reverse' ),
+					'args'                => array(
 						'longitude' => array(
 							'required' => true,
 						),
@@ -41,28 +41,50 @@ class REST_Geo {
 							'required' => true,
 						),
 					),
+					'permission_callback' => function() {
+							return current_user_can( 'publish_posts' );
+					},
 				),
 			)
 		);
 		register_rest_route(
 			'sloc_geo/1.0', '/weather', array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'weather' ),
-					'args'     => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'weather' ),
+					'args'                => array(
 						'longitude' => array(),
 						'latitude'  => array(),
 						'units'     => array(),
 					),
+					'permission_callback' => function() {
+						return current_user_can( 'publish_posts' );
+					},
+				),
+			)
+		);
+		register_rest_route(
+			'sloc_geo/1.0', '/lookup', array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'lookup' ),
+					'args'                => array(
+						'user' => array(
+							'required' => true,
+						),
+					),
+					'permission_callback' => function() {
+						return current_user_can( 'publish_posts' );
+					},
 				),
 			)
 		);
 		register_rest_route(
 			'sloc_geo/1.0', '/map', array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'map' ),
-					'args'     => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'map' ),
+					'args'                => array(
 						'longitude' => array(
 							'required' => true,
 						),
@@ -77,6 +99,9 @@ class REST_Geo {
 						// If map exists return image src
 						'map'       => array(),
 					),
+					'permission_callback' => function() {
+						return current_user_can( 'publish_posts' );
+					},
 				),
 			)
 		);
@@ -125,6 +150,18 @@ class REST_Geo {
 			return $map->get_the_map();
 		}
 		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
+	}
+
+	// Callback Handler for Geolocation Retrieval
+	public static function lookup( $request ) {
+		$params       = $request->get_params();
+		$args['user'] = $params['user'];
+		$geolocation  = Loc_Config::default_geolocation_provider( $args );
+		if ( $geolocation ) {
+			$geolocation->retrieve();
+			return $geolocation->get();
+		}
+		return new WP_Error( 'no_provider', __( 'No Geolocation Provider Available', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
 

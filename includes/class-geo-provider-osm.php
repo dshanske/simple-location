@@ -19,7 +19,9 @@ class Geo_Provider_OSM extends Geo_Provider {
 	}
 
 	public function reverse_lookup() {
-		$response = wp_remote_get( 'http://nominatim.openstreetmap.org/reverse?format=json&extratags=1&addressdetails=1&lat=' . $this->latitude . '&lon=' . $this->longitude . '&zoom=' . $this->reverse_zoom . '&accept-language=' . get_bloginfo( 'language' ) );
+		$query = sprintf( 'http://nominatim.openstreetmap.org/reverse?format=json&extratags=1&addressdetails=1&lat=%1$s&lon=%2$s&zoom=%3$s&accept-language=%4$s', $this->latitude, $this->longitude, $this->reverse_zoom, get_bloginfo( 'language' ) );
+		error_log( $query );
+		$response = wp_remote_get( $query );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -99,15 +101,15 @@ class Geo_Provider_OSM extends Geo_Provider {
 
 
 	public function get_the_map_url() {
-		return 'http://www.openstreetmap.org/#map=14/' . $this->latitude . '/' . $this->longitude;
+		return sprintf( 'http://www.openstreetmap.org/?mlat=%1$s&mlon=%2$s#map=%3$s/%1$s/%2$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
 	public function get_the_map( $static = true ) {
-		$map  = $this->get_the_static_map();
-		$link = $this->get_the_map_url();
-		$c    = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
-		return $c;
-
+		if ( $static ) {
+			$map  = sprintf( '<img src="%s">', $this->get_the_static_map() );
+			$link = $this->get_the_map_url();
+			return '<a href="' . $link . '">' . $map . '</a>';
+		}
 	}
 
 	public function get_the_static_map() {
@@ -115,7 +117,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 		if ( array_key_exists( $this->style, $this->default_styles() ) ) {
 			$user = 'mapbox';
 		}
-		$map = 'https://api.mapbox.com/styles/v1/' . $user . '/' . $this->style . '/static/' . $this->longitude . ',' . $this->latitude . ',' . $this->map_zoom . ',0,0/' . $this->width . 'x' . $this->height . '?access_token=' . $this->api;
+		$map = sprintf( 'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s, %5$s,0,0/%6$sx%7$s?access_token=%8$s', $user, $this->style, $this->longitude, $this->latitude, $this->map_zoom, $this->width, $this->height, $this->api );
 		return $map;
 
 	}

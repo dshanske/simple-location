@@ -43,12 +43,12 @@ class Geo_Provider_Bing extends Geo_Provider {
 
 	// Return code for map
 	public function get_the_static_map() {
-		$map = 'http://dev.virtualearth.net/REST/v1/Imagery/Map/' . $this->style . '/' . $this->latitude . ',' . $this->longitude . '/' . $this->map_zoom . '?mapSize=' . $this->width . ',' . $this->height . '&key=' . $this->api;
+		$map = sprintf( 'http://dev.virtualearth.net/REST/v1/Imagery/Map/%1$s/%2$s,%3$s/%4$s?pushpin=%2$s,%3$s&mapSize=%5$s,%6$s&key=%7$s', $this->style, $this->latitude, $this->longitude, $this->map_zoom, $this->width, $this->height, $this->api );
 		return $map;
 	}
 
 	public function get_the_map_url() {
-		return 'http://bing.com/maps/default.aspx?cp=' . $this->latitude . ',' . $this->longitude . '&lvl=' . $this->map_zoom;
+		return sprintf( 'http://bing.com/maps/default.aspx?cp=%1$s,%2$s&lvl=%3$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
 	// Return code for map
