@@ -70,7 +70,7 @@ class REST_Geo {
 					'callback'            => array( $this, 'lookup' ),
 					'args'                => array(
 						'user' => array(
-							'required' => true
+							'required' => true,
 						),
 					),
 					'permission_callback' => function() {
@@ -154,9 +154,9 @@ class REST_Geo {
 
 	// Callback Handler for Geolocation Retrieval
 	public static function lookup( $request ) {
-		$params = $request->get_params();
+		$params       = $request->get_params();
 		$args['user'] = $params['user'];
-		$geolocation = Loc_Config::default_geolocation_provider( $args );
+		$geolocation  = Loc_Config::default_geolocation_provider( $args );
 		if ( $geolocation ) {
 			$geolocation->retrieve();
 			return $geolocation->get();

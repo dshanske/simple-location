@@ -18,6 +18,7 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function getCurrentPosition( ) {
+		var position;
 		$.ajax({
 				type: 'GET',
 
@@ -35,10 +36,10 @@ jQuery( document ).ready( function( $ ) {
 					if ( 'undefined' == typeof response ) {
 						return null;
 					} else {
-						var position =  {timestamp:(new Date()).getTime(), coords:response};
+						position =  {timestamp: ( new Date() ).getTime(), coords: response};
 						reverseLookup( position );
 					}
-                                   
+
 				},
 				error: function( request, status, error ) {
 					alert( request.responseText );

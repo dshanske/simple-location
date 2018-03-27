@@ -450,7 +450,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'sloc_default_weather_provider', // id
-			__( 'Default Weather Provider', 'simple-location' ), // setting title
+			__( 'Weather Provider', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'provider_callback' ), // display callback
 			'simloc', // settings page
 			'sloc_weather', // settings section
@@ -507,7 +507,7 @@ class Loc_Config {
 		$name      = $args['label_for'];
 		$text      = get_option( $name );
 		$providers = $args['providers'];
-				printf( '<select name="%1$s" %2$s>', $name, count( $providers ) == 1 ? 'disabled' : '' );
+				printf( '<select name="%1$s" %2$s>', $name, count( $providers ) == 1 ? 'hidden' : '' );
 		foreach ( $providers as $key => $value ) {
 				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value );
 		}
