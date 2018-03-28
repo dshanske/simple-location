@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.3.3  
+**Stable tag:** 3.3.4  
 **Requires at least:** 4.7  
 **Tested up to:** 4.9.4  
 **Requires PHP:** 5.3  
@@ -79,6 +79,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 3.3.4 ( 2018-03-27 ) ###
+* Fix issue when default is not set
+
 ### 3.3.3 ( 2018-03-26 ) ###
 * Add markers to static map and map link for Mapbox
 * Clean up URL generation code for static maps
