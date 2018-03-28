@@ -507,7 +507,7 @@ class Loc_Config {
 		$name      = $args['label_for'];
 		$text      = get_option( $name );
 		$providers = $args['providers'];
-				printf( '<select name="%1$s" %2$s>', $name, count( $providers ) == 1 ? 'hidden' : '' );
+		printf( '<select name="%1$s" %2$s>', $name, count( $providers ) === 1 ? 'hidden' : '' );
 		foreach ( $providers as $key => $value ) {
 				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value );
 		}
@@ -586,26 +586,23 @@ class Loc_Config {
 	public static function default_map_provider( $args = array() ) {
 		$option = get_option( 'sloc_default_map_provider' );
 		$option = apply_filters( 'sloc_default_map_provider', $option );
-		$option = 'Geo_Provider_' . $option;
-		try {
-			$map = new $option( $args );
-		} catch ( Exception $e ) {
-			$map = new Geo_Provider_OSM( $args );
+		if ( ! $option ) {
+			$option = 'OSM';
 		}
+		$option = 'Geo_Provider_' . $option;
+		$map    = new $option( $args );
 		return $map;
 	}
 
 	public static function default_reverse_provider( $args = array() ) {
 		$option = get_option( 'sloc_default_reverse_provider' );
 		$option = apply_filters( 'sloc_default_reverse_provider', $option );
-		$option = 'Geo_Provider_' . $option;
-		try {
-			$map = new $option( $args );
-		} catch ( Exception $e ) {
-			$map = new Geo_Provider_OSM( $args );
+		if ( ! $option ) {
+			$option = 'OSM';
 		}
-				return $map;
-
+		$option = 'Geo_Provider_' . $option;
+		$map    = new $option( $args );
+		return $map;
 	}
 
 	public static function default_geolocation_provider( $args = array() ) {
@@ -627,14 +624,12 @@ class Loc_Config {
 	public static function default_weather_provider( $args = array() ) {
 		$option = get_option( 'sloc_default_weather_provider' );
 		$option = apply_filters( 'sloc_default_weather_provider', $option );
-		$option = 'Weather_Provider_' . $option;
-		try {
-			$map = new $option( $args );
-		} catch ( Exception $e ) {
-			$map = new Weather_Provider_OpenWeatherMap( $args );
+		if ( ! $option ) {
+			$option = 'OpenWeatherMap';
 		}
-				return $map;
-
+		$option = 'Weather_Provider_' . $option;
+		$map    = new $option( $args );
+		return $map;
 	}
 
 
