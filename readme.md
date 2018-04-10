@@ -17,6 +17,8 @@ Offers choice of map displays. It supports retrieving location using the HTML5 g
 
 As it stores the GeoData in a WordPress standard format, Geodata can also be added from other plugins.
 
+Automatically saves location data from image metadata when uploaded as well.
+
 Offers the opportunity to change the displayed timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location. 
 Clicking the clock icon next to the timezone will set to the browser timezone.
 

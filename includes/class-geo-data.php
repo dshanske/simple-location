@@ -122,41 +122,11 @@ class WP_Geo_Data {
 
 	public static function attachment( $meta, $post_id ) {
 		$current_user = wp_get_current_user();
-		if ( isset( $meta['image_meta'] ) && isset( $meta['image_meta']['latitude'] ) && isset( $meta['image_meta']['longitude'] ) ) {
-			update_post_meta( $post_id, 'geo_latitude', $meta['image_meta']['latitude'] );
-			update_post_meta( $post_id, 'geo_longitude', $meta['image_meta']['longitude'] );
+		if ( isset( $meta['image_meta'] ) && isset( $meta['image_meta']['location'] ) ) {
+			update_post_meta( $post_id, 'geo_latitude', $meta['image_meta']['location']['latitude'] );
+			update_post_meta( $post_id, 'geo_longitude', $meta['image_meta']['location']['longitude'] );
 		}
 		return $meta;
-	}
-
-	public static function dec_to_dms( $latitude, $longitude ) {
-		$latitudedirection  = $latitude < 0 ? 'S' : 'N';
-		$longitudedirection = $longitude < 0 ? 'W' : 'E';
-
-		$latitudenotation  = $latitude < 0 ? '-' : '';
-		$longitudenotation = $longitude < 0 ? '-' : '';
-
-		$latitudeindegrees  = floor( abs( $latitude ) );
-		$longitudeindegrees = floor( abs( $longitude ) );
-
-		$latitudedecimal  = abs( $latitude ) - $latitudeindegrees;
-		$longitudedecimal = abs( $longitude ) - $longitudeindegrees;
-
-		$_precision       = 3;
-		$latitudeminutes  = round( $latitudedecimal * 60, $_precision );
-		$longitudeminutes = round( $longitudedecimal * 60, $_precision );
-
-		return sprintf(
-			'%s%s° %s %s %s%s° %s %s',
-			$latitudenotation,
-			$latitudeindegrees,
-			$latitudeminutes,
-			$latitudedirection,
-			$longitudenotation,
-			$longitudeindegrees,
-			$longitudeminutes,
-			$longitudedirection
-		);
 	}
 
 	/* Calculates the distance in meters between two coordinates */
@@ -165,32 +135,15 @@ class WP_Geo_Data {
 		return ( 6378100 * acos( cos( deg2rad( $lat1 ) ) * cos( deg2rad( $lat2 ) ) * cos( deg2rad( $lng2 ) - deg2rad( $lng1 ) ) + sin( deg2rad( $lat1 ) ) * sin( deg2rad( $lat2 ) ) ) );
 	}
 
-	public static function gps( $coordinate, $hemisphere ) {
-		for ( $i = 0; $i < 3; $i++ ) {
-			$part = explode( '/', $coordinate[ $i ] );
-			if ( 1 === count( $part ) ) {
-				$coordinate[ $i ] = $part[0];
-			} elseif ( 2 === count( $part ) ) {
-				$coordinate[ $i ] = floatval( $part[0] ) / floatval( $part[1] );
-			} else {
-				$coordinate[ $i ] = 0;
-			}
-		}
-			list($degrees, $minutes, $seconds) = $coordinate;
-			$sign                              = ( 'W' === $hemisphere || 'S' === $hemisphere ) ? -1 : 1;
-			return $sign * ( $degrees + $minutes / 60 + $seconds / 3600 );
-	}
-
 	public static function exif_data( $meta, $file, $file_type ) {
 		if ( is_callable( 'exif_read_data' ) && in_array( $file_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ), true ) ) {
 			$exif = @exif_read_data( $file );
 
-			if ( ! empty( $exif['GPSLatitude'] ) ) {
-				$meta['latitude'] = self::gps( $exif['GPSLatitude'], $exif['GPSLatitudeRef'] );
+			if ( ! empty( $exif['GPSLongitude'] ) && count( $exif['GPSLongitude'] ) === 3 && ! empty( $exif['GPSLongitudeRef'] ) ) {
+				$meta['location']['longitude'] = round( ( 'W' === $exif['GPSLongitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLongitude'] ), 7 );
 			}
-
-			if ( ! empty( $exif['GPSLongitude'] ) ) {
-				$meta['longitude'] = self::gps( $exif['GPSLongitude'], $exif['GPSLongitudeRef'] );
+			if ( ! empty( $exif['GPSLatitude'] ) && count( $exif['GPSLatitude'] ) === 3 && ! empty( $exif['GPSLatitudeRef'] ) ) {
+					$meta['location']['latitude'] = round( ( 'S' === $exif['GPSLatitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLatitude'] ), 7 );
 			}
 		}
 		return $meta;
@@ -518,3 +471,25 @@ class WP_Geo_Data {
 
 
 }
+
+/**
+ * Convert the EXIF geographical longitude and latitude from degrees, minutes
+ * and seconds to degrees format.
+ * This is part of a Trac Ticket - https://core.trac.wordpress.org/ticket/9257
+ * closed due privacy concerns. Updated to match location storage for this just in case
+ * and to use their function over my original one.
+ * 
+ *
+ * @param string $coordinate The coordinate to convert to degrees format.
+ * @return float Coordinate in degrees format.
+ */
+if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
+	function wp_exif_gps_convert( $coordinate ) {
+			@list( $degree, $minute, $second ) = $coordinate;
+			$float                             = wp_exif_frac2dec( $degree ) + ( wp_exif_frac2dec( $minute ) / 60 ) + ( wp_exif_frac2dec( $second ) / 3600 );
+
+			return ( ( is_float( $float ) || ( is_int( $float ) && $degree === $float ) ) && ( abs( $float ) <= 180 ) ) ? $float : 999;
+	}
+}
+
+
