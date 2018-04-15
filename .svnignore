@@ -1,0 +1,14 @@
+build/*
+node_modules/*
+sass/.sass-cache/*
+vendor/*
+readme.md
+tests/*
+bin/*
+package.json
+composer.json
+composer.lock
+Gruntfile.js
+push.sh
+phpunit.xml
+phpcs.xml

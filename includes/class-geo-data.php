@@ -478,7 +478,7 @@ class WP_Geo_Data {
  * This is part of a Trac Ticket - https://core.trac.wordpress.org/ticket/9257
  * closed due privacy concerns. Updated to match location storage for this just in case
  * and to use their function over my original one.
- * 
+ *
  *
  * @param string $coordinate The coordinate to convert to degrees format.
  * @return float Coordinate in degrees format.

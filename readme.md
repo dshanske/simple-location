@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.3.4  
+**Stable tag:** 3.3.5  
 **Requires at least:** 4.7  
 **Tested up to:** 4.9.4  
 **Requires PHP:** 5.3  
@@ -81,6 +81,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 3.3.5 ( 2018-04-15 ) ###
+* Minor location attachment storage changes
 
 ### 3.3.4 ( 2018-03-27 ) ###
 * Fix issue when default is not set
