@@ -9,17 +9,6 @@ SVNURL="https://plugins.svn.wordpress.org/$PLUGINSLUG"
 MAINFILE="$PLUGINSLUG.php"
 default_svnuser="dshanske"
 
-#
-# To tag git for the current version:
-#
-# git tag -a vX.Y --cleanup=verbatim
-#
-# ...delete git-generated comments at bottom, leave first line in editor blank
-# to omit release "title" in github, '### Notable changes' second line, then
-# copy changelog.
-#git push --tags
-
-
 echo "Checking version in main plugin file matches version in readme.txt file..."
 echo
 
@@ -46,6 +35,12 @@ if git show-ref --tags --quiet --verify -- "refs/tags/$PLUGINVERSION"
 		echo "$PLUGINVERSION does not exist as a git tag. Aborting.";
 		exit 1;
 fi
+#
+# To tag git for the current version:
+#
+echo "Tagging this Release in Git"
+git tag -a $PLUGINVERSION --cleanup=verbatim 
+git push --tags
 
 printf "Your WordPress repo SVN username ($default_svnuser): "
 read -e input
