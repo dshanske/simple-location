@@ -1,10 +1,7 @@
-build/*
-node_modules/*
-sass/.sass-cache/*
-vendor/*
+sass/.sass-cache
 readme.md
-tests/*
-bin/*
+tests
+bin
 package.json
 composer.json
 composer.lock
@@ -12,3 +9,5 @@ Gruntfile.js
 push.sh
 phpunit.xml
 phpcs.xml
+README.md
+readme.md

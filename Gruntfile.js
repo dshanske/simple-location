@@ -90,37 +90,6 @@ module.exports = function(grunt) {
       }
     },
 
-    copy: {
-      main: {
-        options: {
-          mode: true
-        },
-        src: [
-          '**',
-          '!node_modules/**',
-	  'node_modules/jstz/dist/jstz.min.js',
-          '!build/**',
-          '!.git/**',
-          '!Gruntfile.js',
-          '!package.json',
-          '!.gitignore',
-	  '!vendor/**',
-          '!sass/.sass-cache/**',
-        ],
-        dest: 'build/trunk/'
-      },
-            assets: {
-               options: {
-                   mode: true
-               },
-               src: [
-                 'assets/*'
-               ],
-               dest: 'build/'
-            }
-
-    },
-
     makepot: {
       target: {
         options: {
@@ -141,7 +110,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-wp-readme-to-markdown');
   grunt.loadNpmTasks('grunt-wp-i18n');
   grunt.loadNpmTasks('grunt-contrib-sass');
-  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-svgstore');
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-checktextdomain');

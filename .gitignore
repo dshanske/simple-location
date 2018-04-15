@@ -1,4 +1,8 @@
-build/*
-node_modules/*
+.DS_Store
+.npm-debug.log
 sass/.sass-cache/*
 vendor/*
+node_modules/*
+!node_modules/jstz
+/node_modules/jstz/dist/*
+!node_modules/jstz/dist/jstz.min.js
