@@ -32,15 +32,11 @@ if git show-ref --tags --quiet --verify -- "refs/tags/$PLUGINVERSION"
 	then
 		echo "Git tag $PLUGINVERSION does exist. Let's continue..."
 	else
-		echo "$PLUGINVERSION does not exist as a git tag. Aborting.";
-		exit 1;
+		echo "Tagging this Release in Git"
+		git tag -a $PLUGINVERSION --cleanup=verbatim 
+		git push --tags
 fi
 #
-# To tag git for the current version:
-#
-echo "Tagging this Release in Git"
-git tag -a $PLUGINVERSION --cleanup=verbatim 
-git push --tags
 
 printf "Your WordPress repo SVN username ($default_svnuser): "
 read -e input
