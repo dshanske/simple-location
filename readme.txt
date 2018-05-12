@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.3.5
+Stable tag: 3.3.6
 Requires at least: 4.7
 Tested up to: 4.9.4
 Requires PHP: 5.3
@@ -90,7 +90,10 @@ will now be required to show maps for services that require API keys.
 
 == Changelog ==
 
-= 3.3.6 ( 2018-xx-xx ) =
+= 3.3.6 ( 2018-05-12 ) =
+* Privacy and data collection statement
+* Add geoJSON to JSONFeed
+* Fix incorrect permissions for GEORSS
 
 = 3.3.5 ( 2018-04-15 ) =
 * Minor location attachment storage changes

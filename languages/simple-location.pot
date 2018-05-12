@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Simple Location package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 3.3.5\n"
+"Project-Id-Version: Simple Location 3.3.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
-"POT-Creation-Date: 2018-05-12 15:11:16+00:00\n"
+"POT-Creation-Date: 2018-05-12 15:57:00+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,27 +13,27 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: grunt-wp-i18n 0.5.4\n"
 
-#: includes/class-geo-data.php:44
+#: includes/class-geo-data.php:45
 msgid "Private"
 msgstr ""
 
-#: includes/class-geo-data.php:45
+#: includes/class-geo-data.php:46
 msgid "Public"
 msgstr ""
 
-#: includes/class-geo-data.php:46
+#: includes/class-geo-data.php:47
 msgid "Protected"
 msgstr ""
 
-#: includes/class-geo-data.php:72
+#: includes/class-geo-data.php:73
 msgid "All Posts"
 msgstr ""
 
-#: includes/class-geo-data.php:73 includes/class-geo-data.php:90
+#: includes/class-geo-data.php:74 includes/class-geo-data.php:91
 msgid "With Location"
 msgstr ""
 
-#: includes/class-geo-data.php:89
+#: includes/class-geo-data.php:90
 msgid "All Comments"
 msgstr ""
 
