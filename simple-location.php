@@ -42,6 +42,9 @@ class Simple_Location_Plugin {
 		// Settings Link
 		add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( 'Simple_Location_Plugin', 'settings_link' ) );
 
+		// Add Privacy Policy
+		add_action( 'admin_init', array( 'Simple_Location_Plugin', 'privacy_declaration' ) );
+
 		// Register Metadata Functions
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
 
@@ -110,6 +113,20 @@ class Simple_Location_Plugin {
 	public static function style_load() {
 		wp_enqueue_style( 'simple-location', plugin_dir_url( __FILE__ ) . 'css/location.min.css', array(), self::$version );
 	}
+
+	public static function privacy_declaration() {
+		if ( function_exists( 'wp_add_privacy_policy_content' ) ) {
+			$content = __(
+				'Location and weather data is optionally stored for all posts, attachments, and comments. Location data is extracted from uploaded images along with other metadata. This
+				data can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it.', 'simple-location'
+			);
+			wp_add_privacy_policy_content(
+				'Simple Location',
+				wp_kses_post( wpautop( $content, false ) )
+			);
+		}
+	}
+
 }
 
 

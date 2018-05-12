@@ -24,6 +24,14 @@ Clicking the clock icon next to the timezone will set to the browser timezone.
 
 * If your site is set to a Manual UTC Offset as opposed to a named timezone, the timezone override feature will not work at this time
 
+== Privacy and Data Notice ==
+
+Simple Location stores location and weather data inside posts, attachments, comments, and term meta...optionally other post types. This data respects a public, private or 
+protected setting. Attachment data is automatically extracted from images if location is present, which could be extracted by any third-party downloading the picture
+unless removed. For all other data, it is provided by the user, who decides its ultimate use. Location data is made available through a geolocation provider...currently
+only HTML5 browser geolocation is built in, for which the user must give consent to share). Other information is secured through use of third-party APIs to identify a 
+location, display maps, and weather conditions.
+
 == Venues ==
 
 Venues are locations stored as a custom taxonomy in WordPress using the Term Metadata functionality added in Version 4.4 of WordPress. Venues as taxonomies
@@ -81,6 +89,8 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 3.3.6 ( 2018-xx-xx ) =
 
 = 3.3.5 ( 2018-04-15 ) =
 * Minor location attachment storage changes

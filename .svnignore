@@ -12,3 +12,4 @@ phpunit.xml
 phpcs.xml
 README.md
 readme.md
+.travis.yml
