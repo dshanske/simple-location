@@ -108,7 +108,7 @@ class WP_Geo_Data {
 			return;
 		}
 
-		if ( empty( $geo['public'] ) || '0' === $geo['public'] ) {
+		if ( empty( $geo['public'] ) || '1' !== $geo['public'] ) {
 			return;
 		}
 
@@ -196,6 +196,7 @@ class WP_Geo_Data {
 				break;
 			case 'text':
 			case 'description':
+			case 'protected':
 				$args['compare'] = '=';
 				$args['value']   = (int) 2;
 				$query->set( 'meta_query', array( $args ) );
