@@ -31,6 +31,7 @@ class WP_Geo_Data {
 		add_action( 'rss2_item', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'atom_entry', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'rdf_item', array( 'WP_Geo_Data', 'georss_item' ) );
+		add_action( 'json_feed_item', array( 'WP_Geo_Data', 'json_feed_item' ) );
 
 		// Add Dropdown
 		add_action( 'restrict_manage_posts', array( 'WP_Geo_Data', 'geo_posts_dropdown' ), 12, 2 );
@@ -108,7 +109,7 @@ class WP_Geo_Data {
 			return;
 		}
 
-		if ( empty( $geo['public'] ) || '1' !== $geo['public'] ) {
+		if ( empty( $geo['public'] ) || 1 !== (int) $geo['public'] ) {
 			return;
 		}
 
@@ -118,6 +119,29 @@ class WP_Geo_Data {
 		echo "\t<georss:point>{$geo['latitude']} {$geo['longitude']}</georss:point>\n";
 		echo "\t\t<geo:lat>{$geo['latitude']}</geo:lat>\n";
 		echo "\t\t<geo:long>{$geo['longitude']}</geo:long>";
+	}
+
+	public static function json_feed_item( $feed_item, $post ) {
+		$geo = self::get_geodata( $post );
+		if ( ! $geo ) {
+			return;
+		}
+
+		if ( empty( $geo['public'] ) || 1 !== (int) $geo['public'] ) {
+			return;
+		}
+		$json             = array(
+			'type'       => 'Feature',
+			'geometry'   => array(
+				'type'        => 'Point',
+				'coordinates' => array( $geo['longitude'], $geo['latitude'] ),
+			),
+			'properties' => array(
+				'name' => $geo['address'],
+			),
+		);
+		$feed_item['geo'] = $json;
+		return $feed_item;
 	}
 
 	public static function attachment( $meta, $post_id ) {
