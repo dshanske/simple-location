@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.3.6
+Stable tag: 3.3.7
 Requires at least: 4.7
-Tested up to: 4.9.4
+Tested up to: 4.9.5
 Requires PHP: 5.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -89,6 +89,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 3.3.7 ( 2018-05-14 ) =
+* Fix for jsonFeed privacy settings
 
 = 3.3.6 ( 2018-05-12 ) =
 * Privacy and data collection statement

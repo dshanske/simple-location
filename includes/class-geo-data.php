@@ -124,11 +124,11 @@ class WP_Geo_Data {
 	public static function json_feed_item( $feed_item, $post ) {
 		$geo = self::get_geodata( $post );
 		if ( ! $geo ) {
-			return;
+			return $feed_item;
 		}
 
 		if ( empty( $geo['public'] ) || 1 !== (int) $geo['public'] ) {
-			return;
+			return  $feed_item;
 		}
 		$json             = array(
 			'type'       => 'Feature',
