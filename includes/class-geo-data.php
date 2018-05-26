@@ -31,7 +31,7 @@ class WP_Geo_Data {
 		add_action( 'rss2_item', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'atom_entry', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'rdf_item', array( 'WP_Geo_Data', 'georss_item' ) );
-		add_action( 'json_feed_item', array( 'WP_Geo_Data', 'json_feed_item' ) );
+		add_action( 'json_feed_item', array( 'WP_Geo_Data', 'json_feed_item' ), 10, 2 );
 
 		// Add Dropdown
 		add_action( 'restrict_manage_posts', array( 'WP_Geo_Data', 'geo_posts_dropdown' ), 12, 2 );
@@ -128,7 +128,7 @@ class WP_Geo_Data {
 		}
 
 		if ( empty( $geo['public'] ) || 1 !== (int) $geo['public'] ) {
-			return  $feed_item;
+			return $feed_item;
 		}
 		$json             = array(
 			'type'       => 'Feature',
