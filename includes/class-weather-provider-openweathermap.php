@@ -59,7 +59,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			if ( isset( $response['wind'] ) ) {
 				$return['wind']           = array();
 				$return['wind']['speed']  = $response['wind']['speed'];
-				$return['wind']['degree'] = $response['wind']['deg'];
+				$return['wind']['degree'] = ifset( $response['wind']['deg'] );
 			}
 			if ( isset( $response['weather'] ) ) {
 				if ( wp_is_numeric_array( $response['weather'] ) ) {
