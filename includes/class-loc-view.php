@@ -110,7 +110,7 @@ class Loc_View {
 			} else {
 				return sprintf(
 					'<data class="p-latitude" value="%1$f"></data>
-					<data class="p-latitude" value="%2$f"></data>', $loc['latitude'], $loc['longitude']
+					<data class="p-longitude" value="%2$f"></data>', $loc['latitude'], $loc['longitude']
 				);
 			}
 		}
