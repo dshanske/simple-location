@@ -109,6 +109,10 @@ class WP_Geo_Data {
 			return;
 		}
 
+		if ( ! isset( $geo['latitude'] ) || ! isset( $geo['longitude'] ) ) {
+			return;
+		}
+
 		if ( empty( $geo['public'] ) || 1 !== (int) $geo['public'] ) {
 			return;
 		}
