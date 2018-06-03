@@ -28,6 +28,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
+			echo '<div>';
 			_e( 'Last Seen: ', 'simple-location' );
 			echo Loc_View::get_location(
 				new WP_User( $instance['user'] ),
@@ -35,6 +36,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 					'weather' => false,
 				)
 			);
+			echo '</div>';
 		}
 	}
 

@@ -132,7 +132,8 @@ abstract class Weather_Provider {
 		if ( isset( $conditions['temperature'] ) ) {
 						$return .= round( $conditions['temperature'] ) . '&deg;' . $this->temp_unit();
 		}
-			return $return;
+		$return .= '</div>';
+		return $return;
 	}
 
 	/**

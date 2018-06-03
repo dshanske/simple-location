@@ -6,7 +6,7 @@ add_action( 'init', array( 'Loc_View', 'init' ) );
 class Loc_View {
 
 	public static function init() {
-		add_filter( 'comment_text', array( 'Loc_View', 'location_comment' ), 12, 2 );
+		add_filter( 'get_comment_text', array( 'Loc_View', 'location_comment' ), 12, 2 );
 		add_filter( 'the_content', array( 'Loc_View', 'content_map' ), 11 );
 		if ( ! current_theme_supports( 'simple-location' ) ) {
 			add_filter( 'the_content', array( 'Loc_View', 'location_content' ), 12 );
@@ -133,7 +133,7 @@ class Loc_View {
 			)
 		);
 		if ( ! empty( $loc ) ) {
-			$comment_text .= $loc;
+			$comment_text .= PHP_EOL . $loc . PHP_EOL;
 		}
 		return $comment_text;
 	}
