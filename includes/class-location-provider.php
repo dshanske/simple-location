@@ -51,15 +51,15 @@ abstract class Location_Provider {
 	 * @return array|boolean Array with Latitude and Longitude false if null
 	 */
 	public function get() {
-		$return               = array();
-		$return['latitude']   = $this->latitude;
-		$return['longitude']  = $this->longitude;
-		$return['altitude']   = $this->altitude;
-		  $return['accuracy'] = $this->accuracy;
-		$return['altitude']   = $this->altitude;
-		$return['heading']    = $this->heading;
-		$return['speed']      = $this->speed;
-		$return               = array_filter( $return );
+		$return              = array();
+		$return['latitude']  = $this->latitude;
+		$return['longitude'] = $this->longitude;
+		$return['altitude']  = $this->altitude;
+		$return['accuracy']  = $this->accuracy;
+		$return['altitude']  = $this->altitude;
+		$return['heading']   = $this->heading;
+		$return['speed']     = $this->speed;
+		$return              = array_filter( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
 		}

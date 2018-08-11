@@ -42,9 +42,9 @@ class WP_Geo_Data {
 
 	public static function geo_public() {
 			return array(
-				0 => __( 'Private', 'simple-location' ),
-				1 => __( 'Public', 'simple-location' ),
-				2 => __( 'Protected', 'simple-location' ),
+				0 => esc_html__( 'Private', 'simple-location' ),
+				1 => esc_html__( 'Public', 'simple-location' ),
+				2 => esc_html__( 'Protected', 'simple-location' ),
 			);
 	}
 
@@ -52,12 +52,12 @@ class WP_Geo_Data {
 			$choices = self::geo_public();
 			$return  = '';
 		foreach ( $choices as $value => $text ) {
-				$return .= sprintf( '<option value=%1s %2s>%3s</option>', $value, selected( $public, $value, false ), $text );
+				$return .= sprintf( '<option value=%1s %2s>%3s</option>', esc_attr( $value ), selected( $public, $value, false ), $text );
 		}
 		if ( ! $echo ) {
 				return $return;
 		}
-			echo $return;
+			echo $return; // phpcs:ignore
 
 	}
 
@@ -70,13 +70,13 @@ class WP_Geo_Data {
 			$selected = $_REQUEST['geo'];
 		}
 			$list = array(
-				'none' => __( 'All Posts', 'simple-location' ),
-				'all'  => __( 'With Location', 'simple-location' ),
+				'none' => esc_html__( 'All Posts', 'simple-location' ),
+				'all'  => esc_html__( 'With Location', 'simple-location' ),
 			);
 		echo '<select id="geo" name="geo">';
 		foreach ( $list as $key => $value ) {
 			$select = ( $key === $selected ) ? ' selected="selected"' : '';
-			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>';
+			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
 		}
 		echo '</select>';
 	}
@@ -87,13 +87,13 @@ class WP_Geo_Data {
 			$selected = $_REQUEST['geo'];
 		}
 			$list = array(
-				'none' => __( 'All Comments', 'simple-location' ),
-				'all'  => __( 'With Location', 'simple-location' ),
+				'none' => esc_html__( 'All Comments', 'simple-location' ),
+				'all'  => esc_html__( 'With Location', 'simple-location' ),
 			);
 		echo '<select id="geo" name="geo">';
 		foreach ( $list as $key => $value ) {
 			$select = ( $key === $selected ) ? ' selected="selected"' : '';
-			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>';
+			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
 		}
 		echo '</select>';
 	}
@@ -120,9 +120,9 @@ class WP_Geo_Data {
 		$geo = array_map( 'esc_html', $geo );
 		$geo = array_map( 'ent2ncr', $geo );
 
-		echo "\t<georss:point>{$geo['latitude']} {$geo['longitude']}</georss:point>\n";
-		echo "\t\t<geo:lat>{$geo['latitude']}</geo:lat>\n";
-		echo "\t\t<geo:long>{$geo['longitude']}</geo:long>";
+		echo "\t<georss:point>{$geo['latitude']} {$geo['longitude']}</georss:point>\n"; // phpcs:ignore
+		echo "\t\t<geo:lat>{$geo['latitude']}</geo:lat>\n"; // phpcs:ignore
+		echo "\t\t<geo:long>{$geo['longitude']}</geo:long>"; // phpcs:ignore
 	}
 
 	public static function json_feed_item( $feed_item, $post ) {

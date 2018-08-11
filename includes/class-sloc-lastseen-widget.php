@@ -29,7 +29,8 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 	public function widget( $args, $instance ) {
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			echo '<div>';
-			_e( 'Last Seen: ', 'simple-location' );
+			esc_html_e( 'Last Seen: ', 'simple-location' );
+			// phpcs:ignore
 			echo Loc_View::get_location(
 				new WP_User( $instance['user'] ),
 				array(
@@ -60,11 +61,11 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 	 * @output displays the widget form
 	 */
 	public function form( $instance ) {
-?>
+		?>
 		<p>
 		<?php esc_html_e( 'Displays last reported user location', 'simple-location' ); ?>
 		</p>
-		<p><label for="user"><?php _e( 'User: ', 'simple-location' ); ?></label>
+		<p><label for="user"><?php esc_html_e( 'User: ', 'simple-location' ); ?></label>
 		<?php
 		wp_dropdown_users(
 			array(
@@ -74,8 +75,8 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 				'selected'         => ifset( $instance['user'], 0 ),
 			)
 		);
-				?>
+		?>
 		</p>
-	<?php
+		<?php
 	}
 }

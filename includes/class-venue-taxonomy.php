@@ -36,7 +36,8 @@ class Venue_Taxonomy {
 				'location',
 				plugins_url( 'simple-location/js/location.js' ),
 				array( 'jquery' ),
-				Simple_Location_Plugin::$version
+				Simple_Location_Plugin::$version,
+				true
 			);
 		}
 	}
@@ -89,56 +90,56 @@ class Venue_Taxonomy {
 	}
 
 	public static function create_screen_fields( $taxonomy ) {
-?>
+		?>
 	<div class="form-field">
-		<label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label>
+		<label for="latitude"><?php esc_html_e( 'Latitude:', 'simple-location' ); ?></label>
 		<input type="text" name="latitude" id="latitude" value="" size="10" />                                                                           
-		<label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label>
+		<label for="longitude"><?php esc_html_e( 'Longitude:', 'simple-location' ); ?></label>
 		<input type="text" name="longitude" id="longitude" value="" size="10" />  
 
-		<button type="button" class="button lookup-address-button"><?php _e( 'Get Location', 'simple-location' ); ?></button>
+		<button type="button" class="button lookup-address-button"><?php esc_html_e( 'Get Location', 'simple-location' ); ?></button>
 	</div>
-<?php
+		<?php
 	}
 
 	public static function edit_screen_fields( $term, $taxonomy ) {
-?>
+		?>
 	<tr class="form-field">
 		<tr>
-		<th><label for="latitude"><?php _e( 'Latitude:', 'simple-location' ); ?></label></th>
+		<th><label for="latitude"><?php esc_html_e( 'Latitude:', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="latitude" id="latitude" value="" size="10" /></td></tr>   
 		<tr>									
-		<th><label for="longitude"><?php _e( 'Longitude:', 'simple-location' ); ?></label></th>
+		<th><label for="longitude"><?php esc_html_e( 'Longitude:', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="longitude" id="longitude" value="" size="10" />  </td>
 		</tr>
 
-		<tr><td><button type="button" class="button lookup-address-button"><?php _e( 'Get Location', 'simple-location' ); ?></button></td></tr>
+		<tr><td><button type="button" class="button lookup-address-button"><?php esc_html_e( 'Get Location', 'simple-location' ); ?></button></td></tr>
 
-		<tr><th><label for="street-address"><?php _e( 'Address', 'simple-location' ); ?></label></th>
+		<tr><th><label for="street-address"><?php esc_html_e( 'Address', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="street-address" id="street-address" value="" size="50" /></td></tr>
 
-		<tr><th><label for="locality"><?php _e( 'City/Town/Village', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="locality" id="locality" value="<?php echo ifset( $address['locality'], '' ); ?>" size="30" /></td></tr>    
+		<tr><th><label for="locality"><?php esc_html_e( 'City/Town/Village', 'simple-location' ); ?></label></th>
+		<td><input type="text" name="locality" id="locality" value="<?php echo esc_attr( ifset( $address['locality'], '' ) ); ?>" size="30" /></td></tr>    
 
-		<tr><th><label for="region"><?php _e( 'State/County/Province', 'simple-location' ); ?></label></th>
+		<tr><th><label for="region"><?php esc_html_e( 'State/County/Province', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="region" id="region" value="" size="30" /> </td></tr>
 
-		<tr><th><label for="country-code"><?php _e( 'Country Code', 'simple-location' ); ?></label></th>
+		<tr><th><label for="country-code"><?php esc_html_e( 'Country Code', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="country-code" id="country-code" value="" size="2" /></td></tr>                                             
 
-		<tr><th><label for="extended-address"><?php _e( 'Neighborhood/Suburb', 'simple-location' ); ?></label></th>
+		<tr><th><label for="extended-address"><?php esc_html_e( 'Neighborhood/Suburb', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="extended-address" id="extended-address" value="" size="30" /></td></tr>                                                                                              
-		<tr><th><label for="postal-code"><?php _e( 'Postal Code', 'simple-location' ); ?></label></th>                                   
+		<tr><th><label for="postal-code"><?php esc_html_e( 'Postal Code', 'simple-location' ); ?></label></th>                                   
 		<td><input type="text" name="postal-code" id="postal-code" value="" size="10" /></td></tr>                                              
 
-		<tr><th><label for="country-name"><?php _e( 'Country Name', 'simple-location' ); ?></label></th>
+		<tr><th><label for="country-name"><?php esc_html_e( 'Country Name', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="country-name" id="country-name" value="" size="30" /></td></tr>
 	</tr>
-<?php
+		<?php
 	}
 
 	public static function save_data( $term_id ) {
-		/* OK, its safe for us to save the data now. */
+		// phpcs:disable
 		if ( ! empty( $_POST['latitude'] ) ) {
 			update_term_meta( $term_id, 'geo_latitude', $_POST['latitude'] );
 		} else {
@@ -154,5 +155,6 @@ class Venue_Taxonomy {
 		} else {
 			delete_post_meta( $post_id, 'geo_address' );
 		}
+		// phpcs:enable
 	}
 }

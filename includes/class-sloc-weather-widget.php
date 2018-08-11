@@ -34,7 +34,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		} elseif ( isset( $instance['latitude'] ) && isset( $instance['longitude'] ) ) {
 			$weather->set_location( $instance['latitude'], $instance['longitude'] );
 		}
-		echo $weather->get_current_condition();
+		echo $weather->get_current_condition(); // phpcs:ignore
 
 	}
 
@@ -58,11 +58,11 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @output displays the widget form
 	 */
 	public function form( $instance ) {
-?>
+		?>
 		<p>
 		<?php esc_html_e( 'Displays current weather based on user location. If set for none will use latitude and longitude set or if not set will use station ID for provider if available.', 'simple-location' ); ?>
 		</p>
-		<p><label for="user"><?php _e( 'User: ', 'simple-location' ); ?></label>
+		<p><label for="user"><?php esc_html_e( 'User: ', 'simple-location' ); ?></label>
 		<?php
 		wp_dropdown_users(
 			array(
@@ -72,14 +72,13 @@ class Sloc_Weather_Widget extends WP_Widget {
 				'selected'         => ifset( $instance['user'], 0 ),
 			)
 		);
-				?>
+		?>
 		</p>
-			<p><label for="latitude"><?php _e( 'Latitude: ', 'simple-location' ); ?></label>
-			<input type="text" size="7" name="<?php $this->get_field_name( 'latitude' ); ?>" id="<?php $this->get_field_id( 'latitude' ); ?>" value="<?php echo ifset( $instance['latitude'] ); ?>" />
-			<label for="longitude"><?php _e( 'Longitude: ', 'simple-location' ); ?></label>
-			<input type="text" size="7" name="<?php $this->get_field_name( 'longitude' ); ?>" id="<?php $this->get_field_id( 'longitude' ); ?>" value="<?php echo ifset( $instance['longitude'] ); ?>" />
+			<p><label for="latitude"><?php esc_html_e( 'Latitude: ', 'simple-location' ); ?></label>
+			<input type="text" size="7" name="<?php $this->get_field_name( 'latitude' ); ?>" id="<?php $this->get_field_id( 'latitude' ); ?>" value="<?php echo esc_attr( ifset( $instance['latitude'] ) ); ?>" />
+			<label for="longitude"><?php esc_html_e( 'Longitude: ', 'simple-location' ); ?></label>
+			<input type="text" size="7" name="<?php $this->get_field_name( 'longitude' ); ?>" id="<?php $this->get_field_id( 'longitude' ); ?>" value="<?php echo esc_attr( ifset( $instance['longitude'] ) ); ?>" />
 			</p>
-		
-	<?php
+		<?php
 	}
 }

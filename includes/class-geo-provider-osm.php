@@ -19,8 +19,7 @@ class Geo_Provider_OSM extends Geo_Provider {
 	}
 
 	public function reverse_lookup() {
-		$query = sprintf( 'http://nominatim.openstreetmap.org/reverse?format=json&extratags=1&addressdetails=1&lat=%1$s&lon=%2$s&zoom=%3$s&accept-language=%4$s', $this->latitude, $this->longitude, $this->reverse_zoom, get_bloginfo( 'language' ) );
-		error_log( $query );
+		$query    = sprintf( 'http://nominatim.openstreetmap.org/reverse?format=json&extratags=1&addressdetails=1&lat=%1$s&lon=%2$s&zoom=%3$s&accept-language=%4$s', $this->latitude, $this->longitude, $this->reverse_zoom, get_bloginfo( 'language' ) );
 		$response = wp_remote_get( $query );
 		if ( is_wp_error( $response ) ) {
 			return $response;

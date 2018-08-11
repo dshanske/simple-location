@@ -237,9 +237,9 @@ class Loc_Config {
 	}
 
 	public static function simloc_options() {
-?>
+		?>
 		<div class="wrap">
-			<h2><?php _e( 'Simple Location', 'simple-location' ); ?> </h2>
+			<h2><?php esc_html_e( 'Simple Location', 'simple-location' ); ?> </h2>
 		<p>
 			<?php esc_html_e( 'API Keys and Settings for Simple Location', 'simple-location' ); ?>
 		</p><hr />
@@ -251,7 +251,7 @@ class Loc_Config {
 			?>
 		</form>
 		</div>
-<?php
+		<?php
 	}
 
 	public static function admin_init() {
@@ -489,18 +489,18 @@ class Loc_Config {
 	public static function checkbox_callback( array $args ) {
 		$name    = $args['label_for'];
 		$checked = get_option( $name );
-		printf( '<input name="%1s" type="hidden" value="0" />', $name );
-		printf( '<input name="%1s" type="checkbox" value="1" %2s />', $name, checked( 1, $checked, false ) );
+		printf( '<input name="%1s" type="hidden" value="0" />', $name ); // phpcs:ignore
+		printf( '<input name="%1s" type="checkbox" value="1" %2s />', $name, checked( 1, $checked, false ) ); // phpcs:ignore
 	}
 
 	public static function number_callback( array $args ) {
 		$name = $args['label_for'];
-		printf( '<input name="%1s" type="number" min="0" step="1" size="4" class="small-text" value="%2s" />', $name, get_option( $name ) );
+		printf( '<input name="%1s" type="number" min="0" step="1" size="4" class="small-text" value="%2s" />', $name, get_option( $name ) ); // phpcs:ignore
 	}
 
 	public static function string_callback( array $args ) {
 		$name = $args['label_for'];
-		printf( '<input name="%1s" size="50" class="regular-text" type="string" value="%2s" />', $name, get_option( $name ) );
+		printf( '<input name="%1s" size="50" class="regular-text" type="string" value="%2s" />', $name, get_option( $name ) ); // phpcs:ignore
 	}
 
 	public static function provider_callback( $args ) {
@@ -509,7 +509,7 @@ class Loc_Config {
 		$providers = $args['providers'];
 		printf( '<select name="%1$s" %2$s>', $name, count( $providers ) === 1 ? 'hidden' : '' );
 		foreach ( $providers as $key => $value ) {
-				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value );
+				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value ); // phpcs:ignore
 		}
 				echo '</select><br /><br />';
 	}
@@ -549,9 +549,9 @@ class Loc_Config {
 	public static function measure_callback( array $args ) {
 		$name = $args['label_for'];
 		$text = get_option( $name );
-		echo '<select name="' . $name . '">';
-		echo '<option value="metric" ' . selected( $text, 'metric' ) . '>' . __( 'Metric', 'simple-location' ) . '</option>';
-		echo '<option value="imperial" ' . selected( $text, 'imperial' ) . '>' . __( 'Imperial', 'simple-location' ) . '</option>';
+		echo '<select name="' . esc_attr( $name ) . '">';
+		echo '<option value="metric" ' . selected( $text, 'metric' ) . '>' . __( 'Metric', 'simple-location' ) . '</option>'; // phpcs:ignore
+		echo '<option value="imperial" ' . selected( $text, 'imperial' ) . '>' . __( 'Imperial', 'simple-location' ) . '</option>'; // phpcs:ignore
 		echo '</select><br /><br />';
 	}
 
@@ -561,24 +561,24 @@ class Loc_Config {
 		$provider = $args['provider'];
 		$styles   = $provider->get_styles();
 		if ( is_wp_error( $styles ) ) {
-			echo $styles->get_error_message();
+			echo esc_html( $styles->get_error_message() );
 			return;
 		}
 		$text = get_option( $name );
 
-		echo '<select name="' . $name . '">';
+		echo '<select name="' . esc_attr( $name ) . '">';
 		foreach ( $styles as $key => $value ) {
-			echo '<option value="' . $key . '" ' . selected( $text, $key ) . '>' . $value . '</option>';
+			echo '<option value="' . $key . '" ' . selected( $text, $key ) . '>' . esc_html( $value ) . '</option>'; // phpcs:ignore
 		}
 		echo '</select><br /><br />';
 	}
 
 	public static function sloc_map_settings() {
-		_e( 'API keys are required for map display services.', 'simple-location' );
+		esc_html_e( 'API keys are required for map display services.', 'simple-location' );
 	}
 
 	public static function sloc_weather_settings() {
-		_e( 'API keys are required for most weather services.', 'simple-location' );
+		esc_html_e( 'API keys are required for most weather services.', 'simple-location' );
 	}
 
 

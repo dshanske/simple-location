@@ -30,32 +30,32 @@ class Loc_Metabox {
 			$public = (int) get_option( 'geo_public' );
 		}
 				wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
-?>
+		?>
 				<div class="misc-pub-section misc-pub-location">
-				<span class="dashicons dashicons-location" id="location-lookup" title="<?php _e( 'Lookup Location', 'simple-location' ); ?>"></span>
-						<label for="post-location"><?php _e( 'Location:', 'simple-location' ); ?></label>
+				<span class="dashicons dashicons-location" id="location-lookup" title="<?php esc_html_e( 'Lookup Location', 'simple-location' ); ?>"></span>
+						<label for="post-location"><?php esc_html_e( 'Location:', 'simple-location' ); ?></label>
 						<span id="post-location-label">
 						<?php
 
-								echo $choices[ $public ];
-?>
+								echo $choices[ $public ]; // phpcs:ignore
+						?>
 </span>
 						<a href="#post_location" class="edit-post-location hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Location Settings</span></a>
 				<br />
 <div id="post-location-select" class="hide-if-js">
-				<input type="hidden" name="hidden_post_location" id="hidden_post_location" value="<?php echo $public; ?>" />
-				<input type="hidden" name="location_default" id="location_default" value="<?php echo get_option( 'geo_public' ); ?>" />
+				<input type="hidden" name="hidden_post_location" id="hidden_post_location" value="<?php echo esc_attr( $public ); ?>" />
+				<input type="hidden" name="location_default" id="location_default" value="<?php echo esc_attr( get_option( 'geo_public' ) ); ?>" />
 				<select name="geo_public" id="post-location" width="90%">
 				<?php
-						echo WP_Geo_Data::geo_public_select( $public );
+						echo WP_Geo_Data::geo_public_select( $public ); // phpcs:ignore
 						echo '</select>';
-?>
+				?>
 <br />
 				<a href="#post_location" class="save-post-location hide-if-no-js button">OK</a>
 				<a href="#post_location" class="cancel-post-location hide-if-no-js button-cancel">Cancel</a>
 </div>
 </div>
-<?php
+		<?php
 	}
 
 
@@ -72,7 +72,8 @@ class Loc_Metabox {
 				'sloc_location',
 				plugins_url( 'js/location.js', dirname( __FILE__ ) ),
 				array( 'jquery' ),
-				Simple_Location_Plugin::$version
+				Simple_Location_Plugin::$version,
+				true
 			);
 			wp_enqueue_style(
 				'sloc_metabox',
@@ -108,9 +109,9 @@ class Loc_Metabox {
 	}
 
 	public static function geo_public_user( $public ) {
-?>
+		?>
 		<tr>
-		<th><label for="geo_public"><?php _e( 'Show:', 'simple-location' ); ?></label></th>
+		<th><label for="geo_public"><?php esc_html_e( 'Show:', 'simple-location' ); ?></label></th>
 		<td><select name="geo_public">
 		<?php WP_Geo_Data::geo_public_select( $public, true ); ?>
 		</select></td>
@@ -140,7 +141,7 @@ class Loc_Metabox {
 
 
 	public static function profile_text_field( $user, $key, $title, $description ) {
-	?>
+		?>
 	<tr>
 		<th><label for="<?php echo esc_html( $key ); ?>"><?php echo esc_html( $title ); ?></label></th>
 		<td>
@@ -148,7 +149,7 @@ class Loc_Metabox {
 			<span class="description"><?php echo esc_html( $description ); ?></span>
 		</td>
 	</tr>
-	<?php
+		<?php
 	}
 
 
@@ -168,7 +169,7 @@ class Loc_Metabox {
 	}
 
 	public static function save_meta( $meta_type, $object_id ) {
-		/* OK, its safe for us to save the data now. */
+		// phpcs:disable
 		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading' );
 		foreach ( $lon_params as $param ) {
 			if ( ! empty( $_POST[ $param ] ) && 'NaN' !== $_POST[ $param ] ) {
@@ -208,6 +209,7 @@ class Loc_Metabox {
 		} else {
 			delete_metadata( $meta_type, $object_id, 'geo_public' );
 		}
+		// phpcs:enable
 	}
 
 	/* Save the meta box's post metadata. */

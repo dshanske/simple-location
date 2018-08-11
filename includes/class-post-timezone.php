@@ -20,7 +20,8 @@ class Post_Timezone {
 			'jstz',
 			plugins_url( 'node_modules/jstz/dist/jstz.min.js', dirname( __FILE__ ) ),
 			array(),
-			Simple_Location_Plugin::$version
+			Simple_Location_Plugin::$version,
+			true
 		);
 	}
 
@@ -53,32 +54,32 @@ class Post_Timezone {
 				}
 			}
 		}
-?>
+		?>
 		<div class="misc-pub-section misc-pub-timezone">
-		<span class="dashicons dashicons-clock" id="timezone-browser" title="<?php _e( 'Set Local Timezone', 'simple-location' ); ?>"></span>
-			<label for="post-timezone"><?php _e( 'Timezone:', 'simple-location' ); ?></label>
+		<span class="dashicons dashicons-clock" id="timezone-browser" title="<?php esc_html_e( 'Set Local Timezone', 'simple-location' ); ?>"></span>
+			<label for="post-timezone"><?php esc_html_e( 'Timezone:', 'simple-location' ); ?></label>
 			<span id="post-timezone-label">
 			<?php
 			if ( $timezone ) {
-				echo $timezone; }
-?>
+				echo esc_html( $timezone ); }
+			?>
 </span>
 			<a href="#post_timezone" class="edit-post-timezone hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Override Timezone</span></a>
 		<br />
 <div id="post-timezone-select" class="hide-if-js">
-		<input type="hidden" name="hidden_post_timezone" id="hidden_post_timezone" value="<?php echo $timezone; ?>" />
-		<input type="hidden" name="timezone_default" id="timezone_default" value="<?php echo get_option( 'timezone_string' ); ?>" />
+		<input type="hidden" name="hidden_post_timezone" id="hidden_post_timezone" value="<?php echo esc_html( $timezone ); ?>" />
+		<input type="hidden" name="timezone_default" id="timezone_default" value="<?php echo esc_attr( get_option( 'timezone_string' ) ); ?>" />
 		<select name="post_timezone" id="post-timezone" width="90%">
 		<?php
-			echo wp_timezone_choice( $timezone );
+			echo wp_timezone_choice( $timezone ); // phpcs:ignore
 			echo '</select>';
-?>
+		?>
 <br />
 		<a href="#post_timezone" class="save-post-timezone hide-if-no-js button">OK</a>
 		<a href="#post_timezone" class="cancel-post-timezone hide-if-no-js button-cancel">Cancel</a>
 </div>
 </div>
-<?php
+		<?php
 	}
 
 	/* Save the post timezone metadata. */

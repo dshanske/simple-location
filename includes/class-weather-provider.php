@@ -301,16 +301,15 @@ abstract class Weather_Provider {
 		if ( ! $icon ) {
 			$icon = 'none';
 		}
-		$choices    = array_merge( array( 'none' => __( 'None', 'simple-location' ) ), $choices );
+		$choices    = array_merge( array( 'none' => esc_html__( 'None', 'simple-location' ) ), $choices );
 			$return = '';
 		foreach ( $choices as $value => $text ) {
-						$return .= sprintf( '<option value="%1s" %2s>%3s</option>', $value, selected( $icon, $value, false ), $text );
+			$return .= sprintf( '<option value="%1s" %2s>%3s</option>', esc_attr( $value ), selected( $icon, $value, false ), esc_html( $text ) );
 		}
 		if ( ! $echo ) {
-						return $return;
+			return $return;
 		}
-					echo $return;
-
+		echo $return; // phpcs:ignore
 	}
 
 
