@@ -118,7 +118,8 @@ class Simple_Location_Plugin {
 		if ( function_exists( 'wp_add_privacy_policy_content' ) ) {
 			$content = __(
 				'Location and weather data is optionally stored for all posts, attachments, and comments. Location data is extracted from uploaded images along with other metadata. This
-				data can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it.', 'simple-location'
+				data can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it.',
+				'simple-location'
 			);
 			wp_add_privacy_policy_content(
 				'Simple Location',

@@ -105,12 +105,16 @@ class Loc_View {
 			if ( $display ) {
 				return sprintf(
 					'<span class="p-latitude">%1$f</span>,
-					<span class="p-longitude">%2$f</span>', $loc['latitude'], $loc['longitude']
+					<span class="p-longitude">%2$f</span>',
+					$loc['latitude'],
+					$loc['longitude']
 				);
 			} else {
 				return sprintf(
 					'<data class="p-latitude" value="%1$f"></data>
-					<data class="p-longitude" value="%2$f"></data>', $loc['latitude'], $loc['longitude']
+					<data class="p-longitude" value="%2$f"></data>',
+					$loc['latitude'],
+					$loc['longitude']
 				);
 			}
 		}
@@ -127,7 +131,8 @@ class Loc_View {
 
 	public static function location_comment( $comment_text, $comment ) {
 		$loc = self::get_location(
-			$comment, array(
+			$comment,
+			array(
 				'text' => false,
 				'icon' => false,
 			)

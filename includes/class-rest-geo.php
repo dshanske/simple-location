@@ -16,7 +16,8 @@ class REST_Geo {
 		// Provide a global object to our JS file containing our REST API endpoint, and API nonce
 		// Nonce must be 'wp_rest'
 		wp_localize_script(
-			'sloc_location', 'sloc',
+			'sloc_location',
+			'sloc',
 			array(
 				'api_nonce' => wp_create_nonce( 'wp_rest' ),
 				'api_url'   => rest_url( '/sloc_geo/1.0/' ),
@@ -29,7 +30,9 @@ class REST_Geo {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			'sloc_geo/1.0', '/reverse', array(
+			'sloc_geo/1.0',
+			'/reverse',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'reverse' ),
@@ -48,7 +51,9 @@ class REST_Geo {
 			)
 		);
 		register_rest_route(
-			'sloc_geo/1.0', '/weather', array(
+			'sloc_geo/1.0',
+			'/weather',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'weather' ),
@@ -64,7 +69,9 @@ class REST_Geo {
 			)
 		);
 		register_rest_route(
-			'sloc_geo/1.0', '/lookup', array(
+			'sloc_geo/1.0',
+			'/lookup',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'lookup' ),
@@ -80,7 +87,9 @@ class REST_Geo {
 			)
 		);
 		register_rest_route(
-			'sloc_geo/1.0', '/map', array(
+			'sloc_geo/1.0',
+			'/map',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'map' ),
