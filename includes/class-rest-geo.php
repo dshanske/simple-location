@@ -183,7 +183,7 @@ class REST_Geo {
 			$reverse->set( $params['latitude'], $params['longitude'] );
 			$reverse_adr = $reverse->reverse_lookup();
 			if ( is_wp_error( $reverse_adr ) ) {
-				return $response;
+				return $reverse_adr;
 			}
 			return array_filter( $reverse_adr );
 		}
