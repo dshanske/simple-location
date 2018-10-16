@@ -116,19 +116,6 @@ class REST_Geo {
 		);
 	}
 
-	/**
-	 * Returns if valid URL for REST validation
-	 *
-	 * @param string $url
-	 *
-	 * @return boolean
-	 */
-	public static function is_valid_url( $url, $request, $key ) {
-		if ( ! is_string( $url ) || empty( $url ) ) {
-			return false;
-		}
-		return filter_var( $url, FILTER_VALIDATE_URL );
-	}
 
 	// Callback Handler for Map Retrieval
 	public static function map( $request ) {
