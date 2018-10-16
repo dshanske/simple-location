@@ -19,10 +19,36 @@ class Geo_Provider_OSM extends Geo_Provider {
 	}
 
 	public function reverse_lookup() {
-		$query    = sprintf( 'http://nominatim.openstreetmap.org/reverse?format=json&extratags=1&addressdetails=1&lat=%1$s&lon=%2$s&zoom=%3$s&accept-language=%4$s', $this->latitude, $this->longitude, $this->reverse_zoom, get_bloginfo( 'language' ) );
-		$response = wp_remote_get( $query );
+		$query = add_query_arg(
+			array(
+				'format'          => 'json',
+				'extratags'       => '1',
+				'addressdetails'  => '1',
+				'lat'             => $this->latitude,
+				'lon'             => $this->longitude,
+				'zoom'            => $this->reverse_zoom,
+				'accept-language' => get_bloginfo( 'language' ),
+			),
+			'https://nominatim.openstreetmap.org/reverse'
+		);
+		$args  = array(
+			'headers'             => array(
+				'Accept' => 'application/json',
+			),
+			'timeout'             => 10,
+			'limit_response_size' => 1048576,
+			'redirection'         => 1,
+			// Use an explicit user-agent for Simple Location
+			'user-agent'          => 'Simple Location for WordPress',
+		);
+
+		$response = wp_remote_get( $query, $args );
 		if ( is_wp_error( $response ) ) {
 			return $response;
+		}
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( ( $code / 100 ) !== 2 ) {
+			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
 		}
 		$json    = json_decode( $response['body'], true );
 		$address = $json['address'];
