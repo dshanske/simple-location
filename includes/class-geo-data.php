@@ -33,6 +33,8 @@ class WP_Geo_Data {
 		add_action( 'rdf_item', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'json_feed_item', array( 'WP_Geo_Data', 'json_feed_item' ), 10, 2 );
 
+		add_action( 'rest_api_init', array( 'WP_Geo_Data', 'rest_location' ) );
+
 		// Add Dropdown
 		add_action( 'restrict_manage_posts', array( 'WP_Geo_Data', 'geo_posts_dropdown' ), 12, 2 );
 		add_action( 'restrict_manage_comments', array( 'WP_Geo_Data', 'geo_comments_dropdown' ), 12, 2 );
@@ -489,6 +491,87 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_address', $args );
 	}
 
+
+	public static function rest_location() {
+		register_rest_field(
+			array( 'post', 'comment', 'user', 'term' ),
+			'latitude',
+			array(
+				'get_callback' => array( 'WP_Geo_Data', 'rest_get_latitude' ),
+				'schema'       => array(
+					'latitude' => __( 'Latitude', 'simple-location' ),
+					'type'     => 'float',
+				),
+			)
+		);
+		register_rest_field(
+			array( 'post', 'comment', 'term' ),
+			'longitude',
+			array(
+				'get_callback' => array( 'WP_Geo_Data', 'rest_get_longitude' ),
+				'schema'       => array(
+					'longitude' => __( 'Longitude', 'simple-location' ),
+					'type'      => 'float',
+				),
+			)
+		);
+		register_rest_field(
+			array( 'post', 'comment', 'term' ),
+			'geo_address',
+			array(
+				'get_callback' => array( 'WP_Geo_Data', 'rest_get_address' ),
+				'schema'       => array(
+					'geo_address' => __( 'Location', 'simple-location' ),
+					'type'        => 'string',
+				),
+			)
+		);
+
+	}
+
+	public static function object( $object, $object_type ) {
+		switch ( $object_type ) {
+			case 'post':
+				return get_post( $object->ID );
+			case 'comment':
+				return get_comment( $object->comment_ID );
+			case 'user':
+				return get_user_by( 'id', $object->ID );
+			case 'term':
+				return get_term( $object->term_id );
+			default:
+				return null;
+		}
+	}
+
+	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
+		$object  = self::object( $object, $object_type );
+		$geodata = self::get_geodata( $object );
+		if ( '1' === $geodata['public'] ) {
+			return $geodata['longitude'];
+		}
+		return false;
+	}
+
+	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
+		$object  = self::object( $object, $object_type );
+		$geodata = self::get_geodata( $object );
+		if ( '1' === $geodata['public'] ) {
+			return $geodata['latitude'];
+		}
+		return false;
+	}
+
+	public static function rest_get_address( $object, $attr, $request, $object_type ) {
+		$object  = self::object( $object, $object_type );
+		$geodata = self::get_geodata( $object );
+		if ( '1' === $geodata['public'] ) {
+			return $geodata['address'];
+		}
+		return false;
+	}
+
+
 	public static function sanitize_address( $data ) {
 		$data = wp_kses_post( $data );
 		$data = trim( $data );
@@ -497,7 +580,6 @@ class WP_Geo_Data {
 		}
 		return $data;
 	}
-
 
 }
 
