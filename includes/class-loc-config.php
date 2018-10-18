@@ -17,7 +17,7 @@ class Loc_Config {
 				'type'         => 'string',
 				'description'  => 'Map Provider',
 				'show_in_rest' => false,
-				'default'      => 'OSM',
+				'default'      => 'MapBox',
 			)
 		);
 		register_setting(
@@ -27,7 +27,7 @@ class Loc_Config {
 				'type'         => 'string',
 				'description'  => 'Reverse Lookup Provider',
 				'show_in_rest' => false,
-				'default'      => 'OSM',
+				'default'      => 'Nominatim',
 			)
 		);
 		register_setting(
@@ -367,7 +367,7 @@ class Loc_Config {
 			'sloc_map',
 			array(
 				'label_for' => 'sloc_google_style',
-				'provider'  => new Geo_Provider_Google(),
+				'provider'  => new Map_Provider_Google(),
 				'class'     => ( 'Google' === $map_provider ) ? '' : 'hidden',
 			)
 		);
@@ -391,7 +391,7 @@ class Loc_Config {
 			'sloc_map',
 			array(
 				'label_for' => 'sloc_bing_style',
-				'provider'  => new Geo_Provider_Bing(),
+				'provider'  => new Map_Provider_Bing(),
 				'class'     => ( 'Bing' === $map_provider ) ? '' : 'hidden',
 			)
 		);
@@ -427,7 +427,7 @@ class Loc_Config {
 			'sloc_map',
 			array(
 				'label_for' => 'sloc_mapbox_style',
-				'provider'  => new Geo_Provider_OSM(),
+				'provider'  => new Map_Provider_Mapbox(),
 				'class'     => ( 'OSM' === $map_provider ) ? '' : 'hidden',
 
 			)
@@ -517,7 +517,7 @@ class Loc_Config {
 
 	public static function map_providers() {
 		$return = array(
-			'OSM'    => __( 'OpenStreetMap/MapBox', 'simple-location' ),
+			'MapBox' => __( 'OpenStreetMap/MapBox', 'simple-location' ),
 			'Google' => __( 'Google Maps', 'simple-location' ),
 			'Bing'   => __( 'Bing Maps', 'simple-location' ),
 		);
@@ -526,7 +526,7 @@ class Loc_Config {
 
 	public static function reverse_providers() {
 		$return = array(
-			'OSM' => __( 'OpenStreetMap/Nominatim', 'simple-location' ),
+			'Nominatim' => __( 'Nominatim', 'simple-location' ),
 		);
 		return apply_filters( 'reverse_providers', $return );
 	}
@@ -587,9 +587,9 @@ class Loc_Config {
 		$option = get_option( 'sloc_default_map_provider' );
 		$option = apply_filters( 'sloc_default_map_provider', $option );
 		if ( ! $option ) {
-			$option = 'OSM';
+			$option = 'MapBox';
 		}
-		$option = 'Geo_Provider_' . $option;
+		$option = 'Map_Provider_' . $option;
 		$map    = new $option( $args );
 		return $map;
 	}
@@ -598,7 +598,7 @@ class Loc_Config {
 		$option = get_option( 'sloc_default_reverse_provider' );
 		$option = apply_filters( 'sloc_default_reverse_provider', $option );
 		if ( ! $option ) {
-			$option = 'OSM';
+			$option = 'Nominatim';
 		}
 		$option = 'Geo_Provider_' . $option;
 		$map    = new $option( $args );

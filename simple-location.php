@@ -52,6 +52,9 @@ class Simple_Location_Plugin {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-venue-taxonomy.php';
 
 		// Map Provider Class
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-map-provider.php';
+
+		// Geo Provider Class
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider.php';
 
 		// Weather Provider Class
@@ -64,9 +67,12 @@ class Simple_Location_Plugin {
 		add_action( 'widgets_init', array( 'Simple_Location_Plugin', 'widgets_init' ) );
 
 		// Map Providers
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-osm.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-google.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-bing.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-map-provider-mapbox.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-map-provider-google.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-map-provider-bing.php';
+
+		// Geo Providers
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-nominatim.php';
 
 		// Location Provider
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-location-provider.php';
