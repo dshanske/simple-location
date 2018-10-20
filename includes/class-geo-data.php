@@ -486,6 +486,18 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_longitude', $args );
 
 		$args = array(
+			'sanitize_callback' => array( 'WP_Geo_Data', 'get_numeric' ),
+			'type'              => 'int',
+			'description'       => 'Altitude',
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		register_meta( 'post', 'geo_altitude', $args );
+		register_meta( 'comment', 'geo_altitude', $args );
+		register_meta( 'user', 'geo_altitude', $args );
+		register_meta( 'term', 'geo_altitude', $args );
+
+		$args = array(
 			'type'         => 'array',
 			'description'  => 'Weather Data',
 			'single'       => true,
