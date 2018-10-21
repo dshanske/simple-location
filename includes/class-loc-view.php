@@ -50,11 +50,12 @@ class Loc_View {
 			$c .= $args['description'];
 		}
 		// 1 is full public
-		if ( '1' === $loc['public'] ) {
-			$c .= self::get_the_geo( $loc );
-			$c .= '<a href="' . $map->get_the_map_url() . '">' . $loc['address'] . '</a>';
+		if ( 1 === $loc['public'] ) {
+			$c             .= self::get_the_geo( $loc );
+			$loc['address'] = isset( $loc['address'] ) ? $loc['address'] : dec_to_dms( $loc['latitude'], $loc['longitude'] );
+			$c             .= '<a href="' . $map->get_the_map_url() . '">' . $loc['address'] . '</a>';
 		} else {
-			$c = $loc['address'];
+			$c = isset( $loc['address'] ) ? $loc['address'] : '';
 		}
 		$c .= '</span>';
 		if ( isset( $loc['weather'] ) && $args['weather'] ) {
@@ -68,7 +69,7 @@ class Loc_View {
 
 	public static function get_map( $object = null, $args = array() ) {
 		$loc = WP_Geo_Data::get_geodata( $object );
-		if ( isset( $loc ) && ( '1' === $loc['public'] ) ) {
+		if ( isset( $loc ) && ( 1 === $loc['public'] ) ) {
 			$map = Loc_Config::default_map_provider( array_merge( $loc, $args ) );
 			return $map->get_the_map();
 		}

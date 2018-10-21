@@ -169,7 +169,7 @@ class WP_Geo_Data {
 		if ( ! is_single() ) {
 			return;
 		}
-		$geo = self::get_geodata( $post );
+		$geo = self::get_geodata( get_the_id() );
 		if ( ! $geo ) {
 			return;
 		}
@@ -670,4 +670,32 @@ if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
 	}
 }
 
+function dec_to_dms( $latitude, $longitude ) {
+	$latitudedirection  = $latitude < 0 ? 'S' : 'N';
+	$longitudedirection = $longitude < 0 ? 'W' : 'E';
 
+	$latitudenotation  = $latitude < 0 ? '-' : '';
+	$longitudenotation = $longitude < 0 ? '-' : '';
+
+	$latitudeindegrees  = floor( abs( $latitude ) );
+	$longitudeindegrees = floor( abs( $longitude ) );
+
+	$latitudedecimal  = abs( $latitude ) - $latitudeindegrees;
+	$longitudedecimal = abs( $longitude ) - $longitudeindegrees;
+
+	$_precision       = 3;
+	$latitudeminutes  = round( $latitudedecimal * 60, $_precision );
+	$longitudeminutes = round( $longitudedecimal * 60, $_precision );
+
+	return sprintf(
+		'%s%s° %s %s %s%s° %s %s',
+		$latitudenotation,
+		$latitudeindegrees,
+		$latitudeminutes,
+		$latitudedirection,
+		$longitudenotation,
+		$longitudeindegrees,
+		$longitudeminutes,
+		$longitudedirection
+	);
+}
