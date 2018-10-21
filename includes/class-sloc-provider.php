@@ -1,15 +1,12 @@
 <?php
 
-abstract class Location_Provider extends Sloc_Provider {
+abstract class Sloc_Provider {
 
+	protected $slug;
+	protected $name;
 	protected $api;
-	protected $user;
 	protected $latitude;
 	protected $longitude;
-	protected $accuracy;
-	protected $altitude;
-	protected $heading;
-	protected $speed;
 
 	/**
 	 * Constructor for the Abstract Class
@@ -19,14 +16,30 @@ abstract class Location_Provider extends Sloc_Provider {
 	 * @param string $key API Key if Needed
 	 */
 	public function __construct( $args = array() ) {
-		$defaults   = array(
-			'api'  => null,
-			'user' => '',
+		$defaults  = array(
+			'api'       => null,
+			'latitude'  => null,
+			'longitude' => null,
 		);
-		$defaults   = apply_filters( 'sloc_location_provider_defaults', $defaults );
-		$r          = wp_parse_args( $args, $defaults );
-		$this->user = $r['user'];
-		$this->api  = $r['api'];
+		$r         = wp_parse_args( $args, $defaults );
+		$this->api = $r['api'];
+		$this->set( $r['latitude'], $r['longitude'] );
+	}
+
+	/**
+	 * Get Name
+	 *
+	 */
+	public function get_name() {
+		return $this->name;
+	}
+
+	/**
+	 * Get Slug
+	 *
+	 */
+	public function get_slug() {
+		return $this->slug;
 	}
 
 	/**
@@ -54,18 +67,10 @@ abstract class Location_Provider extends Sloc_Provider {
 		$return              = array();
 		$return['latitude']  = $this->latitude;
 		$return['longitude'] = $this->longitude;
-		$return['altitude']  = $this->altitude;
-		$return['accuracy']  = $this->accuracy;
-		$return['altitude']  = $this->altitude;
-		$return['heading']   = $this->heading;
-		$return['speed']     = $this->speed;
 		$return              = array_filter( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
 		}
 		return false;
 	}
-
-
-	abstract public function retrieve();
 }

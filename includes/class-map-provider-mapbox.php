@@ -4,6 +4,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Mapbox', 'simple-location' );
+		$this->slug = 'mapbox';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_mapbox_api' );
 		}
@@ -92,3 +93,5 @@ class Map_Provider_Mapbox extends Map_Provider {
 	}
 
 }
+
+register_sloc_provider( new Map_Provider_Mapbox() );

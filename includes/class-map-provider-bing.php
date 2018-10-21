@@ -5,6 +5,7 @@ class Map_Provider_Bing extends Map_Provider {
 
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Bing Maps', 'simple-location' );
+		$this->slug = 'bing';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_bing_api' );
 		}
@@ -43,3 +44,5 @@ class Map_Provider_Bing extends Map_Provider {
 		return $c;
 	}
 }
+
+register_sloc_provider( new Map_Provider_Bing() );

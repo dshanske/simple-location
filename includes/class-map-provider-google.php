@@ -42,3 +42,6 @@ class Map_Provider_Google extends Map_Provider {
 	}
 
 }
+
+register_sloc_provider( new Map_Provider_Google() );
+

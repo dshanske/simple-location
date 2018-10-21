@@ -4,16 +4,9 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Nominatim', 'simple-location' );
+		$this->slug = 'nominatim';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_mapbox_api' );
-		}
-
-		if ( ! isset( $args['user'] ) ) {
-			$args['user'] = get_option( 'sloc_mapbox_user' );
-		}
-
-		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_mapbox_style' );
 		}
 
 		parent::__construct( $args );
@@ -100,3 +93,5 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	}
 
 }
+
+register_sloc_provider( new Geo_Provider_Nominatim() );

@@ -30,9 +30,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 		$weather = new Weather_Provider_OpenWeatherMap();
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			$loc = WP_Geo_Data::get_geodata( new WP_User( $instance['user'] ) );
-			$weather->set_location( $loc['latitude'], $loc['longitude'] );
+			$weather->set( $loc['latitude'], $loc['longitude'] );
 		} elseif ( isset( $instance['latitude'] ) && isset( $instance['longitude'] ) ) {
-			$weather->set_location( $instance['latitude'], $instance['longitude'] );
+			$weather->set( $instance['latitude'], $instance['longitude'] );
 		}
 		echo $weather->get_current_condition(); // phpcs:ignore
 

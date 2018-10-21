@@ -1,6 +1,6 @@
 <?php
 
-abstract class Geo_Provider {
+abstract class Geo_Provider extends Sloc_Provider {
 
 	protected $name;
 	protected $reverse_zoom;

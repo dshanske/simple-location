@@ -10,6 +10,8 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 * @param array $args
 	 */
 	public function __construct( $args = array() ) {
+		$this->name = __( 'OpenWeatherMap', 'simple-location' );
+		$this->slug = 'openweathermap';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_openweathermap_api' );
 		}
@@ -229,3 +231,5 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	}
 
 }
+
+register_sloc_provider( new Weather_Provider_OpenWeatherMap() );

@@ -176,7 +176,7 @@ class WP_Geo_Data {
 		if ( empty( $geo['public'] ) || 1 !== intval( $geo['public'] ) ) {
 			return;
 		}
-		if ( $geo['address'] ) {
+		if ( isset( $geo['address'] ) ) {
 			printf(
 				'<meta name="geo.placename" content="%s" />' . PHP_EOL,
 				esc_attr( $geo['address'] )

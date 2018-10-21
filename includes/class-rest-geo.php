@@ -208,3 +208,4 @@ class REST_Geo {
 
 }
 
+new REST_Geo();

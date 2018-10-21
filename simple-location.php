@@ -51,6 +51,9 @@ class Simple_Location_Plugin {
 		// Venue Taxonomy
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-venue-taxonomy.php';
 
+		// Provider Class
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-sloc-provider.php';
+
 		// Map Provider Class
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-map-provider.php';
 

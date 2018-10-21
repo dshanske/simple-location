@@ -1,17 +1,13 @@
 <?php
 
-abstract class Map_Provider {
+abstract class Map_Provider extends Sloc_Provider {
 
-	protected $name;
 	protected $reverse_zoom;
 	protected $map_zoom;
 	protected $height;
 	protected $width;
-	protected $api;
 	protected $style;
 	protected $user;
-	protected $latitude;
-	protected $longitude;
 	protected $static;
 
 	/**
@@ -43,45 +39,6 @@ abstract class Map_Provider {
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
-	/**
-	 * Get Name
-	 *
-	 */
-	public function get_name() {
-		return $this->name;
-	}
-
-	/**
-	 * Set and Validate Coordinates
-	 *
-	 * @param $lat Latitude
-	 * @param $lng Longitude
-	 * @return boolean Return False if Validation Failed
-	 */
-	public function set( $lat, $lng ) {
-		// Validate inputs
-		if ( ( ! is_numeric( $lat ) ) && ( ! is_numeric( $lng ) ) ) {
-			return false;
-		}
-		$this->latitude  = $lat;
-		$this->longitude = $lng;
-	}
-
-	/**
-	 * Get Coordinates
-	 *
-	 * @return array|boolean Array with Latitude and Longitude false if null
-	 */
-	public function get() {
-		$return              = array();
-		$return['latitude']  = $this->latitude;
-		$return['longitude'] = $this->longitude;
-		$return              = array_filter( $return );
-		if ( ! empty( $return ) ) {
-			return $return;
-		}
-		return false;
-	}
 
 	/**
 	 * Return an array of styles with key being id and value being display name

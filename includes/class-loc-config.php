@@ -6,6 +6,10 @@ add_action( 'admin_menu', array( 'Loc_Config', 'admin_menu' ), 10 );
 
 class Loc_Config {
 
+	private static $maps     = array(); // Store Map Providers
+	private static $geo      = array(); // Reverse Lookup Provider
+	private static $location = array(); // Geolocation Provider
+	private static $weather  = array(); // Weather Provider
 	/**
 	 * Add Settings to the Discussions Page
 	 */
@@ -206,6 +210,22 @@ class Loc_Config {
 		);
 	}
 
+	public static function register_provider( $object ) {
+		if ( ! $object instanceof Sloc_Provider ) {
+			return false;
+		}
+		if ( $object instanceof Geo_Provider ) {
+			static::$geo[ $object->get_slug() ] = $object;
+		} elseif ( $object instanceof Map_Provider ) {
+			static::$maps[ $object->get_slug() ] = $object;
+		} elseif ( $object instanceof Location_Provider ) {
+			static::$location[ $object->get_slug() ] = $object;
+		} elseif ( $object instanceof Weather_Provider ) {
+			static::$weather[ $object->get_slug() ] = $object;
+		}
+		return true;
+	}
+
 	public static function temp_unit_default() {
 		// I cannot foresee every need for imperial but can cover US
 		if ( 'en_US' === get_locale() ) {
@@ -403,7 +423,7 @@ class Loc_Config {
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'sloc_mapbox_api',
-				'class'     => ( 'OSM' === $map_provider ) ? '' : 'hidden',
+				'class'     => ( 'Mapbox' === $map_provider ) ? '' : 'hidden',
 
 			)
 		);
@@ -415,7 +435,7 @@ class Loc_Config {
 			'sloc_map',
 			array(
 				'label_for' => 'sloc_mapbox_user',
-				'class'     => ( 'OSM' === $map_provider ) ? '' : 'hidden',
+				'class'     => ( 'Mapbox' === $map_provider ) ? '' : 'hidden',
 
 			)
 		);
@@ -428,7 +448,7 @@ class Loc_Config {
 			array(
 				'label_for' => 'sloc_mapbox_style',
 				'provider'  => new Map_Provider_Mapbox(),
-				'class'     => ( 'OSM' === $map_provider ) ? '' : 'hidden',
+				'class'     => ( 'Mapbox' === $map_provider ) ? '' : 'hidden',
 
 			)
 		);
@@ -507,43 +527,51 @@ class Loc_Config {
 		$name      = $args['label_for'];
 		$text      = get_option( $name );
 		$providers = $args['providers'];
-		printf( '<select name="%1$s" %2$s>', $name, count( $providers ) === 1 ? 'hidden' : '' );
-		foreach ( $providers as $key => $value ) {
+		if ( count( $providers ) > 1 ) {
+			printf( '<select name="%1$s">', $name );
+			foreach ( $providers as $key => $value ) {
 				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value ); // phpcs:ignore
+			}
+			echo '</select><br /><br />';
+		} else {
+			printf( '<input name="%1$s" type="radio" id="%1$s" value="%2$s" checked /><span>%3$s</span>', $name, key( $providers ), reset( $providers ) );
 		}
-				echo '</select><br /><br />';
 	}
 
 
 	public static function map_providers() {
-		$return = array(
-			'MapBox' => __( 'OpenStreetMap/MapBox', 'simple-location' ),
-			'Google' => __( 'Google Maps', 'simple-location' ),
-			'Bing'   => __( 'Bing Maps', 'simple-location' ),
-		);
-		return apply_filters( 'map_providers', $return );
+		$return = array();
+		foreach ( static::$maps as $map ) {
+			$return[ $map->get_slug() ] = esc_html( $map->get_name() );
+		}
+		return $return;
 	}
 
 	public static function reverse_providers() {
-		$return = array(
-			'Nominatim' => __( 'Nominatim', 'simple-location' ),
-		);
-		return apply_filters( 'reverse_providers', $return );
+		$return = array();
+		foreach ( static::$geo as $g ) {
+			$return[ $g->get_slug() ] = esc_html( $g->get_name() );
+		}
+		return $return;
 	}
 
 	public static function geolocation_providers() {
 		$return = array(
 			'HTML5' => __( 'HTML5 Browser Geolocation (requires HTTPS)', 'simple-location' ),
 		);
-		return apply_filters( 'geolocation_providers', $return );
+		foreach ( static::$location as $location ) {
+			$return[ $location->get_slug() ] = esc_html( $location->get_name() );
+		}
+		return $return;
 	}
 
 
 	public static function weather_providers() {
-		$return = array(
-			'OpenWeatherMap' => __( 'OpenWeatherMap', 'simple-location' ),
-		);
-		return apply_filters( 'weather_providers', $return );
+		$return = array();
+		foreach ( static::$weather as $weather ) {
+			$return[ $weather->get_slug() ] = esc_html( $weather->get_name() );
+		}
+		return $return;
 	}
 
 	public static function measure_callback( array $args ) {
@@ -633,4 +661,8 @@ class Loc_Config {
 	}
 
 
+}
+
+function register_sloc_provider( $object ) {
+	return Loc_Config::register_provider( $object );
 }
