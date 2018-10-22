@@ -45,17 +45,27 @@ abstract class Sloc_Provider {
 	/**
 	 * Set and Validate Coordinates
 	 *
-	 * @param $lat Latitude
+	 * @param $lat Latitude or array
 	 * @param $lng Longitude
 	 * @return boolean Return False if Validation Failed
 	 */
-	public function set( $lat, $lng ) {
+	public function set( $lat, $lng = null ) {
+		if ( ! $lng && is_array( $lat ) ) {
+			if ( isset( $lat['latitude'] ) && isset( $lat['longitude'] ) ) {
+				$this->latitude  = $lat['latitude'];
+				$this->longitude = $lat['longitude'];
+				return true;
+			} else {
+				return false;
+			}
+		}
 		// Validate inputs
 		if ( ( ! is_numeric( $lat ) ) && ( ! is_numeric( $lng ) ) ) {
 			return false;
 		}
 		$this->latitude  = $lat;
 		$this->longitude = $lng;
+		return true;
 	}
 
 	/**

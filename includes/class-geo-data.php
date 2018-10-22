@@ -436,7 +436,8 @@ class WP_Geo_Data {
 			if ( empty( $geodata['longitude'] ) ) {
 				return null;
 			}
-			$map = Loc_Config::default_reverse_provider( $geodata );
+			$map = Loc_Config::geo_provider();
+			$map->set( $geodata );
 			$adr = $map->reverse_lookup();
 			if ( array_key_exists( 'display-name', $adr ) ) {
 				$geodata['address'] = trim( $adr['display-name'] );

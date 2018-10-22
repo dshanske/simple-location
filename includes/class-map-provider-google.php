@@ -5,6 +5,7 @@ class Map_Provider_Google extends Map_Provider {
 
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Google Maps', 'simple-location' );
+		$this->slug = 'google';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
 		}

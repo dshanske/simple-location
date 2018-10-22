@@ -30,22 +30,6 @@ abstract class Location_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Set and Validate Coordinates
-	 *
-	 * @param $lat Latitude
-	 * @param $lng Longitude
-	 * @return boolean Return False if Validation Failed
-	 */
-	public function set( $lat, $lng ) {
-		// Validate inputs
-		if ( ( ! is_numeric( $lat ) ) && ( ! is_numeric( $lng ) ) ) {
-			return false;
-		}
-		$this->latitude  = $lat;
-		$this->longitude = $lng;
-	}
-
-	/**
 	 * Get Coordinates
 	 *
 	 * @return array|boolean Array with Latitude and Longitude false if null

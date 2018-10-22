@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 3.3.8
+ * Version: 3.4.0
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -20,7 +20,7 @@ register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactiva
 
 
 class Simple_Location_Plugin {
-	public static $version = '3.3.7';
+	public static $version = '3.4.0';
 
 	public static function activate() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
@@ -30,6 +30,18 @@ class Simple_Location_Plugin {
 
 	public static function deactivate() {
 		flush_rewrite_rules();
+	}
+
+	public static function load( $files ) {
+		if ( empty( $files ) ) {
+			return;
+		}
+		$path = plugin_dir_path( __FILE__ ) . 'includes/';
+		foreach ( $files as $file ) {
+			if ( file_exists( $path . $file ) ) {
+				require_once( $path . $file );
+			}
+		}
 	}
 
 	public static function init() {
@@ -45,58 +57,38 @@ class Simple_Location_Plugin {
 		// Add Privacy Policy
 		add_action( 'admin_init', array( 'Simple_Location_Plugin', 'privacy_declaration' ) );
 
-		// Register Metadata Functions
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
+		// Core Load Files
+		$core = array(
+			'class-geo-data.php', // Register Metadata Functions
+			'class-venue-taxonomy.php', // Venue Taxonomy
+			'class-sloc-provider.php', // Base Provider Class
+			'class-map-provider.php', // Map Provider Class
+			'class-geo-provider.php', // Geo Provider Class
+			'class-weather-provider.php', // Weather Provider Class
+			'class-location-provider.php', // Location Provider Class
+			'class-sloc-weather-widget.php', // Weather Widget
+			'class-sloc-lastseen-widget.php', // Last Location Seen Widget
+			'class-rest-geo.php', // REST endpoint for Geo
+			'class-loc-config.php', // Configuration and Settings Page
+			'class-loc-metabox.php', // Location Metabox
+			'class-loc-view.php', // Location View functionality
+			'class-timezone-result.php',
+			'class-loc-timezone.php', 
+			'class-post-timezone.php'
+		);
 
-		// Venue Taxonomy
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-venue-taxonomy.php';
-
-		// Provider Class
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-sloc-provider.php';
-
-		// Map Provider Class
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-map-provider.php';
-
-		// Geo Provider Class
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider.php';
-
-		// Weather Provider Class
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-weather-provider.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-weather-provider-openweathermap.php';
-
-		// Weather Widget
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-sloc-weather-widget.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-sloc-lastseen-widget.php';
+		// Load Core Files
+		self::load( $core );
 		add_action( 'widgets_init', array( 'Simple_Location_Plugin', 'widgets_init' ) );
-
-		// Map Providers
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-map-provider-mapbox.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-map-provider-google.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-map-provider-bing.php';
-
-		// Geo Providers
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-provider-nominatim.php';
-
-		// Location Provider
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-location-provider.php';
-
-		// API Endpoint under construction
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-rest-geo.php';
-		$geo_api = new REST_Geo();
-
-		// Configuration Functions
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-loc-config.php';
-
-		// Add Location Post Meta
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-loc-metabox.php';
-
-		// Add Location Display Functions
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-loc-view.php';
-
-		// Timezone Functions
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-timezone-result.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-loc-timezone.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-post-timezone.php';
+		// Load Providers
+		$providers = array(
+			'class-weather-provider-openweathermap.php',
+			'class-map-provider-mapbox.php',
+			'class-map-provider-google.php',
+			'class-map-provider-bing.php',
+			'class-geo-provider-nominatim.php'
+		);
+		self::load( $providers );
 
 	}
 
