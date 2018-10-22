@@ -136,7 +136,8 @@ class REST_Geo {
 				$args['width'] = $params['width'];
 			}
 
-			$map = Loc_Config::default_map_provider( $args );
+			$map = Loc_Config::map_provider();
+			$map->set( $args );
 			if ( ! empty( $params['url'] ) ) {
 				return $map->get_the_map_url();
 			}
@@ -152,10 +153,13 @@ class REST_Geo {
 	public static function lookup( $request ) {
 		$params       = $request->get_params();
 		$args['user'] = $params['user'];
-		$geolocation  = Loc_Config::default_geolocation_provider( $args );
-		if ( $geolocation ) {
+		$geolocation  = Loc_Config::geolocation_provider();
+		if ( is_object( $geolocation ) ) {
+			$gelocation->set( $args );
 			$geolocation->retrieve();
 			return $geolocation->get();
+		} elseif ( 'null' === $geolocation ) {
+			return $geolocation;
 		}
 		return new WP_Error( 'no_provider', __( 'No Geolocation Provider Available', 'simple-location' ), array( 'status' => 400 ) );
 	}
@@ -166,8 +170,8 @@ class REST_Geo {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
 		$params = $request->get_params();
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
-			$reverse = Loc_Config::default_reverse_provider();
-			$reverse->set( $params['latitude'], $params['longitude'] );
+			$reverse = Loc_Config::geo_provider();
+			$reverse->set( $params );
 			$reverse_adr = $reverse->reverse_lookup();
 			if ( is_wp_error( $reverse_adr ) ) {
 				return $reverse_adr;
@@ -189,9 +193,9 @@ class REST_Geo {
 			$args['temp_units'] = $params['units'];
 		}
 		$return  = array();
-		$weather = Loc_Config::default_weather_provider( $args );
+		$weather = Loc_Config::weather_provider();
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
-			$weather->set_location( $params['latitude'], $params['longitude'] );
+			$weather->set( $params );
 			$return = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],

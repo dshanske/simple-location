@@ -3,10 +3,10 @@
 class Geo_Provider_Nominatim extends Geo_Provider {
 
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Nominatim', 'simple-location' );
+		$this->name = __( 'Open Search(Nominatim) via Mapquest', 'simple-location' );
 		$this->slug = 'nominatim';
 		if ( ! isset( $args['api'] ) ) {
-			$args['api'] = get_option( 'sloc_mapbox_api' );
+			$args['api'] = get_option( 'sloc_mapquest_api' );
 		}
 
 		parent::__construct( $args );
@@ -22,8 +22,9 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 				'lon'             => $this->longitude,
 				'zoom'            => $this->reverse_zoom,
 				'accept-language' => get_bloginfo( 'language' ),
+				'key'             => $this->api,
 			),
-			'https://nominatim.openstreetmap.org/reverse'
+			'https://open.mapquestapi.com/nominatim/v1/reverse.php'
 		);
 		$args  = array(
 			'headers'             => array(

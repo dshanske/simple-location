@@ -86,6 +86,16 @@ class Loc_Config {
 		);
 		register_setting(
 			'simloc', // settings page
+			'sloc_mapquest_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Mapquest API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+		register_setting(
+			'simloc', // settings page
 			'sloc_openweathermap_api', // option name
 			array(
 				'type'         => 'string',
@@ -369,6 +379,16 @@ class Loc_Config {
 		$weather_provider = get_option( 'sloc_weather_provider' );
 
 		add_settings_field(
+			'mapquestapi', // id
+			__( 'MapQuest API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_map', // settings section
+			array(
+				'label_for' => 'sloc_mapquest_api',
+			)
+		);
+		add_settings_field(
 			'googleapi', // id
 			__( 'Google Maps API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
@@ -528,13 +548,13 @@ class Loc_Config {
 		$text      = get_option( $name );
 		$providers = $args['providers'];
 		if ( count( $providers ) > 1 ) {
-			printf( '<select name="%1$s">', $name );
+			printf( '<select name="%1$s">', esc_attr( $name ) );
 			foreach ( $providers as $key => $value ) {
 				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value ); // phpcs:ignore
 			}
 			echo '</select><br /><br />';
 		} else {
-			printf( '<input name="%1$s" type="radio" id="%1$s" value="%2$s" checked /><span>%3$s</span>', $name, key( $providers ), reset( $providers ) );
+			printf( '<input name="%1$s" type="radio" id="%1$s" value="%2$s" checked /><span>%3$s</span>', esc_attr( $name ), esc_attr( key( $providers ) ), esc_html( reset( $providers ) ) );
 		}
 	}
 
@@ -575,11 +595,10 @@ class Loc_Config {
 	}
 
 	public static function measure_callback( array $args ) {
-		$name = $args['label_for'];
-		$text = get_option( $name );
-		echo '<select name="' . esc_attr( $name ) . '">';
-		echo '<option value="metric" ' . selected( $text, 'metric' ) . '>' . __( 'Metric', 'simple-location' ) . '</option>'; // phpcs:ignore
-		echo '<option value="imperial" ' . selected( $text, 'imperial' ) . '>' . __( 'Imperial', 'simple-location' ) . '</option>'; // phpcs:ignore
+		$text = get_option( 'sloc_measurements' );
+		echo '<select name="sloc_measurements">';
+		printf( '<option value="metric" %1$s >%2$s</option>', selected( $text, 'metric', false ), __( 'Metric', 'simple-location' ) ); // phpcs:ignore
+		printf( '<option value="imperial" %1$s >%2$s</option>', selected( $text, 'imperial', false ), __( 'Imperial', 'simple-location' ) ); // phpcs:ignore
 		echo '</select><br /><br />';
 	}
 
@@ -613,7 +632,6 @@ class Loc_Config {
 
 	public static function map_provider() {
 		$option = get_option( 'sloc_map_provider' );
-		error_log( $option );
 		if ( isset( static::$maps[ $option ] ) ) {
 			return static::$maps[ $option ];
 		}
@@ -639,7 +657,7 @@ class Loc_Config {
 		return 'null';
 	}
 
-	public static function _weather_provider() {
+	public static function weather_provider() {
 		$option = get_option( 'sloc_weather_provider' );
 		if ( isset( static::$weather[ $option ] ) ) {
 			return static::$weather[ $option ];

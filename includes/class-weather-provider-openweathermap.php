@@ -19,7 +19,6 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			$args['station_id'] = get_option( 'sloc_openweathermap_id' );
 		}
 		parent::__construct( $args );
-
 	}
 
 	/**
@@ -40,20 +39,21 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 					return $conditions;
 				}
 			}
-			$url                  = 'https://api.openweathermap.org/data/2.5/weather?';
-			$data['lat']          = $this->latitude;
-			$data['lon']          = $this->longitude;
-			$url                  = $url . build_query( $data );
-							$args = array(
-								'headers'             => array(
-									'Accept' => 'application/json',
-								),
-								'timeout'             => 10,
-								'limit_response_size' => 1048576,
-								'redirection'         => 1,
-								// Use an explicit user-agent for Simple Location
-								'user-agent'          => 'Simple Location for WordPress',
-							);
+			$url           = 'https://api.openweathermap.org/data/2.5/weather?';
+			$data['lat']   = $this->latitude;
+			$data['lon']   = $this->longitude;
+			$url           = $url . build_query( $data );
+			$return['url'] = $url;
+			$args          = array(
+				'headers'             => array(
+					'Accept' => 'application/json',
+				),
+				'timeout'             => 10,
+				'limit_response_size' => 1048576,
+				'redirection'         => 1,
+				// Use an explicit user-agent for Simple Location
+				'user-agent'          => 'Simple Location for WordPress',
+			);
 
 			$response = wp_remote_get( $url, $args );
 			if ( is_wp_error( $response ) ) {
