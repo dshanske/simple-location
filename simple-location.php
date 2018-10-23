@@ -90,7 +90,7 @@ class Simple_Location_Plugin {
 			'class-map-provider-here.php',
 			'class-geo-provider-nominatim.php',
 			'class-geo-provider-google.php',
-			'class-geo-provider-bing.php'
+			'class-geo-provider-bing.php',
 		);
 		self::load( $providers );
 
