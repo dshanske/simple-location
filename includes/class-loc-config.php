@@ -464,7 +464,7 @@ class Loc_Config {
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'sloc_google_api',
-				'class'     => ( 'google' === $map_provider ) ? '' : 'hidden',
+				'class'     => ( 'google' === $map_provider || 'google' === $geo_provider ) ? '' : 'hidden',
 			)
 		);
 		add_settings_field(
@@ -487,7 +487,7 @@ class Loc_Config {
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'sloc_bing_api',
-				'class'     => ( 'bing' === $map_provider ) ? '' : 'hidden',
+				'class'     => ( 'bing' === $map_provider || 'bing' === $geo_provider ) ? '' : 'hidden',
 
 			)
 		);

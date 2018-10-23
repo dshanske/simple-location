@@ -64,8 +64,8 @@ class Geo_Provider_Google extends Geo_Provider {
 			if ( in_array( 'administrative_area_level_2', $component['types'], true ) ) {
 				$addr['locality'] = $component['long_name'];
 			}
-			if ( in_array( 'route', $component['type'], true ) ) {
-				$addr['street-address'] .= $component['long_name'];
+			if ( in_array( 'route', $component['types'], true ) ) {
+				$addr['street-address'] = $component['long_name'];
 			}
 		}
 
