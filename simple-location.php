@@ -39,7 +39,7 @@ class Simple_Location_Plugin {
 		$path = plugin_dir_path( __FILE__ ) . 'includes/';
 		foreach ( $files as $file ) {
 			if ( file_exists( $path . $file ) ) {
-				require_once( $path . $file );
+				require_once $path . $file;
 			}
 		}
 	}
@@ -73,8 +73,8 @@ class Simple_Location_Plugin {
 			'class-loc-metabox.php', // Location Metabox
 			'class-loc-view.php', // Location View functionality
 			'class-timezone-result.php',
-			'class-loc-timezone.php', 
-			'class-post-timezone.php'
+			'class-loc-timezone.php',
+			'class-post-timezone.php',
 		);
 
 		// Load Core Files
@@ -86,7 +86,9 @@ class Simple_Location_Plugin {
 			'class-map-provider-mapbox.php',
 			'class-map-provider-google.php',
 			'class-map-provider-bing.php',
-			'class-geo-provider-nominatim.php'
+			'class-map-provider-mapquest.php',
+			'class-map-provider-here.php',
+			'class-geo-provider-nominatim.php',
 		);
 		self::load( $providers );
 

@@ -66,6 +66,27 @@ class Loc_Config {
 		);
 		register_setting(
 			'simloc', // settings page
+			'sloc_here_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'HERE Maps API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+		register_setting(
+			'simloc', // settings page
+			'sloc_here_appid', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Here Maps APP ID',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+
+		register_setting(
+			'simloc', // settings page
 			'sloc_mapbox_api', // option name
 			array(
 				'type'         => 'string',
@@ -152,6 +173,16 @@ class Loc_Config {
 				'description'  => 'Google Map Style',
 				'show_in_rest' => false,
 				'default'      => 'roadmap',
+			)
+		);
+		register_setting(
+			'simloc',
+			'sloc_mapquest_style',
+			array(
+				'type'         => 'string',
+				'description'  => 'Mapquest Map Style',
+				'show_in_rest' => false,
+				'default'      => 'map',
 			)
 		);
 
@@ -377,6 +408,7 @@ class Loc_Config {
 
 		$map_provider     = get_option( 'sloc_map_provider' );
 		$weather_provider = get_option( 'sloc_weather_provider' );
+		$geo_provider     = get_option( 'sloc_geo_provider' );
 
 		add_settings_field(
 			'mapquestapi', // id
@@ -386,8 +418,44 @@ class Loc_Config {
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'sloc_mapquest_api',
+				'class'     => ( 'mapquest' === $map_provider || 'mapquest' === $geo_provider ) ? '' : 'hidden',
 			)
 		);
+		add_settings_field(
+			'mapqueststyle', // id
+			__( 'MapQuest Style', 'simple-location' ),
+			array( 'Loc_Config', 'style_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_mapquest_style',
+				'provider'  => new Map_Provider_Mapquest(),
+				'class'     => ( 'mapquest' === $map_provider ) ? '' : 'hidden',
+			)
+		);
+		add_settings_field(
+			'hereapi', // id
+			__( 'HERE API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_map', // settings section
+			array(
+				'label_for' => 'sloc_here_api',
+				'class'     => ( 'here' === $map_provider ) ? '' : 'hidden',
+			)
+		);
+		add_settings_field(
+			'hereapp', // id
+			__( 'HERE Application ID', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_map', // settings section
+			array(
+				'label_for' => 'sloc_here_appid',
+				'class'     => ( 'here' === $map_provider ) ? '' : 'hidden',
+			)
+		);
+
 		add_settings_field(
 			'googleapi', // id
 			__( 'Google Maps API Key', 'simple-location' ), // setting title
