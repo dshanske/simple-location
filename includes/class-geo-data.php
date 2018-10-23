@@ -8,6 +8,8 @@
  */
 
 add_action( 'init', array( 'WP_Geo_Data', 'init' ), 1 );
+// Jetpack added Location support in 2017 remove it due conflict https://github.com/Automattic/jetpack/pull/9573 which created conflict
+add_filter( 'jetpack_tools_to_include', array( 'WP_Geo_Data', 'jetpack_remove' ), 11 );
 
 class WP_Geo_Data {
 	public static function init() {
@@ -32,11 +34,27 @@ class WP_Geo_Data {
 		add_action( 'atom_entry', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'rdf_item', array( 'WP_Geo_Data', 'georss_item' ) );
 		add_action( 'json_feed_item', array( 'WP_Geo_Data', 'json_feed_item' ), 10, 2 );
+		add_action( 'wp_head', array( 'WP_Geo_Data', 'meta_tags' ) );
+
+		add_action( 'rest_api_init', array( 'WP_Geo_Data', 'rest_location' ) );
 
 		// Add Dropdown
 		add_action( 'restrict_manage_posts', array( 'WP_Geo_Data', 'geo_posts_dropdown' ), 12, 2 );
 		add_action( 'restrict_manage_comments', array( 'WP_Geo_Data', 'geo_comments_dropdown' ), 12, 2 );
 
+		// Add the Same Post Type Support JetPack uses
+		add_post_type_support( 'post', 'geo-location' );
+		add_post_type_support( 'page', 'geo-location' );
+		add_post_type_support( 'attachment', 'geo-location' );
+
+	}
+
+	public static function jetpack_remove( $tools ) {
+		$index = array_search( 'geo-location.php', $tools, true );
+		if ( false !== $index ) {
+			unset( $tools[ $index ] );
+		}
+		return $tools;
 	}
 
 
@@ -98,9 +116,8 @@ class WP_Geo_Data {
 		echo '</select>';
 	}
 
-
 	public static function georss_namespace() {
-		echo 'xmlns:georss="http://www.georss.org/georss" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" ';
+		echo PHP_EOL . 'xmlns:georss="http://www.georss.org/georss" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" ';
 	}
 
 	public static function georss_item() {
@@ -113,7 +130,7 @@ class WP_Geo_Data {
 			return;
 		}
 
-		if ( empty( $geo['public'] ) || 1 !== (int) $geo['public'] ) {
+		if ( empty( $geo['public'] ) || 1 !== intval( $geo['public'] ) ) {
 			return;
 		}
 
@@ -131,7 +148,7 @@ class WP_Geo_Data {
 			return $feed_item;
 		}
 
-		if ( empty( $geo['public'] ) || 1 !== (int) $geo['public'] ) {
+		if ( empty( $geo['public'] ) || 1 !== intval( $geo['public'] ) ) {
 			return $feed_item;
 		}
 		$json             = array(
@@ -146,6 +163,37 @@ class WP_Geo_Data {
 		);
 		$feed_item['geo'] = $json;
 		return $feed_item;
+	}
+
+	public static function meta_tags() {
+		if ( ! is_single() ) {
+			return;
+		}
+		$geo = self::get_geodata( get_the_id() );
+		if ( ! $geo ) {
+			return;
+		}
+		if ( empty( $geo['public'] ) || 1 !== intval( $geo['public'] ) ) {
+			return;
+		}
+		if ( isset( $geo['address'] ) ) {
+			printf(
+				'<meta name="geo.placename" content="%s" />' . PHP_EOL,
+				esc_attr( $geo['address'] )
+			);
+		}
+		if ( $geo['latitude'] && 2 !== intval( $geo['public'] ) ) {
+			printf(
+				'<meta name="geo.position" content="%s;%s" />' . PHP_EOL,
+				esc_attr( $geo['latitude'] ),
+				esc_attr( $geo['longitude'] )
+			);
+			printf(
+				'<meta name="ICBM" content="%s, %s" />' . PHP_EOL,
+				esc_attr( $geo['latitude'] ),
+				esc_attr( $geo['longitude'] )
+			);
+		}
 	}
 
 	public static function attachment( $meta, $post_id ) {
@@ -266,6 +314,13 @@ class WP_Geo_Data {
 		$query->meta_query->parse_query_vars( $query->query_vars );
 	}
 
+	public static function get_numeric( $string, $default = 0 ) {
+		if ( is_numeric( $string ) ) {
+			return intval( $string );
+		}
+		return $default;
+	}
+
 
 
 	public static function sanitize_float( $input ) {
@@ -275,7 +330,7 @@ class WP_Geo_Data {
 	public static function clean_coordinate( $coordinate ) {
 		$pattern = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
 		preg_match( $pattern, $coordinate, $matches );
-		return $matches[0];
+		return round( (float) $matches[0], 7 );
 	}
 
 	public static function set_geodata( $object = null, $geodata ) {
@@ -325,7 +380,7 @@ class WP_Geo_Data {
 		$geodata['map_zoom']  = get_metadata( $type, $id, 'geo_zoom', true );
 		$geodata['weather']   = get_metadata( $type, $id, 'geo_weather', true );
 		$geodata              = array_filter( $geodata );
-		$geodata['public']    = get_metadata( $type, $id, 'geo_public', true );
+		$geodata['public']    = self::get_numeric( get_metadata( $type, $id, 'geo_public', true ) );
 		if ( ! is_numeric( $geodata['public'] ) ) {
 			$geodata['public'] = get_option( 'geo_public' );
 		}
@@ -381,7 +436,8 @@ class WP_Geo_Data {
 			if ( empty( $geodata['longitude'] ) ) {
 				return null;
 			}
-			$map = Loc_Config::default_reverse_provider( $geodata );
+			$map = Loc_Config::geo_provider();
+			$map->set( $geodata );
 			$adr = $map->reverse_lookup();
 			if ( array_key_exists( 'display-name', $adr ) ) {
 				$geodata['address'] = trim( $adr['display-name'] );
@@ -431,6 +487,18 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_longitude', $args );
 
 		$args = array(
+			'sanitize_callback' => array( 'WP_Geo_Data', 'get_numeric' ),
+			'type'              => 'int',
+			'description'       => 'Altitude',
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		register_meta( 'post', 'geo_altitude', $args );
+		register_meta( 'comment', 'geo_altitude', $args );
+		register_meta( 'user', 'geo_altitude', $args );
+		register_meta( 'term', 'geo_altitude', $args );
+
+		$args = array(
 			'type'         => 'array',
 			'description'  => 'Weather Data',
 			'single'       => true,
@@ -453,10 +521,11 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_timezone', $args );
 
 		$args = array(
-			'type'         => 'integer',
-			'description'  => 'Geodata Zoom for Map Display',
-			'single'       => true,
-			'show_in_rest' => false,
+			'sanitize_callback' => array( 'WP_Geo_Data', 'get_numeric' ),
+			'type'              => 'integer',
+			'description'       => 'Geodata Zoom for Map Display',
+			'single'            => true,
+			'show_in_rest'      => false,
 		);
 		register_meta( 'post', 'geo_zoom', $args );
 		register_meta( 'comment', 'geo_zoom', $args );
@@ -464,10 +533,11 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_zoom', $args );
 
 		$args = array(
-			'type'         => 'integer',
-			'description'  => 'Geodata Public',
-			'single'       => true,
-			'show_in_rest' => false,
+			'sanitize_callback' => array( 'WP_Geo_Data', 'get_numeric' ),
+			'type'              => 'integer',
+			'description'       => 'Geodata Public',
+			'single'            => true,
+			'show_in_rest'      => false,
 		);
 		// Officially 0 is private 1 is public and absence or non-zero is assumed public.
 		// Therefore any non-zero number could be used to specify different display options.
@@ -489,6 +559,87 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_address', $args );
 	}
 
+
+	public static function rest_location() {
+		register_rest_field(
+			array( 'post', 'comment', 'user', 'term' ),
+			'latitude',
+			array(
+				'get_callback' => array( 'WP_Geo_Data', 'rest_get_latitude' ),
+				'schema'       => array(
+					'latitude' => __( 'Latitude', 'simple-location' ),
+					'type'     => 'float',
+				),
+			)
+		);
+		register_rest_field(
+			array( 'post', 'comment', 'term' ),
+			'longitude',
+			array(
+				'get_callback' => array( 'WP_Geo_Data', 'rest_get_longitude' ),
+				'schema'       => array(
+					'longitude' => __( 'Longitude', 'simple-location' ),
+					'type'      => 'float',
+				),
+			)
+		);
+		register_rest_field(
+			array( 'post', 'comment', 'term' ),
+			'geo_address',
+			array(
+				'get_callback' => array( 'WP_Geo_Data', 'rest_get_address' ),
+				'schema'       => array(
+					'geo_address' => __( 'Location', 'simple-location' ),
+					'type'        => 'string',
+				),
+			)
+		);
+
+	}
+
+	public static function object( $object, $object_type ) {
+		switch ( $object_type ) {
+			case 'post':
+				return get_post( $object->ID );
+			case 'comment':
+				return get_comment( $object->comment_ID );
+			case 'user':
+				return get_user_by( 'id', $object->ID );
+			case 'term':
+				return get_term( $object->term_id );
+			default:
+				return null;
+		}
+	}
+
+	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
+		$object  = self::object( $object, $object_type );
+		$geodata = self::get_geodata( $object );
+		if ( '1' === $geodata['public'] ) {
+			return $geodata['longitude'];
+		}
+		return false;
+	}
+
+	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
+		$object  = self::object( $object, $object_type );
+		$geodata = self::get_geodata( $object );
+		if ( '1' === $geodata['public'] ) {
+			return $geodata['latitude'];
+		}
+		return false;
+	}
+
+	public static function rest_get_address( $object, $attr, $request, $object_type ) {
+		$object  = self::object( $object, $object_type );
+		$geodata = self::get_geodata( $object );
+		if ( '1' === $geodata['public'] ) {
+			return $geodata['address'];
+		}
+		return false;
+	}
+
+
 	public static function sanitize_address( $data ) {
 		$data = wp_kses_post( $data );
 		$data = trim( $data );
@@ -497,7 +648,6 @@ class WP_Geo_Data {
 		}
 		return $data;
 	}
-
 
 }
 
@@ -521,4 +671,32 @@ if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
 	}
 }
 
+function dec_to_dms( $latitude, $longitude ) {
+	$latitudedirection  = $latitude < 0 ? 'S' : 'N';
+	$longitudedirection = $longitude < 0 ? 'W' : 'E';
 
+	$latitudenotation  = $latitude < 0 ? '-' : '';
+	$longitudenotation = $longitude < 0 ? '-' : '';
+
+	$latitudeindegrees  = floor( abs( $latitude ) );
+	$longitudeindegrees = floor( abs( $longitude ) );
+
+	$latitudedecimal  = abs( $latitude ) - $latitudeindegrees;
+	$longitudedecimal = abs( $longitude ) - $longitudeindegrees;
+
+	$_precision       = 3;
+	$latitudeminutes  = round( $latitudedecimal * 60, $_precision );
+	$longitudeminutes = round( $longitudedecimal * 60, $_precision );
+
+	return sprintf(
+		'%s%s° %s %s %s%s° %s %s',
+		$latitudenotation,
+		$latitudeindegrees,
+		$latitudeminutes,
+		$latitudedirection,
+		$longitudenotation,
+		$longitudeindegrees,
+		$longitudeminutes,
+		$longitudedirection
+	);
+}

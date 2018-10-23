@@ -1,62 +1,61 @@
 <?php
-// Bing Map Provider
+// Bing Geocode API Provider
 class Geo_Provider_Bing extends Geo_Provider {
 
-
 	public function __construct( $args = array() ) {
+		$this->name = __( 'Bing', 'simple-location' );
+		$this->slug = 'bing';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_bing_api' );
 		}
-		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_bing_style' );
-		}
+
 		parent::__construct( $args );
 	}
 
 	public function reverse_lookup() {
-		$response = wp_remote_get( 'http://dev.virtualearth.net/REST/v1/Locations/' . $this->latitude . ',' . $this->longitude . '&key=' . $this->api );
-		$json     = json_decode( $response['body'], true );
-		//$address = $json['results'][0]['address_components'];
-		$addr = array(
-			//	'name' => $json['results'][0]['formatted_address'],
-				'latitude' => $this->latitude,
-			'longitude'    => $this->longitude,
-			'raw'          => $json,
+		$query = add_query_arg(
+			array(
+				'key' => $this->api,
+			),
+			sprintf( 'https://dev.virtualearth.net/REST/v1/Locations/%1$s,%2$s', $this->latitude, $this->longitude )
 		);
-		$addr = array_filter( $addr );
-		// $addr['display-name'] = $this->display_name( $addr );
-		$tz   = $this->timezone( $this->latitude, $this->longitude );
-		$addr = array_merge( $addr, $tz );
+		$args  = array(
+			'headers'             => array(
+				'Accept' => 'application/json',
+			),
+			'timeout'             => 10,
+			'limit_response_size' => 1048576,
+			'redirection'         => 1,
+			// Use an explicit user-agent for Simple Location
+			'user-agent'          => 'Simple Location for WordPress',
+		);
+
+		$response = wp_remote_get( $query, $args );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( ( $code / 100 ) !== 2 ) {
+			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
+		}
+		$json = json_decode( $response['body'], true );
+		if ( isset( $json['resourceSets'] ) ) {
+			$json = $json['resourceSets'][0];
+			if ( isset( $json['resources'] ) ) {
+				$json = $json['resources'][0];
+			}
+		}
+
+		$addr                 = array( 'raw' => $json );
+		$addr['display-name'] = $json['name'];
+		$addr['locality']     = ifset( $json['address']['locality'] );
+		$addr['country-name'] = ifset( $json['address']['countryRegion'] );
+		$tz                   = $this->timezone();
+		if ( $tz ) {
+			$addr = array_merge( $addr, $tz );
+		}
 		return $addr;
 	}
-
-	public function get_styles() {
-		return array(
-			'Aerial'           => __( 'Aerial Imagery', 'simple-location' ),
-			'AerialWithLabels' => __( 'Aerial Imagery with a Road Overlay', 'simple-location' ),
-			'CanvasLight'      => __( 'A lighter version of the road maps which also has some of the details such as hill shading disabled.', 'simple-location' ),
-			'CanvasDark'       => __( 'A dark version of the road maps.', 'simple-location' ),
-			'CanvasGray'       => __( 'A grayscale version of the road maps.', 'simple-location' ),
-			'Road'             => __( 'Roads without additional imagery', 'simple-location' ),
-		);
-	}
-
-	// Return code for map
-	public function get_the_static_map() {
-		$map = sprintf( 'http://dev.virtualearth.net/REST/v1/Imagery/Map/%1$s/%2$s,%3$s/%4$s?pushpin=%2$s,%3$s&mapSize=%5$s,%6$s&key=%7$s', $this->style, $this->latitude, $this->longitude, $this->map_zoom, $this->width, $this->height, $this->api );
-		return $map;
-	}
-
-	public function get_the_map_url() {
-		return sprintf( 'http://bing.com/maps/default.aspx?cp=%1$s,%2$s&lvl=%3$s', $this->latitude, $this->longitude, $this->map_zoom );
-	}
-
-	// Return code for map
-	public function get_the_map( $static = true ) {
-		$map  = $this->get_the_static_map();
-		$link = $this->get_the_map_url();
-		$c    = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
-		return $c;
-	}
-
 }
+
+register_sloc_provider( new Geo_Provider_Bing() );

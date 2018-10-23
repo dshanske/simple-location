@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.3.8  
+**Stable tag:** 3.4.0  
 **Requires at least:** 4.7  
-**Tested up to:** 4.9.6  
+**Tested up to:** 4.9.8  
 **Requires PHP:** 5.3  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -41,10 +41,12 @@ To add anything more than a basic location you will have to create a venue. This
 
 ## WordPress GeoData ##
 
-[WordPress Geodata](http://codex.wordpress.org/Geodata) is an existing standard
-used to store geodata about a post, user, comment, or term.
+[WordPress Geodata](http://codex.wordpress.org/Geodata) is an existing standardized way to store geodata about a post, user, comment, or term.
 
-It consists of four fields: latitude, longitude, public, and address. This matches up with the HTML5 Geolocation fields. The plugin also saves zoom which is for the purpose of map display.
+It consists of four fields: latitude, longitude, public, and address. This matches up with the HTML5 Geolocation fields. The [W3C Geolocation Specification](https://dev.w3.org/geo/api/spec-source.html) 
+also provides for properties of altitude, accuracy, altitudeAccuracy, speed, and heading, which may be stored. Map Zoom is also stored as a geodata property.
+
+Timezone is also stored as a property and is derived from the location.
 
 ## Weather ##
 
@@ -52,6 +54,16 @@ Weather consists of at minimum the current conditions and temperature but may in
 is available that can be set to a specific location, a user, or a station ID.
 
 Station ID is available from supported providers for weather stations, for example from a Personal Weather Station(PWS).
+
+## Providers ##
+
+The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
+
+* Map Providers include MapBox, Google, Mapquest's Open Static Map, and Bing
+* Geocoding Providers include the Mapquest hosted version of Nominatim and Google.
+* Location Providers only offer HTML5 Browser Geolocation
+* Weather Providers only include OpenWeatherMap
+
 
 ## Frequently Asked Questions ##
 
@@ -62,13 +74,19 @@ API Keys are required to use certain services.
 * [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/)
 * [Bing Maps](https://www.bingmapsportal.com/)
 * [OpenWeatherMap](http://openweathermap.com/api)
+* [MapQuest](https://developer.mapquest.com/)
+* [HERE](https://developer.here.com/)
 
-If not provided there will be no map displayed regardless of setting. Without a weather provider this service will not work. The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin
-if installed.
+If not provided there will be no map displayed regardless of setting and reverse geo lookup will not work 
+Without a weather provider this service will not work. 
+
+The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin if installed.
 
 ### Is this compatible with the WordPress mobile apps? ###
 
-Simple Location uses WordPress Geodata to store location, as does the WordPress app. So setting location with the app should allow it to be displayed by Simple Location.
+Simple Location uses WordPress Geodata to store location, as does the WordPress app. So setting location with the app should allow it to be displayed by Simple Location. The only major difference
+is that whether or not a location is public is set with either 0 for private or 1 for public. The spec implemented states a non-zero number is considered public. This plugin adds the option of 2,
+also known as protected, which shows a textual description of the location but does not display a map or geographic coordinates.
 
 ### The Location Icon does not retrieve my location. ###
 
@@ -79,16 +97,54 @@ data.
 
 You can filter any query or archive by adding `?geo={all|public|text}` to it to show only public posts with location. Adding /geo/all to the homepage or archive pages should also work
 
+### JetPack offers Location Display, why do I need this? ###
+
+JetPack only began offering location display in 2017, 3 years after this plugin was created. This plugin disables their implementation as it created conflicts.
+
+They do not offer the features this plugin does and their goal is a minimal implementation.
+
+
 ### How can I report issues or request support? ###
 
 The Development Version as well as support can be found on [Github](https://github.com/dshanske/simple-location).
 
+### How can I add support for ___ ? ###
+
+Simple Location has the concept of Providers. Providers are an abstract class that you can implement to take information from one format into the one Simple Location understands.
+The plugin offers providers for:
+* Geolocation - Looking up an address from coordinates or vice versa
+* Location - By default this uses your browser to lookup your location but you can alternatively tap into a service to get your current location, perhaps from your phone
+* Weather - Retrieves weather based on location or station ID
+* Map - Provides maps for display
+
 ## Upgrade Notice ##
+
+### 3.4.0 ###
+
+Hardcoded and filtered options for new providers have been replaced by a provider registration function with the strings and slug for the provider set inside the provider itself.
+
+### 3.0.0 ###
 
 Recommend backup before upgrade to Version 3.0.0 due to the start of venue support. Full location data will not be saved in the post and old posts will be converted. The display name will be saved if set, otherwise a display name will be set from the coordinates. An API key
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 3.4.0 ( 2018-xx-xx ) ###
+* Fix for incorrect return when there is an error
+* Nominatim began to block reverse traffic so added additional options for reverse lookup.
+* Map Providers and Geo Providers are now separated
+* Unload Jetpack Geo Location which was added unknown to me in 2017. However added compatibility functions to ensure functionality matches
+* Declares post-type support for geo-location which is something the JetPack plugin does
+* Adds location meta tags
+* Add sanitize function that ensures geo_public is always saved as an integer
+* Empty address now causes plugin to display coordinates if not private
+* Provider registration now done by function as opposed to filter
+* Mapquests hosted version of Nominatim now offered but requires API Key
+* Mapquest Static Maps now a supported map provider
+* HERE Maps is now a supported map provider
+* Google is now a supported reverse lookup provider
+* Bing is now a supported reverse lookup provider
 
 ### 3.3.8 ( 2018-05-27 ) ###
 * Fix for jsonFeed error

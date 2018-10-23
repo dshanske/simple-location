@@ -1,60 +1,80 @@
 <?php
-// Google Map Provider
+// Google Geocode API Provider
 class Geo_Provider_Google extends Geo_Provider {
 
-
 	public function __construct( $args = array() ) {
+		$this->name = __( 'Google', 'simple-location' );
+		$this->slug = 'google';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
 		}
-		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_google_style' );
-		}
+
 		parent::__construct( $args );
 	}
 
 	public function reverse_lookup() {
-		$response = wp_remote_get( 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $this->latitude . ',' . $this->longitude . '&key=' . $this->api );
-		$json     = json_decode( $response['body'], true );
-		//$address = $json['results'][0]['address_components'];
-		$addr = array(
-			//	'name' => $json['results'][0]['formatted_address'],
-				'latitude' => $this->latitude,
-			'longitude'    => $this->longitude,
-			'raw'          => $json,
+		$query = add_query_arg(
+			array(
+				'latlng'        => $this->latitude . ',' . $this->longitude,
+				'language'      => get_bloginfo( 'language' ),
+				'location_type' => 'ROOFTOP',
+				'result_type'   => 'street_address',
+				'key'           => $this->api,
+			),
+			'https://maps.googleapis.com/maps/api/geocode/json?'
 		);
-		$addr = array_filter( $addr );
-		// $addr['display-name'] = $this->display_name( $addr );
-		$tz   = $this->timezone( $this->latitude, $this->longitude );
-		$addr = array_merge( $addr, $tz );
+		$args  = array(
+			'headers'             => array(
+				'Accept' => 'application/json',
+			),
+			'timeout'             => 10,
+			'limit_response_size' => 1048576,
+			'redirection'         => 1,
+			// Use an explicit user-agent for Simple Location
+			'user-agent'          => 'Simple Location for WordPress',
+		);
+
+		$response = wp_remote_get( $query, $args );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( ( $code / 100 ) !== 2 ) {
+			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
+		}
+		$json = json_decode( $response['body'], true );
+		if ( isset( $json['results'] ) ) {
+			$data = $json['results'][0];
+		} else {
+			return array();
+		}
+		$addr                 = array( 'raw' => $json );
+		$addr['display-name'] = ifset( $data['formatted_address'] );
+		foreach ( $data['address_components'] as $component ) {
+			if ( in_array( 'administrative_area_level_1', $component['types'], true ) ) {
+				$addr['region'] = $component['long_name'];
+			}
+			if ( in_array( 'country', $component['types'], true ) ) {
+				$addr['country-name'] = $component['long_name'];
+				$addr['country-code'] = $component['short_name'];
+			}
+			if ( in_array( 'neighborhood', $component['types'], true ) ) {
+				$addr['extended-address'] = $component['long_name'];
+			}
+			if ( in_array( 'administrative_area_level_2', $component['types'], true ) ) {
+				$addr['locality'] = $component['long_name'];
+			}
+			if ( in_array( 'route', $component['types'], true ) ) {
+				$addr['street-address'] = $component['long_name'];
+			}
+		}
+
+		$tz = $this->timezone();
+		if ( $tz ) {
+			$addr = array_merge( $addr, $tz );
+		}
 		return $addr;
 	}
-
-	public function get_styles() {
-		return array(
-			'roadmap'   => __( 'Roadmap', 'simple-location' ),
-			'satellite' => __( 'Satellite', 'simple-location' ),
-			'terrain'   => __( 'Terrain', 'simple-location' ),
-			'hybrid'    => __( 'Satellite and Roadmap Hybrid', 'simple-location' ),
-		);
-	}
-
-	// Return code for map
-	public function get_the_static_map() {
-		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->width . 'x' . $this->height . '&maptype=' . $this->style . '&language=' . get_bloginfo( 'language' ) . '&key=' . $this->api;
-		return $map;
-	}
-
-	public function get_the_map_url() {
-		return 'http://maps.google.com/maps?q=loc:' . $this->latitude . ',' . $this->longitude;
-	}
-
-	// Return code for map
-	public function get_the_map( $static = true ) {
-		$map  = $this->get_the_static_map();
-		$link = $this->get_the_map_url();
-		$c    = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
-		return $c;
-	}
-
 }
+
+register_sloc_provider( new Geo_Provider_Google() );

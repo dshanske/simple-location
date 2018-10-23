@@ -90,7 +90,7 @@ class Loc_Metabox {
 				'sloc_location',
 				'geo_options',
 				array(
-					'lookup' => get_option( 'sloc_default_geolocation_provider' ),
+					'lookup' => get_option( 'sloc_geolocation_provider' ),
 				)
 			);
 		}

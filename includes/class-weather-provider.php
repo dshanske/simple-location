@@ -1,11 +1,8 @@
 <?php
 
-abstract class Weather_Provider {
+abstract class Weather_Provider extends Sloc_Provider {
 
-	protected $api;
 	protected $style;
-	protected $latitude;
-	protected $longitude;
 	protected $station_id; // Most weather sites permit a station ID to be set
 	protected $temp_units; // Unit of measurement for temperature: imperial, metric, etc
 	protected $cache_key; // If set this will cache the retrieved informatin
@@ -26,7 +23,7 @@ abstract class Weather_Provider {
 			'station_id' => null,
 			'cache_key'  => 'slocw',
 			'cache_time' => 600,
-			'temp_units' => get_option( 'sloc_measurements' ),
+			'temp_units' => get_option( 'sloc_measurements', Loc_Config::temp_unit_default() ),
 			'style'      => '',
 		);
 		$defaults         = apply_filters( 'sloc_weather_provider_defaults', $defaults );
@@ -37,7 +34,7 @@ abstract class Weather_Provider {
 		$this->temp_units = $r['temp_units'];
 		$this->cache_key  = $r['cache_key'];
 		$this->cache_time = $r['cache_time'];
-		$this->set_location( $r['latitude'], $r['longitude'] );
+		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
 	public function get_station() {
@@ -52,22 +49,6 @@ abstract class Weather_Provider {
 		return ( $temp - 32 ) / 1.8;
 	}
 
-	/**
-	 * Set and Validate Coordinates
-	 *
-	 * @param $lat Latitude
-	 * @param $lng Longitude
-	 * @return boolean Return False if Validation Failed
-	 */
-	public function set_location( $lat, $lng ) {
-		// Validate inputs
-		if ( ( ! is_numeric( $lat ) ) && ( ! is_numeric( $lng ) ) ) {
-			return false;
-		}
-		$this->latitude  = $lat;
-		$this->longitude = $lng;
-	}
-
 	public function temp_unit() {
 		switch ( $this->temp_units ) {
 			case 'imperial':
@@ -76,24 +57,6 @@ abstract class Weather_Provider {
 				return 'C';
 		}
 	}
-
-
-	/**
-	 * Get Coordinates
-	 *
-	 * @return array|boolean Array with Latitude and Longitude false if null
-	 */
-	public function get_location() {
-		$return              = array();
-		$return['latitude']  = $this->latitude;
-		$return['longitude'] = $this->longitude;
-		$return              = array_filter( $return );
-		if ( ! empty( $return ) ) {
-			return $return;
-		}
-		return false;
-	}
-
 
 	/**
 	 * Return the marked up  icon standardized to the fontse

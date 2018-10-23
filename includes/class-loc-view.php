@@ -41,20 +41,22 @@ class Loc_View {
 		$default  = apply_filters( 'simple_location_display_defaults', $defaults );
 		$args     = wp_parse_args( $args, $defaults );
 		$args     = array_merge( $loc, $args );
-		$map      = Loc_Config::default_map_provider( $args );
-		$wrap     = '<%1$s class="%2$s">%3$s</%1$s>';
-		$class    = is_array( $args['wrapper-class'] ) ? implode( ' ', $args['wrapper-class'] ) : $args['wrapper-class'];
-		$c        = '<span class="p-location">';
+		$map      = Loc_Config::map_provider();
+		$map->set( $loc );
+		$wrap  = '<%1$s class="%2$s">%3$s</%1$s>';
+		$class = is_array( $args['wrapper-class'] ) ? implode( ' ', $args['wrapper-class'] ) : $args['wrapper-class'];
+		$c     = '<span class="p-location">';
 
 		if ( $args['text'] ) {
 			$c .= $args['description'];
 		}
 		// 1 is full public
-		if ( '1' === $loc['public'] ) {
-			$c .= self::get_the_geo( $loc );
-			$c .= '<a href="' . $map->get_the_map_url() . '">' . $loc['address'] . '</a>';
+		if ( 1 === $loc['public'] ) {
+			$c             .= self::get_the_geo( $loc );
+			$loc['address'] = isset( $loc['address'] ) ? $loc['address'] : dec_to_dms( $loc['latitude'], $loc['longitude'] );
+			$c             .= '<a href="' . $map->get_the_map_url() . '">' . $loc['address'] . '</a>';
 		} else {
-			$c = $loc['address'];
+			$c = isset( $loc['address'] ) ? $loc['address'] : '';
 		}
 		$c .= '</span>';
 		if ( isset( $loc['weather'] ) && $args['weather'] ) {
@@ -68,8 +70,9 @@ class Loc_View {
 
 	public static function get_map( $object = null, $args = array() ) {
 		$loc = WP_Geo_Data::get_geodata( $object );
-		if ( isset( $loc ) && ( '1' === $loc['public'] ) ) {
-			$map = Loc_Config::default_map_provider( array_merge( $loc, $args ) );
+		if ( isset( $loc ) && ( 1 === $loc['public'] ) ) {
+			$map = Loc_Config::map_provider();
+			$map->set( $loc );
 			return $map->get_the_map();
 		}
 		return '';
