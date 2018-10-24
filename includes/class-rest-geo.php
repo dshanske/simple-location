@@ -155,7 +155,7 @@ class REST_Geo {
 		$args['user'] = $params['user'];
 		$geolocation  = Loc_Config::geolocation_provider();
 		if ( is_object( $geolocation ) ) {
-			$gelocation->set( $args );
+			$geolocation->set( $args );
 			$geolocation->retrieve();
 			return $geolocation->get();
 		} elseif ( 'null' === $geolocation ) {
