@@ -12,6 +12,43 @@ class Geo_Provider_Google extends Geo_Provider {
 		parent::__construct( $args );
 	}
 
+	public function elevation() {
+		$query = add_query_arg(
+			array(
+				'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+				'key'       => $this->api,
+			),
+			'https://maps.googleapis.com/maps/api/elevation/json'
+		);
+		$args  = array(
+			'headers'             => array(
+				'Accept' => 'application/json',
+			),
+			'timeout'             => 10,
+			'limit_response_size' => 1048576,
+			'redirection'         => 1,
+			// Use an explicit user-agent for Simple Location
+			'user-agent'          => 'Simple Location for WordPress',
+		);
+
+		$response = wp_remote_get( $query, $args );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( ( $code / 100 ) !== 2 ) {
+			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
+		}
+		$json = json_decode( $response['body'], true );
+		if ( isset( $json['error_message'] ) ) {
+			return new WP_Error( $json['status'], $json['error_message'] );
+		}
+		if ( ! isset( $json['results'] ) ) {
+			return null;
+		}
+		return round( $json['results'][0]['elevation'] );
+	}
+
 	public function reverse_lookup() {
 		$query = add_query_arg(
 			array(
@@ -50,22 +87,24 @@ class Geo_Provider_Google extends Geo_Provider {
 		}
 		$addr                 = array( 'raw' => $json );
 		$addr['display-name'] = ifset( $data['formatted_address'] );
-		foreach ( $data['address_components'] as $component ) {
-			if ( in_array( 'administrative_area_level_1', $component['types'], true ) ) {
-				$addr['region'] = $component['long_name'];
-			}
-			if ( in_array( 'country', $component['types'], true ) ) {
-				$addr['country-name'] = $component['long_name'];
-				$addr['country-code'] = $component['short_name'];
-			}
-			if ( in_array( 'neighborhood', $component['types'], true ) ) {
-				$addr['extended-address'] = $component['long_name'];
-			}
-			if ( in_array( 'administrative_area_level_2', $component['types'], true ) ) {
-				$addr['locality'] = $component['long_name'];
-			}
-			if ( in_array( 'route', $component['types'], true ) ) {
-				$addr['street-address'] = $component['long_name'];
+		if ( isset( $data['address_components'] ) ) {
+			foreach ( $data['address_components'] as $component ) {
+				if ( in_array( 'administrative_area_level_1', $component['types'], true ) ) {
+					$addr['region'] = $component['long_name'];
+				}
+				if ( in_array( 'country', $component['types'], true ) ) {
+					$addr['country-name'] = $component['long_name'];
+					$addr['country-code'] = $component['short_name'];
+				}
+				if ( in_array( 'neighborhood', $component['types'], true ) ) {
+					$addr['extended-address'] = $component['long_name'];
+				}
+				if ( in_array( 'administrative_area_level_2', $component['types'], true ) ) {
+					$addr['locality'] = $component['long_name'];
+				}
+				if ( in_array( 'route', $component['types'], true ) ) {
+					$addr['street-address'] = $component['long_name'];
+				}
 			}
 		}
 

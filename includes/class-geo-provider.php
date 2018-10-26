@@ -50,6 +50,12 @@ abstract class Geo_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Return elevation based on longitude and latitude
+	 *
+	 */
+	abstract public function elevation();
+
+	/**
 	 * Return an address
 	 *
 	 * @return array microformats2 address elements in an array

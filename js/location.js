@@ -85,12 +85,16 @@ jQuery( document ).ready( function( $ ) {
 						if ( 'name' in response ) {
 							$( '#location-name' ).val( response.name ) ;
 						}
-						if ( 'latitude' in response ) {
+						if ( 'latitude' in response  && ( '' === $( '#latitude' ).val() ) ) {
 							$( '#latitude' ).val( response.latitude ) ;
 						}
-						if ( 'longitude' in response ) {
+						if ( 'longitude' in response  && ( '' === $( '#longitude' ).val() ) ) {
 							$( '#longitude' ).val( response.longitude ) ;
 						}
+						if ( 'altitude' in response && ( '' === $( '#altitude' ).val() ) ) {
+							$( '#altitude' ).val( response.altitude ) ;
+						}
+
 						if ( 'street-address' in response ) {
 							$( '#street-address' ).val( response['street-address']) ;
 
