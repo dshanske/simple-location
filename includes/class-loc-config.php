@@ -117,6 +117,16 @@ class Loc_Config {
 		);
 		register_setting(
 			'simloc', // settings page
+			'sloc_darksky_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'DarkSky API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+		register_setting(
+			'simloc', // settings page
 			'sloc_openweathermap_api', // option name
 			array(
 				'type'         => 'string',
@@ -568,6 +578,18 @@ class Loc_Config {
 			)
 		);
 		add_settings_field(
+			'sloc_darksky_api', // id
+			__( 'Dark Sky API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_weather', // settings section
+			array(
+				'label_for' => 'sloc_darksky_api',
+				'class'     => ( 'darksky' === $weather_provider ) ? '' : 'hidden',
+
+			)
+		);
+		add_settings_field(
 			'openweatherapi', // id
 			__( 'OpenWeatherMap API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
@@ -579,6 +601,8 @@ class Loc_Config {
 
 			)
 		);
+
+	
 		add_settings_field(
 			'openweatherid', // id
 			__( 'OpenWeatherMap Station ID', 'simple-location' ),

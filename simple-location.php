@@ -73,6 +73,7 @@ class Simple_Location_Plugin {
 			'class-loc-metabox.php', // Location Metabox
 			'class-loc-view.php', // Location View functionality
 			'class-timezone-result.php',
+			'class-location-plugins.php',
 			'class-loc-timezone.php',
 			'class-post-timezone.php',
 		);
@@ -83,6 +84,7 @@ class Simple_Location_Plugin {
 		// Load Providers
 		$providers = array(
 			'class-weather-provider-openweathermap.php',
+			'class-weather-provider-darksky.php',
 			'class-map-provider-mapbox.php',
 			'class-map-provider-google.php',
 			'class-map-provider-bing.php',

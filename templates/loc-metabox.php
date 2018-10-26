@@ -43,6 +43,10 @@ $wind    = ifset( $weather['wind'], array() );
 					<?php _e( 'Longitude:', 'simple-location' ); ?>
 					<input type="text" name="longitude" id="longitude" class="widefat" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" />
 				</label>
+				<label for="altitude" class="quarter">
+					<?php _e( 'Altitude:', 'simple-location' ); ?>
+					<input type="text" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
+				</label>
 			</p>
 			<p class="field-row">
 				<label for="temperature" class="quarter">
@@ -64,7 +68,6 @@ $wind    = ifset( $weather['wind'], array() );
 			<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
 			<input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
 			<input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />
-			<input type="hidden" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
 
 
 			<p>

@@ -43,6 +43,7 @@ class REST_Geo {
 						'latitude'  => array(
 							'required' => true,
 						),
+						'altitude' => array()
 					),
 					'permission_callback' => function() {
 							return current_user_can( 'publish_posts' );
@@ -175,6 +176,9 @@ class REST_Geo {
 			$reverse_adr = $reverse->reverse_lookup();
 			if ( is_wp_error( $reverse_adr ) ) {
 				return $reverse_adr;
+			}
+			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
+				$reverse_adr['altitude'] = $reverse->elevation();
 			}
 			return array_filter( $reverse_adr );
 		}

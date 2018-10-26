@@ -198,6 +198,7 @@ jQuery( document ).ready( function( $ ) {
 		var fieldIds = [
 			'latitude',
 			'longitude',
+			'altitude',
 			'map_zoom',
 			'street-address',
 			'extended-address',
