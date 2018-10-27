@@ -19,6 +19,20 @@ class Loc_View {
 		return '<img class="icon-location" aria-label="' . __( 'Location: ', 'simple-location' ) . '" aria-hidden="true" src="' . $sprite . '" />';
 	}
 
+	public static function display_altitude( $altitude ) {
+		$aunits = get_option( 'sloc_measurements' );
+		switch ( $aunits ) {
+			case 'imperial':
+				$altitude = $altitude * 3.281;
+				$aunits   = 'ft';
+				break;
+			default:
+				$aunits = 'm';
+		}
+		return $altitude . $aunits;
+	}
+
+
 	public static function get_location( $object = null, $args = array() ) {
 		$loc = WP_Geo_Data::get_geodata( $object );
 		if ( ! isset( $loc ) || 'private' === $loc['visibility'] ) {
@@ -50,9 +64,22 @@ class Loc_View {
 			$c .= $args['description'];
 		}
 		if ( 'public' === $args['visibility'] ) {
-			$c             .= self::get_the_geo( $loc );
-			$loc['address'] = isset( $loc['address'] ) ? $loc['address'] : dec_to_dms( $loc['latitude'], $loc['longitude'] );
-			$c             .= sprintf( '<a href="%1$s">%2$s</a>', $map->get_the_map_url(), $args['address'] );
+			$c .= self::get_the_geo( $loc );
+			if ( isset( $loc['altitude'] ) ) {
+				if ( 500 < (int) $loc['altitude'] ) {
+					$loc['altitude'] = self::display_altitude( $loc['altitude'] );
+				} else {
+					unset( $loc['altitude'] );
+				}
+			}
+			if ( ! array_key_exists( 'address', $loc ) ) {
+				$loc['address'] = dec_to_dms( $loc['latitude'], $loc['longitude'], $loc['altitude'] );
+			}
+
+			if ( isset( $loc['altitude'] ) ) {
+				$loc['address'] .= sprintf( '(%1$s)', $loc['altitude'] );
+			}
+			$c .= sprintf( '<a href="%1$s">%2$s</a>', $map->get_the_map_url(), $loc['address'] );
 		} else {
 			$c = isset( $args['address'] ) ? $args['address'] : '';
 		}
@@ -102,24 +129,14 @@ class Loc_View {
 
 	// Return marked up coordinates
 	public static function get_the_geo( $loc, $display = false ) {
-		if ( isset( $loc['latitude'] ) && isset( $loc['longitude'] ) ) {
-			if ( $display ) {
-				return sprintf(
-					'<span class="p-latitude">%1$f</span>,
-					<span class="p-longitude">%2$f</span>',
-					$loc['latitude'],
-					$loc['longitude']
-				);
-			} else {
-				return sprintf(
-					'<data class="p-latitude" value="%1$f"></data>
-					<data class="p-longitude" value="%2$f"></data>',
-					$loc['latitude'],
-					$loc['longitude']
-				);
+		$string = $display ? '<span class="p-%1$s">%2$f</span>' : '<data class="p-%1$s" value="%2$f"></data>';
+		$return = '';
+		foreach ( array( 'latitude', 'longitude', 'altitude' ) as $value ) {
+			if ( isset( $loc[ $value ] ) ) {
+				$return .= sprintf( $string, $value, $loc[ $value ] );
 			}
 		}
-		return '';
+		return $return;
 	}
 
 	public static function location_content( $content ) {

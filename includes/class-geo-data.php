@@ -83,7 +83,6 @@ class WP_Geo_Data {
 				delete_metadata( $type, $id, 'geo_public' );
 				return false;
 		}
-		error_log( $status );
 		update_metadata( $type, $id, 'geo_public', $status );
 	}
 
@@ -362,7 +361,7 @@ class WP_Geo_Data {
 		if ( ! is_array( $geodata ) ) {
 			return false;
 		}
-		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visdibility' ) );
+		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visibility' ) );
 		if ( isset( $geodata['map_zoom'] ) ) {
 			$geodata['zoom'] = $geodata['map_zoom'];
 			unset( $geodata['map_zoom'] );
@@ -405,6 +404,7 @@ class WP_Geo_Data {
 		$geodata               = array();
 		$geodata['longitude']  = get_metadata( $type, $id, 'geo_longitude', true );
 		$geodata['latitude']   = get_metadata( $type, $id, 'geo_latitude', true );
+		$geodata['altitude']   = get_metadata( $type, $id, 'geo_altitude', true );
 		$geodata['address']    = get_metadata( $type, $id, 'geo_address', true );
 		$geodata['map_zoom']   = get_metadata( $type, $id, 'geo_zoom', true );
 		$geodata['weather']    = get_metadata( $type, $id, 'geo_weather', true );
@@ -458,7 +458,7 @@ class WP_Geo_Data {
 			$geodata['user_ID'] = $object->ID;
 		}
 
-		if ( empty( $geodata['address'] ) ) {
+		/*	if ( empty( $geodata['address'] ) ) {
 			if ( empty( $geodata['longitude'] ) ) {
 				return null;
 			}
@@ -479,11 +479,8 @@ class WP_Geo_Data {
 				}
 			}
 			$geodata['adr'] = $adr;
-		}
+		} */
 
-		if ( 3 === $geodata['visibility'] ) {
-			$geodata['visibility'] = 2;
-		}
 		return $geodata;
 	}
 
@@ -694,7 +691,7 @@ if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
 	}
 }
 
-function dec_to_dms( $latitude, $longitude ) {
+function dec_to_dms( $latitude, $longitude, $altitude = '' ) {
 	$latitudedirection  = $latitude < 0 ? 'S' : 'N';
 	$longitudedirection = $longitude < 0 ? 'W' : 'E';
 
@@ -710,9 +707,13 @@ function dec_to_dms( $latitude, $longitude ) {
 	$_precision       = 3;
 	$latitudeminutes  = round( $latitudedecimal * 60, $_precision );
 	$longitudeminutes = round( $longitudedecimal * 60, $_precision );
-
+	if ( ! empty( $altitude ) && is_numeric( $altitude ) ) {
+		$altitudedisplay = sprintf( '%1$s%2$s', $altitude, __( 'm', 'simple-location' ) );
+	} else {
+		$altitudedisplay = '';
+	}
 	return sprintf(
-		'%s%s° %s %s %s%s° %s %s',
+		'%s%s° %s %s %s%s° %s %s%s',
 		$latitudenotation,
 		$latitudeindegrees,
 		$latitudeminutes,
@@ -720,6 +721,7 @@ function dec_to_dms( $latitude, $longitude ) {
 		$longitudenotation,
 		$longitudeindegrees,
 		$longitudeminutes,
-		$longitudedirection
+		$longitudedirection,
+		$altitudedisplay
 	);
 }
