@@ -38,6 +38,6 @@ $geodata = WP_Geo_Data::get_geodata( $profileuser );
 <span class="description"><?php _e( 'Address', 'simple-location' ); ?></span>
 </td>
 </tr>
-<?php Loc_Metabox::geo_public_user( ifset( $geodata['public'], get_option( 'geo_public' ) ) ); ?>
+<?php Loc_Metabox::geo_public_user( $geodata['visibility']); ?>
 </table>
 </div>

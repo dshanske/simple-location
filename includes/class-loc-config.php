@@ -233,7 +233,7 @@ class Loc_Config {
 				'type'         => 'boolean',
 				'description'  => 'Default Setting for Geodata',
 				'show_in_rest' => true,
-				'default'      => SLOC_PUBLIC,
+				'default'      => 'public',
 				// WordPress Geodata defaults to public but this allows a global override for new posts
 			)
 		);
@@ -367,12 +367,13 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'geo_public', // id
-			__( 'Show Location By Default', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'checkbox_callback' ), // display callback
+			__( 'Default Display for Location', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'provider_callback' ), // display callback
 			'simloc', // settings page
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'geo_public',
+				'providers' => self::geo_public(),
 			)
 		);
 		add_settings_field(
@@ -649,6 +650,9 @@ class Loc_Config {
 		}
 	}
 
+	public static function geo_public() {
+		return WP_Geo_Data::geo_public();
+	}
 
 	public static function map_providers() {
 		$return = array();

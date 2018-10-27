@@ -17,7 +17,6 @@ class WP_Geo_Data {
 		add_filter( 'query_vars', array( 'WP_Geo_Data', 'query_var' ) );
 		add_action( 'pre_get_posts', array( 'WP_Geo_Data', 'pre_get_posts' ) );
 		add_action( 'pre_get_comments', array( 'WP_Geo_Data', 'pre_get_comments' ) );
-		add_action( 'save_post', array( 'WP_Geo_Data', 'public_post' ), 99, 2 );
 
 		// Grab geo data from EXIF, if it's available
 		add_action( 'wp_read_image_metadata', array( 'WP_Geo_Data', 'exif_data' ), 10, 3 );
@@ -95,8 +94,8 @@ class WP_Geo_Data {
 		if ( ! is_null( $type ) && ! is_null( $id ) ) {
 			$status = get_metadata( $type, $id, 'geo_public', true );
 		}
-		if ( false === $status ) {
-			$status = get_option( 'geo_public' );
+		if ( empty( $status ) ) {
+			return get_option( 'geo_public' );
 		}
 		switch ( $status ) {
 			case '0':
@@ -180,7 +179,7 @@ class WP_Geo_Data {
 			return;
 		}
 
-		if ( empty( $geo['public'] ) || 1 !== intval( $geo['public'] ) ) {
+		if ( empty( $geo['visibility'] ) || 'private' === $geo['visibility'] ) {
 			return;
 		}
 
@@ -198,7 +197,7 @@ class WP_Geo_Data {
 			return $feed_item;
 		}
 
-		if ( empty( $geo['public'] ) || 1 !== intval( $geo['public'] ) ) {
+		if ( empty( $geo['visibility'] ) || 'public' !== $geo['visibility'] ) {
 			return $feed_item;
 		}
 		$json             = array(
@@ -223,7 +222,7 @@ class WP_Geo_Data {
 		if ( ! $geo ) {
 			return;
 		}
-		if ( empty( $geo['public'] ) || 1 !== intval( $geo['public'] ) ) {
+		if ( empty( $geo['visibility'] ) || 'private' === $geo['visibility'] ) {
 			return;
 		}
 		if ( isset( $geo['address'] ) ) {
@@ -232,7 +231,7 @@ class WP_Geo_Data {
 				esc_attr( $geo['address'] )
 			);
 		}
-		if ( $geo['latitude'] && 2 !== intval( $geo['public'] ) ) {
+		if ( $geo['latitude'] && 'protected' !== $geo['visibility'] ) {
 			printf(
 				'<meta name="geo.position" content="%s;%s" />' . PHP_EOL,
 				esc_attr( $geo['latitude'] ),
@@ -273,19 +272,6 @@ class WP_Geo_Data {
 			}
 		}
 		return $meta;
-	}
-
-	// Set Posts Added by Means other than the Post UI to the system default if not set
-	public static function public_post( $post_id, $post ) {
-		$lat = get_post_meta( $post_id, 'geo_latitude' );
-		$add = get_post_meta( $post_id, 'geo_address' );
-		if ( ! $lat || ! $add ) {
-			return;
-		}
-		$public = get_post_meta( $post_id, 'geo_public' );
-		if ( ! $public ) {
-			add_post_meta( $post_id, 'geo_public', get_option( 'geo_public' ) );
-		}
 	}
 
 	public static function rewrite() {
@@ -378,7 +364,7 @@ class WP_Geo_Data {
 		if ( ! is_array( $geodata ) ) {
 			return false;
 		}
-		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'public' ) );
+		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visdibility' ) );
 		if ( isset( $geodata['map_zoom'] ) ) {
 			$geodata['zoom'] = $geodata['map_zoom'];
 			unset( $geodata['map_zoom'] );
@@ -408,9 +394,9 @@ class WP_Geo_Data {
 			$id   = $object->ID;
 			$type = 'user';
 		}
-		if ( isset( $geodata['public'] ) ) {
-			self::set_visibility( $type, $id, $geodata['public'] );
-			unset( $geodata['public'] );
+		if ( isset( $geodata['visibility'] ) ) {
+			self::set_visibility( $type, $id, $geodata['visibility'] );
+			unset( $geodata['visibility'] );
 		}
 		foreach ( $geodata as $key => $value ) {
 			update_metadata( $type, $id, 'geo_' . $key, $value );
@@ -418,14 +404,14 @@ class WP_Geo_Data {
 	}
 
 	private static function get_geometadata( $type, $id ) {
-		$geodata              = array();
-		$geodata['longitude'] = get_metadata( $type, $id, 'geo_longitude', true );
-		$geodata['latitude']  = get_metadata( $type, $id, 'geo_latitude', true );
-		$geodata['address']   = get_metadata( $type, $id, 'geo_address', true );
-		$geodata['map_zoom']  = get_metadata( $type, $id, 'geo_zoom', true );
-		$geodata['weather']   = get_metadata( $type, $id, 'geo_weather', true );
-		$geodata              = array_filter( $geodata );
-		$geodata['public']    = self::get_visibility( $type, $id );
+		$geodata               = array();
+		$geodata['longitude']  = get_metadata( $type, $id, 'geo_longitude', true );
+		$geodata['latitude']   = get_metadata( $type, $id, 'geo_latitude', true );
+		$geodata['address']    = get_metadata( $type, $id, 'geo_address', true );
+		$geodata['map_zoom']   = get_metadata( $type, $id, 'geo_zoom', true );
+		$geodata['weather']    = get_metadata( $type, $id, 'geo_weather', true );
+		$geodata               = array_filter( $geodata );
+		$geodata['visibility'] = self::get_visibility( $type, $id );
 		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 			return null;
 		}
@@ -497,8 +483,8 @@ class WP_Geo_Data {
 			$geodata['adr'] = $adr;
 		}
 
-		if ( 3 === $geodata['public'] ) {
-			$geodata['public'] = 2;
+		if ( 3 === $geodata['visibility'] ) {
+			$geodata['visibility'] = 2;
 		}
 		return $geodata;
 	}
@@ -654,7 +640,7 @@ class WP_Geo_Data {
 	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
-		if ( 'public' === $geodata['public'] ) {
+		if ( 'public' === $geodata['visibility'] ) {
 			return $geodata['longitude'];
 		}
 		return false;
@@ -663,7 +649,7 @@ class WP_Geo_Data {
 	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
-		if ( 'public' === $geodata['public'] ) {
+		if ( 'public' === $geodata['visibility'] ) {
 			return $geodata['latitude'];
 		}
 		return false;
@@ -672,7 +658,7 @@ class WP_Geo_Data {
 	public static function rest_get_address( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
-		if ( 'public' === $geodata['public'] ) {
+		if ( 'public' === $geodata['visibility'] ) {
 			return $geodata['address'];
 		}
 		return false;

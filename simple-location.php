@@ -10,8 +10,6 @@
  * Domain Path:  /languages
  */
 
-define( 'SLOC_PUBLIC', 1 );
-
 add_action( 'plugins_loaded', array( 'Simple_Location_Plugin', 'init' ) );
 
 // Activation and Deactivation Hooks

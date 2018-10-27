@@ -13,7 +13,7 @@ $wind    = ifset( $weather['wind'], array() );
 			<p>
 				<?php if ( 'comment' === $screen->id ) { ?>
 					<select name="geo_public">
-					<?php echo WP_Geo_Data::geo_public_select( $geodata['public'] ); ?>
+					<?php echo WP_Geo_Data::geo_public_select( $geodata['visibility'] ); ?>
 					</select>
 				<?php } ?>
 				<button
