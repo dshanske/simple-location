@@ -81,7 +81,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		}
 		$json = json_decode( $response['body'], true );
 		if ( isset( $json['results'] ) ) {
-			$data = $json['results'][0];
+			$data = wp_is_numeric_array( $json['results'] ) ? array_pop( $json['results'] ) : $json['results'];
 		} else {
 			return array();
 		}

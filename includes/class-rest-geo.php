@@ -43,7 +43,7 @@ class REST_Geo {
 						'latitude'  => array(
 							'required' => true,
 						),
-						'altitude' => array()
+						'altitude'  => array(),
 					),
 					'permission_callback' => function() {
 							return current_user_can( 'publish_posts' );

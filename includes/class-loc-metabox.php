@@ -25,11 +25,8 @@ class Loc_Metabox {
 	public static function post_submitbox() {
 		$choices = WP_Geo_Data::geo_public();
 		global $post;
-		$public = (int) get_post_meta( $post->ID, 'geo_public', true );
-		if ( ! $public ) {
-			$public = (int) get_option( 'geo_public' );
-		}
-				wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
+		$public = WP_Geo_Data::get_visibility( 'post', $post->ID );
+		wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
 		?>
 				<div class="misc-pub-section misc-pub-location">
 				<span class="dashicons dashicons-location" id="location-lookup" title="<?php esc_html_e( 'Lookup Location', 'simple-location' ); ?>"></span>
@@ -205,7 +202,7 @@ class Loc_Metabox {
 			delete_metadata( $meta_type, $object_id, 'geo_weather' );
 		}
 		if ( isset( $_POST['latitude'] ) || isset( $_POST['longitude'] ) || isset( $_POST['address'] ) ) {
-			update_metadata( $meta_type, $object_id, 'geo_public', (int) $_POST['geo_public'] );
+			WP_Geo_Data::set_visibility( $meta_type, $object_id, $_POST['geo_public'] );
 		} else {
 			delete_metadata( $meta_type, $object_id, 'geo_public' );
 		}

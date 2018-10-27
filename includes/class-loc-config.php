@@ -602,7 +602,6 @@ class Loc_Config {
 			)
 		);
 
-	
 		add_settings_field(
 			'openweatherid', // id
 			__( 'OpenWeatherMap Station ID', 'simple-location' ),

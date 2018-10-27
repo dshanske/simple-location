@@ -21,7 +21,7 @@ class Loc_View {
 
 	public static function get_location( $object = null, $args = array() ) {
 		$loc = WP_Geo_Data::get_geodata( $object );
-		if ( ! isset( $loc ) || '0' === $loc['public'] ) {
+		if ( ! isset( $loc ) || 'private' === $loc['public'] ) {
 			return null;
 		}
 		$defaults = array(
@@ -30,7 +30,7 @@ class Loc_View {
 			'map_zoom'      => null,
 			'mapboxstyle'   => null,
 			'mapboxuser'    => null,
-			'public'        => get_option( 'geo_public' ),
+			'public'        => WP_Geo_Data::get_visibility(),
 			'weather'       => true,
 			'icon'          => true, // Show Location Icon
 			'text'          => false, // Show Description
@@ -50,8 +50,7 @@ class Loc_View {
 		if ( $args['text'] ) {
 			$c .= $args['description'];
 		}
-		// 1 is full public
-		if ( 1 === $loc['public'] ) {
+		if ( 'public' === $loc['public'] ) {
 			$c             .= self::get_the_geo( $loc );
 			$loc['address'] = isset( $loc['address'] ) ? $loc['address'] : dec_to_dms( $loc['latitude'], $loc['longitude'] );
 			$c             .= '<a href="' . $map->get_the_map_url() . '">' . $loc['address'] . '</a>';
@@ -70,7 +69,7 @@ class Loc_View {
 
 	public static function get_map( $object = null, $args = array() ) {
 		$loc = WP_Geo_Data::get_geodata( $object );
-		if ( isset( $loc ) && ( 1 === $loc['public'] ) ) {
+		if ( isset( $loc ) && ( 'public' === $loc['public'] ) ) {
 			$map = Loc_Config::map_provider();
 			$map->set( $loc );
 			return $map->get_the_map();

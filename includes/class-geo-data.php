@@ -60,10 +60,60 @@ class WP_Geo_Data {
 
 	public static function geo_public() {
 			return array(
-				0 => esc_html__( 'Private', 'simple-location' ),
-				1 => esc_html__( 'Public', 'simple-location' ),
-				2 => esc_html__( 'Protected', 'simple-location' ),
+				'private'   => esc_html__( 'Private', 'simple-location' ),
+				'public'    => esc_html__( 'Public', 'simple-location' ),
+				'protected' => esc_html__( 'Protected', 'simple-location' ),
 			);
+	}
+
+	public static function set_visibility( $type, $id, $status ) {
+		switch ( $status ) {
+			case '0':
+			case 0:
+			case 'private':
+				$status = '0';
+				break;
+			case '1':
+			case 1:
+			case 'public':
+				$status = '1';
+				break;
+			case '2':
+			case 2:
+			case 'protected':
+				$status = '2';
+				break;
+			default:
+				delete_metadata( $type, $id, 'geo_public' );
+				return false;
+		}
+		update_metadata( $type, $object, 'geo_public', $status );
+	}
+
+	public static function get_visibility( $type = null, $id = null ) {
+		$status = false;
+		if ( ! is_null( $type ) && ! is_null( $id ) ) {
+			$status = get_metadata( $type, $id, 'geo_public', true );
+		}
+		if ( false === $status ) {
+			$status = get_option( 'geo_public' );
+		}
+		switch ( $status ) {
+			case '0':
+			case 0:
+			case 'private':
+				return 'private';
+			case '1':
+			case 1:
+			case 'public':
+				return 'public';
+			case '2':
+			case 2:
+			case 'protected':
+				return 'protected';
+			default:
+				return false;
+		}
 	}
 
 	public static function geo_public_select( $public, $echo = false ) {
@@ -314,15 +364,6 @@ class WP_Geo_Data {
 		$query->meta_query->parse_query_vars( $query->query_vars );
 	}
 
-	public static function get_numeric( $string, $default = 0 ) {
-		if ( is_numeric( $string ) ) {
-			return intval( $string );
-		}
-		return $default;
-	}
-
-
-
 	public static function sanitize_float( $input ) {
 		return filter_var( $input, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION );
 	}
@@ -367,6 +408,10 @@ class WP_Geo_Data {
 			$id   = $object->ID;
 			$type = 'user';
 		}
+		if ( isset( $geodata['public'] ) ) {
+			self::set_visibility( $type, $id, $geodata['public'] );
+			unset( $geodata['public'] );
+		}
 		foreach ( $geodata as $key => $value ) {
 			update_metadata( $type, $id, 'geo_' . $key, $value );
 		}
@@ -380,10 +425,7 @@ class WP_Geo_Data {
 		$geodata['map_zoom']  = get_metadata( $type, $id, 'geo_zoom', true );
 		$geodata['weather']   = get_metadata( $type, $id, 'geo_weather', true );
 		$geodata              = array_filter( $geodata );
-		$geodata['public']    = self::get_numeric( get_metadata( $type, $id, 'geo_public', true ) );
-		if ( ! is_numeric( $geodata['public'] ) ) {
-			$geodata['public'] = get_option( 'geo_public' );
-		}
+		$geodata['public']    = self::get_visibility( $type, $id );
 		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 			return null;
 		}
@@ -487,11 +529,10 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_longitude', $args );
 
 		$args = array(
-			'sanitize_callback' => array( 'WP_Geo_Data', 'get_numeric' ),
-			'type'              => 'int',
-			'description'       => 'Altitude',
-			'single'            => true,
-			'show_in_rest'      => false,
+			'type'         => 'int',
+			'description'  => 'Altitude',
+			'single'       => true,
+			'show_in_rest' => false,
 		);
 		register_meta( 'post', 'geo_altitude', $args );
 		register_meta( 'comment', 'geo_altitude', $args );
@@ -521,11 +562,10 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_timezone', $args );
 
 		$args = array(
-			'sanitize_callback' => array( 'WP_Geo_Data', 'get_numeric' ),
-			'type'              => 'integer',
-			'description'       => 'Geodata Zoom for Map Display',
-			'single'            => true,
-			'show_in_rest'      => false,
+			'type'         => 'integer',
+			'description'  => 'Geodata Zoom for Map Display',
+			'single'       => true,
+			'show_in_rest' => false,
 		);
 		register_meta( 'post', 'geo_zoom', $args );
 		register_meta( 'comment', 'geo_zoom', $args );
@@ -533,11 +573,10 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_zoom', $args );
 
 		$args = array(
-			'sanitize_callback' => array( 'WP_Geo_Data', 'get_numeric' ),
-			'type'              => 'integer',
-			'description'       => 'Geodata Public',
-			'single'            => true,
-			'show_in_rest'      => false,
+			'type'         => 'integer',
+			'description'  => 'Geodata Public',
+			'single'       => true,
+			'show_in_rest' => false,
 		);
 		// Officially 0 is private 1 is public and absence or non-zero is assumed public.
 		// Therefore any non-zero number could be used to specify different display options.
@@ -615,7 +654,7 @@ class WP_Geo_Data {
 	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
-		if ( '1' === $geodata['public'] ) {
+		if ( 'public' === $geodata['public'] ) {
 			return $geodata['longitude'];
 		}
 		return false;
@@ -624,7 +663,7 @@ class WP_Geo_Data {
 	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
-		if ( '1' === $geodata['public'] ) {
+		if ( 'public' === $geodata['public'] ) {
 			return $geodata['latitude'];
 		}
 		return false;
@@ -633,7 +672,7 @@ class WP_Geo_Data {
 	public static function rest_get_address( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
-		if ( '1' === $geodata['public'] ) {
+		if ( 'public' === $geodata['public'] ) {
 			return $geodata['address'];
 		}
 		return false;
