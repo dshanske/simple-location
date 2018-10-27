@@ -7,7 +7,7 @@ class Loc_Metabox {
 	public static function admin_init() {
 		/* Add meta boxes on the 'add_meta_boxes' hook. */
 		add_action( 'add_meta_boxes', array( 'Loc_Metabox', 'add_meta_boxes' ) );
-				add_action( 'post_submitbox_misc_actions', array( 'Loc_Metabox', 'post_submitbox' ) );
+		add_action( 'post_submitbox_misc_actions', array( 'Loc_Metabox', 'post_submitbox' ) );
 	}
 
 	public static function init() {

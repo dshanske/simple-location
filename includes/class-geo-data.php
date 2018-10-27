@@ -68,17 +68,14 @@ class WP_Geo_Data {
 	public static function set_visibility( $type, $id, $status ) {
 		switch ( $status ) {
 			case '0':
-			case 0:
 			case 'private':
 				$status = '0';
 				break;
 			case '1':
-			case 1:
 			case 'public':
 				$status = '1';
 				break;
 			case '2':
-			case 2:
 			case 'protected':
 				$status = '2';
 				break;
@@ -86,7 +83,8 @@ class WP_Geo_Data {
 				delete_metadata( $type, $id, 'geo_public' );
 				return false;
 		}
-		update_metadata( $type, $object, 'geo_public', $status );
+		error_log( $status );
+		update_metadata( $type, $id, 'geo_public', $status );
 	}
 
 	public static function get_visibility( $type = null, $id = null ) {
