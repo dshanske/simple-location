@@ -76,9 +76,12 @@ API Keys are required to use certain services.
 * [OpenWeatherMap](http://openweathermap.com/api)
 * [MapQuest](https://developer.mapquest.com/)
 * [HERE](https://developer.here.com/)
+* [Dark Sky](https://darksky.net/dev)
 
-If not provided there will be no map displayed regardless of setting and reverse geo lookup will not work 
+If not provided there will be no map displayed regardless of setting, reverse geo lookup will not work 
 Without a weather provider this service will not work. 
+
+API Keys may have free limits, or may incur fees if overused. This plugin only uses a request when you post, which is usually well within the free tier which is usually thousands of requests.
 
 The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin if installed.
 
@@ -130,7 +133,7 @@ will now be required to show maps for services that require API keys.
 
 == Changelog ==
 
-= 3.4.0 ( 2018-xx-xx ) =
+= 3.4.0 ( 2018-10-27 ) =
 * Fix for incorrect return when there is an error
 * Nominatim began to block reverse traffic so added additional options for reverse lookup.
 * Map Providers and Geo Providers are now separated
@@ -145,6 +148,12 @@ will now be required to show maps for services that require API keys.
 * HERE Maps is now a supported map provider
 * Google is now a supported reverse lookup provider
 * Bing is now a supported reverse lookup provider
+* Elevation/altitude in meters is now calculated using an Elevation API when not supplied by the location provider
+* DarkSky is now a supported weather provider
+* Removal of the SLOC_PUBLIC constant in favor of this being stored in the options table
+* Default Location Visibility now allows all three options
+* Display altitude over 500m
+* Auto add weather and location textual description when coordinates are provided
 
 = 3.3.8 ( 2018-05-27 ) =
 * Fix for jsonFeed error
