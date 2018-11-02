@@ -95,7 +95,7 @@ class Loc_View {
 
 	public static function get_map( $object = null, $args = array() ) {
 		$loc = WP_Geo_Data::get_geodata( $object );
-		if ( isset( $loc ) && ( 'public' === $loc['visibility'] ) ) {
+		if ( isset( $loc ) && ( 'public' === $loc['visibility'] ) && ( isset( $loc['latitude'] ) ) ) {
 			$map = Loc_Config::map_provider();
 			$map->set( $loc );
 			return $map->get_the_map();
