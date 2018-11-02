@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.4.0
+Stable tag: 3.4.1
 Requires at least: 4.7
 Tested up to: 4.9.8
 Requires PHP: 5.3
@@ -132,6 +132,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 3.4.1 ( 2018-11-02 ) =
+* Fix for displaying map when altitude but no location is set
+* Automatically update timezone based on location on Micropub posts
 
 = 3.4.0 ( 2018-10-27 ) =
 * Fix for incorrect return when there is an error
