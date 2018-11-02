@@ -29,7 +29,14 @@ class Post_Timezone {
 	public static function after_micropub( $input, $args ) {
 		if ( $args && array_key_exists( 'timezone', $args ) ) {
 			update_post_meta( $args['ID'], 'geo_timezone', $args['timezone'] );
+			return;
 		}
+		if ( isset( $args['meta_input'] ) ) {
+			if ( isset( $args['meta_input']['geo_latitude'] ) ) {
+				update_post_meta( $args['ID'], 'geo_timezone', Loc_Timezone::timezone_for_location( $args['meta_input']['geo_latitude'], $args['meta_input']['geo_longitude'] ) );	
+			}
+		}
+
 	}
 
 	public static function post_submitbox() {

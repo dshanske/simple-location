@@ -73,7 +73,7 @@ class Loc_View {
 				}
 			}
 			if ( ! array_key_exists( 'address', $loc ) ) {
-				$loc['address'] = dec_to_dms( $loc['latitude'], $loc['longitude'], $loc['altitude'] );
+				$loc['address'] = dec_to_dms( $loc['latitude'], $loc['longitude'], ifset( $loc['altitude'] ) );
 			}
 
 			if ( isset( $loc['altitude'] ) ) {
