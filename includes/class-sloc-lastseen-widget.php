@@ -27,6 +27,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
+		echo $args['before_widget'];
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			echo '<div>';
 			esc_html_e( 'Last Seen: ', 'simple-location' );
@@ -39,6 +40,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 			);
 			echo '</div>';
 		}
+		echo $args['after_widget'];
 	}
 
 	/**
