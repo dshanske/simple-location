@@ -96,7 +96,7 @@ class WP_Geo_Data {
 		if ( ! is_null( $type ) && ! is_null( $id ) ) {
 			$status = get_metadata( $type, $id, 'geo_public', true );
 		}
-		if ( empty( $status ) ) {
+		if ( false === $status ) {
 			return get_option( 'geo_public' );
 		}
 		switch ( $status ) {
