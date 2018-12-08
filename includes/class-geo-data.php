@@ -625,6 +625,17 @@ class WP_Geo_Data {
 				),
 			)
 		);
+		register_rest_field(
+			array( 'post', 'comment', 'term' ),
+			'geo_public',
+			array(
+				'get_callback' => array( 'WP_Geo_Data', 'rest_get_visibility' ),
+				'schema'       => array(
+					'geo_public' => __( 'Location Visibility', 'simple-location' ),
+					'type'       => 'string',
+				),
+			)
+		);
 
 	}
 
@@ -646,30 +657,44 @@ class WP_Geo_Data {
 	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
+		if ( empty( $geodata['latitude'] ) ) {
+			return '';
+		}
 		if ( 'public' === $geodata['visibility'] ) {
 			return $geodata['longitude'];
 		}
-		return false;
+		return 'private';
 	}
 
 	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
+		if ( empty( $geodata['latitude'] ) ) {
+			return '';
+		}
 		if ( 'public' === $geodata['visibility'] ) {
 			return $geodata['latitude'];
 		}
-		return false;
+		return 'private';
 	}
 
 	public static function rest_get_address( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
-		if ( 'public' === $geodata['visibility'] ) {
+		if ( empty( $geodata['address'] ) ) {
+			return '';
+		}
+		if ( in_array( $geodata['visibility'], array( 'public', 'protected' ), true ) ) {
 			return $geodata['address'];
 		}
-		return false;
+		return 'private';
 	}
 
+	public static function rest_get_visibility( $object, $attr, $request, $object_type ) {
+		$object     = self::object( $object, $object_type );
+		$visibility = self::get_visibility( $object_type, $object );
+		return $visibility;
+	}
 
 	public static function sanitize_address( $data ) {
 		$data = wp_kses_post( $data );
