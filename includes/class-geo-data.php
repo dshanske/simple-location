@@ -640,6 +640,9 @@ class WP_Geo_Data {
 	}
 
 	public static function object( $object, $object_type ) {
+		if ( ! is_object( $object ) ) {
+			return null;
+		}
 		switch ( $object_type ) {
 			case 'post':
 				return get_post( $object->ID );
