@@ -10,7 +10,6 @@ jQuery( document ).ready( function( $ ) {
 			navigator.geolocation.getCurrentPosition( reverseLookup, error, options );
 			} else {
 				alert( 'Geolocation is not supported by this browser.' );
-				getWeather();
 			}
 		} else {
 			getCurrentPosition();
@@ -122,6 +121,39 @@ jQuery( document ).ready( function( $ ) {
 							$( '#post-timezone' ).val( response.timezone ) ;
 							$( '#post-timezone-label' ).text( response.timezone );
 						}
+						if ( 'weather' in response ) {
+							weather = response.weather;
+							if ( ( 'temperature' in weather ) && ( '' === $( '#temperature' ).val() ) ) {
+								$( '#temperature' ).val( weather.temperature ) ;
+							}
+							if ( ( 'humidity' in weather ) && ( '' === $( '#humidity' ).val() ) ) {
+								$( '#humidity' ).val( weather.humidity ) ;
+							}
+							if ( ( 'icon' in weather ) && ( 'none' === $( '#weather_icon' ).val() ) ) {
+								$( '#weather_icon' ).val( weather.icon ).change() ;
+							}
+							if ( ( 'summary' in weather ) && ( '' === $( '#weather_summary' ).val() ) ) {
+								$( '#weather_summary' ).val( weather.summary ) ;
+							}
+							if ( ( 'pressure' in weather ) && ( '' === $( '#pressure' ).val() ) ) {
+								$( '#pressure' ).val( weather.pressure ) ;
+							}
+							if ( ( 'visibility' in weather ) && ( '' === $( '#visibility' ).val() ) ) {
+								$( '#visibility' ).val( weather.visibility ) ;
+							}
+								if ( 'wind' in weather ) {
+									if ( 'speed' in weather.wind ) {
+										$( '#wind_speed' ).val( weather.wind.speed ) ;
+									}
+								if ( 'degree' in weather.wind ) {
+									$( '#wind_degree' ).val( weather.wind.degree ) ;
+								}
+							}
+							if ( 'units' in weather ) {
+								$( '#units' ).val( weather.units ) ;
+							}
+						}
+
 						if ( window.console ) {
 							console.log( response );
 						}
@@ -132,67 +164,6 @@ jQuery( document ).ready( function( $ ) {
 				},
 				always: hideLoadingSpinner()
 			});
-		getWeather();
-	}
-
-	function getWeather() {
-		$.ajax({
-			type: 'GET',
-
-			// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-			url: sloc.api_url + 'weather/',
-			beforeSend: function( xhr ) {
-
-				// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-				xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
-			},
-			data: {
-				latitude: $( '#latitude' ).val(),
-				longitude: $( '#longitude' ).val()
-			},
-			success: function( response ) {
-				if ( 'undefined' == typeof response ) {
-					return;
-				}
-
-				if ( ( 'temperature' in response ) && ( '' === $( '#temperature' ).val() ) ) {
-					$( '#temperature' ).val( response.temperature ) ;
-				}
-				if ( ( 'humidity' in response ) && ( '' === $( '#humidity' ).val() ) ) {
-					$( '#humidity' ).val( response.humidity ) ;
-				}
-				if ( ( 'icon' in response ) && ( 'none' === $( '#weather_icon' ).val() ) ) {
-					$( '#weather_icon' ).val( response.icon ).change() ;
-				}
-				if ( ( 'summary' in response ) && ( '' === $( '#weather_summary' ).val() ) ) {
-					$( '#weather_summary' ).val( response.summary ) ;
-				}
-				if ( ( 'pressure' in response ) && ( '' === $( '#pressure' ).val() ) ) {
-					$( '#pressure' ).val( response.pressure ) ;
-				}
-				if ( ( 'visibility' in response ) && ( '' === $( '#visibility' ).val() ) ) {
-					$( '#visibility' ).val( response.visibility ) ;
-				}
-				if ( 'wind' in response ) {
-					if ( 'speed' in response.wind ) {
-						$( '#wind_speed' ).val( response.wind.speed ) ;
-					}
-					if ( 'degree' in response.wind ) {
-						$( '#wind_degree' ).val( response.wind.degree ) ;
-					}
-				}
-				if ( 'units' in response ) {
-					$( '#units' ).val( response.units ) ;
-				}
-				if ( console ) {
-					console.log( response );
-				}
-			},
-			error: function( request, status, error ) {
-				alert( request.responseText );
-			},
-			always: hideLoadingSpinner()
-		});
 	}
 
 	function clearLocation() {
@@ -361,7 +332,6 @@ jQuery( document ).ready( function( $ ) {
 	$LocationDetail.click( function( event ) {
 		showLoadingSpinner();
 		getFullLocation();
-		getWeather();
 		event.preventDefault();
 	});
 });
