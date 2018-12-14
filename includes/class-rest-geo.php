@@ -56,6 +56,7 @@ class REST_Geo {
 						'latitude'  => array(),
 						'altitude'  => array(),
 						'address'   => array(),
+						'weather'   => array()
 					),
 					'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
@@ -231,6 +232,11 @@ class REST_Geo {
 			}
 			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
 				$reverse_adr['altitude'] = $reverse->elevation();
+			}
+			if ( isset( $params['weather'] ) && $params['weather'] ) {
+				$weather = Loc_Config::weather_provider();
+				$weather->set( $params );
+				$reverse_adr['weather'] = $weather->get_conditions();
 			}
 			return array_filter( $reverse_adr );
 		}

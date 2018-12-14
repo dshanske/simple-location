@@ -74,6 +74,7 @@ jQuery( document ).ready( function( $ ) {
 					latitude: $( '#latitude' ).val(),
 					longitude: $( '#longitude' ).val(),
 					altitude: $( '#altitude' ).val(),
+					weather: true,
 					map_zoom: $( '#map_zoom' ).val() // eslint-disable-line camelcase
 				},
 				success: function( response ) {

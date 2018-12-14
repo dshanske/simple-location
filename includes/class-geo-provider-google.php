@@ -89,7 +89,6 @@ class Geo_Provider_Google extends Geo_Provider {
 		$addr                 = array(
 			'latitude'  => $this->latitude,
 			'longitude' => $this->longitude,
-			'altitude'  => $this->altitude,
 		);
 		$addr['display-name'] = ifset( $data['formatted_address'] );
 		$addr['plus-code']    = ifset( $data['plus_code']['global_code'] );
