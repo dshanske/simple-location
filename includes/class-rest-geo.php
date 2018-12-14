@@ -31,6 +31,36 @@ class REST_Geo {
 	public function register_routes() {
 		register_rest_route(
 			'sloc_geo/1.0',
+			'/timezone',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'timezone' ),
+					'args'     => array(
+						'longitude' => array(),
+						'latitude'  => array(),
+						'airport'   => array(),
+					),
+				),
+			)
+		);
+		register_rest_route(
+			'sloc_geo/1.0',
+			'/geocode',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'geocode' ),
+					'args'     => array(
+						'longitude' => array(),
+						'latitude'  => array(),
+						'address' => array(),
+					),
+				),
+			)
+		);
+		register_rest_route(
+			'sloc_geo/1.0',
 			'/reverse',
 			array(
 				array(
@@ -185,6 +215,24 @@ class REST_Geo {
 		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
+	public static function geocode( $request ) {
+		// We dont need to check the nonce like with admin-ajax.
+		$params = $request->get_params();
+		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+			$reverse = Loc_Config::geo_provider();
+			$reverse->set( $params );
+			$reverse_adr = $reverse->reverse_lookup();
+			if ( is_wp_error( $reverse_adr ) ) {
+				return $reverse_adr;
+			}
+			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
+				$reverse_adr['altitude'] = $reverse->elevation();
+			}
+			return array_filter( $reverse_adr );
+		}
+		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
+	}
+
 	// Callback Handler for Weather
 	public static function weather( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
@@ -212,6 +260,36 @@ class REST_Geo {
 		return array_merge( $conditions, $return );
 	}
 
+	// Callback handler for timezone
+	public static function timezone( $request ) {
+		$params = $request->get_params();
+		$return = array();
+		if ( isset( $params['airport'] ) ) {
+			$return = Airport_Location::get( $params['airport'] );
+			if ( $return ) {
+				$params['latitude']  = $return['latitude'];
+				$params['longitude'] = $return['longitude'];
+			} else {
+				return new WP_Error( 'airport_not_found', __( 'This Airport Code was Not Found', 'simple-location' ) );
+			}
+		}
+
+		$timezone = Loc_Timezone::timezone_for_location( $params['latitude'], $params['longitude'] );
+		if ( ! $timezone instanceof Timezone_Result ) {
+			return new WP_Error( 'timezone_not_found', __( 'Could Not Determine Timezone', 'simple-location' ) );
+		}
+		return array_merge(
+			$return,
+			array(
+				'timezone'  => $timezone->name,
+				'latitude'  => $params['latitude'],
+				'longitude' => $params['longitude'],
+				'localtime' => $timezone->localtime,
+				'offset'    => $timezone->offset,
+				'seconds'   => $timezone->seconds,
+			)
+		);
+	}
 
 
 }
