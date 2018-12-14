@@ -49,13 +49,17 @@ class REST_Geo {
 			'/geocode',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'geocode' ),
-					'args'     => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'geocode' ),
+					'args'                => array(
 						'longitude' => array(),
 						'latitude'  => array(),
-						'address' => array(),
+						'altitude'  => array(),
+						'address'   => array(),
 					),
+					'permission_callback' => function() {
+						return current_user_can( 'publish_posts' );
+					},
 				),
 			)
 		);

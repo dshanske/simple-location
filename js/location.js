@@ -64,7 +64,7 @@ jQuery( document ).ready( function( $ ) {
 				type: 'GET',
 
 				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-				url: sloc.api_url + 'reverse/',
+				url: sloc.api_url + 'geocode/',
 				beforeSend: function( xhr ) {
 
 					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
