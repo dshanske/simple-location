@@ -69,16 +69,15 @@ class REST_Geo {
 			'/weather',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'weather' ),
-					'args'     => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'weather' ),
+					'args'                => array(
 						'longitude' => array(),
 						'latitude'  => array(),
-						'units'     => array(),
 					),
-					/*'permission_callback' => function() {
+					'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
-					}, */
+					},
 				),
 			)
 		);
@@ -195,7 +194,6 @@ class REST_Geo {
 				$weather = Loc_Config::weather_provider();
 				$weather->set( $params );
 				$reverse_adr['weather'] = $weather->get_conditions();
-				error_log( wp_json_encode( $reverse_adr['weather'] ) );
 			}
 			return array_filter( $reverse_adr );
 		}
@@ -205,14 +203,11 @@ class REST_Geo {
 	// Callback Handler for Weather
 	public static function weather( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
-		$params = $request->get_params();
-		$args   = array(
+		$params  = $request->get_params();
+		$args    = array(
 			'cache_key'  => 'slocw',
 			'cache_time' => 600,
 		);
-		if ( isset( $params['units'] ) ) {
-			$args['temp_units'] = $params['units'];
-		}
 		$return  = array();
 		$weather = Loc_Config::weather_provider();
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {

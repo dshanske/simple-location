@@ -4,7 +4,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 	protected $style;
 	protected $station_id; // Most weather sites permit a station ID to be set
-	protected $temp_units; // Unit of measurement for temperature: imperial, si, etc
+	protected $units; // Unit of measurement: imperial, si, etc
 	protected $cache_key; // If set this will cache the retrieved informatin
 	protected $cache_time; // This will dictate for how long
 
@@ -23,7 +23,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'station_id' => null,
 			'cache_key'  => 'slocw',
 			'cache_time' => 600,
-			'temp_units' => get_option( 'sloc_measurements', Loc_Config::measurement_default() ),
+			'units'      => get_option( 'sloc_measurements', Loc_Config::measurement_default() ),
 			'style'      => '',
 		);
 		$defaults         = apply_filters( 'sloc_weather_provider_defaults', $defaults );
@@ -31,7 +31,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$this->style      = $r['style'];
 		$this->api        = $r['api'];
 		$this->station_id = $r['station_id'];
-		$this->temp_units = $r['temp_units'];
+		$this->units      = $r['units'];
 		$this->cache_key  = $r['cache_key'];
 		$this->cache_time = $r['cache_time'];
 		$this->set( $r['latitude'], $r['longitude'] );
@@ -54,7 +54,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	}
 
 	public function temp_unit() {
-		switch ( $this->temp_units ) {
+		switch ( $this->units ) {
 			case 'imperial':
 				return 'F';
 			default:
@@ -106,7 +106,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/* Passes temperature and returns it either same or converted with units
 	 */
 	private function get_temp( $temperature ) {
-		if ( 'imperial' === $this->temp_units ) {
+		if ( 'imperial' === $this->units ) {
 			$temperature = self::celsius_to_fahrenheit( $temperature );
 		}
 		return round( $temperature ) . '&deg;' . $this->temp_unit();
