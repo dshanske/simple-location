@@ -8,21 +8,6 @@
 class REST_Geo {
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'localize_script' ), 11 );
-
-	}
-
-	public function localize_script() {
-		// Provide a global object to our JS file containing our REST API endpoint, and API nonce
-		// Nonce must be 'wp_rest'
-		wp_localize_script(
-			'sloc_location',
-			'sloc',
-			array(
-				'api_nonce' => wp_create_nonce( 'wp_rest' ),
-				'api_url'   => rest_url( '/sloc_geo/1.0/' ),
-			)
-		);
 	}
 
 	/**
@@ -251,6 +236,8 @@ class REST_Geo {
 				'localtime' => $timezone->localtime,
 				'offset'    => $timezone->offset,
 				'seconds'   => $timezone->seconds,
+				'sunrise'   => sloc_sunrise( $params['latitude'], $params['longitude'], $timezone ),
+				'sunset'    => sloc_sunset( $params['latitude'], $params['longitude'], $timezone ),
 			)
 		);
 	}

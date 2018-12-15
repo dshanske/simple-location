@@ -5,7 +5,7 @@ jQuery( document ).ready( function( $ ) {
 			enableHighAccuracy: true,
 			maximumAge: 600000
 		};
-		if ( 'HTML5' === geo_options.lookup ) { // eslint-disable-line camelcase
+		if ( 'HTML5' === slocOptions.lookup ) { // eslint-disable-line camelcase
 			if ( navigator.geolocation ) {
 			navigator.geolocation.getCurrentPosition( reverseLookup, error, options );
 			} else {
@@ -22,11 +22,11 @@ jQuery( document ).ready( function( $ ) {
 				type: 'GET',
 
 				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-				url: sloc.api_url + 'lookup/',
+				url: slocOptions.api_url + 'lookup/',
 				beforeSend: function( xhr ) {
 
 					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
 				},
 				data: {
 					user: $( '#post_author_override' ).val()
@@ -63,11 +63,11 @@ jQuery( document ).ready( function( $ ) {
 				type: 'GET',
 
 				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-				url: sloc.api_url + 'geocode/',
+				url: slocOptions.api_url + 'geocode/',
 				beforeSend: function( xhr ) {
 
 					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
 				},
 				data: {
 					latitude: $( '#latitude' ).val(),
@@ -242,7 +242,7 @@ jQuery( document ).ready( function( $ ) {
 				beforeSend: function( xhr ) {
 
 					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
 				},
 				data: {
 					action: 'save_venue_data',
@@ -318,7 +318,7 @@ jQuery( document ).ready( function( $ ) {
 
 	$postLocationSelect.find( '.save-post-location' ).click( function( event ) {
 		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-post-location' ).show().focus();
-		$( '#post-location-label' ).text( geo_public_options[$( '#post-location' ).val()]); // eslint-disable-line camelcase
+		$( '#post-location-label' ).text( slocOptions.visibility_options[$( '#post-location' ).val()]); // eslint-disable-line camelcase
 		event.preventDefault();
 	});
 
