@@ -91,6 +91,9 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			if ( isset( $response['visibility'] ) ) {
 				$return['visibility'] = $response['visibility'];
 			}
+			$timezone          = Loc_Timezone::timezone_for_location( $this->latitude, $this->longitude );
+			$return['sunrise'] = sloc_sunrise( $time->latitude, $this->longitude, $timezone );
+			$return['sunset']  = sloc_sunset( $this->latitude, $this->longitude, $timezone );
 
 			if ( $this->cache_key ) {
 				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
