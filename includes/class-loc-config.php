@@ -256,7 +256,7 @@ class Loc_Config {
 				'type'         => 'string',
 				'description'  => 'Units to Display',
 				'show_in_rest' => true,
-				'default'      => self::temp_unit_default(),
+				'default'      => self::measurement_default(),
 			)
 		);
 	}
@@ -277,7 +277,7 @@ class Loc_Config {
 		return true;
 	}
 
-	public static function temp_unit_default() {
+	public static function measurement_default() {
 		// I cannot foresee every need for imperial but can cover US
 		if ( 'en_US' === get_locale() ) {
 			return 'imperial';
@@ -326,51 +326,22 @@ class Loc_Config {
 	}
 
 	public static function admin_init() {
+		$map_provider     = get_option( 'sloc_map_provider' );
+		$weather_provider = get_option( 'sloc_weather_provider' );
+		$geo_provider     = get_option( 'sloc_geo_provider' );
+
 		add_settings_section(
-			'sloc_map',
-			__( 'Map Settings', 'simple-location' ),
-			array( 'Loc_Config', 'sloc_map_settings' ),
+			'sloc_general',
+			__( 'General Settings', 'simple-location' ),
+			array( 'Loc_Config', 'sloc_general_settings' ),
 			'simloc'
-		);
-		add_settings_field(
-			'sloc_map_provider', // id
-			__( 'Map Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
-			array(
-				'label_for' => 'sloc_map_provider',
-				'providers' => self::map_providers(),
-			)
-		);
-		add_settings_field(
-			'sloc_geo_provider', // id
-			__( 'Reverse Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
-			array(
-				'label_for' => 'sloc_geo_provider',
-				'providers' => self::geo_providers(),
-			)
-		);
-		add_settings_field(
-			'sloc_geolocation_provider', // id
-			__( 'Geolocation Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
-			array(
-				'label_for' => 'sloc_geolocation_provider',
-				'providers' => self::geolocation_providers(),
-			)
 		);
 		add_settings_field(
 			'geo_public', // id
 			__( 'Default Display for Location', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'provider_callback' ), // display callback
 			'simloc', // settings page
-			'sloc_map', // settings section
+			'sloc_general', // settings section
 			array(
 				'label_for' => 'geo_public',
 				'providers' => self::geo_public(),
@@ -381,11 +352,84 @@ class Loc_Config {
 			__( 'Update Author Last Reported Location on New Post', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'checkbox_callback' ), // display callback
 			'simloc', // settings page
-			'sloc_map', // settings section
+			'sloc_general', // settings section
 			array(
 				'label_for' => 'sloc_last_report',
 			)
 		);
+		add_settings_field(
+			'sloc_measurements', // id
+			__( 'Unit of Measure', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'measure_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_general', // settings section
+			array(
+				'label_for' => 'sloc_measurements',
+			)
+		);
+		add_settings_section(
+			'sloc_providers',
+			__( 'Provider Settings', 'simple-location' ),
+			array( 'Loc_Config', 'sloc_provider_settings' ),
+			'simloc'
+		);
+
+		add_settings_field(
+			'sloc_map_provider', // id
+			__( 'Map Provider', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'provider_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_providers', // settings section
+			array(
+				'label_for'   => 'sloc_map_provider',
+				'description' => __( 'Provides Static Map Images', 'simple-location' ),
+				'providers'   => self::map_providers(),
+			)
+		);
+		add_settings_field(
+			'sloc_geo_provider', // id
+			__( 'Geo Provider', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'provider_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_providers', // settings section
+			array(
+				'label_for'   => 'sloc_geo_provider',
+				'description' => __( 'Looking up an address from coordinates or vice versa', 'simple-location' ),
+				'providers'   => self::geo_providers(),
+			)
+		);
+		add_settings_field(
+			'sloc_geolocation_provider', // id
+			__( 'Geolocation Provider', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'provider_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_providers', // settings section
+			array(
+				'label_for'   => 'sloc_geolocation_provider',
+				'description' => __( 'By default this uses your browser to lookup your location but you can alternatively tap into a service to get your current location, perhaps from your phone', 'simple-location' ),
+				'providers'   => self::geolocation_providers(),
+			)
+		);
+		add_settings_field(
+			'sloc_weather_provider', // id
+			__( 'Weather Provider', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'provider_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_providers', // settings section
+			array(
+				'label_for'   => 'sloc_weather_provider',
+				'description' => __( 'Retrieves Weather Data about a Location', 'simple-location' ),
+				'providers'   => self::weather_providers(),
+			)
+		);
+
+		add_settings_section(
+			'sloc_map',
+			__( 'Map Settings', 'simple-location' ),
+			array( 'Loc_Config', 'sloc_map_settings' ),
+			'simloc'
+		);
+
 		add_settings_field(
 			'width', // id
 			__( 'Default Map Width', 'simple-location' ), // setting title
@@ -417,67 +461,6 @@ class Loc_Config {
 			)
 		);
 
-		$map_provider     = get_option( 'sloc_map_provider' );
-		$weather_provider = get_option( 'sloc_weather_provider' );
-		$geo_provider     = get_option( 'sloc_geo_provider' );
-
-		add_settings_field(
-			'mapquestapi', // id
-			__( 'MapQuest API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
-			array(
-				'label_for' => 'sloc_mapquest_api',
-				'class'     => ( 'mapquest' === $map_provider || 'mapquest' === $geo_provider ) ? '' : 'hidden',
-			)
-		);
-		add_settings_field(
-			'mapqueststyle', // id
-			__( 'MapQuest Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_mapquest_style',
-				'provider'  => new Map_Provider_Mapquest(),
-				'class'     => ( 'mapquest' === $map_provider ) ? '' : 'hidden',
-			)
-		);
-		add_settings_field(
-			'hereapi', // id
-			__( 'HERE API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
-			array(
-				'label_for' => 'sloc_here_api',
-				'class'     => ( 'here' === $map_provider ) ? '' : 'hidden',
-			)
-		);
-		add_settings_field(
-			'hereapp', // id
-			__( 'HERE Application ID', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
-			array(
-				'label_for' => 'sloc_here_appid',
-				'class'     => ( 'here' === $map_provider ) ? '' : 'hidden',
-			)
-		);
-
-		add_settings_field(
-			'googleapi', // id
-			__( 'Google Maps API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
-			array(
-				'label_for' => 'sloc_google_api',
-				'class'     => ( 'google' === $map_provider || 'google' === $geo_provider ) ? '' : 'hidden',
-			)
-		);
 		add_settings_field(
 			'googlestyle', // id
 			__( 'Google Style', 'simple-location' ),
@@ -491,18 +474,6 @@ class Loc_Config {
 			)
 		);
 		add_settings_field(
-			'bingapi', // id
-			__( 'Bing API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
-			array(
-				'label_for' => 'sloc_bing_api',
-				'class'     => ( 'bing' === $map_provider || 'bing' === $geo_provider ) ? '' : 'hidden',
-
-			)
-		);
-		add_settings_field(
 			'bingstyle', // id
 			__( 'Bing Style', 'simple-location' ),
 			array( 'Loc_Config', 'style_callback' ),
@@ -512,18 +483,6 @@ class Loc_Config {
 				'label_for' => 'sloc_bing_style',
 				'provider'  => new Map_Provider_Bing(),
 				'class'     => ( 'bing' === $map_provider ) ? '' : 'hidden',
-			)
-		);
-		add_settings_field(
-			'mapboxapi', // id
-			__( 'Mapbox API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
-			array(
-				'label_for' => 'sloc_mapbox_api',
-				'class'     => ( 'mapbox' === $map_provider ) ? '' : 'hidden',
-
 			)
 		);
 		add_settings_field(
@@ -551,6 +510,20 @@ class Loc_Config {
 
 			)
 		);
+
+		add_settings_field(
+			'mapqueststyle', // id
+			__( 'MapQuest Style', 'simple-location' ),
+			array( 'Loc_Config', 'style_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_mapquest_style',
+				'provider'  => new Map_Provider_Mapquest(),
+				'class'     => ( 'mapquest' === $map_provider ) ? '' : 'hidden',
+			)
+		);
+
 		add_settings_section(
 			'sloc_weather',
 			__( 'Weather Settings', 'simple-location' ),
@@ -558,24 +531,100 @@ class Loc_Config {
 			'simloc'
 		);
 		add_settings_field(
-			'sloc_measurements', // id
-			__( 'Unit of Measure', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'measure_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_weather', // settings section
+			'openweatherid', // id
+			__( 'OpenWeatherMap Station ID', 'simple-location' ),
+			array( 'Loc_Config', 'string_callback' ),
+			'simloc',
+			'sloc_weather',
 			array(
-				'label_for' => 'sloc_measurements',
+				'label_for' => 'sloc_openweathermap_id',
+				'class'     => ( 'openweathermap' === $weather_provider ) ? '' : 'hidden',
+
+			)
+		);
+
+		add_settings_section(
+			'sloc_providers',
+			__( 'Providers', 'simple-location' ),
+			array( 'Loc_Config', 'sloc_provider_settings' ),
+			'simloc'
+		);
+
+		add_settings_section(
+			'sloc_api',
+			__( 'API Keys', 'simple-location' ),
+			array( 'Loc_Config', 'sloc_api_settings' ),
+			'simloc'
+		);
+
+		add_settings_field(
+			'hereapi', // id
+			__( 'HERE API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_here_api',
+				'class'     => ( 'here' === $map_provider ) ? '' : 'hidden',
 			)
 		);
 		add_settings_field(
-			'sloc_weather_provider', // id
-			__( 'Weather Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'provider_callback' ), // display callback
+			'hereapp', // id
+			__( 'HERE Application ID', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
 			'simloc', // settings page
-			'sloc_weather', // settings section
+			'sloc_api', // settings section
 			array(
-				'label_for' => 'sloc_weather_provider',
-				'providers' => self::weather_providers(),
+				'label_for' => 'sloc_here_appid',
+				'class'     => ( 'here' === $map_provider ) ? '' : 'hidden',
+			)
+		);
+
+		add_settings_field(
+			'mapquestapi', // id
+			__( 'MapQuest API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_mapquest_api',
+				'class'     => ( 'mapquest' === $map_provider || 'mapquest' === $geo_provider ) ? '' : 'hidden',
+			)
+		);
+		add_settings_field(
+			'googleapi', // id
+			__( 'Google Maps API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_google_api',
+				'class'     => ( 'google' === $map_provider || 'google' === $geo_provider ) ? '' : 'hidden',
+			)
+		);
+		add_settings_field(
+			'bingapi', // id
+			__( 'Bing API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_bing_api',
+				'class'     => ( 'bing' === $map_provider || 'bing' === $geo_provider ) ? '' : 'hidden',
+
+			)
+		);
+
+		add_settings_field(
+			'mapboxapi', // id
+			__( 'Mapbox API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_mapbox_api',
+				'class'     => ( 'mapbox' === $map_provider ) ? '' : 'hidden',
+
 			)
 		);
 		add_settings_field(
@@ -583,7 +632,7 @@ class Loc_Config {
 			__( 'Dark Sky API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
 			'simloc', // settings page
-			'sloc_weather', // settings section
+			'sloc_api', // settings section
 			array(
 				'label_for' => 'sloc_darksky_api',
 				'class'     => ( 'darksky' === $weather_provider ) ? '' : 'hidden',
@@ -595,22 +644,9 @@ class Loc_Config {
 			__( 'OpenWeatherMap API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
 			'simloc', // settings page
-			'sloc_weather', // settings section
+			'sloc_api', // settings section
 			array(
 				'label_for' => 'sloc_openweathermap_api',
-				'class'     => ( 'openweathermap' === $weather_provider ) ? '' : 'hidden',
-
-			)
-		);
-
-		add_settings_field(
-			'openweatherid', // id
-			__( 'OpenWeatherMap Station ID', 'simple-location' ),
-			array( 'Loc_Config', 'string_callback' ),
-			'simloc',
-			'sloc_weather',
-			array(
-				'label_for' => 'sloc_openweathermap_id',
 				'class'     => ( 'openweathermap' === $weather_provider ) ? '' : 'hidden',
 
 			)
@@ -632,19 +668,25 @@ class Loc_Config {
 
 	public static function string_callback( array $args ) {
 		$name = $args['label_for'];
-		printf( '<input name="%1s" size="50" class="regular-text" type="string" value="%2s" />', $name, get_option( $name ) ); // phpcs:ignore
+		if ( ! isset( $args['type'] ) ) {
+			$args['type'] = 'text';
+		}
+		printf( '<input name="%1s" size="50" autocomplete="off" class="regular-text" type="%2s" value="%3s" />', $name, esc_attR( $args['type'] ), get_option( $name ) ); // phpcs:ignore
 	}
 
 	public static function provider_callback( $args ) {
-		$name      = $args['label_for'];
-		$text      = get_option( $name );
-		$providers = $args['providers'];
+		$name        = $args['label_for'];
+		$description = ifset( $args['description'], '' );
+		$text        = get_option( $name );
+		$providers   = $args['providers'];
 		if ( count( $providers ) > 1 ) {
 			printf( '<select name="%1$s">', esc_attr( $name ) );
 			foreach ( $providers as $key => $value ) {
 				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value ); // phpcs:ignore
 			}
-			echo '</select><br /><br />';
+			echo '</select>';
+			echo '<p class="description">' . esc_html( $description ) . '</p>';
+			echo '<br /><br />';
 		} else {
 			printf( '<input name="%1$s" type="radio" id="%1$s" value="%2$s" checked /><span>%3$s</span>', esc_attr( $name ), esc_attr( key( $providers ) ), esc_html( reset( $providers ) ) );
 		}
@@ -715,12 +757,22 @@ class Loc_Config {
 		echo '</select><br /><br />';
 	}
 
+	public static function sloc_general_settings() {
+	}
+
+	public static function sloc_provider_settings() {
+		esc_html_e( 'Simple Location Depends on External Services', 'simple-location' );
+	}
+
+
 	public static function sloc_map_settings() {
-		esc_html_e( 'API keys are required for map display services.', 'simple-location' );
 	}
 
 	public static function sloc_weather_settings() {
-		esc_html_e( 'API keys are required for most weather services.', 'simple-location' );
+	}
+
+	public static function sloc_api_settings() {
+		esc_html_e( 'API keys are required for most services.', 'simple-location' );
 	}
 
 

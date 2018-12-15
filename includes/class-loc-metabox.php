@@ -64,7 +64,8 @@ class Loc_Metabox {
 
 	public static function enqueue( $hook_suffix ) {
 		$screens = self::screens();
-		if ( in_array( get_current_screen()->id, $screens, true ) || 'profile.php' === $hook_suffix ) {
+		$hooks   = array( 'profile.php' );
+		if ( in_array( get_current_screen()->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
 			wp_enqueue_script(
 				'sloc_location',
 				plugins_url( 'js/location.js', dirname( __FILE__ ) ),

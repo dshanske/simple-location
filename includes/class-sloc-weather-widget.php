@@ -28,7 +28,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		echo $args['before_widget'];
-		$weather = new Weather_Provider_OpenWeatherMap();
+		$weather = Loc_Config::weather_provider();
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			$loc = WP_Geo_Data::get_geodata( new WP_User( $instance['user'] ) );
 			$weather->set( $loc['latitude'], $loc['longitude'] );
