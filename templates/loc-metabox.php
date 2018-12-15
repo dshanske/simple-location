@@ -50,7 +50,7 @@ $wind    = ifset( $weather['wind'], array() );
 			</p>
 			<p class="field-row">
 				<label for="temperature" class="quarter">
-					<?php _e( 'Temperature: ', 'simple-location' ); ?>
+					<?php _e( 'Temperature(C): ', 'simple-location' ); ?>
 					<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
 				</label>
 
@@ -139,6 +139,17 @@ $wind    = ifset( $weather['wind'], array() );
 					<label for="visibility" class="quarter"><?php _e( 'Visibility', 'simple-location' ); ?>
 					<input type="text" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
 					</label>
+					<label for="cloudiness" class="quarter"><?php _e( 'Cloudiness', 'simple-location' ); ?>
+					<input type="text" name="cloudiness" id="cloudiness" value="<?php echo ifset( $weather['cloudiness'], '' ); ?>" />
+					</label>
+				</p>
+				<p class="field-row">
+					<label for="rain" class="quarter"><?php _e( 'Rain', 'simple-location' ); ?>
+					<input type="text" name="rain" id="rain" value="<?php echo ifset( $weather['rain'], '' ); ?>" />
+					</label>
+					<label for="snow" class="quarter"><?php _e( 'Snow', 'simple-location' ); ?>
+					<input type="text" name="snow" id="snow" value="<?php echo ifset( $weather['snow'], '' ); ?>" />
+					</label>
 				</p>
 			<p class="field-row">
 					<label for="weather_icon" class="quarter"><?php _e( 'Icon', 'simple-location' ); ?>
@@ -146,9 +157,6 @@ $wind    = ifset( $weather['wind'], array() );
 						<?php Weather_Provider::icon_select( ifset( $weather['icon'] ), true ); ?>" />
 					</select>
 			</p>
-
-			<input type="hidden" name="units" id="units" value="<?php echo ifset( $wind['units'], Loc_Metabox::temp_unit() ); ?>" />
-
 
 				<div class="button-group">
 					<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>

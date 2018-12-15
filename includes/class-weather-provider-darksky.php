@@ -25,7 +25,7 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions() {
-		$return = array( 'units' => $this->temp_unit() );
+		$return = array();
 		if ( $this->latitude && $this->longitude ) {
 			if ( $this->cache_key ) {
 				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
@@ -33,7 +33,13 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 					return $conditions;
 				}
 			}
+			$data = array(
+				'units'   => 'si',
+				'exclude' => 'minutely,hourly,daily,alerts,flags',
+				'lang'    => get_bloginfo( 'language' ),
+			);
 			$url  = sprintf( 'https://api.darksky.net/forecast/%1$s/%2$s,%3$s', $this->api, $this->latitude, $this->longitude );
+			$url  = add_query_arg( $data, $url );
 			$args = array(
 				'headers'             => array(
 					'Accept' => 'application/json',
@@ -55,18 +61,28 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 				$return['raw'] = $response;
 			}
 			if ( ! isset( $response['currently'] ) ) {
-				return array();
+				return $return;
 			}
-			$current                  = $response['currently'];
-			$return['temperature']    = $current['temperature'];
-			$return['humidity']       = $current['humidity'];
-			$return['pressure']       = $current['pressure'];
+			$current               = ifset( $response['currently'] );
+			$return['temperature'] = ifset( $current['temperature'] );
+			if ( isset( $current['humidity'] ) ) {
+				$return['humidity'] = $current['humidity'] * 100;
+			}
+			$return['pressure'] = ifset( $current['pressure'] );
+			if ( isset( $current['cloudCover'] ) ) {
+				$return['cloudiness'] = $current['cloudCover'] * 100;
+			}
 			$return['wind']           = array();
-			$return['wind']['speed']  = $current['windSpeed'];
-			$return['wind']['degree'] = $current['windBearing'];
-			$return['summary']        = $current['summary'];
+			$return['wind']['speed']  = ifset( $current['windSpeed'] );
+			$return['wind']['degree'] = ifset( $current['windBearing'] );
+			$return['wind']           = array_filter( $return['wind'] );
+			$return['rain']           = ifset( $current['precipIntensity'] );
+			$return['snow']           = ifset( $current['precipAccumulation'] );
+			$return['summary']        = ifset( $current['summary'] );
 			$return['icon']           = $this->icon_map( $current['icon'] );
-			$return['visibility']     = $current['visibility'];
+			if ( isset( $current['visibility'] ) ) {
+				$return['visibility'] = $current['visibility'] * 1000;
+			}
 
 			if ( $this->cache_key ) {
 				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
@@ -77,7 +93,36 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	}
 
 	private function icon_map( $id ) {
-		return '';
+		switch ( $id ) {
+			case 'clear-day':
+				return 'wi-day-sunny';
+			case 'clear-night':
+				return 'wi-night-clear';
+			case 'rain':
+				return 'wi-rain';
+			case 'snow':
+				return 'wi-snow';
+			case 'sleet':
+				return 'wi-sleet';
+			case 'wind':
+				return 'wi-windy';
+			case 'fog':
+				return 'wi-fog';
+			case 'cloudy':
+				return 'wi-cloudy';
+			case 'partly-cloudy-day':
+				return 'wi-day-cloudy';
+			case 'partly-cloudy-night':
+				return 'wi-night-cloudy';
+			case 'hail':
+				return 'wi-hail';
+			case 'thunderstorm':
+				return 'wi-thunderstorm';
+			case 'tornado':
+				return 'wi-tornado';
+			default:
+				return '';
+		}
 	}
 
 }

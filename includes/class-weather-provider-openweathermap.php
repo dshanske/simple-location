@@ -27,11 +27,10 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions() {
-		$data   = array(
+		$data = array(
 			'appid' => $this->api,
-			'units' => $this->temp_units,
+			'units' => 'metric',
 		);
-		$return = array( 'units' => $this->temp_unit() );
 		if ( $this->latitude && $this->longitude ) {
 			if ( $this->cache_key ) {
 				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
@@ -39,12 +38,11 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 					return $conditions;
 				}
 			}
-			$url           = 'https://api.openweathermap.org/data/2.5/weather?';
-			$data['lat']   = $this->latitude;
-			$data['lon']   = $this->longitude;
-			$url           = $url . build_query( $data );
-			$return['url'] = $url;
-			$args          = array(
+			$url         = 'https://api.openweathermap.org/data/2.5/weather?';
+			$data['lat'] = $this->latitude;
+			$data['lon'] = $this->longitude;
+			$url         = add_query_arg( $data, $url );
+			$args        = array(
 				'headers'             => array(
 					'Accept' => 'application/json',
 				),
@@ -69,6 +67,9 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				$return['humidity']    = $response['main']['humidity'];
 				$return['pressure']    = $response['main']['pressure'];
 			}
+			if ( isset( $response['clouds'] ) ) {
+				$return['cloudiness'] = $response['clouds']['all'];
+			}
 			if ( isset( $response['wind'] ) ) {
 				$return['wind']           = array();
 				$return['wind']['speed']  = $response['wind']['speed'];
@@ -81,16 +82,16 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				$return['summary'] = $response['weather']['description'];
 				$return['icon']    = $this->icon_map( (int) $response['weather']['id'] );
 			}
+			if ( isset( $response['rain'] ) ) {
+				$return['rain'] = $response['rain']['1h'];
+			}
+			if ( isset( $response['snow'] ) ) {
+				$return['snow'] = $response['snow']['1h'];
+			}
 			if ( isset( $response['visibility'] ) ) {
 				$return['visibility'] = $response['visibility'];
 			}
-			if ( isset( $response['precipitation'] ) ) {
-				$return['precipitation'] = $response['precipitation']['mode'];
-				if ( 'no' === $return['precipitation'] ) {
-					unset( $return['precipitation'] );
-				}
-				$return['precipitation_value'] = $return['precipitation']['value'];
-			}
+
 			if ( $this->cache_key ) {
 				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
 			}
@@ -126,10 +127,6 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			}
 			if ( isset( $response['temp'] ) ) {
 				$return['temperature'] = $response['temp']['average'];
-				// OpenWeatherMap doesn't allow you to set fahrenheit in this API
-				if ( 'imperial' === $this->temp_units ) {
-					$return['temperature'] = $this->metric_to_imperial( $return['temperature'] );
-				}
 			}
 			if ( isset( $response['humidity'] ) ) {
 				$return['humidity'] = $response['humidity']['average'];

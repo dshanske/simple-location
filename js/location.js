@@ -73,7 +73,7 @@ jQuery( document ).ready( function( $ ) {
 					latitude: $( '#latitude' ).val(),
 					longitude: $( '#longitude' ).val(),
 					altitude: $( '#altitude' ).val(),
-					weather: true,
+					weather: 1,
 					map_zoom: $( '#map_zoom' ).val() // eslint-disable-line camelcase
 				},
 				success: function( response ) {
@@ -137,6 +137,15 @@ jQuery( document ).ready( function( $ ) {
 							}
 							if ( ( 'pressure' in weather ) && ( '' === $( '#pressure' ).val() ) ) {
 								$( '#pressure' ).val( weather.pressure ) ;
+							}
+							if ( ( 'cloudiness' in weather ) && ( '' === $( '#cloudiness' ).val() ) ) {
+								$( '#cloudiness' ).val( weather.cloudiness ) ;
+							}
+							if ( ( 'rain' in weather ) && ( '' === $( '#rain' ).val() ) ) {
+								$( '#rain' ).val( weather.rain );
+							}
+							if ( ( 'snow' in weather ) && ( '' === $( '#snow' ).val() ) ) {
+								$( '#snow' ).val( weather.snow );
 							}
 							if ( ( 'visibility' in weather ) && ( '' === $( '#visibility' ).val() ) ) {
 								$( '#visibility' ).val( weather.visibility ) ;

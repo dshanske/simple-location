@@ -177,7 +177,7 @@ class Loc_Metabox {
 		}
 
 		$weather    = array();
-		$wtr_params = array( 'temperature', 'units', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility' );
+		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility', 'cloudiness', 'rain', 'snow', 'visibility' );
 		foreach ( $wtr_params as $param ) {
 			if ( ! empty( $_POST[ $param ] ) ) {
 				$weather[ str_replace( 'weather_', '', $param ) ] = $_POST[ $param ];

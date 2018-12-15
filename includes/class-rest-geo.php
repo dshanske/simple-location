@@ -56,32 +56,10 @@ class REST_Geo {
 						'latitude'  => array(),
 						'altitude'  => array(),
 						'address'   => array(),
-						'weather'   => array()
+						'weather'   => array(),
 					),
 					'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
-					},
-				),
-			)
-		);
-		register_rest_route(
-			'sloc_geo/1.0',
-			'/reverse',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'reverse' ),
-					'args'                => array(
-						'longitude' => array(
-							'required' => true,
-						),
-						'latitude'  => array(
-							'required' => true,
-						),
-						'altitude'  => array(),
-					),
-					'permission_callback' => function() {
-							return current_user_can( 'publish_posts' );
 					},
 				),
 			)
@@ -91,16 +69,16 @@ class REST_Geo {
 			'/weather',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'weather' ),
-					'args'                => array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'weather' ),
+					'args'     => array(
 						'longitude' => array(),
 						'latitude'  => array(),
 						'units'     => array(),
 					),
-					'permission_callback' => function() {
+					/*'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
-					},
+					}, */
 				),
 			)
 		);
@@ -200,26 +178,6 @@ class REST_Geo {
 		return new WP_Error( 'no_provider', __( 'No Geolocation Provider Available', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
-
-	// Callback Handler for Reverse Lookup
-	public static function reverse( $request ) {
-		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
-		$params = $request->get_params();
-		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
-			$reverse = Loc_Config::geo_provider();
-			$reverse->set( $params );
-			$reverse_adr = $reverse->reverse_lookup();
-			if ( is_wp_error( $reverse_adr ) ) {
-				return $reverse_adr;
-			}
-			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
-				$reverse_adr['altitude'] = $reverse->elevation();
-			}
-			return array_filter( $reverse_adr );
-		}
-		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
-	}
-
 	public static function geocode( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
 		$params = $request->get_params();
@@ -233,10 +191,11 @@ class REST_Geo {
 			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
 				$reverse_adr['altitude'] = $reverse->elevation();
 			}
-			if ( isset( $params['weather'] ) && $params['weather'] ) {
+			if ( isset( $params['weather'] ) ) {
 				$weather = Loc_Config::weather_provider();
 				$weather->set( $params );
 				$reverse_adr['weather'] = $weather->get_conditions();
+				error_log( wp_json_encode( $reverse_adr['weather'] ) );
 			}
 			return array_filter( $reverse_adr );
 		}

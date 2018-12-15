@@ -282,7 +282,7 @@ class Loc_Config {
 		if ( 'en_US' === get_locale() ) {
 			return 'imperial';
 		}
-		return 'metric';
+		return 'si';
 	}
 
 	public static function admin_menu() {
@@ -692,7 +692,7 @@ class Loc_Config {
 	public static function measure_callback( array $args ) {
 		$text = get_option( 'sloc_measurements' );
 		echo '<select name="sloc_measurements">';
-		printf( '<option value="metric" %1$s >%2$s</option>', selected( $text, 'metric', false ), __( 'Metric', 'simple-location' ) ); // phpcs:ignore
+		printf( '<option value="si" %1$s >%2$s</option>', selected( $text, 'si', false ), __( 'International(SI)', 'simple-location' ) ); // phpcs:ignore
 		printf( '<option value="imperial" %1$s >%2$s</option>', selected( $text, 'imperial', false ), __( 'Imperial', 'simple-location' ) ); // phpcs:ignore
 		echo '</select><br /><br />';
 	}

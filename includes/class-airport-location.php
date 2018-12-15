@@ -3,7 +3,7 @@
  * Functionality borrowed from https://github.com/aaronpk/Atlas
  * airports.csv is from
  * http://ourairports.com/data/
- * http://ourairports.com/data/airports.csv 
+ * http://ourairports.com/data/airports.csv
  */
 
 class Airport_Location {
