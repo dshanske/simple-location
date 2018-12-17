@@ -30,56 +30,11 @@ $wind    = ifset( $weather['wind'], array() );
 			</p>
 			<p><?php _e( 'You can lookup your current location or information about the location you enter', 'simple-location' ); ?></p>
 
-			<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label>
-			<input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" data-role="none" />
-
-			<p class="field-row">
-				<label for="latitude" class="quarter">
-					<?php _e( 'Latitude:', 'simple-location' ); ?>
-					<input type="text" name="latitude" id="latitude" class="widefat" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" />
-				</label>
-
-				<label for="longitude" class="quarter">
-					<?php _e( 'Longitude:', 'simple-location' ); ?>
-					<input type="text" name="longitude" id="longitude" class="widefat" value="<?php echo ifset( $geodata['longitude'], '' ); ?>" />
-				</label>
-				<label for="altitude" class="quarter">
-					<?php _e( 'Altitude:', 'simple-location' ); ?>
-					<input type="text" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
-				</label>
-			</p>
-			<p class="field-row">
-				<label for="temperature" class="quarter">
-					<?php _e( 'Temperature(C): ', 'simple-location' ); ?>
-					<input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
-				</label>
-
-				<label for="humidity" class="quarter">
-					<?php _e( 'Humidity: ', 'simple-location' ); ?>
-					<input type="text" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
-				</label>
-			</p>
-			<p class="field-row">
-			<label for="humidity" class="half">
-				<?php _e( 'Weather Description: ', 'simple-location' ); ?>
-				<input type="text" name="weather_summary" id="weather_summary" value="<?php echo ifset( $weather['summary'], '' ); ?>" />
-			</p>
-
-			<input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
-			<input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
-			<input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />
-
-
 			<p>
 				<a href="#location-details" class="show-location-details hide-if-no-js"><?php _e( 'Show Additional Details', 'simple-location' ); ?></a>
 			</p>
 			<div id="location-details" class="hide-if-js">
 				<p><?php _e( 'Location Data below can be used to complete the location description, which will be displayed or is held for future use.', 'simple-location' ); ?></p>
-
-				<p>
-					<label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
-					<input type="text" name="map_zoom" id="map_zoom" class="widefat" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />
-				</p>
 
 				<p>
 					<label for="location-name"><?php _e( 'Location Name', 'simple-location' ); ?></label>
@@ -124,48 +79,6 @@ $wind    = ifset( $weather['wind'], array() );
 						<input type="text" name="country-code" id="country-code" value="" class="widefat" />
 					</label>
 				</p>
-				<p class="field-row">
-					<label for="wind_degree" class="quarter"><?php _e( 'Wind Degree', 'simple-location' ); ?>
-					<input type="text" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" />
-					</label>
-					<label for="wind_speed" class="quarter"><?php _e( 'Wind Speed', 'simple-location' ); ?>
-					<input type="text" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" />
-					</label>
-				</p>
-				<p class="field-row">
-					<label for="pressure" class="quarter"><?php _e( 'Pressure', 'simple-location' ); ?>
-					<input type="text" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
-					</label>
-					<label for="visibility" class="quarter"><?php _e( 'Visibility', 'simple-location' ); ?>
-					<input type="text" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
-					</label>
-					<label for="cloudiness" class="quarter"><?php _e( 'Cloudiness', 'simple-location' ); ?>
-					<input type="text" name="cloudiness" id="cloudiness" value="<?php echo ifset( $weather['cloudiness'], '' ); ?>" />
-					</label>
-				</p>
-				<p class="field-row">
-					<label for="rain" class="quarter"><?php _e( 'Rain', 'simple-location' ); ?>
-					<input type="text" name="rain" id="rain" value="<?php echo ifset( $weather['rain'], '' ); ?>" />
-					</label>
-					<label for="snow" class="quarter"><?php _e( 'Snow', 'simple-location' ); ?>
-					<input type="text" name="snow" id="snow" value="<?php echo ifset( $weather['snow'], '' ); ?>" />
-					</label>
-				</p>
-			<p class="field-row">
-					<label for="weather_icon" class="quarter"><?php _e( 'Icon', 'simple-location' ); ?>
-					<select name="weather_icon" id="weather_icon">
-						<?php Weather_Provider::icon_select( ifset( $weather['icon'] ), true ); ?>" />
-					</select>
-			</p>
-
-				<div class="button-group">
-					<button type="button" class="save-venue-button button-secondary" disabled><?php _e( 'Save as Venue', 'simple-location' ); ?> </button>
-				</div>
-			</div>
-		</div>
 
 
-		<div class="loading">
-			<img src="<?php echo esc_url( includes_url( '/images/wpspin-2x.gif' ) ); ?>" class="loading-spinner" />
-		</div>
 <?php

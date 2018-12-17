@@ -43,9 +43,9 @@ class REST_Geo {
 						'address'   => array(),
 						'weather'   => array(),
 					),
-					/* 'permission_callback' => function() {
+					'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
-					}, */
+					},
 				),
 			)
 		);
@@ -198,7 +198,7 @@ class REST_Geo {
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$weather->set( $params );
 			$timezone = Loc_Timezone::timezone_for_location( $params['latitude'], $params['longitude'] );
-			$return = array(
+			$return   = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],
 			);

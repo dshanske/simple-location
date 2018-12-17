@@ -8,7 +8,7 @@ class Post_Timezone {
 		add_filter( 'get_the_time', array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
 		add_filter( 'get_the_modified_date', array( 'Post_Timezone', 'get_the_date' ), 12, 2 );
 		add_filter( 'get_the_modified_time', array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
-		add_action( 'post_submitbox_misc_actions', array( 'Post_Timezone', 'post_submitbox' ) );
+		add_action( 'simple_location_sidebox', array( 'Post_Timezone', 'post_submitbox' ) );
 		add_action( 'save_post', array( 'Post_Timezone', 'postbox_save_post_meta' ) );
 		add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( 'Post_Timezone', 'enqueue' ) );
@@ -39,7 +39,10 @@ class Post_Timezone {
 
 	}
 
-	public static function post_submitbox() {
+	public static function post_submitbox( $screen ) {
+		if ( in_array( $screen, array( 'comment', 'nav-menu' ), true ) ) {
+			return;
+		}
 		global $post;
 		wp_nonce_field( 'timezone_override_metabox', 'timezone_override_nonce' );
 		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
@@ -62,7 +65,7 @@ class Post_Timezone {
 			}
 		}
 		?>
-		<div class="misc-pub-section misc-pub-timezone">
+		<div class="location-section location-section-timezone">
 		<span class="dashicons dashicons-clock" id="timezone-browser" title="<?php esc_html_e( 'Set Local Timezone', 'simple-location' ); ?>"></span>
 			<label for="post-timezone"><?php esc_html_e( 'Timezone:', 'simple-location' ); ?></label>
 			<span id="post-timezone-label">

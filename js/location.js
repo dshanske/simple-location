@@ -81,6 +81,7 @@ jQuery( document ).ready( function( $ ) {
 					} else {
 						if ( ( 'display-name' in response ) && ( '' === $( '#address' ).val() ) ) {
 							$( '#address' ).val( response['display-name']) ;
+							$( '#location-label' ).text( response['display-name'] );
 						}
 						if ( 'name' in response ) {
 							$( '#location-name' ).val( response.name ) ;
@@ -134,6 +135,8 @@ jQuery( document ).ready( function( $ ) {
 							}
 							if ( ( 'summary' in weather ) && ( '' === $( '#weather_summary' ).val() ) ) {
 								$( '#weather_summary' ).val( weather.summary ) ;
+								$( '#weather-label' ).text( weather.summary );
+
 							}
 							if ( ( 'pressure' in weather ) && ( '' === $( '#pressure' ).val() ) ) {
 								$( '#pressure' ).val( weather.pressure ) ;
@@ -199,7 +202,7 @@ jQuery( document ).ready( function( $ ) {
 			'wind_speed',
 			'wind_degree',
 			'visibility',
-			'pressure'
+			'pressure',
 
 		];
 		if ( ! confirm( 'Are you sure you want to remove the location details?' ) ) {
@@ -208,14 +211,16 @@ jQuery( document ).ready( function( $ ) {
 		$.each( fieldIds, function( count, val ) {
 			document.getElementById( val ).value = '';
 		});
+		$( '#location-label' ).text( 'None' );
+		$( '#weather-label' ).text( 'None' );
 	}
 
 	function showLoadingSpinner() {
-		$( '#locationbox-meta' ).addClass( 'is-loading' );
+		$( '#locationsidebox' ).addClass( 'is-loading' );
 	}
 
 	function hideLoadingSpinner() {
-		$( '#locationbox-meta' ).removeClass( 'is-loading' );
+		$( '#locationsidebox' ).removeClass( 'is-loading' );
 	}
 
 	function error( err ) {
@@ -303,10 +308,35 @@ jQuery( document ).ready( function( $ ) {
 	});
 
 
-	$postLocationSelect = $( '#post-location-select' );
-	$LocationDetail = $( '#location-lookup' );
+	$postLocationFields = $( '#location-fields' );
 
-	$postLocationSelect.siblings( 'a.edit-post-location' ).click( function( event ) {
+	$postLocationFields.siblings( 'a.edit-location' ).click( function( event ) {
+		if ( $postLocationFields.is( ':hidden' ) ) {
+			$postLocationFields.slideDown( 'fast', function() {
+				$postLocationFields.find( 'select' ).focus();
+			});
+			$( this ).hide();
+		}
+		event.preventDefault();
+	});
+
+	$postLocationFields.find( '.lookup-location' ).click( function( event ) {
+		showLoadingSpinner();
+		lookupLocation();
+		$postLocationFields.slideUp( 'fast' ).siblings( 'a.edit-location' ).show().focus();
+		event.preventDefault();
+	});
+
+	$postLocationFields.find( '.hide-location' ).click( function( event ) {
+		$postLocationFields.slideUp( 'fast' ).siblings( 'a.edit-location' ).show().focus();
+		$( '#location-label' ).text( $( '#address').val() ); // eslint-disable-line camelcase
+		event.preventDefault();
+	});
+
+
+	$postLocationSelect = $( '#location-visibility-select' );
+
+	$postLocationSelect.siblings( 'a.edit-location-visibility' ).click( function( event ) {
 		if ( $postLocationSelect.is( ':hidden' ) ) {
 			$postLocationSelect.slideDown( 'fast', function() {
 				$postLocationSelect.find( 'select' ).focus();
@@ -316,18 +346,37 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
-	$postLocationSelect.find( '.save-post-location' ).click( function( event ) {
-		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-post-location' ).show().focus();
-		$( '#post-location-label' ).text( slocOptions.visibility_options[$( '#post-location' ).val()]); // eslint-disable-line camelcase
+	$postLocationSelect.find( '.save-location-visibility' ).click( function( event ) {
+		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-location-visibility' ).show().focus();
+		$( '#location-visibility-label' ).text( slocOptions.visibility_options[ $( '#location-visibility').val() ] ); // eslint-disable-line camelcase
 		event.preventDefault();
 	});
 
-	$postLocationSelect.find( '.cancel-post-location' ).click( function( event ) {
-		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-post-location' ).show().focus();
-		$( '#post_location' ).val( $( '#hidden_post_location' ).val() );
+	$postLocationSelect.find( '.cancel-location-visibility' ).click( function( event ) {
+		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-location-visibility' ).show().focus();
+		$( '#location-visibility' ).val( $( '#hidden_location_visibility' ).val() );
 		event.preventDefault();
 	});
 
+	$postWeatherFields = $( '#weather-fields' );
+
+	$postWeatherFields.siblings( 'a.edit-weather' ).click( function( event ) {
+		if ( $postWeatherFields.is( ':hidden' ) ) {
+			$postWeatherFields.slideDown( 'fast', function() {
+				$postWeatherFields.find( 'select' ).focus();
+			});
+			$( this ).hide();
+		}
+		event.preventDefault();
+	});
+
+	$postWeatherFields.find( '.hide-weather' ).click( function( event ) {
+		$postWeatherFields.slideUp( 'fast' ).siblings( 'a.edit-weather' ).show().focus();
+		$( '#weather-label' ).text( $( '#weather_summary').val() );
+		event.preventDefault();
+	});
+
+	$LocationDetail = $( '#location-lookup' );
 
 	$( 'a.show-location-details' ).click( function( event ) {
 		if ( $locationDetail.is( ':hidden' ) ) {
@@ -338,9 +387,10 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
-	$LocationDetail.click( function( event ) {
+	$( '#location-title').click( function( event ) {
 		showLoadingSpinner();
-		getFullLocation();
+		lookupLocation();
 		event.preventDefault();
 	});
+
 });
