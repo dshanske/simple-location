@@ -128,6 +128,40 @@ class Loc_View {
 		return $c;
 	}
 
+	public static function get_weather_data( $lat, $lng ) {
+		$weather = Loc_Config::weather_provider();
+		$weather->set( $lat, $lng );
+		return $weather->get_conditions();
+	}
+
+	public static function get_weather_by_user( $user ) {
+		if ( is_numeric( $user ) && 0 !== $user ) {
+			$user = new WP_User( $user );
+		}
+		if ( ! $user instanceof WP_User ) {
+			return '';
+		}
+		$loc = WP_Geo_Data::get_geodata( $user );
+		if ( ! isset( $loc['latitude'] ) ) {
+			return '';
+		}
+		return self::get_weather_by_location( $loc['latitude'], $loc['longitude'] );
+	}
+
+	public static function get_weather_by_location( $lat, $lng ) {
+		$weather = self::get_weather_data( $lat, $lng );
+		return self::get_the_weather( self::get_weather_data( $lat, $lng ) );
+	}
+
+	public static function get_weather_by_station( $station, $provider = null ) {
+		if ( ! $provider ) {
+			$provider = Loc_Config::weather_provider( $provider );
+		}
+		$provider->set( array( 'station_id' => $station ) );
+		$weather = $provider->get_conditions();
+		return self::get_the_weather( $weather );
+	}
+
 	// Return marked up coordinates
 	public static function get_the_geo( $loc, $display = false ) {
 		$string = $display ? '<span class="p-%1$s">%2$f</span>' : '<data class="p-%1$s" value="%2$f"></data>';

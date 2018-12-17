@@ -15,10 +15,16 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_openweathermap_api' );
 		}
-		if ( ! isset( $args['station_id'] ) ) {
-			$args['station_id'] = get_option( 'sloc_openweathermap_id' );
-		}
 		parent::__construct( $args );
+	}
+
+	public function set( $lat, $lng = null ) {
+		if ( ! $lng && is_array( $lat ) ) {
+			if ( isset( $lat['station_id'] ) ) {
+				$this->station_id = $lat['station_id'];
+			}
+		}
+		parent::set( $lat, $lng );
 	}
 
 	/**
@@ -31,6 +37,9 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			'appid' => $this->api,
 			'units' => 'metric',
 		);
+		if ( $this->station_id && ! $this->latitude ) {
+			return $this->get_station_data();
+		}
 		if ( $this->latitude && $this->longitude ) {
 			if ( $this->cache_key ) {
 				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
@@ -100,11 +109,18 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			}
 			return array_filter( $return );
 		}
+	}
+
+	public function get_station_data() {
+		$data = array(
+			'appid' => $this->api,
+			'units' => 'metric',
+		);
 		if ( $this->station_id ) {
 			if ( $this->cache_key ) {
 				$conditions = get_transient( $this->cache_key . '_' . md5( $this->station_id ) );
 				if ( $conditions ) {
-					return $conditions;
+					// return $conditions;
 				}
 			}
 
@@ -115,7 +131,8 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			$data['from']  = current_time( 'timestamp' ) - 3600;
 			$data['to']    = current_time( 'timestamp' );
 			$data['limit'] = '1';
-			$url           = $url . build_query( $data );
+			$url           = add_query_arg( $data, $url );
+			$return = array();
 			$response      = wp_remote_get( $url );
 			if ( is_wp_error( $response ) ) {
 				return $response;
@@ -125,6 +142,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			if ( WP_DEBUG ) {
 				$return['raw'] = $response;
 			}
+			return $return;
 			if ( wp_is_numeric_array( $response ) ) {
 				$response = $response[0];
 			}

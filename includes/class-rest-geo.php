@@ -59,10 +59,11 @@ class REST_Geo {
 					'args'                => array(
 						'longitude' => array(),
 						'latitude'  => array(),
+						'station' => array(),
 					),
-					'permission_callback' => function() {
+					/* 'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
-					},
+					}, */
 				),
 			)
 		);
@@ -195,19 +196,24 @@ class REST_Geo {
 		);
 		$return  = array();
 		$weather = Loc_Config::weather_provider();
-		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+		if ( isset( $params['station'] ) ) {
+			$weather->set( array( 'station_id' => $params['station'] ) );
+		} elseif ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$weather->set( $params );
 			$timezone = Loc_Timezone::timezone_for_location( $params['latitude'], $params['longitude'] );
 			$return   = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],
 			);
-		} elseif ( ! $weather->get_station() ) {
+		} else {
 				return new WP_Error( 'missing_geo', __( 'Missing Coordinates or Station for Weather Lookup', 'simple-location' ), array( 'status' => 400 ) );
 		}
 		$conditions = $weather->get_conditions();
 		$return     = array_filter( $return );
-		return array_merge( $conditions, $return );
+		if ( is_array( $conditions ) ) {
+			$return = array_merge( $conditions, $return );
+		}
+		return $return;
 	}
 
 	// Callback handler for timezone

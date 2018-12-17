@@ -21,7 +21,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'latitude'   => null,
 			'longitude'  => null,
 			'station_id' => null,
-			'cache_key'  => 'slocw',
+			'cache_key'  => null, // 'slocw',
 			'cache_time' => 600,
 			'units'      => get_option( 'sloc_measurements', Loc_Config::measurement_default() ),
 			'style'      => '',
@@ -35,6 +35,11 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$this->cache_key  = $r['cache_key'];
 		$this->cache_time = $r['cache_time'];
 		$this->set( $r['latitude'], $r['longitude'] );
+	}
+
+	// Does this provider allow for station data
+	public function is_station() {
+		return true;
 	}
 
 	public function get_station() {

@@ -723,10 +723,14 @@ class Loc_Config {
 	}
 
 
-	public static function weather_providers() {
+	public static function weather_providers( $station = false ) {
 		$return = array();
 		foreach ( static::$weather as $weather ) {
-			$return[ $weather->get_slug() ] = esc_html( $weather->get_name() );
+			if ( ! $station ) {
+				$return[ $weather->get_slug() ] = esc_html( $weather->get_name() );
+			} else if ( $weather->is_station() ) {
+				$return[ $weather->get_slug() ] = esc_html( $weather->get_name() );
+			}
 		}
 		return $return;
 	}
@@ -804,15 +808,15 @@ class Loc_Config {
 		return 'null';
 	}
 
-	public static function weather_provider() {
-		$option = get_option( 'sloc_weather_provider' );
-		if ( isset( static::$weather[ $option ] ) ) {
-			return static::$weather[ $option ];
+	public static function weather_provider( $provider = null ) {
+		if ( ! $provider ) {
+			$provider = get_option( 'sloc_weather_provider' );
+		}	
+		if ( isset( static::$weather[ $provider ] ) ) {
+			return static::$weather[ $provider ];
 		}
 		return null;
 	}
-
-
 }
 
 function register_sloc_provider( $object ) {

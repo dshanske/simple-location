@@ -28,14 +28,18 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		echo $args['before_widget'];
+		if( isset( $instance['title'] ) ) {
+			printf( '<h2>%1$s</h2>', esc_html( $instance['title'] ) );
+		}
 		$weather = Loc_Config::weather_provider();
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
-			$loc = WP_Geo_Data::get_geodata( new WP_User( $instance['user'] ) );
-			$weather->set( $loc['latitude'], $loc['longitude'] );
+			echo Loc_View::get_weather_by_user( $instance['user'] );
+			return;
 		} elseif ( isset( $instance['latitude'] ) && isset( $instance['longitude'] ) ) {
 			$weather->set( $instance['latitude'], $instance['longitude'] );
+		} elseif ( isset( $instance['station'] ) ) {
 		}
-		echo $weather->get_current_condition(); // phpcs:ignore
+		echo Loc_View::get_the_weather( $weather->get_conditions() ); // phpcs:ignore
 		echo $args['after_widget'];
 
 	}
@@ -60,7 +64,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @output displays the widget form
 	 */
 	public function form( $instance ) {
-		?>
+?>
+		<p><label for="title"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
+		<input type="text" size="30" name="<?php $this->get_field_name( 'title' ); ?> id="<?php $this->get_field_id( 'title' ); ?>" value="<?php echo esc_html( ifset( $instance['title'] ) ); ?>" />
 		<p>
 		<?php esc_html_e( 'Displays current weather based on user location. If set for none will use latitude and longitude set or if not set will use station ID for provider if available.', 'simple-location' ); ?>
 		</p>
