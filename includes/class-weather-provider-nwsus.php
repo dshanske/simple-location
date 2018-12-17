@@ -38,22 +38,14 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		if ( $this->station_id && ! $this->latitude ) {
 			return $this->get_station_data();
 		}
-		return array( 'blah' );
-
-		/*if ( $this->latitude && $this->longitude ) {
+		if ( $this->latitude && $this->longitude ) {
 			if ( $this->cache_key ) {
 				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
 				if ( $conditions ) {
 					return $conditions;
 				}
 			}
-			$data = array(
-				'units'   => 'si',
-				'exclude' => 'minutely,hourly,daily,alerts,flags',
-				'lang'    => get_bloginfo( 'language' ),
-			);
-			$url  = sprintf( '');
-			$url  = add_query_arg( $data, $url );
+			$url  = sprintf( 'https://api.weather.gov/points/%1$s,%2$s', $this->latitude, $this->longitude );
 			$args = array(
 				'headers'             => array(
 					'Accept' => 'application/json',
@@ -71,41 +63,22 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			}
 			$response = wp_remote_retrieve_body( $response );
 			$response = json_decode( $response, true );
-			if ( WP_DEBUG ) {
-				$return['raw'] = $response;
+			if ( ! isset( $response['properties'] ) ) {
+				return false;
 			}
-			if ( ! isset( $response['currently'] ) ) {
-				return $return;
+			$url = $response['properties']['observationStations'];
+			$response = wp_remote_get( $url, $args );
+			if ( is_wp_error( $response ) ) {
+				return false;
 			}
-			$current               = ifset( $response['currently'] );
-			$return['temperature'] = ifset( $current['temperature'] );
-			if ( isset( $current['humidity'] ) ) {
-				$return['humidity'] = $current['humidity'] * 100;
+			$response = wp_remote_retrieve_body( $response );
+			$response = json_decode( $response, true );
+			if ( ! isset( $response['features'] ) ) {
+				return false;
 			}
-			$return['pressure'] = ifset( $current['pressure'] );
-			if ( isset( $current['cloudCover'] ) ) {
-				$return['cloudiness'] = $current['cloudCover'] * 100;
-			}
-			$return['wind']           = array();
-			$return['wind']['speed']  = ifset( $current['windSpeed'] );
-			$return['wind']['degree'] = ifset( $current['windBearing'] );
-			$return['wind']           = array_filter( $return['wind'] );
-			$return['rain']           = ifset( $current['precipIntensity'] );
-			$return['snow']           = ifset( $current['precipAccumulation'] );
-			$return['summary']        = ifset( $current['summary'] );
-			$return['icon']           = $this->icon_map( $current['icon'] );
-			if ( isset( $current['visibility'] ) ) {
-				$return['visibility'] = $current['visibility'] * 1000;
-			}
-			$timezone          = Loc_Timezone::timezone_for_location( $this->latitude, $this->longitude );
-			$return['sunrise'] = sloc_sunrise( $time->latitude, $this->longitude, $timezone );
-			$return['sunset']  = sloc_sunset( $this->latitude, $this->longitude, $timezone );
-
-			if ( $this->cache_key ) {
-				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
-			}
-			return array_filter( $return );
-		} */
+			$this->station_id = $response['features'][0]['properties']['stationIdentifier'];
+			return self::get_station_data();
+		}
 		return false;
 	}
 
@@ -162,6 +135,9 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		}
 		$return['pressure'] = self::get_value( $properties, 'barometricPressure' );
 		$return['summary'] = ifset( $properties['textDescription'] );
+		if ( isset( $return['summary'] ) ) {
+			$return['icon'] = self::icon_map( $return['summary'] );
+		}
 		$url = sprintf( 'https://api.weather.gov/stations/%1$s', $this->station_id );
 		$response = wp_remote_get( $url, $args );
 		if ( is_wp_error( $response ) ) {
@@ -180,32 +156,64 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 
 	private function icon_map( $id ) {
 		switch ( $id ) {
-			case 'clear-day':
-				return 'wi-day-sunny';
-			case 'clear-night':
-				return 'wi-night-clear';
-			case 'rain':
-				return 'wi-rain';
-			case 'snow':
-				return 'wi-snow';
-			case 'sleet':
+			case "Cloudy":
+				return "wi-cloudy";	
+			case "A few clouds":
+				return "wi-cloud";
+			case "Partly Cloudy":
+				return "wi-day-cloudy";
+            		case "Mostly Cloudy":
+				return "wi-cloudy";
+			case "Overcast":
+				return "wi-cloudy";
+			case "Fair/clear and windy":
+				return "wi-windy";	
+			case "A few clouds and windy":
+				return "wi-cloudy-windy";
+			case "Partly cloudy and windy":
+				return "wi-cloudy-windy";
+			case "Mostly cloudy and windy":
+				return "wi-cloudy-windy";
+			case "Overcast and windy":
+				return "wi-cloudy-windy";
+			case "Snow":
+				return "wi-snow";
+			case "Rain/snow":
+				return "wi-snow";
+			case "Rain/sleet":
+			case "Rain/sleet":
+			case "Freezing rain":
+			case "Rain/freezing rain":
+			case "Freezing rain/snow":
+			case"Sleet":
 				return 'wi-sleet';
-			case 'wind':
-				return 'wi-windy';
-			case 'fog':
-				return 'wi-fog';
-			case 'cloudy':
-				return 'wi-cloudy';
-			case 'partly-cloudy-day':
-				return 'wi-day-cloudy';
-			case 'partly-cloudy-night':
-				return 'wi-night-cloudy';
-			case 'hail':
-				return 'wi-hail';
-			case 'thunderstorm':
-				return 'wi-thunderstorm';
-			case 'tornado':
-				return 'wi-tornado';
+			case "Rain":
+			case "Rain showers (high cloud cover)":
+			case "Rain showers (low cloud cover)":
+				return "wi-rain";
+			case "Thunderstorm (high cloud cover)":
+			case "Thunderstorm (medium cloud cover)":
+			case "Thunderstorm (low cloud cover)":
+				return "wi-thunderstorm";
+			case "Tornado":
+				return "wi-tornado";
+			case "Hurricane conditions":
+				return "wi-hurricane";
+			case "Tropical storm conditions":
+				return "wi-storm-showers";
+			case "Dust":
+				return "wi-dust";
+			case "Smoke":
+				return "wi-smoke";
+			case "Haze":
+				return "wi-day-haze";
+			case "Hot":
+				return "wi-hot";
+			case "Cold":
+			case "Blizzard":
+				return "wi-snow";
+			case "Fog/mist":
+				return "wi-fog";
 			default:
 				return '';
 		}
