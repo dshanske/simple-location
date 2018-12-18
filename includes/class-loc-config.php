@@ -137,16 +137,6 @@ class Loc_Config {
 		);
 		register_setting(
 			'simloc',
-			'sloc_openweathermap_id',
-			array(
-				'type'         => 'string',
-				'description'  => 'OpenWeatherMap Station ID',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-		register_setting(
-			'simloc',
 			'sloc_mapbox_user',
 			array(
 				'type'         => 'string',
@@ -530,19 +520,6 @@ class Loc_Config {
 			array( 'Loc_Config', 'sloc_weather_settings' ),
 			'simloc'
 		);
-		add_settings_field(
-			'openweatherid', // id
-			__( 'OpenWeatherMap Station ID', 'simple-location' ),
-			array( 'Loc_Config', 'string_callback' ),
-			'simloc',
-			'sloc_weather',
-			array(
-				'label_for' => 'sloc_openweathermap_id',
-				'class'     => ( 'openweathermap' === $weather_provider ) ? '' : 'hidden',
-
-			)
-		);
-
 		add_settings_section(
 			'sloc_providers',
 			__( 'Providers', 'simple-location' ),
