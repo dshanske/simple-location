@@ -728,7 +728,7 @@ class Loc_Config {
 		foreach ( static::$weather as $weather ) {
 			if ( ! $station ) {
 				$return[ $weather->get_slug() ] = esc_html( $weather->get_name() );
-			} else if ( $weather->is_station() ) {
+			} elseif ( $weather->is_station() ) {
 				$return[ $weather->get_slug() ] = esc_html( $weather->get_name() );
 			}
 		}
@@ -811,7 +811,7 @@ class Loc_Config {
 	public static function weather_provider( $provider = null ) {
 		if ( ! $provider ) {
 			$provider = get_option( 'sloc_weather_provider' );
-		}	
+		}
 		if ( isset( static::$weather[ $provider ] ) ) {
 			return static::$weather[ $provider ];
 		}

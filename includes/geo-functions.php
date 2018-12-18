@@ -21,4 +21,3 @@ function sloc_sunset( $latitude, $longitude, $timezone, $timestamp = null ) {
 	$datetime->setTimezone( new DateTimeZone( $timezone ) );
 	return $datetime->format( DATE_W3C );
 }
-

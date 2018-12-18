@@ -41,14 +41,14 @@ class Sloc_Station_Widget extends WP_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
-		echo $args['before_widget'];
+		echo $args['before_widget']; // phpcs:ignore
 		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
+			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
 		if ( isset( $instance['station'] ) ) {
-			echo Loc_View::get_weather_by_station( $instance['station'], $instance['provider'] );
+			echo Loc_View::get_weather_by_station( $instance['station'], $instance['provider'] ); // phpcs:ignore
 		}
-		echo $args['after_widget'];
+		echo $args['after_widget'] ); // phpcs:ignore
 
 	}
 
@@ -74,14 +74,14 @@ class Sloc_Station_Widget extends WP_Widget {
 	public function form( $instance ) {
 		?>
 		<p><label for="title"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
-		<input type="text" size="30" name="<?php echo $this->get_field_name( 'title' ); ?> id="<?php echo $this->get_field_id( 'title' ); ?>" value="<?php echo esc_html( ifset( $instance['title'] ) ); ?>" />
+		<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?> id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" value="
+			<?php echo esc_html( ifset( $instance['title'] ) ); ?>" /></p>
 		<p>
 		<?php esc_html_e( 'Displays current weather at a weather station', 'simple-location' ); ?>
 		</p>
 		<p><?php self::provider_list( ifset( $instance['provider'] ), $this->get_field_name( 'provider' ), $this->get_field_id( 'provider' ) ); ?>
-	
 			<p><label for="station"><?php esc_html_e( 'Station ID: ', 'simple-location' ); ?></label>
-			<input type="text" size="7" name="<?php echo $this->get_field_name( 'station' ); ?>" id="<?php echo $this->get_field_id( 'station' ); ?>" value="<?php echo esc_attr( ifset( $instance['station'] ) ); ?>" />
+			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'station' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'station' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['station'] ) ); ?>" />
 			</p>
 		<?php
 	}

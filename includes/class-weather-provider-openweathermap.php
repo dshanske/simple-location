@@ -120,7 +120,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			if ( $this->cache_key ) {
 				$conditions = get_transient( $this->cache_key . '_' . md5( $this->station_id ) );
 				if ( $conditions ) {
-					// return $conditions;
+					return $conditions;
 				}
 			}
 
@@ -132,7 +132,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			$data['to']    = current_time( 'timestamp' );
 			$data['limit'] = '1';
 			$url           = add_query_arg( $data, $url );
-			$return = array();
+			$return        = array();
 			$response      = wp_remote_get( $url );
 			if ( is_wp_error( $response ) ) {
 				return $response;
@@ -142,7 +142,6 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			if ( WP_DEBUG ) {
 				$return['raw'] = $response;
 			}
-			return $return;
 			if ( wp_is_numeric_array( $response ) ) {
 				$response = $response[0];
 			}

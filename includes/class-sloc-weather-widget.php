@@ -27,20 +27,19 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
-		echo $args['before_widget'];
-		if( isset( $instance['title'] ) ) {
-			printf( '<h2>%1$s</h2>', esc_html( $instance['title'] ) );
+		echo $args['before_widget']; // phpcs:ignore
+		if ( ! empty( $instance['title'] ) ) {
+				echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
 		$weather = Loc_Config::weather_provider();
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
-			echo Loc_View::get_weather_by_user( $instance['user'] );
+			echo Loc_View::get_weather_by_user( $instance['user'] ); // phpcs:ignore
 			return;
 		} elseif ( isset( $instance['latitude'] ) && isset( $instance['longitude'] ) ) {
 			$weather->set( $instance['latitude'], $instance['longitude'] );
-		} elseif ( isset( $instance['station'] ) ) {
 		}
 		echo Loc_View::get_the_weather( $weather->get_conditions() ); // phpcs:ignore
-		echo $args['after_widget'];
+		echo $args['after_widget']; // phpcs:ignore
 
 	}
 
@@ -64,7 +63,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @output displays the widget form
 	 */
 	public function form( $instance ) {
-?>
+		?>
 		<p><label for="title"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
 		<input type="text" size="30" name="<?php $this->get_field_name( 'title' ); ?> id="<?php $this->get_field_id( 'title' ); ?>" value="<?php echo esc_html( ifset( $instance['title'] ) ); ?>" />
 		<p>

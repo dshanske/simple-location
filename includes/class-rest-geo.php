@@ -54,12 +54,12 @@ class REST_Geo {
 			'/weather',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'weather' ),
-					'args'                => array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'weather' ),
+					'args'     => array(
 						'longitude' => array(),
 						'latitude'  => array(),
-						'station' => array(),
+						'station'   => array(),
 					),
 					/* 'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );

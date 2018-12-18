@@ -80,8 +80,8 @@ jQuery( document ).ready( function( $ ) {
 					if ( 'undefined' == typeof response ) {
 					} else {
 						if ( ( 'display-name' in response ) && ( '' === $( '#address' ).val() ) ) {
-							$( '#address' ).val( response['display-name']) ;
-							$( '#location-label' ).text( response['display-name'] );
+							$( '#address' ).val( response['display-name']);
+							$( '#location-label' ).text( response['display-name']);
 						}
 						if ( 'name' in response ) {
 							$( '#location-name' ).val( response.name ) ;
@@ -202,8 +202,7 @@ jQuery( document ).ready( function( $ ) {
 			'wind_speed',
 			'wind_degree',
 			'visibility',
-			'pressure',
-
+			'pressure'
 		];
 		if ( ! confirm( 'Are you sure you want to remove the location details?' ) ) {
 			return;
@@ -329,7 +328,7 @@ jQuery( document ).ready( function( $ ) {
 
 	$postLocationFields.find( '.hide-location' ).click( function( event ) {
 		$postLocationFields.slideUp( 'fast' ).siblings( 'a.edit-location' ).show().focus();
-		$( '#location-label' ).text( $( '#address').val() ); // eslint-disable-line camelcase
+		$( '#location-label' ).text( $( '#address' ).val() ); // eslint-disable-line camelcase
 		event.preventDefault();
 	});
 
@@ -348,7 +347,7 @@ jQuery( document ).ready( function( $ ) {
 
 	$postLocationSelect.find( '.save-location-visibility' ).click( function( event ) {
 		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-location-visibility' ).show().focus();
-		$( '#location-visibility-label' ).text( slocOptions.visibility_options[ $( '#location-visibility').val() ] ); // eslint-disable-line camelcase
+		$( '#location-visibility-label' ).text( slocOptions.visibility_options[$( '#location-visibility' ).val() ]); // eslint-disable-line camelcase
 		event.preventDefault();
 	});
 
@@ -372,7 +371,7 @@ jQuery( document ).ready( function( $ ) {
 
 	$postWeatherFields.find( '.hide-weather' ).click( function( event ) {
 		$postWeatherFields.slideUp( 'fast' ).siblings( 'a.edit-weather' ).show().focus();
-		$( '#weather-label' ).text( $( '#weather_summary').val() );
+		$( '#weather-label' ).text( $( '#weather_summary' ).val() );
 		event.preventDefault();
 	});
 
@@ -387,7 +386,7 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
-	$( '#location-title').click( function( event ) {
+	$( '#location-title' ).click( function( event ) {
 		showLoadingSpinner();
 		lookupLocation();
 		event.preventDefault();

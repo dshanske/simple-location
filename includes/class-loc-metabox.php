@@ -32,9 +32,9 @@ class Loc_Metabox {
 	}
 
 	public static function enqueue( $hook_suffix ) {
-		$screens = self::screens();
+		$screens   = self::screens();
 		$screens[] = 'comment';
-		$hooks   = array( 'profile.php' );
+		$hooks     = array( 'profile.php' );
 		if ( in_array( get_current_screen()->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
 			wp_enqueue_script(
 				'sloc_location',
