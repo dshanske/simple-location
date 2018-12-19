@@ -150,11 +150,10 @@ class REST_Geo {
 
 	// Callback Handler for Geolocation Retrieval
 	public static function lookup( $request ) {
-		$params       = $request->get_params();
-		$args['user'] = $params['user'];
-		$geolocation  = Loc_Config::geolocation_provider();
+		$params      = $request->get_params();
+		$geolocation = Loc_Config::geolocation_provider();
 		if ( is_object( $geolocation ) ) {
-			$geolocation->set( $args );
+			$geolocation->set_user( $params['user'] );
 			$geolocation->retrieve();
 			return $geolocation->get();
 		} elseif ( 'null' === $geolocation ) {

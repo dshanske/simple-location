@@ -52,11 +52,11 @@ class Geo_Provider_Google extends Geo_Provider {
 	public function reverse_lookup() {
 		$query = add_query_arg(
 			array(
-				'latlng'        => $this->latitude . ',' . $this->longitude,
+				'latlng' => $this->latitude . ',' . $this->longitude,
 				// 'language'      => get_bloginfo( 'language' ),
 				//'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
 				// 'result_type'   => 'street_address',
-				'key'           => $this->api,
+				'key'    => $this->api,
 			),
 			'https://maps.googleapis.com/maps/api/geocode/json?'
 		);
