@@ -300,13 +300,6 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
-	$TimezoneDetail.click( function( event ) {
-		$( '#post-timezone' ).val( jstz.determine().name() );
-		$( '#post-timezone-label' ).text( jstz.determine().name() );
-		event.preventDefault();
-	});
-
-
 	$postLocationFields = $( '#location-fields' );
 
 	$postLocationFields.siblings( 'a.edit-location' ).click( function( event ) {

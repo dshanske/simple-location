@@ -11,20 +11,7 @@ class Post_Timezone {
 		add_action( 'simple_location_sidebox', array( 'Post_Timezone', 'post_submitbox' ) );
 		add_action( 'save_post', array( 'Post_Timezone', 'postbox_save_post_meta' ) );
 		add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
-		add_action( 'admin_enqueue_scripts', array( 'Post_Timezone', 'enqueue' ) );
-
 	}
-
-	public static function enqueue() {
-		wp_enqueue_script(
-			'jstz',
-			plugins_url( 'node_modules/jstz/dist/jstz.min.js', dirname( __FILE__ ) ),
-			array(),
-			Simple_Location_Plugin::$version,
-			true
-		);
-	}
-
 
 	public static function after_micropub( $input, $args ) {
 		if ( $args && array_key_exists( 'timezone', $args ) ) {
