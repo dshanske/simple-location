@@ -48,7 +48,7 @@ class Sloc_Station_Widget extends WP_Widget {
 		if ( isset( $instance['station'] ) ) {
 			echo Loc_View::get_weather_by_station( $instance['station'], $instance['provider'] ); // phpcs:ignore
 		}
-		echo $args['after_widget'] ); // phpcs:ignore
+		echo $args['after_widget']; // phpcs:ignore
 
 	}
 
