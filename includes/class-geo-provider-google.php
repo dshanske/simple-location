@@ -53,9 +53,9 @@ class Geo_Provider_Google extends Geo_Provider {
 		$query = add_query_arg(
 			array(
 				'latlng'        => $this->latitude . ',' . $this->longitude,
-				'language'      => get_bloginfo( 'language' ),
-				'location_type' => 'ROOFTOP',
-				'result_type'   => 'street_address',
+				// 'language'      => get_bloginfo( 'language' ),
+				//'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
+				// 'result_type'   => 'street_address',
 				'key'           => $this->api,
 			),
 			'https://maps.googleapis.com/maps/api/geocode/json?'
@@ -82,7 +82,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		$json = json_decode( $response['body'], true );
 		$raw  = $json;
 		if ( isset( $json['results'] ) ) {
-			$data = wp_is_numeric_array( $json['results'] ) ? array_pop( $json['results'] ) : $json['results'];
+			$data = wp_is_numeric_array( $json['results'] ) ? array_shift( $json['results'] ) : $json['results'];
 		} else {
 			return array();
 		}

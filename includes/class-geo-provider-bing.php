@@ -84,7 +84,7 @@ class Geo_Provider_Bing extends Geo_Provider {
 		$json = json_decode( $response['body'], true );
 		if ( isset( $json['resourceSets'] ) ) {
 			$json = $json['resourceSets'][0];
-			if ( isset( $json['resources'] ) ) {
+			if ( isset( $json['resources'] ) && is_array( $json['resources'] ) ) {
 				$json = $json['resources'][0];
 			}
 		}

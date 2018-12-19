@@ -6,13 +6,18 @@ jQuery( document ).ready( function( $ ) {
 			maximumAge: 600000
 		};
 		if ( 'HTML5' === slocOptions.lookup ) { // eslint-disable-line camelcase
-			if ( navigator.geolocation ) {
-			navigator.geolocation.getCurrentPosition( reverseLookup, error, options );
+			if ( ( '' === $( '#latitude' ).val() ) && ( '' === $( '#longitude' ).val() ) ) {
+				if ( navigator.geolocation ) {
+					navigator.geolocation.getCurrentPosition( setLocation, error, options );
+				} else {
+					alert( 'Geolocation is not supported by this browser.' );
+				}
 			} else {
-				alert( 'Geolocation is not supported by this browser.' );
+				reverseLookup();
 			}
 		} else {
 			getCurrentPosition();
+			reverseLookup();
 		}
 	}
 
@@ -36,7 +41,7 @@ jQuery( document ).ready( function( $ ) {
 						return null;
 					} else {
 						position =  {timestamp: ( new Date() ).getTime(), coords: response};
-						reverseLookup( position );
+						setLocation( position );
 					}
 
 				},
@@ -47,7 +52,7 @@ jQuery( document ).ready( function( $ ) {
 
 	}
 
-	function reverseLookup( position ) {
+	function setLocation( position ) {
 		if ( '' === $( '#longitude' ).val() ) {
 			$( '#longitude' ).val( position.coords.longitude ) ;
 		}
@@ -59,6 +64,18 @@ jQuery( document ).ready( function( $ ) {
 		$( '#speed' ).val( position.coords.speed );
 		$( '#altitude' ).val( position.coords.altitude );
 		$( '#map_zoom' ).val( parseInt( Math.log2( 591657550.5 / ( position.coords.accuracy * 45 ) ) ) + 1 );
+		reverseLookup();
+	}
+
+	function reverseLookup() {
+		if ( ( '' === $( '#longitude' ).val() ) && ( '' === $( '#latitude' ).val() ) )  {
+			return;
+		}
+
+		if ( '' !== $( '#address' ).val() ) {
+			return;
+		}
+
 		$.ajax({
 				type: 'GET',
 
@@ -180,19 +197,11 @@ jQuery( document ).ready( function( $ ) {
 
 	function clearLocation() {
 		var fieldIds = [
+			'address',
 			'latitude',
 			'longitude',
 			'altitude',
 			'map_zoom',
-			'street-address',
-			'extended-address',
-			'locality',
-			'region',
-			'postal-code',
-			'country-name',
-			'country-code',
-			'address',
-			'location-name',
 			'temperature',
 			'humidity',
 			'speed',

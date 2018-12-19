@@ -43,11 +43,9 @@ wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
                         <input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
                         <input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />
 
-	<a href="#location" class="lookup-location hide-if-no-js button">Lookup</a>
-	<a href="#location" class="hide-location hide-if-no-js button-cancel">Hide</a>
-	<button class="clear-location-button button">
-		<?php _e( 'Clear', 'simple-location' ); ?>
-       </button>
+			<a href="#location" class="lookup-location hide-if-no-js button"><?php _e( 'Lookup', 'simple-location' ); ?></a>
+			<a href="#location" class="hide-location hide-if-no-js"><?php _e( 'Hide', 'simple-location' ); ?></a>
+			<a href="#location" class="clear-location-button"><?php _e( 'Clear', 'simple-location' ); ?></a>
 	</div>
 </div>
 <div class="location-section location-section-visibility">
