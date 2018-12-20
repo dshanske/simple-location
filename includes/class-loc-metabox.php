@@ -79,7 +79,11 @@ class Loc_Metabox {
 			array( 'Loc_Metabox', 'location_side_metabox' ),
 			self::screens(), // post types
 			'side',
-			'default'
+			'default',
+			array(
+				'__block_editor_compatible_meta_box' => true,
+				'__back_compat_meta_box'             => false,
+			)
 		);
 		add_meta_box(
 			'locationsidebox',

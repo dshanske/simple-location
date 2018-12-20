@@ -20,7 +20,7 @@ As it stores the GeoData in a WordPress standard format, Geodata can also be add
 Automatically saves location data from image metadata when uploaded as well.
 
 Offers the opportunity to change the displayed timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location. 
-Clicking the clock icon next to the timezone will set to the browser timezone.
+While Gutenberg compatible, this is not built for Gutenberg.
 
 * If your site is set to a Manual UTC Offset as opposed to a named timezone, the timezone override feature will not work at this time
 
@@ -151,6 +151,7 @@ will now be required to show maps for services that require API keys.
 * Removal of hidden underused feature that set timezone based on browser settings
 * Fix of map endpoint and add map url to the reverse geocode endpoint as it is merely a URL
 * Map now displayed when location is looked up.
+* Plugin will now work with Gutenberg, though not strictly built for it.
 
 ### 3.4.1 ( 2018-11-02 ) ###
 * Fix for displaying map when altitude but no location is set
