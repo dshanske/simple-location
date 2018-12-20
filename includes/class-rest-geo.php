@@ -54,16 +54,16 @@ class REST_Geo {
 			'/weather',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'weather' ),
-					'args'     => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'weather' ),
+					'args'                => array(
 						'longitude' => array(),
 						'latitude'  => array(),
 						'station'   => array(),
 					),
-					/* 'permission_callback' => function() {
+					'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
-					}, */
+					},
 				),
 			)
 		);
@@ -102,10 +102,6 @@ class REST_Geo {
 						'height'    => array(),
 						'width'     => array(),
 						'zoom'      => array(),
-						// If url exists return URL
-						'url'       => array(),
-						// If map exists return image src
-						'map'       => array(),
 					),
 					'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
@@ -123,7 +119,7 @@ class REST_Geo {
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$args = array(
 				'latitude'  => $params['latitude'],
-				'longitude' => $param['longitude'],
+				'longitude' => $params['longitude'],
 			);
 			if ( ! empty( $params['zoom'] ) ) {
 				$args['map_zoom'] = $params['zoom'];
@@ -137,13 +133,10 @@ class REST_Geo {
 
 			$map = Loc_Config::map_provider();
 			$map->set( $args );
-			if ( ! empty( $params['url'] ) ) {
-				return $map->get_the_map_url();
-			}
-			if ( ! empty( $params['map'] ) ) {
-				return $map->get_the_static_map();
-			}
-			return $map->get_the_map();
+			$args['url']    = $map->get_the_map_url();
+			$args['map']    = $map->get_the_static_map();
+			$args['return'] = $map->get_the_map();
+			return $args;
 		}
 		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
 	}
@@ -172,6 +165,14 @@ class REST_Geo {
 			if ( is_wp_error( $reverse_adr ) ) {
 				return $reverse_adr;
 			}
+			$map = Loc_Config::map_provider();
+			$map->set(
+				array(
+					'latitude'  => $params['latitude'],
+					'longitude' => $params['longitude'],
+				)
+			);
+
 			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
 				$reverse_adr['altitude'] = $reverse->elevation();
 			}
@@ -180,6 +181,9 @@ class REST_Geo {
 				$weather->set( $params );
 				$reverse_adr['weather'] = $weather->get_conditions();
 			}
+			$reverse_adr['map_url']    = $map->get_the_static_map();
+			$reverse_adr['map_link']   = $map->get_the_map_url();
+			$reverse_adr['map_return'] = $map->get_the_map();
 			return array_filter( $reverse_adr );
 		}
 		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
