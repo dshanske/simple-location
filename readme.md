@@ -30,7 +30,7 @@ Simple Location stores location and weather data inside posts, attachments, comm
 protected setting. Attachment data is automatically extracted from images if location is present, which could be extracted by any third-party downloading the picture
 unless removed. For all other data, it is provided by the user, who decides its ultimate use. Location data is made available through a geolocation provider...currently
 only HTML5 browser geolocation is built in, for which the user must give consent to share). Other information is secured through use of third-party APIs to identify a 
-location, display maps, and weather conditions.
+location, calculate elevation, display maps, and weather conditions.
 
 ## Venues ##
 
@@ -133,7 +133,7 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
-### 3.5.0 ( 2018-12-xx ) ###
+### 3.5.0 ( 2018-12-19 ) ###
 * Another attempt to fix the setting of private location by adding testing
 * Enhance rest integration
 * Add timezone endpoint
@@ -146,6 +146,11 @@ will now be required to show maps for services that require API keys.
 * Split Weather Station into a Separate Widget
 * Remove Station ID API settings in favor of widget
 * Add support for the US National Weather Service as a weather provider. It finds the nearest weather station and reports current conditions
+* Update Micropub return to add weather even if there is not a location lookup occurring
+* Add Micropub query for location
+* Removal of hidden underused feature that set timezone based on browser settings
+* Fix of map endpoint and add map url to the reverse geocode endpoint as it is merely a URL
+* Map now displayed when location is looked up.
 
 ### 3.4.1 ( 2018-11-02 ) ###
 * Fix for displaying map when altitude but no location is set
