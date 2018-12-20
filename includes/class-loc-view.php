@@ -110,7 +110,7 @@ class Loc_View {
 		if ( ! isset( $weather['icon'] ) ) {
 			$weather['icon'] = 'wi-thermometer';
 		}
-		$c = '<br />' . Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'], '' ) );
+		$c = '<br />' . Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
 		if ( isset( $weather['temperature'] ) ) {
 			$units = ifset( $weather['units'] );
 			if ( ! $units ) {
@@ -124,6 +124,12 @@ class Loc_View {
 				}
 			}
 			$c .= '<span class="p-temperature">' . round( $weather['temperature'] ) . '&deg;' . $units . '</span>';
+		}
+		$c .= '&nbsp;' . ifset( $weather['summary'], '' ); 
+		if ( isset( $weather['station_id'] ) ) {
+			if ( isset( $weather['name'] ) ) {
+				$c .= sprintf( '<p>%1$s</p>', $weather['name'] );
+			}
 		}
 		return $c;
 	}
@@ -154,9 +160,7 @@ class Loc_View {
 	}
 
 	public static function get_weather_by_station( $station, $provider = null ) {
-		if ( ! $provider ) {
-			$provider = Loc_Config::weather_provider( $provider );
-		}
+		$provider = Loc_Config::weather_provider( $provider );
 		$provider->set( array( 'station_id' => $station ) );
 		$weather = $provider->get_conditions();
 		return self::get_the_weather( $weather );

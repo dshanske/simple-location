@@ -37,6 +37,10 @@ jQuery( document ).ready( function( $ ) {
 					user: $( '#post_author_override' ).val()
 				},
 				success: function( response ) {
+					if ( window.console ) {
+						console.log( response );
+					}
+
 					if ( 'undefined' == typeof response ) {
 						return null;
 					} else {
@@ -91,7 +95,9 @@ jQuery( document ).ready( function( $ ) {
 					longitude: $( '#longitude' ).val(),
 					altitude: $( '#altitude' ).val(),
 					weather: 1,
-					map_zoom: $( '#map_zoom' ).val() // eslint-disable-line camelcase
+					map_zoom: $( '#map_zoom' ).val(), // eslint-disable-line camelcase
+					height: 200,
+					width: 200
 				},
 				success: function( response ) {
 					if ( 'undefined' == typeof response ) {
@@ -108,6 +114,9 @@ jQuery( document ).ready( function( $ ) {
 						}
 						if ( 'longitude' in response  && ( '' === $( '#longitude' ).val() ) ) {
 							$( '#longitude' ).val( response.longitude ) ;
+						}
+						if ( 'map_return' in response ) {
+							$( '#hide-map' ).html( response['map_return']);
 						}
 						if ( 'altitude' in response && ( '' === $( '#altitude' ).val() ) ) {
 							$( '#altitude' ).val( response.altitude ) ;
@@ -221,6 +230,7 @@ jQuery( document ).ready( function( $ ) {
 		});
 		$( '#location-label' ).text( 'None' );
 		$( '#weather-label' ).text( 'None' );
+		$( '#hide-map' ).html( '' );
 	}
 
 	function showLoadingSpinner() {

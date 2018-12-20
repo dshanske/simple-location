@@ -19,7 +19,7 @@ class Sloc_Station_Widget extends WP_Widget {
 	}
 
 	public static function provider_list( $option, $name, $id ) {
-			$providers = Loc_Config::weather_providers( true );
+		$providers = Loc_Config::weather_providers( true );
 		if ( count( $providers ) > 1 ) {
 				printf( '<select name="%1$s">', esc_attr( $name ) );
 			foreach ( $providers as $key => $value ) {
@@ -28,7 +28,7 @@ class Sloc_Station_Widget extends WP_Widget {
 				echo '</select>';
 				echo '<br /><br />';
 		} else {
-				printf( '<input name="%1$s" type="radio" id="%1$s" value="%2$s" checked /><span>%3$s</span>', esc_attr( $name ), esc_attr( key( $providers ) ), esc_html( reset( $providers ) ) );
+				printf( '<input name="%1$s" type="radio" id="%1$s" value="%2$s" checked /><span>%3$s</span>', esc_attr( $name ), esc_attr( $value ), esc_html( reset( $providers ) ) );
 		}
 	}
 

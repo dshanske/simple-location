@@ -39,6 +39,21 @@ abstract class Map_Provider extends Sloc_Provider {
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
+	public function set( $args, $lng = null ) {
+		if ( is_array( $args ) ) {
+			if ( isset( $args['height'] ) ) {
+				$this->height = $args['height'];
+			}
+			if ( isset( $args['width'] ) ) {
+				$this->width = $args['width'];
+			}
+			if ( isset( $args['map_zoom'] ) ) {
+				$this->map_zoom = $args['map_zoom'];
+			}
+		}
+		parent::set( $args, $lng );
+	}
+
 
 	/**
 	 * Return an array of styles with key being id and value being display name

@@ -21,7 +21,7 @@ wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
 	<br />
 	<div id="location-fields" class="field-row hide-if-js">
 			<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label>
-                          <input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" data-role="none"
+                          <input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" data-role="none" />
 		<label for="latitude" class="quarter">
         		<?php _e( 'Latitude:', 'simple-location' ); ?>
         		<input type="text" name="latitude" id="latitude" class="widefat" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" />
@@ -38,7 +38,8 @@ wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
                                         <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
                                         <input type="text" name="map_zoom" id="map_zoom" class="widefat" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />
 
-                                </p>
+				</p>
+			<span id="hide-map"></span>
                         <input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
                         <input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
                         <input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />

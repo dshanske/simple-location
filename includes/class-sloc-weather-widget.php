@@ -67,7 +67,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		<p><label for="title"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
 		<input type="text" size="30" name="<?php $this->get_field_name( 'title' ); ?> id="<?php $this->get_field_id( 'title' ); ?>" value="<?php echo esc_html( ifset( $instance['title'] ) ); ?>" />
 		<p>
-		<?php esc_html_e( 'Displays current weather based on user location. If set for none will use latitude and longitude set or if not set will use station ID for provider if available.', 'simple-location' ); ?>
+		<?php esc_html_e( 'Displays current weather based on user location set in user profile. If set for none will use latitude and longitude set', 'simple-location' ); ?>
 		</p>
 		<p><label for="user"><?php esc_html_e( 'User: ', 'simple-location' ); ?></label>
 		<?php
