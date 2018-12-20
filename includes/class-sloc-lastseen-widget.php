@@ -27,7 +27,10 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
-		echo $args['before_widget'];
+		echo $args['before_widget']; // phpcs:ignore
+		if ( ! empty( $instance['title'] ) ) {
+				echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
+		}
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			echo '<div>';
 			esc_html_e( 'Last Seen: ', 'simple-location' );
@@ -40,7 +43,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 			);
 			echo '</div>';
 		}
-		echo $args['after_widget'];
+		echo $args['after_widget']; // phpcs:ignore
 	}
 
 	/**
@@ -64,6 +67,9 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 	 */
 	public function form( $instance ) {
 		?>
+				<p><label for="title"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
+				<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?> id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" value="
+						<?php echo esc_html( ifset( $instance['title'] ) ); ?>" /></p>
 		<p>
 		<?php esc_html_e( 'Displays last reported user location', 'simple-location' ); ?>
 		</p>

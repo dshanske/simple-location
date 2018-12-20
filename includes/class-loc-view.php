@@ -110,21 +110,60 @@ class Loc_View {
 		if ( ! isset( $weather['icon'] ) ) {
 			$weather['icon'] = 'wi-thermometer';
 		}
-		$units = ifset( $weather['units'] );
-		if ( ! $units ) {
-			switch ( get_option( 'sloc_measurements' ) ) {
-				case 'imperial':
-					$units = 'F';
-					break;
-				default:
-					$units = 'C';
-			}
-		}
-		$c = '<br />' . Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'], '' ) );
+		$c = '<br />' . Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
 		if ( isset( $weather['temperature'] ) ) {
+			$units = ifset( $weather['units'] );
+			if ( ! $units ) {
+				switch ( get_option( 'sloc_measurements' ) ) {
+					case 'imperial':
+						$units                  = 'F';
+						$weather['temperature'] = Weather_Provider::celsius_to_fahrenheit( $weather['temperature'] );
+						break;
+					default:
+						$units = 'C';
+				}
+			}
 			$c .= '<span class="p-temperature">' . round( $weather['temperature'] ) . '&deg;' . $units . '</span>';
 		}
+		$c .= '&nbsp;' . ifset( $weather['summary'], '' ); 
+		if ( isset( $weather['station_id'] ) ) {
+			if ( isset( $weather['name'] ) ) {
+				$c .= sprintf( '<p>%1$s</p>', $weather['name'] );
+			}
+		}
 		return $c;
+	}
+
+	public static function get_weather_data( $lat, $lng ) {
+		$weather = Loc_Config::weather_provider();
+		$weather->set( $lat, $lng );
+		return $weather->get_conditions();
+	}
+
+	public static function get_weather_by_user( $user ) {
+		if ( is_numeric( $user ) && 0 !== $user ) {
+			$user = new WP_User( $user );
+		}
+		if ( ! $user instanceof WP_User ) {
+			return '';
+		}
+		$loc = WP_Geo_Data::get_geodata( $user );
+		if ( ! isset( $loc['latitude'] ) ) {
+			return '';
+		}
+		return self::get_weather_by_location( $loc['latitude'], $loc['longitude'] );
+	}
+
+	public static function get_weather_by_location( $lat, $lng ) {
+		$weather = self::get_weather_data( $lat, $lng );
+		return self::get_the_weather( self::get_weather_data( $lat, $lng ) );
+	}
+
+	public static function get_weather_by_station( $station, $provider = null ) {
+		$provider = Loc_Config::weather_provider( $provider );
+		$provider->set( array( 'station_id' => $station ) );
+		$weather = $provider->get_conditions();
+		return self::get_the_weather( $weather );
 	}
 
 	// Return marked up coordinates

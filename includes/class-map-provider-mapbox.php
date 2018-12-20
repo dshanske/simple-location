@@ -78,7 +78,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 		if ( $static ) {
 			$map  = sprintf( '<img src="%s">', $this->get_the_static_map() );
 			$link = $this->get_the_map_url();
-			return '<a href="' . $link . '">' . $map . '</a>';
+			return '<a target="_blank" href="' . $link . '">' . $map . '</a>';
 		}
 	}
 

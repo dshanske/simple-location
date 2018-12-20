@@ -38,7 +38,7 @@ class Map_Provider_Google extends Map_Provider {
 	public function get_the_map( $static = true ) {
 		$map  = $this->get_the_static_map();
 		$link = $this->get_the_map_url();
-		$c    = '<a href="' . $link . '"><img src="' . $map . '" /></a>';
+		$c    = '<a target="_blank" href="' . $link . '"><img src="' . $map . '" /></a>';
 		return $c;
 	}
 

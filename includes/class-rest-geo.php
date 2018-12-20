@@ -8,21 +8,6 @@
 class REST_Geo {
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'localize_script' ), 11 );
-
-	}
-
-	public function localize_script() {
-		// Provide a global object to our JS file containing our REST API endpoint, and API nonce
-		// Nonce must be 'wp_rest'
-		wp_localize_script(
-			'sloc_location',
-			'sloc',
-			array(
-				'api_nonce' => wp_create_nonce( 'wp_rest' ),
-				'api_url'   => rest_url( '/sloc_geo/1.0/' ),
-			)
-		);
 	}
 
 	/**
@@ -31,22 +16,37 @@ class REST_Geo {
 	public function register_routes() {
 		register_rest_route(
 			'sloc_geo/1.0',
-			'/reverse',
+			'/timezone',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'timezone' ),
+					'args'     => array(
+						'longitude' => array(),
+						'latitude'  => array(),
+						'airport'   => array(),
+					),
+				),
+			)
+		);
+		register_rest_route(
+			'sloc_geo/1.0',
+			'/geocode',
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'reverse' ),
+					'callback'            => array( $this, 'geocode' ),
 					'args'                => array(
-						'longitude' => array(
-							'required' => true,
-						),
-						'latitude'  => array(
-							'required' => true,
-						),
+						'longitude' => array(),
+						'latitude'  => array(),
 						'altitude'  => array(),
+						'address'   => array(),
+						'weather'   => array(),
+						'height'    => array(),
+						'width'     => array(),
 					),
 					'permission_callback' => function() {
-							return current_user_can( 'publish_posts' );
+						return current_user_can( 'publish_posts' );
 					},
 				),
 			)
@@ -61,7 +61,7 @@ class REST_Geo {
 					'args'                => array(
 						'longitude' => array(),
 						'latitude'  => array(),
-						'units'     => array(),
+						'station'   => array(),
 					),
 					'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
@@ -104,10 +104,6 @@ class REST_Geo {
 						'height'    => array(),
 						'width'     => array(),
 						'zoom'      => array(),
-						// If url exists return URL
-						'url'       => array(),
-						// If map exists return image src
-						'map'       => array(),
 					),
 					'permission_callback' => function() {
 						return current_user_can( 'publish_posts' );
@@ -125,7 +121,7 @@ class REST_Geo {
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$args = array(
 				'latitude'  => $params['latitude'],
-				'longitude' => $param['longitude'],
+				'longitude' => $params['longitude'],
 			);
 			if ( ! empty( $params['zoom'] ) ) {
 				$args['map_zoom'] = $params['zoom'];
@@ -139,24 +135,20 @@ class REST_Geo {
 
 			$map = Loc_Config::map_provider();
 			$map->set( $args );
-			if ( ! empty( $params['url'] ) ) {
-				return $map->get_the_map_url();
-			}
-			if ( ! empty( $params['map'] ) ) {
-				return $map->get_the_static_map();
-			}
-			return $map->get_the_map();
+			$args['url']    = $map->get_the_map_url();
+			$args['map']    = $map->get_the_static_map();
+			$args['return'] = $map->get_the_map();
+			return $args;
 		}
 		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
 	// Callback Handler for Geolocation Retrieval
 	public static function lookup( $request ) {
-		$params       = $request->get_params();
-		$args['user'] = $params['user'];
-		$geolocation  = Loc_Config::geolocation_provider();
+		$params      = $request->get_params();
+		$geolocation = Loc_Config::geolocation_provider();
 		if ( is_object( $geolocation ) ) {
-			$geolocation->set( $args );
+			$geolocation->set_user( $params['user'] );
 			$geolocation->retrieve();
 			return $geolocation->get();
 		} elseif ( 'null' === $geolocation ) {
@@ -165,10 +157,8 @@ class REST_Geo {
 		return new WP_Error( 'no_provider', __( 'No Geolocation Provider Available', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
-
-	// Callback Handler for Reverse Lookup
-	public static function reverse( $request ) {
-		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
+	public static function geocode( $request ) {
+		// We dont need to check the nonce like with admin-ajax.
 		$params = $request->get_params();
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$reverse = Loc_Config::geo_provider();
@@ -177,41 +167,94 @@ class REST_Geo {
 			if ( is_wp_error( $reverse_adr ) ) {
 				return $reverse_adr;
 			}
+			$map      = Loc_Config::map_provider();
+			$map_args = array(
+				'latitude'  => $params['latitude'],
+				'longitude' => $params['longitude'],
+				'height'    => ifset( $params['height'] ),
+				'width'     => ifset( $params['width'] ),
+			);
+
+			$map->set( array_filter( $map_args ) );
+
 			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
 				$reverse_adr['altitude'] = $reverse->elevation();
 			}
+			if ( isset( $params['weather'] ) ) {
+				$weather = Loc_Config::weather_provider();
+				$weather->set( $params );
+				$reverse_adr['weather'] = $weather->get_conditions();
+			}
+			$reverse_adr['map_url']    = $map->get_the_static_map();
+			$reverse_adr['map_link']   = $map->get_the_map_url();
+			$reverse_adr['map_return'] = $map->get_the_map();
 			return array_filter( $reverse_adr );
 		}
-		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
+		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
 	// Callback Handler for Weather
 	public static function weather( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
-		$params = $request->get_params();
-		$args   = array(
+		$params  = $request->get_params();
+		$args    = array(
 			'cache_key'  => 'slocw',
 			'cache_time' => 600,
 		);
-		if ( isset( $params['units'] ) ) {
-			$args['temp_units'] = $params['units'];
-		}
 		$return  = array();
 		$weather = Loc_Config::weather_provider();
-		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+		if ( isset( $params['station'] ) ) {
+			$weather->set( array( 'station_id' => $params['station'] ) );
+		} elseif ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$weather->set( $params );
-			$return = array(
+			$timezone = Loc_Timezone::timezone_for_location( $params['latitude'], $params['longitude'] );
+			$return   = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],
 			);
-		} elseif ( ! $weather->get_station() ) {
+		} else {
 				return new WP_Error( 'missing_geo', __( 'Missing Coordinates or Station for Weather Lookup', 'simple-location' ), array( 'status' => 400 ) );
 		}
 		$conditions = $weather->get_conditions();
 		$return     = array_filter( $return );
-		return array_merge( $conditions, $return );
+		if ( is_array( $conditions ) ) {
+			$return = array_merge( $conditions, $return );
+		}
+		return $return;
 	}
 
+	// Callback handler for timezone
+	public static function timezone( $request ) {
+		$params = $request->get_params();
+		$return = array();
+		if ( isset( $params['airport'] ) ) {
+			$return = Airport_Location::get( $params['airport'] );
+			if ( $return ) {
+				$params['latitude']  = $return['latitude'];
+				$params['longitude'] = $return['longitude'];
+			} else {
+				return new WP_Error( 'airport_not_found', __( 'This Airport Code was Not Found', 'simple-location' ) );
+			}
+		}
+
+		$timezone = Loc_Timezone::timezone_for_location( $params['latitude'], $params['longitude'] );
+		if ( ! $timezone instanceof Timezone_Result ) {
+			return new WP_Error( 'timezone_not_found', __( 'Could Not Determine Timezone', 'simple-location' ) );
+		}
+		return array_merge(
+			$return,
+			array(
+				'timezone'  => $timezone->name,
+				'latitude'  => $params['latitude'],
+				'longitude' => $params['longitude'],
+				'localtime' => $timezone->localtime,
+				'offset'    => $timezone->offset,
+				'seconds'   => $timezone->seconds,
+				'sunrise'   => sloc_sunrise( $params['latitude'], $params['longitude'], $timezone ),
+				'sunset'    => sloc_sunset( $params['latitude'], $params['longitude'], $timezone ),
+			)
+		);
+	}
 
 
 }

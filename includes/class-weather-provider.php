@@ -4,7 +4,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 	protected $style;
 	protected $station_id; // Most weather sites permit a station ID to be set
-	protected $temp_units; // Unit of measurement for temperature: imperial, metric, etc
+	protected $units; // Unit of measurement: imperial, si, etc
 	protected $cache_key; // If set this will cache the retrieved informatin
 	protected $cache_time; // This will dictate for how long
 
@@ -21,9 +21,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'latitude'   => null,
 			'longitude'  => null,
 			'station_id' => null,
-			'cache_key'  => 'slocw',
+			'cache_key'  => null, // 'slocw',
 			'cache_time' => 600,
-			'temp_units' => get_option( 'sloc_measurements', Loc_Config::temp_unit_default() ),
+			'units'      => get_option( 'sloc_measurements', Loc_Config::measurement_default() ),
 			'style'      => '',
 		);
 		$defaults         = apply_filters( 'sloc_weather_provider_defaults', $defaults );
@@ -31,26 +31,35 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$this->style      = $r['style'];
 		$this->api        = $r['api'];
 		$this->station_id = $r['station_id'];
-		$this->temp_units = $r['temp_units'];
+		$this->units      = $r['units'];
 		$this->cache_key  = $r['cache_key'];
 		$this->cache_time = $r['cache_time'];
 		$this->set( $r['latitude'], $r['longitude'] );
+	}
+
+	// Does this provider allow for station data
+	public function is_station() {
+		return true;
 	}
 
 	public function get_station() {
 		return $this->station_id;
 	}
 
-	public function metric_to_imperial( $temp ) {
+	public static function celsius_to_fahrenheit( $temp ) {
 		return ( $temp * 9 / 5 ) + 32;
 	}
 
-	public function imperial_to_metric( $temp ) {
+	public static function fahrenheit_to_celsius( $temp ) {
 		return ( $temp - 32 ) / 1.8;
 	}
 
+	public static function meters_to_feet( $meters ) {
+		return floatval( $meters ) * 3.2808399;
+	}
+
 	public function temp_unit() {
-		switch ( $this->temp_units ) {
+		switch ( $this->units ) {
 			case 'imperial':
 				return 'F';
 			default:
@@ -69,7 +78,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 		if ( ! $summary ) {
 			$summary = $icon;
-		}
+		} 
 		$sprite = plugins_url( 'weather-icons.svg', dirname( __FILE__ ) );
 		return '<span aria-label="' . $summary . '" title="' . $summary . '" ><svg class="svg-icon svg-' . $icon . '" aria-hidden="true"><use xlink:href="' . $sprite . '#' . $icon . '"></use></svg></span>';
 	}
@@ -93,10 +102,19 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$return     = '<div class="sloc-weather">';
 		$return    .= $this->get_icon( ifset( $conditions['icon'] ), ifset( $conditions['summary'] ) );
 		if ( isset( $conditions['temperature'] ) ) {
-						$return .= round( $conditions['temperature'] ) . '&deg;' . $this->temp_unit();
+			$return .= $this->get_temp( $conditions['temperature'] );
 		}
 		$return .= '</div>';
 		return $return;
+	}
+
+	/* Passes temperature and returns it either same or converted with units
+	 */
+	private function get_temp( $temperature ) {
+		if ( 'imperial' === $this->units ) {
+			$temperature = self::celsius_to_fahrenheit( $temperature );
+		}
+		return round( $temperature ) . '&deg;' . $this->temp_unit();
 	}
 
 	/**
@@ -107,7 +125,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	public function get_current_temperature() {
 			$conditions = $this->get_conditions();
 		if ( isset( $conditions['temperature'] ) ) {
-				return $conditions['temperature'] . '&deg;' . $this->temp_unit();
+				return $this->get_temp( $conditions['temperature'] );
 		}
 			return '';
 	}

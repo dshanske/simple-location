@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.4.1  
+**Stable tag:** 3.5.0  
 **Requires at least:** 4.7  
-**Tested up to:** 4.9.8  
+**Tested up to:** 5.0.1  
 **Requires PHP:** 5.3  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -30,7 +30,7 @@ Simple Location stores location and weather data inside posts, attachments, comm
 protected setting. Attachment data is automatically extracted from images if location is present, which could be extracted by any third-party downloading the picture
 unless removed. For all other data, it is provided by the user, who decides its ultimate use. Location data is made available through a geolocation provider...currently
 only HTML5 browser geolocation is built in, for which the user must give consent to share). Other information is secured through use of third-party APIs to identify a 
-location, display maps, and weather conditions.
+location, calculate elevation, display maps, and weather conditions.
 
 ## Venues ##
 
@@ -59,10 +59,10 @@ Station ID is available from supported providers for weather stations, for examp
 
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
-* Map Providers include MapBox, Google, Mapquest's Open Static Map, and Bing
-* Geocoding Providers include the Mapquest hosted version of Nominatim and Google.
+* Map Providers include MapBox, Google, Mapquest's Open Static Map, HERE, and Bing
+* Geocoding Providers include the Mapquest hosted version of Nominatim, Google, and Bing.
 * Location Providers only offer HTML5 Browser Geolocation
-* Weather Providers only include OpenWeatherMap
+* Weather Providers include OpenWeatherMap, Dark Sky, and the US National Weather Service. Dark Sky does not support stations.
 
 
 ## Frequently Asked Questions ##
@@ -132,6 +132,25 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 3.5.0 ( 2018-12-19 ) ###
+* Another attempt to fix the setting of private location by adding testing
+* Enhance rest integration
+* Add timezone endpoint
+* Add geocode endpoint to replace reverse endpoint
+* Add airport lookup using method used by @aaronpk
+* Rename metric to SI to be more accurate as multiple measurements not just temperature
+* Store measurements in SI(meters, celsius, etc) and allow for change to imperial on the fly
+* Store additional weather parameters
+* Add sunrise and sunset parameters
+* Split Weather Station into a Separate Widget
+* Remove Station ID API settings in favor of widget
+* Add support for the US National Weather Service as a weather provider. It finds the nearest weather station and reports current conditions
+* Update Micropub return to add weather even if there is not a location lookup occurring
+* Add Micropub query for location
+* Removal of hidden underused feature that set timezone based on browser settings
+* Fix of map endpoint and add map url to the reverse geocode endpoint as it is merely a URL
+* Map now displayed when location is looked up.
 
 ### 3.4.1 ( 2018-11-02 ) ###
 * Fix for displaying map when altitude but no location is set

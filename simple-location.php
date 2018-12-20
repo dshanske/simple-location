@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 3.4.1
+ * Version: 3.5.0
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -18,7 +18,7 @@ register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactiva
 
 
 class Simple_Location_Plugin {
-	public static $version = '3.4.1';
+	public static $version = '3.5.0';
 
 	public static function activate() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
@@ -65,6 +65,7 @@ class Simple_Location_Plugin {
 			'class-weather-provider.php', // Weather Provider Class
 			'class-location-provider.php', // Location Provider Class
 			'class-sloc-weather-widget.php', // Weather Widget
+			'class-sloc-station-widget.php', // Weather Station Widget
 			'class-sloc-lastseen-widget.php', // Last Location Seen Widget
 			'class-rest-geo.php', // REST endpoint for Geo
 			'class-loc-config.php', // Configuration and Settings Page
@@ -74,6 +75,8 @@ class Simple_Location_Plugin {
 			'class-location-plugins.php',
 			'class-loc-timezone.php',
 			'class-post-timezone.php',
+			'class-airport-location.php',
+			'geo-functions.php',
 		);
 
 		// Load Core Files
@@ -83,6 +86,7 @@ class Simple_Location_Plugin {
 		$providers = array(
 			'class-weather-provider-openweathermap.php',
 			'class-weather-provider-darksky.php',
+			'class-weather-provider-nwsus.php',
 			'class-map-provider-mapbox.php',
 			'class-map-provider-google.php',
 			'class-map-provider-bing.php',
@@ -98,6 +102,7 @@ class Simple_Location_Plugin {
 
 	public static function widgets_init() {
 		register_widget( 'Sloc_Weather_Widget' );
+		register_widget( 'Sloc_Station_Widget' );
 		register_widget( 'Sloc_Lastseen_Widget' );
 	}
 

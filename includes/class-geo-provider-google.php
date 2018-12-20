@@ -52,11 +52,11 @@ class Geo_Provider_Google extends Geo_Provider {
 	public function reverse_lookup() {
 		$query = add_query_arg(
 			array(
-				'latlng'        => $this->latitude . ',' . $this->longitude,
-				'language'      => get_bloginfo( 'language' ),
-				'location_type' => 'ROOFTOP',
-				'result_type'   => 'street_address',
-				'key'           => $this->api,
+				'latlng' => $this->latitude . ',' . $this->longitude,
+				// 'language'      => get_bloginfo( 'language' ),
+				//'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
+				// 'result_type'   => 'street_address',
+				'key'    => $this->api,
 			),
 			'https://maps.googleapis.com/maps/api/geocode/json?'
 		);
@@ -80,13 +80,18 @@ class Geo_Provider_Google extends Geo_Provider {
 			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
 		}
 		$json = json_decode( $response['body'], true );
+		$raw  = $json;
 		if ( isset( $json['results'] ) ) {
-			$data = wp_is_numeric_array( $json['results'] ) ? array_pop( $json['results'] ) : $json['results'];
+			$data = wp_is_numeric_array( $json['results'] ) ? array_shift( $json['results'] ) : $json['results'];
 		} else {
 			return array();
 		}
-		$addr                 = array( 'raw' => $json );
+		$addr                 = array(
+			'latitude'  => $this->latitude,
+			'longitude' => $this->longitude,
+		);
 		$addr['display-name'] = ifset( $data['formatted_address'] );
+		$addr['plus-code']    = ifset( $data['plus_code']['global_code'] );
 		if ( isset( $data['address_components'] ) ) {
 			foreach ( $data['address_components'] as $component ) {
 				if ( in_array( 'administrative_area_level_1', $component['types'], true ) ) {
@@ -99,11 +104,21 @@ class Geo_Provider_Google extends Geo_Provider {
 				if ( in_array( 'neighborhood', $component['types'], true ) ) {
 					$addr['extended-address'] = $component['long_name'];
 				}
-				if ( in_array( 'administrative_area_level_2', $component['types'], true ) ) {
+				if ( in_array( 'locality', $component['types'], true ) ) {
 					$addr['locality'] = $component['long_name'];
 				}
-				if ( in_array( 'route', $component['types'], true ) ) {
+				if ( in_array( 'street_number', $component['types'], true ) ) {
 					$addr['street-address'] = $component['long_name'];
+				}
+				if ( in_array( 'route', $component['types'], true ) ) {
+					if ( isset( $addr['street-address'] ) ) {
+						$addr['street-address'] .= ' ' . $component['long_name'];
+					} else {
+						$addr['street-address'] = $component['long_name'];
+					}
+				}
+				if ( in_array( 'postal_code', $component['types'], true ) ) {
+					$addr['postal-code'] = $component['long_name'];
 				}
 			}
 		}
@@ -111,6 +126,9 @@ class Geo_Provider_Google extends Geo_Provider {
 		$tz = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
+		}
+		if ( WP_DEBUG ) {
+			$addr['raw'] = $raw;
 		}
 		return $addr;
 	}

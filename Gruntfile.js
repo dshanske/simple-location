@@ -89,6 +89,9 @@ module.exports = function(grunt) {
         }
       }
     },
+  curl: {
+    'data/airports.csv': 'http://ourairports.com/data/airports.csv'
+  },
 
     makepot: {
       target: {
@@ -113,7 +116,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-svgstore');
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-checktextdomain');
+  grunt.loadNpmTasks('grunt-curl');
 
-  // Default task(s).
+// Default task(s).
   grunt.registerTask('default', ['wp_readme_to_markdown', 'makepot', 'eslint', 'sass', 'checktextdomain']);
 };

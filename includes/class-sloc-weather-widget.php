@@ -27,16 +27,19 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
-		echo $args['before_widget'];
-		$weather = new Weather_Provider_OpenWeatherMap();
+		echo $args['before_widget']; // phpcs:ignore
+		if ( ! empty( $instance['title'] ) ) {
+				echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
+		}
+		$weather = Loc_Config::weather_provider();
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
-			$loc = WP_Geo_Data::get_geodata( new WP_User( $instance['user'] ) );
-			$weather->set( $loc['latitude'], $loc['longitude'] );
+			echo Loc_View::get_weather_by_user( $instance['user'] ); // phpcs:ignore
+			return;
 		} elseif ( isset( $instance['latitude'] ) && isset( $instance['longitude'] ) ) {
 			$weather->set( $instance['latitude'], $instance['longitude'] );
 		}
-		echo $weather->get_current_condition(); // phpcs:ignore
-		echo $args['after_widget'];
+		echo Loc_View::get_the_weather( $weather->get_conditions() ); // phpcs:ignore
+		echo $args['after_widget']; // phpcs:ignore
 
 	}
 
@@ -61,8 +64,10 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 */
 	public function form( $instance ) {
 		?>
+		<p><label for="title"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
+		<input type="text" size="30" name="<?php $this->get_field_name( 'title' ); ?> id="<?php $this->get_field_id( 'title' ); ?>" value="<?php echo esc_html( ifset( $instance['title'] ) ); ?>" />
 		<p>
-		<?php esc_html_e( 'Displays current weather based on user location. If set for none will use latitude and longitude set or if not set will use station ID for provider if available.', 'simple-location' ); ?>
+		<?php esc_html_e( 'Displays current weather based on user location set in user profile. If set for none will use latitude and longitude set', 'simple-location' ); ?>
 		</p>
 		<p><label for="user"><?php esc_html_e( 'User: ', 'simple-location' ); ?></label>
 		<?php

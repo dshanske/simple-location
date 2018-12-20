@@ -5,15 +5,19 @@ jQuery( document ).ready( function( $ ) {
 			enableHighAccuracy: true,
 			maximumAge: 600000
 		};
-		if ( 'HTML5' === geo_options.lookup ) { // eslint-disable-line camelcase
-			if ( navigator.geolocation ) {
-			navigator.geolocation.getCurrentPosition( reverseLookup, error, options );
+		if ( 'HTML5' === slocOptions.lookup ) { // eslint-disable-line camelcase
+			if ( ( '' === $( '#latitude' ).val() ) && ( '' === $( '#longitude' ).val() ) ) {
+				if ( navigator.geolocation ) {
+					navigator.geolocation.getCurrentPosition( setLocation, error, options );
+				} else {
+					alert( 'Geolocation is not supported by this browser.' );
+				}
 			} else {
-				alert( 'Geolocation is not supported by this browser.' );
-				getWeather();
+				reverseLookup();
 			}
 		} else {
 			getCurrentPosition();
+			reverseLookup();
 		}
 	}
 
@@ -23,21 +27,25 @@ jQuery( document ).ready( function( $ ) {
 				type: 'GET',
 
 				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-				url: sloc.api_url + 'lookup/',
+				url: slocOptions.api_url + 'lookup/',
 				beforeSend: function( xhr ) {
 
 					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
 				},
 				data: {
 					user: $( '#post_author_override' ).val()
 				},
 				success: function( response ) {
+					if ( window.console ) {
+						console.log( response );
+					}
+
 					if ( 'undefined' == typeof response ) {
 						return null;
 					} else {
 						position =  {timestamp: ( new Date() ).getTime(), coords: response};
-						reverseLookup( position );
+						setLocation( position );
 					}
 
 				},
@@ -48,7 +56,7 @@ jQuery( document ).ready( function( $ ) {
 
 	}
 
-	function reverseLookup( position ) {
+	function setLocation( position ) {
 		if ( '' === $( '#longitude' ).val() ) {
 			$( '#longitude' ).val( position.coords.longitude ) ;
 		}
@@ -60,27 +68,43 @@ jQuery( document ).ready( function( $ ) {
 		$( '#speed' ).val( position.coords.speed );
 		$( '#altitude' ).val( position.coords.altitude );
 		$( '#map_zoom' ).val( parseInt( Math.log2( 591657550.5 / ( position.coords.accuracy * 45 ) ) ) + 1 );
+		reverseLookup();
+	}
+
+	function reverseLookup() {
+		if ( ( '' === $( '#longitude' ).val() ) && ( '' === $( '#latitude' ).val() ) )  {
+			return;
+		}
+
+		if ( '' !== $( '#address' ).val() ) {
+			return;
+		}
+
 		$.ajax({
 				type: 'GET',
 
 				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-				url: sloc.api_url + 'reverse/',
+				url: slocOptions.api_url + 'geocode/',
 				beforeSend: function( xhr ) {
 
 					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
 				},
 				data: {
 					latitude: $( '#latitude' ).val(),
 					longitude: $( '#longitude' ).val(),
 					altitude: $( '#altitude' ).val(),
-					map_zoom: $( '#map_zoom' ).val() // eslint-disable-line camelcase
+					weather: 1,
+					map_zoom: $( '#map_zoom' ).val(), // eslint-disable-line camelcase
+					height: 200,
+					width: 200
 				},
 				success: function( response ) {
 					if ( 'undefined' == typeof response ) {
 					} else {
 						if ( ( 'display-name' in response ) && ( '' === $( '#address' ).val() ) ) {
-							$( '#address' ).val( response['display-name']) ;
+							$( '#address' ).val( response['display-name']);
+							$( '#location-label' ).text( response['display-name']);
 						}
 						if ( 'name' in response ) {
 							$( '#location-name' ).val( response.name ) ;
@@ -90,6 +114,9 @@ jQuery( document ).ready( function( $ ) {
 						}
 						if ( 'longitude' in response  && ( '' === $( '#longitude' ).val() ) ) {
 							$( '#longitude' ).val( response.longitude ) ;
+						}
+						if ( 'map_return' in response ) {
+							$( '#hide-map' ).html( response['map_return']);
 						}
 						if ( 'altitude' in response && ( '' === $( '#altitude' ).val() ) ) {
 							$( '#altitude' ).val( response.altitude ) ;
@@ -121,6 +148,50 @@ jQuery( document ).ready( function( $ ) {
 							$( '#post-timezone' ).val( response.timezone ) ;
 							$( '#post-timezone-label' ).text( response.timezone );
 						}
+						if ( 'weather' in response ) {
+							weather = response.weather;
+							if ( ( 'temperature' in weather ) && ( '' === $( '#temperature' ).val() ) ) {
+								$( '#temperature' ).val( weather.temperature ) ;
+							}
+							if ( ( 'humidity' in weather ) && ( '' === $( '#humidity' ).val() ) ) {
+								$( '#humidity' ).val( weather.humidity ) ;
+							}
+							if ( ( 'icon' in weather ) && ( 'none' === $( '#weather_icon' ).val() ) ) {
+								$( '#weather_icon' ).val( weather.icon ).change() ;
+							}
+							if ( ( 'summary' in weather ) && ( '' === $( '#weather_summary' ).val() ) ) {
+								$( '#weather_summary' ).val( weather.summary ) ;
+								$( '#weather-label' ).text( weather.summary );
+
+							}
+							if ( ( 'pressure' in weather ) && ( '' === $( '#pressure' ).val() ) ) {
+								$( '#pressure' ).val( weather.pressure ) ;
+							}
+							if ( ( 'cloudiness' in weather ) && ( '' === $( '#cloudiness' ).val() ) ) {
+								$( '#cloudiness' ).val( weather.cloudiness ) ;
+							}
+							if ( ( 'rain' in weather ) && ( '' === $( '#rain' ).val() ) ) {
+								$( '#rain' ).val( weather.rain );
+							}
+							if ( ( 'snow' in weather ) && ( '' === $( '#snow' ).val() ) ) {
+								$( '#snow' ).val( weather.snow );
+							}
+							if ( ( 'visibility' in weather ) && ( '' === $( '#visibility' ).val() ) ) {
+								$( '#visibility' ).val( weather.visibility ) ;
+							}
+								if ( 'wind' in weather ) {
+									if ( 'speed' in weather.wind ) {
+										$( '#wind_speed' ).val( weather.wind.speed ) ;
+									}
+								if ( 'degree' in weather.wind ) {
+									$( '#wind_degree' ).val( weather.wind.degree ) ;
+								}
+							}
+							if ( 'units' in weather ) {
+								$( '#units' ).val( weather.units ) ;
+							}
+						}
+
 						if ( window.console ) {
 							console.log( response );
 						}
@@ -131,84 +202,15 @@ jQuery( document ).ready( function( $ ) {
 				},
 				always: hideLoadingSpinner()
 			});
-		getWeather();
-	}
-
-	function getWeather() {
-		$.ajax({
-			type: 'GET',
-
-			// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-			url: sloc.api_url + 'weather/',
-			beforeSend: function( xhr ) {
-
-				// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-				xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
-			},
-			data: {
-				latitude: $( '#latitude' ).val(),
-				longitude: $( '#longitude' ).val()
-			},
-			success: function( response ) {
-				if ( 'undefined' == typeof response ) {
-					return;
-				}
-
-				if ( ( 'temperature' in response ) && ( '' === $( '#temperature' ).val() ) ) {
-					$( '#temperature' ).val( response.temperature ) ;
-				}
-				if ( ( 'humidity' in response ) && ( '' === $( '#humidity' ).val() ) ) {
-					$( '#humidity' ).val( response.humidity ) ;
-				}
-				if ( ( 'icon' in response ) && ( 'none' === $( '#weather_icon' ).val() ) ) {
-					$( '#weather_icon' ).val( response.icon ).change() ;
-				}
-				if ( ( 'summary' in response ) && ( '' === $( '#weather_summary' ).val() ) ) {
-					$( '#weather_summary' ).val( response.summary ) ;
-				}
-				if ( ( 'pressure' in response ) && ( '' === $( '#pressure' ).val() ) ) {
-					$( '#pressure' ).val( response.pressure ) ;
-				}
-				if ( ( 'visibility' in response ) && ( '' === $( '#visibility' ).val() ) ) {
-					$( '#visibility' ).val( response.visibility ) ;
-				}
-				if ( 'wind' in response ) {
-					if ( 'speed' in response.wind ) {
-						$( '#wind_speed' ).val( response.wind.speed ) ;
-					}
-					if ( 'degree' in response.wind ) {
-						$( '#wind_degree' ).val( response.wind.degree ) ;
-					}
-				}
-				if ( 'units' in response ) {
-					$( '#units' ).val( response.units ) ;
-				}
-				if ( console ) {
-					console.log( response );
-				}
-			},
-			error: function( request, status, error ) {
-				alert( request.responseText );
-			},
-			always: hideLoadingSpinner()
-		});
 	}
 
 	function clearLocation() {
 		var fieldIds = [
+			'address',
 			'latitude',
 			'longitude',
 			'altitude',
 			'map_zoom',
-			'street-address',
-			'extended-address',
-			'locality',
-			'region',
-			'postal-code',
-			'country-name',
-			'country-code',
-			'address',
-			'location-name',
 			'temperature',
 			'humidity',
 			'speed',
@@ -219,7 +221,6 @@ jQuery( document ).ready( function( $ ) {
 			'wind_degree',
 			'visibility',
 			'pressure'
-
 		];
 		if ( ! confirm( 'Are you sure you want to remove the location details?' ) ) {
 			return;
@@ -227,14 +228,17 @@ jQuery( document ).ready( function( $ ) {
 		$.each( fieldIds, function( count, val ) {
 			document.getElementById( val ).value = '';
 		});
+		$( '#location-label' ).text( 'None' );
+		$( '#weather-label' ).text( 'None' );
+		$( '#hide-map' ).html( '' );
 	}
 
 	function showLoadingSpinner() {
-		$( '#locationbox-meta' ).addClass( 'is-loading' );
+		$( '#locationsidebox' ).addClass( 'is-loading' );
 	}
 
 	function hideLoadingSpinner() {
-		$( '#locationbox-meta' ).removeClass( 'is-loading' );
+		$( '#locationsidebox' ).removeClass( 'is-loading' );
 	}
 
 	function error( err ) {
@@ -261,7 +265,7 @@ jQuery( document ).ready( function( $ ) {
 				beforeSend: function( xhr ) {
 
 					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-					xhr.setRequestHeader( 'X-WP-Nonce', sloc.api_nonce );
+					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
 				},
 				data: {
 					action: 'save_venue_data',
@@ -315,17 +319,35 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
-	$TimezoneDetail.click( function( event ) {
-		$( '#post-timezone' ).val( jstz.determine().name() );
-		$( '#post-timezone-label' ).text( jstz.determine().name() );
+	$postLocationFields = $( '#location-fields' );
+
+	$postLocationFields.siblings( 'a.edit-location' ).click( function( event ) {
+		if ( $postLocationFields.is( ':hidden' ) ) {
+			$postLocationFields.slideDown( 'fast', function() {
+				$postLocationFields.find( 'select' ).focus();
+			});
+			$( this ).hide();
+		}
+		event.preventDefault();
+	});
+
+	$postLocationFields.find( '.lookup-location' ).click( function( event ) {
+		showLoadingSpinner();
+		lookupLocation();
+		$postLocationFields.slideUp( 'fast' ).siblings( 'a.edit-location' ).show().focus();
+		event.preventDefault();
+	});
+
+	$postLocationFields.find( '.hide-location' ).click( function( event ) {
+		$postLocationFields.slideUp( 'fast' ).siblings( 'a.edit-location' ).show().focus();
+		$( '#location-label' ).text( $( '#address' ).val() ); // eslint-disable-line camelcase
 		event.preventDefault();
 	});
 
 
-	$postLocationSelect = $( '#post-location-select' );
-	$LocationDetail = $( '#location-lookup' );
+	$postLocationSelect = $( '#location-visibility-select' );
 
-	$postLocationSelect.siblings( 'a.edit-post-location' ).click( function( event ) {
+	$postLocationSelect.siblings( 'a.edit-location-visibility' ).click( function( event ) {
 		if ( $postLocationSelect.is( ':hidden' ) ) {
 			$postLocationSelect.slideDown( 'fast', function() {
 				$postLocationSelect.find( 'select' ).focus();
@@ -335,18 +357,37 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
-	$postLocationSelect.find( '.save-post-location' ).click( function( event ) {
-		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-post-location' ).show().focus();
-		$( '#post-location-label' ).text( geo_public_options[$( '#post-location' ).val()]); // eslint-disable-line camelcase
+	$postLocationSelect.find( '.save-location-visibility' ).click( function( event ) {
+		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-location-visibility' ).show().focus();
+		$( '#location-visibility-label' ).text( slocOptions.visibility_options[$( '#location-visibility' ).val() ]); // eslint-disable-line camelcase
 		event.preventDefault();
 	});
 
-	$postLocationSelect.find( '.cancel-post-location' ).click( function( event ) {
-		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-post-location' ).show().focus();
-		$( '#post_location' ).val( $( '#hidden_post_location' ).val() );
+	$postLocationSelect.find( '.cancel-location-visibility' ).click( function( event ) {
+		$postLocationSelect.slideUp( 'fast' ).siblings( 'a.edit-location-visibility' ).show().focus();
+		$( '#location-visibility' ).val( $( '#hidden_location_visibility' ).val() );
 		event.preventDefault();
 	});
 
+	$postWeatherFields = $( '#weather-fields' );
+
+	$postWeatherFields.siblings( 'a.edit-weather' ).click( function( event ) {
+		if ( $postWeatherFields.is( ':hidden' ) ) {
+			$postWeatherFields.slideDown( 'fast', function() {
+				$postWeatherFields.find( 'select' ).focus();
+			});
+			$( this ).hide();
+		}
+		event.preventDefault();
+	});
+
+	$postWeatherFields.find( '.hide-weather' ).click( function( event ) {
+		$postWeatherFields.slideUp( 'fast' ).siblings( 'a.edit-weather' ).show().focus();
+		$( '#weather-label' ).text( $( '#weather_summary' ).val() );
+		event.preventDefault();
+	});
+
+	$LocationDetail = $( '#location-lookup' );
 
 	$( 'a.show-location-details' ).click( function( event ) {
 		if ( $locationDetail.is( ':hidden' ) ) {
@@ -357,10 +398,10 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	});
 
-	$LocationDetail.click( function( event ) {
+	$( '#location-title' ).click( function( event ) {
 		showLoadingSpinner();
-		getFullLocation();
-		getWeather();
+		lookupLocation();
 		event.preventDefault();
 	});
+
 });

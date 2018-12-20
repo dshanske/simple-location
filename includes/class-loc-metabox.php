@@ -7,7 +7,6 @@ class Loc_Metabox {
 	public static function admin_init() {
 		/* Add meta boxes on the 'add_meta_boxes' hook. */
 		add_action( 'add_meta_boxes', array( 'Loc_Metabox', 'add_meta_boxes' ) );
-		add_action( 'post_submitbox_misc_actions', array( 'Loc_Metabox', 'post_submitbox' ) );
 	}
 
 	public static function init() {
@@ -22,49 +21,21 @@ class Loc_Metabox {
 		add_action( 'edit_user_profile_update', array( 'Loc_Metabox', 'save_user_meta' ), 12 );
 	}
 
-	public static function post_submitbox() {
-		$choices = WP_Geo_Data::geo_public();
-		global $post;
-		$public = WP_Geo_Data::get_visibility( 'post', $post->ID );
-		wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
-		?>
-				<div class="misc-pub-section misc-pub-location">
-				<span class="dashicons dashicons-location" id="location-lookup" title="<?php esc_html_e( 'Lookup Location', 'simple-location' ); ?>"></span>
-						<label for="post-location"><?php esc_html_e( 'Location:', 'simple-location' ); ?></label>
-						<span id="post-location-label">
-						<?php
-
-								echo $choices[ $public ]; // phpcs:ignore
-						?>
-</span>
-						<a href="#post_location" class="edit-post-location hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Location Settings</span></a>
-				<br />
-<div id="post-location-select" class="hide-if-js">
-				<input type="hidden" name="hidden_post_location" id="hidden_post_location" value="<?php echo esc_attr( $public ); ?>" />
-				<input type="hidden" name="location_default" id="location_default" value="<?php echo esc_attr( get_option( 'geo_public' ) ); ?>" />
-				<select name="geo_public" id="post-location" width="90%">
-				<?php
-						echo WP_Geo_Data::geo_public_select( $public ); // phpcs:ignore
-						echo '</select>';
-				?>
-<br />
-				<a href="#post_location" class="save-post-location hide-if-no-js button">OK</a>
-				<a href="#post_location" class="cancel-post-location hide-if-no-js button-cancel">Cancel</a>
-</div>
-</div>
-		<?php
+	public static function location_side_metabox() {
+		load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-side-metabox.php' );
+		do_action( 'simple_location_sidebox', get_current_screen()->id );
 	}
 
-
-
 	public static function screens() {
-		$screens = array( 'post', 'comment', 'attachment' );
+		$screens = array( 'post', 'attachment' );
 		return apply_filters( 'sloc_post_types', $screens );
 	}
 
 	public static function enqueue( $hook_suffix ) {
-		$screens = self::screens();
-		if ( in_array( get_current_screen()->id, $screens, true ) || 'profile.php' === $hook_suffix ) {
+		$screens   = self::screens();
+		$screens[] = 'comment';
+		$hooks     = array( 'profile.php' );
+		if ( in_array( get_current_screen()->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
 			wp_enqueue_script(
 				'sloc_location',
 				plugins_url( 'js/location.js', dirname( __FILE__ ) ),
@@ -80,14 +51,13 @@ class Loc_Metabox {
 			);
 			wp_localize_script(
 				'sloc_location',
-				'geo_public_options',
-				WP_Geo_Data::geo_public()
-			);
-			wp_localize_script(
-				'sloc_location',
-				'geo_options',
+				'slocOptions',
 				array(
-					'lookup' => get_option( 'sloc_geolocation_provider' ),
+					'lookup'             => get_option( 'sloc_geolocation_provider' ),
+					'units'              => get_option( 'sloc_measurements' ),
+					'visibility_options' => WP_Geo_Data::geo_public(),
+					'api_nonce'          => wp_create_nonce( 'wp_rest' ),
+					'api_url'            => rest_url( '/sloc_geo/1.0/' ),
 				)
 			);
 		}
@@ -95,13 +65,29 @@ class Loc_Metabox {
 
 	/* Create location meta boxes to be displayed on the post editor screen. */
 	public static function add_meta_boxes() {
-		add_meta_box(
+		/*	add_meta_box(
 			'locationbox-meta',      // Unique ID
 			esc_html__( 'Location', 'simple-location' ),    // Title
 			array( 'Loc_Metabox', 'metabox' ),   // Callback function
 			self::screens(),         // Admin page (or post type)
 			'normal',         // Context
 			'default'         // Priority
+		); */
+		add_meta_box(
+			'locationsidebox',
+			esc_html__( 'Location', 'simple-location' ),
+			array( 'Loc_Metabox', 'location_side_metabox' ),
+			self::screens(), // post types
+			'side',
+			'default'
+		);
+		add_meta_box(
+			'locationsidebox',
+			esc_html__( 'Location', 'simple-location' ),
+			array( 'Loc_Metabox', 'location_side_metabox' ),
+			'comment',
+			'normal',
+			'default'
 		);
 	}
 
@@ -177,7 +163,7 @@ class Loc_Metabox {
 		}
 
 		$weather    = array();
-		$wtr_params = array( 'temperature', 'units', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility' );
+		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility', 'cloudiness', 'rain', 'snow', 'visibility' );
 		foreach ( $wtr_params as $param ) {
 			if ( ! empty( $_POST[ $param ] ) ) {
 				$weather[ str_replace( 'weather_', '', $param ) ] = $_POST[ $param ];

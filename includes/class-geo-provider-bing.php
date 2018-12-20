@@ -84,18 +84,29 @@ class Geo_Provider_Bing extends Geo_Provider {
 		$json = json_decode( $response['body'], true );
 		if ( isset( $json['resourceSets'] ) ) {
 			$json = $json['resourceSets'][0];
-			if ( isset( $json['resources'] ) ) {
+			if ( isset( $json['resources'] ) && is_array( $json['resources'] ) ) {
 				$json = $json['resources'][0];
 			}
 		}
 
-		$addr                 = array( 'raw' => $json );
-		$addr['display-name'] = $json['name'];
-		$addr['locality']     = ifset( $json['address']['locality'] );
-		$addr['country-name'] = ifset( $json['address']['countryRegion'] );
-		$tz                   = $this->timezone();
+		$addr                   = array(
+			'latitude'  => $this->latitude,
+			'longitude' => $this->longitude,
+		);
+		$addr['display-name']   = $json['name'];
+		$addr['street-address'] = ifset( $json['address']['addressLine'] );
+		$addr['locality']       = ifset( $json['address']['locality'] );
+		$addr['region']         = ifset( $json['address']['adminDistrict'] );
+		$addr['country-name']   = ifset( $json['address']['countryRegion'] );
+		$addr['postal-code']    = ifset( $json['address']['postalCode'] );
+		$addr['label']          = ifset( $json['address']['landmark'] );
+
+		$tz = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
+		}
+		if ( WP_DEBUG ) {
+			$addr['raw'] = $json;
 		}
 		return $addr;
 	}

@@ -50,6 +50,9 @@ abstract class Location_Provider extends Sloc_Provider {
 		return false;
 	}
 
+	public function set_user( $user ) {
+		$this->user = $user;
+	}
 
 	abstract public function retrieve();
 }
