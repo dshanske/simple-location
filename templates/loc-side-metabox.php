@@ -9,11 +9,11 @@ $weather = ifset( $geodata['weather'], array() );
 $wind    = ifset( $weather['wind'], array() );
 $public = isset( $geodata['visibility'] ) ? $geodata['visibility'] : WP_Geo_Data::get_visibility();
 $choices = WP_Geo_Data::geo_public();
-wp_nonce_field( 'location_visibility_metabox', 'location_visibility_nonce' );
 
 ?>
 
 <div class="location-section location-section-main">
+	<?php wp_nonce_field( 'location_metabox', 'location_metabox_nonce' ); ?>
 	<span class="dashicons dashicons-location-alt" id="location-title" title="<?php esc_html_e( 'Location', 'simple-location' ); ?>"></span>
 	<label for="location"><?php esc_html_e( 'Location:', 'simple-location' ); ?></label>
 	<span id="location-label"><?php echo ifset( $geodata['address'], __( 'None', 'simple-location' ) ); ?></span>

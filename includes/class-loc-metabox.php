@@ -208,6 +208,7 @@ class Loc_Metabox {
 		if ( ! isset( $_POST['location_metabox_nonce'] ) ) {
 			return;
 		}
+		
 		// Verify that the nonce is valid.
 		if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
 			return;

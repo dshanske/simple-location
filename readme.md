@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.5.0  
+**Stable tag:** 3.5.1  
 **Requires at least:** 4.7  
-**Tested up to:** 5.0.1  
+**Tested up to:** 5.0.2  
 **Requires PHP:** 5.3  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -132,6 +132,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 3.5.1 ( 2018-12-19 ) ###
+* Did not merge in fix before pushing
 
 ### 3.5.0 ( 2018-12-19 ) ###
 * Another attempt to fix the setting of private location by adding testing
