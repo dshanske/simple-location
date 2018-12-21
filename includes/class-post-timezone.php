@@ -53,29 +53,30 @@ class Post_Timezone {
 		}
 		?>
 		<div class="location-section location-section-timezone">
-		<span class="dashicons dashicons-clock" id="timezone-browser" title="<?php esc_html_e( 'Set Local Timezone', 'simple-location' ); ?>"></span>
-			<label for="post-timezone"><?php esc_html_e( 'Timezone:', 'simple-location' ); ?></label>
-			<span id="post-timezone-label">
-			<?php
-			if ( $timezone ) {
-				echo esc_html( $timezone ); }
-			?>
-</span>
+			<span class="dashicons-before dashicons-clock" id="timezone-browser" title="<?php esc_html_e( 'Set Local Timezone', 'simple-location' ); ?>"> <?php esc_html_e( 'Timezone:', 'simple-location' ); ?></span>
+				<span id="post-timezone-label">
+				<?php
+				if ( $timezone ) {
+					echo esc_html( $timezone ); }
+				?>
+			</span>
 			<a href="#post_timezone" class="edit-post-timezone hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Override Timezone</span></a>
-		<br />
-<div id="post-timezone-select" class="hide-if-js">
-		<input type="hidden" name="hidden_post_timezone" id="hidden_post_timezone" value="<?php echo esc_html( $timezone ); ?>" />
-		<input type="hidden" name="timezone_default" id="timezone_default" value="<?php echo esc_attr( get_option( 'timezone_string' ) ); ?>" />
-		<select name="post_timezone" id="post-timezone" width="90%">
-		<?php
-			echo wp_timezone_choice( $timezone ); // phpcs:ignore
-			echo '</select>';
-		?>
-<br />
-		<a href="#post_timezone" class="save-post-timezone hide-if-no-js button">OK</a>
-		<a href="#post_timezone" class="cancel-post-timezone hide-if-no-js button-cancel">Cancel</a>
-</div>
-</div>
+
+			<div id="post-timezone-select" class="hide-if-js">
+				<input type="hidden" name="hidden_post_timezone" id="hidden_post_timezone" value="<?php echo esc_html( $timezone ); ?>" />
+				<input type="hidden" name="timezone_default" id="timezone_default" value="<?php echo esc_attr( get_option( 'timezone_string' ) ); ?>" />
+				<select name="post_timezone" id="post-timezone" width="90%">
+				<?php
+					echo wp_timezone_choice( $timezone ); // phpcs:ignore
+					echo '</select>';
+				?>
+
+				<p>
+					<a href="#post_timezone" class="save-post-timezone hide-if-no-js button">OK</a>
+					<a href="#post_timezone" class="cancel-post-timezone hide-if-no-js button-cancel">Cancel</a>
+				</p>
+			</div><!-- #post-timezone-select -->
+		</div><!-- .location-section -->
 		<?php
 	}
 
