@@ -67,7 +67,7 @@ $choices = WP_Geo_Data::geo_public();
 
 	<span class="dashicons dashicons-palmtree" id="weather-title" title="<?php esc_html_e( 'Weather', 'simple-location' ); ?>"></span>
 	<label for="weather"><?php esc_html_e( 'Weather:', 'simple-location' ); ?></label>
-	<span id="weather-label"><?php echo 'None'; ?></span>
+	<span id="weather-label"><?php echo ifset( $weather['summary'] ) ? $weather['summary'] : __( 'None', 'simple-location' ); ?></span>
 	<a href="#weather" class="edit-weather hide-if-no-js" role="button"><span aria-hidden="true">Edit</a><span class="screen-reader-text">weather</span>
 	<br />
 <div id="weather-fields" class="field-row hide-if-js">
@@ -108,7 +108,7 @@ $choices = WP_Geo_Data::geo_public();
                                         <input type="text" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
                                         </label>
                                         <label for="visibility" class="quarter"><?php _e( 'Visibility', 'simple-location' ); ?>
-                                        <input type="text" name="visibility" id="visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
+                                        <input type="text" name="weather_visibility" id="weather_visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
                                         </label>
                                         <label for="cloudiness" class="quarter"><?php _e( 'Cloudiness', 'simple-location' ); ?>
                                         <input type="text" name="cloudiness" id="cloudiness" value="<?php echo ifset( $weather['cloudiness'], '' ); ?>" />

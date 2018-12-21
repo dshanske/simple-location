@@ -125,7 +125,7 @@ class Loc_View {
 			}
 			$c .= '<span class="p-temperature">' . round( $weather['temperature'] ) . '&deg;' . $units . '</span>';
 		}
-		$c .= '&nbsp;' . ifset( $weather['summary'], '' ); 
+		$c .= '&nbsp;' . ifset( $weather['summary'], '' );
 		if ( isset( $weather['station_id'] ) ) {
 			if ( isset( $weather['name'] ) ) {
 				$c .= sprintf( '<p>%1$s</p>', $weather['name'] );

@@ -176,8 +176,8 @@ jQuery( document ).ready( function( $ ) {
 							if ( ( 'snow' in weather ) && ( '' === $( '#snow' ).val() ) ) {
 								$( '#snow' ).val( weather.snow );
 							}
-							if ( ( 'visibility' in weather ) && ( '' === $( '#visibility' ).val() ) ) {
-								$( '#visibility' ).val( weather.visibility ) ;
+							if ( ( 'visibility' in weather ) && ( '' === $( '#weather_visibility' ).val() ) ) {
+								$( '#weather_visibility' ).val( weather.visibility ) ;
 							}
 								if ( 'wind' in weather ) {
 									if ( 'speed' in weather.wind ) {
@@ -219,7 +219,7 @@ jQuery( document ).ready( function( $ ) {
 			'weather_icon',
 			'wind_speed',
 			'wind_degree',
-			'visibility',
+			'weather-visibility',
 			'pressure'
 		];
 		if ( ! confirm( 'Are you sure you want to remove the location details?' ) ) {
