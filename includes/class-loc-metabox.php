@@ -167,7 +167,7 @@ class Loc_Metabox {
 		}
 
 		$weather    = array();
-		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility', 'cloudiness', 'rain', 'snow', 'visibility' );
+		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility', 'cloudiness', 'rain', 'snow', 'weather_visibility' );
 		foreach ( $wtr_params as $param ) {
 			if ( ! empty( $_POST[ $param ] ) ) {
 				$weather[ str_replace( 'weather_', '', $param ) ] = $_POST[ $param ];
@@ -208,7 +208,7 @@ class Loc_Metabox {
 		if ( ! isset( $_POST['location_metabox_nonce'] ) ) {
 			return;
 		}
-		
+
 		// Verify that the nonce is valid.
 		if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
 			return;
