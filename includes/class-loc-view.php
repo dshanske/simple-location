@@ -35,7 +35,16 @@ class Loc_View {
 
 	public static function get_location( $object = null, $args = array() ) {
 		$loc = WP_Geo_Data::get_geodata( $object );
-		if ( ! isset( $loc ) || 'private' === $loc['visibility'] ) {
+		if ( ! isset( $loc ) ) {
+			return '';
+		}
+		if ( current_user_can( 'publish_posts' ) && 'public' !== $loc['visibility'] ) {
+			$loc['visibility'] = 'public';
+			if ( isset( $loc['address'] ) ) {
+				$loc['address'] = sprintf( __( 'Private: %1$s', 'simple-location' ), $loc['address'] );
+			}
+		}
+		if ( 'private' === $loc['visibility'] ) {
 			return '';
 		}
 		$defaults = array(
