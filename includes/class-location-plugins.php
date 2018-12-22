@@ -36,12 +36,19 @@ class Location_Plugins {
 			}
 		}
 		if ( isset( $meta['geo_longitude'] ) && $meta['geo_latitude'] ) {
+			if ( isset( $args['timezone'] ) ) {
+				update_post_meta( $post_id, 'geo_timezone', $args['timezone'] );
+			} else {
+				update_post_meta( $post_id, 'geo_timezone', timezone_for_location( $meta['geo_longitude'], $meta['geo_latitude'] ) );
+			}
 			$weather = Loc_Config::weather_provider();
 			$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
 			$conditions = $weather->get_conditions();
 			if ( ! empty( $conditions ) ) {
 				update_post_meta( $args['ID'], 'geo_weather', $conditions );
 			}
+		} elseif ( isset( $args['timezone'] ) ) {
+				update_post_meta( $post_id, 'geo_timezone', $_POST['post_timezone'] );
 		}
 	}
 
