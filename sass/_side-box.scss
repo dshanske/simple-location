@@ -13,16 +13,21 @@
 
 
 #locationsidebox {
-	#location-title {
-		color: grey;
-			&:hover {
-			color: red;
+	.location-ajax {
+		background-color: transparent;
+		border: none;
+		line-height: 1.6;
+		padding: 0;
+		cursor: pointer;
+
+		&::before {
+			color: currentColor;
+			transition: color 150ms;
 		}
-	}
-	#timezone-browser {
-		color: grey;
-		&:hover {
-			color: red;
+
+		&:hover::before {
+			color: firebrick;
 		}
 	}
 }
+

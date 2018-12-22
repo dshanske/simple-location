@@ -12,17 +12,19 @@
   font-weight: bold;
 }
 
-#locationsidebox #location-title {
-  color: grey;
+#locationsidebox .location-ajax {
+  background-color: transparent;
+  border: none;
+  line-height: 1.6;
+  padding: 0;
+  cursor: pointer;
 }
-#locationsidebox #location-title:hover {
-  color: red;
+#locationsidebox .location-ajax::before {
+  color: currentColor;
+  transition: color 150ms;
 }
-#locationsidebox #timezone-browser {
-  color: grey;
-}
-#locationsidebox #timezone-browser:hover {
-  color: red;
+#locationsidebox .location-ajax:hover::before {
+  color: firebrick;
 }
 
 /*# sourceMappingURL=location-admin.css.map */

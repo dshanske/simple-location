@@ -401,7 +401,6 @@ jQuery( document ).ready( function( $ ) {
 	$( '#location-title' ).click( function( event ) {
 		showLoadingSpinner();
 		lookupLocation();
-		event.preventDefault();
+		return false;
 	});
-
 });
