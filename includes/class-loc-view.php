@@ -41,6 +41,7 @@ class Loc_View {
 		if ( current_user_can( 'publish_posts' ) && 'public' !== $loc['visibility'] ) {
 			$loc['visibility'] = 'public';
 			if ( isset( $loc['address'] ) ) {
+				/* translators: Prefaces the address 1. with the private status */
 				$loc['address'] = sprintf( __( 'Private: %1$s', 'simple-location' ), $loc['address'] );
 			}
 		}
