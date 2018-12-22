@@ -152,7 +152,9 @@ class Loc_Metabox {
 		}
 		$geodata = WP_Geo_Data::get_geodata( $post );
 		$author  = new WP_User( $post->post_author );
-		WP_Geo_Data::set_geodata( $author, $geodata );
+		if ( 'private' !== $geodata['visibility'] ) {
+			WP_Geo_Data::set_geodata( $author, $geodata );
+		}
 	}
 
 	public static function save_meta( $meta_type, $object_id ) {

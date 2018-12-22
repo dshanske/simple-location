@@ -14,9 +14,6 @@ $geodata = WP_Geo_Data::get_geodata( $profileuser );
 
 				</button>
 <table class="form-table">
-<div class="loading">
-	<img src="<?php echo esc_url( includes_url( '/images/wpspin-2x.gif' ) ); ?>" class="loading-spinner" />
-</div>
 <tr><th><label for="latitude"><?php _e( 'Latitude', 'simple-location'); ?></label></th>
 <td>
 <input type="text" name="latitude" id="latitude" value="<?php echo ifset( $geodata['latitude'], '' ); ?>" class="regular-text" />
