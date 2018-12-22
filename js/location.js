@@ -34,7 +34,6 @@ jQuery( document ).ready( function( $ ) {
 					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
 				},
 				data: {
-					user: $( '#post_author_override' ).val()
 				},
 				success: function( response ) {
 					if ( window.console ) {

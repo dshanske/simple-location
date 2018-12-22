@@ -103,13 +103,9 @@ class REST_Geo {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'lookup' ),
-					'args'                => array(
-						'user' => array(
-							'required' => true,
-						),
-					),
+					'args'                => array(),
 					'permission_callback' => function() {
-						return current_user_can( 'publish_posts' );
+						return current_user_can( 'read' );
 					},
 				),
 			)
@@ -175,7 +171,7 @@ class REST_Geo {
 		$params      = $request->get_params();
 		$geolocation = Loc_Config::geolocation_provider();
 		if ( is_object( $geolocation ) ) {
-			$geolocation->set_user( $params['user'] );
+			$geolocation->set_user( get_current_user_id() );
 			$geolocation->retrieve();
 			return $geolocation->get();
 		} elseif ( 'null' === $geolocation ) {
