@@ -16,6 +16,33 @@ class REST_Geo {
 	public function register_routes() {
 		register_rest_route(
 			'sloc_geo/1.0',
+			'/user',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'user' ),
+					'args'                => array(
+						'longitude'  => array(
+							'required' => true,
+						),
+						'latitude'   => array(
+							'required' => true,
+						),
+						'altitude'   => array(),
+						'accuracy'   => array(),
+						'speed'      => array(),
+						'heading'    => array(),
+						'visibility' => array(),
+
+					),
+					'permission_callback' => function() {
+						return current_user_can( 'read' );
+					},
+				),
+			)
+		);
+		register_rest_route(
+			'sloc_geo/1.0',
 			'/timezone',
 			array(
 				array(
@@ -155,6 +182,35 @@ class REST_Geo {
 			return $geolocation;
 		}
 		return new WP_Error( 'no_provider', __( 'No Geolocation Provider Available', 'simple-location' ), array( 'status' => 400 ) );
+	}
+
+	// Callback for updating user location
+	public static function user( $request ) {
+		$params   = $request->get_params();
+		$location = wp_array_slice_assoc( $params, array( 'latitude', 'longitude', 'altitude', 'accuracy', 'speed', 'heading', 'visibility' ) );
+		$location = array_filter( $location );
+		if ( isset( $location['latitude'] ) && isset( $location['longitude'] ) ) {
+			$reverse = Loc_Config::geo_provider();
+			$reverse->set( $location['latitude'], $location['longitude'] );
+			$reverse_adr = $reverse->reverse_lookup();
+
+			if ( isset( $reverse_adr['display-name'] ) ) {
+				$location['address'] = $reverse_adr['display-name'];
+			}
+			if ( isset( $location['altitude'] ) && 0 !== $location['altitude'] && 'NaN' !== $location['altitude'] ) {
+				unset( $location['altitude'] );
+			}
+			if ( ! isset( $location['altitude'] ) ) {
+				$location['altitude'] = $reverse->elevation();
+			}
+		}
+
+		$return = WP_Geo_Data::set_geodata( wp_get_current_user(), $location );
+		if ( is_wp_error( $return ) ) {
+			return $return;
+		} else {
+			return __( 'Updated', 'simple-location' );
+		}
 	}
 
 	public static function geocode( $request ) {

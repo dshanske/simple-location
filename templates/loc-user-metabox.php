@@ -31,6 +31,13 @@ $geodata = WP_Geo_Data::get_geodata( $profileuser );
 <span class="description"><?php _e( 'Longitude', 'simple-location' ); ?></span>
 </td>
 </tr>
+<tr><th><label for="altitude"><?php _e( 'Altitude', 'simple-location'); ?></label></th>
+<td>
+<input type="text" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" class="regular-text" />
+<br />
+<span class="description"><?php _e( 'Altitude', 'simple-location' ); ?></span>
+</td>
+</tr>
 <tr><th><label for="address"><?php _e( 'Address', 'simple-location'); ?></label></th>
 <td>
 <input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'], '' ); ?>" class="regular-text" />

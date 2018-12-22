@@ -371,6 +371,7 @@ class WP_Geo_Data {
 		if ( ! is_array( $geodata ) ) {
 			return false;
 		}
+		$type = null;
 		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visibility' ) );
 		if ( isset( $geodata['map_zoom'] ) ) {
 			$geodata['zoom'] = $geodata['map_zoom'];
@@ -401,6 +402,9 @@ class WP_Geo_Data {
 			$id   = $object->ID;
 			$type = 'user';
 		}
+		if ( ! $type ) {
+			return new WP_Error( 'invalid input', __( 'Invalid Input', 'simple-location' ), array( 'object' => $object, 'geodata' => $geodata ) );
+		}
 		if ( isset( $geodata['visibility'] ) ) {
 			self::set_visibility( $type, $id, $geodata['visibility'] );
 			unset( $geodata['visibility'] );
@@ -408,6 +412,7 @@ class WP_Geo_Data {
 		foreach ( $geodata as $key => $value ) {
 			update_metadata( $type, $id, 'geo_' . $key, $value );
 		}
+		return true;
 	}
 
 	private static function get_geometadata( $type, $id ) {
