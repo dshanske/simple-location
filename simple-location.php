@@ -84,17 +84,18 @@ class Simple_Location_Plugin {
 		add_action( 'widgets_init', array( 'Simple_Location_Plugin', 'widgets_init' ) );
 		// Load Providers
 		$providers = array(
-			'class-weather-provider-openweathermap.php',
-			'class-weather-provider-darksky.php',
-			'class-weather-provider-nwsus.php',
-			'class-map-provider-mapbox.php',
-			'class-map-provider-google.php',
-			'class-map-provider-bing.php',
-			'class-map-provider-mapquest.php',
-			'class-map-provider-here.php',
-			'class-geo-provider-nominatim.php',
-			'class-geo-provider-google.php',
-			'class-geo-provider-bing.php',
+			'class-location-provider-dummy.php', // Dummy Location Provider
+			'class-weather-provider-openweathermap.php', // Open Weather Map
+			'class-weather-provider-darksky.php', // Dark Sky
+			'class-weather-provider-nwsus.php', // National Weather Service (US)
+			'class-map-provider-mapbox.php', // MapBox
+			'class-map-provider-google.php', // Google
+			'class-map-provider-bing.php', // Bing
+			'class-map-provider-mapquest.php', // MapQuest
+			'class-map-provider-here.php', // HERE
+			'class-geo-provider-nominatim.php', // Nominatim
+			'class-geo-provider-google.php', // Google
+			'class-geo-provider-bing.php', // Bing
 		);
 		self::load( $providers );
 

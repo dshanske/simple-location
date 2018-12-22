@@ -5,6 +5,8 @@ $geodata = WP_Geo_Data::get_geodata( $profileuser );
 <div id="locationbox-meta">
 <h3><?php esc_html_e( 'Last Reported Location', 'simple-location' ); ?></h3>
 <p><?php esc_html_e( 'This allows you to set the last reported location for this author. See Simple Location settings for options.', 'simple-location' ); ?></p>
+
+<?php if( 'dummy' !== get_option( 'sloc_geolocation_provider' ) ) { ?>
 <button
                                         class="lookup-address-button button button-primary"
                                         aria-label="<?php _e( 'Location Lookup', 'simple-location' ); ?>"
@@ -13,6 +15,7 @@ $geodata = WP_Geo_Data::get_geodata( $profileuser );
                                         <?php _e( 'Use My Current Location', 'simple-location' ); ?>
 
 				</button>
+<?php } ?>
 <table class="form-table">
 <tr><th><label for="latitude"><?php _e( 'Latitude', 'simple-location'); ?></label></th>
 <td>
