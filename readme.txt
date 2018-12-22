@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.5.1
+Stable tag: 3.5.2
 Requires at least: 4.7
 Tested up to: 5.0.2
 Requires PHP: 5.3
@@ -61,7 +61,7 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 
 * Map Providers include MapBox, Google, Mapquest's Open Static Map, HERE, and Bing
 * Geocoding Providers include the Mapquest hosted version of Nominatim, Google, and Bing.
-* Location Providers only offer HTML5 Browser Geolocation
+* Location Providers only offer HTML5 Browser Geolocation and a Provider that takes the location setting out of the author profile
 * Weather Providers include OpenWeatherMap, Dark Sky, and the US National Weather Service. Dark Sky does not support stations.
 
 
@@ -93,8 +93,23 @@ also known as protected, which shows a textual description of the location but d
 
 = The Location Icon does not retrieve my location. =
 
-Chrome Users: The button that retrieves the location using the HTML5 geolocation API will not work on Chrome if your website is not secure(https). This is a Chrome decision to ensure safe control of personal
-data.
+Chrome Users: Retrieves the location using the HTML5 geolocation API(available in your browser) will not work on Chrome if your website is not secure(https). This is a Chrome decision to ensure safe control of personal data.
+
+You can take advantage of the other built-in location provider which uses the location of the user or create your own location provider as a separate plugin.
+
+= How can I update the location of my user profile? = 
+
+You can do so under your user profile or alternatively update using a REST API endpoint. By posting to `/wp-json/sloc_geo/1.0/user` with the latitude, longitude, altitude parameters will
+update the user associated with the credentials you provide to the REST API.
+
+= How can I access the location or weather data on the frontend? =
+
+There are REST API endpoints to retrieve the data so it can be used in the admin under the namespace `/wp-json/sloc_geo/1.0`:
+* /timezone which will return timezone data for a latitude/longitude or airport code
+* /weather which will return the weather for a latitude/longitude or station ID
+* /geocode which will return the address information for a latitude/longitude and optionally add the weather
+* /lookup which will return the current location for a user based on the location provider
+* /map which will return static map data for the provided latitude and longitude
 
 = How can I show a list of posts tagged with a location? =
 
@@ -106,6 +121,9 @@ JetPack only began offering location display in 2017, 3 years after this plugin 
 
 They do not offer the features this plugin does and their goal is a minimal implementation.
 
+= Why am I seeing location on private posts with the notation Private? =
+
+This appears to users who can publish posts when logged in.
 
 = How can I report issues or request support? =
 
@@ -132,6 +150,14 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 3.5.2 ( 2018-12-22 ) =
+* Fix visibility issue finally
+* Fix widget title issues
+* Style changes/fixes( thanks @asuh)
+* Add location provider that always returns the location in the author user profile
+* Add endpoint to update the user location
+* Show private or protected location if logged in as user who can publish posts with the notation private
 
 = 3.5.1 ( 2018-12-19 ) =
 * Did not merge in fix before pushing
