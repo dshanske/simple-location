@@ -33,15 +33,20 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 		}
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			echo '<div>';
-			esc_html_e( 'Last Seen: ', 'simple-location' );
-			// phpcs:ignore
-			echo Loc_View::get_location(
+			$location = Loc_View::get_location(
 				new WP_User( $instance['user'] ),
 				array(
 					'weather' => false,
 				)
 			);
+			if ( ! empty( $location ) ) {
+				echo $location; // phpcs:ignore
+			} else {
+				esc_html_e( 'No current location information available', 'simple-location' );
+			}
 			echo '</div>';
+		} else {
+			esc_html_e( 'No User Set', 'simple-location' );
 		}
 		echo $args['after_widget']; // phpcs:ignore
 	}
@@ -77,10 +82,9 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 		<?php
 		wp_dropdown_users(
 			array(
-				'id'               => $this->get_field_id( 'user' ),
-				'name'             => $this->get_field_name( 'user' ),
-				'show_option_none' => __( 'None', 'simple-location' ),
-				'selected'         => ifset( $instance['user'], 0 ),
+				'id'       => $this->get_field_id( 'user' ),
+				'name'     => $this->get_field_name( 'user' ),
+				'selected' => ifset( $instance['user'], 0 ),
 			)
 		);
 		?>
