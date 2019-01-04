@@ -42,7 +42,7 @@ class Loc_View {
 			$loc['visibility'] = 'public';
 			if ( isset( $loc['address'] ) ) {
 				/* translators: Prefaces the address 1. with the private status */
-				$loc['address'] = sprintf( __( 'Private: %1$s', 'simple-location' ), $loc['address'] );
+				$loc['address'] = sprintf( __( 'Hidden: %1$s', 'simple-location' ), $loc['address'] );
 			}
 		}
 		if ( 'private' === $loc['visibility'] ) {
