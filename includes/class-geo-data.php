@@ -435,7 +435,7 @@ class WP_Geo_Data {
 		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 			return null;
 		}
-		return $geodata;
+		return array_filter( $geodata );
 	}
 
 	public static function has_location( $object = null ) {

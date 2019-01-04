@@ -161,10 +161,15 @@ class Loc_Metabox {
 		// phpcs:disable
 		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading' );
 		foreach ( $lon_params as $param ) {
-			if ( ! empty( $_POST[ $param ] ) && 'NaN' !== $_POST[ $param ] ) {
-				update_metadata( $meta_type, $object_id, 'geo_' . $param, $_POST[ $param ] );
+			if ( 'map_zoom' === $param ) {
+				$maparam = 'zoom';
 			} else {
-				delete_metadata( $meta_type, $object_id, 'geo_' . $param );
+				$maparam = $param;
+			}
+			if ( ! empty( $_POST[ $param ] ) && 'NaN' !== $_POST[ $param ] ) {
+				update_metadata( $meta_type, $object_id, 'geo_' . $maparam, $_POST[ $param ] );
+			} else {
+				delete_metadata( $meta_type, $object_id, 'geo_' . $maparam );
 			}
 		}
 

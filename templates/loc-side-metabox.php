@@ -9,6 +9,20 @@ $weather = ifset( $geodata['weather'], array() );
 $wind    = ifset( $weather['wind'], array() );
 $public = isset( $geodata['visibility'] ) ? $geodata['visibility'] : WP_Geo_Data::get_visibility();
 $choices = WP_Geo_Data::geo_public();
+$map_return = '';
+if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
+	$map      = Loc_Config::map_provider();
+	$map_args = array(
+		'latitude'  => ifset( $geodata['latitude'] ),
+		'longitude' => ifset( $geodata['longitude'] ),
+		'height'    => 200,
+		'width'     => 200,
+		'map_zoom' => ifset( $geodata['map_zoom'] )
+	);
+	
+	$map->set( array_filter( $map_args ) );
+	$map_return = $map->get_the_map();
+}
 
 ?>
 
@@ -19,7 +33,7 @@ $choices = WP_Geo_Data::geo_public();
 	<a href="#location" class="edit-location hide-if-no-js" role="button"><span aria-hidden="true">Edit</a><span class="screen-reader-text">Location</span>
 	<div id="location-fields" class="field-row hide-if-js">
 		<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label>
-        <input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" data-role="none" />
+        <input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'], __( 'None', 'simple-location' ) ); ?>" class="widefat" data-role="none" />
 
 		<label for="latitude" class="quarter">
     		<?php _e( 'Latitude:', 'simple-location' ); ?>
@@ -40,15 +54,16 @@ $choices = WP_Geo_Data::geo_public();
         <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
         <input type="text" name="map_zoom" id="map_zoom" class="widefat" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />
 
-		<span id="hide-map"></span>
+	<span id="hide-map"><?php echo $map_return; ?></span>
         <input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
         <input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
         <input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />
 
 		<p>
-            <a href="#location" class="lookup-location hide-if-no-js button"><?php _e( 'Lookup', 'simple-location' ); ?></a>
+            <a href="#location" class="lookup-location hide-if-no-js button button-primary"><?php _e( 'Lookup', 'simple-location' ); ?></a>
             <a href="#location" class="clear-location-button button-cancel"><?php _e( 'Clear', 'simple-location' ); ?></a>
-            <a href="#location" class="hide-location hide-if-no-js button-cancel"><?php _e( 'Cancel', 'simple-location' ); ?></a>
+            <a href="#location" class="hide-location hide-if-no-js button-secondary"><?php _e( 'Hide', 'simple-location' ); ?></a>
+
         </p>
 	</div><!-- #location-fields -->
 </div><!-- .location-section -->
@@ -69,7 +84,7 @@ $choices = WP_Geo_Data::geo_public();
 
 <div class="location-section location-section-weather">
 	<span class="dashicons-before dashicons-palmtree" id="weather-title" title="<?php esc_html_e( 'Weather', 'simple-location' ); ?>"> <?php esc_html_e( 'Weather:', 'simple-location' ); ?></span>
-	<span id="weather-label"><?php echo 'None'; ?></span>
+	<span id="weather-label"><?php echo ifset( $weather['summary'], __( 'None', 'simple-location' ) ); ?></span>
 	<a href="#weather" class="edit-weather hide-if-no-js" role="button"><span aria-hidden="true">Edit</a><span class="screen-reader-text">weather</span>
 
     <div id="weather-fields" class="field-row hide-if-js">
