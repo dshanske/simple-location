@@ -774,15 +774,17 @@ class Loc_Config {
 		return null;
 	}
 
-	public static function geolocation_provider() {
-		$option = get_option( 'sloc_geolocation_provider' );
-		if ( 'HTML5' === $option ) {
-			return 'null';
+	public static function geolocation_provider( $provider = null ) {
+		if ( ! $provider ) {
+			$provider = get_option( 'sloc_geolocation_provider' );
 		}
-		if ( isset( static::$location [ $option ] ) ) {
-			return static::$location[ $option ];
+		if ( 'HTML5' === $provider ) {
+			return null;
 		}
-		return 'null';
+		if ( isset( static::$location [ $provider ] ) ) {
+			return static::$location[ $provider ];
+		}
+		return null;
 	}
 
 	public static function weather_provider( $provider = null ) {

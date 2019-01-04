@@ -33,7 +33,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 	<a href="#location" class="edit-location hide-if-no-js" role="button"><span aria-hidden="true">Edit</a><span class="screen-reader-text">Location</span>
 	<div id="location-fields" class="field-row hide-if-js">
 		<label for="address"><?php _e( 'Location:', 'simple-location' ); ?></label>
-        <input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'], __( 'None', 'simple-location' ) ); ?>" class="widefat" data-role="none" />
+        <input type="text" name="address" id="address" value="<?php echo ifset( $geodata['address'] ); ?>" class="widefat" data-role="none" />
 
 		<label for="latitude" class="quarter">
     		<?php _e( 'Latitude:', 'simple-location' ); ?>

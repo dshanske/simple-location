@@ -171,6 +171,9 @@ class REST_Geo {
 		$params      = $request->get_params();
 		$geolocation = Loc_Config::geolocation_provider();
 		if ( is_object( $geolocation ) ) {
+			if ( 'HTML5' === $geolocation->get_slug() ) {
+				$geolocation = Loc_Config::geolocation_provider( 'dummy' );
+			}
 			$geolocation->set_user( get_current_user_id() );
 			$geolocation->retrieve();
 			return $geolocation->get();
