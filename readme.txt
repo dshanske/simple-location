@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.5.2
+Stable tag: 3.5.3
 Requires at least: 4.7
 Tested up to: 5.0.2
 Requires PHP: 5.3
@@ -150,6 +150,15 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 3.5.3 ( 2019-01-04 ) =
+* Fix bug in timezone scope causing Micropub to fail
+* Fix sunset darksky error ( props @xavierroy )
+* Rename Private to Hidden for logged in users to indicate location isn't shown if not logged in
+* Show map on load not just on lookup
+* Fix map zoom setting
+* Fix properties not showing when post displayed in editor
+* When HTML5 geolocation provider is set the rest endpoint will use the user location is queried as you cannot use a browser option outside of the browser
 
 = 3.5.2 ( 2018-12-22 ) =
 * Fix visibility issue finally
