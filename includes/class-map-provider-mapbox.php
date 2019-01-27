@@ -84,7 +84,11 @@ class Map_Provider_Mapbox extends Map_Provider {
 
 	public function get_the_static_map() {
 		$user = $this->user;
-		if ( array_key_exists( $this->style, $this->default_styles() ) ) {
+		$styles = $this->default_styles();
+		if ( empty( $styles ) || empty( $this->styles ) ) {
+			return '';
+		}
+		if ( array_key_exists( $this->style, $styles ) ) {
 			$user = 'mapbox';
 		}
 		$map = sprintf( 'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s, %5$s,0,0/%6$sx%7$s?access_token=%8$s', $user, $this->style, $this->longitude, $this->latitude, $this->map_zoom, $this->width, $this->height, $this->api );
