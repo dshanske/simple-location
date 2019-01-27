@@ -23,7 +23,7 @@ class Loc_View {
 		$aunits = get_option( 'sloc_measurements' );
 		switch ( $aunits ) {
 			case 'imperial':
-				$altitude = $altitude * 3.281;
+				$altitude = round( $altitude * 3.281 );
 				$aunits   = 'ft';
 				break;
 			default:
