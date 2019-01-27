@@ -22,6 +22,9 @@ class Map_Provider_Here extends Map_Provider {
 
 	// Return code for map
 	public function get_the_static_map() {
+		if ( empty( $this->api ) ) {
+			return '';
+		}
 		$map = sprintf( 'https://image.maps.api.here.com/mia/1.6/?app_code=%1$s&app_id=%2$s&lat=%3$s&lon=%4$s&w=%5$s&h=%6$s', $this->api, $this->appid, $this->latitude, $this->longitude, $this->width, $this->height );
 		return $map;
 	}

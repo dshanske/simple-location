@@ -27,6 +27,9 @@ class Map_Provider_Mapquest extends Map_Provider {
 
 	// Return code for map
 	public function get_the_static_map() {
+		if ( empty( $this->api ) ) {
+			return '';
+		}
 		$map = sprintf( 'https://open.mapquestapi.com/staticmap/v5/map?key=%1$s&center=%2$s,%3$s&size=%4$s,%5$s&type=%6$s', $this->api, $this->latitude, $this->longitude, $this->width, $this->height, $this->style );
 		return $map;
 	}

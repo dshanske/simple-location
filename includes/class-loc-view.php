@@ -114,9 +114,8 @@ class Loc_View {
 	}
 
 	public static function get_the_weather( $weather, $args = null ) {
-		$defaults = array(
-		);
-		$args = wp_parse_args( $args, $defaults );
+		$defaults = array();
+		$args     = wp_parse_args( $args, $defaults );
 		if ( ! is_array( $weather ) || empty( $weather ) ) {
 			return '';
 		}

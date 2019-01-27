@@ -26,6 +26,9 @@ class Map_Provider_Google extends Map_Provider {
 
 	// Return code for map
 	public function get_the_static_map() {
+		if ( empty( $this->api ) ) {
+			return '';
+		}
 		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->width . 'x' . $this->height . '&maptype=' . $this->style . '&language=' . get_bloginfo( 'language' ) . '&key=' . $this->api;
 		return $map;
 	}

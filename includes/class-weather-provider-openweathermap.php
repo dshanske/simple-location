@@ -33,6 +33,9 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions() {
+		if ( empty( $this->api ) ) {
+			return array();
+		}
 		$data = array(
 			'appid' => $this->api,
 			'units' => 'metric',

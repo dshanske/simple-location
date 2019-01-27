@@ -13,23 +13,26 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	}
 
 	public function elevation() {
-			$query = add_query_arg(
-				array(
-					'latLngCollection' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-					'key'              => $this->api,
-				),
-				'https://open.mapquestapi.com/elevation/v1/profile'
-			);
-			$args  = array(
-				'headers'             => array(
-					'Accept' => 'application/json',
-				),
-				'timeout'             => 10,
-				'limit_response_size' => 1048576,
-				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location
-				'user-agent'          => 'Simple Location for WordPress',
-			);
+		if ( empty( $this->api ) ) {
+			return null;
+		}
+		$query = add_query_arg(
+			array(
+				'latLngCollection' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+				'key'              => $this->api,
+			),
+			'https://open.mapquestapi.com/elevation/v1/profile'
+		);
+		$args  = array(
+			'headers'             => array(
+				'Accept' => 'application/json',
+			),
+			'timeout'             => 10,
+			'limit_response_size' => 1048576,
+			'redirection'         => 1,
+			// Use an explicit user-agent for Simple Location
+			'user-agent'          => 'Simple Location for WordPress',
+		);
 
 			$response = wp_remote_get( $query, $args );
 		if ( is_wp_error( $response ) ) {
@@ -51,6 +54,9 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 
 
 	public function reverse_lookup() {
+		if ( empty( $this->api ) ) {
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API Key for Mapquest', 'simple-location' ) );
+		}
 		$query = add_query_arg(
 			array(
 				'format'          => 'json',

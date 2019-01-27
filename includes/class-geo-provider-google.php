@@ -13,6 +13,9 @@ class Geo_Provider_Google extends Geo_Provider {
 	}
 
 	public function elevation() {
+		if ( empty( $this->api ) ) {
+			return null;
+		}
 		$query = add_query_arg(
 			array(
 				'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
@@ -50,6 +53,9 @@ class Geo_Provider_Google extends Geo_Provider {
 	}
 
 	public function reverse_lookup() {
+		if ( empty( $this->api ) ) {
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Google', 'simple-location' ) );
+		}
 		$query = add_query_arg(
 			array(
 				'latlng' => $this->latitude . ',' . $this->longitude,

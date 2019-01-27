@@ -83,7 +83,10 @@ class Map_Provider_Mapbox extends Map_Provider {
 	}
 
 	public function get_the_static_map() {
-		$user = $this->user;
+		if ( empty( $this->api ) ) {
+			return '';
+		}
+		$user   = $this->user;
 		$styles = $this->default_styles();
 		if ( empty( $styles ) || empty( $this->styles ) ) {
 			return '';

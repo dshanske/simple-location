@@ -29,6 +29,9 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions() {
+		if ( empty( $this->api ) ) {
+			return array();
+		}
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {
 			if ( $this->cache_key ) {
