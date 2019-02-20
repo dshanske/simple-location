@@ -191,7 +191,9 @@ class WP_Geo_Data {
 		echo "\t<georss:point>{$geo['latitude']} {$geo['longitude']}</georss:point>\n"; // phpcs:ignore
 		echo "\t\t<geo:lat>{$geo['latitude']}</geo:lat>\n"; // phpcs:ignore
 		echo "\t\t<geo:long>{$geo['longitude']}</geo:long>"; // phpcs:ignore
-		echo "\t\t<geo:featureName>{$geo['address']}</geo:featureName>"; // phpcs:ignore
+		if ( isset( $geo['address'] ) ) {
+			echo "\t\t<geo:featureName>{$geo['address']}</geo:featureName>"; // phpcs:ignore
+		}
 	}
 
 	public static function json_feed_item( $feed_item, $post ) {
