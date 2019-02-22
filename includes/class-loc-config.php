@@ -278,7 +278,7 @@ class Loc_Config {
 	public static function admin_menu() {
 		// If the IndieWeb Plugin is installed use its menu.
 		if ( class_exists( 'IndieWeb_Plugin' ) ) {
-			add_submenu_page(
+			$hook = add_submenu_page(
 				'indieweb',
 				__( 'Simple Location', 'simple-location' ), // page title
 				__( 'Location', 'simple-location' ), // menu title
@@ -287,7 +287,7 @@ class Loc_Config {
 				array( 'Loc_Config', 'simloc_options' )
 			);
 		} else {
-			add_options_page(
+			$hook = add_options_page(
 				'',
 				'Simple Location',
 				'manage_options',

@@ -76,7 +76,7 @@ class Location_Plugins {
 		return array(
 			'venues' => array(),
 			'geo'    => array(
-				'label'      => ifset( $reverse_adr['display-name'] ),
+				'label'     => ifset( $reverse_adr['display-name'] ),
 				'latitude'  => $input['lat'],
 				'longitude' => $input['lon'],
 			),

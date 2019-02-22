@@ -73,6 +73,7 @@ class Simple_Location_Plugin {
 			'class-loc-view.php', // Location View functionality
 			'class-timezone-result.php',
 			'class-location-plugins.php',
+			'class-location-zones.php',
 			'class-loc-timezone.php',
 			'class-post-timezone.php',
 			'class-airport-location.php',

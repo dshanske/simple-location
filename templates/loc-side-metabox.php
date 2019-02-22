@@ -10,7 +10,9 @@ $wind    = ifset( $weather['wind'], array() );
 $public = isset( $geodata['visibility'] ) ? $geodata['visibility'] : WP_Geo_Data::get_visibility();
 $choices = WP_Geo_Data::geo_public();
 $map_return = '';
+$zone = '';
 if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
+	$zone = Location_Zones::in_zone( $geodata['latitude'], $geodata['longitude'] );
 	$map      = Loc_Config::map_provider();
 	$map_args = array(
 		'latitude'  => ifset( $geodata['latitude'] ),
