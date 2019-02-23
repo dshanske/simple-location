@@ -76,7 +76,7 @@ class Loc_View {
 		if ( 'public' === $args['visibility'] ) {
 			$c .= self::get_the_geo( $loc );
 			if ( isset( $loc['altitude'] ) ) {
-				if ( 500 < (int) $loc['altitude'] ) {
+				if ( get_option( 'sloc_altitude' ) < (int) $loc['altitude'] ) {
 					$loc['altitude'] = self::display_altitude( $loc['altitude'] );
 				} else {
 					unset( $loc['altitude'] );

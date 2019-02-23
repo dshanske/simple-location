@@ -218,6 +218,17 @@ class Loc_Config {
 		);
 		register_setting(
 			'simloc', // settings page
+			'sloc_altitude', // option name
+			array(
+				'type'         => 'number',
+				'description'  => 'Simple Location Height After Which Altitude would be displayed(in meters)',
+				'show_in_rest' => true,
+				'default'      => 500,
+			)
+		);
+
+		register_setting(
+			'simloc', // settings page
 			'geo_public', // option name
 			array(
 				'type'         => 'boolean',
@@ -448,6 +459,17 @@ class Loc_Config {
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'sloc_zoom',
+			)
+		);
+
+		add_settings_field(
+			'altitude', // id
+			__( 'Altitude will Display if Above This Height(in meters)', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'number_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_map', // settings section
+			array(
+				'label_for' => 'sloc_altitude',
 			)
 		);
 
