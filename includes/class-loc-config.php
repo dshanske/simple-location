@@ -21,7 +21,7 @@ class Loc_Config {
 				'type'         => 'string',
 				'description'  => 'Map Provider',
 				'show_in_rest' => false,
-				'default'      => 'mapbox',
+				'default'      => 'wikimedia',
 			)
 		);
 		register_setting(

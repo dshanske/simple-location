@@ -94,6 +94,7 @@ class Simple_Location_Plugin {
 			'class-map-provider-bing.php', // Bing
 			'class-map-provider-mapquest.php', // MapQuest
 			'class-map-provider-here.php', // HERE
+			'class-map-provider-wikimedia.php', // Wikimedia
 			'class-geo-provider-nominatim.php', // Nominatim
 			'class-geo-provider-google.php', // Google
 			'class-geo-provider-bing.php', // Bing
