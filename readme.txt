@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.6.0
+Stable tag: 3.6.1
 Requires at least: 4.7
 Tested up to: 5.1.0
 Requires PHP: 5.3
@@ -158,6 +158,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 3.6.1 ( 2019-02-23 ) =
+* Missing commit
 
 = 3.6.0 ( 2019-02-23 ) =
 * Round altitude to nearest even number for display
