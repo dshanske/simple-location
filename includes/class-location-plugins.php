@@ -36,10 +36,18 @@ class Location_Plugins {
 			}
 		}
 		if ( isset( $meta['geo_longitude'] ) && $meta['geo_latitude'] ) {
+			if ( ! isset( $input['properties']['location-visibility'] ) ) {
+				$zone = Location_Zones::in_zone( $meta['geo_latitude'], $meta['geo_longitude'] );
+				if ( ! empty( $zone ) ) {
+					update_post_meta( $args['ID'], 'geo_address', $zone );
+					WP_Geo_Data::set_visibility( 'post', $args['ID'], 'protected' );
+					update_post_meta( $args['ID'], 'geo_zone', $zone );
+				}
+			}
 			if ( isset( $args['timezone'] ) ) {
-				update_post_meta( $post_id, 'geo_timezone', $args['timezone'] );
+				update_post_meta( $args['ID'], 'geo_timezone', $args['timezone'] );
 			} else {
-				update_post_meta( $post_id, 'geo_timezone', Loc_Timezone::timezone_for_location( $meta['geo_longitude'], $meta['geo_latitude'] ) );
+				update_post_meta( $args['ID'], 'geo_timezone', Loc_Timezone::timezone_for_location( $meta['geo_longitude'], $meta['geo_latitude'] ) );
 			}
 			$weather = Loc_Config::weather_provider();
 			$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
@@ -72,13 +80,19 @@ class Location_Plugins {
 		}
 		$reverse = Loc_Config::geo_provider();
 		$reverse->set( $input['lat'], $input['lon'] );
-		$reverse_adr = $reverse->reverse_lookup();
+		$zone = Location_Zones::in_zone( $input['lat'], $input['lon'] );
+		if ( empty( $zone ) ) {
+			$reverse_adr = $reverse->reverse_lookup();
+		} else {
+			$reverse_adr = array( 'display-name' => $zone );
+		}
 		return array(
 			'venues' => array(),
 			'geo'    => array(
-				'label'     => ifset( $reverse_adr['display-name'] ),
-				'latitude'  => $input['lat'],
-				'longitude' => $input['lon'],
+				'label'      => ifset( $reverse_adr['display-name'] ),
+				'latitude'   => $input['lat'],
+				'longitude'  => $input['lon'],
+				'visibility' => empty( $zone ) ? 'public' : 'protected',
 			),
 		);
 	}

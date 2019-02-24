@@ -216,11 +216,20 @@ class REST_Geo {
 		// We dont need to check the nonce like with admin-ajax.
 		$params = $request->get_params();
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+			$zone    = Location_Zones::in_zone( $params['latitude'], $params['longitude'] );
 			$reverse = Loc_Config::geo_provider();
 			$reverse->set( $params );
-			$reverse_adr = $reverse->reverse_lookup();
-			if ( is_wp_error( $reverse_adr ) ) {
-				return $reverse_adr;
+
+			if ( ! empty( $zone ) ) {
+				$reverse_adr = array(
+					'display-name' => $zone,
+					'visibility'   => 'protected',
+				);
+			} else {
+				$reverse_adr = $reverse->reverse_lookup();
+				if ( is_wp_error( $reverse_adr ) ) {
+					return $reverse_adr;
+				}
 			}
 			$map      = Loc_Config::map_provider();
 			$map_args = array(

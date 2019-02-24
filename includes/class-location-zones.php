@@ -38,6 +38,23 @@ class Location_Zones {
 		);
 	}
 
+
+	public static function save_zone( $meta_type, $object_id ) {
+		if ( isset( $_POST['latitude'] ) || isset( $_POST['longitude'] ) || isset( $_POST['address'] ) ) {
+			$zone = self::in_zone( $_POST['latitude'], $_POST['longitude'] );
+			if ( empty( $zone ) ) {
+				WP_Geo_Data::set_visibility( $meta_type, $object_id, $_POST['geo_public'] );
+			} else {
+				$_POST['address'] = $zone;
+				WP_Geo_Data::set_visibility( $meta_type, $object_id, 'protected' );
+				update_metadata( $meta_type, $object_id, 'geo_zone', $zone );
+			}
+		} else {
+			delete_metadata( $meta_type, $object_id, 'geo_public' );
+			delete_metadata( $meta_type, $object_id, 'geo_zone' );
+		}
+	}
+
 	public static function sloc_zones() {
 		esc_html_e(
 			'Enter Name, Latitude, Longitude, and Radius for each Zone. When a location is within the radius of this zone, the description will be set to the name of the zone,
@@ -79,10 +96,12 @@ class Location_Zones {
 		$output = '<input type="text" name="%1$s[%2$s][%3$s]" id="%4$s" value="%5$s" placeholder="%6$s" />';
 		$name   = 'sloc_zones';
 		echo '<li>';
+		// phpcs:disable
 		printf( $output, $name, $int, 'name', esc_attr( $name ), esc_attr( self::ifset( $value, 'name' ) ), esc_html__( 'Name', 'simple-location' ) );
 		printf( $output, $name, $int, 'latitude', esc_attr( $name ), esc_attr( self::ifset( $value, 'latitude' ) ), esc_html__( 'Latitude', 'simple-location' ) );
 		printf( $output, $name, $int, 'longitude', esc_attr( $name ), esc_attr( self::ifset( $value, 'longitude' ) ), esc_html__( 'Longitude', 'simple-location' ) );
 		printf( $output, $name, $int, 'radius', esc_attr( $name ), esc_attr( self::ifset( $value, 'radius' ) ), esc_html__( 'Radius(in meters)', 'simple-location' ) );
+		// phpcs:enable
 		echo '</li>';
 	}
 
@@ -94,11 +113,6 @@ class Location_Zones {
 			Simple_Location_Plugin::$version,
 			true
 		);
-		wp_localize_script(
-			'sloc_zones',
-			'slocOptions',
-			array()
-		);
 	}
 
 	public static function in_zone( $lat, $lng ) {
@@ -108,7 +122,7 @@ class Location_Zones {
 				return $zone['name'];
 			}
 		}
-		return 'Not in Zone';
+		return '';
 	}
 
 }

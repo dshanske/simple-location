@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.5.3  
+**Stable tag:** 3.6.0  
 **Requires at least:** 4.7  
-**Tested up to:** 5.0.2  
+**Tested up to:** 5.1.0  
 **Requires PHP:** 5.3  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -32,6 +32,13 @@ unless removed. For all other data, it is provided by the user, who decides its 
 only HTML5 browser geolocation is built in, for which the user must give consent to share). Other information is secured through use of third-party APIs to identify a 
 location, calculate elevation, display maps, and weather conditions.
 
+## Zones ##
+
+Zones allow for geofencing. You can set coordinates and a radius around them. If you set location to a place within a zone, the default behavior is to replace the location
+with a preset Name and hide the coordinates. This allows you to protect private locations such as your home, or your place of business. For Micropub, it will set the location
+as protected if the location is in the zone and the location-visibility property is not set. For the post editor in WordPress, looking up the location of an item inside the 
+zone will result in the visibility being set to protected and the name being set to the zone name. This can be overridden.
+
 ## Venues ##
 
 Venues are locations stored as a custom taxonomy in WordPress using the Term Metadata functionality added in Version 4.4 of WordPress. Venues as taxonomies
@@ -59,7 +66,7 @@ Station ID is available from supported providers for weather stations, for examp
 
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
-* Map Providers include MapBox, Google, Mapquest's Open Static Map, HERE, and Bing
+* Map Providers include Wikimedia, MapBox, Google, Mapquest's Open Static Map, HERE, and Bing
 * Geocoding Providers include the Mapquest hosted version of Nominatim, Google, and Bing.
 * Location Providers only offer HTML5 Browser Geolocation and a Provider that takes the location setting out of the author profile
 * Weather Providers include OpenWeatherMap, Dark Sky, and the US National Weather Service. Dark Sky does not support stations.
@@ -78,6 +85,7 @@ API Keys are required to use certain services.
 * [HERE](https://developer.here.com/)
 * [Dark Sky](https://darksky.net/dev)
 
+At this time, the only map service available without an API key is Wikimedia maps
 If not provided there will be no map displayed regardless of setting, reverse geo lookup will not work 
 Without a weather provider this service will not work. 
 
@@ -150,6 +158,14 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 3.6.0 ( 2019-02-23 ) ###
+* Round altitude to nearest even number for display
+* Minor bug fixes for PHP notices 
+* Add Wikimedia maps as a map provider. Link to their map site do not quite work but the static maps could be cached in future
+* Add setting to display altitude only if above a certain number of meters
+* Add zones to encourage privacy
+* Visibility returned in geo query if in zone
 
 ### 3.5.3 ( 2019-01-04 ) ###
 * Fix bug in timezone scope causing Micropub to fail

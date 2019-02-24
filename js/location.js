@@ -143,6 +143,10 @@ jQuery( document ).ready( function( $ ) {
 						if ( 'country-code' in response ) {
 							$( '#country-code' ).val( response['country-code']) ;
 						}
+						if ( 'visibility' in response ) {
+							$( '#location-visibility' ).val( response['visibility']) ;
+							$( '#location-visibility-label' ).text( slocOptions.visibility_options[$( '#location-visibility' ).val() ]); // eslint-disable-line camelcase
+						}
 						if ( 'timezone' in response ) {
 							$( '#post-timezone' ).val( response.timezone ) ;
 							$( '#post-timezone-label' ).text( response.timezone );

@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Simple Location package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 3.5.3\n"
+"Project-Id-Version: Simple Location 3.6.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
-"POT-Creation-Date: 2019-01-05 05:42:13+00:00\n"
+"POT-Creation-Date: 2019-02-24 04:33:27+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -37,31 +37,31 @@ msgstr ""
 msgid "All Comments"
 msgstr ""
 
-#: includes/class-geo-data.php:408
+#: includes/class-geo-data.php:410
 msgid "Invalid Input"
 msgstr ""
 
-#: includes/class-geo-data.php:618 templates/loc-user-metabox.php:20
-#: templates/loc-user-metabox.php:24
+#: includes/class-geo-data.php:620 includes/class-location-zones.php:101
+#: templates/loc-user-metabox.php:20 templates/loc-user-metabox.php:24
 msgid "Latitude"
 msgstr ""
 
-#: includes/class-geo-data.php:629 templates/loc-user-metabox.php:27
-#: templates/loc-user-metabox.php:31
+#: includes/class-geo-data.php:631 includes/class-location-zones.php:102
+#: templates/loc-user-metabox.php:27 templates/loc-user-metabox.php:31
 msgid "Longitude"
 msgstr ""
 
-#: includes/class-geo-data.php:640 includes/class-loc-config.php:284
+#: includes/class-geo-data.php:642 includes/class-loc-config.php:295
 #: includes/class-loc-metabox.php:78 includes/class-loc-metabox.php:90
-#: templates/loc-side-metabox.php:31
+#: templates/loc-side-metabox.php:33
 msgid "Location"
 msgstr ""
 
-#: includes/class-geo-data.php:651
+#: includes/class-geo-data.php:653
 msgid "Location Visibility"
 msgstr ""
 
-#: includes/class-geo-data.php:767
+#: includes/class-geo-data.php:769
 msgid "m"
 msgstr ""
 
@@ -69,174 +69,190 @@ msgstr ""
 msgid "Bing"
 msgstr ""
 
+#: includes/class-geo-provider-bing.php:63
+msgid "You have not set an API key for Bing"
+msgstr ""
+
 #: includes/class-geo-provider-google.php:6
 msgid "Google"
+msgstr ""
+
+#: includes/class-geo-provider-google.php:57
+msgid "You have not set an API key for Google"
 msgstr ""
 
 #: includes/class-geo-provider-nominatim.php:6
 msgid "Open Search(Nominatim) via Mapquest"
 msgstr ""
 
+#: includes/class-geo-provider-nominatim.php:58
+msgid "You have not set an API Key for Mapquest"
+msgstr ""
+
 #. Plugin Name of the plugin/theme
 msgid "Simple Location"
 msgstr ""
 
-#: includes/class-loc-config.php:305
+#: includes/class-loc-config.php:316
 msgid "API Keys and Settings for Simple Location"
 msgstr ""
 
-#: includes/class-loc-config.php:325
+#: includes/class-loc-config.php:336
 msgid "General Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:331
+#: includes/class-loc-config.php:342
 msgid "Default Display for Location"
 msgstr ""
 
-#: includes/class-loc-config.php:342
+#: includes/class-loc-config.php:353
 msgid "Update Author Last Reported Location on New Post"
 msgstr ""
 
-#: includes/class-loc-config.php:352
+#: includes/class-loc-config.php:363
 msgid "Unit of Measure"
 msgstr ""
 
-#: includes/class-loc-config.php:362
+#: includes/class-loc-config.php:373
 msgid "Provider Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:369
+#: includes/class-loc-config.php:380
 msgid "Map Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:375
+#: includes/class-loc-config.php:386
 msgid "Provides Static Map Images"
 msgstr ""
 
-#: includes/class-loc-config.php:381
+#: includes/class-loc-config.php:392
 msgid "Geo Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:387
+#: includes/class-loc-config.php:398
 msgid "Looking up an address from coordinates or vice versa"
 msgstr ""
 
-#: includes/class-loc-config.php:393
+#: includes/class-loc-config.php:404
 msgid "Geolocation Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:399
+#: includes/class-loc-config.php:410
 msgid ""
 "By default this uses your browser to lookup your location but you can "
 "alternatively tap into a service to get your current location, perhaps from "
 "your phone"
 msgstr ""
 
-#: includes/class-loc-config.php:405
+#: includes/class-loc-config.php:416
 msgid "Weather Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:411
+#: includes/class-loc-config.php:422
 msgid "Retrieves Weather Data about a Location"
 msgstr ""
 
-#: includes/class-loc-config.php:418
+#: includes/class-loc-config.php:429
 msgid "Map Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:425
+#: includes/class-loc-config.php:436
 msgid "Default Map Width"
 msgstr ""
 
-#: includes/class-loc-config.php:435
+#: includes/class-loc-config.php:446
 msgid "Default Map Height"
 msgstr ""
 
-#: includes/class-loc-config.php:445
+#: includes/class-loc-config.php:456
 msgid "Default Map Zoom"
 msgstr ""
 
-#: includes/class-loc-config.php:456
+#: includes/class-loc-config.php:467
+msgid "Altitude will Display if Above This Height(in meters)"
+msgstr ""
+
+#: includes/class-loc-config.php:478
 msgid "Google Style"
 msgstr ""
 
-#: includes/class-loc-config.php:468
+#: includes/class-loc-config.php:490
 msgid "Bing Style"
 msgstr ""
 
-#: includes/class-loc-config.php:480
+#: includes/class-loc-config.php:502
 msgid "Mapbox User"
 msgstr ""
 
-#: includes/class-loc-config.php:492
+#: includes/class-loc-config.php:514
 msgid "Mapbox Style"
 msgstr ""
 
-#: includes/class-loc-config.php:506
+#: includes/class-loc-config.php:528
 msgid "MapQuest Style"
 msgstr ""
 
-#: includes/class-loc-config.php:519
+#: includes/class-loc-config.php:541
 msgid "Weather Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:525
+#: includes/class-loc-config.php:547
 msgid "Providers"
 msgstr ""
 
-#: includes/class-loc-config.php:532
+#: includes/class-loc-config.php:554
 msgid "API Keys"
 msgstr ""
 
-#: includes/class-loc-config.php:539
+#: includes/class-loc-config.php:561
 msgid "HERE API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:550
+#: includes/class-loc-config.php:572
 msgid "HERE Application ID"
 msgstr ""
 
-#: includes/class-loc-config.php:562
+#: includes/class-loc-config.php:584
 msgid "MapQuest API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:573
+#: includes/class-loc-config.php:595
 msgid "Google Maps API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:584
+#: includes/class-loc-config.php:606
 msgid "Bing API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:597
+#: includes/class-loc-config.php:619
 msgid "Mapbox API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:609
+#: includes/class-loc-config.php:631
 msgid "Dark Sky API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:621
+#: includes/class-loc-config.php:643
 msgid "OpenWeatherMap API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:694
+#: includes/class-loc-config.php:716
 msgid "HTML5 Browser Geolocation (requires HTTPS)"
 msgstr ""
 
-#: includes/class-loc-config.php:718
+#: includes/class-loc-config.php:740
 msgid "International(SI)"
 msgstr ""
 
-#: includes/class-loc-config.php:719
+#: includes/class-loc-config.php:741
 msgid "Imperial"
 msgstr ""
 
-#: includes/class-loc-config.php:745
+#: includes/class-loc-config.php:767
 msgid "Simple Location Depends on External Services"
 msgstr ""
 
-#: includes/class-loc-config.php:756
+#: includes/class-loc-config.php:778
 msgid "API keys are required for most services."
 msgstr ""
 
@@ -255,6 +271,42 @@ msgstr ""
 
 #: includes/class-location-provider-dummy.php:6
 msgid "Set Location from Author Profile"
+msgstr ""
+
+#: includes/class-location-zones.php:27
+msgid "Geofencing Zones Settings"
+msgstr ""
+
+#: includes/class-location-zones.php:33
+msgid "Zones"
+msgstr ""
+
+#: includes/class-location-zones.php:59
+msgid ""
+"Enter Name, Latitude, Longitude, and Radius for each Zone. When a location "
+"is within the radius of this zone, the description will be set to the name "
+"of the zone,\n"
+"\t\t\tand the visibility would be set to protected"
+msgstr ""
+
+#: includes/class-location-zones.php:73
+msgid "Enter Name, Latitude, Longitude, and Radius for this Zone"
+msgstr ""
+
+#: includes/class-location-zones.php:84
+msgid "Add"
+msgstr ""
+
+#: includes/class-location-zones.php:85
+msgid "Remove"
+msgstr ""
+
+#: includes/class-location-zones.php:100
+msgid "Name"
+msgstr ""
+
+#: includes/class-location-zones.php:103
+msgid "Radius(in meters)"
 msgstr ""
 
 #: includes/class-map-provider-bing.php:7
@@ -336,6 +388,18 @@ msgstr ""
 msgid "Dark"
 msgstr ""
 
+#: includes/class-map-provider-wikimedia.php:7
+msgid "Wikimedia Maps"
+msgstr ""
+
+#: includes/class-map-provider-wikimedia.php:15
+msgid "Map with Labels"
+msgstr ""
+
+#: includes/class-map-provider-wikimedia.php:16
+msgid "Map without Labels"
+msgstr ""
+
 #: includes/class-post-timezone.php:56
 msgid "Set Local Timezone"
 msgstr ""
@@ -356,19 +420,19 @@ msgstr ""
 msgid "Updated"
 msgstr ""
 
-#: includes/class-rest-geo.php:248
+#: includes/class-rest-geo.php:257
 msgid "Missing Arguments"
 msgstr ""
 
-#: includes/class-rest-geo.php:271
+#: includes/class-rest-geo.php:280
 msgid "Missing Coordinates or Station for Weather Lookup"
 msgstr ""
 
-#: includes/class-rest-geo.php:291
+#: includes/class-rest-geo.php:300
 msgid "This Airport Code was Not Found"
 msgstr ""
 
-#: includes/class-rest-geo.php:297
+#: includes/class-rest-geo.php:306
 msgid "Could Not Determine Timezone"
 msgstr ""
 
@@ -420,7 +484,7 @@ msgstr ""
 msgid "Station ID: "
 msgstr ""
 
-#: includes/class-sloc-weather-widget.php:14 templates/loc-side-metabox.php:86
+#: includes/class-sloc-weather-widget.php:14 templates/loc-side-metabox.php:88
 msgid "Weather"
 msgstr ""
 
@@ -431,8 +495,8 @@ msgid ""
 msgstr ""
 
 #: includes/class-sloc-weather-widget.php:78
-#: includes/class-weather-provider.php:285 templates/loc-side-metabox.php:32
-#: templates/loc-side-metabox.php:87
+#: includes/class-weather-provider.php:285 templates/loc-side-metabox.php:34
+#: templates/loc-side-metabox.php:89
 msgid "None"
 msgstr ""
 
@@ -505,12 +569,12 @@ msgid "Reflects a location"
 msgstr ""
 
 #: includes/class-venue-taxonomy.php:95 includes/class-venue-taxonomy.php:109
-#: templates/loc-side-metabox.php:39
+#: templates/loc-side-metabox.php:41
 msgid "Latitude:"
 msgstr ""
 
 #: includes/class-venue-taxonomy.php:97 includes/class-venue-taxonomy.php:112
-#: templates/loc-side-metabox.php:44
+#: templates/loc-side-metabox.php:46
 msgid "Longitude:"
 msgstr ""
 
@@ -583,7 +647,7 @@ msgstr ""
 msgid "Rain-Mix"
 msgstr ""
 
-#: includes/class-weather-provider.php:142 templates/loc-side-metabox.php:158
+#: includes/class-weather-provider.php:142 templates/loc-side-metabox.php:160
 msgid "Rain"
 msgstr ""
 
@@ -591,7 +655,7 @@ msgstr ""
 msgid "Rain and Windy"
 msgstr ""
 
-#: includes/class-weather-provider.php:144 templates/loc-side-metabox.php:165
+#: includes/class-weather-provider.php:144 templates/loc-side-metabox.php:167
 msgid "Snow"
 msgstr ""
 
@@ -1075,11 +1139,11 @@ msgstr ""
 msgid "Waxing Gibbous 6"
 msgstr ""
 
-#: simple-location.php:116
+#: simple-location.php:118
 msgid "Settings"
 msgstr ""
 
-#: simple-location.php:130
+#: simple-location.php:132
 msgid ""
 "Location and weather data is optionally stored for all posts, attachments, "
 "and comments. Location data is extracted from uploaded images along with "
@@ -1088,71 +1152,71 @@ msgid ""
 "be stored. There are options to display this information or hide it."
 msgstr ""
 
-#: templates/loc-side-metabox.php:31 templates/loc-side-metabox.php:35
+#: templates/loc-side-metabox.php:33 templates/loc-side-metabox.php:37
 msgid "Location:"
 msgstr ""
 
-#: templates/loc-side-metabox.php:50
+#: templates/loc-side-metabox.php:52
 msgid "Altitude:"
 msgstr ""
 
-#: templates/loc-side-metabox.php:54
+#: templates/loc-side-metabox.php:56
 msgid "Map Zoom:"
 msgstr ""
 
-#: templates/loc-side-metabox.php:63
+#: templates/loc-side-metabox.php:65
 msgid "Lookup"
 msgstr ""
 
-#: templates/loc-side-metabox.php:64
+#: templates/loc-side-metabox.php:66
 msgid "Clear"
 msgstr ""
 
-#: templates/loc-side-metabox.php:65
+#: templates/loc-side-metabox.php:67
 msgid "Hide"
 msgstr ""
 
-#: templates/loc-side-metabox.php:72 templates/loc-side-metabox.php:144
+#: templates/loc-side-metabox.php:74 templates/loc-side-metabox.php:146
 msgid "Visibility"
 msgstr ""
 
-#: templates/loc-side-metabox.php:72
+#: templates/loc-side-metabox.php:74
 msgid "Visibility:"
 msgstr ""
 
-#: templates/loc-side-metabox.php:86
+#: templates/loc-side-metabox.php:88
 msgid "Weather:"
 msgstr ""
 
-#: templates/loc-side-metabox.php:93
+#: templates/loc-side-metabox.php:95
 msgid "Temperature(C): "
 msgstr ""
 
-#: templates/loc-side-metabox.php:100
+#: templates/loc-side-metabox.php:102
 msgid "Humidity: "
 msgstr ""
 
-#: templates/loc-side-metabox.php:107
+#: templates/loc-side-metabox.php:109
 msgid "Weather Description: "
 msgstr ""
 
-#: templates/loc-side-metabox.php:114
+#: templates/loc-side-metabox.php:116
 msgid "Icon"
 msgstr ""
 
-#: templates/loc-side-metabox.php:123
+#: templates/loc-side-metabox.php:125
 msgid "Wind Degree"
 msgstr ""
 
-#: templates/loc-side-metabox.php:130
+#: templates/loc-side-metabox.php:132
 msgid "Wind Speed"
 msgstr ""
 
-#: templates/loc-side-metabox.php:137
+#: templates/loc-side-metabox.php:139
 msgid "Pressure"
 msgstr ""
 
-#: templates/loc-side-metabox.php:151
+#: templates/loc-side-metabox.php:153
 msgid "Cloudiness"
 msgstr ""
 
