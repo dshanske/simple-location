@@ -4,10 +4,10 @@ add_action( 'init', array( 'Post_Timezone', 'init' ) );
 
 class Post_Timezone {
 	public static function init() {
-		add_filter( 'get_the_date', array( 'Post_Timezone', 'get_the_date' ), 12, 2 );
-		add_filter( 'get_the_time', array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
-		add_filter( 'get_the_modified_date', array( 'Post_Timezone', 'get_the_date' ), 12, 2 );
-		add_filter( 'get_the_modified_time', array( 'Post_Timezone', 'get_the_time' ), 12, 2 );
+		add_filter( 'get_the_date', array( 'Post_Timezone', 'get_the_date' ), 12, 3 );
+		add_filter( 'get_the_time', array( 'Post_Timezone', 'get_the_time' ), 12, 3 );
+		add_filter( 'get_the_modified_date', array( 'Post_Timezone', 'get_the_date' ), 12, 3 );
+		add_filter( 'get_the_modified_time', array( 'Post_Timezone', 'get_the_time' ), 12, 3 );
 		add_action( 'simple_location_sidebox', array( 'Post_Timezone', 'post_submitbox' ) );
 		add_action( 'save_post', array( 'Post_Timezone', 'postbox_save_post_meta' ) );
 		add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
@@ -138,7 +138,7 @@ class Post_Timezone {
 		if ( 1 === strlen( $timezone ) ) {
 			// Something Got Set Wrong
 			delete_post_meta( $post->ID, 'geo_timezone' );
-			return $the_time;
+			return $the_date;
 		}
 
 		if ( '' === $d ) {
