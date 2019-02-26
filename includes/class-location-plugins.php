@@ -47,7 +47,8 @@ class Location_Plugins {
 			if ( isset( $args['timezone'] ) ) {
 				update_post_meta( $args['ID'], 'geo_timezone', $args['timezone'] );
 			} else {
-				update_post_meta( $args['ID'], 'geo_timezone', Loc_Timezone::timezone_for_location( $meta['geo_longitude'], $meta['geo_latitude'] ) );
+				$t = Loc_Timezone::timezone_for_location( $meta['geo_longitude'], $meta['geo_latitude'] );
+				update_post_meta( $args['ID'], 'geo_timezone', $t->name );
 			}
 			$weather = Loc_Config::weather_provider();
 			$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
