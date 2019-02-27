@@ -144,7 +144,7 @@ jQuery( document ).ready( function( $ ) {
 							$( '#country-code' ).val( response['country-code']) ;
 						}
 						if ( 'visibility' in response ) {
-							$( '#location-visibility' ).val( response['visibility']) ;
+							$( '#location-visibility' ).val( response['visibility']) ; // eslint-disable-line dot-notation
 							$( '#location-visibility-label' ).text( slocOptions.visibility_options[$( '#location-visibility' ).val() ]); // eslint-disable-line camelcase
 						}
 						if ( 'timezone' in response ) {

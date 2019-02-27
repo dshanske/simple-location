@@ -7,7 +7,7 @@ if ( 'comment' === $screen->id ) {
 }
 $weather = ifset( $geodata['weather'], array() );
 $wind    = ifset( $weather['wind'], array() );
-$public = isset( $geodata['visibility'] ) ? $geodata['visibility'] : WP_Geo_Data::get_visibility();
+$public =  array_key_exists( 'visibility', $geodata ) ? $geodata['visibility'] : get_option( 'geo_public' );
 $choices = WP_Geo_Data::geo_public();
 $map_return = '';
 $zone = '';
@@ -77,7 +77,6 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 
     <div id="location-visibility-select" class="hide-if-js">
     	<input type="hidden" name="hidden_location_visibility" id="hidden_location_visibility" value="<?php echo esc_attr( $public ); ?>" />
-    	<input type="hidden" name="location_visibility_default" id="location_visibility_default" value="<?php echo esc_attr( get_option( 'geo_public' ) ); ?>" />
     	<select name="geo_public" id="location-visibility" width="90%"><?php echo WP_Geo_Data::geo_public_select( $public ); ?></select>
         <a href="#location-visibility" class="save-location-visibility hide-if-no-js button">OK</a>
         <a href="#location-visibility" class="cancel-location-visibility hide-if-no-js button-cancel">Cancel</a>

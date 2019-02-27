@@ -1,7 +1,7 @@
 <?php
 
 add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10 );
-add_filter( 'init', array( 'Loc_Config', 'init' ), 10 );
+add_filter( 'plugins_loaded', array( 'Loc_Config', 'init' ), 11 );
 add_action( 'admin_menu', array( 'Loc_Config', 'admin_menu' ), 10 );
 
 class Loc_Config {
@@ -234,7 +234,7 @@ class Loc_Config {
 				'type'         => 'boolean',
 				'description'  => 'Default Setting for Geodata',
 				'show_in_rest' => true,
-				'default'      => 'public',
+				'default'      => 1,
 				// WordPress Geodata defaults to public but this allows a global override for new posts
 			)
 		);
