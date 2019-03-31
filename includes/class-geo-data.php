@@ -142,12 +142,12 @@ class WP_Geo_Data {
 				'none' => esc_html__( 'All Posts', 'simple-location' ),
 				'all'  => esc_html__( 'With Location', 'simple-location' ),
 			);
-		echo '<select id="geo" name="geo">';
-		foreach ( $list as $key => $value ) {
-			$select = ( $key === $selected ) ? ' selected="selected"' : '';
-			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
-		}
-		echo '</select>';
+			echo '<select id="geo" name="geo">';
+			foreach ( $list as $key => $value ) {
+				$select = ( $key === $selected ) ? ' selected="selected"' : '';
+				echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
+			}
+			echo '</select>';
 	}
 
 	public static function geo_comments_dropdown() {
@@ -159,12 +159,12 @@ class WP_Geo_Data {
 				'none' => esc_html__( 'All Comments', 'simple-location' ),
 				'all'  => esc_html__( 'With Location', 'simple-location' ),
 			);
-		echo '<select id="geo" name="geo">';
-		foreach ( $list as $key => $value ) {
-			$select = ( $key === $selected ) ? ' selected="selected"' : '';
-			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
-		}
-		echo '</select>';
+			echo '<select id="geo" name="geo">';
+			foreach ( $list as $key => $value ) {
+				$select = ( $key === $selected ) ? ' selected="selected"' : '';
+				echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
+			}
+			echo '</select>';
 	}
 
 	public static function georss_namespace() {

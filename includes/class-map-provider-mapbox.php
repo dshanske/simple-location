@@ -52,21 +52,21 @@ class Map_Provider_Mapbox extends Map_Provider {
 					// Use an explicit user-agent for Simple Location
 					'user-agent'          => 'Simple Location for WordPress',
 				);
-		$request = wp_remote_get( $url, $args );
-		if ( is_wp_error( $request ) ) {
-			return $request; // Bail early.
-		}
-		$body = wp_remote_retrieve_body( $request );
-		$data = json_decode( $body );
-		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-			return new WP_Error( '403', $data->message );
-		}
-		foreach ( $data as $style ) {
-			if ( is_object( $style ) ) {
-				$return[ $style->id ] = $style->name;
-			}
-		}
-		return $return;
+				$request = wp_remote_get( $url, $args );
+				if ( is_wp_error( $request ) ) {
+					return $request; // Bail early.
+				}
+				$body = wp_remote_retrieve_body( $request );
+				$data = json_decode( $body );
+				if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
+					return new WP_Error( '403', $data->message );
+				}
+				foreach ( $data as $style ) {
+					if ( is_object( $style ) ) {
+						$return[ $style->id ] = $style->name;
+					}
+				}
+				return $return;
 	}
 
 
