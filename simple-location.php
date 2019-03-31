@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 3.6.2
+ * Version: 3.6.3
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -18,7 +18,7 @@ register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactiva
 
 
 class Simple_Location_Plugin {
-	public static $version = '3.6.1';
+	public static $version = '3.6.3';
 
 	public static function activate() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
@@ -86,6 +86,7 @@ class Simple_Location_Plugin {
 		// Load Providers
 		$providers = array(
 			'class-location-provider-dummy.php', // Dummy Location Provider
+			'class-location-provider-compass.php', // Compass https://github.com/aaronpk/Compass Location Provder
 			'class-weather-provider-openweathermap.php', // Open Weather Map
 			'class-weather-provider-darksky.php', // Dark Sky
 			'class-weather-provider-nwsus.php', // National Weather Service (US)

@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Simple Location package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 3.6.2\n"
+"Project-Id-Version: Simple Location 3.6.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
-"POT-Creation-Date: 2019-02-27 22:31:32+00:00\n"
+"POT-Creation-Date: 2019-03-31 14:05:09+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -51,7 +51,7 @@ msgstr ""
 msgid "Longitude"
 msgstr ""
 
-#: includes/class-geo-data.php:642 includes/class-loc-config.php:295
+#: includes/class-geo-data.php:642 includes/class-loc-config.php:318
 #: includes/class-loc-metabox.php:78 includes/class-loc-metabox.php:90
 #: templates/loc-side-metabox.php:33
 msgid "Location"
@@ -93,166 +93,174 @@ msgstr ""
 msgid "Simple Location"
 msgstr ""
 
-#: includes/class-loc-config.php:316
+#: includes/class-loc-config.php:339
 msgid "API Keys and Settings for Simple Location"
 msgstr ""
 
-#: includes/class-loc-config.php:336
+#: includes/class-loc-config.php:360
 msgid "General Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:342
+#: includes/class-loc-config.php:366
 msgid "Default Display for Location"
 msgstr ""
 
-#: includes/class-loc-config.php:353
+#: includes/class-loc-config.php:377
 msgid "Update Author Last Reported Location on New Post"
 msgstr ""
 
-#: includes/class-loc-config.php:363
+#: includes/class-loc-config.php:387
 msgid "Unit of Measure"
 msgstr ""
 
-#: includes/class-loc-config.php:373
+#: includes/class-loc-config.php:397
 msgid "Provider Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:380
+#: includes/class-loc-config.php:404
 msgid "Map Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:386
+#: includes/class-loc-config.php:410
 msgid "Provides Static Map Images"
 msgstr ""
 
-#: includes/class-loc-config.php:392
+#: includes/class-loc-config.php:416
 msgid "Geo Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:398
+#: includes/class-loc-config.php:422
 msgid "Looking up an address from coordinates or vice versa"
 msgstr ""
 
-#: includes/class-loc-config.php:404
+#: includes/class-loc-config.php:428
 msgid "Geolocation Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:410
+#: includes/class-loc-config.php:434
 msgid ""
 "By default this uses your browser to lookup your location but you can "
 "alternatively tap into a service to get your current location, perhaps from "
 "your phone"
 msgstr ""
 
-#: includes/class-loc-config.php:416
+#: includes/class-loc-config.php:440
 msgid "Weather Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:422
+#: includes/class-loc-config.php:446
 msgid "Retrieves Weather Data about a Location"
 msgstr ""
 
-#: includes/class-loc-config.php:429
+#: includes/class-loc-config.php:453
 msgid "Map Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:436
+#: includes/class-loc-config.php:460
 msgid "Default Map Width"
 msgstr ""
 
-#: includes/class-loc-config.php:446
+#: includes/class-loc-config.php:470
 msgid "Default Map Height"
 msgstr ""
 
-#: includes/class-loc-config.php:456
+#: includes/class-loc-config.php:480
 msgid "Default Map Zoom"
 msgstr ""
 
-#: includes/class-loc-config.php:467
+#: includes/class-loc-config.php:491
 msgid "Altitude will Display if Above This Height(in meters)"
 msgstr ""
 
-#: includes/class-loc-config.php:478
+#: includes/class-loc-config.php:502
 msgid "Google Style"
 msgstr ""
 
-#: includes/class-loc-config.php:490
+#: includes/class-loc-config.php:514
 msgid "Bing Style"
 msgstr ""
 
-#: includes/class-loc-config.php:502
+#: includes/class-loc-config.php:526
 msgid "Mapbox User"
 msgstr ""
 
-#: includes/class-loc-config.php:514
+#: includes/class-loc-config.php:538
 msgid "Mapbox Style"
 msgstr ""
 
-#: includes/class-loc-config.php:528
+#: includes/class-loc-config.php:552
 msgid "MapQuest Style"
 msgstr ""
 
-#: includes/class-loc-config.php:541
+#: includes/class-loc-config.php:565
 msgid "Weather Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:547
+#: includes/class-loc-config.php:571
 msgid "Providers"
 msgstr ""
 
-#: includes/class-loc-config.php:554
+#: includes/class-loc-config.php:578
 msgid "API Keys"
 msgstr ""
 
-#: includes/class-loc-config.php:561
+#: includes/class-loc-config.php:585
 msgid "HERE API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:572
+#: includes/class-loc-config.php:596
 msgid "HERE Application ID"
 msgstr ""
 
-#: includes/class-loc-config.php:584
+#: includes/class-loc-config.php:608
 msgid "MapQuest API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:595
+#: includes/class-loc-config.php:619
 msgid "Google Maps API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:606
+#: includes/class-loc-config.php:630
 msgid "Bing API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:619
+#: includes/class-loc-config.php:643
 msgid "Mapbox API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:631
+#: includes/class-loc-config.php:655
 msgid "Dark Sky API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:643
+#: includes/class-loc-config.php:667
 msgid "OpenWeatherMap API Key"
 msgstr ""
 
-#: includes/class-loc-config.php:716
+#: includes/class-loc-config.php:680
+msgid "Compass API Key"
+msgstr ""
+
+#: includes/class-loc-config.php:693
+msgid "Compass URL"
+msgstr ""
+
+#: includes/class-loc-config.php:766
 msgid "HTML5 Browser Geolocation (requires HTTPS)"
 msgstr ""
 
-#: includes/class-loc-config.php:740
+#: includes/class-loc-config.php:790
 msgid "International(SI)"
 msgstr ""
 
-#: includes/class-loc-config.php:741
+#: includes/class-loc-config.php:791
 msgid "Imperial"
 msgstr ""
 
-#: includes/class-loc-config.php:767
+#: includes/class-loc-config.php:817
 msgid "Simple Location Depends on External Services"
 msgstr ""
 
-#: includes/class-loc-config.php:778
+#: includes/class-loc-config.php:828
 msgid "API keys are required for most services."
 msgstr ""
 
@@ -267,6 +275,10 @@ msgstr ""
 #: includes/class-loc-view.php:45
 #. translators: Prefaces the address 1. with the private status
 msgid "Hidden: %1$s"
+msgstr ""
+
+#: includes/class-location-provider-compass.php:6
+msgid "Compass"
 msgstr ""
 
 #: includes/class-location-provider-dummy.php:6
@@ -1139,11 +1151,11 @@ msgstr ""
 msgid "Waxing Gibbous 6"
 msgstr ""
 
-#: simple-location.php:118
+#: simple-location.php:119
 msgid "Settings"
 msgstr ""
 
-#: simple-location.php:132
+#: simple-location.php:133
 msgid ""
 "Location and weather data is optionally stored for all posts, attachments, "
 "and comments. Location data is extracted from uploaded images along with "

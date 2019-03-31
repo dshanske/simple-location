@@ -64,6 +64,29 @@ class Loc_Config {
 				'default'      => '',
 			)
 		);
+
+		register_setting(
+			'simloc', // settings page
+			'sloc_compass_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Compass P3K API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+
+		register_setting(
+			'simloc', // settings page
+			'sloc_compass_url', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Compass P3K URL',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+
 		register_setting(
 			'simloc', // settings page
 			'sloc_here_api', // option name
@@ -327,9 +350,10 @@ class Loc_Config {
 	}
 
 	public static function admin_init() {
-		$map_provider     = get_option( 'sloc_map_provider' );
-		$weather_provider = get_option( 'sloc_weather_provider' );
-		$geo_provider     = get_option( 'sloc_geo_provider' );
+		$map_provider      = get_option( 'sloc_map_provider' );
+		$weather_provider  = get_option( 'sloc_weather_provider' );
+		$geo_provider      = get_option( 'sloc_geo_provider' );
+		$location_provider = get_option( 'sloc_geolocation_provider' );
 
 		add_settings_section(
 			'sloc_general',
@@ -647,6 +671,32 @@ class Loc_Config {
 			array(
 				'label_for' => 'sloc_openweathermap_api',
 				'class'     => ( 'openweathermap' === $weather_provider ) ? '' : 'hidden',
+
+			)
+		);
+
+		add_settings_field(
+			'compassapi', // id
+			__( 'Compass API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_compass_api',
+				'class'     => ( 'compass' === $location_provider ) ? '' : 'hidden',
+
+			)
+		);
+
+		add_settings_field(
+			'compassurl', // id
+			__( 'Compass URL', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_compass_url',
+				'class'     => ( 'compass' === $location_provider ) ? '' : 'hidden',
 
 			)
 		);

@@ -1,10 +1,10 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.6.2
+Stable tag: 3.6.3
 Requires at least: 4.7
 Tested up to: 5.1.1
-Requires PHP: 5.3
+Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,7 +68,8 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 
 * Map Providers include Wikimedia, MapBox, Google, Mapquest's Open Static Map, HERE, and Bing
 * Geocoding Providers include the Mapquest hosted version of Nominatim, Google, and Bing.
-* Location Providers only offer HTML5 Browser Geolocation and a Provider that takes the location setting out of the author profile
+* Location Providers offers HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, and [Compass](https://github.com/aaronpk/Compass), a self-hosted
+option for storing your location.
 * Weather Providers include OpenWeatherMap, Dark Sky, and the US National Weather Service. Dark Sky does not support stations.
 
 
@@ -84,6 +85,7 @@ API Keys are required to use certain services.
 * [MapQuest](https://developer.mapquest.com/)
 * [HERE](https://developer.here.com/)
 * [Dark Sky](https://darksky.net/dev)
+* [Compass](https://github.com/aaronpk/Compass)
 
 At this time, the only map service available without an API key is Wikimedia maps
 If not provided there will be no map displayed regardless of setting, reverse geo lookup will not work 
@@ -118,6 +120,11 @@ There are REST API endpoints to retrieve the data so it can be used in the admin
 * /geocode which will return the address information for a latitude/longitude and optionally add the weather
 * /lookup which will return the current location for a user based on the location provider
 * /map which will return static map data for the provided latitude and longitude
+
+= What is Compass? =
+
+[Compass](https://github.com/aaronpk/Compass) is a GPS tracking server that stores data in flat files. The instructions for installation are available in the GitHub repository. GPS
+data can be sent to it from iOS or Android devices using various apps. 
 
 = How can I show a list of posts tagged with a location? =
 
@@ -158,6 +165,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 3.6.3 ( 2019-03-31 )
+* Add Compass as a location provider
 
 = 3.6.2 ( 2019-02-25 ) =
 * Fix timezone data conversion when get_the_date is called with a $post object

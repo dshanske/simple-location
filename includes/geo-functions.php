@@ -4,6 +4,9 @@ function sloc_sunrise( $latitude, $longitude, $timezone, $timestamp = null ) {
 	if ( ! $timestamp ) {
 		$timestamp = time();
 	}
+	if ( ! $timezone ) {
+		$timezone = get_option( 'timezone_string' );
+	}
 	$sunrise  = date_sunrise( $timestamp, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude );
 	$datetime = new DateTime();
 	$datetime->setTimestamp( $sunrise );
