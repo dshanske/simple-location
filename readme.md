@@ -70,7 +70,7 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 * Geocoding Providers include the Mapquest hosted version of Nominatim, Google, and Bing.
 * Location Providers offers HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, and [Compass](https://github.com/aaronpk/Compass), a self-hosted
 option for storing your location.
-* Weather Providers include OpenWeatherMap, Dark Sky, and the US National Weather Service. Dark Sky does not support stations.
+* Weather Providers include OpenWeatherMap, Dark Sky, APIXU and the US National Weather Service. Dark Sky and APIXU do not support stations.
 
 
 ## Frequently Asked Questions ##
@@ -86,6 +86,7 @@ API Keys are required to use certain services.
 * [HERE](https://developer.here.com/)
 * [Dark Sky](https://darksky.net/dev)
 * [Compass](https://github.com/aaronpk/Compass)
+* [APIXU](https://apixu.com)
 
 At this time, the only map service available without an API key is Wikimedia maps
 If not provided there will be no map displayed regardless of setting, reverse geo lookup will not work 

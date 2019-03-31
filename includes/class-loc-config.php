@@ -158,6 +158,18 @@ class Loc_Config {
 				'default'      => '',
 			)
 		);
+
+		register_setting(
+			'simloc', // settings page
+			'sloc_apixu_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'APIXU API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+
 		register_setting(
 			'simloc',
 			'sloc_mapbox_user',
@@ -578,6 +590,18 @@ class Loc_Config {
 			__( 'API Keys', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_api_settings' ),
 			'simloc'
+		);
+
+		add_settings_field(
+			'apixuapi', // id
+			__( 'APIXU API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_apixu_api',
+				'class'     => ( 'apixu' === $weather_provider ) ? '' : 'hidden',
+			)
 		);
 
 		add_settings_field(
