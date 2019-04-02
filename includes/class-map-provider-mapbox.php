@@ -22,14 +22,16 @@ class Map_Provider_Mapbox extends Map_Provider {
 
 	public function default_styles() {
 		return array(
-			'streets-v10'           => 'Mapbox Streets',
-			'outdoors-v10'          => 'Mapbox Outdoor',
-			'light-v9'              => 'Mapbox Light',
-			'dark-v9'               => 'Mapbox Dark',
-			'satellite-v9'          => 'Mapbox Satellite',
-			'satellite-streets-v10' => 'Mapbox Satellite Streets',
-			'traffic-day-v2'        => 'Mapbox Traffic Day',
-			'traffic-night-v2'      => 'Mapbox Traffic Night',
+			'streets-v11'                  => 'Streets',
+			'outdoors-v11'                 => 'Outdoor',
+			'light-v10'                    => 'Light',
+			'dark-v10'                     => 'Dark',
+			'satellite-v9'                 => 'Satellite',
+			'satellite-streets-v11'        => 'Satellite Streets',
+			'navigation-preview-day-v4'    => 'Navigation Preview Day',
+			'navigation-preview-night-v4'  => 'Navigation Preview Night',
+			'navigation-guidance-day-v4'   => 'Navigation Guidance Day',
+			'navigation-guidance-night-v4' => 'Navigation Guidance Night',
 		);
 	}
 
@@ -88,9 +90,6 @@ class Map_Provider_Mapbox extends Map_Provider {
 		}
 		$user   = $this->user;
 		$styles = $this->default_styles();
-		if ( empty( $styles ) || empty( $this->styles ) ) {
-			return '';
-		}
 		if ( array_key_exists( $this->style, $styles ) ) {
 			$user = 'mapbox';
 		}
