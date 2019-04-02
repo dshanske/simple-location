@@ -17,12 +17,14 @@ class Map_Provider_Bing extends Map_Provider {
 
 	public function get_styles() {
 		return array(
-			'Aerial'           => __( 'Aerial Imagery', 'simple-location' ),
-			'AerialWithLabels' => __( 'Aerial Imagery with a Road Overlay', 'simple-location' ),
-			'CanvasLight'      => __( 'A lighter version of the road maps which also has some of the details such as hill shading disabled.', 'simple-location' ),
-			'CanvasDark'       => __( 'A dark version of the road maps.', 'simple-location' ),
-			'CanvasGray'       => __( 'A grayscale version of the road maps.', 'simple-location' ),
-			'Road'             => __( 'Roads without additional imagery', 'simple-location' ),
+			'Aerial'                   => __( 'Aerial Imagery', 'simple-location' ),
+			'AerialWithLabels'         => __( 'Aerial Imagery with a Road Overlay', 'simple-location' ),
+			'AerialWithLabelsOnDemand' => __( 'Aerial imagery with on-demand road overlay.', 'simple-location' ),
+			'CanvasLight'              => __( 'A lighter version of the road maps which also has some of the details such as hill shading disabled.', 'simple-location' ),
+			'CanvasDark'               => __( 'A dark version of the road maps.', 'simple-location' ),
+			'CanvasGray'               => __( 'A grayscale version of the road maps.', 'simple-location' ),
+			'Road'                     => __( 'Roads without additional imagery', 'simple-location' ),
+			'Streetside'               => __( 'Street-level imagery', 'simple-location' ),
 		);
 	}
 
