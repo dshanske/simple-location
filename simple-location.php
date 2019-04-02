@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 3.6.3
+ * Version: 3.6.4
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location

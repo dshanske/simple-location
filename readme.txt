@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.6.3
+Stable tag: 3.6.4
 Requires at least: 4.7
 Tested up to: 5.1.1
 Requires PHP: 5.4
@@ -79,7 +79,7 @@ option for storing your location.
 
 API Keys are required to use certain services.
 * [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key)
-* [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/)
+* [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/) - To retrieve style list inside the UI, you need a token with the styles:list scope
 * [Bing Maps](https://www.bingmapsportal.com/)
 * [OpenWeatherMap](http://openweathermap.com/api)
 * [MapQuest](https://developer.mapquest.com/)
@@ -167,8 +167,13 @@ will now be required to show maps for services that require API keys.
 
 == Changelog ==
 
+= 3.6.4 ( 2019-04-01 )
+* Fix/update default map styles for Mapbox
+* Add default map style now available for Bing
+
 = 3.6.3 ( 2019-03-31 )
 * Add Compass as a location provider
+* Add APIXU as a weather provider
 
 = 3.6.2 ( 2019-02-25 ) =
 * Fix timezone data conversion when get_the_date is called with a $post object
