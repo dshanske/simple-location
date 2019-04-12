@@ -56,6 +56,8 @@ class Location_Plugins {
 			$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
 			$conditions = $weather->get_conditions();
 			if ( ! empty( $conditions ) ) {
+				// if debug mode is on remove the raw data from storage
+				unset( $conditions['raw'] );
 				update_post_meta( $args['ID'], 'geo_weather', $conditions );
 			}
 		} elseif ( isset( $args['timezone'] ) ) {
