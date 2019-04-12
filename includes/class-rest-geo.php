@@ -219,7 +219,15 @@ class REST_Geo {
 			$zone    = Location_Zones::in_zone( $params['latitude'], $params['longitude'] );
 			$reverse = Loc_Config::geo_provider();
 			$reverse->set( $params );
+			$map      = Loc_Config::map_provider();
+			$map_args = array(
+				'latitude'  => $params['latitude'],
+				'longitude' => $params['longitude'],
+				'height'    => ifset( $params['height'] ),
+				'width'     => ifset( $params['width'] ),
+			);
 
+			$map->set( array_filter( $map_args ) );
 			if ( ! empty( $zone ) ) {
 				$reverse_adr = array(
 					'display-name' => $zone,
@@ -239,15 +247,6 @@ class REST_Geo {
 				$weather->set( $params );
 				$reverse_adr['weather'] = $weather->get_conditions();
 			}
-			$map      = Loc_Config::map_provider();
-			$map_args = array(
-				'latitude'  => $params['latitude'],
-				'longitude' => $params['longitude'],
-				'height'    => ifset( $params['height'] ),
-				'width'     => ifset( $params['width'] ),
-			);
-
-			$map->set( array_filter( $map_args ) );
 
 			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
 				$reverse_adr['altitude'] = $reverse->elevation();

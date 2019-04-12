@@ -174,9 +174,9 @@ class Loc_Metabox {
 		}
 
 		$weather    = array();
-		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'visibility', 'cloudiness', 'rain', 'snow', 'weather_visibility' );
+		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'weather_summary', 'weather_icon', 'cloudiness', 'rain', 'snow', 'weather_visibility' );
 		foreach ( $wtr_params as $param ) {
-			if ( ! empty( $_POST[ $param ] ) ) {
+			if ( ! empty( $_POST[ $param ] ) && 'none' !== $_POST[ $param ] ) {
 				$weather[ str_replace( 'weather_', '', $param ) ] = $_POST[ $param ];
 			}
 		}
@@ -198,7 +198,7 @@ class Loc_Metabox {
 		} else {
 			delete_metadata( $meta_type, $object_id, 'geo_weather' );
 		}
-		if ( isset( $_POST['latitude'] ) || isset( $_POST['longitude'] ) || isset( $_POST['address'] ) ) {
+		if ( ! empty( $_POST['latitude'] ) || ! empty( $_POST['longitude'] ) || ! empty( $_POST['address'] ) ) {
 			WP_Geo_Data::set_visibility( $meta_type, $object_id, $_POST['geo_public'] );
 		} else {
 			delete_metadata( $meta_type, $object_id, 'geo_public' );
