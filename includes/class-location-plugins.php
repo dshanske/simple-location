@@ -42,6 +42,8 @@ class Location_Plugins {
 					update_post_meta( $args['ID'], 'geo_address', $zone );
 					WP_Geo_Data::set_visibility( 'post', $args['ID'], 'protected' );
 					update_post_meta( $args['ID'], 'geo_zone', $zone );
+				} else {
+					WP_Geo_Data::set_visibility( 'post', $args['ID'], 'public' );
 				}
 			}
 			if ( isset( $args['timezone'] ) ) {
