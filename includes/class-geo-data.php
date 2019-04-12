@@ -45,12 +45,31 @@ class WP_Geo_Data {
 		// Add Dropdown
 		add_action( 'restrict_manage_posts', array( 'WP_Geo_Data', 'geo_posts_dropdown' ), 12, 2 );
 		add_action( 'restrict_manage_comments', array( 'WP_Geo_Data', 'geo_comments_dropdown' ), 12, 2 );
+		add_filter( 'manage_posts_columns', array( 'WP_Geo_Data', 'add_location_admin_column' ) );
+		add_action( 'manage_posts_custom_column', array( 'WP_Geo_Data', 'manage_location_admin_column' ), 10, 2 );
 
 		// Add the Same Post Type Support JetPack uses
 		add_post_type_support( 'post', 'geo-location' );
 		add_post_type_support( 'page', 'geo-location' );
 		add_post_type_support( 'attachment', 'geo-location' );
 
+	}
+
+	public static function add_location_admin_column( $columns ) {
+		$columns['location'] = __( 'Location', 'simple-location' );
+		return $columns;
+	}
+
+	public static function manage_location_admin_column( $column, $post_id ) {
+		if ( 'location' === $column ) {
+			$geo_public = self::geo_public();
+			$location   = self::get_geodata( $post_id );
+			if ( $location ) {
+				echo esc_html( $geo_public[ $location['visibility'] ] );
+			} else {
+				esc_html_e( 'None', 'simple-location' );
+			}
+		}
 	}
 
 	public static function jetpack_remove( $tools ) {
@@ -139,8 +158,11 @@ class WP_Geo_Data {
 			$selected = $_REQUEST['geo'];
 		}
 			$list = array(
-				'none' => esc_html__( 'All Posts', 'simple-location' ),
-				'all'  => esc_html__( 'With Location', 'simple-location' ),
+				'none'      => esc_html__( 'All Posts', 'simple-location' ),
+				'all'       => esc_html__( 'With Location', 'simple-location' ),
+				'private'   => esc_html__( 'Private', 'simple-location' ),
+				'public'    => esc_html__( 'Public', 'simple-location' ),
+				'protected' => esc_html__( 'Protected', 'simple-location' ),
 			);
 			echo '<select id="geo" name="geo">';
 			foreach ( $list as $key => $value ) {
@@ -156,8 +178,11 @@ class WP_Geo_Data {
 			$selected = $_REQUEST['geo'];
 		}
 			$list = array(
-				'none' => esc_html__( 'All Comments', 'simple-location' ),
-				'all'  => esc_html__( 'With Location', 'simple-location' ),
+				'none'      => esc_html__( 'All Comments', 'simple-location' ),
+				'all'       => esc_html__( 'With Location', 'simple-location' ),
+				'private'   => esc_html__( 'Private', 'simple-location' ),
+				'public'    => esc_html__( 'Public', 'simple-location' ),
+				'protected' => esc_html__( 'Protected', 'simple-location' ),
 			);
 			echo '<select id="geo" name="geo">';
 			foreach ( $list as $key => $value ) {
@@ -292,38 +317,53 @@ class WP_Geo_Data {
 		return $vars;
 	}
 
+	// Return meta query arguments based on input
+	public static function filter_geo_query( $geo ) {
+		$args   = array(
+			'relation' => 'OR',
+			array(
+				'key'     => 'geo_longitude',
+				'compare' => 'EXISTS',
+			),
+			array(
+				'key'     => 'geo_address',
+				'compare' => 'EXISTS',
+			),
+		);
+		$public = array(
+			'key'     => 'geo_public',
+			'type'    => 'numeric',
+			'compare' => '=',
+		);
+		switch ( $geo ) {
+			case 'all':
+				return $args;
+			case 'private':
+				$public['value'] = (int) 0;
+				return $public;
+			case 'public':
+			case 'map':
+				$public['value'] = (int) 1;
+				return $public;
+			case 'text':
+			case 'description':
+			case 'protected':
+				$public['value'] = (int) 2;
+				return $public;
+			default:
+				return array();
+		}
+	}
+
 	public static function pre_get_posts( $query ) {
 		if ( ! array_key_exists( 'geo', $query->query_vars ) ) {
 			return;
 		}
 
 		$geo  = $query->get( 'geo' );
-		$args = array(
-			'key'  => 'geo_public',
-			'type' => 'numeric',
-		);
-
-		switch ( $geo ) {
-			case 'all':
-				$args['compare'] = '>';
-				$args['value']   = (int) 0;
-				$query->set( 'meta_query', array( $args ) );
-				break;
-			case 'public':
-			case 'map':
-				$args['compare'] = '=';
-				$args['value']   = (int) 1;
-				$query->set( 'meta_query', array( $args ) );
-				break;
-			case 'text':
-			case 'description':
-			case 'protected':
-				$args['compare'] = '=';
-				$args['value']   = (int) 2;
-				$query->set( 'meta_query', array( $args ) );
-				break;
-			default:
-				return;
+		$args = self::filter_geo_query( $geo );
+		if ( ! empty( $args ) ) {
+			$query->set( 'meta_query', array( $args ) );
 		}
 	}
 
@@ -332,31 +372,11 @@ class WP_Geo_Data {
 			return;
 		}
 		$geo  = $_REQUEST['geo'];
-		$args = array(
-			'key'  => 'geo_public',
-			'type' => 'numeric',
-		);
-
-		switch ( $geo ) {
-			case 'all':
-				$args['compare'] = '>';
-				$args['value']   = (int) 0;
-				break;
-			case 'public':
-			case 'map':
-				$args['compare'] = '=';
-				$args['value']   = (int) 1;
-				break;
-			case 'text':
-			case 'description':
-				$args['compare'] = '=';
-				$args['value']   = (int) 2;
-				break;
-			default:
-				return;
+		$args = self::filter_geo_query( $geo );
+		if ( ! empty( $args ) ) {
+			$query->query_vars['meta_query'] = array( $args );
+			$query->meta_query->parse_query_vars( $query->query_vars );
 		}
-		$query->query_vars['meta_query'] = array( $args );
-		$query->meta_query->parse_query_vars( $query->query_vars );
 	}
 
 	public static function sanitize_float( $input ) {
