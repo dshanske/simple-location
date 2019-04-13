@@ -46,12 +46,6 @@ class Location_Plugins {
 					WP_Geo_Data::set_visibility( 'post', $args['ID'], 'public' );
 				}
 			}
-			if ( isset( $args['timezone'] ) ) {
-				update_post_meta( $args['ID'], 'geo_timezone', $args['timezone'] );
-			} else {
-				$t = Loc_Timezone::timezone_for_location( $meta['geo_longitude'], $meta['geo_latitude'] );
-				update_post_meta( $args['ID'], 'geo_timezone', $t->name );
-			}
 			$weather = Loc_Config::weather_provider();
 			$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
 			$conditions = $weather->get_conditions();
@@ -60,8 +54,6 @@ class Location_Plugins {
 				unset( $conditions['raw'] );
 				update_post_meta( $args['ID'], 'geo_weather', $conditions );
 			}
-		} elseif ( isset( $args['timezone'] ) ) {
-				update_post_meta( $post_id, 'geo_timezone', $_POST['post_timezone'] );
 		}
 	}
 

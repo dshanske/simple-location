@@ -20,7 +20,7 @@ class Post_Timezone {
 		}
 		if ( isset( $args['meta_input'] ) ) {
 			if ( isset( $args['meta_input']['geo_latitude'] ) ) {
-				update_post_meta( $args['ID'], 'geo_timezone', Loc_Timezone::timezone_for_location( $args['meta_input']['geo_latitude'], $args['meta_input']['geo_longitude'] ) );
+				update_post_meta( $args['ID'], 'geo_timezone', (string) Loc_Timezone::timezone_for_location( $args['meta_input']['geo_latitude'], $args['meta_input']['geo_longitude'] ) );
 			}
 		}
 
