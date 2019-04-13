@@ -309,6 +309,10 @@ class WP_Geo_Data {
 	/* Calculates the distance in meters between two coordinates */
 
 	public static function gc_distance( $lat1, $lng1, $lat2, $lng2 ) {
+		$lat1 = floatval( $lat1 );
+		$lng1 = floatval( $lng1 );
+		$lat2 = floatval( $lat2 );
+		$lng2 = floatval( $lng2 );
 		return ( 6378100 * acos( cos( deg2rad( $lat1 ) ) * cos( deg2rad( $lat2 ) ) * cos( deg2rad( $lng2 ) - deg2rad( $lng1 ) ) + sin( deg2rad( $lat1 ) ) * sin( deg2rad( $lat2 ) ) ) );
 	}
 
