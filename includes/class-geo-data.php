@@ -48,12 +48,34 @@ class WP_Geo_Data {
 		add_filter( 'manage_posts_columns', array( 'WP_Geo_Data', 'add_location_admin_column' ) );
 		add_action( 'manage_posts_custom_column', array( 'WP_Geo_Data', 'manage_location_admin_column' ), 10, 2 );
 
+		add_filter( 'bulk_actions-edit-post', array( 'WP_Geo_Data', 'register_bulk_edit_location' ), 10 );
+		add_filter( 'handle_bulk_actions-edit-post', array( 'WP_Geo_Data', 'handle_bulk_edit_location' ), 10, 3 );
+
 		// Add the Same Post Type Support JetPack uses
 		add_post_type_support( 'post', 'geo-location' );
 		add_post_type_support( 'page', 'geo-location' );
 		add_post_type_support( 'attachment', 'geo-location' );
 
 	}
+
+	public static function register_bulk_edit_location( $actions ) {
+		$actions['location_public']  = __( 'Public Location', 'simple-location' );
+		$actions['location_private'] = __( 'Private Location', 'simple-location' );
+		return $actions;
+	}
+
+	public static function handle_bulk_edit_location( $redirect_to, $doaction, $post_ids ) {
+		if ( in_array( $doaction, array( 'location_public', 'location_private' ), true ) ) {
+			$visibility = str_replace( 'location_', '', $doaction );
+			foreach ( $post_ids as $post_id ) {
+				self::set_visibility( 'post', $post_id, $visibility );
+			}
+		}
+		return $redirect_to;
+	}
+
+
+
 
 	public static function add_location_admin_column( $columns ) {
 		$columns['location'] = __( 'Location', 'simple-location' );
