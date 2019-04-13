@@ -344,6 +344,29 @@ class Loc_Config {
 	}
 
 	public static function simloc_options() {
+		$posts = get_posts(
+			array(
+				'meta_query' => array(
+					array(
+						'key'     => 'geo_latitude',
+						'compare' => 'NOT EXISTS',
+					),
+					array(
+						'key'     => 'geo_address',
+						'compare' => 'NOT EXISTS',
+					),
+					array(
+						'key'     => 'geo_public',
+						'compare' => 'EXISTS',
+					),
+				),
+				'fields'     => 'ids',
+			)
+		);
+		foreach ( $posts as $post_id ) {
+			delete_post_meta( $post_id, 'geo_public' );
+		}
+
 		?>
 		<div class="wrap">
 			<h2><?php esc_html_e( 'Simple Location', 'simple-location' ); ?> </h2>
