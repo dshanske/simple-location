@@ -9,8 +9,46 @@
  */
 class Location_Plugins {
 	public function __construct() {
+		add_filter( 'before_micropub', array( 'Location_Plugins', 'micropub_lookup_location' ), 10 );
 		add_action( 'after_micropub', array( 'Location_Plugins', 'micropub_set_location' ), 10, 2 );
 		add_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_geo' ), 10, 2 );
+	}
+
+	public static function micropub_lookup_location( $input ) {
+		if ( ! isset( $input['properties'] ) ) {
+			return $input;
+		}
+		$properties = $input['properties'];
+		if ( isset( $properties['checkin'] ) || isset( $properties['location'] ) ) {
+			return $input;
+		}
+		if ( ! get_option( 'sloc_auto_micropub' ) ) {
+			return $input;
+		}
+		$geolocation = Loc_Config::geolocation_provider();
+		if ( ! is_object( $geolocation ) ) {
+			return $input;
+		}
+		if ( ! $geolocation->background() ) {
+			return $input;
+		}
+		// Do not add if the publish time if more than 5 minutes in the past or future
+		if ( isset( $properties['published'] ) ) {
+			$published = strtotime( $properties['published'][0] );
+			$now       = time();
+			$diff      = abs( $now - $published );
+			if ( $diff > 300 ) {
+				return $input;
+			}
+		}
+		$geolocation->set_user( get_current_user_id() );
+		$geolocation->retrieve();
+		$return = $geolocation->get_mf2();
+		if ( $return ) {
+			$input['properties']['location']            = array( $return );
+			$input['properties']['location-visibility'] = array( 'private' );
+		}
+		return $input;
 	}
 
 	public static function micropub_set_location( $input, $args ) {

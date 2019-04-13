@@ -3,8 +3,9 @@
 class Location_Provider_Dummy extends Location_Provider {
 
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Set Location from Author Profile', 'simple-location' );
-		$this->slug = 'dummy';
+		$this->name       = __( 'Set Location from Author Profile', 'simple-location' );
+		$this->slug       = 'dummy';
+		$this->background = true;
 		parent::__construct( $args );
 	}
 

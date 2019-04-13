@@ -6,7 +6,8 @@ class Location_Provider_Compass extends Location_Provider {
 		$this->name = __( 'Compass', 'simple-location' );
 		$this->slug = 'compass';
 		parent::__construct( $args );
-		$this->api = get_option( 'sloc_compass_api' );
+		$this->api        = get_option( 'sloc_compass_api' );
+		$this->background = true;
 	}
 
 	public function retrieve() {

@@ -266,7 +266,7 @@ class Loc_Config {
 			'simloc', // settings page
 			'geo_public', // option name
 			array(
-				'type'         => 'boolean',
+				'type'         => 'number',
 				'description'  => 'Default Setting for Geodata',
 				'show_in_rest' => true,
 				'default'      => 1,
@@ -282,6 +282,18 @@ class Loc_Config {
 				'show_in_rest' => true,
 				'default'      => true,
 				// If this is true then each time a post is made with location properties it will update the user location
+			)
+		);
+
+		register_setting(
+			'simloc', // settings page
+			'sloc_auto_micropub', // option name
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Add Location from Geolocation Provider Automatically on Micropub Posts',
+				'show_in_rest' => true,
+				'default'      => false,
+				// If this is true then each time a post is made without location it will add it set automatically to private
 			)
 		);
 
@@ -415,6 +427,16 @@ class Loc_Config {
 			'sloc_general', // settings section
 			array(
 				'label_for' => 'sloc_last_report',
+			)
+		);
+		add_settings_field(
+			'sloc_auto_micropub', // id
+			__( 'Automatically lookup location from supported geolocation provider for Micropub posts', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_general', // settings section
+			array(
+				'label_for' => 'sloc_auto_micropub',
 			)
 		);
 		add_settings_field(
