@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.6.4  
+**Stable tag:** 3.7.0  
 **Requires at least:** 4.7  
 **Tested up to:** 5.1.1  
 **Requires PHP:** 5.4  
@@ -156,6 +156,10 @@ The plugin offers providers for:
 
 ## Upgrade Notice ##
 
+### 3.7.0 ###
+
+This upgrade cleans up some possibly old data in the database when you load the settings page for the plugin. If you have a lot of posts, the load may be slow initially.
+
 ### 3.4.0 ###
 
 Hardcoded and filtered options for new providers have been replaced by a provider registration function with the strings and slug for the provider set inside the provider itself.
@@ -167,6 +171,18 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
+### 3.7.0 ( 2019-04-13 )
+* Do not return maps if location is protected
+* Set Micropub posts with location to public visibility
+* Do not save raw weather data on Micropub
+* Enhance post filter to include all visibilities
+* Add location visibility column to posts
+* Fix storage of timezone on Micropub entries
+* Update airport data
+* Add bulk edit post location visibility
+* Automatically add private location on Micropub post
+* Clean up data on loading settings page
+###
 ### 3.6.4 ( 2019-04-01 )
 * Fix/update default map styles for Mapbox
 * Add default map style now available for Bing

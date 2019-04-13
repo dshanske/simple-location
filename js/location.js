@@ -224,7 +224,7 @@ jQuery( document ).ready( function( $ ) {
 			'wind_degree',
 			'weather-visibility',
 			'pressure',
-			'cloudiness',
+			'cloudiness'
 		];
 		if ( ! confirm( 'Are you sure you want to remove the location details?' ) ) {
 			return;
