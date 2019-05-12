@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.7.0
+Stable tag: 3.7.1
 Requires at least: 4.7
-Tested up to: 5.1.1
+Tested up to: 5.2
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -171,9 +171,10 @@ will now be required to show maps for services that require API keys.
 
 == Changelog ==
 
-= 3.7.1 ( 2019-05-11 )
+= 3.7.1 ( 2019-05-12 )
 * Fix reported issue with icons being oversized when loaded without style sheet
 * Redid weather and location microformats markup. Temperature now marked up as h-measure and location as h-adr
+* Update formatting in widgets to not include microformats
 
 = 3.7.0 ( 2019-04-13 )
 * Do not return maps if location is protected
