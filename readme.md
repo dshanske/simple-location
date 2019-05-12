@@ -171,6 +171,10 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
+### 3.7.1 ( 2019-05-11 )
+* Fix reported issue with icons being oversized when loaded without style sheet
+* Redid weather and location microformats markup. Temperature now marked up as h-measure and location as h-adr
+###
 ### 3.7.0 ( 2019-04-13 )
 * Do not return maps if location is protected
 * Set Micropub posts with location to public visibility

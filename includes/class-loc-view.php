@@ -56,6 +56,7 @@ class Loc_View {
 			'weather'       => true,
 			'icon'          => true, // Show Location Icon
 			'text'          => false, // Show Description
+			'markup'        => true, // Mark up with Microformats
 			'description'   => __( 'Location: ', 'simple-location' ),
 			'wrapper-class' => array( 'sloc-display' ), // Class or classes to wrap the entire location in
 			'wrapper-type'  => 'div', // HTML type to wrap the entire location in
@@ -67,15 +68,19 @@ class Loc_View {
 		$map->set( $loc );
 		$wrap    = '<%1$s class="%2$s">%3$s</%1$s>';
 		$class   = is_array( $args['wrapper-class'] ) ? $args['wrapper-class'] : explode( ' ', $args['wrapper-class'] );
-		$class[] = 'p-location';
-		$class[] = 'h-adr';
+		if ( $args['markup'] ) {
+			$class[] = 'p-location';
+			$class[] = 'h-adr';
+		}
 		$c       = array( PHP_EOL );
 
 		if ( $args['text'] ) {
 			$c[] = $args['description'];
 		}
 		if ( 'public' === $args['visibility'] ) {
-			$c[] = self::get_the_geo( $loc );
+			if ( $args['markup'] ) {
+				$c[] = self::get_the_geo( $loc );
+			}
 			if ( isset( $loc['altitude'] ) ) {
 				if ( get_option( 'sloc_altitude' ) < (int) $loc['altitude'] ) {
 					$loc['altitude'] = self::display_altitude( $loc['altitude'] );
@@ -90,7 +95,8 @@ class Loc_View {
 			if ( isset( $loc['altitude'] ) ) {
 				$loc['address'] .= sprintf( '(%1$s)', $loc['altitude'] );
 			}
-			$c[] = sprintf( '<a class="p-label" href="%1$s">%2$s</a>', $map->get_the_map_url(), $loc['address'] );
+			$adclass = $args['markup'] ? 'p-label' : '';
+			$c[] = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $map->get_the_map_url(), $loc['address'] );
 		} elseif ( isset( $args['address'] ) ) {
 			$c[] = $args['address'];
 		}
@@ -223,15 +229,13 @@ class Loc_View {
 	}
 
 	public static function get_weather_by_location( $lat, $lng ) {
-		$weather = self::get_weather_data( $lat, $lng );
-		return self::get_the_weather( self::get_weather_data( $lat, $lng ) );
+		return self::get_weather_data( $lat, $lng );
 	}
 
 	public static function get_weather_by_station( $station, $provider = null ) {
 		$provider = Loc_Config::weather_provider( $provider );
 		$provider->set( array( 'station_id' => $station ) );
-		$weather = $provider->get_conditions();
-		return self::get_the_weather( $weather );
+		return $provider->get_conditions();
 	}
 
 	// Return marked up coordinates

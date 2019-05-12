@@ -27,20 +27,77 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
+		$measurements = get_option( 'sloc_measurements' );
 		echo $args['before_widget']; // phpcs:ignore
 		if ( ! empty( $instance['title'] ) ) {
 				echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
-		$weather = Loc_Config::weather_provider();
-		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
+		$w = Loc_Config::weather_provider();
+		if ( isset( $instance['user'] ) && '-1' !== $instance['user'] ) {
 			echo Loc_View::get_weather_by_user( $instance['user'] ); // phpcs:ignore
 			return;
-		} elseif ( isset( $instance['latitude'] ) && isset( $instance['longitude'] ) ) {
-			$weather->set( $instance['latitude'], $instance['longitude'] );
+		} elseif ( ! empty( $instance['latitude'] ) && ! empty( $instance['longitude'] ) ) {
+			$w->set( $instance['latitude'], $instance['longitude'] );
+		} else {
+			return;
 		}
-		echo Loc_View::get_the_weather( $weather->get_conditions() ); // phpcs:ignore
+		$weather = $w->get_conditions();
+		if ( ! isset( $weather['icon'] ) ) {
+			$weather['icon'] = 'wi-thermometer';
+		}
+
+		$class    = 'sloc-weather-widget';
+		$return   = array( PHP_EOL );
+		$return[] = '<h2>';
+		$return[] = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
+		if ( ! empty( $weather['summary'] ) ) {
+			$return[] = sprintf( '<span class="p-weather">%1$s</span>', $weather['summary'] );
+		}
+		$return[] = '</h2>';
+		$return[] = '<ul>';
+		if ( isset( $weather['temperature'] ) ) {
+			$units = ifset( $weather['units'] );
+			if ( ! $units ) {
+				switch ( $measurements ) {
+					case 'imperial':
+						$units                  = __( 'F', 'simple-location' );
+						$weather['temperature'] = round( Weather_Provider::celsius_to_fahrenheit( $weather['temperature'] ) );
+						break;
+					default:
+						$units = __( 'C', 'simple-location' );
+				}
+			}
+			$return[] = sprintf( '<li>%1$s&deg;%2$s</li>', $weather['temperature'], $units );
+		}
+
+		if ( isset( $weather['humidity'] ) ) {
+			$return[] = self::markup_parameter( $weather['humidity'], 'humidity', '%', __( 'Humidity', 'simple-location' ) );
+		}
+		if ( isset( $weather['cloudiness'] ) ) {
+			$return[] = self::markup_parameter( $weather['cloudiness'], 'cloudiness', '%', __( 'Cloudiness', 'simple-location' ) );
+		}
+		if ( isset( $weather['visibility'] ) ) {
+			$return[] = self::markup_parameter( $weather['visibility'], 'visibility', 'm', __( 'Visibility', 'simple-location' ) );
+		}
+		$return[] = '</ul>';
+		if ( isset( $weather['station_id'] ) ) {
+			if ( isset( $weather['name'] ) ) {
+				$return[] = sprintf( '<p>%1$s</p>', $weather['name'] );
+			}
+		}
+		echo implode( PHP_EOL, array_filter( $return ) );
 		echo $args['after_widget']; // phpcs:ignore
 
+	}
+
+	private static function markup_parameter( $value, $property, $unit, $type ) {
+		return sprintf(
+			'<li class="sloc-%1$s">%4$s: %2$s%3$s</li>',
+			$property,
+			$value,
+			$unit,
+			$type
+		);
 	}
 
 	/**
@@ -82,9 +139,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 		?>
 		</p>
 			<p><label for="latitude"><?php esc_html_e( 'Latitude: ', 'simple-location' ); ?></label>
-			<input type="text" size="7" name="<?php $this->get_field_name( 'latitude' ); ?>" id="<?php $this->get_field_id( 'latitude' ); ?>" value="<?php echo esc_attr( ifset( $instance['latitude'] ) ); ?>" />
+			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'latitude' ) ); ?>" id="<?php $this->get_field_id( 'latitude' ); ?>" value="<?php echo esc_attr( ifset( $instance['latitude'] ) ); ?>" />
 			<label for="longitude"><?php esc_html_e( 'Longitude: ', 'simple-location' ); ?></label>
-			<input type="text" size="7" name="<?php $this->get_field_name( 'longitude' ); ?>" id="<?php $this->get_field_id( 'longitude' ); ?>" value="<?php echo esc_attr( ifset( $instance['longitude'] ) ); ?>" />
+			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'longitude' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'longitude' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['longitude'] ) ); ?>" />
 			</p>
 		<?php
 	}

@@ -37,6 +37,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 				new WP_User( $instance['user'] ),
 				array(
 					'weather' => false,
+					'markup'  => false,
 				)
 			);
 			if ( ! empty( $location ) ) {
