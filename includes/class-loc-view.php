@@ -14,9 +14,8 @@ class Loc_View {
 	}
 
 	public static function get_icon() {
-		// Substitute another svg sprite file
-		$sprite = plugins_url( 'location.svg', dirname( __FILE__ ) );
-		return '<img class="icon-location" aria-label="' . __( 'Location: ', 'simple-location' ) . '" aria-hidden="true" src="' . $sprite . '" />';
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M443.683 4.529L27.818 196.418C-18.702 217.889-3.39 288 47.933 288H224v175.993c0 51.727 70.161 66.526 91.582 20.115L507.38 68.225c18.905-40.961-23.752-82.133-63.697-63.696z"/></svg>';
+		return '<span class="sloc-icon-location" style="display: inline-block; max-width: 1rem; margin: 2px;"  aria-label="' . __( 'Location: ', 'simple-location' ) . '" aria-hidden="true" />' . $svg . '</span>';
 	}
 
 	public static function display_altitude( $altitude ) {
@@ -59,22 +58,24 @@ class Loc_View {
 			'text'          => false, // Show Description
 			'description'   => __( 'Location: ', 'simple-location' ),
 			'wrapper-class' => array( 'sloc-display' ), // Class or classes to wrap the entire location in
-			'wrapper-type'  => 'p', // HTML type to wrap the entire location in
+			'wrapper-type'  => 'div', // HTML type to wrap the entire location in
 		);
 		$default  = apply_filters( 'simple_location_display_defaults', $defaults );
 		$args     = wp_parse_args( $args, $defaults );
 		$args     = array_merge( $loc, $args );
 		$map      = Loc_Config::map_provider();
 		$map->set( $loc );
-		$wrap  = '<%1$s class="%2$s">%3$s</%1$s>';
-		$class = is_array( $args['wrapper-class'] ) ? implode( ' ', $args['wrapper-class'] ) : $args['wrapper-class'];
-		$c     = '<span class="p-location">';
+		$wrap    = '<%1$s class="%2$s">%3$s</%1$s>';
+		$class   = is_array( $args['wrapper-class'] ) ? $args['wrapper-class'] : explode( ' ', $args['wrapper-class'] );
+		$class[] = 'p-location';
+		$class[] = 'h-adr';
+		$c       = array( PHP_EOL );
 
 		if ( $args['text'] ) {
-			$c .= $args['description'];
+			$c[] = $args['description'];
 		}
 		if ( 'public' === $args['visibility'] ) {
-			$c .= self::get_the_geo( $loc );
+			$c[] = self::get_the_geo( $loc );
 			if ( isset( $loc['altitude'] ) ) {
 				if ( get_option( 'sloc_altitude' ) < (int) $loc['altitude'] ) {
 					$loc['altitude'] = self::display_altitude( $loc['altitude'] );
@@ -89,18 +90,19 @@ class Loc_View {
 			if ( isset( $loc['altitude'] ) ) {
 				$loc['address'] .= sprintf( '(%1$s)', $loc['altitude'] );
 			}
-			$c .= sprintf( '<a href="%1$s">%2$s</a>', $map->get_the_map_url(), $loc['address'] );
-		} else {
-			$c = isset( $args['address'] ) ? $args['address'] : '';
-		}
-		$c .= '</span>';
-		if ( isset( $loc['weather'] ) && $args['weather'] ) {
-			$c .= self::get_the_weather( $loc['weather'] );
+			$c[] = sprintf( '<a class="p-label" href="%1$s">%2$s</a>', $map->get_the_map_url(), $loc['address'] );
+		} elseif ( isset( $args['address'] ) ) {
+			$c[] = $args['address'];
 		}
 		if ( $args['icon'] ) {
-			$c = self::get_icon() . $c;
+			array_unshift( $c, self::get_icon() );
 		}
-		return sprintf( $wrap, $args['wrapper-type'], $class, $c );
+		if ( isset( $loc['weather'] ) && $args['weather'] ) {
+			$c[] = self::get_the_weather( $loc['weather'] );
+		}
+
+		$return = implode( PHP_EOL, $c );
+		return sprintf( '<%1s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], implode( ' ', $class ), $return );
 	}
 
 	public static function get_map( $object = null, $args = array() ) {
@@ -114,7 +116,12 @@ class Loc_View {
 	}
 
 	public static function get_the_weather( $weather, $args = null ) {
-		$defaults = array();
+		$defaults = array(
+			'style'         => 'simple', // Options are simple, complete, graphic (only)
+			'description'   => __( 'Weather: ', 'simple-location' ),
+			'wrapper-class' => array( 'sloc-weather' ), // Class or classes to wrap the weather in
+			'wrapper-type'  => 'span', // HTML type to wrap the weather in
+		);
 		$args     = wp_parse_args( $args, $defaults );
 		if ( ! is_array( $weather ) || empty( $weather ) ) {
 			return '';
@@ -122,28 +129,77 @@ class Loc_View {
 		if ( ! isset( $weather['icon'] ) ) {
 			$weather['icon'] = 'wi-thermometer';
 		}
-		$c = '<br />' . Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
-		if ( isset( $weather['temperature'] ) ) {
-			$units = ifset( $weather['units'] );
-			if ( ! $units ) {
-				switch ( get_option( 'sloc_measurements' ) ) {
-					case 'imperial':
-						$units                  = 'F';
-						$weather['temperature'] = Weather_Provider::celsius_to_fahrenheit( $weather['temperature'] );
-						break;
-					default:
-						$units = 'C';
-				}
+
+		$class    = implode( ' ', $args['wrapper-class'] );
+		$return   = array( PHP_EOL );
+		$return[] = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
+		if ( 'graphic' !== $args['style'] ) {
+			$return[] = self::get_the_temperature( $weather ) . PHP_EOL;
+			if ( ! empty( $weather['summary'] ) ) {
+				$return[] = sprintf( '<span class="p-weather">%1$s</span>', $weather['summary'] );
 			}
-			$c .= '<span class="p-temperature">' . round( $weather['temperature'] ) . '&deg;' . $units . '</span>';
 		}
-		$c .= '&nbsp;' . ifset( $weather['summary'], '' );
+		if ( 'complete' === $args['style'] ) {
+			$return[] = self::get_weather_extras( $weather );
+		}
 		if ( isset( $weather['station_id'] ) ) {
 			if ( isset( $weather['name'] ) ) {
-				$c .= sprintf( '<p>%1$s</p>', $weather['name'] );
+				$return[] = sprintf( '<p>%1$s</p>', $weather['name'] );
 			}
 		}
-		return $c;
+		return implode( PHP_EOL, array_filter( $return ) );
+	}
+
+	private static function get_the_temperature( $weather ) {
+		if ( ! isset( $weather['temperature'] ) ) {
+			return null;
+		}
+		$units = ifset( $weather['units'] );
+		if ( ! $units ) {
+			switch ( get_option( 'sloc_measurements' ) ) {
+				case 'imperial':
+					$units                  = __( 'F', 'simple-location' );
+					$weather['temperature'] = Weather_Provider::celsius_to_fahrenheit( $weather['temperature'] );
+					break;
+				default:
+					$units = __( 'C', 'simple-location' );
+			}
+		}
+		return sprintf(
+			'<span class="sloc-temp p-temperature h-measure">
+		<data class="p-num" value="%1$s">%1$s</data>
+		<data class="p-unit" value="&deg;%2$s">&deg;%2$s</data></span>',
+			round( $weather['temperature'] ),
+			$units
+		);
+	}
+
+	private static function get_weather_extras( $weather ) {
+		$measurements = get_option( 'sloc_measurements' );
+		$return       = array();
+		if ( isset( $weather['humidity'] ) ) {
+			$return[] = self::markup_parameter( $weather['humidity'], 'humidity', '%', __( 'Humidity', 'simple-location' ) );
+		}
+		if ( isset( $weather['cloudiness'] ) ) {
+			$return[] = self::markup_parameter( $weather['cloudiness'], 'cloudiness', '%', __( 'Cloudiness', 'simple-location' ) );
+		}
+		if ( isset( $weather['visibility'] ) ) {
+			$return[] = self::markup_parameter( $weather['visibility'], 'visibility', 'm', __( 'Visibility', 'simple-location' ) );
+		}
+		return '<ul>' . implode( '', $return ) . '</ul>';
+	}
+
+	private static function markup_parameter( $value, $property, $unit, $type ) {
+		return sprintf(
+			'<li class="sloc-%1$s p-%1$s h-measure">
+			<data class="p-type" value="%2$s">%4$s</data>
+			<data class="p-num" value="%2$s">%2$s</data>
+			<data class="p-unit" value="%3$s">%3$s</data></li>',
+			$property,
+			$value,
+			$unit,
+			$type
+		);
 	}
 
 	public static function get_weather_data( $lat, $lng ) {

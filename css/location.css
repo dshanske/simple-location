@@ -19,13 +19,23 @@
   color: black;
 }
 
-.sloc-weather .svg-icon {
-  fill: currentColor;
+.sloc-weather {
+  display: block;
+}
+.sloc-weather .sloc-temp {
+  margin-left: 10px;
+}
+
+.sloc-weather-icon {
+  padding-left: 2px;
+  padding-right: 2px;
   vertical-align: middle;
-  /*  position: relative;  Align more nicely with capital letters */
-  top: -0.0625em;
-  height: 3em;
-  width: 3em;
+  display: block;
+}
+.sloc-weather-icon svg {
+  vertical-align: middle;
+  height: 2rem;
+  fill: currentColor;
 }
 
 /*# sourceMappingURL=location.css.map */
