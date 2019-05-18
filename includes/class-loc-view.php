@@ -273,11 +273,20 @@ class Loc_View {
 	}
 
 	public static function content_map( $content ) {
-		if ( is_single() ) {
+		if ( self::show_map() ) {
 			$content .= self::get_map();
 		}
 		return $content;
 	}
+
+	public static function show_map() {
+		if ( get_option( 'sloc_map_display' ) ) {
+			return true;
+		} else {
+			return is_single();
+		}
+	}
+
 
 } // Class Ends
 

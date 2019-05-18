@@ -299,6 +299,17 @@ class Loc_Config {
 
 		register_setting(
 			'simloc', // settings page
+			'sloc_map_display', // option name
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Show Maps on Home and Archive Pages. Only on single if false',
+				'show_in_rest' => true,
+				'default'      => false,
+			)
+		);
+
+		register_setting(
+			'simloc', // settings page
 			'sloc_measurements', // option name
 			array(
 				'type'         => 'string',
@@ -429,6 +440,18 @@ class Loc_Config {
 				'label_for' => 'sloc_last_report',
 			)
 		);
+
+		add_settings_field(
+			'sloc_map_display', // id
+			__( 'Show Maps on Home and Archive Pages Not Just Single Posts', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_general', // settings section
+			array(
+				'label_for' => 'sloc_map_display',
+			)
+		);
+
 		add_settings_field(
 			'sloc_auto_micropub', // id
 			__( 'Automatically lookup location from supported geolocation provider for Micropub posts', 'simple-location' ), // setting title
