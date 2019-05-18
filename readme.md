@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.7.1  
+**Stable tag:** 3.7.2  
 **Requires at least:** 4.7  
 **Tested up to:** 5.2  
 **Requires PHP:** 5.4  
@@ -171,6 +171,10 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
+### 3.7.2 ( 2019-05-17 )
+* Additional style fixes
+* Add option to show maps on archive and home pages not just single
+###
 ### 3.7.1 ( 2019-05-12 )
 * Fix reported issue with icons being oversized when loaded without style sheet
 * Redid weather and location microformats markup. Temperature now marked up as h-measure and location as h-adr
