@@ -81,7 +81,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), $icon );
 		if ( file_exists( $svg ) ) {
-			return PHP_EOL . sprintf( '<span class="sloc-weather-icon sloc-icon-%1$s" style="display: inline; width: 1.5rem; margin: 2px;" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), file_get_contents( $svg ) );
+			return PHP_EOL . sprintf( '<span class="sloc-weather-icon sloc-icon-%1$s" style="display: inline-block; max-height: 1.5rem; margin-right: 0.1rem;" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), file_get_contents( $svg ) );
 		}
 		return '';
 	}

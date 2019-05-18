@@ -1,18 +1,13 @@
 .sloc-weather {
 	display: block;
-	.sloc-temp {
-		margin-left: 10px;
-	}
 }
 
 .sloc-weather-icon {
-        padding-left: 2px;
-        padding-right: 2px;
         vertical-align: middle;
-	display: block;
+	display: inline-block;
 	svg {
 		vertical-align: middle;
-		height: 2rem;
+		width: 1.5rem;
 		fill: currentColor;
 	}
 }

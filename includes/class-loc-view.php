@@ -15,7 +15,7 @@ class Loc_View {
 
 	public static function get_icon() {
 		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M443.683 4.529L27.818 196.418C-18.702 217.889-3.39 288 47.933 288H224v175.993c0 51.727 70.161 66.526 91.582 20.115L507.38 68.225c18.905-40.961-23.752-82.133-63.697-63.696z"/></svg>';
-		return '<span class="sloc-icon-location" style="display: inline-block; max-width: 1rem; margin: 2px;"  aria-label="' . __( 'Location: ', 'simple-location' ) . '" aria-hidden="true" />' . $svg . '</span>';
+		return '<span class="sloc-icon-location" style="display: inline-block; max-width: 1rem; margin-right: 0.1rem;"  aria-label="' . __( 'Location: ', 'simple-location' ) . '" aria-hidden="true" />' . $svg . '</span>';
 	}
 
 	public static function display_altitude( $altitude ) {
@@ -66,13 +66,13 @@ class Loc_View {
 		$args     = array_merge( $loc, $args );
 		$map      = Loc_Config::map_provider();
 		$map->set( $loc );
-		$wrap    = '<%1$s class="%2$s">%3$s</%1$s>';
-		$class   = is_array( $args['wrapper-class'] ) ? $args['wrapper-class'] : explode( ' ', $args['wrapper-class'] );
+		$wrap  = '<%1$s class="%2$s">%3$s</%1$s>';
+		$class = is_array( $args['wrapper-class'] ) ? $args['wrapper-class'] : explode( ' ', $args['wrapper-class'] );
 		if ( $args['markup'] ) {
 			$class[] = 'p-location';
 			$class[] = 'h-adr';
 		}
-		$c       = array( PHP_EOL );
+		$c = array( PHP_EOL );
 
 		if ( $args['text'] ) {
 			$c[] = $args['description'];
@@ -96,7 +96,7 @@ class Loc_View {
 				$loc['address'] .= sprintf( '(%1$s)', $loc['altitude'] );
 			}
 			$adclass = $args['markup'] ? 'p-label' : '';
-			$c[] = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $map->get_the_map_url(), $loc['address'] );
+			$c[]     = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $map->get_the_map_url(), $loc['address'] );
 		} elseif ( isset( $args['address'] ) ) {
 			$c[] = $args['address'];
 		}
@@ -126,7 +126,7 @@ class Loc_View {
 			'style'         => 'simple', // Options are simple, complete, graphic (only)
 			'description'   => __( 'Weather: ', 'simple-location' ),
 			'wrapper-class' => array( 'sloc-weather' ), // Class or classes to wrap the weather in
-			'wrapper-type'  => 'span', // HTML type to wrap the weather in
+			'wrapper-type'  => 'p', // HTML type to wrap the weather in
 		);
 		$args     = wp_parse_args( $args, $defaults );
 		if ( ! is_array( $weather ) || empty( $weather ) ) {
@@ -153,7 +153,7 @@ class Loc_View {
 				$return[] = sprintf( '<p>%1$s</p>', $weather['name'] );
 			}
 		}
-		return implode( PHP_EOL, array_filter( $return ) );
+		return sprintf( '<%1$s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], esc_attr( $class ), implode( PHP_EOL, array_filter( $return ) ) );
 	}
 
 	private static function get_the_temperature( $weather ) {
