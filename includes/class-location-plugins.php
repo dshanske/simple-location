@@ -58,7 +58,7 @@ class Location_Plugins {
 		$meta = $args['meta_input'];
 		// If there is already a description set
 		if ( ! array_key_exists( 'geo_address', $meta ) || empty( $meta['geo_address'] ) ) {
-			if ( isset( $meta['geo_latitude'] ) && ! isset( $meta['geo_longitude'] ) ) {
+			if ( isset( $meta['geo_latitude'] ) && isset( $meta['geo_longitude'] ) ) {
 				$reverse = Loc_Config::geo_provider();
 				$reverse->set( $meta['geo_latitude'], $meta['geo_longitude'] );
 				$reverse_adr = $reverse->reverse_lookup();
