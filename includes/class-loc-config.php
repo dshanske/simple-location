@@ -671,7 +671,6 @@ class Loc_Config {
 			'simloc'
 		);
 
-
 		add_settings_field(
 			'geonamesuser', // id
 			__( 'Geonames User', 'simple-location' ),

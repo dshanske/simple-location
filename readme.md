@@ -1,8 +1,8 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 3.7.2  
-**Requires at least:** 4.7  
+**Stable tag:** 3.8.0  
+**Requires at least:** 4.9  
 **Tested up to:** 5.2  
 **Requires PHP:** 5.4  
 **License:** GPLv2 or later  
@@ -171,6 +171,10 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
+### 3.8.0 ( 2019-05-26 )
+* Add Geonames as a Provider
+* Fix issue with auto-location on micropub
+###
 ### 3.7.2 ( 2019-05-17 )
 * Additional style fixes
 * Add option to show maps on archive and home pages not just single
