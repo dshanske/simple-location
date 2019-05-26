@@ -100,6 +100,7 @@ class Simple_Location_Plugin {
 			'class-geo-provider-nominatim.php', // Nominatim
 			'class-geo-provider-google.php', // Google
 			'class-geo-provider-bing.php', // Bing
+			'class-geo-provider-geonames.php' // Geonames
 		);
 		self::load( $providers );
 

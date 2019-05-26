@@ -172,6 +172,17 @@ class Loc_Config {
 
 		register_setting(
 			'simloc',
+			'sloc_geonames_user',
+			array(
+				'type'         => 'string',
+				'description'  => 'Geonames User',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+
+		register_setting(
+			'simloc',
 			'sloc_mapbox_user',
 			array(
 				'type'         => 'string',
@@ -658,6 +669,20 @@ class Loc_Config {
 			__( 'API Keys', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_api_settings' ),
 			'simloc'
+		);
+
+
+		add_settings_field(
+			'geonamesuser', // id
+			__( 'Geonames User', 'simple-location' ),
+			array( 'Loc_Config', 'string_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_geonames_user',
+				'class'     => ( 'geonames' === $geo_provider ) ? '' : 'hidden',
+
+			)
 		);
 
 		add_settings_field(
