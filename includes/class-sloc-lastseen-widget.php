@@ -74,8 +74,8 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 	public function form( $instance ) {
 		?>
 				<p><label for="title"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
-				<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?> id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" value="
-						<?php echo esc_html( ifset( $instance['title'] ) ); ?>" /></p>
+				<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?> id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"
+				value="<?php echo esc_html( ifset( $instance['title'] ) ); ?>" /></p>
 		<p>
 		<?php esc_html_e( 'Displays last reported user location', 'simple-location' ); ?>
 		</p>
