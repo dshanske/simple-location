@@ -228,7 +228,7 @@ class WP_Geo_Data {
 			return;
 		}
 
-		if ( empty( $geo['visibility'] ) || 'private' === $geo['visibility'] ) {
+		if ( empty( $geo['visibility'] ) || 'public' !== $geo['visibility'] ) {
 			return;
 		}
 
