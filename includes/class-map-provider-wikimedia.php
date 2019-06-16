@@ -25,7 +25,7 @@ class Map_Provider_Wikimedia extends Map_Provider {
 	}
 
 	public function get_the_map_url() {
-		return sprintf( 'https://maps.wikimedia.org/#/%1$s/%2$s/%3$s', $this->map_zoom, $this->latitude, $this->longitude );
+		return sprintf( 'https://maps.wikimedia.org/#%1$s/%2$s/%3$s', $this->map_zoom, $this->latitude, $this->longitude );
 	}
 
 	// Return code for map
