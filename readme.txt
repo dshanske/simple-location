@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.8.0
+Stable tag: 3.8.1
 Requires at least: 4.9
-Tested up to: 5.2
+Tested up to: 5.2.1
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -170,6 +170,11 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 3.8.1 ( 2019-06-16 )
+* Fix issue where hidden location showed in RSS feed
+* Automatically lookup location for uploaded photos
+* Automatically convert timestamp on photo to published property
 
 = 3.8.0 ( 2019-05-26 )
 * Add Geonames as a Provider
