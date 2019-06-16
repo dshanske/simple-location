@@ -85,7 +85,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 				$return[] = sprintf( '<p>%1$s</p>', $weather['name'] );
 			}
 		}
-		echo implode( PHP_EOL, array_filter( $return ) );
+		echo implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
 		echo $args['after_widget']; // phpcs:ignore
 
 	}

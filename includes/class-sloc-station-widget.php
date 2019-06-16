@@ -104,7 +104,7 @@ class Sloc_Station_Widget extends WP_Widget {
 				$return[] = self::markup_parameter( $weather['visibility'], 'visibility', 'm', __( 'Visibility', 'simple-location' ) );
 			}
 			$return[] = '</ul>';
-			echo implode( PHP_EOL, array_filter( $return ) );
+			echo implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
 		}
 		echo $args['after_widget']; // phpcs:ignore
 
