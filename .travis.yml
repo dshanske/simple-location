@@ -45,13 +45,9 @@ before_script:
         echo "Using PHPUnit 6.x"
         composer global require "phpunit/phpunit:^6"
         ;;
-      5.6|5.5|5.4|5.3)
+      5.6|5.5|5.4)
         echo "Using PHPUnit 4.x"
         composer global require "phpunit/phpunit:^4"
-        ;;
-      5.2)
-        # Do nothing, use default PHPUnit 3.6.x
-        echo "Using default PHPUnit, hopefully 3.6"
         ;;
       *)
         echo "No PHPUnit version handling for PHP version $TRAVIS_PHP_VERSION"
@@ -59,6 +55,8 @@ before_script:
         ;;
     esac
   fi
+  if [[ ! -z "$WP_VERSION" ]] ; then
+      bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
   if [[ "$WP_TRAVISCI" == "travis:phpcs" ]] ; then
       composer install
   fi
