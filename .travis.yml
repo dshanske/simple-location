@@ -22,9 +22,6 @@ matrix:
   - php: 5.6
   - php: 5.6
     env: WP_TRAVISCI=travis:phpcs
-  - php: 5.4
-    env: WP_VERSION=4.9.9 WP_MULTISITE=0
-    # WordPress 5.2 removes support for WordPress 5.4. Testing for 4.9.9 as many people did not move to 5.0 due Gutenberg concerns
 before_script:
 - |
   # Remove Xdebug for a huge performance increase:
@@ -45,7 +42,7 @@ before_script:
         echo "Using PHPUnit 6.x"
         composer global require "phpunit/phpunit:^6"
         ;;
-      5.6|5.5|5.4)
+      5.6)
         echo "Using PHPUnit 4.x"
         composer global require "phpunit/phpunit:^4"
         ;;
