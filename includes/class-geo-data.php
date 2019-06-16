@@ -299,9 +299,41 @@ class WP_Geo_Data {
 
 	public static function attachment( $meta, $post_id ) {
 		$current_user = wp_get_current_user();
-		if ( isset( $meta['image_meta'] ) && isset( $meta['image_meta']['location'] ) ) {
-			update_post_meta( $post_id, 'geo_latitude', $meta['image_meta']['location']['latitude'] );
-			update_post_meta( $post_id, 'geo_longitude', $meta['image_meta']['location']['longitude'] );
+		if ( ! isset( $meta['image_meta'] ) ) {
+			return $meta;
+		}
+		$data = $meta['image_meta'];
+		if ( isset( $data['location'] ) ) {
+			update_post_meta( $post_id, 'geo_latitude', $data['location']['latitude'] );
+			update_post_meta( $post_id, 'geo_longitude', $data['location']['longitude'] );
+			$reverse = Loc_Config::geo_provider();
+			$reverse->set( $data['location']['latitude'], $data['location']['longitude'] );
+			$reverse_adr = $reverse->reverse_lookup();
+			if ( isset( $reverse_adr['display-name'] ) ) {
+				update_post_meta( $post_id, 'geo_address', $reverse_adr['display-name'] );
+			}
+			update_post_meta( $post_id, 'geo_altitude', $reverse->elevation() );
+			$zone = Location_Zones::in_zone( $data['latitude'], $data['longitude'] );
+			if ( ! empty( $zone ) ) {
+				update_post_meta( $post_id, 'geo_address', $zone );
+				self::set_visibility( 'post', $post_id, 'protected' );
+				update_post_meta( $post_id, 'geo_zone', $zone );
+			} else {
+				self::set_visibility( 'post', $post_id, 'public' );
+			}
+		}
+		if ( isset( $data['created_timestamp'] ) && 0 !== (int) $data['created_timestamp'] ) {
+			if ( isset( $data['location'] ) ) {
+				$timezone = Loc_Timezone::timezone_for_location( $data['location']['latitude'], $data['location']['longitude'] );
+			} else {
+				$timezone = get_option( 'timezone_string' );
+			}
+			if ( ! $timezone ) {
+				$timezone = 'GMT';
+			}
+			$datetime = date_create_from_format( 'U', $data['created_timestamp'] );
+			$datetime->setTimezone( new DateTimeZone( $timezone ) );
+			update_post_meta( $post_id, 'mf2_published', $datetime->format( DATE_W3C ) );
 		}
 		return $meta;
 	}
