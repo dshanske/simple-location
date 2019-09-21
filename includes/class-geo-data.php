@@ -25,7 +25,7 @@ class WP_Geo_Data {
 		} else {
 			add_action( 'wp_read_image_metadata', array( 'WP_Geo_Data', 'exif_data' ), 10, 3 );
 		}
-		add_action( 'wp_update_attachment_metadata', array( 'WP_Geo_Data', 'attachment' ), 10, 2 );
+		add_action( 'wp_update_attachment_metadata', array( 'WP_Geo_Data', 'attachment' ), 20, 2 );
 
 		self::rewrite();
 
@@ -298,10 +298,10 @@ class WP_Geo_Data {
 	}
 
 	public static function attachment( $meta, $post_id ) {
-		$current_user = wp_get_current_user();
 		if ( ! isset( $meta['image_meta'] ) ) {
 			return $meta;
 		}
+
 		$data = $meta['image_meta'];
 		if ( isset( $data['location'] ) ) {
 			update_post_meta( $post_id, 'geo_latitude', $data['location']['latitude'] );
