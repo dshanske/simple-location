@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.8.1
+Stable tag: 3.8.2
 Requires at least: 4.9
-Tested up to: 5.2.1
+Tested up to: 5.2.3
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -171,25 +171,29 @@ will now be required to show maps for services that require API keys.
 
 == Changelog ==
 
-= 3.8.1 ( 2019-06-16 )
+= 3.8.2 ( 2019-09-21 ) =
+* Minor Fixes to photo improvements released in 3.8.1
+* Prioritize determining timezone from location over published time when using Micropub
+
+= 3.8.1 ( 2019-06-16 ) = 
 * Fix issue where hidden location showed in RSS feed
 * Automatically lookup location for uploaded photos
 * Automatically convert timestamp on photo to published property
 
-= 3.8.0 ( 2019-05-26 )
+= 3.8.0 ( 2019-05-26 ) =
 * Add Geonames as a Provider
 * Fix issue with auto-location on micropub
 
-= 3.7.2 ( 2019-05-17 )
+= 3.7.2 ( 2019-05-17 ) =
 * Additional style fixes
 * Add option to show maps on archive and home pages not just single
 
-= 3.7.1 ( 2019-05-12 )
+= 3.7.1 ( 2019-05-12 ) =
 * Fix reported issue with icons being oversized when loaded without style sheet
 * Redid weather and location microformats markup. Temperature now marked up as h-measure and location as h-adr
 * Update formatting in widgets to not include microformats
 
-= 3.7.0 ( 2019-04-13 )
+= 3.7.0 ( 2019-04-13 ) = 
 * Do not return maps if location is protected
 * Set Micropub posts with location to public visibility
 * Do not save raw weather data on Micropub
@@ -201,11 +205,11 @@ will now be required to show maps for services that require API keys.
 * Automatically add private location on Micropub post
 * Clean up data on loading settings page
 
-= 3.6.4 ( 2019-04-01 )
+= 3.6.4 ( 2019-04-01 ) =
 * Fix/update default map styles for Mapbox
 * Add default map style now available for Bing
 
-= 3.6.3 ( 2019-03-31 )
+= 3.6.3 ( 2019-03-31 ) =
 * Add Compass as a location provider
 * Add APIXU as a weather provider
 
