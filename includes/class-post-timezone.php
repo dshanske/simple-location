@@ -140,9 +140,7 @@ class Post_Timezone {
 		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
 			return $the_date;
 		}
-		$datetime = new DateTime( $post->post_date_gmt, new DateTimeZone( 'GMT' ) );
-		$datetime->setTimezone( new DateTimeZone( $timezone ) );
-		return $datetime->format( $d );
+		return wp_date( $d, get_post_time( 'U', true, $post ), new DateTimeZone( $timezone ) );
 	}
 
 	public static function get_the_time( $the_time, $d = '', $post = null ) {
@@ -169,10 +167,7 @@ class Post_Timezone {
 		if ( '' === $d ) {
 			$d = get_option( 'time_format' );
 		}
-		$datetime = new DateTime( $post->post_date_gmt, new DateTimeZone( 'GMT' ) );
-		$datetime->setTimezone( new DateTimeZone( $timezone ) );
-		$the_time = $datetime->format( $d );
-		return $the_time;
+		return wp_date( $d, get_post_time( 'U', true, $post ), new DateTimeZone( $timezone ) );
 	}
 
 } // End Class
