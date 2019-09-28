@@ -78,6 +78,7 @@ class Simple_Location_Plugin {
 			'class-post-timezone.php',
 			'class-airport-location.php',
 			'geo-functions.php',
+			'compat-functions.php',
 		);
 
 		// Load Core Files

@@ -40,15 +40,7 @@ class Post_Timezone {
 				delete_post_meta( $post->ID, '_timezone' );
 			}
 			if ( ! $timezone ) {
-				$timezone = get_option( 'timezone_string' );
-				if ( ! $timezone ) {
-					$timezone = get_option( 'gmt_offset', 0 );
-					if ( 0 < (int) $timezone ) {
-						$timezone = 'UTC+' . $timezone;
-					} else {
-						$timezone = 'UTC' . $timezone;
-					}
-				}
+				$timezone = wp_get_timezone_string();
 			}
 		}
 		?>
@@ -109,7 +101,7 @@ class Post_Timezone {
 		}
 		if ( isset( $_POST['post_timezone'] ) ) {
 			$tzlist = DateTimeZone::listIdentifiers();
-			if ( get_option( 'timezone_string' ) !== $_POST['post_timezone'] ) {
+			if ( wp_get_timezone_string() !== $_POST['post_timezone'] ) {
 				// For now protect against non-standard timezones
 				if ( in_array( $_POST['post_timezone'], $tzlist, true ) ) {
 					update_post_meta( $post_id, 'geo_timezone', $_POST['post_timezone'] );

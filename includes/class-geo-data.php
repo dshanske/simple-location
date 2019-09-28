@@ -326,13 +326,10 @@ class WP_Geo_Data {
 			if ( isset( $data['location'] ) ) {
 				$timezone = Loc_Timezone::timezone_for_location( $data['location']['latitude'], $data['location']['longitude'] );
 			} else {
-				$timezone = get_option( 'timezone_string' );
-			}
-			if ( ! $timezone ) {
-				$timezone = 'GMT';
+				$timezone = wp_get_timezone();
 			}
 			$datetime = date_create_from_format( 'U', $data['created_timestamp'] );
-			$datetime->setTimezone( new DateTimeZone( $timezone ) );
+			$datetime->setTimezone( $timezone );
 			update_post_meta( $post_id, 'mf2_published', $datetime->format( DATE_W3C ) );
 		}
 		return $meta;
