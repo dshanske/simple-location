@@ -131,8 +131,8 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			$data['station_id'] = $this->station_id;
 			$data['type']       = 'h';
 			// An hour ago
-			$data['from']  = current_time( 'timestamp' ) - 3600;
-			$data['to']    = current_time( 'timestamp' );
+			$data['from']  = time() - 3600;
+			$data['to']    = time();
 			$data['limit'] = '1';
 			$url           = add_query_arg( $data, $url );
 			$return        = array();
