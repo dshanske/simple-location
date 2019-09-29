@@ -6,8 +6,8 @@ class Post_Timezone {
 	public static function init() {
 		add_filter( 'get_the_date', array( 'Post_Timezone', 'get_the_date' ), 12, 3 );
 		add_filter( 'get_the_time', array( 'Post_Timezone', 'get_the_time' ), 12, 3 );
-		add_filter( 'get_the_modified_date', array( 'Post_Timezone', 'get_the_date' ), 12, 3 );
-		add_filter( 'get_the_modified_time', array( 'Post_Timezone', 'get_the_time' ), 12, 3 );
+		add_filter( 'get_the_modified_date', array( 'Post_Timezone', 'get_the_modified_date' ), 12, 3 );
+		add_filter( 'get_the_modified_time', array( 'Post_Timezone', 'get_the_modified_time' ), 12, 3 );
 		add_action( 'simple_location_sidebox', array( 'Post_Timezone', 'post_submitbox' ) );
 		add_action( 'save_post', array( 'Post_Timezone', 'postbox_save_post_meta' ) );
 		add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
@@ -114,33 +114,50 @@ class Post_Timezone {
 		}
 	}
 
+	public static function get_timezone( $post = null ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return false;
+		}
+		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
+		// For now disable with manual offset
+		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
+			return false;
+		}
+		if ( ! $timezone ) {
+			$timezone = get_post_meta( $post->ID, '_timezone', true );
+			if ( ! $timezone ) {
+				return false;
+			}
+		}
+		if ( 1 === strlen( $timezone ) ) {
+			// Something Got Set Wrong
+			delete_post_meta( $post->ID, 'geo_timezone' );
+			return false;
+		}
+		// For now disable functionality if manual offset
+		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
+			return false;
+		}
+		return new DateTimeZone( $timezone );
+	}
+
 
 	public static function get_the_date( $the_date, $d = '', $post = null ) {
 		$post = get_post( $post );
 		if ( ! $post ) {
 			return $the_date;
 		}
-		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
+		$timezone = self::get_timezone( $post );
 		if ( ! $timezone ) {
-			$timezone = get_post_meta( $post->ID, '_timezone', true );
-			if ( ! $timezone ) {
-				return $the_date;
-			}
-		}
-		if ( 1 === strlen( $timezone ) ) {
-			// Something Got Set Wrong
-			delete_post_meta( $post->ID, 'geo_timezone' );
 			return $the_date;
 		}
 
 		if ( '' === $d ) {
 			$d = get_option( 'date_format' );
 		}
-		// For now disable functionality if manual offset
-		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
-			return $the_date;
-		}
-		return wp_date( $d, get_post_time( 'U', true, $post ), new DateTimeZone( $timezone ) );
+
+		return wp_date( $d, get_post_timestamp( $post ), $timezone );
 	}
 
 	public static function get_the_time( $the_time, $d = '', $post = null ) {
@@ -148,26 +165,46 @@ class Post_Timezone {
 		if ( ! $post ) {
 			return $the_time;
 		}
-		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
-		// For now disable with manual offset
-		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
-			return $the_time;
-		}
+		$timezone = self::get_timezone( $post );
 		if ( ! $timezone ) {
-			$timezone = get_post_meta( $post->ID, '_timezone', true );
-			if ( ! $timezone ) {
-				return $the_time;
-			}
-		}
-		if ( 1 === strlen( $timezone ) ) {
-			// Something Got Set Wrong
-			delete_post_meta( $post->ID, 'geo_timezone' );
 			return $the_time;
 		}
 		if ( '' === $d ) {
 			$d = get_option( 'time_format' );
 		}
-		return wp_date( $d, get_post_time( 'U', true, $post ), new DateTimeZone( $timezone ) );
+		return wp_date( $d, get_post_timestamp( $post ), $timezone );
+	}
+
+	public static function get_the_modified_date( $the_date, $d = '', $post = null ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return $the_date;
+		}
+		$timezone = self::get_timezone( $post );
+		if ( ! $timezone ) {
+			return $the_date;
+		}
+
+		if ( '' === $d ) {
+			$d = get_option( 'date_format' );
+		}
+
+		return wp_date( $d, get_post_timestamp( $post, 'modified' ), $timezone );
+	}
+
+	public static function get_the_modified_time( $the_time, $d = '', $post = null ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return $the_time;
+		}
+		$timezone = self::get_timezone( $post );
+		if ( ! $timezone ) {
+			return $the_time;
+		}
+		if ( '' === $d ) {
+			$d = get_option( 'time_format' );
+		}
+		return wp_date( $d, get_post_timestamp( $post, 'modified' ), $timezone );
 	}
 
 } // End Class
