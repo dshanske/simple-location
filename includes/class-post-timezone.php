@@ -40,7 +40,7 @@ class Post_Timezone {
 				delete_post_meta( $post->ID, '_timezone' );
 			}
 			if ( ! $timezone ) {
-				$timezone = wp_get_timezone_string();
+				$timezone = wp_timezone_string();
 			}
 		}
 		?>
