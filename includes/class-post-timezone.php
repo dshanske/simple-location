@@ -119,27 +119,38 @@ class Post_Timezone {
 		if ( ! $post ) {
 			return false;
 		}
+		$timezone = wp_cache_get( $post->ID, 'post_timezone' );
+		if ( false !== $timezone ) {
+			return $timezone;
+		}
+
 		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
 		// For now disable with manual offset
 		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
-			return false;
+			wp_cache_set( $post->ID, null, 'post_timezone', DAY_IN_SECONDS );
+			return null;
 		}
 		if ( ! $timezone ) {
 			$timezone = get_post_meta( $post->ID, '_timezone', true );
 			if ( ! $timezone ) {
-				return false;
+				wp_cache_set( $post->ID, null, 'post_timezone', DAY_IN_SECONDS );
+				return null;
 			}
 		}
 		if ( 1 === strlen( $timezone ) ) {
 			// Something Got Set Wrong
 			delete_post_meta( $post->ID, 'geo_timezone' );
-			return false;
+			wp_cache_set( $post->ID, null, 'post_timezone', DAY_IN_SECONDS );
+			return null;
 		}
 		// For now disable functionality if manual offset
 		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
-			return false;
+			wp_cache_set( $post->ID, null, 'post_timezone', DAY_IN_SECONDS );
+			return null;
 		}
-		return new DateTimeZone( $timezone );
+		$timezone = new DateTimeZone( $timezone );
+		wp_cache_set( $post->ID, $timezone, 'post_timezone', DAY_IN_SECONDS );
+		return $timezone;
 	}
 
 
@@ -149,7 +160,7 @@ class Post_Timezone {
 			return $the_date;
 		}
 		$timezone = self::get_timezone( $post );
-		if ( ! $timezone ) {
+		if ( is_null( $timezone ) ) {
 			return $the_date;
 		}
 
@@ -166,7 +177,7 @@ class Post_Timezone {
 			return $the_time;
 		}
 		$timezone = self::get_timezone( $post );
-		if ( ! $timezone ) {
+		if ( is_null( $timezone ) ) {
 			return $the_time;
 		}
 		if ( '' === $d ) {
@@ -181,7 +192,7 @@ class Post_Timezone {
 			return $the_date;
 		}
 		$timezone = self::get_timezone( $post );
-		if ( ! $timezone ) {
+		if ( is_null( $timezone ) ) {
 			return $the_date;
 		}
 
@@ -198,7 +209,7 @@ class Post_Timezone {
 			return $the_time;
 		}
 		$timezone = self::get_timezone( $post );
-		if ( ! $timezone ) {
+		if ( is_null( $timezone ) ) {
 			return $the_time;
 		}
 		if ( '' === $d ) {
