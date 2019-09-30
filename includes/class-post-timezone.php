@@ -115,94 +115,95 @@ class Post_Timezone {
 				$structure[] = '</optgroup>';
 			}
 		}
-
-		// Do UTC
-		$structure[] = '<optgroup label="' . esc_attr__( 'UTC', 'default' ) . '">';
-		$selected    = '';
-		if ( 'UTC' === $selected_zone ) {
-			$selected = 'selected="selected" ';
-		}
-		$structure[] = '<option ' . $selected . 'value="' . esc_attr( 'UTC' ) . '">' . __( 'UTC', 'default' ) . '</option>';
-		$structure[] = '</optgroup>';
-
-		// Do manual UTC offsets
-		$structure[]  = '<optgroup label="' . esc_attr__( 'Manual Offsets', 'default' ) . '">';
-		$offset_range = array(
-			-12,
-			-11.5,
-			-11,
-			-10.5,
-			-10,
-			-9.5,
-			-9,
-			-8.5,
-			-8,
-			-7.5,
-			-7,
-			-6.5,
-			-6,
-			-5.5,
-			-5,
-			-4.5,
-			-4,
-			-3.5,
-			-3,
-			-2.5,
-			-2,
-			-1.5,
-			-1,
-			-0.5,
-			0,
-			0.5,
-			1,
-			1.5,
-			2,
-			2.5,
-			3,
-			3.5,
-			4,
-			4.5,
-			5,
-			5.5,
-			5.75,
-			6,
-			6.5,
-			7,
-			7.5,
-			8,
-			8.5,
-			8.75,
-			9,
-			9.5,
-			10,
-			10.5,
-			11,
-			11.5,
-			12,
-			12.75,
-			13,
-			13.75,
-			14,
-		);
-		foreach ( $offset_range as $offset ) {
-			if ( 0 <= $offset ) {
-				$offset_name = '+' . $offset;
-			} else {
-				$offset_name = (string) $offset;
-			}
-
-			$offset_name  = str_replace( array( '.25', '.5', '.75' ), array( ':15', ':30', ':45' ), $offset_name );
-			$offset_value = $offset_name;
-			$offset_name  = 'UTC' . $offset_name;
-			$selected     = '';
-			if ( $offset_value === $selected_zone ) {
+		// Older versions of PHP didn't handle offsets as timezones well so hide this feature
+		if ( version_compare( PHP_VERSION, '5.4', '>' ) ) {
+			// Do UTC
+			$structure[] = '<optgroup label="' . esc_attr__( 'UTC', 'default' ) . '">';
+			$selected    = '';
+			if ( 'UTC' === $selected_zone ) {
 				$selected = 'selected="selected" ';
 			}
-			$structure[] = '<option ' . $selected . 'value="' . esc_attr( $offset_value ) . '">' . esc_html( $offset_name ) . '</option>';
+			$structure[] = '<option ' . $selected . 'value="' . esc_attr( 'UTC' ) . '">' . __( 'UTC', 'default' ) . '</option>';
+			$structure[] = '</optgroup>';
 
+			// Do manual UTC offsets
+			$structure[]  = '<optgroup label="' . esc_attr__( 'Manual Offsets', 'default' ) . '">';
+			$offset_range = array(
+				-12,
+				-11.5,
+				-11,
+				-10.5,
+				-10,
+				-9.5,
+				-9,
+				-8.5,
+				-8,
+				-7.5,
+				-7,
+				-6.5,
+				-6,
+				-5.5,
+				-5,
+				-4.5,
+				-4,
+				-3.5,
+				-3,
+				-2.5,
+				-2,
+				-1.5,
+				-1,
+				-0.5,
+				0,
+				0.5,
+				1,
+				1.5,
+				2,
+				2.5,
+				3,
+				3.5,
+				4,
+				4.5,
+				5,
+				5.5,
+				5.75,
+				6,
+				6.5,
+				7,
+				7.5,
+				8,
+				8.5,
+				8.75,
+				9,
+				9.5,
+				10,
+				10.5,
+				11,
+				11.5,
+				12,
+				12.75,
+				13,
+				13.75,
+				14,
+			);
+			foreach ( $offset_range as $offset ) {
+				if ( 0 <= $offset ) {
+					$offset_name = '+' . $offset;
+				} else {
+					$offset_name = (string) $offset;
+				}
+
+				$offset_name  = str_replace( array( '.25', '.5', '.75' ), array( ':15', ':30', ':45' ), $offset_name );
+				$offset_value = $offset_name;
+				$offset_name  = 'UTC' . $offset_name;
+				$selected     = '';
+				if ( $offset_value === $selected_zone ) {
+					$selected = 'selected="selected" ';
+				}
+				$structure[] = '<option ' . $selected . 'value="' . esc_attr( $offset_value ) . '">' . esc_html( $offset_name ) . '</option>';
+
+			}
+			$structure[] = '</optgroup>';
 		}
-		$structure[] = '</optgroup>';
-
 		return join( "\n", $structure );
 	}
 
