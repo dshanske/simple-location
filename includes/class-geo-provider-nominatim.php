@@ -34,7 +34,8 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			'limit_response_size' => 1048576,
 			'redirection'         => 1,
 			// Use an explicit user-agent for Simple Location
-			'user-agent'          => sprintf( 'Simple Location for WordPress(%1$s)', home_url() );
+			'user-agent'          => sprintf( 'Simple Location for WordPress(%1$s)', home_url() ),
+			'email'               => get_option( 'admin_email' ),
 		);
 
 		$response = wp_remote_get( $query, $args );
