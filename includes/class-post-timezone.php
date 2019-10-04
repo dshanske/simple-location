@@ -4,13 +4,16 @@ add_action( 'init', array( 'Post_Timezone', 'init' ) );
 
 class Post_Timezone {
 	public static function init() {
-		add_filter( 'get_the_date', array( 'Post_Timezone', 'get_the_date' ), 12, 3 );
-		add_filter( 'get_the_time', array( 'Post_Timezone', 'get_the_time' ), 12, 3 );
-		add_filter( 'get_the_modified_date', array( 'Post_Timezone', 'get_the_modified_date' ), 12, 3 );
-		add_filter( 'get_the_modified_time', array( 'Post_Timezone', 'get_the_modified_time' ), 12, 3 );
-		add_action( 'simple_location_sidebox', array( 'Post_Timezone', 'post_submitbox' ) );
-		add_action( 'save_post', array( 'Post_Timezone', 'postbox_save_post_meta' ) );
-		add_action( 'after_micropub', array( 'Post_Timezone', 'after_micropub' ), 10, 2 );
+		$cls = get_called_class();
+		add_filter( 'get_the_date', array( $cls, 'get_the_date' ), 12, 3 );
+		add_filter( 'get_the_time', array( $cls, 'get_the_time' ), 12, 3 );
+		add_filter( 'get_the_modified_date', array( $cls, 'get_the_modified_date' ), 12, 3 );
+		add_filter( 'get_the_modified_time', array( $cls, 'get_the_modified_time' ), 12, 3 );
+		add_filter( 'get_comment_date', array( $cls, 'get_comment_date' ), 12, 3 );
+		add_filter( 'get_comment_time', array( $cls, 'get_comment_time' ), 12, 5 );
+		add_action( 'simple_location_sidebox', array( $cls, 'post_submitbox' ) );
+		add_action( 'save_post', array( $cls, 'postbox_save_post_meta' ) );
+		add_action( 'after_micropub', array( $cls, 'after_micropub' ), 10, 2 );
 	}
 
 	public static function after_micropub( $input, $args ) {
@@ -291,42 +294,54 @@ class Post_Timezone {
 		}
 	}
 
-	public static function get_timezone( $post = null ) {
-		$post = get_post( $post );
-		if ( ! $post ) {
-			return false;
+	public static function get_timezone( $object = null ) {
+		if ( ! $object ) {
+			$object = get_post();
 		}
-		$timezone = wp_cache_get( $post->ID, 'post_timezone' );
+		// If numeric assume post_ID
+		if ( is_numeric( $object ) ) {
+			$object = get_post( $object );
+		}
+		if ( $object instanceof WP_Post ) {
+			$type = 'post';
+			$id   = $object->ID;
+		}
+		if ( $object instanceof WP_Comment ) {
+			$id   = $object->comment_ID;
+			$type = 'comment';
+		}
+		if ( $object instanceof WP_Term ) {
+			$id   = $object->term_id;
+			$type = 'term';
+		}
+		if ( $object instanceof WP_User ) {
+			$id   = $object->ID;
+			$type = 'user';
+		}
+
+		$timezone = wp_cache_get( $id, $type . '_timezone' );
 		if ( false !== $timezone ) {
 			return $timezone;
 		}
 
-		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
-		// For now disable with manual offset
-		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
-			wp_cache_set( $post->ID, null, 'post_timezone', DAY_IN_SECONDS );
+		$timezone = get_metadata( $type, $id, 'geo_timezone', true );
+		if ( ! $timezone ) {
 			return null;
 		}
-		if ( ! $timezone ) {
-			$timezone = get_post_meta( $post->ID, '_timezone', true );
-			if ( ! $timezone ) {
-				wp_cache_set( $post->ID, null, 'post_timezone', DAY_IN_SECONDS );
-				return null;
-			}
+		// For now disable with manual offset
+		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
+			wp_cache_set( $id, null, $type . '_timezone', DAY_IN_SECONDS );
+			return null;
 		}
 		if ( 1 === strlen( $timezone ) ) {
 			// Something Got Set Wrong
-			delete_post_meta( $post->ID, 'geo_timezone' );
-			wp_cache_set( $post->ID, null, 'post_timezone', DAY_IN_SECONDS );
+			delete_metadata( $type, $id, 'geo_timezone' );
+			wp_cache_set( $id, null, $type . '_timezone', DAY_IN_SECONDS );
 			return null;
 		}
-		// For now disable functionality if manual offset
-		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
-			wp_cache_set( $post->ID, null, 'post_timezone', DAY_IN_SECONDS );
-			return null;
-		}
+
 		$timezone = new DateTimeZone( $timezone );
-		wp_cache_set( $post->ID, $timezone, 'post_timezone', DAY_IN_SECONDS );
+		wp_cache_set( $id, $timezone, $type . '_timezone', DAY_IN_SECONDS );
 		return $timezone;
 	}
 
@@ -393,6 +408,29 @@ class Post_Timezone {
 			$d = get_option( 'time_format' );
 		}
 		return wp_date( $d, get_post_timestamp( $post, 'modified' ), $timezone );
+	}
+
+
+	public static function get_comment_date( $date, $d, $comment ) {
+		if ( '' === $d ) {
+			$d = get_option( 'date_format' );
+		}
+		$timezone = self::get_timezone( $comment );
+		if ( is_null( $timezone ) ) {
+			return $date;
+		}
+		return wp_date( $d, get_comment_timestamp( $comment ), $timezone );
+	}
+
+	public static function get_comment_time( $date, $d, $gmt, $translate, $comment ) {
+		if ( '' === $d ) {
+			$d = get_option( 'time_format' );
+		}
+		$timezone = self::get_timezone( $comment );
+		if ( is_null( $timezone ) ) {
+			return $date;
+		}
+		return wp_date( $d, get_comment_timestamp( $comment ), $timezone );
 	}
 
 } // End Class

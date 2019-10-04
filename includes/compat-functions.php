@@ -62,6 +62,51 @@ if ( ! function_exists( 'get_post_datetime' ) ) {
 	}
 }
 
+if ( ! function_exists( 'get_comment_datetime' ) ) {
+	/**
+	 * Retrieve comment published time as a `DateTime` object instance.
+	 *
+	 * The object will be set to the timezone from WordPress settings.
+	 *
+	 * Modified version of the get_post_datetime function from WordPress 5.3
+	 *
+	 * @param int|WP_Comment $comment  Optional. WP_Comment object or ID. Default is global `$comment` object.
+	 * @return DateTime|false Time object on success, false on failure.
+	 */
+	function get_comment_datetime( $comment = null ) {
+		$comment = get_comment( $comment );
+		if ( ! $comment ) {
+			return false;
+		}
+		$time = $comment->comment_date;
+		if ( empty( $time ) || '0000-00-00 00:00:00' === $time ) {
+			return false;
+		}
+		return date_create_from_format( 'Y-m-d H:i:s', $time, wp_timezone() );
+	}
+}
+
+if ( ! function_exists( 'get_comment_timestamp' ) ) {
+	/**
+	 * Retrieve comment published time as a Unix timestamp.
+	 *
+	 * Note that this function returns a true Unix timestamp, not summed with timezone offset
+	 * like older WP functions.
+	 *
+	 * Based on get_post_timestamp function introduced in WordPress 5.3
+	 *
+	 * @param int|WP_Comment $comment  Optional. WP_Comment object or ID. Default is global `$comment` object.
+	 * @return int|false Unix timestamp on success, false on failure.
+	 */
+	function get_comment_timestamp( $comment = null ) {
+		$datetime = get_comment_datetime( $comment );
+		if ( false === $datetime ) {
+			return false;
+		}
+		return $datetime->getTimestamp();
+	}
+}
+
 
 
 if ( ! function_exists( 'wp_timezone_string' ) ) {
