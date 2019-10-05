@@ -161,10 +161,10 @@ class Loc_Config {
 
 		register_setting(
 			'simloc', // settings page
-			'sloc_apixu_api', // option name
+			'sloc_weatherstack_api', // option name
 			array(
 				'type'         => 'string',
-				'description'  => 'APIXU API Key',
+				'description'  => 'Weatherstack API Key',
 				'show_in_rest' => false,
 				'default'      => '',
 			)
@@ -685,14 +685,14 @@ class Loc_Config {
 		);
 
 		add_settings_field(
-			'apixuapi', // id
-			__( 'APIXU API Key', 'simple-location' ), // setting title
+			'weatherstackapi', // id
+			__( 'Weatherstack API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
 			'simloc', // settings page
 			'sloc_api', // settings section
 			array(
-				'label_for' => 'sloc_apixu_api',
-				'class'     => ( 'apixu' === $weather_provider ) ? '' : 'hidden',
+				'label_for' => 'sloc_weatherstack_api',
+				'class'     => ( 'weatherstack' === $weather_provider ) ? '' : 'hidden',
 			)
 		);
 

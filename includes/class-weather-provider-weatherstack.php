@@ -1,6 +1,6 @@
 <?php
 
-class Weather_Provider_Apixu extends Weather_Provider {
+class Weather_Provider_Weatherstack extends Weather_Provider {
 
 	/**
 	 * Constructor
@@ -10,10 +10,10 @@ class Weather_Provider_Apixu extends Weather_Provider {
 	 * @param array $args
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Apixu', 'simple-location' );
-		$this->slug = 'apixu';
+		$this->name = __( 'Weatherstack', 'simple-location' );
+		$this->slug = 'weatherstack';
 		if ( ! isset( $args['api'] ) ) {
-			$args['api'] = get_option( 'sloc_apixu_api' );
+			$args['api'] = get_option( 'sloc_weatherstack_api' );
 		}
 		$args['cache_key'] = '';
 		parent::__construct( $args );
@@ -41,11 +41,11 @@ class Weather_Provider_Apixu extends Weather_Provider {
 				}
 			}
 			$data = array(
-				'key'  => $this->api,
-				'q'    => $this->latitude . ',' . $this->longitude,
-				'lang' => get_bloginfo( 'language' ),
+				'access_key'  => $this->api,
+				'query'    => $this->latitude . ',' . $this->longitude,
+				'units' => 'm'
 			);
-			$url  = 'https://api.apixu.com/v1/current.json';
+			$url  = 'http://api.weatherstack.com/current';
 			$url  = add_query_arg( $data, $url );
 			$args = array(
 				'headers'             => array(
@@ -71,23 +71,25 @@ class Weather_Provider_Apixu extends Weather_Provider {
 				return $return;
 			}
 			$response              = $response['current'];
-			$return['temperature'] = ifset( $response['temp_c'] );
-			if ( isset( $current['humidity'] ) ) {
+			$return['temperature'] = ifset( $response['temperature'] );
+			if ( isset( $response['humidity'] ) ) {
 				$return['humidity'] = $response['humidity'];
 			}
-			$return['pressure'] = ifset( $response['pressure_mb'] );
-			if ( isset( $response['cloud'] ) ) {
-				$return['cloudiness'] = $response['cloud'];
+			$return['pressure'] = ifset( $response['pressure'] );
+			if ( isset( $response['cloudcover'] ) ) {
+				$return['cloudiness'] = $response['cloudcover'];
 			}
 
 			$return['wind']           = array();
-			$return['wind']['speed']  = ifset( $response['wind_kph'] );
+			$return['wind']['speed']  = ifset( $response['wind_speed'] );
 			$return['wind']['degree'] = ifset( $response['wind_degree'] );
 			$return['wind']           = array_filter( $return['wind'] );
-			$return['rain']           = ifset( $response['precip_mm'] );
-			$condition                = ifset( $response['condition'] );
-			$return['summary']        = ifset( $condition['text'] );
-			$return['icon']           = $this->icon_map( $condition['code'], ifset( $response['is_day'] ) );
+			$return['rain']           = ifset( $response['precip'] );
+			$return['visibility']     = ifset( $response['visibility'] );
+			$summary        = ifset( $response['weather_descriptions'] );
+			$summary = is_array( $summary ) ? implode( ' ', $summary ) : '';
+			$return['summary']         = $summary;
+			$return['icon']           = $this->icon_map( $response['weather_code'], ifset( $response['is_day'] ) );
 			$timezone                 = Loc_Timezone::timezone_for_location( $this->latitude, $this->longitude );
 			$return['sunrise']        = sloc_sunrise( $this->latitude, $this->longitude, $timezone );
 			$return['sunset']         = sloc_sunset( $this->latitude, $this->longitude, $timezone );
@@ -103,13 +105,13 @@ class Weather_Provider_Apixu extends Weather_Provider {
 	private function icon_map( $id, $is_day ) {
 		$id = (int) $id;
 		switch ( $id ) {
-			case 1000:
+			case 113:
 				return $is_day ? 'wi-day-sunny' : 'wi-night-clear';
-			case 1003:
+			case 116:
 				return $is_day ? 'wi-day-cloudy' : 'wi-night-partly-cloudy';
-			case 1006:
+			case 119:
 				return $is_day ? 'wi-cloudy' : 'wi-night-cloudy';
-			case 1009:
+			case 122:
 				return $is_day ? 'wi-day-sunny-overcast' : 'wi-night-alt-cloudy';
 			case 1030:
 				return 'wi-raindrops';
@@ -183,4 +185,4 @@ class Weather_Provider_Apixu extends Weather_Provider {
 
 }
 
-register_sloc_provider( new Weather_Provider_Apixu() );
+register_sloc_provider( new Weather_Provider_Weatherstack() );

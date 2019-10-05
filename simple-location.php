@@ -91,7 +91,7 @@ class Simple_Location_Plugin {
 			'class-weather-provider-openweathermap.php', // Open Weather Map
 			'class-weather-provider-darksky.php', // Dark Sky
 			'class-weather-provider-nwsus.php', // National Weather Service (US)
-			'class-weather-provider-apixu.php', // APIXU.com
+			'class-weather-provider-weatherstack.php', // weatherstack.com
 			'class-map-provider-mapbox.php', // MapBox
 			'class-map-provider-google.php', // Google
 			'class-map-provider-bing.php', // Bing
