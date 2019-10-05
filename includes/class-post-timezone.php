@@ -307,8 +307,8 @@ class Post_Timezone {
 			$id   = $object->ID;
 		}
 		if ( $object instanceof WP_Comment ) {
-			$id   = $object->comment_ID;
-			$type = 'comment';
+			$id   = $object->comment_post_ID;
+			$type = 'post';
 		}
 		if ( $object instanceof WP_Term ) {
 			$id   = $object->term_id;
