@@ -63,4 +63,21 @@ class Astronomical_Calculator {
 		}
 		return $zenith;
 	}
+
+	public function is_daytime( $timestamp = null ) {
+		if ( ! $timestamp ) {
+			$timestamp = null;
+		}
+		$sunrise = $this->get_timestamp( $timestamp, 'sunrise' );
+		$sunset  = $this->get_timestamp( $timestamp, 'sunset' );
+		if ( $timestamp < $sunrise ) {
+			return false;
+		}
+		if ( $timestamp > $sunrise && $timestamp < $sunset ) {
+			return true;
+		}
+		if ( $timestamp > $sunset ) {
+			return false;
+		}
+	}
 }
