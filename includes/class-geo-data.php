@@ -313,7 +313,7 @@ class WP_Geo_Data {
 				update_post_meta( $post_id, 'geo_address', $reverse_adr['display-name'] );
 			}
 			update_post_meta( $post_id, 'geo_altitude', $reverse->elevation() );
-			$zone = Location_Zones::in_zone( $data['latitude'], $data['longitude'] );
+			$zone = Location_Zones::in_zone( $data['location']['latitude'], $data['location']['longitude'] );
 			if ( ! empty( $zone ) ) {
 				update_post_meta( $post_id, 'geo_address', $zone );
 				self::set_visibility( 'post', $post_id, 'protected' );
