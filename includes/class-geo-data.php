@@ -449,7 +449,7 @@ class WP_Geo_Data {
 			return false;
 		}
 		$type    = null;
-		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visibility' ) );
+		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visibility', 'timezone' ) );
 		if ( isset( $geodata['map_zoom'] ) ) {
 			$geodata['zoom'] = $geodata['map_zoom'];
 			unset( $geodata['map_zoom'] );
@@ -503,6 +503,7 @@ class WP_Geo_Data {
 		$geodata               = array();
 		$geodata['longitude']  = get_metadata( $type, $id, 'geo_longitude', true );
 		$geodata['latitude']   = get_metadata( $type, $id, 'geo_latitude', true );
+		$geodata['timezone']   = get_metadata( $type, $id, 'geo_timezone', true );
 		$geodata['altitude']   = get_metadata( $type, $id, 'geo_altitude', true );
 		$geodata['address']    = get_metadata( $type, $id, 'geo_address', true );
 		$geodata['map_zoom']   = get_metadata( $type, $id, 'geo_zoom', true );

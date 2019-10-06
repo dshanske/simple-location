@@ -41,9 +41,9 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 				}
 			}
 			$data = array(
-				'access_key'  => $this->api,
-				'query'    => $this->latitude . ',' . $this->longitude,
-				'units' => 'm'
+				'access_key' => $this->api,
+				'query'      => $this->latitude . ',' . $this->longitude,
+				'units'      => 'm',
 			);
 			$url  = 'http://api.weatherstack.com/current';
 			$url  = add_query_arg( $data, $url );
@@ -86,9 +86,9 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			$return['wind']           = array_filter( $return['wind'] );
 			$return['rain']           = ifset( $response['precip'] );
 			$return['visibility']     = ifset( $response['visibility'] );
-			$summary        = ifset( $response['weather_descriptions'] );
-			$summary = is_array( $summary ) ? implode( ' ', $summary ) : '';
-			$return['summary']         = $summary;
+			$summary                  = ifset( $response['weather_descriptions'] );
+			$summary                  = is_array( $summary ) ? implode( ' ', $summary ) : '';
+			$return['summary']        = $summary;
 			$return['icon']           = $this->icon_map( $response['weather_code'], ifset( $response['is_day'] ) );
 			$timezone                 = Loc_Timezone::timezone_for_location( $this->latitude, $this->longitude );
 			$return['sunrise']        = sloc_sunrise( $this->latitude, $this->longitude, $timezone );
@@ -113,71 +113,6 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 				return $is_day ? 'wi-cloudy' : 'wi-night-cloudy';
 			case 122:
 				return $is_day ? 'wi-day-sunny-overcast' : 'wi-night-alt-cloudy';
-			case 1030:
-				return 'wi-raindrops';
-			case 1063:
-				return 'wi-raindrop';
-			case 1066:
-				return 'wi-snowflake-cold';
-			case 1069:
-				return 'wi-sleet';
-			case 1072:
-				return 'wi-sprinkle';
-			case 1087:
-				return 'wi-thunderstorm';
-			case 1114:
-				return 'wi-snow-wind';
-			case 1117:
-				return 'wi-snow';
-			case 1135:
-				return 'wi-fog';
-			case 1147:
-				return 'wi-fog';
-			case 1150:
-				return 'wi-sprinkle';
-			case 1153:
-				return 'wi-sprinkle';
-			case 1168:
-				return 'wi-sprinkle';
-			case 1171:
-				return 'wi-sprinkle';
-			case 1180:
-				return 'wi-rain';
-			case 1183:
-				return 'wi-rain';
-			case 1186:
-			case 1189:
-			case 1192:
-			case 1198:
-				return 'wi-rain';
-			case 1201:
-				return 'wi-storm-showers';
-			case 1204:
-			case 1207:
-				return 'wi-sleet';
-			case 1210:
-			case 1213:
-			case 1216:
-			case 1219:
-			case 1222:
-			case 1225:
-			case 1237:
-				return 'wi-snow';
-			case 1240:
-			case 1243:
-			case 1249:
-			case 1252:
-			case 1255:
-			case 1258:
-				return 'wi-showers';
-			case 1261:
-			case 1264:
-				return 'wi-snow-wind';
-			case 1273:
-			case 1276:
-			case 1279:
-			case 1282:
-				return 'wi-storm-showers';
 			default:
 				return '';
 		}

@@ -31,6 +31,15 @@ $geodata = WP_Geo_Data::get_geodata( $profileuser );
 <span class="description"><?php _e( 'Longitude', 'simple-location' ); ?></span>
 </td>
 </tr>
+<tr><th><label for="timezone"><?php _e( 'Time Zone', 'simple-location'); ?></label></th>
+<td>
+<select name="timezone" id="timezone" width="90%">
+<?php echo wp_timezone_choice( ifset( $geodata['timezone'] ) ); ?>
+</select>
+<br />
+<span class="description"><?php _e( 'Time Zone', 'simple-location' ); ?></span>
+</td>
+</tr>
 <tr><th><label for="altitude"><?php _e( 'Altitude', 'simple-location'); ?></label></th>
 <td>
 <input type="text" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" class="regular-text" />

@@ -159,7 +159,7 @@ class Loc_Metabox {
 
 	public static function save_meta( $meta_type, $object_id ) {
 		// phpcs:disable
-		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading' );
+		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading', 'timezone' );
 		foreach ( $lon_params as $param ) {
 			if ( 'map_zoom' === $param ) {
 				$maparam = 'zoom';

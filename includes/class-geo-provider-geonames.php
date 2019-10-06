@@ -30,7 +30,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 			),
 			'https://secure.geonames.org/findNearbyPlaceNameJSON'
 		);
-		$args = array(
+		$args  = array(
 			'headers'             => array(
 				'Accept' => 'application/json',
 			),
