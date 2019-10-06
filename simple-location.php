@@ -72,12 +72,12 @@ class Simple_Location_Plugin {
 			'class-loc-metabox.php', // Location Metabox
 			'class-loc-view.php', // Location View functionality
 			'class-timezone-result.php',
+			'class-astronomical-calculator.php', // Calculates sunrise sunset etc
 			'class-location-plugins.php',
 			'class-location-zones.php',
 			'class-loc-timezone.php',
 			'class-post-timezone.php',
 			'class-airport-location.php',
-			'geo-functions.php',
 			'compat-functions.php',
 		);
 

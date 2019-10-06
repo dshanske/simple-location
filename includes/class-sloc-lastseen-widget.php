@@ -32,13 +32,20 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 				echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
-			echo '<ul>';
-			$user = new WP_User( $instance['user'] );
+			echo '<div>';
+			$user    = new WP_User( $instance['user'] );
+			$geodata = WP_Geo_Data::get_geodata( $user );
 			if ( 1 === (int) $instance['showtime'] ) {
 				$format   = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 				$timezone = Post_Timezone::get_timezone( $user );
 				echo Weather_Provider::get_icon( 'wi-time-1', __( 'Local Time', 'simple-location' ) ); // phpcs:ignore
 				printf( '<time datetime="%1$s">%2$s</time>', esc_attr( wp_date( DATE_W3C, null, $timezone ) ), esc_html( wp_date( $format, null, $timezone ) ) );
+			}
+			if ( 1 === (int) $instance['showastro'] ) {
+				$calc = new Astronomical_Calculator( $geodata['latitude'], $geodata['longitude'], ifset( $geodata['altitude'], 0 ) );
+
+				printf( '<p>%1$s: <time datetime="%2$s">%3$s</time></p>', esc_html__( 'Sunrise', 'simple-location' ), esc_attr( $calc->get_iso8601( null, 'sunrise' ) ), esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunrise' ) ) );
+				printf( '<p>%1$s: <time datetime="%2$s">%3$s</time></p>', esc_html__( 'Sunset', 'simple-location' ), esc_attr( $calc->get_iso8601( null, 'sunset' ) ), esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunset' ) ) );
 			}
 			if ( 1 === (int) $instance['showtext'] ) {
 				$location = Loc_View::get_location(
@@ -63,7 +70,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 					)
 				); // phpcs:ignore
 			}
-			echo '</ul>';
+			echo '</div>';
 		} else {
 			esc_html_e( 'No User Set', 'simple-location' );
 		}
@@ -112,6 +119,10 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 		<p><label for="showtime"><?php esc_html_e( 'Show Local Time: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showtime' ) ); ?>" type="hidden" value="0" />
 			<input name="<?php echo esc_attr( $this->get_field_name( 'showtime' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showtime'] ) ); ?> />
+		</p>
+		<p><label for="showastro"><?php esc_html_e( 'Show Astrological Info: ', 'simple-location' ); ?></label>
+		<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="hidden" value="0" />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
 		</p>
 		<p><label for="showtext"><?php esc_html_e( 'Show Text: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showtext' ) ); ?>" type="hidden" value="0" />
