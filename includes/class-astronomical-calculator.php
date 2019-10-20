@@ -64,20 +64,19 @@ class Astronomical_Calculator {
 		return $zenith;
 	}
 
+	public static function between( $number, $from, $to ) {
+		return $number > $from && $number < $to;
+	}
+
 	public function is_daytime( $timestamp = null ) {
 		if ( ! $timestamp ) {
 			$timestamp = null;
 		}
 		$sunrise = $this->get_timestamp( $timestamp, 'sunrise' );
 		$sunset  = $this->get_timestamp( $timestamp, 'sunset' );
-		if ( $timestamp < $sunrise ) {
-			return false;
-		}
-		if ( $timestamp > $sunrise && $timestamp < $sunset ) {
+		if ( self::between( $timestamp, $sunrise, $sunset ) ) {
 			return true;
 		}
-		if ( $timestamp > $sunset ) {
-			return false;
-		}
+		return false;
 	}
 }
