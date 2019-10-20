@@ -196,6 +196,8 @@ class REST_Geo {
 				$location['altitude']  = isset( $coord[2] ) ? $coord[2] : null;
 				$properties            = $response['properties'];
 				$location['accuracy']  = isset( $properties['accuracy'] ) ? $properties['accuracy'] : null;
+				$location['speed']  = isset( $properties['speed'] ) ? $properties['speed'] : null;
+				$location['heading']  = isset( $properties['heading'] ) ? $properties['heading'] : null;
 			}
 		} else {
 			$params   = $request->get_params();
