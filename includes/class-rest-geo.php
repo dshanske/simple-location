@@ -185,8 +185,22 @@ class REST_Geo {
 
 	// Callback for updating user location
 	public static function user( $request ) {
-		$params   = $request->get_params();
-		$location = wp_array_slice_assoc( $params, array( 'latitude', 'longitude', 'altitude', 'accuracy', 'speed', 'heading', 'visibility' ) );
+		$json = $request->get_json_params();
+		if ( is_array( $json ) && array_key_exists( 'locations', $json ) ) {
+			$location = array();
+			$json     = $json['locations'];
+			if ( isset( $json['geometry'] ) && isset( $json['properties'] ) ) {
+				$coord                 = $json['geometry']['coordinates'];
+				$location['longitude'] = $coord[0];
+				$location['latitude']  = $coord[1];
+				$location['altitude']  = isset( $coord[2] ) ? $coord[2] : null;
+				$properties            = $response['properties'];
+				$location['accuracy']  = isset( $properties['accuracy'] ) ? $properties['accuracy'] : null;
+			}
+		} else {
+			$params   = $request->get_params();
+			$location = wp_array_slice_assoc( $params, array( 'latitude', 'longitude', 'altitude', 'accuracy', 'speed', 'heading', 'visibility' ) );
+		}
 		$location = array_filter( $location );
 		if ( isset( $location['latitude'] ) && isset( $location['longitude'] ) ) {
 			$reverse = Loc_Config::geo_provider();
