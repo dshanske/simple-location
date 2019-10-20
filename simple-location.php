@@ -66,6 +66,7 @@ class Simple_Location_Plugin {
 			'class-location-provider.php', // Location Provider Class
 			'class-sloc-weather-widget.php', // Weather Widget
 			'class-sloc-station-widget.php', // Weather Station Widget
+			'class-sloc-airport-widget.php', // Airport Weather Widget
 			'class-sloc-lastseen-widget.php', // Last Location Seen Widget
 			'class-rest-geo.php', // REST endpoint for Geo
 			'class-loc-config.php', // Configuration and Settings Page
@@ -111,6 +112,7 @@ class Simple_Location_Plugin {
 	public static function widgets_init() {
 		register_widget( 'Sloc_Weather_Widget' );
 		register_widget( 'Sloc_Station_Widget' );
+		register_widget( 'Sloc_Airport_Widget' );
 		register_widget( 'Sloc_Lastseen_Widget' );
 	}
 

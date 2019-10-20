@@ -295,16 +295,18 @@ class REST_Geo {
 			if ( $return ) {
 				$params['latitude']  = $return['latitude'];
 				$params['longitude'] = $return['longitude'];
+				$params['altitude']  = $return['elevation'];
 			} else {
 				return new WP_Error( 'airport_not_found', __( 'This Airport Code was Not Found', 'simple-location' ) );
 			}
 		}
+		$params['altitude'] = ifset( $params['altitude'], null );
 
 		$timezone = Loc_Timezone::timezone_for_location( $params['latitude'], $params['longitude'] );
 		if ( ! $timezone instanceof Timezone_Result ) {
 			return new WP_Error( 'timezone_not_found', __( 'Could Not Determine Timezone', 'simple-location' ) );
 		}
-		$calc = new Astronomical_Calculator( $params['latitude'], $params['longitude'] );
+		$calc = new Astronomical_Calculator( $params['latitude'], $params['longitude'], $params['altitude'] );
 		return array_merge(
 			$return,
 			array(
