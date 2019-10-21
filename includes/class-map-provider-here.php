@@ -21,7 +21,7 @@ class Map_Provider_Here extends Map_Provider {
 
 	public static function init() {
 		register_setting(
-			'simloc', // option group
+			'sloc_providers', // option group
 			'sloc_here_api', // option name
 			array(
 				'type'         => 'string',
@@ -31,7 +31,7 @@ class Map_Provider_Here extends Map_Provider {
 			)
 		);
 		register_setting(
-			'simloc', // option group
+			'sloc_providers', // option group
 			'sloc_here_appid', // option name
 			array(
 				'type'         => 'string',
@@ -47,7 +47,7 @@ class Map_Provider_Here extends Map_Provider {
 			'hereapi', // id
 			__( 'HERE API Key', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
+			'sloc_providers', // settings page
 			'sloc_api', // settings section
 			array(
 				'label_for' => 'sloc_here_api',
@@ -57,7 +57,7 @@ class Map_Provider_Here extends Map_Provider {
 			'hereapp', // id
 			__( 'HERE Application ID', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
+			'sloc_providers', // settings page
 			'sloc_api', // settings section
 			array(
 				'label_for' => 'sloc_here_appid',
