@@ -15,7 +15,36 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_openweathermap_api' );
 		}
+
+		add_action( 'init', array( get_called_class(), 'init' ) );
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function init() {
+		register_setting(
+			'sloc_providers', // option group
+			'sloc_openweathermap_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'OpenWeatherMap API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'openweatherapi', // id
+			__( 'OpenWeatherMap API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'sloc_providers', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_openweathermap_api',
+			)
+		);
 	}
 
 	public function set( $lat, $lng = null ) {

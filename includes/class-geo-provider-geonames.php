@@ -8,8 +8,23 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( ! isset( $args['user'] ) ) {
 			$args['user'] = get_option( 'sloc_geonames_user' );
 		}
+
+		add_action( 'init', array( get_called_class(), 'init' ) );
 		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function init() {
+		register_setting(
+			'sloc_providers',
+			'sloc_geonames_user',
+			array(
+				'type'         => 'string',
+				'description'  => 'Geonames User',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
 	}
 
 	public static function admin_init() {
@@ -18,7 +33,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 			__( 'Geonames User', 'simple-location' ),
 			array( 'Loc_Config', 'string_callback' ),
 			'sloc_providers',
-			'sloc_providers',
+			'sloc_api',
 			array(
 				'label_for' => 'sloc_geonames_user',
 			)

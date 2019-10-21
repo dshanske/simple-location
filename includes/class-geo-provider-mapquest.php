@@ -9,7 +9,35 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			$args['api'] = get_option( 'sloc_mapquest_api' );
 		}
 
+		add_action( 'init', array( get_called_class(), 'init' ) );
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function init() {
+		register_setting(
+			'sloc_providers', // option group
+			'sloc_mapquest_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Mapquest API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'mapquestapi', // id
+			__( 'MapQuest API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'sloc_providers', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_mapquest_api',
+			)
+		);
 	}
 
 	public function elevation() {

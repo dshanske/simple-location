@@ -16,8 +16,42 @@ class Map_Provider_Mapbox extends Map_Provider {
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_mapbox_style' );
 		}
+		add_action( 'init', array( get_called_class(), 'init' ) );
 		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function init() {
+		register_setting(
+			'sloc_providers', // option group
+			'sloc_mapbox_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Mapbox Static Maps API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+		register_setting(
+			'sloc_providers',
+			'sloc_mapbox_user',
+			array(
+				'type'         => 'string',
+				'description'  => 'Mapbox User',
+				'show_in_rest' => false,
+				'default'      => 'mapbox',
+			)
+		);
+		register_setting(
+			'sloc_providers',
+			'sloc_mapbox_style',
+			array(
+				'type'         => 'string',
+				'description'  => 'Mapbox Style',
+				'show_in_rest' => false,
+				'default'      => 'streets-v10',
+			)
+		);
 	}
 
 	public static function admin_init() {
@@ -26,7 +60,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 			__( 'Mapbox User', 'simple-location' ),
 			array( 'Loc_Config', 'string_callback' ),
 			'sloc_providers',
-			'sloc_providers',
+			'sloc_api',
 			array(
 				'label_for' => 'sloc_mapbox_user',
 
@@ -36,11 +70,22 @@ class Map_Provider_Mapbox extends Map_Provider {
 			'mapboxstyle', // id
 			__( 'Mapbox Style', 'simple-location' ),
 			array( 'Loc_Config', 'style_callback' ),
-			'sloc_providers',
-			'sloc_providers',
+			'simloc',
+			'sloc_map',
 			array(
 				'label_for' => 'sloc_mapbox_style',
 				'provider'  => new Map_Provider_Mapbox(),
+
+			)
+		);
+		add_settings_field(
+			'mapboxapi', // id
+			__( 'Mapbox API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'sloc_providers', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_mapbox_api',
 
 			)
 		);

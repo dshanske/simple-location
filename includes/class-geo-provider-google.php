@@ -8,8 +8,35 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
 		}
-
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+		add_action( 'init', array( get_called_class(), 'init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'googleapi', // id
+			__( 'Google Maps API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'sloc_providers', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_google_api',
+			)
+		);
+	}
+
+	public static function init() {
+		register_setting(
+			'sloc_providers', // option group
+			'sloc_google_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Google Maps API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
 	}
 
 	public function elevation() {

@@ -16,7 +16,35 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 			$args['api'] = get_option( 'sloc_darksky_api' );
 		}
 		$args['cache_key'] = '';
+		add_action( 'init', array( get_called_class(), 'init' ) );
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function init() {
+		register_setting(
+			'sloc_providers', // option group
+			'sloc_darksky_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'DarkSky API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'sloc_darksky_api', // id
+			__( 'Dark Sky API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'sloc_providers', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_darksky_api',
+			)
+		);
 	}
 
 	public function is_station() {

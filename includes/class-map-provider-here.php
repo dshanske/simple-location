@@ -13,8 +13,58 @@ class Map_Provider_Here extends Map_Provider {
 			$args['appid'] = get_option( 'sloc_here_appid' );
 		}
 		$this->appid = $args['appid'];
+
+		add_action( 'init', array( get_called_class(), 'init' ) );
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
 	}
+
+	public static function init() {
+		register_setting(
+			'simloc', // option group
+			'sloc_here_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'HERE Maps API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+		register_setting(
+			'simloc', // option group
+			'sloc_here_appid', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Here Maps APP ID',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'hereapi', // id
+			__( 'HERE API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_here_api',
+			)
+		);
+		add_settings_field(
+			'hereapp', // id
+			__( 'HERE Application ID', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'simloc', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_here_appid',
+			)
+		);
+	}
+
 
 	public function get_styles() {
 		return array();

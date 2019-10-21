@@ -16,7 +16,37 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			$args['api'] = get_option( 'sloc_weatherstack_api' );
 		}
 		$args['cache_key'] = '';
+
+		add_action( 'init', array( get_called_class(), 'init' ) );
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function init() {
+		register_setting(
+			'sloc_providers', // option group
+			'sloc_weatherstack_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Weatherstack API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'weatherstackapi', // id
+			__( 'Weatherstack API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'sloc_providers', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_weatherstack_api',
+			)
+		);
 	}
 
 	public function is_station() {

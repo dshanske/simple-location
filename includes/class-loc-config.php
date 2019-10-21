@@ -15,7 +15,6 @@ class Loc_Config {
 	 */
 	public static function init() {
 		self::register_provider_settings();
-		self::register_api_settings();
 		self::register_map_settings();
 	}
 
@@ -121,189 +120,9 @@ class Loc_Config {
 		);
 	}
 
-	public static function register_api_settings() {
-		register_setting(
-			'simloc', // option group
-			'sloc_google_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Google Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-
-		register_setting(
-			'simloc', // option group
-			'sloc_compass_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Compass P3K API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-
-		register_setting(
-			'simloc', // option group
-			'sloc_compass_url', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Compass P3K URL',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-
-		register_setting(
-			'simloc', // option group
-			'sloc_here_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'HERE Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-		register_setting(
-			'simloc', // option group
-			'sloc_here_appid', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Here Maps APP ID',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-
-		register_setting(
-			'simloc', // option group
-			'sloc_mapbox_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Mapbox Static Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-		register_setting(
-			'simloc', // option group
-			'sloc_bing_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Bing Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-		register_setting(
-			'simloc', // option group
-			'sloc_mapquest_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Mapquest API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-		register_setting(
-			'simloc', // option group
-			'sloc_darksky_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'DarkSky API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-		register_setting(
-			'simloc', // option group
-			'sloc_openweathermap_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'OpenWeatherMap API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-
-		register_setting(
-			'simloc', // option group
-			'sloc_weatherstack_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Weatherstack API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-
-		register_setting(
-			'simloc',
-			'sloc_geonames_user',
-			array(
-				'type'         => 'string',
-				'description'  => 'Geonames User',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-
-		register_setting(
-			'simloc',
-			'sloc_mapbox_user',
-			array(
-				'type'         => 'string',
-				'description'  => 'Mapbox User',
-				'show_in_rest' => false,
-				'default'      => 'mapbox',
-			)
-		);
-		register_setting(
-			'simloc',
-			'sloc_mapbox_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'Mapbox Style',
-				'show_in_rest' => false,
-				'default'      => 'streets-v10',
-			)
-		);
-		register_setting(
-			'simloc',
-			'sloc_bing_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'Bing Map Style',
-				'show_in_rest' => false,
-				'default'      => 'CanvasLight',
-			)
-		);
-		register_setting(
-			'simloc',
-			'sloc_google_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'Google Map Style',
-				'show_in_rest' => false,
-				'default'      => 'roadmap',
-			)
-		);
-		register_setting(
-			'simloc',
-			'sloc_mapquest_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'Mapquest Map Style',
-				'show_in_rest' => false,
-				'default'      => 'map',
-			)
-		);
-	}
-
 	public static function register_map_settings() {
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_height', // option name
 			array(
 				'type'         => 'number',
@@ -313,7 +132,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_width', // option name
 			array(
 				'type'         => 'number',
@@ -624,158 +443,18 @@ class Loc_Config {
 		);
 
 		add_settings_section(
-			'sloc_weather',
-			__( 'Weather Settings', 'simple-location' ),
-			array( 'Loc_Config', 'sloc_weather_settings' ),
-			'simloc'
-		);
-		add_settings_section(
 			'sloc_providers',
 			__( 'Providers', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_provider_settings' ),
-			'simloc'
+			'sloc_providers'
 		);
 
 		add_settings_section(
 			'sloc_api',
 			__( 'API Keys', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_api_settings' ),
-			'simloc'
+			'sloc_providers'
 		);
-
-		add_settings_field(
-			'weatherstackapi', // id
-			__( 'Weatherstack API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_weatherstack_api',
-				'class'     => ( 'weatherstack' === $weather_provider ) ? '' : 'hidden',
-			)
-		);
-
-		add_settings_field(
-			'hereapi', // id
-			__( 'HERE API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_here_api',
-				'class'     => ( 'here' === $map_provider ) ? '' : 'hidden',
-			)
-		);
-		add_settings_field(
-			'hereapp', // id
-			__( 'HERE Application ID', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_here_appid',
-				'class'     => ( 'here' === $map_provider ) ? '' : 'hidden',
-			)
-		);
-
-		add_settings_field(
-			'mapquestapi', // id
-			__( 'MapQuest API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_mapquest_api',
-				'class'     => ( 'mapquest' === $map_provider || 'mapquest' === $geo_provider ) ? '' : 'hidden',
-			)
-		);
-		add_settings_field(
-			'googleapi', // id
-			__( 'Google Maps API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_google_api',
-				'class'     => ( 'google' === $map_provider || 'google' === $geo_provider ) ? '' : 'hidden',
-			)
-		);
-		add_settings_field(
-			'bingapi', // id
-			__( 'Bing API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_bing_api',
-				'class'     => ( 'bing' === $map_provider || 'bing' === $geo_provider ) ? '' : 'hidden',
-
-			)
-		);
-
-		add_settings_field(
-			'mapboxapi', // id
-			__( 'Mapbox API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_mapbox_api',
-				'class'     => ( 'mapbox' === $map_provider ) ? '' : 'hidden',
-
-			)
-		);
-		add_settings_field(
-			'sloc_darksky_api', // id
-			__( 'Dark Sky API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_darksky_api',
-				'class'     => ( 'darksky' === $weather_provider ) ? '' : 'hidden',
-
-			)
-		);
-		add_settings_field(
-			'openweatherapi', // id
-			__( 'OpenWeatherMap API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_openweathermap_api',
-				'class'     => ( 'openweathermap' === $weather_provider ) ? '' : 'hidden',
-
-			)
-		);
-
-		add_settings_field(
-			'compassapi', // id
-			__( 'Compass API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_compass_api',
-				'class'     => ( 'compass' === $location_provider ) ? '' : 'hidden',
-
-			)
-		);
-
-		add_settings_field(
-			'compassurl', // id
-			__( 'Compass URL', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_compass_url',
-				'class'     => ( 'compass' === $location_provider ) ? '' : 'hidden',
-
-			)
-		);
-
 	}
 
 	public static function checkbox_callback( array $args ) {
@@ -894,9 +573,6 @@ class Loc_Config {
 
 
 	public static function sloc_map_settings() {
-	}
-
-	public static function sloc_weather_settings() {
 	}
 
 	public static function sloc_api_settings() {
