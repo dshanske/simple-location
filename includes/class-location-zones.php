@@ -9,7 +9,7 @@ class Location_Zones {
 		add_action( 'admin_enqueue_scripts', array( $cls, 'enqueue' ) );
 
 		register_setting(
-			'simloc', // settings page
+			'sloc_zones', // option group
 			'sloc_zones', // option name
 			array(
 				'type'         => 'string',
@@ -26,13 +26,13 @@ class Location_Zones {
 			'sloc_zone_section',
 			__( 'Geofencing Zones Settings', 'simple-location' ),
 			array( $cls, 'sloc_zones' ),
-			'simloc'
+			'sloc_zones' // option group
 		);
 		add_settings_field(
 			'sloc_zones', // id
 			__( 'Zones', 'simple-location' ), // setting title
 			array( $cls, 'zone_callback' ), // display callback
-			'simloc', // settings page
+			'sloc_zones', // option group
 			'sloc_zone_section', // settings section
 			array()
 		);

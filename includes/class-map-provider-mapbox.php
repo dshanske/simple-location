@@ -16,8 +16,34 @@ class Map_Provider_Mapbox extends Map_Provider {
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_mapbox_style' );
 		}
-
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'mapboxuser', // id
+			__( 'Mapbox User', 'simple-location' ),
+			array( 'Loc_Config', 'string_callback' ),
+			'sloc_providers',
+			'sloc_providers',
+			array(
+				'label_for' => 'sloc_mapbox_user',
+
+			)
+		);
+		add_settings_field(
+			'mapboxstyle', // id
+			__( 'Mapbox Style', 'simple-location' ),
+			array( 'Loc_Config', 'style_callback' ),
+			'sloc_providers',
+			'sloc_providers',
+			array(
+				'label_for' => 'sloc_mapbox_style',
+				'provider'  => new Map_Provider_Mapbox(),
+
+			)
+		);
 	}
 
 	public function default_styles() {

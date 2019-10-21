@@ -8,8 +8,21 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( ! isset( $args['user'] ) ) {
 			$args['user'] = get_option( 'sloc_geonames_user' );
 		}
-
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'geonamesuser', // id
+			__( 'Geonames User', 'simple-location' ),
+			array( 'Loc_Config', 'string_callback' ),
+			'sloc_providers',
+			'sloc_providers',
+			array(
+				'label_for' => 'sloc_geonames_user',
+			)
+		);
 	}
 
 	public function elevation() {

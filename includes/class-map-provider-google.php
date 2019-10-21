@@ -12,7 +12,22 @@ class Map_Provider_Google extends Map_Provider {
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_google_style' );
 		}
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'googlestyle', // id
+			__( 'Google Style', 'simple-location' ),
+			array( 'Loc_Config', 'style_callback' ),
+			'sloc_providers',
+			'sloc_providers',
+			array(
+				'label_for' => 'sloc_google_style',
+				'provider'  => new Map_Provider_Google(),
+			)
+		);
 	}
 
 	public function get_styles() {

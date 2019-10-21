@@ -6,13 +6,31 @@ class Location_Provider_Compass extends Location_Provider {
 		$this->name = __( 'Compass', 'simple-location' );
 		$this->slug = 'compass';
 		parent::__construct( $args );
-		$this->api        = get_option( 'sloc_compass_api' );
 		$this->background = true;
+		add_filter( 'user_contactmethods', array( get_called_class(), 'user_contactmethods' ), 12 );
 	}
 
+	public static function user_contactmethods( $profile_fields ) {
+		$profile_fields['compass_api'] = __( 'Compass API Key', 'simple-location' );
+		$profile_fields['compass_url'] = __( 'Compass URL', 'simple-location' );
+		return $profile_fields;
+	}
+
+
 	public function retrieve() {
-		$compass  = get_option( 'sloc_compass_url' );
-		$url      = sprintf( '%1$s/api/last/?token=%2$s', $compass, $this->api );
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return;
+		}
+		$compass = get_user_meta( $user_id, 'compass_url', true );
+		if ( ! $compass ) {
+			return;
+		}
+		$api = get_user_meta( $user_id, 'compass_api', true );
+		if ( ! $api ) {
+			return;
+		}
+		$url      = sprintf( '%1$s/api/last/?token=%2$s', $compass, $api );
 			$args = array(
 				'headers'             => array(
 					'Accept' => 'application/json',

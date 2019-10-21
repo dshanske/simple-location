@@ -12,7 +12,22 @@ class Map_Provider_Mapquest extends Map_Provider {
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_mapquest_style' );
 		}
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'mapqueststyle', // id
+			__( 'MapQuest Style', 'simple-location' ),
+			array( 'Loc_Config', 'style_callback' ),
+			'sloc_providers',
+			'sloc_providers',
+			array(
+				'label_for' => 'sloc_mapquest_style',
+				'provider'  => new Map_Provider_Mapquest(),
+			)
+		);
 	}
 
 	public function get_styles() {

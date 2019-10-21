@@ -14,8 +14,73 @@ class Loc_Config {
 	 * Add Settings to the Discussions Page
 	 */
 	public static function init() {
+		self::register_provider_settings();
+		self::register_api_settings();
+		self::register_map_settings();
+	}
+
+	public static function register_general_settings() {
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
+			'geo_public', // option name
+			array(
+				'type'         => 'number',
+				'description'  => 'Default Setting for Geodata',
+				'show_in_rest' => true,
+				'default'      => 1,
+				// WordPress Geodata defaults to public but this allows a global override for new posts
+			)
+		);
+		register_setting(
+			'simloc', // option group
+			'sloc_last_report', // option name
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Update Authors Last Reported Location on New Post',
+				'show_in_rest' => true,
+				'default'      => true,
+				// If this is true then each time a post is made with location properties it will update the user location
+			)
+		);
+
+		register_setting(
+			'simloc', // option group
+			'sloc_auto_micropub', // option name
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Add Location from Geolocation Provider Automatically on Micropub Posts',
+				'show_in_rest' => true,
+				'default'      => false,
+				// If this is true then each time a post is made without location it will add it set automatically to private
+			)
+		);
+
+		register_setting(
+			'simloc', // option group
+			'sloc_map_display', // option name
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Show Maps on Home and Archive Pages. Only on single if false',
+				'show_in_rest' => true,
+				'default'      => false,
+			)
+		);
+
+		register_setting(
+			'simloc', // option group
+			'sloc_measurements', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Units to Display',
+				'show_in_rest' => true,
+				'default'      => self::measurement_default(),
+			)
+		);
+	}
+
+	public static function register_provider_settings() {
+		register_setting(
+			'sloc_providers', // option group
 			'sloc_map_provider', // option name
 			array(
 				'type'         => 'string',
@@ -25,7 +90,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'sloc_providers', // option group
 			'sloc_geo_provider', // option name
 			array(
 				'type'         => 'string',
@@ -35,7 +100,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'sloc_providers', // option group
 			'sloc_geolocation_provider', // option name
 			array(
 				'type'         => 'string',
@@ -45,7 +110,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'sloc_providers', // option group
 			'sloc_weather_provider', // option name
 			array(
 				'type'         => 'string',
@@ -54,8 +119,11 @@ class Loc_Config {
 				'default'      => 'openweathermap',
 			)
 		);
+	}
+
+	public static function register_api_settings() {
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_google_api', // option name
 			array(
 				'type'         => 'string',
@@ -66,7 +134,7 @@ class Loc_Config {
 		);
 
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_compass_api', // option name
 			array(
 				'type'         => 'string',
@@ -77,7 +145,7 @@ class Loc_Config {
 		);
 
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_compass_url', // option name
 			array(
 				'type'         => 'string',
@@ -88,7 +156,7 @@ class Loc_Config {
 		);
 
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_here_api', // option name
 			array(
 				'type'         => 'string',
@@ -98,7 +166,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_here_appid', // option name
 			array(
 				'type'         => 'string',
@@ -109,7 +177,7 @@ class Loc_Config {
 		);
 
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_mapbox_api', // option name
 			array(
 				'type'         => 'string',
@@ -119,7 +187,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_bing_api', // option name
 			array(
 				'type'         => 'string',
@@ -129,7 +197,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_mapquest_api', // option name
 			array(
 				'type'         => 'string',
@@ -139,7 +207,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_darksky_api', // option name
 			array(
 				'type'         => 'string',
@@ -149,7 +217,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_openweathermap_api', // option name
 			array(
 				'type'         => 'string',
@@ -160,7 +228,7 @@ class Loc_Config {
 		);
 
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_weatherstack_api', // option name
 			array(
 				'type'         => 'string',
@@ -231,7 +299,9 @@ class Loc_Config {
 				'default'      => 'map',
 			)
 		);
+	}
 
+	public static function register_map_settings() {
 		register_setting(
 			'simloc', // settings page
 			'sloc_height', // option name
@@ -253,7 +323,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_zoom', // option name
 			array(
 				'type'         => 'number',
@@ -263,7 +333,7 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // settings page
+			'simloc', // option group
 			'sloc_altitude', // option name
 			array(
 				'type'         => 'number',
@@ -273,62 +343,6 @@ class Loc_Config {
 			)
 		);
 
-		register_setting(
-			'simloc', // settings page
-			'geo_public', // option name
-			array(
-				'type'         => 'number',
-				'description'  => 'Default Setting for Geodata',
-				'show_in_rest' => true,
-				'default'      => 1,
-				// WordPress Geodata defaults to public but this allows a global override for new posts
-			)
-		);
-		register_setting(
-			'simloc', // settings page
-			'sloc_last_report', // option name
-			array(
-				'type'         => 'boolean',
-				'description'  => 'Update Authors Last Reported Location on New Post',
-				'show_in_rest' => true,
-				'default'      => true,
-				// If this is true then each time a post is made with location properties it will update the user location
-			)
-		);
-
-		register_setting(
-			'simloc', // settings page
-			'sloc_auto_micropub', // option name
-			array(
-				'type'         => 'boolean',
-				'description'  => 'Add Location from Geolocation Provider Automatically on Micropub Posts',
-				'show_in_rest' => true,
-				'default'      => false,
-				// If this is true then each time a post is made without location it will add it set automatically to private
-			)
-		);
-
-		register_setting(
-			'simloc', // settings page
-			'sloc_map_display', // option name
-			array(
-				'type'         => 'boolean',
-				'description'  => 'Show Maps on Home and Archive Pages. Only on single if false',
-				'show_in_rest' => true,
-				'default'      => false,
-			)
-		);
-
-		register_setting(
-			'simloc', // settings page
-			'sloc_measurements', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Units to Display',
-				'show_in_rest' => true,
-				'default'      => self::measurement_default(),
-			)
-		);
 	}
 
 	public static function register_provider( $object ) {
@@ -400,17 +414,33 @@ class Loc_Config {
 		foreach ( $posts as $post_id ) {
 			delete_post_meta( $post_id, 'geo_public' );
 		}
+		$active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'general';
 
 		?>
 		<div class="wrap">
 			<h2><?php esc_html_e( 'Simple Location', 'simple-location' ); ?> </h2>
-		<p>
-			<?php esc_html_e( 'API Keys and Settings for Simple Location', 'simple-location' ); ?>
-		</p><hr />
+		<h2 class="nav-tab-wrapper">
+		
+		<?php self::tab_link( 'general', __( 'General', 'simple-location' ), $active_tab ); ?>
+		<?php self::tab_link( 'providers', __( 'Providers', 'simple-location' ), $active_tab ); ?>
+		<?php self::tab_link( 'zones', __( 'Zones', 'simple-location' ), $active_tab ); ?>
+		</h2>
+		<hr />
 		<form method="post" action="options.php">
 			<?php
-				settings_fields( 'simloc' );
-				do_settings_sections( 'simloc' );
+			switch ( $active_tab ) {
+				case 'providers':
+					settings_fields( 'sloc_providers' );
+					do_settings_sections( 'sloc_providers' );
+					break;
+				case 'zones':
+					settings_fields( 'sloc_zones' );
+					do_settings_sections( 'sloc_zones' );
+					break;
+				default:
+					settings_fields( 'simloc' );
+					do_settings_sections( 'simloc' );
+			}
 				submit_button();
 			?>
 		</form>
@@ -418,6 +448,11 @@ class Loc_Config {
 		<?php
 	}
 
+	public static function tab_link( $tab, $name, $active = 'general' ) {
+		$url    = add_query_arg( 'tab', $tab, menu_page_url( 'simloc', false ) );
+		$active = ( $active === $tab ) ? ' nav-tab-active' : '';
+		printf( '<a href="%1$s" class="nav-tab%2$s">%3$s</a>', esc_url( $url ), esc_attr( $active ), esc_html( $name ) );
+	}
 	public static function admin_init() {
 		$map_provider      = get_option( 'sloc_map_provider' );
 		$weather_provider  = get_option( 'sloc_weather_provider' );
@@ -487,14 +522,14 @@ class Loc_Config {
 			'sloc_providers',
 			__( 'Provider Settings', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_provider_settings' ),
-			'simloc'
+			'sloc_providers'
 		);
 
 		add_settings_field(
 			'sloc_map_provider', // id
 			__( 'Map Provider', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'simloc', // settings page
+			'sloc_providers', // option group
 			'sloc_providers', // settings section
 			array(
 				'label_for'   => 'sloc_map_provider',
@@ -506,7 +541,7 @@ class Loc_Config {
 			'sloc_geo_provider', // id
 			__( 'Geo Provider', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'simloc', // settings page
+			'sloc_providers', // option group
 			'sloc_providers', // settings section
 			array(
 				'label_for'   => 'sloc_geo_provider',
@@ -518,7 +553,7 @@ class Loc_Config {
 			'sloc_geolocation_provider', // id
 			__( 'Geolocation Provider', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'simloc', // settings page
+			'sloc_providers', // option group
 			'sloc_providers', // settings section
 			array(
 				'label_for'   => 'sloc_geolocation_provider',
@@ -530,7 +565,7 @@ class Loc_Config {
 			'sloc_weather_provider', // id
 			__( 'Weather Provider', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'simloc', // settings page
+			'sloc_providers', // option group
 			'sloc_providers', // settings section
 			array(
 				'label_for'   => 'sloc_weather_provider',
@@ -588,69 +623,6 @@ class Loc_Config {
 			)
 		);
 
-		add_settings_field(
-			'googlestyle', // id
-			__( 'Google Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_google_style',
-				'provider'  => new Map_Provider_Google(),
-				'class'     => ( 'google' === $map_provider ) ? '' : 'hidden',
-			)
-		);
-		add_settings_field(
-			'bingstyle', // id
-			__( 'Bing Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_bing_style',
-				'provider'  => new Map_Provider_Bing(),
-				'class'     => ( 'bing' === $map_provider ) ? '' : 'hidden',
-			)
-		);
-		add_settings_field(
-			'mapboxuser', // id
-			__( 'Mapbox User', 'simple-location' ),
-			array( 'Loc_Config', 'string_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_mapbox_user',
-				'class'     => ( 'mapbox' === $map_provider ) ? '' : 'hidden',
-
-			)
-		);
-		add_settings_field(
-			'mapboxstyle', // id
-			__( 'Mapbox Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_mapbox_style',
-				'provider'  => new Map_Provider_Mapbox(),
-				'class'     => ( 'mapbox' === $map_provider ) ? '' : 'hidden',
-
-			)
-		);
-
-		add_settings_field(
-			'mapqueststyle', // id
-			__( 'MapQuest Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_mapquest_style',
-				'provider'  => new Map_Provider_Mapquest(),
-				'class'     => ( 'mapquest' === $map_provider ) ? '' : 'hidden',
-			)
-		);
-
 		add_settings_section(
 			'sloc_weather',
 			__( 'Weather Settings', 'simple-location' ),
@@ -669,19 +641,6 @@ class Loc_Config {
 			__( 'API Keys', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_api_settings' ),
 			'simloc'
-		);
-
-		add_settings_field(
-			'geonamesuser', // id
-			__( 'Geonames User', 'simple-location' ),
-			array( 'Loc_Config', 'string_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_geonames_user',
-				'class'     => ( 'geonames' === $geo_provider ) ? '' : 'hidden',
-
-			)
 		);
 
 		add_settings_field(
