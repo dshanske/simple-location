@@ -4,6 +4,7 @@ abstract class Sloc_Provider {
 
 	protected $slug;
 	protected $name;
+	protected $description;
 	protected $api;
 	protected $latitude;
 	protected $longitude;
@@ -32,6 +33,15 @@ abstract class Sloc_Provider {
 	 */
 	public function get_name() {
 		return $this->name;
+	}
+
+
+	/**
+	 * Get Description
+	 *
+	 */
+	public function get_description() {
+		return $this->description;
 	}
 
 	/**

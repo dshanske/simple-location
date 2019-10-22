@@ -99,10 +99,12 @@ class Simple_Location_Plugin {
 			'class-map-provider-mapquest.php', // MapQuest
 			'class-map-provider-here.php', // HERE
 			'class-map-provider-wikimedia.php', // Wikimedia
+			'class-map-provider-locationiq.php', // LocationIQ
 			'class-geo-provider-nominatim.php', // Nominatim
 			'class-geo-provider-mapquest.php', /// MapQuest Nominatim
 			'class-geo-provider-google.php', // Google
 			'class-geo-provider-bing.php', // Bing
+			'class-geo-provider-locationiq.php', // LocationIQ
 			'class-geo-provider-geonames.php', // Geonames
 		);
 		self::load( $providers );

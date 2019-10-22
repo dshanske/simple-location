@@ -286,7 +286,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'geo_public', // id
-			__( 'Default Display for Location', 'simple-location' ), // setting title
+			__( 'Default Visibility for Location', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'provider_callback' ), // display callback
 			'simloc', // settings page
 			'sloc_general', // settings section
@@ -297,7 +297,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'sloc_last_report', // id
-			__( 'Update Author Last Reported Location on New Post', 'simple-location' ), // setting title
+			__( 'When Making a New Post, update the Author with Posts Location', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'checkbox_callback' ), // display callback
 			'simloc', // settings page
 			'sloc_general', // settings section
@@ -436,7 +436,7 @@ class Loc_Config {
 			__( 'Altitude will Display if Above This Height(in meters)', 'simple-location' ), // setting title
 			array( 'Loc_Config', 'number_callback' ), // display callback
 			'simloc', // settings page
-			'sloc_map', // settings section
+			'sloc_general', // settings section
 			array(
 				'label_for' => 'sloc_altitude',
 			)
@@ -568,15 +568,19 @@ class Loc_Config {
 	}
 
 	public static function sloc_provider_settings() {
-		esc_html_e( 'Simple Location Depends on External Services', 'simple-location' );
+		?>
+		<h4><?php esc_html_e( 'Simple Location Depends on Third Party Services', 'simple-location' ); ?></h4>
+		<p><?php esc_html_e( 'Many of these services require you to sign up for an account and provide an API key below. Many have free and paid tiers. For this reason, the plugin offers multiple providers. At this moment, Nominatim, Wikimedia Maps, and the US National Weather Service can be used without API keys. Geonames requires an account, but is otherwise free to use. If you are uncertain of which to try, start with the defaults.', 'simple-location' ); ?></p>
+		<?php
 	}
 
 
 	public static function sloc_map_settings() {
+		esc_html_e( 'These settings dictate the display of maps', 'simple-location' );
 	}
 
 	public static function sloc_api_settings() {
-		esc_html_e( 'API keys are required for most services.', 'simple-location' );
+		esc_html_e( 'In order for a specific service to work, you must add their API key below', 'simple-location' );
 	}
 
 
