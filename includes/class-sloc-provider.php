@@ -8,6 +8,7 @@ abstract class Sloc_Provider {
 	protected $api;
 	protected $latitude;
 	protected $longitude;
+	protected $altitude;
 
 	/**
 	 * Constructor for the Abstract Class
@@ -21,6 +22,7 @@ abstract class Sloc_Provider {
 			'api'       => null,
 			'latitude'  => null,
 			'longitude' => null,
+			'altitude' => null
 		);
 		$r         = wp_parse_args( $args, $defaults );
 		$this->api = $r['api'];
@@ -59,11 +61,14 @@ abstract class Sloc_Provider {
 	 * @param $lng Longitude
 	 * @return boolean Return False if Validation Failed
 	 */
-	public function set( $lat, $lng = null ) {
+	public function set( $lat, $lng = null, $alt = null ) {
 		if ( ! $lng && is_array( $lat ) ) {
 			if ( isset( $lat['latitude'] ) && isset( $lat['longitude'] ) ) {
 				$this->latitude  = $lat['latitude'];
 				$this->longitude = $lat['longitude'];
+				if ( isset( $lat['altitude'] ) ) {
+					$this->altitude = $lat['altitude'];
+				}
 				return true;
 			} else {
 				return false;

@@ -39,7 +39,7 @@ abstract class Map_Provider extends Sloc_Provider {
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
-	public function set( $args, $lng = null ) {
+	public function set( $args, $lng = null, $alt = null ) {
 		if ( is_array( $args ) ) {
 			if ( isset( $args['height'] ) ) {
 				$this->height = $args['height'];

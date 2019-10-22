@@ -47,13 +47,13 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		);
 	}
 
-	public function set( $lat, $lng = null ) {
+	public function set( $lat, $lng = null, $alt = null ) {
 		if ( ! $lng && is_array( $lat ) ) {
 			if ( isset( $lat['station_id'] ) ) {
 				$this->station_id = $lat['station_id'];
 			}
 		}
-		parent::set( $lat, $lng );
+		parent::set( $lat, $lng, $alt );
 	}
 
 	/**
