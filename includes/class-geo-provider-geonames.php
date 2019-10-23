@@ -41,6 +41,40 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	}
 
 	public function elevation() {
+		if ( ! $this->user ) {
+			return null;
+		}
+		$query = add_query_arg(
+			array(
+				'username' => $this->user,
+				'lat'      => $this->latitude,
+				'lng'      => $this->longitude,
+			),
+			'http://api.geonames.org/srtm1'
+		);
+		$args  = array(
+			'headers'             => array(
+				'Accept' => 'application/json',
+			),
+			'timeout'             => 10,
+			'limit_response_size' => 1048576,
+			'redirection'         => 1,
+			// Use an explicit user-agent for Simple Location
+			'user-agent'          => 'Simple Location for WordPress',
+		);
+
+		$response = wp_remote_get( $query, $args );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( ( $code / 100 ) !== 2 ) {
+			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
+		}
+		$json = json_decode( $response['body'], true );
+		if ( array_key_exists( 'srtm1', $json ) ) {
+			return $json['srtm1'];
+		}
 		return null;
 	}
 
