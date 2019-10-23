@@ -14,6 +14,7 @@ class Loc_Config {
 	 * Add Settings to the Discussions Page
 	 */
 	public static function init() {
+		self::register_general_settings();
 		self::register_provider_settings();
 		self::register_map_settings();
 	}
