@@ -134,14 +134,63 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 	private function icon_map( $id, $is_day ) {
 		$id = (int) $id;
 		switch ( $id ) {
-			case 113:
+			case 200: // Thunderstorm with light rain
+			case 201: // Thunderstorm with rain
+			case 202: // Thunderstorm with heavy rain
+			case 230: // Thunderstorm with light drizzle
+			case 231: // Thunderstorm with drizzle
+			case 232: // Thunderstorm with heavy drizzle
+				return $is_day ? 'wi-day-thunderstorm' : 'wi-night-thunderstorm';
+			case 233: // Thunderstorm with Hail
+				return $is_day ? 'wi-day-hail' : 'wi-night-hail';
+			case 300: // Light drizzle
+			case 301: // Drizzle
+				return $is_day ? 'wi-day-sprinkle' : 'wi-night-sprinkle';
+			case 302: // Heavy Drizzle
+			case 500: // Light Rain
+			case 501: // Moderate Rain
+				return $is_day ? 'wi-day-rain' : 'wi-night-rain';
+			case 502: // Heavy Rain
+			case 511: // Freezing Rain
+			case 520: // Light shower rain
+			case 521: // Shower Rain
+			case 522: // Heavy Shower Rain
+				return $is_day ? 'wi-day-showers' : 'wi-night-showers';
+			case 600: // Light Snow
+			case 601: // Snow
+			case 602: // Heavy Snow
+				return $is_day ? 'wi-day-snow' : 'wi-night-snow';
+			case 610: // Mix Snow-Rain
+				return $is_day ? 'wi-day-rain-mix' : 'wi-night-rain-mix';
+			case 611: // Sleet
+			case 612: // Heavy Sleet
+				return $is_day ? 'wi-day-sleet' : 'wi-night-sleet';
+			case 621: // Snow Shower
+				return $is_day ? 'wi-day-sleet-storm' : 'wi-night-sleet-storm';
+			case 622: // Heavy Snow Shower
+				return $is_day ? 'wi-day-snow-wind' : 'wi-night-snow-wind';
+			case 623: // Flurries
+				return $is_day ? 'wi-day-snow' : 'wi-night-snow';
+			case 700: // Mist
+				return 'wi-sprinkle';
+			case 711: // Smoke
+				return 'wi-smoke';
+			case 721: // Haze
+				return 'wi-day-haze';
+			case 731: // Sand-dust
+				return 'wi-dust';
+			case 741: // Fog
+			case 751: // Freezing Fog
+				return $is_day ? 'wi-day-fog' : 'wi-night-fog';
+			case 800: // Clear Sky
 				return $is_day ? 'wi-day-sunny' : 'wi-night-clear';
-			case 116:
-				return $is_day ? 'wi-day-cloudy' : 'wi-night-partly-cloudy';
-			case 119:
-				return $is_day ? 'wi-cloudy' : 'wi-night-cloudy';
-			case 122:
-				return $is_day ? 'wi-day-sunny-overcast' : 'wi-night-alt-cloudy';
+			case 801: // Few Clouds
+			case 802: // Scattered Clouds
+			case 803: // Broken Clouds
+			case 804: // Overcast clouds
+				return $is_day ? 'wi-day-cloudy' : 'wi-night-cloudy';
+			case 900: // Unknown Precipitation
+				return 'wi-rain';
 			default:
 				return '';
 		}
