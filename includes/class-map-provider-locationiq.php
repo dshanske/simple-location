@@ -4,7 +4,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 
 
 	public function __construct( $args = array() ) {
-		$this->name  = __( 'Location IQ', 'simple-location' );
+		$this->name  = __( 'LocationIQ', 'simple-location' );
 		$this->slug  = 'locationiq';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_locationiq_api' );
