@@ -52,10 +52,10 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 		}
 		$query = add_query_arg(
 			array(
-				'key' => $this->api,
+				'key'    => $this->api,
 				'format' => 'json',
-				'lat' => $this->latitude,
-				'lon' => $this->longitude,
+				'lat'    => $this->latitude,
+				'lon'    => $this->longitude,
 			),
 			'https://us1.locationiq.com/v1/reverse.php'
 		);

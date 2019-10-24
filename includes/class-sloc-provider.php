@@ -22,7 +22,7 @@ abstract class Sloc_Provider {
 			'api'       => null,
 			'latitude'  => null,
 			'longitude' => null,
-			'altitude' => null
+			'altitude'  => null,
 		);
 		$r         = wp_parse_args( $args, $defaults );
 		$this->api = $r['api'];

@@ -71,14 +71,14 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 				}
 			} */
 			$data = array(
-				'key' => $this->api,
-				'lat'      => $this->latitude,
-				'lon'      => $this->longitude,
-				'units'      => 'M',
+				'key'   => $this->api,
+				'lat'   => $this->latitude,
+				'lon'   => $this->longitude,
+				'units' => 'M',
 
 			);
-			$url  = 'https://api.weatherbit.io/v2.0/current';
-			$url  = add_query_arg( $data, $url );
+			$url = 'https://api.weatherbit.io/v2.0/current';
+			$url = add_query_arg( $data, $url );
 			error_log( $url );
 			$args = array(
 				'headers'             => array(
@@ -104,9 +104,9 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 			}
 			$response              = $response['data'][0];
 			$return['temperature'] = ifset( $response['temp'] );
-			$return['humidity'] = ifset( $response['rh'] );
-			$return['pressure'] = ifset( $response['pres'] );
-			$return['cloudiness'] = ifset( $response['clouds'] );
+			$return['humidity']    = ifset( $response['rh'] );
+			$return['pressure']    = ifset( $response['pres'] );
+			$return['cloudiness']  = ifset( $response['clouds'] );
 
 			$return['wind']           = array();
 			$return['wind']['speed']  = ifset( $response['wind_spd'] );
@@ -115,13 +115,13 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 			$return['rain']           = ifset( $response['precip'] );
 			$return['visibility']     = ifset( $response['vis'] );
 			$return['airquality']     = ifset( $response['aqi'] );
-			$return['uv']     = ifset( $response['uv'] );
-			$return['snow']     = ifset( $response['snow'] );
-			$return['summary']   = ifset( $response['weather']['description'] );
+			$return['uv']             = ifset( $response['uv'] );
+			$return['snow']           = ifset( $response['snow'] );
+			$return['summary']        = ifset( $response['weather']['description'] );
 			$return['icon']           = $this->icon_map( $response['weather']['code'], ifset( $response['pod'] ) === 'd' );
-			$calc              = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );
-			$return['sunrise'] = $calc->get_iso8601( null );
-			$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
+			$calc                     = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );
+			$return['sunrise']        = $calc->get_iso8601( null );
+			$return['sunset']         = $calc->get_iso8601( null, 'sunset' );
 
 			if ( $this->cache_key ) {
 				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
