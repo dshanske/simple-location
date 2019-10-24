@@ -11,7 +11,6 @@
   "devDependencies": {
     "eslint-config-wordpress": "^2.0.0",
     "grunt": "^1.0.2",
-    "grunt-checktextdomain": "^1.0.1",
     "grunt-contrib-sass": "~1.0.0",
     "grunt-curl": "^2.5.0",
     "grunt-eslint": "^20.1.0",
