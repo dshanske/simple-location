@@ -79,7 +79,6 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 			);
 			$url = 'https://api.weatherbit.io/v2.0/current';
 			$url = add_query_arg( $data, $url );
-			error_log( $url );
 			$args = array(
 				'headers'             => array(
 					'Accept' => 'application/json',
