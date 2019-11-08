@@ -64,12 +64,12 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 		} */
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {
-			/* if ( $this->cache_key ) {
+			if ( $this->cache_key ) {
 				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
 				if ( $conditions ) {
 					return $conditions;
 				}
-			} */
+			}
 			$data = array(
 				'key'   => $this->api,
 				'lat'   => $this->latitude,
