@@ -25,7 +25,7 @@ class WP_Geo_Data {
 		} else {
 			add_action( 'wp_read_image_metadata', array( 'WP_Geo_Data', 'exif_data' ), 10, 3 );
 		}
-		add_action( 'wp_update_attachment_metadata', array( 'WP_Geo_Data', 'attachment' ), 20, 2 );
+		add_action( 'wp_generate_attachment_metadata', array( 'WP_Geo_Data', 'attachment' ), 20, 2 );
 
 		self::rewrite();
 
