@@ -43,7 +43,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 			)
 		);
 		register_setting(
-			'sloc_providers',
+			'simloc',
 			'sloc_mapbox_style',
 			array(
 				'type'         => 'string',
@@ -164,7 +164,17 @@ class Map_Provider_Mapbox extends Map_Provider {
 		if ( array_key_exists( $this->style, $styles ) ) {
 			$user = 'mapbox';
 		}
-		$map = sprintf( 'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s, %5$s,0,0/%6$sx%7$s?access_token=%8$s', $user, $this->style, $this->longitude, $this->latitude, $this->map_zoom, $this->width, $this->height, $this->api );
+		$map = sprintf(
+			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s, %5$s,0,0/%6$sx%7$s?access_token=%8$s',
+			$user,
+			$this->style,
+			$this->longitude,
+			$this->latitude,
+			$this->map_zoom,
+			$this->width,
+			$this->height,
+			$this->api
+		);
 		return $map;
 
 	}
