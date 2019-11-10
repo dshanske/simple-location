@@ -10,7 +10,7 @@ abstract class Location_Provider extends Sloc_Provider {
 	protected $altitude;
 	protected $heading;
 	protected $speed;
-	protected $time = null;
+	protected $time       = null;
 	protected $background = false; // Background determines if this source allows background updates
 
 	/**

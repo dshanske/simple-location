@@ -43,7 +43,7 @@ class Location_Provider_Compass extends Location_Provider {
 		);
 		if ( $time ) {
 			$this->time = $time;
-			$url = add_query_arg( 'before', $time, $url );
+			$url        = add_query_arg( 'before', $time, $url );
 		}
 		$response = wp_remote_get( $url, $args );
 		if ( is_wp_error( $response ) ) {

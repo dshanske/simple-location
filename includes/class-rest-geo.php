@@ -176,7 +176,7 @@ class REST_Geo {
 				$geolocation = Loc_Config::geolocation_provider( 'dummy' );
 			}
 			$geolocation->set_user( get_current_user_id() );
-			$geolocation->retrieve( $time  );
+			$geolocation->retrieve( $time );
 			return $geolocation->get();
 		} elseif ( 'null' === $geolocation ) {
 			return $geolocation;
@@ -262,7 +262,7 @@ class REST_Geo {
 			if ( isset( $params['weather'] ) && ( 'no' !== $params['weather'] ) ) {
 				$weather = Loc_Config::weather_provider();
 				$weather->set( $params );
-				$time = ifset( $params['time'], null );
+				$time                   = ifset( $params['time'], null );
 				$reverse_adr['weather'] = $weather->get_conditions( $time );
 			}
 
