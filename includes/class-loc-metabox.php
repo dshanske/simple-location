@@ -43,6 +43,13 @@ class Loc_Metabox {
 				Simple_Location_Plugin::$version,
 				true
 			);
+			wp_enqueue_script(
+				'moment-timezone',
+				plugins_url( 'js/luxon.min.js', dirname( __FILE__ ) ),
+				array(),
+				Simple_Location_Plugin::$version,
+				true
+			);
 			wp_enqueue_style(
 				'sloc_metabox',
 				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),

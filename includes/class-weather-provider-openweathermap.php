@@ -61,7 +61,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 *
 	 * @return array Current Conditions in Array
 	 */
-	public function get_conditions() {
+	public function get_conditions( $time = null ) {
 		if ( empty( $this->api ) ) {
 			return array();
 		}

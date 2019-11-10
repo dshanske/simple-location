@@ -241,7 +241,7 @@ class Post_Timezone {
 
 			<div id="post-timezone-select" class="hide-if-js">
 				<input type="hidden" name="hidden_post_timezone" id="hidden_post_timezone" value="<?php echo esc_html( $timezone ); ?>" />
-				<input type="hidden" name="timezone_default" id="timezone_default" value="<?php echo esc_attr( get_option( 'timezone_string' ) ); ?>" />
+				<input type="hidden" name="timezone_default" id="timezone_default" value="<?php echo esc_attr( wp_timezone_string() ); ?>" />
 				<select name="post_timezone" id="post-timezone" width="90%">
 				<?php
 					echo self::wp_timezone_choice( $timezone ); // phpcs:ignore

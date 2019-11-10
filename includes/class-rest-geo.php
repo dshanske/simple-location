@@ -169,13 +169,14 @@ class REST_Geo {
 	// Callback Handler for Geolocation Retrieval
 	public static function lookup( $request ) {
 		$params      = $request->get_params();
+		$time        = ifset( $params['time'], null );
 		$geolocation = Loc_Config::geolocation_provider();
 		if ( is_object( $geolocation ) ) {
 			if ( 'HTML5' === $geolocation->get_slug() ) {
 				$geolocation = Loc_Config::geolocation_provider( 'dummy' );
 			}
 			$geolocation->set_user( get_current_user_id() );
-			$geolocation->retrieve();
+			$geolocation->retrieve( $time  );
 			return $geolocation->get();
 		} elseif ( 'null' === $geolocation ) {
 			return $geolocation;
@@ -258,10 +259,11 @@ class REST_Geo {
 					return $reverse_adr;
 				}
 			}
-			if ( isset( $params['weather'] ) ) {
+			if ( isset( $params['weather'] ) && ( 'no' !== $params['weather'] ) ) {
 				$weather = Loc_Config::weather_provider();
 				$weather->set( $params );
-				$reverse_adr['weather'] = $weather->get_conditions();
+				$time = ifset( $params['time'], null );
+				$reverse_adr['weather'] = $weather->get_conditions( $time );
 			}
 
 			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {

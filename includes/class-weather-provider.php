@@ -90,9 +90,10 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @param string $time ISO8601 timestamp
 	 * @return array Current Conditions in Array
 	 */
-	abstract public function get_conditions();
+	abstract public function get_conditions( $time );
 
 		/**
 		 * Return summary of current conditions

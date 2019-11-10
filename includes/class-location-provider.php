@@ -10,6 +10,7 @@ abstract class Location_Provider extends Sloc_Provider {
 	protected $altitude;
 	protected $heading;
 	protected $speed;
+	protected $time = null;
 	protected $background = false; // Background determines if this source allows background updates
 
 	/**
@@ -43,6 +44,7 @@ abstract class Location_Provider extends Sloc_Provider {
 		$return['accuracy']  = $this->accuracy;
 		$return['heading']   = $this->heading;
 		$return['speed']     = $this->speed;
+		$return['time']      = $this->time;
 		$return              = array_filter( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
@@ -135,5 +137,12 @@ abstract class Location_Provider extends Sloc_Provider {
 		return $this->background;
 	}
 
-	abstract public function retrieve();
+
+	/**
+	 * Get Coordinates in H-Geo MF2 Format
+	 *
+	 * @param int $time An ISO8601 time string
+	 * @return array|boolean Array with h-geo mf2 false if null
+	 */
+	abstract public function retrieve( $time = null );
 }

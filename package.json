@@ -16,6 +16,8 @@
     "grunt-eslint": "^20.1.0",
     "grunt-wp-i18n": "~0.5.4",
     "grunt-wp-readme-to-markdown": "~2.0.1",
-    "jstz": "^2.0.0"
+    "luxon": "^1.21.1"
+  },
+  "dependencies": {
   }
 }

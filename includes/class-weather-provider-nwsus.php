@@ -33,7 +33,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 *
 	 * @return array Current Conditions in Array
 	 */
-	public function get_conditions() {
+	public function get_conditions( $time = null ) {
 		$return = array();
 		if ( $this->station_id && ! $this->latitude ) {
 			return $this->get_station_data();

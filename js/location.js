@@ -1,10 +1,49 @@
 jQuery( document ).ready( function( $ ) {
-
+		var DateTime = luxon.DateTime;
+		var weather = 1;
+		var originalDate = DateTime.fromObject(
+			{
+				year: $( '#hidden_aa' ).val(),
+				month: $( '#hidden_mm' ).val(),
+				day: $( '#hidden_jj' ).val(),
+				hour: $( '#hidden_hh' ).val(),
+				minute: $( '#hidden_mn' ).val(),
+				second: $( '#hidden_ss' ).val(),
+				zone: $( '#timezone_default' ).val()
+			}
+		);
+		var currentDate = DateTime.fromObject(
+			{
+				year: $( '#cur_aa' ).val(),
+				month: $( '#cur_mm' ).val(),
+				day: $( '#cur_jj' ).val(),
+				hour: $( '#cur_hh' ).val(),
+				minute: $( '#cur_mn' ).val(),
+				zone: $( '#timezone_default' ).val()
+			}
+		);
+		var time = '';
 	function lookupLocation() {
+		var attemptedDate = DateTime.fromObject(
+			{
+				year: $( '#aa' ).val(),
+				month: $( '#mm' ).val(),
+				day: $( '#jj' ).val(),
+				hour: $( '#hh' ).val(),
+				minute: $( '#mn' ).val(),
+				second: $( '#ss' ).val(),
+				zone: $( '#timezone_default' ).val()
+			}
+		);
 		var options = {
 			enableHighAccuracy: true,
 			maximumAge: 600000
 		};
+		if ( attemptedDate < currentDate  ) {
+			time = attemptedDate.toISO();
+			console.log( time );
+			weather = 'no';
+		}
 		if ( 'HTML5' === slocOptions.lookup ) { // eslint-disable-line camelcase
 			if ( ( '' === $( '#latitude' ).val() ) && ( '' === $( '#longitude' ).val() ) ) {
 				if ( navigator.geolocation ) {
@@ -21,7 +60,7 @@ jQuery( document ).ready( function( $ ) {
 		}
 	}
 
-	function getCurrentPosition( ) {
+	function getCurrentPosition() {
 		var position;
 		$.ajax({
 				type: 'GET',
@@ -34,6 +73,7 @@ jQuery( document ).ready( function( $ ) {
 					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
 				},
 				data: {
+					time: time
 				},
 				success: function( response ) {
 					if ( window.console ) {
@@ -44,7 +84,7 @@ jQuery( document ).ready( function( $ ) {
 						return null;
 					} else {
 						position =  {timestamp: ( new Date() ).getTime(), coords: response};
-						setLocation( position );
+						setLocation( position, time );
 					}
 
 				},
@@ -78,7 +118,6 @@ jQuery( document ).ready( function( $ ) {
 		if ( '' !== $( '#address' ).val() ) {
 			return;
 		}
-
 		$.ajax({
 				type: 'GET',
 
@@ -93,10 +132,11 @@ jQuery( document ).ready( function( $ ) {
 					latitude: $( '#latitude' ).val(),
 					longitude: $( '#longitude' ).val(),
 					altitude: $( '#altitude' ).val(),
-					weather: 1,
+					weather: weather,
 					map_zoom: $( '#map_zoom' ).val(), // eslint-disable-line camelcase
 					height: 200,
-					width: 200
+					width: 200,
+					time: time
 				},
 				success: function( response ) {
 					if ( 'undefined' == typeof response ) {

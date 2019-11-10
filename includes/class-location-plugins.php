@@ -84,13 +84,24 @@ class Location_Plugins {
 					WP_Geo_Data::set_visibility( 'post', $args['ID'], 'public' );
 				}
 			}
-			$weather = Loc_Config::weather_provider();
-			$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
-			$conditions = $weather->get_conditions();
-			if ( ! empty( $conditions ) ) {
-				// if debug mode is on remove the raw data from storage
-				unset( $conditions['raw'] );
-				update_post_meta( $args['ID'], 'geo_weather', $conditions );
+			$current = true;
+			if ( isset( $input['properties']['published'] ) ) {
+				$published = new DateTime( $input['properties']['published'][0] );
+				$now       = new DateTime();
+				$diff      = abs( $now->getTimestamp() - $published->getTimestamp() );
+				if ( $diff > HOUR_IN_SECONDS ) {
+					$current = false;
+				}
+			}
+			if ( $current ) {
+				$weather = Loc_Config::weather_provider();
+				$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
+				$conditions = $weather->get_conditions();
+				if ( ! empty( $conditions ) ) {
+					// if debug mode is on remove the raw data from storage
+					unset( $conditions['raw'] );
+					update_post_meta( $args['ID'], 'geo_weather', $conditions );
+				}
 			}
 		}
 	}
