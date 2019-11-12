@@ -84,8 +84,26 @@ class Map_Provider_Bing extends Map_Provider {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$map = sprintf( 'https://dev.virtualearth.net/REST/v1/Imagery/Map/%1$s/%2$s,%3$s/%4$s?pushpin=%2$s,%3$s&mapSize=%5$s,%6$s&key=%7$s', $this->style, $this->latitude, $this->longitude, $this->map_zoom, $this->width, $this->height, $this->api );
+		$url = sprintf(
+			'https://dev.virtualearth.net/REST/v1/Imagery/Map/%1$s/%2$s,%3$s/%4$s',
+			$this->style,
+			$this->latitude,
+			$this->longitude,
+			$this->map_zoom
+		);
+		$map = add_query_arg(
+			array(
+				'pushpin' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+				'mapSize' => sprintf( '%1$s,%2$s', $this->width, $this->height ),
+				'key'     => $this->api,
+			),
+			$url
+		);
 		return $map;
+	}
+
+	public function get_archive_map( $locations ) {
+		return '';
 	}
 
 	public function get_the_map_url() {

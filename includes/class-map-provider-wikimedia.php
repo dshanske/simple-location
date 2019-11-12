@@ -28,6 +28,11 @@ class Map_Provider_Wikimedia extends Map_Provider {
 		return sprintf( 'https://maps.wikimedia.org/#%1$s/%2$s/%3$s', $this->map_zoom, $this->latitude, $this->longitude );
 	}
 
+
+	public function get_archive_map( $locations ) {
+		return '';
+	}
+
 	// Return code for map
 	public function get_the_map( $static = true ) {
 		$map  = $this->get_the_static_map();

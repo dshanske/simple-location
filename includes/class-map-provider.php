@@ -2,13 +2,13 @@
 
 abstract class Map_Provider extends Sloc_Provider {
 
-	protected $reverse_zoom;
 	protected $map_zoom;
 	protected $height;
 	protected $width;
 	protected $style;
 	protected $user;
 	protected $static;
+	protected $location;
 
 	/**
 	 * Constructor for the Abstract Class
@@ -25,6 +25,8 @@ abstract class Map_Provider extends Sloc_Provider {
 			'api'       => null,
 			'latitude'  => null,
 			'longitude' => null,
+			'altitude'  => null,
+			'location'  => null,
 			'user'      => '',
 			'style'     => '',
 		);
@@ -32,11 +34,12 @@ abstract class Map_Provider extends Sloc_Provider {
 		$r              = wp_parse_args( $args, $defaults );
 		$this->height   = $r['height'];
 		$this->width    = $r['width'];
+		$this->location = $r['location'];
 		$this->map_zoom = $r['map_zoom'];
 		$this->user     = $r['user'];
 		$this->style    = $r['style'];
 		$this->api      = $r['api'];
-		$this->set( $r['latitude'], $r['longitude'] );
+		$this->set( $r['latitude'], $r['longitude'], $r['altitude'] );
 	}
 
 	public function set( $args, $lng = null, $alt = null ) {
@@ -50,8 +53,11 @@ abstract class Map_Provider extends Sloc_Provider {
 			if ( isset( $args['map_zoom'] ) ) {
 				$this->map_zoom = $args['map_zoom'];
 			}
+			if ( isset( $args['location'] ) ) {
+				$this->location = $args['location'];
+			}
 		}
-		parent::set( $args, $lng );
+		parent::set( $args, $lng, $alt );
 	}
 
 
@@ -62,7 +68,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 */
 	abstract public function get_styles();
 
-		/**
+	/**
 	 * Return a URL for a static map
 	 *
 	 * @return string URL of MAP
@@ -70,7 +76,17 @@ abstract class Map_Provider extends Sloc_Provider {
 	 */
 	abstract public function get_the_static_map();
 
-		/**
+
+	/**
+	 * Return a URL for a static map with multiple locations
+	 *
+	 * @param $locations Array of latitude and longitudes
+	 * @return string URL of MAP
+	 *
+	 */
+	abstract public function get_archive_map( $locations );
+
+	/**
 	 * Return a URL for a link to a map
 	 *
 	 * @return string URL of link to a map
@@ -78,7 +94,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 */
 	abstract public function get_the_map_url();
 
-		/**
+	/**
 	 * Return HTML code for a map
 	 *
 	 * @param boolean $static Return Static or Dynamic Map
@@ -86,7 +102,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 */
 	abstract public function get_the_map( $static = false );
 
-		/**
+	/**
 	 * Given coordinates echo the output of get_the_map
 	 *
 	 * @param boolean $static Return Static or Dynamic Map

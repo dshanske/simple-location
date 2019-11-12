@@ -78,7 +78,44 @@ class Map_Provider_Google extends Map_Provider {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$map = 'https://maps.googleapis.com/maps/api/staticmap?markers=color:red%7Clabel:P%7C' . $this->latitude . ',' . $this->longitude . '&size=' . $this->width . 'x' . $this->height . '&maptype=' . $this->style . '&language=' . get_bloginfo( 'language' ) . '&key=' . $this->api;
+		$url = 'https://maps.googleapis.com/maps/api/staticmap';
+		$map = add_query_arg(
+			array(
+				'markers'  => sprintf( 'color:red%7Clabel:P%7C|%1$s,%2$s', $this->latitude, $this->longitude ),
+				'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
+				'maptype'  => $this->style,
+				'language' => get_bloginfo( 'language' ),
+				'key'      => $this->api,
+			),
+			$url
+		);
+		return $map;
+	}
+
+
+	public function get_archive_map( $locations ) {
+		if ( empty( $this->api ) || empty( $this->style ) || empty( $locations ) ) {
+			return '';
+		}
+		$url = 'https://maps.googleapis.com/maps/api/staticmap';
+
+		$markers = array();
+		foreach ( $locations as $location ) {
+			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
+		}
+		$polyline = Polyline::encode( $locations );
+
+		$map = add_query_arg(
+			array(
+				'markers'  => 'color:red%7Clabel:P%7C|' . implode( '|', $markers ),
+				'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
+				'maptype'  => $this->style,
+				'language' => get_bloginfo( 'language' ),
+				'key'      => $this->api,
+				'path'     => 'color:0xff0000ff|weight:5|enc:' . $polyline,
+			),
+			$url
+		);
 		return $map;
 	}
 

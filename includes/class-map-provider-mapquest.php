@@ -83,7 +83,44 @@ class Map_Provider_Mapquest extends Map_Provider {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$map = sprintf( 'https://open.mapquestapi.com/staticmap/v5/map?key=%1$s&center=%2$s,%3$s&size=%4$s,%5$s&type=%6$s', $this->api, $this->latitude, $this->longitude, $this->width, $this->height, $this->style );
+		$url = 'https://open.mapquestapi.com/staticmap/v5/map';
+		$map = add_query_arg(
+			array(
+				'key'       => $this->api,
+				'center'    => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+				'size'      => sprintf( '%1$s,%2$s', $this->width, $this->height ),
+				'type'      => $this->style,
+				'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+			),
+			$url
+		);
+		return $map;
+	}
+
+
+	public function get_archive_map( $locations ) {
+		if ( empty( $this->api ) || empty( $this->style ) || empty( $locations ) ) {
+			return '';
+		}
+
+		$markers = array();
+		foreach ( $locations as $location ) {
+			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
+		}
+		$polyline = Polyline::encode( $locations );
+
+		$url = 'https://open.mapquestapi.com/staticmap/v5/map';
+		$map = add_query_arg(
+			array(
+				'key'       => $this->api,
+				// 'center' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+				'size'      => sprintf( '%1$s,%2$s', $this->width, $this->height ),
+				'type'      => $this->style,
+				'locations' => implode( '||', $markers ),
+				'shape'     => 'cmp|enc:' . $polyline,
+			),
+			$url
+		);
 		return $map;
 	}
 

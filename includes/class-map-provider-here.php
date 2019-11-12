@@ -3,6 +3,7 @@
 class Map_Provider_Here extends Map_Provider {
 
 	protected $appid;
+	protected $type;
 	public function __construct( $args = array() ) {
 		$this->name = __( 'HERE Maps', 'simple-location' );
 		$this->slug = 'here';
@@ -11,6 +12,12 @@ class Map_Provider_Here extends Map_Provider {
 		}
 		if ( ! isset( $args['appid'] ) ) {
 			$args['appid'] = get_option( 'sloc_here_appid' );
+		}
+		if ( ! isset( $args['style'] ) ) {
+			$args['style'] = get_option( 'sloc_here_style' );
+		}
+		if ( ! isset( $args['type'] ) ) {
+			$this->type = get_option( 'sloc_here_type' );
 		}
 		$this->appid = $args['appid'];
 
@@ -40,6 +47,27 @@ class Map_Provider_Here extends Map_Provider {
 				'default'      => '',
 			)
 		);
+		register_setting(
+			'simloc',
+			'sloc_here_style',
+			array(
+				'type'         => 'string',
+				'description'  => 'HERE Style',
+				'show_in_rest' => false,
+				'default'      => 'alps',
+			)
+		);
+
+		register_setting(
+			'simloc',
+			'sloc_here_type',
+			array(
+				'type'         => 'string',
+				'description'  => 'HERE Map Scheme Type',
+				'show_in_rest' => false,
+				'default'      => 0,
+			)
+		);
 	}
 
 	public static function admin_init() {
@@ -63,11 +91,62 @@ class Map_Provider_Here extends Map_Provider {
 				'label_for' => 'sloc_here_appid',
 			)
 		);
+		add_settings_field(
+			'herestyle', // id
+			__( 'HERE Style', 'simple-location' ),
+			array( 'Loc_Config', 'style_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_here_style',
+				'provider'  => new Map_Provider_Here(),
+			)
+		);
+
+		add_settings_field(
+			'heretype', // id
+			__( 'HERE Map Scheme Type', 'simple-location' ),
+			array( get_called_class(), 'type_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_here_type',
+				'provider'  => new Map_Provider_Here(),
+			)
+		);
 	}
 
+	public static function type_callback( array $args ) {
+		$name  = $args['label_for'];
+		$types = self::get_types();
+		if ( is_wp_error( $types ) ) {
+			echo esc_html( $types->get_error_message() );
+			return;
+		}
+		$text = get_option( $name );
+		Loc_Config::select_callback( $name, $text, $types );
+	}
 
 	public function get_styles() {
-		return array();
+		return array(
+			'alps'       => __( 'Alps', 'simple-location' ),
+			'daisy'      => __( 'Daisy', 'simple-location' ),
+			'dreamworks' => __( 'Dreamworks', 'simple-location' ),
+			'flame'      => __( 'Flame', 'simple-location' ),
+			'fleet'      => __( 'Fleet', 'simple-location' ),
+			'mini'       => __( 'Mini', 'simple-location' ),
+		);
+	}
+
+	public function get_types() {
+		return array(
+			0 => __( 'Normal map view in day light mode', 'simple-location' ),
+			1 => __( 'Satellite map view in day light mode', 'simple-location' ),
+			2 => __( 'Terrain map view in day light mode', 'simple-location' ),
+			3 => __( 'Satellite map view with streets in day light mode', 'simple-location' ),
+			4 => __( 'Normal grey map view with public transit in day light mode', 'simple-location' ),
+			5 => __( 'Normal grey map view in day light mode (used for background maps)', 'simple-location' ),
+		);
 	}
 
 	// Return code for map
@@ -75,7 +154,49 @@ class Map_Provider_Here extends Map_Provider {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$map = sprintf( 'https://image.maps.api.here.com/mia/1.6/?app_code=%1$s&app_id=%2$s&lat=%3$s&lon=%4$s&w=%5$s&h=%6$s', $this->api, $this->appid, $this->latitude, $this->longitude, $this->width, $this->height );
+		$url = 'https://image.maps.api.here.com/mia/1.6/';
+		$map = add_query_arg(
+			array(
+				'app_code' => $this->api,
+				'app_id'   => $this->appid,
+				'lat'      => $this->latitude,
+				'lon'      => $this->longitude,
+				'w'        => $this->width,
+				'h'        => $this->height,
+				'style'    => $this->style,
+				't'        => $this->type,
+			),
+			$url
+		);
+		return $map;
+	}
+
+	public function get_archive_map( $locations ) {
+		if ( empty( $this->api ) || empty( $this->appid ) || empty( $locations ) ) {
+			return '';
+		}
+
+		$markers = array();
+		foreach ( $locations as $location ) {
+			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
+		}
+		$polyline = Polyline::encode( $locations );
+
+		$url = 'https://image.maps.api.here.com/mia/1.6/route';
+		$map = add_query_arg(
+			array(
+				'app_code' => $this->api,
+				'app_id'   => $this->appid,
+				'style'    => $this->style,
+				't'        => $this->type,
+				'w'        => $this->width,
+				'h'        => $this->height,
+				'r0'       => implode( ',', $markers ),
+				'm0'       => implode( ',', $markers ),
+			),
+			$url
+		);
+
 		return $map;
 	}
 

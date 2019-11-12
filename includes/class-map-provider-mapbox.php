@@ -155,6 +155,33 @@ class Map_Provider_Mapbox extends Map_Provider {
 		}
 	}
 
+	public function get_archive_map( $locations ) {
+		if ( empty( $this->api ) || empty( $this->style ) || empty( $locations ) ) {
+			return '';
+		}
+		$user   = $this->user;
+		$styles = $this->default_styles();
+		if ( array_key_exists( $this->style, $styles ) ) {
+			$user = 'mapbox';
+		}
+		$markers = array();
+		foreach ( $locations as $location ) {
+			$markers[] = sprintf( 'pin-s(%1$s,%2$s)', $location[1], $location[0] );
+		}
+		$polyline = Polyline::encode( $locations );
+		$map      = sprintf(
+			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/%3$s,path-5+f44-0.5(%4$s)/auto/%5$sx%6$s?access_token=%7$s',
+			$user,
+			$this->style,
+			implode( ',', $markers ),
+			rawurlencode( $polyline ),
+			$this->width,
+			$this->height,
+			$this->api
+		);
+		return $map;
+	}
+
 	public function get_the_static_map() {
 		if ( empty( $this->api ) || empty( $this->style ) ) {
 			return '';
