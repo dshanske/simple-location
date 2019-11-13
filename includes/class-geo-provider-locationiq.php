@@ -80,31 +80,91 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 		}
 		$json    = json_decode( $response['body'], true );
 		$address = $json['address'];
+
 		if ( 'us' === $address['country_code'] ) {
-			$region = ifset( $address['state'] ) ?: ifset( $address['county'] );
+			$region = self::ifnot(
+				$address,
+				array(
+					'state',
+					'county',
+				)
+			);
 		} else {
-			$region = ifset( $address['county'] ) ?: ifset( $address['state'] );
+			$region = self::ifnot(
+				$address,
+				array(
+					'county',
+					'state',
+				)
+			);
 		}
 		$street  = ifset( $address['house_number'], '' ) . ' ';
-		$street .= ifset( $address['road'] ) ?: ifset( $address['highway'] ) ?: ifset( $address['footway'] ) ?: '';
+		$street .= self::ifnot(
+			$address,
+			array(
+				'road',
+				'highway',
+				'footway',
+			)
+		);
 		$addr    = array(
-			'name'             => ifset( $address['attraction'] ) ?: ifset( $address['building'] ) ?: ifset( $address['hotel'] ) ?: ifset( $address['address29'] ) ?: ifset( $address['address26'] ) ?: null,
+			'name'             => self::ifnot(
+				$address,
+				array(
+					'attraction',
+					'building',
+					'hotel',
+					'address29',
+					'address26',
+				)
+			),
 			'street-address'   => $street,
-			'extended-address' => ifset( $address['boro'] ) ?: ifset( $address['neighbourhood'] ) ?: ifset( $address['suburb'] ) ?: null,
-			'locality'         => ifset( $address['hamlet'] ) ?: ifset( $address['village'] ) ?: ifset( $address['town'] ) ?: ifset( $address['city'] ) ?: null,
+			'extended-address' => self::ifnot(
+				$address,
+				array(
+					'boro',
+					'neighbourhood',
+					'suburb',
+				)
+			),
+			'locality'         => self::ifnot(
+				$address,
+				array(
+					'hamlet',
+					'village',
+					'town',
+					'city',
+				)
+			),
 			'region'           => $region,
-			'country-name'     => ifset( $address['country'] ) ?: null,
-			'postal-code'      => ifset( $address['postcode'] ) ?: null,
-			'country-code'     => strtoupper( $address['country_code'] ) ?: null,
+			'country-name'     => self::ifnot(
+				$address,
+				array(
+					'country',
+				)
+			),
+			'postal-code'      => self::ifnot(
+				$address,
+				array(
+					'postcode',
+				)
+			),
+			'country-code'     => strtoupper( $address['country_code'] ),
 			'latitude'         => $this->latitude,
 			'longitude'        => $this->longitude,
 			'raw'              => $address,
 		);
 		if ( is_null( $addr['country-name'] ) ) {
-			$codes                = json_decode( wp_remote_retrieve_body( wp_remote_get( 'http://country.io/names.json' ) ), true );
+			$codes                = json_decode(
+				wp_remote_retrieve_body(
+					wp_remote_get( 'http://country.io/names.json' )
+				),
+				true
+			);
 			$addr['country-name'] = $codes[ $addr['country-code'] ];
 		}
-				$addr         = array_filter( $addr );
+
+		$addr                 = array_filter( $addr );
 		$addr['display-name'] = $this->display_name( $addr );
 
 		if ( WP_DEBUG ) {

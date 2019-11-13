@@ -29,6 +29,20 @@ abstract class Sloc_Provider {
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
+	/*
+	 *
+	 * @param $array Input Array
+	 * @param $keys the keys in order returns the first one that exists
+	*/
+	public static function ifnot( $array, $keys ) {
+		foreach ( $keys as $key ) {
+			if ( array_key_exists( $key, $array ) ) {
+				return $array[ $key ];
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Get Name
 	 *

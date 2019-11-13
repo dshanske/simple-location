@@ -557,9 +557,12 @@ class Loc_Config {
 			return;
 		}
 		$text = get_option( $name );
+		self::select_callback( $name, $text, $styles );
+	}
 
+	public static function select_callback( $name, $text, $values ) {
 		echo '<select name="' . esc_attr( $name ) . '">';
-		foreach ( $styles as $key => $value ) {
+		foreach ( $values as $key => $value ) {
 			echo '<option value="' . $key . '" ' . selected( $text, $key ) . '>' . esc_html( $value ) . '</option>'; // phpcs:ignore
 		}
 		echo '</select><br /><br />';

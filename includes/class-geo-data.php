@@ -13,49 +13,87 @@ add_filter( 'jetpack_tools_to_include', array( 'WP_Geo_Data', 'jetpack_remove' )
 
 class WP_Geo_Data {
 	public static function init() {
+		$cls = get_called_class();
 		self::register_meta();
-		add_filter( 'query_vars', array( 'WP_Geo_Data', 'query_var' ) );
-		add_action( 'pre_get_posts', array( 'WP_Geo_Data', 'pre_get_posts' ) );
-		add_action( 'pre_get_comments', array( 'WP_Geo_Data', 'pre_get_comments' ) );
+		add_filter( 'query_vars', array( $cls, 'query_var' ) );
+		add_action( 'pre_get_posts', array( $cls, 'pre_get_posts' ) );
+		add_action( 'pre_get_comments', array( $cls, 'pre_get_comments' ) );
 
 		// Grab geo data from EXIF, if it's available
 		$wp_version = get_bloginfo( 'version' );
 		if ( version_compare( $wp_version, '5.0', '>=' ) ) {
-			add_action( 'wp_read_image_metadata', array( 'WP_Geo_Data', 'exif_data' ), 10, 5 );
+			add_action( 'wp_read_image_metadata', array( $cls, 'exif_data' ), 10, 5 );
 		} else {
-			add_action( 'wp_read_image_metadata', array( 'WP_Geo_Data', 'exif_data' ), 10, 3 );
+			add_action( 'wp_read_image_metadata', array( $cls, 'exif_data' ), 10, 3 );
 		}
-		add_action( 'wp_generate_attachment_metadata', array( 'WP_Geo_Data', 'attachment' ), 20, 2 );
+		add_action( 'wp_generate_attachment_metadata', array( $cls, 'attachment' ), 20, 2 );
 
 		self::rewrite();
 
-		add_action( 'rss2_ns', array( 'WP_Geo_Data', 'georss_namespace' ) );
-		add_action( 'atom_ns', array( 'WP_Geo_Data', 'georss_namespace' ) );
-		add_action( 'rdf_ns', array( 'WP_Geo_Data', 'georss_namespace' ) );
+		add_action( 'rss2_ns', array( $cls, 'georss_namespace' ) );
+		add_action( 'atom_ns', array( $cls, 'georss_namespace' ) );
+		add_action( 'rdf_ns', array( $cls, 'georss_namespace' ) );
 
-		add_action( 'rss_item', array( 'WP_Geo_Data', 'georss_item' ) );
-		add_action( 'rss2_item', array( 'WP_Geo_Data', 'georss_item' ) );
-		add_action( 'atom_entry', array( 'WP_Geo_Data', 'georss_item' ) );
-		add_action( 'rdf_item', array( 'WP_Geo_Data', 'georss_item' ) );
-		add_action( 'json_feed_item', array( 'WP_Geo_Data', 'json_feed_item' ), 10, 2 );
-		add_action( 'wp_head', array( 'WP_Geo_Data', 'meta_tags' ) );
+		add_action( 'rss_item', array( $cls, 'georss_item' ) );
+		add_action( 'rss2_item', array( $cls, 'georss_item' ) );
+		add_action( 'atom_entry', array( $cls, 'georss_item' ) );
+		add_action( 'rdf_item', array( $cls, 'georss_item' ) );
+		add_action( 'json_feed_item', array( $cls, 'json_feed_item' ), 10, 2 );
+		add_action( 'wp_head', array( $cls, 'meta_tags' ) );
 
-		add_action( 'rest_api_init', array( 'WP_Geo_Data', 'rest_location' ) );
+		add_action( 'rest_api_init', array( $cls, 'rest_location' ) );
 
 		// Add Dropdown
-		add_action( 'restrict_manage_posts', array( 'WP_Geo_Data', 'geo_posts_dropdown' ), 12, 2 );
-		add_action( 'restrict_manage_comments', array( 'WP_Geo_Data', 'geo_comments_dropdown' ), 12, 2 );
-		add_filter( 'manage_posts_columns', array( 'WP_Geo_Data', 'add_location_admin_column' ) );
-		add_action( 'manage_posts_custom_column', array( 'WP_Geo_Data', 'manage_location_admin_column' ), 10, 2 );
+		add_action( 'restrict_manage_posts', array( $cls, 'geo_posts_dropdown' ), 12, 2 );
+		add_action( 'restrict_manage_comments', array( $cls, 'geo_comments_dropdown' ), 12, 2 );
+		add_filter( 'manage_posts_columns', array( $cls, 'add_location_admin_column' ) );
+		add_action( 'manage_posts_custom_column', array( $cls, 'manage_location_admin_column' ), 10, 2 );
 
-		add_filter( 'bulk_actions-edit-post', array( 'WP_Geo_Data', 'register_bulk_edit_location' ), 10 );
-		add_filter( 'handle_bulk_actions-edit-post', array( 'WP_Geo_Data', 'handle_bulk_edit_location' ), 10, 3 );
+		add_filter( 'bulk_actions-edit-post', array( $cls, 'register_bulk_edit_location' ), 10 );
+		add_filter( 'handle_bulk_actions-edit-post', array( $cls, 'handle_bulk_edit_location' ), 10, 3 );
 
 		// Add the Same Post Type Support JetPack uses
 		add_post_type_support( 'post', 'geo-location' );
 		add_post_type_support( 'page', 'geo-location' );
 		add_post_type_support( 'attachment', 'geo-location' );
 
+		add_filter( 'get_the_archive_description', array( $cls, 'get_the_archive_description' ), 99 );
+
+	}
+
+	public static function location_list() {
+		global $wp_query;
+		$post_ids = wp_list_pluck( $wp_query->posts, 'ID' );
+		return $post_ids;
+	}
+
+	public static function get_archive_public_location_list() {
+		global $wp_query;
+		$locations = array();
+		if ( empty( $wp_query->posts ) ) {
+			return '';
+		}
+		foreach ( $wp_query->posts as $post ) {
+			$location = self::get_geodata( $post, false );
+			if ( 'public' === $location['visibility'] ) {
+				$locations[] = array_values(
+					wp_array_slice_assoc(
+						$location,
+						array(
+							'latitude',
+							'longitude',
+						)
+					)
+				);
+			}
+		}
+		return $locations;
+	}
+
+	public static function get_the_archive_description( $description ) {
+		$map = Loc_Config::map_provider();
+		$url = sprintf( '<img class="archive-map" src="%s" />', $map->get_archive_map( self::get_archive_public_location_list() ) );
+		return $description . $url;
 	}
 
 	public static function register_bulk_edit_location( $actions ) {
@@ -499,17 +537,20 @@ class WP_Geo_Data {
 		return true;
 	}
 
-	private static function get_geometadata( $type, $id ) {
+	private static function get_geometadata( $type, $id, $full = true ) {
 		$geodata               = array();
 		$geodata['longitude']  = get_metadata( $type, $id, 'geo_longitude', true );
 		$geodata['latitude']   = get_metadata( $type, $id, 'geo_latitude', true );
-		$geodata['timezone']   = get_metadata( $type, $id, 'geo_timezone', true );
 		$geodata['altitude']   = get_metadata( $type, $id, 'geo_altitude', true );
 		$geodata['address']    = get_metadata( $type, $id, 'geo_address', true );
-		$geodata['map_zoom']   = get_metadata( $type, $id, 'geo_zoom', true );
-		$geodata['weather']    = get_metadata( $type, $id, 'geo_weather', true );
-		$geodata               = array_filter( $geodata );
 		$geodata['visibility'] = self::get_visibility( $type, $id );
+
+		if ( $full ) {
+			$geodata['timezone'] = get_metadata( $type, $id, 'geo_timezone', true );
+			$geodata['map_zoom'] = get_metadata( $type, $id, 'geo_zoom', true );
+			$geodata['weather']  = get_metadata( $type, $id, 'geo_weather', true );
+		}
+		$geodata = array_filter( $geodata );
 		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 			return null;
 		}
@@ -522,7 +563,7 @@ class WP_Geo_Data {
 	}
 
 
-	public static function get_geodata( $object = null ) {
+	public static function get_geodata( $object = null, $full = true ) {
 		if ( ! $object ) {
 			$object = get_post();
 		}
@@ -531,7 +572,7 @@ class WP_Geo_Data {
 			$object = get_post( $object );
 		}
 		if ( $object instanceof WP_Post ) {
-			$geodata = self::get_geometadata( 'post', $object->ID );
+			$geodata = self::get_geometadata( 'post', $object->ID, $full );
 			if ( ! $geodata ) {
 				return null;
 			}
@@ -543,21 +584,21 @@ class WP_Geo_Data {
 		}
 
 		if ( $object instanceof WP_Comment ) {
-			$geodata = self::get_geometadata( 'comment', $object->comment_ID );
+			$geodata = self::get_geometadata( 'comment', $object->comment_ID, $full );
 			if ( ! $geodata ) {
 				return null;
 			}
 			$geodata['comment_ID'] = $object->comment_ID;
 		}
 		if ( $object instanceof WP_Term ) {
-			$geodata = self::get_geometadata( 'term', $object->term_id );
+			$geodata = self::get_geometadata( 'term', $object->term_id, $full );
 			if ( ! $geodata ) {
 				return null;
 			}
 			$geodata['term_id'] = $object->term_id;
 		}
 		if ( $object instanceof WP_User ) {
-			$geodata = self::get_geometadata( 'user', $object->ID );
+			$geodata = self::get_geometadata( 'user', $object->ID, $full );
 			if ( ! $geodata ) {
 				return null;
 			}

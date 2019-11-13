@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 3.9.0
+ * Version: 4.0.0
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -18,7 +18,7 @@ register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactiva
 
 
 class Simple_Location_Plugin {
-	public static $version = '3.9.0';
+	public static $version = '4.0.0';
 
 	public static function activate() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
@@ -30,14 +30,16 @@ class Simple_Location_Plugin {
 		flush_rewrite_rules();
 	}
 
-	public static function load( $files ) {
+	public static function load( $files, $dir = 'includes/' ) {
 		if ( empty( $files ) ) {
 			return;
 		}
-		$path = plugin_dir_path( __FILE__ ) . 'includes/';
+		$path = plugin_dir_path( __FILE__ ) . $dir;
 		foreach ( $files as $file ) {
 			if ( file_exists( $path . $file ) ) {
 				require_once $path . $file;
+			} else {
+				error_log( $path . $file );
 			}
 		}
 	}
@@ -85,6 +87,12 @@ class Simple_Location_Plugin {
 		// Load Core Files
 		self::load( $core );
 		add_action( 'widgets_init', array( 'Simple_Location_Plugin', 'widgets_init' ) );
+
+		$libraries = array(
+			'Polyline.php', // Polyline Encoding Library
+		);
+		self::load( $libraries, 'lib/' );
+
 		// Load Providers
 		$providers = array(
 			'class-location-provider-dummy.php', // Dummy Location Provider
@@ -109,7 +117,6 @@ class Simple_Location_Plugin {
 			'class-geo-provider-geonames.php', // Geonames
 		);
 		self::load( $providers );
-
 	}
 
 	public static function widgets_init() {
@@ -153,9 +160,9 @@ class Simple_Location_Plugin {
 
 }
 
-
 if ( ! function_exists( 'ifset' ) ) {
 	function ifset( &$var, $default = false ) {
 		return isset( $var ) ? $var : $default;
 	}
 }
+
