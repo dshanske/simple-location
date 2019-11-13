@@ -16,8 +16,12 @@ class Map_Provider_Mapbox extends Map_Provider {
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_mapbox_style' );
 		}
-		add_action( 'init', array( get_called_class(), 'init' ) );
-		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+
+		$option = get_option( 'sloc_map_provider' );
+		if ( 'mapbox' === $option ) {
+			add_action( 'init', array( get_called_class(), 'init' ) );
+			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+		}
 		parent::__construct( $args );
 	}
 

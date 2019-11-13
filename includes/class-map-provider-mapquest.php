@@ -13,13 +13,15 @@ class Map_Provider_Mapquest extends Map_Provider {
 			$args['style'] = get_option( 'sloc_mapquest_style' );
 		}
 
-		add_action( 'init', array( get_called_class(), 'init' ) );
-		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+		$option = get_option( 'sloc_map_provider' );
+		if ( 'mapquest' === $option ) {
+			add_action( 'init', array( get_called_class(), 'init' ) );
+			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+		}
 		parent::__construct( $args );
 	}
 
 	public static function init() {
-
 		register_setting(
 			'sloc_providers', // option group
 			'sloc_mapquest_api', // option name
@@ -43,7 +45,6 @@ class Map_Provider_Mapquest extends Map_Provider {
 	}
 
 	public static function admin_init() {
-
 		add_settings_field(
 			'mapquestapi', // id
 			__( 'MapQuest API Key', 'simple-location' ), // setting title

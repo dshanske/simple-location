@@ -10,8 +10,41 @@ class Map_Provider_LocationIQ extends Map_Provider {
 			$args['api'] = get_option( 'sloc_locationiq_api' );
 		}
 		$this->style = 'roadmap';
+
+		$option = get_option( 'sloc_map_provider' );
+		if ( 'locationiq' === $option ) {
+			add_action( 'init', array( get_called_class(), 'init' ) );
+			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+		}
 		parent::__construct( $args );
 	}
+
+	public static function init() {
+		register_setting(
+			'sloc_providers', // option group
+			'sloc_locationiq_api', // option name
+			array(
+				'type'         => 'string',
+				'description'  => 'Location IQ API Key',
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+	}
+
+	public static function admin_init() {
+		add_settings_field(
+			'locationiq_api', // id
+			__( 'LocationIQ API Key', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'string_callback' ), // display callback
+			'sloc_providers', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_locationiq_api',
+			)
+		);
+	}
+
 
 	public function get_styles() {
 		return array();

@@ -13,8 +13,11 @@ class Map_Provider_Bing extends Map_Provider {
 			$args['style'] = get_option( 'sloc_bing_style' );
 		}
 
-		add_action( 'init', array( get_called_class(), 'init' ) );
-		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+		$option = get_option( 'sloc_map_provider' );
+		if ( 'bing' === $option ) {
+			add_action( 'init', array( get_called_class(), 'init' ) );
+			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+		}
 		parent::__construct( $args );
 	}
 
