@@ -18,9 +18,20 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @param string $key API Key if Needed
 	 */
 	public function __construct( $args = array() ) {
-		$defaults       = array(
-			'height'    => get_option( 'sloc_height' ),
-			'width'     => get_option( 'sloc_width' ),
+		global $content_width;
+		$width = 1024;
+		if ( $content_width ) {
+			$width = $content_width;
+		}
+		if ( ! $width || $width > 1 ) {
+			$width = get_option( 'sloc_width' );
+			if ( ! is_numeric( $width ) ) {
+				$width = 1024;
+			}
+		}
+		$defaults = array(
+			'width'     => $width,
+			'height'    => round( $width / get_option( 'sloc_aspect', (16 / 9 ) ) ),
 			'map_zoom'  => get_option( 'sloc_zoom' ),
 			'api'       => null,
 			'latitude'  => null,
@@ -30,8 +41,9 @@ abstract class Map_Provider extends Sloc_Provider {
 			'user'      => '',
 			'style'     => '',
 		);
-		$defaults       = apply_filters( 'sloc_geo_provider_defaults', $defaults );
-		$r              = wp_parse_args( $args, $defaults );
+		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
+		$r        = wp_parse_args( $args, $defaults );
+
 		$this->height   = $r['height'];
 		$this->width    = $r['width'];
 		$this->location = $r['location'];

@@ -19,6 +19,10 @@
   color: black;
 }
 
+.sloc-map {
+  max-width: 100%;
+}
+
 .sloc-weather {
   display: block;
 }

@@ -122,16 +122,12 @@ class Loc_Config {
 	}
 
 	public static function register_map_settings() {
-		register_setting(
-			'simloc', // option group
-			'sloc_height', // option name
-			array(
-				'type'         => 'number',
-				'description'  => 'Simple Location Map Height',
-				'show_in_rest' => true,
-				'default'      => 350,
-			)
-		);
+		global $content_width;
+		if ( $content_width && $content_width > 1 ) {
+			$width = $content_width;
+		} else {
+			$width = 1024;
+		}
 		register_setting(
 			'simloc', // option group
 			'sloc_width', // option name
@@ -139,7 +135,17 @@ class Loc_Config {
 				'type'         => 'number',
 				'description'  => 'Simple Location Map Width',
 				'show_in_rest' => true,
-				'default'      => 350,
+				'default'      => $width,
+			)
+		);
+		register_setting(
+			'simloc', // option group
+			'sloc_aspect', // option name
+			array(
+				'type'         => 'number',
+				'description'  => 'Simple Location Map Aspect Ratio',
+				'show_in_rest' => true,
+				'default'      => self::get_default_aspect_ratio(),
 			)
 		);
 		register_setting(
@@ -353,7 +359,7 @@ class Loc_Config {
 			'sloc_providers', // settings section
 			array(
 				'label_for'   => 'sloc_map_provider',
-				'description' => __( 'Provides Static Map Images', 'simple-location' ),
+				'description' => __( 'Provides maps to display on posts and pages', 'simple-location' ),
 				'providers'   => self::map_providers(),
 			)
 		);
@@ -365,7 +371,7 @@ class Loc_Config {
 			'sloc_providers', // settings section
 			array(
 				'label_for'   => 'sloc_geo_provider',
-				'description' => __( 'Looking up an address from coordinates or vice versa', 'simple-location' ),
+				'description' => __( 'Services that Look up an address from coordinates or vice versa', 'simple-location' ),
 				'providers'   => self::geo_providers(),
 			)
 		);
@@ -377,7 +383,7 @@ class Loc_Config {
 			'sloc_providers', // settings section
 			array(
 				'label_for'   => 'sloc_geolocation_provider',
-				'description' => __( 'By default this uses your browser to lookup your location but you can alternatively tap into a service to get your current location, perhaps from your phone', 'simple-location' ),
+				'description' => __( 'Services that allow your site to figure out your location', 'simple-location' ),
 				'providers'   => self::geolocation_providers(),
 			)
 		);
@@ -411,16 +417,19 @@ class Loc_Config {
 				'label_for' => 'sloc_width',
 			)
 		);
+
 		add_settings_field(
-			'height', // id
-			__( 'Default Map Height', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'number_callback' ), // display callback
+			'aspect', // id
+			__( 'Default Map Aspect Ratio', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'values_callback' ), // display callback
 			'simloc', // settings page
 			'sloc_map', // settings section
 			array(
-				'label_for' => 'sloc_height',
+				'label_for' => 'sloc_aspect',
+				'list' => self::get_default_aspect_ratio()  
 			)
 		);
+
 		add_settings_field(
 			'zoom', // id
 			__( 'Default Map Zoom', 'simple-location' ), // setting title
@@ -455,6 +464,16 @@ class Loc_Config {
 			__( 'API Keys', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_api_settings' ),
 			'sloc_providers'
+		);
+	}
+
+	public static function get_default_aspect_ratio() {
+		return apply_filters(
+			'default_sloc_aspect_ratios',
+			array(
+				'1.77777777778' => __( 'Widescreen', 'simple-location' ),
+				'1'             => __( 'Square', 'simple-location' ),
+			)
 		);
 	}
 
@@ -518,7 +537,7 @@ class Loc_Config {
 
 	public static function geolocation_providers() {
 		$return = array(
-			'HTML5' => __( 'HTML5 Browser Geolocation (requires HTTPS)', 'simple-location' ),
+			'HTML5' => __( 'Ask your Web Browser for Your Location(requires HTTPS)', 'simple-location' ),
 		);
 		foreach ( static::$location as $location ) {
 			$return[ $location->get_slug() ] = esc_html( $location->get_name() );
@@ -558,6 +577,17 @@ class Loc_Config {
 		}
 		$text = get_option( $name );
 		self::select_callback( $name, $text, $styles );
+	}
+
+	public static function values_callback( array $args ) {
+		$name = $args['label_for'];
+		$list = $args['list'];
+		if ( is_wp_error( $list ) ) {
+			echo esc_html( $list->get_error_message() );
+			return;
+		}
+		$text = get_option( $name );
+		self::select_callback( $name, $text, $list );
 	}
 
 	public static function select_callback( $name, $text, $values ) {

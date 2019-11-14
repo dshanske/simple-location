@@ -153,7 +153,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 
 	public function get_the_map( $static = true ) {
 		if ( $static ) {
-			$map  = sprintf( '<img src="%s">', $this->get_the_static_map() );
+			$map  = sprintf( '<img class="sloc-map" src="%s">', $this->get_the_static_map() );
 			$link = $this->get_the_map_url();
 			return '<a target="_blank" href="' . $link . '">' . $map . '</a>';
 		}
