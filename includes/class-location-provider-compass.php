@@ -61,7 +61,7 @@ class Location_Provider_Compass extends Location_Provider {
 		$coord           = $response['geometry']['coordinates'];
 		$this->longitude = $coord[0];
 		$this->latitude  = $coord[1];
-		$this->altitude  = isset( $coord[2] ) ? $coord[2] : null;
+		$this->altitude  = isset( $coord[2] ) ? round( $coord[2], 2 ) : null;
 		$properties      = $response['properties'];
 		$this->accuracy  = isset( $properties['accuracy'] ) ? $properties['accuracy'] : null;
 	}

@@ -45,11 +45,19 @@ abstract class Location_Provider extends Sloc_Provider {
 		$return['heading']   = $this->heading;
 		$return['speed']     = $this->speed;
 		$return['time']      = $this->time;
+		$return['zoom']      = self::derive_zoom();
 		$return              = array_filter( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
 		}
 		return false;
+	}
+
+	public function derive_zoom() {
+		if ( $this->altitude > 1000 ) {
+			return 9;
+		}
+		return round( log( 591657550.5 / ( $this->accuracy * 45 ), 2 ) ) + 1;
 	}
 
 	/**

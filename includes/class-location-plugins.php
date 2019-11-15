@@ -84,6 +84,12 @@ class Location_Plugins {
 					WP_Geo_Data::set_visibility( 'post', $args['ID'], 'public' );
 				}
 			}
+			// If altitude is above 1000m always show the higher zoom level
+			if ( isset( $meta['geo_altitude'] ) && 1000 < $meta['geo_altitude'] ) {
+				update_post_meta( $args['ID'], 'geo_zoom', 9 );
+			} elseif ( isset( $meta['geo_accuracy'] ) ) {
+				update_post_meta( $args['ID'], 'geo_zoom', round( log( 591657550.5 / ( $meta['geo_accuracy'] * 45 ), 2 ) ) + 1 );
+			}
 			$current = true;
 			if ( isset( $input['properties']['published'] ) ) {
 				$published = new DateTime( $input['properties']['published'][0] );

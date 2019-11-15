@@ -106,7 +106,13 @@ jQuery( document ).ready( function( $ ) {
 		$( '#heading' ).val( position.coords.heading );
 		$( '#speed' ).val( position.coords.speed );
 		$( '#altitude' ).val( position.coords.altitude );
-		$( '#map_zoom' ).val( parseInt( Math.log2( 591657550.5 / ( position.coords.accuracy * 45 ) ) ) + 1 );
+		if ( '' === $( '#map_zoom' ).val() ) {
+			if ( position.coords.hasOwnProperty('zoom') ) {
+				$( '#map_zoom' ).val( position.coords.zoom );
+			} else {
+				$( '#map_zoom' ).val( parseInt( Math.log2( 591657550.5 / ( position.coords.accuracy * 45 ) ) ) + 1 );
+			}
+		}
 		reverseLookup();
 	}
 
