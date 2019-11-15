@@ -68,7 +68,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	}
 
 	public function get_archive_map( $locations ) {
-		if ( empty( $this->api ) || empty( $this->style ) || empty( $locations ) ) {
+		if ( empty( $this->api ) || empty( $locations ) ) {
 			return '';
 		}
 
@@ -76,19 +76,17 @@ class Map_Provider_LocationIQ extends Map_Provider {
 		foreach ( $locations as $location ) {
 			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
-		$polyline = Polyline::encode( $locations );
+		// $polyline = Polyline::encode( $locations );
 
-		$url = 'https://open.mapquestapi.com/staticmap/v5/map';
 		$map = add_query_arg(
 			array(
-				'key'       => $this->api,
-				// 'center' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-				'size'      => sprintf( '%1$s,%2$s', $this->width, $this->height ),
-				'type'      => $this->style,
-				'locations' => implode( '||', $markers ),
-				'shape'     => 'cmp|enc:' . $polyline,
+				'key'     => $this->api,
+				'format'  => 'png',
+				'size'    => sprintf( '%1$sx%2$s', $this->width, $this->height ),
+				'markers' => sprintf( 'size:small|color:red|%1$s', implode( '|', $markers ) ),
+				'path'    => sprintf( 'weight:2|color:blue|fillcolor:%23add8e6|%1$s', implode( '|', $markers ) ),
 			),
-			$url
+			'https://maps.locationiq.com/v2/staticmap'
 		);
 		return $map;
 	}
