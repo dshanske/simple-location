@@ -426,18 +426,19 @@ class Loc_Config {
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'sloc_aspect',
-				'list' => self::get_default_aspect_ratio()  
+				'list'      => self::get_default_aspect_ratio(),
 			)
 		);
 
 		add_settings_field(
 			'zoom', // id
-			__( 'Default Map Zoom', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'number_callback' ), // display callback
+			__( 'Default Map Zoom Level', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'values_callback' ), // display callback
 			'simloc', // settings page
 			'sloc_map', // settings section
 			array(
 				'label_for' => 'sloc_zoom',
+				'list'      => self::get_zoom_levels(),
 			)
 		);
 
@@ -467,12 +468,30 @@ class Loc_Config {
 		);
 	}
 
+	public static function get_zoom_levels() {
+		return array(
+			'20' => __( 'Building', 'simple-location' ),
+			'18' => __( 'Block', 'simple-location' ),
+			'16' => __( 'Street', 'simple-location' ),
+			'14' => __( 'Village', 'simple-location' ),
+			'12' => __( 'Town', 'simple-location' ),
+			'10' => __( 'Metropolitan Area', 'simple-location' ),
+			'8'  => __( 'State', 'simple-location' ),
+			'6'  => __( 'Large European Country', 'simple-location' ),
+			'3'  => __( 'Largest Country', 'simple-location' ),
+			'2'  => __( 'Subcontinent', 'simple-location' ),
+		);
+	}
+
 	public static function get_default_aspect_ratio() {
 		return apply_filters(
 			'default_sloc_aspect_ratios',
 			array(
 				'1.77777777778' => __( 'Widescreen', 'simple-location' ),
 				'1'             => __( 'Square', 'simple-location' ),
+				'1.333333333'   => __( 'Medium Format', 'simple-location' ),
+				'3'             => __( 'Panorama', 'simple-location' ),
+				'12'            => __( 'Circle-Vision 360', 'simple-location' ),
 			)
 		);
 	}

@@ -50,11 +50,11 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 
         <label for="altitude" class="quarter">
             <?php _e( 'Altitude:', 'simple-location' ); ?>
-            <input class="widefat" type="text" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
+            <input class="widefat" type="number" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
         </label>
 
         <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
-        <input type="text" name="map_zoom" id="map_zoom" class="widefat" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />
+        <input type="number" name="map_zoom" id="map_zoom" class="widefat" max="20" min="1" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />
 
 	<span id="hide-map"><?php echo $map_return; ?></span>
         <input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
@@ -93,14 +93,14 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
             <label for="temperature">
                 <?php _e( 'Temperature(C): ', 'simple-location' ); ?>
             </label>
-            <input type="text" name="temperature" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
+            <input type="number" name="temperature" step="0.1" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
         </p>
 
         <p class="field-row">
             <label for="humidity">
                 <?php _e( 'Humidity: ', 'simple-location' ); ?>
             </label>
-            <input type="text" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
+            <input type="number" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
         </p>
 
         <p class="field-row">
@@ -123,49 +123,49 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
             <label for="wind_degree">
                 <?php _e( 'Wind Degree', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="text" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" />
+            <input class="widefat" type="number" min="0" max="360" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="wind_speed">
                 <?php _e( 'Wind Speed', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="text" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" />
+            <input class="widefat" type="number" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="pressure">
                 <?php _e( 'Pressure', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="text" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
+            <input class="widefat" type="number" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="weather_visibility">
                 <?php _e( 'Visibility', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="text" name="weather_visibility" id="weather_visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
+            <input class="widefat" type="number" name="weather_visibility" id="weather_visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="cloudiness">
                 <?php _e( 'Cloudiness', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="text" name="cloudiness" id="cloudiness" value="<?php echo ifset( $weather['cloudiness'], '' ); ?>" />
+            <input class="widefat" type="number" min="0" max="100" name="cloudiness" id="cloudiness" value="<?php echo ifset( $weather['cloudiness'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="rain">
                 <?php _e( 'Rain', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="text" name="rain" id="rain" value="<?php echo ifset( $weather['rain'], '' ); ?>" />
+            <input class="widefat" type="number" name="rain" id="rain" value="<?php echo ifset( $weather['rain'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="snow">
                 <?php _e( 'Snow', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="text" name="snow" id="snow" value="<?php echo ifset( $weather['snow'], '' ); ?>" />
+            <input class="widefat" type="number" name="snow" id="snow" value="<?php echo ifset( $weather['snow'], '' ); ?>" />
         </p>
 
         <p>

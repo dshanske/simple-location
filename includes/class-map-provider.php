@@ -31,7 +31,7 @@ abstract class Map_Provider extends Sloc_Provider {
 		}
 		$defaults = array(
 			'width'     => $width,
-			'height'    => round( $width / get_option( 'sloc_aspect', (16 / 9 ) ) ),
+			'height'    => round( $width / get_option( 'sloc_aspect', ( 16 / 9 ) ) ),
 			'map_zoom'  => get_option( 'sloc_zoom' ),
 			'api'       => null,
 			'latitude'  => null,
