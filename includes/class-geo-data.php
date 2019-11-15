@@ -16,7 +16,8 @@ class WP_Geo_Data {
 		$cls = get_called_class();
 		self::register_meta();
 		add_filter( 'query_vars', array( $cls, 'query_var' ) );
-		add_action( 'pre_get_posts', array( $cls, 'pre_get_posts' ) );
+		add_filter( 'template_include', array( $cls, 'map_archive_template' ) );
+		add_action( 'pre_get_posts', array( $cls, 'filter_location_posts' ) );
 		add_action( 'pre_get_comments', array( $cls, 'pre_get_comments' ) );
 
 		// Grab geo data from EXIF, if it's available
@@ -57,8 +58,28 @@ class WP_Geo_Data {
 		add_post_type_support( 'page', 'geo-location' );
 		add_post_type_support( 'attachment', 'geo-location' );
 
-		add_filter( 'get_the_archive_description', array( $cls, 'get_the_archive_description' ), 99 );
+	}
 
+	public static function map_archive_template( $original_template ) {
+		if ( false === get_query_var( 'map', false ) ) {
+			return $original_template;
+		}
+		if ( ! is_archive() ) {
+			return $original_template;
+		}
+		$template_name = 'map-archive.php';
+		$look          = array(
+			get_theme_file_path(),
+			plugin_dir_path( __DIR__ ) . 'templates/',
+		);
+
+		foreach ( $look as $l ) {
+			if ( file_exists( $l . $template_name ) ) {
+				return $l . $template_name;
+				break;
+			}
+		}
+		return $original_template;
 	}
 
 	public static function location_list() {
@@ -88,12 +109,6 @@ class WP_Geo_Data {
 			}
 		}
 		return $locations;
-	}
-
-	public static function get_the_archive_description( $description ) {
-		$map = Loc_Config::map_provider();
-		$url = sprintf( '<img class="archive-map" src="%s" />', $map->get_archive_map( self::get_archive_public_location_list() ) );
-		return $description . $url;
 	}
 
 	public static function register_bulk_edit_location( $actions ) {
@@ -402,11 +417,13 @@ class WP_Geo_Data {
 	}
 
 	public static function rewrite() {
-		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES | EP_ROOT );
+		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES );
+		add_rewrite_endpoint( 'map', EP_ALL_ARCHIVES );
 	}
 
 	public static function query_var( $vars ) {
 		$vars[] = 'geo';
+		$vars[] = 'map';
 		return $vars;
 	}
 
@@ -448,7 +465,7 @@ class WP_Geo_Data {
 		}
 	}
 
-	public static function pre_get_posts( $query ) {
+	public static function filter_location_posts( $query ) {
 		if ( ! array_key_exists( 'geo', $query->query_vars ) ) {
 			return;
 		}
