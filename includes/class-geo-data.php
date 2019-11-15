@@ -17,6 +17,8 @@ class WP_Geo_Data {
 		self::register_meta();
 		add_filter( 'query_vars', array( $cls, 'query_var' ) );
 		add_filter( 'template_include', array( $cls, 'map_archive_template' ) );
+
+		add_action( 'pre_get_posts', array( $cls, 'remove_maps_pagination' ) );
 		add_action( 'pre_get_posts', array( $cls, 'filter_location_posts' ) );
 		add_action( 'pre_get_comments', array( $cls, 'pre_get_comments' ) );
 
@@ -58,6 +60,14 @@ class WP_Geo_Data {
 		add_post_type_support( 'page', 'geo-location' );
 		add_post_type_support( 'attachment', 'geo-location' );
 
+	}
+
+
+	public static function remove_maps_pagination( $query ) {
+		if ( ! array_key_exists( 'map', $query->query_vars ) ) {
+			return;
+		}
+		$query->set( 'posts_per_page', -1 );
 	}
 
 	public static function map_archive_template( $original_template ) {

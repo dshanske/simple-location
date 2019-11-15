@@ -19,10 +19,10 @@ get_header();
 			// Start the Loop.
 			while ( have_posts() ) {
 				the_post();
-				if ( empty( get_the_title() ) ) {
-					printf( '<li><a href="%1$s">%2$s %3$s</a></li>', get_the_permalink(), get_the_date(), get_the_time() );
-				} else {
-					the_title( sprintf( '<li class="p-name"><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></li>' );
+				
+				$location = WP_Geo_Data::get_geodata( get_post(), false );
+				if ( 'public' === $location['visibility'] && array_key_exists( 'address', $location ) ) {
+					printf( '<li class="h-entry"><a class="u-url p-location" href="%1$s">%2$s</a></li>', get_the_permalink(), $location['address'] );	
 				}
 			}
 ?>
