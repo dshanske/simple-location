@@ -63,6 +63,8 @@ class Location_Provider_Compass extends Location_Provider {
 		$this->latitude  = $coord[1];
 		$this->altitude  = isset( $coord[2] ) ? round( $coord[2], 2 ) : null;
 		$properties      = $response['properties'];
+		$this->heading   = array_key_exists( 'heading', $properties ) ? $properties['heading'] : null;
+		$this->speed     = array_key_exists( 'speed', $properties ) ? $properties['speed'] : null;
 		$this->accuracy  = self::ifnot(
 			$properties,
 			array(
