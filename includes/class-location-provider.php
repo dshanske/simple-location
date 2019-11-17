@@ -57,7 +57,10 @@ abstract class Location_Provider extends Sloc_Provider {
 		if ( $this->altitude > 1000 ) {
 			return 9;
 		}
-		return round( log( 591657550.5 / ( $this->accuracy * 45 ), 2 ) ) + 1;
+		if ( 0 < $this->accuracy ) {
+			return round( log( 591657550.5 / ( $this->accuracy * 45 ), 2 ) ) + 1;
+		}
+		return get_option( 'sloc_zoom' );
 	}
 
 	/**

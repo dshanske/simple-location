@@ -9,7 +9,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	}
 
 	public function elevation() {
-		return null;
+		return 0;
 	}
 
 

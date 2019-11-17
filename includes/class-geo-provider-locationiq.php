@@ -43,7 +43,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 		);
 	}
 	public function elevation() {
-		return null;
+		return 0;
 	}
 
 

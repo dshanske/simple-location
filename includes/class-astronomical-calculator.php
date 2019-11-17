@@ -57,7 +57,7 @@ class Astronomical_Calculator {
 
 	private function get_zenith() {
 		$zenith = 90.583333; // default zenith
-		if ( 0 !== $this->elevation ) {
+		if ( 0 < $this->elevation ) {
 			$adjustment = 0.0347 * sqrt( $this->elevation );
 			$zenith     = $zenith + $adjustment;
 		}
