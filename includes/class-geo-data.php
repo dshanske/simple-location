@@ -375,7 +375,7 @@ class WP_Geo_Data {
 			);
 			echo '<div class="misc-pub-section curtime misc-pub-pubtime">';
 			/* translators: Attachment information. %s: Date based on the timestamp in the attachment file. */
-			printf( __( 'Created on: %s', 'simple-location' ), '<b>' . $created_on . '</b>' );
+			printf(  _( 'Created on: %s', 'simple-location' ), '<b>' . $created_on . '</b>' ); // phpcs:ignore
 			echo '</div>';
 		}
 	}
