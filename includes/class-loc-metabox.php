@@ -106,7 +106,7 @@ class Loc_Metabox {
 		?>
 		<tr>
 		<th><label for="geo_public"><?php esc_html_e( 'Show:', 'simple-location' ); ?></label></th>
-		<td><select name="geo_public">
+		<td><select id="location-visibility" name="geo_public">
 		<?php WP_Geo_Data::geo_public_select( $public, true ); ?>
 		</select></td>
 		</tr>

@@ -106,13 +106,12 @@ jQuery( document ).ready( function( $ ) {
 		$( '#heading' ).val( position.coords.heading );
 		$( '#speed' ).val( position.coords.speed );
 		$( '#altitude' ).val( position.coords.altitude );
-		if ( '' === $( '#map_zoom' ).val() ) {
-			if ( position.coords.hasOwnProperty('zoom') ) {
-				$( '#map_zoom' ).val( position.coords.zoom );
-			} else {
-				$( '#map_zoom' ).val( parseInt( Math.log2( 591657550.5 / ( position.coords.accuracy * 45 ) ) ) + 1 );
-			}
+		if ( position.coords.hasOwnProperty('zoom') ) {
+			$( '#map_zoom' ).val( position.coords.zoom );
+		} else {
+			$( '#map_zoom' ).val( parseInt( Math.log2( 591657550.5 / ( position.coords.accuracy * 45 ) ) ) + 1 );
 		}
+		
 		reverseLookup();
 	}
 
@@ -167,35 +166,14 @@ jQuery( document ).ready( function( $ ) {
 							$( '#altitude' ).val( response.altitude ) ;
 						}
 
-						if ( 'street-address' in response ) {
-							$( '#street-address' ).val( response['street-address']) ;
-
-						}
-						if ( 'extended-address' in response ) {
-							$( '#extended-address' ).val( response['extended-address']) ;
-						}
-						if ( 'locality' in response ) {
-							$( '#locality' ).val( response.locality ) ;
-						}
-						if ( 'region' in response ) {
-							$( '#region' ).val( response.region ) ;
-						}
-						if ( 'postal-code' in response ) {
-							$( '#postal-code' ).val( response['postal-code']) ;
-						}
-						if ( 'country-name' in response ) {
-							$( '#country-name' ).val( response['country-name']) ;
-						}
-						if ( 'country-code' in response ) {
-							$( '#country-code' ).val( response['country-code']) ;
-						}
 						if ( 'visibility' in response ) {
 							$( '#location-visibility' ).val( response['visibility']) ; // eslint-disable-line dot-notation
 							$( '#location-visibility-label' ).text( slocOptions.visibility_options[$( '#location-visibility' ).val() ]); // eslint-disable-line camelcase
 						}
 						if ( 'timezone' in response ) {
-							$( '#post-timezone' ).val( response.timezone ) ;
+							$( '#post-timezone' ).val( response.timezone );
 							$( '#post-timezone-label' ).text( response.timezone );
+							$( '#local-timezone' ).val( response.timezone );
 						}
 						if ( 'weather' in response ) {
 							weather = response.weather;
