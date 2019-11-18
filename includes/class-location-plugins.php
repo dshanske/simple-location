@@ -32,17 +32,13 @@ class Location_Plugins {
 		if ( ! $geolocation->background() ) {
 			return $input;
 		}
-		// Do not add if the publish time if more than 5 minutes in the past or future
+		$published = null;
 		if ( isset( $properties['published'] ) ) {
-			$published = strtotime( $properties['published'][0] );
+			$published = $properties['published'][0];
 			$now       = time();
-			$diff      = abs( $now - $published );
-			if ( $diff > 300 ) {
-				return $input;
-			}
 		}
 		$geolocation->set_user( get_current_user_id() );
-		$geolocation->retrieve();
+		$geolocation->retrieve( $published );
 		$return = $geolocation->get_mf2();
 		if ( $return ) {
 			$input['properties']['location']            = array( $return );
