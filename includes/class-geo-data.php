@@ -30,6 +30,8 @@ class WP_Geo_Data {
 			add_action( 'wp_read_image_metadata', array( $cls, 'exif_data' ), 10, 3 );
 		}
 		add_action( 'wp_generate_attachment_metadata', array( $cls, 'attachment' ), 20, 2 );
+		add_filter( 'attachment_fields_to_edit', array( $cls, 'attachment_fields_to_edit' ), 10, 2 );
+		add_action( 'attachment_submitbox_misc_actions', array( $cls, 'attachment_submitbox_metadata' ), 12 );
 
 		self::rewrite();
 
@@ -61,7 +63,6 @@ class WP_Geo_Data {
 		add_post_type_support( 'attachment', 'geo-location' );
 
 	}
-
 
 	public static function remove_maps_pagination( $query ) {
 		if ( ! array_key_exists( 'map', $query->query_vars ) ) {
@@ -360,6 +361,56 @@ class WP_Geo_Data {
 		}
 	}
 
+	public static function attachment_submitbox_metadata( $post ) {
+		$published = get_post_meta( $post->ID, 'mf2_published', true );
+		$date      = new DateTime( $published );
+		if ( $published ) {
+			$created_on = sprintf(
+				/* translators: Publish box date string. 1: Date, 2: Time. See https://secure.php.net/date */
+				__( '%1$s at %2$s', 'simple-location' ),
+				/* translators: Publish box date format, see https://secure.php.net/date */
+				wp_date( _x( 'M j, Y', 'publish box date format', 'simple-location' ), $date->getTimestamp(), $date->getTimeZone() ),
+				/* translators: Publish box time format, see https://secure.php.net/date */
+				wp_date( _x( 'H:i T', 'publish box time format', 'simple-location' ), $date->getTimestamp(), $date->getTimeZone() )
+			);
+			echo '<div class="misc-pub-section curtime misc-pub-pubtime">';
+			/* translators: Attachment information. %s: Date based on the timestamp in the attachment file. */
+			printf( __( 'Created on: %s', 'simple-location' ), '<b>' . $created_on . '</b>' );
+			echo '</div>';
+		}
+	}
+
+	public static function attachment_fields_to_edit( $form_fields, $post ) {
+		$geodata                    = self::get_geodata( $post );
+		$form_fields['geo_address'] = array(
+			'value'        => $geodata['address'],
+			'label'        => __( 'Location', 'simple-location' ),
+			'input'        => 'html',
+			'show_in_edit' => false,
+			'html'         => sprintf( '<span>%1$s</span>', $geodata['address'] ),
+		);
+		if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
+			$form_fields['location'] = array(
+				'value'        => '',
+				'label'        => __( 'Geo Coordinates', 'simple-location' ),
+				'input'        => 'html',
+				'show_in_edit' => false,
+				'html'         => sprintf( '<span>%1$s, %2$s</span>', $geodata['latitude'], $geodata['longitude'] ),
+			);
+		}
+		$time = get_post_meta( $post->ID, 'mf2_published', true );
+		if ( $time ) {
+			$form_fields['mf2_published'] = array(
+				'value'        => $time,
+				'label'        => __( 'Creation Time', 'simple-location' ),
+				'input'        => 'html',
+				'show_in_edit' => false,
+				'html'         => sprintf( '<time dateime="%1$s" />%1$s</time><br />', $time ),
+			);
+		}
+		return $form_fields;
+	}
+
 	public static function attachment( $meta, $post_id ) {
 		if ( ! isset( $meta['image_meta'] ) ) {
 			return $meta;
@@ -386,13 +437,17 @@ class WP_Geo_Data {
 			}
 		}
 		if ( isset( $data['created_timestamp'] ) && 0 !== (int) $data['created_timestamp'] ) {
+			$datetime = date_create_from_format( 'U', $data['created_timestamp'], new DateTimeZone( 'GMT' ) );
 			if ( isset( $data['location'] ) ) {
-				$timezone = Loc_Timezone::timezone_for_location( $data['location']['latitude'], $data['location']['longitude'] );
+				// As EXIF data does not have a timezone offset try to adjust the time into the correct timezone based on the location of the photo
+				$timezone       = Loc_Timezone::timezone_for_location( $data['location']['latitude'], $data['location']['longitude'] );
+				$strip_timezone = $datetime->format( 'Y-m-d\TH:i:s' );
+				$datetime       = new DateTime( $strip_timezone . $timezone->offset );
 			} else {
-				$timezone = wp_get_timezone();
+				$datetime->setTimezone( wp_get_timezone() );
 			}
-			$datetime = date_create_from_format( 'U', $data['created_timestamp'] );
-			$datetime->setTimezone( $timezone );
+			// Fix the timestamp to the correct time
+			$meta['image_meta']['created_timestamp'] = $datetime->getTimeStamp();
 			update_post_meta( $post_id, 'mf2_published', $datetime->format( DATE_W3C ) );
 		}
 		return $meta;

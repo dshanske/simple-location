@@ -12,7 +12,8 @@ class Timezone_Result {
 		} else {
 			$this->now = new DateTime();
 		}
-		$this->now->setTimeZone( new DateTimeZone( $timezone ) );
+		$this->timezone = new DateTimeZone( $timezone );
+		$this->now->setTimeZone( $this->timezone );
 		$this->name = $timezone;
 	}
 
