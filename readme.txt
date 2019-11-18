@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, geo, maps, location, weather, indieweb
-Stable tag: 3.8.2
+Stable tag: 4.0.0
 Requires at least: 4.9
-Tested up to: 5.2.3
+Tested up to: 5.3
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -22,13 +22,13 @@ Automatically saves location data from image metadata when uploaded as well.
 Offers the opportunity to change the displayed timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location. 
 While Gutenberg compatible, this is not built for Gutenberg.
 
-* If your site is set to a Manual UTC Offset as opposed to a named timezone, the timezone override feature will not work at this time
+* If your site is set to a Manual UTC Offset as opposed to a named timezone, the timezone override feature will not work properly if you are running PHP5.4 or less
 
 == Privacy and Data Notice ==
 
 Simple Location stores location and weather data inside posts, attachments, comments, and term meta...optionally other post types. This data respects a public, private or 
 protected setting. Attachment data is automatically extracted from images if location is present, which could be extracted by any third-party downloading the picture
-unless removed. For all other data, it is provided by the user, who decides its ultimate use. Location data is made available through a geolocation provider...currently
+unless removed. For all other data, it is provided by the user, who decides its ultimate use. Location data is made available through a geolocation provider...the default is currently
 only HTML5 browser geolocation is built in, for which the user must give consent to share). Other information is secured through use of third-party APIs to identify a 
 location, calculate elevation, display maps, and weather conditions.
 
@@ -53,24 +53,21 @@ To add anything more than a basic location you will have to create a venue. This
 It consists of four fields: latitude, longitude, public, and address. This matches up with the HTML5 Geolocation fields. The [W3C Geolocation Specification](https://dev.w3.org/geo/api/spec-source.html) 
 also provides for properties of altitude, accuracy, altitudeAccuracy, speed, and heading, which may be stored. Map Zoom is also stored as a geodata property.
 
-Timezone is also stored as a property and is derived from the location.
+Timezone is also stored as a property and is derived from the location by default or set manually.
 
 == Weather ==
 
-Weather consists of at minimum the current conditions and temperature but may include future parameters for use such as pressure, wind speed, wind direction degree, etc. A weather widget
-is available that can be set to a specific location, a user, or a station ID.
-
-Station ID is available from supported providers for weather stations, for example from a Personal Weather Station(PWS).
+Weather consists of at minimum the current conditions and temperature but includes future parameters for use such as pressure, wind speed, wind direction degree, etc. Weather widgets are available 
+that can be set to a specific location, a user, station ID, or airport code. Station ID is available from supported providers for weather stations, for example from a Personal Weather Station(PWS).
 
 == Providers ==
 
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
-* Map Providers include Wikimedia, MapBox, Google, Mapquest's Open Static Map, HERE, and Bing
-* Geocoding Providers include the Mapquest hosted version of Nominatim, Google, and Bing.
-* Location Providers offers HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, and [Compass](https://github.com/aaronpk/Compass), a self-hosted
-option for storing your location.
-* Weather Providers include OpenWeatherMap, Dark Sky, APIXU and the US National Weather Service. Dark Sky and APIXU do not support stations.
+* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include Wikimedia, MapBox, Google, Mapquest's Open Static Map, HERE, LocationIQ, and Bing
+* Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ and Geonames.
+* Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
+* Weather Providers retrieve weather data about your location and include OpenWeatherMap, Dark Sky, Weatherstack, WeatherBit and the US National Weather Service. Dark Sky, WeatherBit, and Weatherstack do not support stations.
 
 
 == Frequently Asked Questions ==
@@ -78,17 +75,21 @@ option for storing your location.
 = What are the requirements to use this plugin? =
 
 API Keys are required to use certain services.
-* [Google Static Maps](https://developers.google.com/maps/documentation/javascript/get-api-key)
-* [Mapbox Static Maps](https://www.mapbox.com/help/create-api-access-token/) - To retrieve style list inside the UI, you need a token with the styles:list scope
-* [Bing Maps](https://www.bingmapsportal.com/)
+* [Google](https://developers.google.com/maps/documentation/javascript/get-api-key)
+* [Mapbox](https://www.mapbox.com/help/create-api-access-token/) - To retrieve style list inside the UI, you need a token with the styles:list scope
+* [Bing](https://www.bingmapsportal.com/)
 * [OpenWeatherMap](http://openweathermap.com/api)
 * [MapQuest](https://developer.mapquest.com/)
 * [HERE](https://developer.here.com/)
 * [Dark Sky](https://darksky.net/dev)
 * [Compass](https://github.com/aaronpk/Compass)
-* [APIXU](https://apixu.com)
+* [Weatherstack](https://weatherstack.com)
+* [Weatherbit](https://www.weatherbit.io/api/weather-current)
+* [GeoNames](https://www.geonames.org) - requires a username
+* [LocationIQ](https://locationiq.com/)
 
 At this time, the only map service available without an API key is Wikimedia maps
+Nominatim does not require an API key, but it does ask for an email address, which will be the admin email of the site
 If not provided there will be no map displayed regardless of setting, reverse geo lookup will not work 
 Without a weather provider this service will not work. 
 
@@ -106,11 +107,11 @@ also known as protected, which shows a textual description of the location but d
 
 Chrome Users: Retrieves the location using the HTML5 geolocation API(available in your browser) will not work on Chrome if your website is not secure(https). This is a Chrome decision to ensure safe control of personal data.
 
-You can take advantage of the other built-in location provider which uses the location of the user or create your own location provider as a separate plugin.
+You can take advantage of the other built-in location providers, for example, one uses the location of the user or create your own location provider as a separate plugin.
 
 = How can I update the location of my user profile? = 
 
-You can do so under your user profile or alternatively update using a REST API endpoint. By posting to `/wp-json/sloc_geo/1.0/user` with the latitude, longitude, altitude parameters will
+You can do so under your user profile or alternatively update using a REST API endpoint. By posting to `/wp-json/sloc_geo/1.0/user` with the latitude, longitude, altitude parameters, or with a geojson body, will
 update the user associated with the credentials you provide to the REST API.
 
 = How can I access the location or weather data on the frontend? =
@@ -131,15 +132,20 @@ data can be sent to it from iOS or Android devices using various apps.
 
 You can filter any query or archive by adding `?geo={all|public|text}` to it to show only public posts with location. Adding /geo/all to the homepage or archive pages should also work
 
+= How can I see a map of all the locations in an archive page? =
+
+If you add /map to any archive URL, for example, example.com/2019/map it will return a template with a map view of that archive. It uses a default template built into the theme.
+Being as styling this would not be customized to your theme, you can add a map-archive.php file to your theme to customize this.
+
 = JetPack offers Location Display, why do I need this? =
 
 JetPack only began offering location display in 2017, 3 years after this plugin was created. This plugin disables their implementation as it created conflicts.
 
 They do not offer the features this plugin does and their goal is a minimal implementation.
 
-= Why am I seeing location on private posts with the notation Private? =
+= Why am I seeing location on private posts with the notation Hidden? =
 
-This appears to users who can publish posts when logged in.
+This appears to users who can edit private posts when logged in.
 
 = How can I report issues or request support? =
 
@@ -156,6 +162,11 @@ The plugin offers providers for:
 
 == Upgrade Notice ==
 
+= 4.0.0 =
+
+The Compass API/URL information is now stored in the user profile. When publishing, it will pull this information in from the current logged in user. This was previously stored globally. When using UTC offsets over
+timezone strings, only systems running PHP5.5 and above will work correctly. Default height for maps has been replaced by aspect ratio.
+
 = 3.7.0 =
 
 This upgrade cleans up some possibly old data in the database when you load the settings page for the plugin. If you have a lot of posts, the load may be slow initially.
@@ -170,6 +181,34 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.0.0 ( 2019-10-xx ) =
+* Reimplement timezone handling using updated functions from WordPress 5.3 backported to this plugin
+* Enable UTC and offset override support provided you are using PHP5.5 or above
+* Reenable the option for nominatim despite it being prone to denial but provide the admin email address as requested by service
+* Add support for comments using the timezone of the post they are part of
+* APIXU is now Weatherstack.com
+* Sunrise and sunset function now in astronomical calculation class and factor in elevation to calculate visual sunset
+* Last seen widget now shows local time, sunrise and sunset times and map optionally
+* Add airport widget
+* Support user update using geojson
+* Add tabbed settings page
+* Compass API is now a user not a global setting
+* Add support for LocationIQ as a map and geo provider
+* Add support for WeatherBit as a weather provider
+* Add polyline encoder
+* Add support for historical locations, currently only Compass supported, in the Classic Editor
+* Support generating a static map with multiple location markers for archive views
+* Do not add current weather if publish date is not current
+* Enhance HERE map styles
+* Switch from default map width/height to width and aspect ratio
+* Switch default map zoom to summary descriptions over numerical values
+* Generate default map zooms when possible based on altitude or accuracy when available
+* Update various form fields to use number over text types
+* Add /map to archive pages and it will display a custom map archive page
+* Misc validation checks to prevent PHP notices
+* Fix timezone issues on attachments by using the location of the photo to update the timestamp
+* If no location is provided Micropub will lookup the location factoring in the publish time if one is provided
 
 = 3.8.2 ( 2019-09-21 ) =
 * Minor Fixes to photo improvements released in 3.8.1

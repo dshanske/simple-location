@@ -33,7 +33,7 @@ $geodata = WP_Geo_Data::get_geodata( $profileuser );
 </tr>
 <tr><th><label for="timezone"><?php _e( 'Time Zone', 'simple-location'); ?></label></th>
 <td>
-<select name="timezone" id="timezone" width="90%">
+<select name="timezone" id="user-timezone" width="90%">
 <?php echo Post_Timezone::wp_timezone_choice( ifset( $geodata['timezone'] ) ); ?>
 </select>
 <br />
