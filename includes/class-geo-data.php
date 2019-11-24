@@ -68,7 +68,9 @@ class WP_Geo_Data {
 		if ( ! array_key_exists( 'map', $query->query_vars ) ) {
 			return;
 		}
-		$query->set( 'posts_per_page', -1 );
+		$query->set( 'meta_query', array( self::filter_geo_query( 'map' ) ) );
+		$query->set( 'posts_per_page', 100 );
+		$query->set( 'order', 'ASC' );
 	}
 
 	public static function map_archive_template( $original_template ) {
