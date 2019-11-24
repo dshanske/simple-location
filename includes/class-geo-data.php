@@ -69,7 +69,7 @@ class WP_Geo_Data {
 			return;
 		}
 		$query->set( 'meta_query', array( self::filter_geo_query( 'map' ) ) );
-		$query->set( 'posts_per_page', 100 );
+		$query->set( 'posts_per_page', SLOC_PER_PAGE );
 		$query->set( 'order', 'ASC' );
 	}
 

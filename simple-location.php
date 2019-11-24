@@ -16,6 +16,11 @@ add_action( 'plugins_loaded', array( 'Simple_Location_Plugin', 'init' ) );
 register_activation_hook( __FILE__, array( 'Simple_Location_Plugin', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactivate' ) );
 
+if ( ! defined( 'SLOC_PER_PAGE' ) ) {
+	        define( 'SLOC_PER_PAGE', 100 );
+}
+
+
 
 class Simple_Location_Plugin {
 	public static $version = '4.0.0';
