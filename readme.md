@@ -182,7 +182,7 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
-### 4.0.1 ( 2019-11-xx ) ###
+### 4.0.1 ( 2019-11-24 ) ###
 * Switch from removing pagination to limiting it to 100 per page by default
 * Filter query by location instead of filtering posts from the quantity afterward
 
