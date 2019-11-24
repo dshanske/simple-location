@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
-**Tags:** geolocation, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.0.0  
+**Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
+**Stable tag:** 4.0.1  
 **Requires at least:** 4.9  
 **Tested up to:** 5.3  
 **Requires PHP:** 5.4  
@@ -182,7 +182,11 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
-### 4.0.0 ( 2019-10-xx ) ###
+### 4.0.1 ( 2019-11-xx ) ###
+* Switch from removing pagination to limiting it to 100 per page by default
+* Filter query by location instead of filtering posts from the quantity afterward
+
+### 4.0.0 ( 2019-11-18 ) ###
 * Reimplement timezone handling using updated functions from WordPress 5.3 backported to this plugin
 * Enable UTC and offset override support provided you are using PHP5.5 or above
 * Reenable the option for nominatim despite it being prone to denial but provide the admin email address as requested by service
