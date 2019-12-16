@@ -50,15 +50,15 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 
         <label for="altitude" class="quarter">
             <?php _e( 'Altitude:', 'simple-location' ); ?>
-            <input class="widefat" type="number" name="altitude" id="altitude" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
+            <input class="widefat" type="number" name="altitude" id="altitude" step="0.1" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
         </label>
 
         <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
         <input type="number" name="map_zoom" id="map_zoom" class="widefat" max="20" min="1" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />
 
 	<span id="hide-map"><?php echo $map_return; ?></span>
-        <input type="hidden" name="accuracy" id="accuracy" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
-        <input type="hidden" name="heading" id="heading" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
+        <input type="hidden" name="accuracy" id="accuracy" step="0.01" value="<?php echo ifset( $geodata['accuracy'], '' ); ?>" />
+        <input type="hidden" name="heading" id="heading" step="0.1" value="<?php echo ifset( $geodata['heading'], '' ); ?>" />
         <input type="hidden" name="speed" id="speed" value="<?php echo ifset( $geodata['speed'], '' ); ?>" />
 
 		<p>
@@ -100,7 +100,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
             <label for="humidity">
                 <?php _e( 'Humidity: ', 'simple-location' ); ?>
             </label>
-            <input type="number" name="humidity" id="humidity" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
+            <input type="number" name="humidity" id="humidity" step="0.1" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
         </p>
 
         <p class="field-row">
