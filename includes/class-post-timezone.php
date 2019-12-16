@@ -328,6 +328,10 @@ class Post_Timezone {
 		if ( ! $timezone ) {
 			return null;
 		}
+		// Ensure timezone is a string
+		if ( ! is_string( $timezone ) ) {
+			$timezone = strval( $timezone );
+		}
 		// For now disable with manual offset
 		if ( false !== stripos( $timezone, 'UTC' ) && 'UTC' !== $timezone ) {
 			wp_cache_set( $id, null, $type . '_timezone', DAY_IN_SECONDS );
