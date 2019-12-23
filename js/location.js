@@ -74,7 +74,7 @@ jQuery( document ).ready( function( $ ) {
 				},
 				data: {
 					time: time,
-					address: $( '#address' ).val(),
+					address: $( '#address' ).val()
 
 				},
 				success: function( response ) {

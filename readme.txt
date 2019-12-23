@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.0.1
+Stable tag: 4.0.2
 Requires at least: 4.9
-Tested up to: 5.3
+Tested up to: 5.3.2
 Requires PHP: 5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -29,7 +29,7 @@ While Gutenberg compatible, this is not built for Gutenberg.
 Simple Location stores location and weather data inside posts, attachments, comments, and term meta...optionally other post types. This data respects a public, private or 
 protected setting. Attachment data is automatically extracted from images if location is present, which could be extracted by any third-party downloading the picture
 unless removed. For all other data, it is provided by the user, who decides its ultimate use. Location data is made available through a geolocation provider...the default is currently
-only HTML5 browser geolocation is built in, for which the user must give consent to share). Other information is secured through use of third-party APIs to identify a 
+HTML5 browser geolocation, for which the user must give consent to share). Other information is secured through use of third-party APIs to identify a 
 location, calculate elevation, display maps, and weather conditions.
 
 == Zones == 
@@ -66,7 +66,8 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 
 * Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include Wikimedia, MapBox, Google, Mapquest's Open Static Map, HERE, LocationIQ, and Bing
 * Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ and Geonames.
-* Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
+* Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
+location of a three letter airport code, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
 * Weather Providers retrieve weather data about your location and include OpenWeatherMap, Dark Sky, Weatherstack, WeatherBit and the US National Weather Service. Dark Sky, WeatherBit, and Weatherstack do not support stations.
 
 
@@ -181,6 +182,13 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.0.2 ( 2019-12-22 ) =
+* Extract more information from Compass normalize it and pass it to WordPress
+* Extract flight information from Compass if in the properties and use this to replace the place name with flight info
+* Round weather and location data to 2 or less decimal places
+* Ensure timezone is a string
+* Introduce new location provider which will derive location from a 3 letter airport code because why not
 
 = 4.0.1 ( 2019-11-24 ) =
 * Switch from removing pagination to limiting it to 100 per page by default
