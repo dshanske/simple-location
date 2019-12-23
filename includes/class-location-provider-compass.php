@@ -27,7 +27,7 @@ class Location_Provider_Compass extends Location_Provider {
 		return $array;
 	}
 
-	public function retrieve( $time = null ) {
+	public function retrieve( $time = null, $args = array() ) {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
 			return;

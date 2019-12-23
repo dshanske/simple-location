@@ -73,7 +73,9 @@ jQuery( document ).ready( function( $ ) {
 					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
 				},
 				data: {
-					time: time
+					time: time,
+					address: $( '#address' ).val(),
+
 				},
 				success: function( response ) {
 					if ( window.console ) {
@@ -106,7 +108,7 @@ jQuery( document ).ready( function( $ ) {
 		$( '#heading' ).val( position.coords.heading );
 		$( '#speed' ).val( position.coords.speed );
 		$( '#altitude' ).val( position.coords.altitude );
-		if ( position.coords.hasOwnProperty( 'annotation' ) && ( '' === $( '#address' ).val() ) ) {
+		if ( position.coords.hasOwnProperty( 'annotation' ) ) {
 			$( '#address' ).val( position.coords.annotation );
 			$( '#location-label' ).text( position.coords.annotation );
 		}
@@ -123,9 +125,6 @@ jQuery( document ).ready( function( $ ) {
 			return;
 		}
 
-		if ( '' !== $( '#address' ).val() ) {
-			return;
-		}
 		$.ajax({
 				type: 'GET',
 

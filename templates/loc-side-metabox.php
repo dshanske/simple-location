@@ -64,7 +64,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 		<p>
             <a href="#location" class="lookup-location hide-if-no-js button button-primary"><?php _e( 'Lookup', 'simple-location' ); ?></a>
             <a href="#location" class="clear-location-button button-cancel"><?php _e( 'Clear', 'simple-location' ); ?></a>
-            <a href="#location" class="hide-location hide-if-no-js button-secondary"><?php _e( 'Hide', 'simple-location' ); ?></a>
+            <a href="#location" class="hide-location hide-if-no-js button-secondary"><?php _e( 'Minimize', 'simple-location' ); ?></a>
 
         </p>
 	</div><!-- #location-fields -->

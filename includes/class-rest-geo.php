@@ -176,7 +176,7 @@ class REST_Geo {
 				$geolocation = Loc_Config::geolocation_provider( 'dummy' );
 			}
 			$geolocation->set_user( get_current_user_id() );
-			$geolocation->retrieve( $time );
+			$geolocation->retrieve( $time, $params );
 			return $geolocation->get();
 		} elseif ( 'null' === $geolocation ) {
 			return $geolocation;

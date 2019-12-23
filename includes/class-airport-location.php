@@ -32,7 +32,7 @@ class Airport_Location {
 					'code'           => $code,
 					'latitude'       => $line[4],
 					'longitude'      => $line[5],
-					'elevation'      => ( $line[6] * 3.28 ),
+					'elevation'      => round( $line[6] * 3.28, 2 ),
 					'name'           => $line[3],
 					'type'           => $line[2],
 					'home_link'      => $line[15],

@@ -9,7 +9,7 @@ class Location_Provider_Dummy extends Location_Provider {
 		parent::__construct( $args );
 	}
 
-	public function retrieve( $time = null ) {
+	public function retrieve( $time = null, $args = array() ) {
 		$location = WP_Geo_Data::get_geodata( get_user_by( 'ID', $this->user ) );
 		if ( ! $location ) {
 			return null;

@@ -166,7 +166,8 @@ abstract class Location_Provider extends Sloc_Provider {
 	 * Get Coordinates in H-Geo MF2 Format
 	 *
 	 * @param int $time An ISO8601 time string
+	 * @param array $args Optional arguments to be passed
 	 * @return array|boolean Array with h-geo mf2 false if null
 	 */
-	abstract public function retrieve( $time = null );
+	abstract public function retrieve( $time = null, $args = array() );
 }
