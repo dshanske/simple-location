@@ -6,11 +6,15 @@ abstract class Location_Provider extends Sloc_Provider {
 	protected $user;
 	protected $latitude;
 	protected $longitude;
-	protected $accuracy;
+	protected $accuracy; // AKA Horizontal Accuracy
+	protected $altitude_accuracy; // AKA Vertical Accuracy
 	protected $altitude;
 	protected $heading;
 	protected $speed;
 	protected $time       = null;
+	protected $activity   = null;
+	protected $annotation = ''; // Any annotation
+	protected $other      = array(); // Extra data
 	protected $background = false; // Background determines if this source allows background updates
 
 	/**
@@ -37,16 +41,20 @@ abstract class Location_Provider extends Sloc_Provider {
 	 * @return array|boolean Array with Latitude and Longitude false if null
 	 */
 	public function get() {
-		$return              = array();
-		$return['latitude']  = $this->latitude;
-		$return['longitude'] = $this->longitude;
-		$return['altitude']  = $this->altitude;
-		$return['accuracy']  = $this->accuracy;
-		$return['heading']   = $this->heading;
-		$return['speed']     = $this->speed;
-		$return['time']      = $this->time;
-		$return['zoom']      = self::derive_zoom();
-		$return              = array_filter( $return );
+		$return                      = array();
+		$return['latitude']          = $this->latitude;
+		$return['longitude']         = $this->longitude;
+		$return['altitude']          = $this->altitude;
+		$return['accuracy']          = $this->accuracy;
+		$return['altitude_accuracy'] = $this->altitude_accuracy;
+		$return['heading']           = $this->heading;
+		$return['speed']             = $this->speed;
+		$return['time']              = $this->time;
+		$return['zoom']              = self::derive_zoom();
+		$return['activity']          = $this->activity;
+		$return['annotation']        = $this->annotation;
+		$return['other']             = $this->other;
+		$return                      = array_filter( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
 		}
@@ -58,7 +66,11 @@ abstract class Location_Provider extends Sloc_Provider {
 			return 9;
 		}
 		if ( 0 < $this->accuracy ) {
-			return round( log( 591657550.5 / ( $this->accuracy * 45 ), 2 ) ) + 1;
+			$return = round( log( 591657550.5 / ( $this->accuracy * 45 ), 2 ) ) + 1;
+			if ( $return > 20 ) {
+				return 20;
+			}
+			return $return;
 		}
 		return get_option( 'sloc_zoom' );
 	}

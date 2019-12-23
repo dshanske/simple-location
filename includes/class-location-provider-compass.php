@@ -17,6 +17,16 @@ class Location_Provider_Compass extends Location_Provider {
 	}
 
 
+	// Opposite of array_slice_assoc as this removes only the keys in the $keys array
+	public function array_strip_assoc( $array, $keys ) {
+		foreach ( $keys as $key ) {
+			if ( isset( $array[ $key ] ) ) {
+				unset( $array[ $key ] );
+			}
+		}
+		return $array;
+	}
+
 	public function retrieve( $time = null ) {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
@@ -62,16 +72,98 @@ class Location_Provider_Compass extends Location_Provider {
 		$this->longitude = $coord[0];
 		$this->latitude  = $coord[1];
 		$this->altitude  = isset( $coord[2] ) ? round( $coord[2], 2 ) : null;
-		$properties      = $response['properties'];
+		$properties      = array_filter( $response['properties'] );
 		$this->heading   = array_key_exists( 'heading', $properties ) ? $properties['heading'] : null;
 		$this->speed     = array_key_exists( 'speed', $properties ) ? $properties['speed'] : null;
-		$this->accuracy  = self::ifnot(
+		// Altitude is stored by Overland as a property not in the coordinates
+		if ( is_null( $this->altitude ) && array_key_exists( 'altitude', $properties ) ) {
+			$this->altitude = $properties['altitude'];
+		}
+		$this->accuracy          = self::ifnot(
 			$properties,
 			array(
 				'accuracy',
 				'horizontal_accuracy',
 			)
 		);
+		$this->altitude_accuracy = self::ifnot(
+			$properties,
+			array(
+				'altitude_accuracy',
+				'vertical_accuracy',
+			)
+		);
+		if ( array_key_exists( 'activity', $properties ) ) {
+			if ( is_string( $properties['activity'] ) ) {
+				$this->activity = $properties['activity'];
+			}
+		}
+		if ( is_null( $this->altitude ) && array_key_exists( 'altitude', $properties ) ) {
+			$this->altitude = $properties['altitude'];
+		}
+		// A lot of this is specific to my tasker implementation that tracks airline activity
+		if ( array_key_exists( 'source', $properties ) && is_null( $this->activity ) ) {
+			switch ( $properties['source'] ) {
+				case 'flight':
+					$this->activity = __( 'Flight', 'simple-location' );
+					break;
+				case 'train':
+					$this->activity = __( 'Train', 'simple-location' );
+					break;
+			}
+			if ( array_key_exists( 'airline', $properties ) ) {
+				$properties['airline'] = strtoupper( $properties['airline'] );
+			}
+			if ( array_key_exists( 'number', $properties ) && ! is_numeric( $properties['number'] ) ) {
+				$properties['number'] = strtoupper( $properties['number'] );
+				$prefixes             = array( 'EIN', 'EI', 'JBU', 'WN' );
+				foreach ( $prefixes as $prefix ) {
+					$properties['number'] = str_replace( $prefix, '', $properties['number'] );
+				}
+			}
+			if ( 'flight' === $properties['source'] && empty( $this->annotation ) ) {
+				$annotate = array();
+				if ( array_key_exists( 'airline', $properties ) ) {
+					$annotate[] = $properties['airline'];
+				}
+				if ( array_key_exists( 'number', $properties ) ) {
+					$annotate[] = $properties['number'];
+				}
+				if ( array_key_exists( 'origin', $properties ) && array_key_exists( 'destination', $properties ) ) {
+					$annotate[] = sprintf( '%1$s - %2$s', $properties['origin'], $properties['destination'] );
+				}
+				$this->annotation = implode( ' ', $annotate );
+			}
+		}
+		if ( is_null( $this->speed ) ) {
+			if ( array_key_exists( 'ground_speed_knots', $properties ) ) {
+				// Convert from knots to meters per second
+				$this->speed = round( $properties['ground_speed_knots'] * 0.51444444 );
+			} elseif ( array_key_exists( 'ground_speed', $properties ) ) {
+				// Convert from miles per hour to meters per second
+				$this->speed = round( $properties['ground_speed'] * 0.44704 );
+			}
+		}
+
+		// Store other properties in other
+		$this->other = array_filter(
+			$this->array_strip_assoc(
+				$properties,
+				array(
+					'heading',
+					'speed',
+					'accuracy',
+					'horizontal_accuracy',
+					'altitude',
+					'altitude_accuracy',
+					'vertical_accuracy',
+					'ground_speed',
+					'ground_speed_knots',
+					'timestamp',
+				)
+			)
+		);
+
 	}
 
 
