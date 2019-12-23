@@ -85,7 +85,7 @@ class Geo_Provider_Bing extends Geo_Provider {
 		if ( ! isset( $json['elevations'] ) ) {
 			return null;
 		}
-			return round( $json['elevations'][0], 2);
+			return round( $json['elevations'][0], 2 );
 	}
 
 
