@@ -114,23 +114,29 @@ class Location_Provider_Compass extends Location_Provider {
 			if ( array_key_exists( 'airline', $properties ) ) {
 				$properties['airline'] = strtoupper( $properties['airline'] );
 			}
-			if ( array_key_exists( 'number', $properties ) && ! is_numeric( $properties['number'] ) ) {
-				$properties['number'] = strtoupper( $properties['number'] );
-				$prefixes             = array( 'EIN', 'EI', 'JBU', 'WN' );
-				foreach ( $prefixes as $prefix ) {
-					$properties['number'] = str_replace( $prefix, '', $properties['number'] );
-				}
-			}
 			if ( 'flight' === $properties['source'] && empty( $this->annotation ) ) {
 				$annotate = array();
 				if ( array_key_exists( 'airline', $properties ) ) {
 					$annotate[] = $properties['airline'];
 				}
 				if ( array_key_exists( 'number', $properties ) ) {
-					$annotate[] = $properties['number'];
+					$properties['flight_number'] = $properties['number'];
+					unset( $properties['number'] );
+				}
+				if ( array_key_exists( 'flight_number', $properties ) ) {
+					if ( ! is_numeric( $properties['flight_number'] ) ) {
+						$properties['flight_number'] = strtoupper( $properties['flight_number'] );
+						$prefixes                    = array( 'EIN', 'EI', 'JBU', 'WN' );
+						foreach ( $prefixes as $prefix ) {
+							$properties['flight_number'] = str_replace( $prefix, '', $properties['flight_number'] );
+						}
+					}
+					$annotate[] = $properties['flight_number'];
 				}
 				if ( array_key_exists( 'origin', $properties ) && array_key_exists( 'destination', $properties ) ) {
-					$annotate[] = sprintf( '%1$s - %2$s', $properties['origin'], $properties['destination'] );
+					$origin      = Airport_Location::get( $properties['origin'] );
+					$destination = Airport_Location::get( $properties['destination'] );
+					$annotate[]  = sprintf( '%1$s - %2$s', $origin['name'], $destination['name'] );
 				}
 				$this->annotation = implode( ' ', $annotate );
 			}
