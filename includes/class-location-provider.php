@@ -138,6 +138,7 @@ abstract class Location_Provider extends Sloc_Provider {
 		$properties['altitude']  = $this->altitude;
 		$properties['heading']   = $this->heading;
 		$properties['speed']     = $this->speed;
+		$properties['name']      = $this->annotation; // If there is an annotation set that as the name
 		$properties              = array_filter( $properties );
 		if ( empty( $properties ) ) {
 			return false;
