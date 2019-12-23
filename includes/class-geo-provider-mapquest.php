@@ -80,7 +80,7 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 		if ( ! isset( $json['elevationProfile'] ) ) {
 			return null;
 		}
-			return $json['elevationProfile'][0]['height'];
+			return round( $json['elevationProfile'][0]['height'], 2 );
 	}
 
 

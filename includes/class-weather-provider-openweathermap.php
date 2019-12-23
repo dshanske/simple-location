@@ -107,17 +107,17 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				$return['raw'] = $response;
 			}
 			if ( isset( $response['main'] ) ) {
-				$return['temperature'] = $response['main']['temp'];
-				$return['humidity']    = $response['main']['humidity'];
-				$return['pressure']    = $response['main']['pressure'];
+				$return['temperature'] = round( $response['main']['temp'], 1 );
+				$return['humidity']    = round( $response['main']['humidity'], 1 );
+				$return['pressure']    = round( $response['main']['pressure'], 1 );
 			}
 			if ( isset( $response['clouds'] ) ) {
 				$return['cloudiness'] = $response['clouds']['all'];
 			}
 			if ( isset( $response['wind'] ) ) {
 				$return['wind']           = array();
-				$return['wind']['speed']  = $response['wind']['speed'];
-				$return['wind']['degree'] = ifset( $response['wind']['deg'] );
+				$return['wind']['speed']  = round( $response['wind']['speed'] );
+				$return['wind']['degree'] = ifset_round( $response['wind']['deg'], 1 );
 			}
 			if ( isset( $response['weather'] ) ) {
 				if ( wp_is_numeric_array( $response['weather'] ) ) {
@@ -127,13 +127,13 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				$return['icon']    = $this->icon_map( (int) $response['weather']['id'] );
 			}
 			if ( isset( $response['rain'] ) ) {
-				$return['rain'] = $response['rain']['1h'];
+				$return['rain'] = round( $response['rain']['1h'], 2 );
 			}
 			if ( isset( $response['snow'] ) ) {
-				$return['snow'] = $response['snow']['1h'];
+				$return['snow'] = round( $response['snow']['1h'], 2 );
 			}
 			if ( isset( $response['visibility'] ) ) {
-				$return['visibility'] = $response['visibility'];
+				$return['visibility'] = round( $response['visibility'], 1 );
 			}
 
 			$calc              = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );
@@ -182,18 +182,18 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				$response = $response[0];
 			}
 			if ( isset( $response['temp'] ) ) {
-				$return['temperature'] = $response['temp']['average'];
+				$return['temperature'] = round( $response['temp']['average'], 1 );
 			}
 			if ( isset( $response['humidity'] ) ) {
-				$return['humidity'] = $response['humidity']['average'];
+				$return['humidity'] = round( $response['humidity']['average'], 1 );
 			}
 			if ( isset( $response['wind'] ) ) {
 				$return['wind']           = array();
-				$return['wind']['speed']  = $response['wind']['speed'];
-				$return['wind']['degree'] = $response['wind']['deg'];
+				$return['wind']['speed']  = round( $response['wind']['speed'], 1 );
+				$return['wind']['degree'] = round( $response['wind']['deg'], 1 );
 			}
 			if ( isset( $response['pressure'] ) ) {
-				$return['pressure'] = $response['pressure']['average'];
+				$return['pressure'] = round( $response['pressure']['average'], 1 );
 			}
 			if ( $this->cache_key ) {
 				set_transient( $this->cache_key . '_' . md5( $this->station_id ), $return, $this->cache_time );

@@ -104,9 +104,9 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 				return $return;
 			}
 			$response              = $response['current'];
-			$return['temperature'] = ifset( $response['temperature'] );
+			$return['temperature'] = ifset_round( $response['temperature'], 2 );
 			if ( isset( $response['humidity'] ) ) {
-				$return['humidity'] = $response['humidity'];
+				$return['humidity'] = round( $response['humidity'], 2 );
 			}
 			$return['pressure'] = ifset( $response['pressure'] );
 			if ( isset( $response['cloudcover'] ) ) {
@@ -114,11 +114,11 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			}
 
 			$return['wind']           = array();
-			$return['wind']['speed']  = ifset( $response['wind_speed'] );
-			$return['wind']['degree'] = ifset( $response['wind_degree'] );
+			$return['wind']['speed']  = ifset_round( $response['wind_speed'] );
+			$return['wind']['degree'] = ifset_round( $response['wind_degree'] );
 			$return['wind']           = array_filter( $return['wind'] );
-			$return['rain']           = ifset( $response['precip'] );
-			$return['visibility']     = ifset( $response['visibility'] );
+			$return['rain']           = ifset_round( $response['precip'], 2 );
+			$return['visibility']     = ifset_round( $response['visibility'], 2 );
 			$summary                  = ifset( $response['weather_descriptions'] );
 			$summary                  = is_array( $summary ) ? implode( ' ', $summary ) : '';
 			$return['summary']        = $summary;

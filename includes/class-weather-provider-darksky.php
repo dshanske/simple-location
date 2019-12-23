@@ -103,24 +103,24 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 				return $return;
 			}
 			$current               = ifset( $response['currently'] );
-			$return['temperature'] = ifset( $current['temperature'] );
+			$return['temperature'] = ifset_round( $current['temperature'], 1 );
 			if ( isset( $current['humidity'] ) ) {
-				$return['humidity'] = $current['humidity'] * 100;
+				$return['humidity'] = round( $current['humidity'] * 100, 1 );
 			}
-			$return['pressure'] = ifset( $current['pressure'] );
+			$return['pressure'] = ifset_round( $current['pressure'], 1 );
 			if ( isset( $current['cloudCover'] ) ) {
-				$return['cloudiness'] = $current['cloudCover'] * 100;
+				$return['cloudiness'] = round( $current['cloudCover'] * 100, 1 );
 			}
 			$return['wind']           = array();
-			$return['wind']['speed']  = ifset( $current['windSpeed'] );
-			$return['wind']['degree'] = ifset( $current['windBearing'] );
+			$return['wind']['speed']  = ifset_round( $current['windSpeed'] );
+			$return['wind']['degree'] = ifset_round( $current['windBearing'], 1 );
 			$return['wind']           = array_filter( $return['wind'] );
-			$return['rain']           = ifset( $current['precipIntensity'] );
-			$return['snow']           = ifset( $current['precipAccumulation'] );
+			$return['rain']           = ifset_round( $current['precipIntensity'], 2 );
+			$return['snow']           = ifset_round( $current['precipAccumulation'], 2 );
 			$return['summary']        = ifset( $current['summary'] );
 			$return['icon']           = $this->icon_map( $current['icon'] );
 			if ( isset( $current['visibility'] ) ) {
-				$return['visibility'] = $current['visibility'] * 1000;
+				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
 			$calc              = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );
 			$return['sunrise'] = $calc->get_iso8601( null );

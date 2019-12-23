@@ -80,7 +80,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( ! isset( $json['results'] ) ) {
 			return null;
 		}
-		return round( $json['results'][0]['elevation'] );
+		return round( $json['results'][0]['elevation'], 2 );
 	}
 
 	public function reverse_lookup() {

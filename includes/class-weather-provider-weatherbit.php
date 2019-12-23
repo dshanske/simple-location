@@ -105,20 +105,20 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 				return $return;
 			}
 			$response              = $response['data'][0];
-			$return['temperature'] = ifset( $response['temp'] );
-			$return['humidity']    = ifset( $response['rh'] );
-			$return['pressure']    = ifset( $response['pres'] );
-			$return['cloudiness']  = ifset( $response['clouds'] );
+			$return['temperature'] = ifset_round( $response['temp'], 1 );
+			$return['humidity']    = ifset_round( $response['rh'], 1 );
+			$return['pressure']    = ifset_round( $response['pres'], 2 );
+			$return['cloudiness']  = ifset_round( $response['clouds'] );
 
 			$return['wind']           = array();
-			$return['wind']['speed']  = ifset( $response['wind_spd'] );
-			$return['wind']['degree'] = ifset( $response['wind_dir'] );
+			$return['wind']['speed']  = ifset_round( $response['wind_spd'] );
+			$return['wind']['degree'] = ifset_round( $response['wind_dir'], 1 );
 			$return['wind']           = array_filter( $return['wind'] );
-			$return['rain']           = ifset( $response['precip'] );
-			$return['visibility']     = ifset( $response['vis'] );
-			$return['airquality']     = ifset( $response['aqi'] );
-			$return['uv']             = ifset( $response['uv'] );
-			$return['snow']           = ifset( $response['snow'] );
+			$return['rain']           = ifset_round( $response['precip'], 2 );
+			$return['visibility']     = ifset_round( $response['vis'], 2 );
+			$return['airquality']     = ifset_round( $response['aqi'], 2 );
+			$return['uv']             = ifset_round( $response['uv'] );
+			$return['snow']           = ifset_round( $response['snow'], 2 );
 			$return['summary']        = ifset( $response['weather']['description'] );
 			$return['icon']           = $this->icon_map( $response['weather']['code'], ifset( $response['pod'] ) === 'd' );
 			$calc                     = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );

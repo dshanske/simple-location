@@ -76,7 +76,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		}
 		$json = json_decode( $response['body'], true );
 		if ( array_key_exists( 'srtm1', $json ) ) {
-			return $json['srtm1'];
+			return round( $json['srtm1'], 2 );
 		}
 		return null;
 	}

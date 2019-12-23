@@ -171,3 +171,13 @@ if ( ! function_exists( 'ifset' ) ) {
 	}
 }
 
+if ( ! function_exists( 'ifset_round' ) ) {
+	function ifset_round( &$var, $precision = 0, $default = false ) {
+		$return = ifset( $var, $default );
+		if ( is_float( $return ) ) {
+			return round( $return, $precision );
+		}
+		return $return;
+	}
+}
+
