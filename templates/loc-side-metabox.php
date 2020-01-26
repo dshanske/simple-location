@@ -50,7 +50,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 
         <label for="altitude" class="quarter">
             <?php _e( 'Altitude:', 'simple-location' ); ?>
-            <input class="widefat" type="number" name="altitude" id="altitude" step="0.1" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
+            <input class="widefat" type="number" name="altitude" id="altitude" step="0.01" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
         </label>
 
         <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
@@ -158,14 +158,14 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
             <label for="rain">
                 <?php _e( 'Rain', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="number" name="rain" id="rain" value="<?php echo ifset( $weather['rain'], '' ); ?>" />
+            <input class="widefat" type="number" name="rain" step="0.01" id="rain" value="<?php echo ifset( $weather['rain'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="snow">
                 <?php _e( 'Snow', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="number" name="snow" id="snow" value="<?php echo ifset( $weather['snow'], '' ); ?>" />
+            <input class="widefat" type="number" name="snow" step="0.01" id="snow" value="<?php echo ifset( $weather['snow'], '' ); ?>" />
         </p>
 
         <p>
