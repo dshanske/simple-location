@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.0.2  
+**Stable tag:** 4.0.3  
 **Requires at least:** 4.9  
 **Tested up to:** 5.3.2  
 **Requires PHP:** 5.4  
