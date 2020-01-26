@@ -183,6 +183,11 @@ will now be required to show maps for services that require API keys.
 
 == Changelog ==
 
+= 4.0.3 ( 2020-01-26 ) =
+* Minor bug fixes
+* Fix precision of weather fields
+* Fix incorrect function call
+
 = 4.0.2 ( 2019-12-22 ) =
 * Extract more information from Compass normalize it and pass it to WordPress
 * Extract flight information from Compass if in the properties and use this to replace the place name with flight info

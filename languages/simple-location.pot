@@ -1,105 +1,105 @@
-# Copyright (C) 2019 David Shanske
+# Copyright (C) 2020 David Shanske
 # This file is distributed under the same license as the Simple Location package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.0.2\n"
+"Project-Id-Version: Simple Location 4.0.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
-"POT-Creation-Date: 2019-12-23 03:25:23+00:00\n"
+"POT-Creation-Date: 2020-01-26 07:29:38+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2019-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2020-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: grunt-wp-i18n 0.5.4\n"
 
-#: includes/class-geo-data.php:128
+#: includes/class-geo-data.php:127
 msgid "Public Location"
 msgstr ""
 
-#: includes/class-geo-data.php:129
+#: includes/class-geo-data.php:128
 msgid "Private Location"
 msgstr ""
 
-#: includes/class-geo-data.php:147 includes/class-geo-data.php:389
-#: includes/class-geo-data.php:843 includes/class-loc-config.php:204
+#: includes/class-geo-data.php:146 includes/class-geo-data.php:388
+#: includes/class-geo-data.php:842 includes/class-loc-config.php:204
 #: includes/class-loc-metabox.php:85 includes/class-loc-metabox.php:97
 #: templates/loc-side-metabox.php:33
 msgid "Location"
 msgstr ""
 
-#: includes/class-geo-data.php:158 includes/class-sloc-weather-widget.php:135
+#: includes/class-geo-data.php:157 includes/class-sloc-weather-widget.php:135
 #: includes/class-weather-provider.php:289 templates/loc-side-metabox.php:34
 #: templates/loc-side-metabox.php:88
 msgid "None"
 msgstr ""
 
+#: includes/class-geo-data.php:173 includes/class-geo-data.php:250
+#: includes/class-geo-data.php:270
+msgid "Private"
+msgstr ""
+
 #: includes/class-geo-data.php:174 includes/class-geo-data.php:251
 #: includes/class-geo-data.php:271
-msgid "Private"
+msgid "Public"
 msgstr ""
 
 #: includes/class-geo-data.php:175 includes/class-geo-data.php:252
 #: includes/class-geo-data.php:272
-msgid "Public"
-msgstr ""
-
-#: includes/class-geo-data.php:176 includes/class-geo-data.php:253
-#: includes/class-geo-data.php:273
 msgid "Protected"
 msgstr ""
 
-#: includes/class-geo-data.php:249
+#: includes/class-geo-data.php:248
 msgid "All Posts"
 msgstr ""
 
-#: includes/class-geo-data.php:250 includes/class-geo-data.php:270
+#: includes/class-geo-data.php:249 includes/class-geo-data.php:269
 msgid "With Location"
 msgstr ""
 
-#: includes/class-geo-data.php:269
+#: includes/class-geo-data.php:268
 msgid "All Comments"
 msgstr ""
 
-#: includes/class-geo-data.php:372
+#: includes/class-geo-data.php:371
 #. translators: Publish box date string. 1: Date, 2: Time. See
 #. https:secure.php.net/date
 msgid "%1$s at %2$s"
 msgstr ""
 
-#: includes/class-geo-data.php:380
+#: includes/class-geo-data.php:379
 #. translators: Attachment information. %s: Date based on the timestamp in the
 #. attachment file.
 msgid "Created on: %s"
 msgstr ""
 
-#: includes/class-geo-data.php:397
+#: includes/class-geo-data.php:396
 msgid "Geo Coordinates"
 msgstr ""
 
-#: includes/class-geo-data.php:407
+#: includes/class-geo-data.php:406
 msgid "Creation Time"
 msgstr ""
 
-#: includes/class-geo-data.php:607
+#: includes/class-geo-data.php:606
 msgid "Invalid Input"
 msgstr ""
 
-#: includes/class-geo-data.php:821 includes/class-location-zones.php:101
+#: includes/class-geo-data.php:820 includes/class-location-zones.php:101
 #: templates/loc-user-metabox.php:20 templates/loc-user-metabox.php:24
 msgid "Latitude"
 msgstr ""
 
-#: includes/class-geo-data.php:832 includes/class-location-zones.php:102
+#: includes/class-geo-data.php:831 includes/class-location-zones.php:102
 #: templates/loc-user-metabox.php:27 templates/loc-user-metabox.php:31
 msgid "Longitude"
 msgstr ""
 
-#: includes/class-geo-data.php:854
+#: includes/class-geo-data.php:853
 msgid "Location Visibility"
 msgstr ""
 
-#: includes/class-geo-data.php:970
+#: includes/class-geo-data.php:969
 msgid "m"
 msgstr ""
 
@@ -1610,13 +1610,13 @@ msgstr ""
 msgid "https://david.shanske.com"
 msgstr ""
 
-#: includes/class-geo-data.php:374
+#: includes/class-geo-data.php:373
 #. translators: Publish box date format, see https:secure.php.net/date
 msgctxt "publish box date format"
 msgid "M j, Y"
 msgstr ""
 
-#: includes/class-geo-data.php:376
+#: includes/class-geo-data.php:375
 #. translators: Publish box time format, see https:secure.php.net/date
 msgctxt "publish box time format"
 msgid "H:i T"
