@@ -446,7 +446,7 @@ class WP_Geo_Data {
 				$strip_timezone = $datetime->format( 'Y-m-d\TH:i:s' );
 				$datetime       = new DateTime( $strip_timezone . $timezone->offset );
 			} else {
-				$datetime->setTimezone( wp_get_timezone() );
+				$datetime->setTimezone( wp_timezone() );
 			}
 			// Fix the timestamp to the correct time
 			$meta['image_meta']['created_timestamp'] = $datetime->getTimeStamp();
