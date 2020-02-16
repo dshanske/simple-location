@@ -169,11 +169,11 @@ class WP_Geo_Data {
 
 
 	public static function geo_public() {
-			return array(
-				'private'   => esc_html__( 'Private', 'simple-location' ),
-				'public'    => esc_html__( 'Public', 'simple-location' ),
-				'protected' => esc_html__( 'Protected', 'simple-location' ),
-			);
+		return array(
+			'private'   => esc_html__( 'Private', 'simple-location' ),
+			'public'    => esc_html__( 'Public', 'simple-location' ),
+			'protected' => esc_html__( 'Protected', 'simple-location' ),
+		);
 	}
 
 	public static function set_visibility( $type, $id, $status ) {
@@ -224,15 +224,15 @@ class WP_Geo_Data {
 	}
 
 	public static function geo_public_select( $public, $echo = false ) {
-			$choices = self::geo_public();
-			$return  = '';
+		$choices = self::geo_public();
+		$return  = '';
 		foreach ( $choices as $value => $text ) {
-				$return .= sprintf( '<option value=%1s %2s>%3s</option>', esc_attr( $value ), selected( $public, $value, false ), $text );
+			$return .= sprintf( '<option value=%1s %2s>%3s</option>', esc_attr( $value ), selected( $public, $value, false ), $text );
 		}
 		if ( ! $echo ) {
-				return $return;
+			return $return;
 		}
-			echo $return; // phpcs:ignore
+		echo $return; // phpcs:ignore
 
 	}
 
@@ -240,43 +240,43 @@ class WP_Geo_Data {
 		if ( 'post' !== $post_type ) {
 			return;
 		}
-			$selected = 'none';
+		$selected = 'none';
 		if ( isset( $_REQUEST['geo'] ) ) {
 			$selected = $_REQUEST['geo'];
 		}
-			$list = array(
-				'none'      => esc_html__( 'All Posts', 'simple-location' ),
-				'all'       => esc_html__( 'With Location', 'simple-location' ),
-				'private'   => esc_html__( 'Private', 'simple-location' ),
-				'public'    => esc_html__( 'Public', 'simple-location' ),
-				'protected' => esc_html__( 'Protected', 'simple-location' ),
-			);
-			echo '<select id="geo" name="geo">';
-			foreach ( $list as $key => $value ) {
-				$select = ( $key === $selected ) ? ' selected="selected"' : '';
-				echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
-			}
-			echo '</select>';
+		$list = array(
+			'none'      => esc_html__( 'All Posts', 'simple-location' ),
+			'all'       => esc_html__( 'With Location', 'simple-location' ),
+			'private'   => esc_html__( 'Private', 'simple-location' ),
+			'public'    => esc_html__( 'Public', 'simple-location' ),
+			'protected' => esc_html__( 'Protected', 'simple-location' ),
+		);
+		echo '<select id="geo" name="geo">';
+		foreach ( $list as $key => $value ) {
+			$select = ( $key === $selected ) ? ' selected="selected"' : '';
+			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
+		}
+		echo '</select>';
 	}
 
 	public static function geo_comments_dropdown() {
-			$selected = 'none';
+		$selected = 'none';
 		if ( isset( $_REQUEST['geo'] ) ) {
 			$selected = $_REQUEST['geo'];
 		}
-			$list = array(
-				'none'      => esc_html__( 'All Comments', 'simple-location' ),
-				'all'       => esc_html__( 'With Location', 'simple-location' ),
-				'private'   => esc_html__( 'Private', 'simple-location' ),
-				'public'    => esc_html__( 'Public', 'simple-location' ),
-				'protected' => esc_html__( 'Protected', 'simple-location' ),
-			);
-			echo '<select id="geo" name="geo">';
-			foreach ( $list as $key => $value ) {
-				$select = ( $key === $selected ) ? ' selected="selected"' : '';
-				echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
-			}
-			echo '</select>';
+		$list = array(
+			'none'      => esc_html__( 'All Comments', 'simple-location' ),
+			'all'       => esc_html__( 'With Location', 'simple-location' ),
+			'private'   => esc_html__( 'Private', 'simple-location' ),
+			'public'    => esc_html__( 'Public', 'simple-location' ),
+			'protected' => esc_html__( 'Protected', 'simple-location' ),
+		);
+		echo '<select id="geo" name="geo">';
+		foreach ( $list as $key => $value ) {
+			$select = ( $key === $selected ) ? ' selected="selected"' : '';
+			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
+		}
+		echo '</select>';
 	}
 
 	public static function georss_namespace() {
@@ -367,7 +367,7 @@ class WP_Geo_Data {
 		$date      = new DateTime( $published );
 		if ( $published ) {
 			$created_on = sprintf(
-				/* translators: Publish box date string. 1: Date, 2: Time. See https://secure.php.net/date */
+			/* translators: Publish box date string. 1: Date, 2: Time. See https://secure.php.net/date */
 				__( '%1$s at %2$s', 'simple-location' ),
 				/* translators: Publish box date format, see https://secure.php.net/date */
 				wp_date( _x( 'M j, Y', 'publish box date format', 'simple-location' ), $date->getTimestamp(), $date->getTimeZone() ),
@@ -376,7 +376,7 @@ class WP_Geo_Data {
 			);
 			echo '<div class="misc-pub-section curtime misc-pub-pubtime">';
 			/* translators: Attachment information. %s: Date based on the timestamp in the attachment file. */
-			printf(  _( 'Created on: %s', 'simple-location' ), '<b>' . $created_on . '</b>' ); // phpcs:ignore
+			printf(  __( 'Created on: %s', 'simple-location' ), '<b>' . $created_on . '</b>' ); // phpcs:ignore
 			echo '</div>';
 		}
 	}
@@ -421,6 +421,9 @@ class WP_Geo_Data {
 		if ( isset( $data['location'] ) ) {
 			update_post_meta( $post_id, 'geo_latitude', $data['location']['latitude'] );
 			update_post_meta( $post_id, 'geo_longitude', $data['location']['longitude'] );
+			if ( isset( $data['location']['altitude'] ) ) {
+				update_post_meta( $post_id, 'geo_altitude', $data['location']['altitude'] );
+			}
 			$reverse = Loc_Config::geo_provider();
 			$reverse->set( $data['location']['latitude'], $data['location']['longitude'] );
 			$reverse_adr = $reverse->reverse_lookup();
@@ -437,19 +440,8 @@ class WP_Geo_Data {
 				self::set_visibility( 'post', $post_id, 'public' );
 			}
 		}
-		if ( isset( $data['created_timestamp'] ) && 0 !== (int) $data['created_timestamp'] ) {
-			$datetime = date_create_from_format( 'U', $data['created_timestamp'], new DateTimeZone( 'GMT' ) );
-			if ( isset( $data['location'] ) ) {
-				// As EXIF data does not have a timezone offset try to adjust the time into the correct timezone based on the location of the photo
-				$timezone       = Loc_Timezone::timezone_for_location( $data['location']['latitude'], $data['location']['longitude'] );
-				$strip_timezone = $datetime->format( 'Y-m-d\TH:i:s' );
-				$datetime       = new DateTime( $strip_timezone . $timezone->offset );
-			} else {
-				$datetime->setTimezone( wp_timezone() );
-			}
-			// Fix the timestamp to the correct time
-			$meta['image_meta']['created_timestamp'] = $datetime->getTimeStamp();
-			update_post_meta( $post_id, 'mf2_published', $datetime->format( DATE_W3C ) );
+		if ( isset( $data['created'] ) ) {
+			update_post_meta( $post_id, 'mf2_published', $data['created'] );
 		}
 		return $meta;
 	}
@@ -471,13 +463,65 @@ class WP_Geo_Data {
 
 	public static function exif_data( $meta, $file, $image_type, $iptc = null, $exif = null ) {
 		if ( ! is_array( $exif ) && is_callable( 'exif_read_data' ) && in_array( $image_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ), true ) ) {
-				$exif = @exif_read_data( $file );
+			$exif = @exif_read_data( $file );
 		}
-		if ( ! empty( $exif['GPSLongitude'] ) && count( $exif['GPSLongitude'] ) === 3 && ! empty( $exif['GPSLongitudeRef'] ) ) {
-			$meta['location']['longitude'] = round( ( 'W' === $exif['GPSLongitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLongitude'] ), 7 );
+		// If there is no Exif Version set return
+		if ( ! $exif['ExifVersion'] ) {
+			return $meta;
 		}
-		if ( ! empty( $exif['GPSLatitude'] ) && count( $exif['GPSLatitude'] ) === 3 && ! empty( $exif['GPSLatitudeRef'] ) ) {
+		$version             = (int) $exif['ExifVersion'];
+		$meta['ExifVersion'] = sanitize_text_field( $exif['ExifVersion'] );
+		if ( $version < 232 ) {
+			if ( ! empty( $exif['GPSLongitude'] ) && count( $exif['GPSLongitude'] ) === 3 && ! empty( $exif['GPSLongitudeRef'] ) ) {
+				$meta['location']['longitude'] = round( ( 'W' === $exif['GPSLongitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLongitude'] ), 7 );
+			}
+			if ( ! empty( $exif['GPSLatitude'] ) && count( $exif['GPSLatitude'] ) === 3 && ! empty( $exif['GPSLatitudeRef'] ) ) {
 				$meta['location']['latitude'] = round( ( 'S' === $exif['GPSLatitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLatitude'] ), 7 );
+			}
+			$datetime = null;
+			if ( 231 === $version ) {
+				foreach (
+					array(
+						'DateTimeOriginal'  => 'UndefinedTag:0x9011',
+						'DateTimeDigitized' => 'UndefinedTag:0x9012',
+					)
+					as $time => $offset
+				) {
+					if ( ! empty( $exif[ $time ] ) && ! empty( $exif[ $offset ] ) ) {
+						$datetime = wp_exif_datetime( $exif[ $time ], $exif[ $offset ] );
+						break;
+					}
+				}
+			} else {
+				if ( ! empty( $meta['location'] ) ) {
+					// Try to get the right timezone from the location
+					$timezone = Loc_Timezone::timezone_for_location( $meta['location']['latitude'], $meta['location']['longitude'] );
+				} else {
+					$timezone = wp_timezone();
+				}
+				if ( ! empty( $exif['DateTimeOriginal'] ) ) {
+					$datetime = wp_exif_datetime( $exif['DateTimeOriginal'], $timezone );
+				} elseif ( ! empty( $exif['DateTimeDigitized'] ) ) {
+					$datetime = wp_exif_datetime( $exif['DateTimeDigitized'], $timezone );
+				}
+			}
+			if ( $datetime ) {
+				$meta['created_timestamp'] = $datetime->getTimestamp();
+				$meta['created']           = $datetime->format( DATE_W3C );
+			}
+		} elseif ( 232 === $version ) {
+			if ( ! empty( $exif['DateTimeOriginal'] ) ) {
+				$datetime = new DateTime( $exif['DateTimeOriginal'] );
+			} elseif ( ! empty( $exif['DateTimeDigitized'] ) ) {
+				$datetime = new DateTime( $exif['DateTimeDigitized'] );
+			}
+			if ( $datetime ) {
+				$meta['created']           = $datetime->getTimestamp();
+				$meta['created_timestamp'] = $datetime->format( DATE_W3C );
+			}
+		}
+		if ( ! empty( $exif['GPSAltitude'] ) ) {
+			$meta['location']['altitude'] = wp_exif_frac2dec( $exif['GPSAltitude'] ) * ( 1 === $exif['GPSAltitudeRef'] ? -1 : 1 );
 		}
 		return $meta;
 	}
@@ -645,7 +689,6 @@ class WP_Geo_Data {
 		return ! is_null( $data );
 	}
 
-
 	public static function get_geodata( $object = null, $full = true ) {
 		if ( ! $object ) {
 			$object = get_post();
@@ -809,7 +852,6 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_address', $args );
 	}
 
-
 	public static function rest_location() {
 		register_rest_field(
 			array( 'post', 'comment', 'user', 'term' ),
@@ -932,20 +974,40 @@ class WP_Geo_Data {
 /**
  * Convert the EXIF geographical longitude and latitude from degrees, minutes
  * and seconds to degrees format.
- * This is part of a Trac Ticket - https://core.trac.wordpress.org/ticket/9257
+ * This is based on a Trac Ticket - https://core.trac.wordpress.org/ticket/9257
  * closed due privacy concerns. Updated to match location storage for this just in case
  * and to use their function over my original one.
  *
  *
- * @param string $coordinate The coordinate to convert to degrees format.
- * @return float Coordinate in degrees format.
+ * @param array|string $coordinate The coordinate to convert to degrees format.
+ * @return float|false Coordinate in degrees format or false if failure
  */
 if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
 	function wp_exif_gps_convert( $coordinate ) {
+		if ( is_array( $coordinate ) ) {
 			@list( $degree, $minute, $second ) = $coordinate;
 			$float                             = wp_exif_frac2dec( $degree ) + ( wp_exif_frac2dec( $minute ) / 60 ) + ( wp_exif_frac2dec( $second ) / 3600 );
 
 			return ( ( is_float( $float ) || ( is_int( $float ) && $degree === $float ) ) && ( abs( $float ) <= 180 ) ) ? $float : 999;
+		}
+		return false;
+	}
+}
+
+
+/**
+ * Convert the exif date format to a datetime object
+ *
+ *
+ * @param string $str
+ * @param string $timezone A timezone or offset string. Default is the WordPress timezone
+ * @return DateTime
+ */
+if ( ! function_exists( 'wp_exif_datetime' ) ) {
+	function wp_exif_datetime( $str, $timezone = null ) {
+		$timezone = ( $timezone ) ? new DateTimeZone( $timezone ) : wp_timezone();
+		$datetime = new DateTime( $str, $timezone );
+		return $datetime;
 	}
 }
 

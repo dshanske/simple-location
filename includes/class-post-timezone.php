@@ -14,6 +14,19 @@ class Post_Timezone {
 		add_action( 'simple_location_sidebox', array( $cls, 'post_submitbox' ) );
 		add_action( 'save_post', array( $cls, 'postbox_save_post_meta' ) );
 		add_action( 'after_micropub', array( $cls, 'after_micropub' ), 10, 2 );
+		add_filter( 'rest_prepare_post', array( $cls, 'rest_prepare_post' ), 10, 3 );
+	}
+
+	public static function rest_prepare_post( $response, $post, $request ) {
+		$data                 = $response->get_data();
+		$data['date']         = self::get_the_date( $data['date_gmt'], DATE_W3C, $post );
+		$data['modified']     = self::get_the_modified_date( $data['date_gmt'], DATE_W3C, $post );
+		$date_gmt             = new DateTime( $data['date_gmt'], new DatetimeZone( 'GMT' ) );
+		$data['date_gmt']     = $date_gmt->format( DATE_W3C );
+		$modified_gmt         = new DateTime( $data['modified_gmt'], new DatetimeZone( 'GMT' ) );
+		$data['modified_gmt'] = $modified_gmt->format( DATE_W3C );
+		$response->set_data( $data );
+		return $response;
 	}
 
 	public static function after_micropub( $input, $args ) {
