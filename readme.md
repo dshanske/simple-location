@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.0.3  
+**Stable tag:** 4.0.4  
 **Requires at least:** 4.9  
 **Tested up to:** 5.3.2  
 **Requires PHP:** 5.4  
@@ -182,6 +182,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.0.4 ( 2020-02-17 ) ###
+* Update timezone handling in attachments
+* Add timezone offsets to REST API
 
 ### 4.0.3 ( 2020-01-26 ) ###
 * Minor bug fixes
