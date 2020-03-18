@@ -417,31 +417,38 @@ class WP_Geo_Data {
 			return $meta;
 		}
 
-		$data = $meta['image_meta'];
+		$data   = $meta['image_meta'];
+		$update = array();
+		if ( isset( $data['created'] ) ) {
+			$update['mf2_published'] = $data['created'];
+		}
 		if ( isset( $data['location'] ) ) {
-			update_post_meta( $post_id, 'geo_latitude', $data['location']['latitude'] );
-			update_post_meta( $post_id, 'geo_longitude', $data['location']['longitude'] );
-			if ( isset( $data['location']['altitude'] ) ) {
-				update_post_meta( $post_id, 'geo_altitude', $data['location']['altitude'] );
+			foreach ( array( 'latitude', 'longitude', 'altitude' ) as $prop ) {
+				if ( array_key_exists( $prop, $data['location'] ) ) {
+					$update[ 'geo_' . $prop ] = $data['location'][ $prop ];
+				}
 			}
 			$reverse = Loc_Config::geo_provider();
 			$reverse->set( $data['location']['latitude'], $data['location']['longitude'] );
 			$reverse_adr = $reverse->reverse_lookup();
 			if ( isset( $reverse_adr['display-name'] ) ) {
-				update_post_meta( $post_id, 'geo_address', $reverse_adr['display-name'] );
+				$update['geo_address'] = $reverse_adr['display-name'];
 			}
-			update_post_meta( $post_id, 'geo_altitude', $reverse->elevation() );
+			if ( ! array_key_exists( 'geo_altitude', $update ) ) {
+				$update['geo_altitude'] = $reverse->elevation();
+			}
 			$zone = Location_Zones::in_zone( $data['location']['latitude'], $data['location']['longitude'] );
 			if ( ! empty( $zone ) ) {
-				update_post_meta( $post_id, 'geo_address', $zone );
+				$update['geo_address'] = $zone;
 				self::set_visibility( 'post', $post_id, 'protected' );
-				update_post_meta( $post_id, 'geo_zone', $zone );
+				$update['geo_zone'] = $zone;
 			} else {
 				self::set_visibility( 'post', $post_id, 'public' );
 			}
 		}
-		if ( isset( $data['created'] ) ) {
-			update_post_meta( $post_id, 'mf2_published', $data['created'] );
+		$update = array_filter( $update );
+		foreach ( $update as $key => $value ) {
+			update_post_meta( $post_id, $key, $value );
 		}
 		return $meta;
 	}
@@ -760,7 +767,7 @@ class WP_Geo_Data {
 	public static function register_meta() {
 		$args = array(
 			'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
-			'type'              => 'float',
+			'type'              => 'number',
 			'description'       => 'Latitude',
 			'single'            => true,
 			'show_in_rest'      => false,
@@ -772,7 +779,7 @@ class WP_Geo_Data {
 
 		$args = array(
 			'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
-			'type'              => 'float',
+			'type'              => 'number',
 			'description'       => 'Longitude',
 			'single'            => true,
 			'show_in_rest'      => false,
@@ -783,7 +790,7 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_longitude', $args );
 
 		$args = array(
-			'type'         => 'int',
+			'type'         => 'number',
 			'description'  => 'Altitude',
 			'single'       => true,
 			'show_in_rest' => false,
@@ -816,7 +823,7 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_timezone', $args );
 
 		$args = array(
-			'type'         => 'integer',
+			'type'         => 'number',
 			'description'  => 'Geodata Zoom for Map Display',
 			'single'       => true,
 			'show_in_rest' => false,
@@ -827,7 +834,7 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_zoom', $args );
 
 		$args = array(
-			'type'         => 'integer',
+			'type'         => 'number',
 			'description'  => 'Geodata Public',
 			'single'       => true,
 			'show_in_rest' => false,
