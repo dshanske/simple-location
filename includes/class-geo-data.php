@@ -1000,12 +1000,16 @@ if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
  *
  *
  * @param string $str
- * @param string $timezone A timezone or offset string. Default is the WordPress timezone
+ * @param string|DateTimeZone $timezone A timezone or offset string. Default is the WordPress timezone
  * @return DateTime
  */
 if ( ! function_exists( 'wp_exif_datetime' ) ) {
 	function wp_exif_datetime( $str, $timezone = null ) {
-		$timezone = ( $timezone ) ? new DateTimeZone( $timezone ) : wp_timezone();
+		if ( is_string( $timezone ) ) {
+			$timezone = new DateTimeZone( $timezone );
+		} elseif ( ! $timezone instanceof DateTimeZone ) {
+			$timezone = wp_timezone();
+		}
 		$datetime = new DateTime( $str, $timezone );
 		return $datetime;
 	}
