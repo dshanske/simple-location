@@ -3,6 +3,9 @@ module.exports = function(grunt) {
     // Project configuration.
     grunt.initConfig({
         eslint: {
+	    options: {
+		fix: true
+	    },
             location: {
                 src: ['js/location.js']
             }
