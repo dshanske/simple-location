@@ -42,9 +42,14 @@ module.exports = function(grunt) {
                 }
             }
         },
-        curl: {
-            'data/airports.csv': 'http://ourairports.com/data/airports.csv'
-        },
+        downloadfile: {
+	    options: {
+	       overwriteEverytime: true
+            },
+	    files: {
+              'data/airports.csv': 'https://ourairports.com/data/airports.csv'
+            } 
+       },
 
         makepot: {
             target: {
@@ -67,7 +72,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-wp-i18n');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-eslint');
-    grunt.loadNpmTasks('grunt-curl');
+    grunt.loadNpmTasks('grunt-downloadfile');
 
     // Default task(s).
     grunt.registerTask('default', ['wp_readme_to_markdown', 'makepot', 'eslint', 'sass' ]);
