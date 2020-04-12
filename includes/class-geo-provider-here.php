@@ -56,8 +56,8 @@ class Geo_Provider_Here extends Geo_Provider {
 		}
 		$query = add_query_arg(
 			array(
-				'apiKey'     => $this->api,
-				'at'       => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+				'apiKey' => $this->api,
+				'at'     => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
 
 			),
 			'https://revgeocode.search.hereapi.com/v1/revgeocode'
@@ -82,7 +82,7 @@ class Geo_Provider_Here extends Geo_Provider {
 		if ( ( $code / 100 ) !== 2 ) {
 			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
 		}
-		$json                   = json_decode( $response['body'], true );
+		$json = json_decode( $response['body'], true );
 		if ( ! isset( $json['items'] ) || empty( $json['items'] ) ) {
 			return new WP_Error( 'invalid_response', __( 'No results', 'simple-location' ) );
 		}

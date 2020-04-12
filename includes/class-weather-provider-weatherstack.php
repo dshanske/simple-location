@@ -18,7 +18,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 		$args['cache_key'] = '';
 
 		$this->region = false;
-		$option = get_option( 'sloc_weather_provider' );
+		$option       = get_option( 'sloc_weather_provider' );
 		if ( 'weatherstack' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
@@ -123,6 +123,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			$summary                  = ifset( $response['weather_descriptions'] );
 			$summary                  = is_array( $summary ) ? implode( ' ', $summary ) : '';
 			$return['summary']        = $summary;
+			$return['uv']             = ifset( $response['uv_index'] );
 			$return['icon']           = $this->icon_map( $response['weather_code'], ifset( $response['is_day'] ) );
 
 			$calc              = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );

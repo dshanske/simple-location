@@ -18,7 +18,7 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 		$args['cache_key'] = '';
 
 		$this->region = false;
-		$option = get_option( 'sloc_weather_provider' );
+		$option       = get_option( 'sloc_weather_provider' );
 		if ( 'weatherbit' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
