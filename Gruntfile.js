@@ -49,31 +49,15 @@ module.exports = function(grunt) {
 	    files: {
               'data/airports.csv': 'https://ourairports.com/data/airports.csv'
             } 
-       },
-
-        makepot: {
-            target: {
-                options: {
-                    mainFile: 'simple-location.php',
-                    domainPath: '/languages',
-                    potFilename: 'simple-location.pot',
-                    type: 'wp-plugin',
-                    exclude: [
-                        'build/.*'
-                    ],
-                    updateTimestamp: true
-                }
-            }
-        }
+       }
     });
 
     // Load plugins.
     grunt.loadNpmTasks('grunt-wp-readme-to-markdown');
-    grunt.loadNpmTasks('grunt-wp-i18n');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-eslint');
     grunt.loadNpmTasks('grunt-downloadfile');
 
     // Default task(s).
-    grunt.registerTask('default', ['wp_readme_to_markdown', 'makepot', 'eslint', 'sass' ]);
+    grunt.registerTask('default', ['wp_readme_to_markdown', 'eslint', 'sass' ]);
 };
