@@ -10,8 +10,8 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 * @param array $args
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'National Weather Service(US)', 'simple-location' );
-		$this->slug = 'nwsus';
+		$this->name   = __( 'National Weather Service(US)', 'simple-location' );
+		$this->slug   = 'nwsus';
 		$this->region = 'US';
 		parent::__construct( $args );
 	}
@@ -77,7 +77,18 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			if ( ! isset( $response['features'] ) ) {
 				return false;
 			}
-			$this->station_id = $response['features'][0]['properties']['stationIdentifier'];
+			$sitelist = $response['features'];
+			foreach ( $sitelist as $key => $value ) {
+				$sitelist[ $key ]['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $value['geometry']['coordinates'][1], $value['geometry']['coordinates'][0] ) );
+			}
+			usort(
+				$sitelist,
+				function( $a, $b ) {
+					return $a['distance'] > $b['distance'];
+				}
+			);
+
+			$this->station_id = $sitelist[0]['properties']['stationIdentifier'];
 			return self::get_station_data();
 		}
 		return false;
@@ -116,8 +127,11 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		}
 		$properties = ifset( $response['properties'] );
 		if ( isset( $response['geometry'] ) ) {
-			$return['latitude']  = $response['geometry']['coordinates'][0];
-			$return['longitude'] = $response['geometry']['coordinates'][1];
+			$return['latitude']  = $response['geometry']['coordinates'][1];
+			$return['longitude'] = $response['geometry']['coordinates'][0];
+			if ( ! empty( $this->latitude ) ) {
+				$return['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $return['latitude'], $return['longitude'] ) );
+			}
 		}
 		if ( empty( $properties ) ) {
 			return array();
@@ -134,7 +148,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		if ( ! empty( $wind ) ) {
 			$return['wind'] = $wind;
 		}
-		$return['pressure'] = self::get_value( $properties, 'barometricPressure' );
+		$return['pressure'] = round( self::get_value( $properties, 'barometricPressure' ) / 1000, 2 ); // Convert Pa to hPa/mBar
 		$return['summary']  = ifset( $properties['textDescription'] );
 		if ( isset( $return['summary'] ) ) {
 			$return['icon'] = self::icon_map( $return['summary'] );
