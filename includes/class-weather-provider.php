@@ -3,6 +3,7 @@
 abstract class Weather_Provider extends Sloc_Provider {
 
 	protected $style;
+	protected $region; // If this weather provider is limited to a region
 	protected $station_id; // Most weather sites permit a station ID to be set
 	protected $units; // Unit of measurement: imperial, si, etc
 	protected $cache_key; // If set this will cache the retrieved informatin

@@ -12,6 +12,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'National Weather Service(US)', 'simple-location' );
 		$this->slug = 'nwsus';
+		$this->region = 'US';
 		parent::__construct( $args );
 	}
 

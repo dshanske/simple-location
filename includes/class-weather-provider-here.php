@@ -16,7 +16,7 @@ class Weather_Provider_HERE extends Weather_Provider {
 			$args['api'] = get_option( 'sloc_here_api' );
 		}
 		$args['cache_key'] = '';
-
+		$this->region = false;
 		$option = get_option( 'sloc_weather_provider' );
 		if ( 'darksky' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
