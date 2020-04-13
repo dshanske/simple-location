@@ -260,6 +260,7 @@ class Loc_Config {
 		<?php
 		if ( 'debug' === $active_tab ) {
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/geocode-form.php' );
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/weather-form.php' );
 			?>
 			</div>
 			<?php
