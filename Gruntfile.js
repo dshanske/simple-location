@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 		fix: true
 	    },
             location: {
-                src: ['js/location.js']
+                src: ['js/location.js', 'js/zones.js' ]
             }
         },
         
