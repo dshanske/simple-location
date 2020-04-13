@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 4.0.5
+ * Version: 4.0.6
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -23,7 +23,7 @@ if ( ! defined( 'SLOC_PER_PAGE' ) ) {
 
 
 class Simple_Location_Plugin {
-	public static $version = '4.0.5';
+	public static $version = '4.0.6';
 
 	public static function activate() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
