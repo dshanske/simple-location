@@ -161,7 +161,7 @@ class Loc_Metabox {
 		if ( ! is_array( $geodata ) ) {
 			return;
 		}
-		$author  = new WP_User( $post->post_author );
+		$author = new WP_User( $post->post_author );
 		if ( 'private' !== $geodata['visibility'] ) {
 			WP_Geo_Data::set_geodata( $author, $geodata );
 		}

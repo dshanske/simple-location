@@ -47,40 +47,24 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 		if ( empty( $this->api ) ) {
 			return null;
 		}
-		$query = add_query_arg(
-			array(
-				'latLngCollection' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-				'key'              => $this->api,
-			),
-			'https://open.mapquestapi.com/elevation/v1/profile'
+		$args = array(
+			'latLngCollection' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+			'key'              => $this->api,
 		);
-		$args  = array(
-			'headers'             => array(
-				'Accept' => 'application/json',
-			),
-			'timeout'             => 10,
-			'limit_response_size' => 1048576,
-			'redirection'         => 1,
-			// Use an explicit user-agent for Simple Location
-			'user-agent'          => 'Simple Location for WordPress',
-		);
+		$url  = 'https://open.mapquestapi.com/elevation/v1/profile';
 
-			$response = wp_remote_get( $query, $args );
-		if ( is_wp_error( $response ) ) {
-				return $response;
+		$json = $this->fetch_json( $url, $args );
+
+		if ( is_wp_error( $json ) ) {
+			return $json;
 		}
-			$code = wp_remote_retrieve_response_code( $response );
-		if ( ( $code / 100 ) !== 2 ) {
-				return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
-		}
-			$json = json_decode( $response['body'], true );
 		if ( isset( $json['error_message'] ) ) {
 				return new WP_Error( $json['status'], $json['error_message'] );
 		}
 		if ( ! isset( $json['elevationProfile'] ) ) {
 			return null;
 		}
-			return round( $json['elevationProfile'][0]['height'], 2 );
+		return round( $json['elevationProfile'][0]['height'], 2 );
 	}
 
 
@@ -88,39 +72,22 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API Key for Mapquest', 'simple-location' ) );
 		}
-		$query = add_query_arg(
-			array(
-				'format'          => 'json',
-				'extratags'       => '1',
-				'addressdetails'  => '1',
-				'lat'             => $this->latitude,
-				'lon'             => $this->longitude,
-				'zoom'            => $this->reverse_zoom,
-				'accept-language' => get_bloginfo( 'language' ),
-				'key'             => $this->api,
-			),
-			'https://open.mapquestapi.com/nominatim/v1/reverse.php'
+		$args = array(
+			'format'          => 'json',
+			'extratags'       => '1',
+			'addressdetails'  => '1',
+			'lat'             => $this->latitude,
+			'lon'             => $this->longitude,
+			'zoom'            => $this->reverse_zoom,
+			'accept-language' => get_bloginfo( 'language' ),
+			'key'             => $this->api,
 		);
-		$args  = array(
-			'headers'             => array(
-				'Accept' => 'application/json',
-			),
-			'timeout'             => 10,
-			'limit_response_size' => 1048576,
-			'redirection'         => 1,
-			// Use an explicit user-agent for Simple Location
-			'user-agent'          => 'Simple Location for WordPress',
-		);
+		$url  = 'https://open.mapquestapi.com/nominatim/v1/reverse.php';
 
-		$response = wp_remote_get( $query, $args );
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
 		}
-		$code = wp_remote_retrieve_response_code( $response );
-		if ( ( $code / 100 ) !== 2 ) {
-			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
-		}
-		$json    = json_decode( $response['body'], true );
 		$address = $json['address'];
 
 		if ( 'us' === $address['country_code'] ) {

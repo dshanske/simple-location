@@ -54,35 +54,16 @@ class Geo_Provider_Here extends Geo_Provider {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
 		}
-		$query = add_query_arg(
-			array(
-				'apiKey' => $this->api,
-				'at'     => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-
-			),
-			'https://revgeocode.search.hereapi.com/v1/revgeocode'
-		);
 		$args = array(
-			'headers'             => array(
-				'Accept' => 'application/json',
-			),
-			'timeout'             => 10,
-			'limit_response_size' => 1048576,
-			'redirection'         => 1,
-			// Use an explicit user-agent for Simple Location
-			'user-agent'          => 'Simple Location for WordPress',
-		);
-		error_log( $query );
+			'apiKey' => $this->api,
+			'at'     => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
 
-		$response = wp_remote_get( $query, $args );
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		);
+		$url  = 'https://revgeocode.search.hereapi.com/v1/revgeocode';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
 		}
-		$code = wp_remote_retrieve_response_code( $response );
-		if ( ( $code / 100 ) !== 2 ) {
-			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
-		}
-		$json = json_decode( $response['body'], true );
 		if ( ! isset( $json['items'] ) || empty( $json['items'] ) ) {
 			return new WP_Error( 'invalid_response', __( 'No results', 'simple-location' ) );
 		}

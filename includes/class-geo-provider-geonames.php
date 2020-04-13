@@ -47,34 +47,16 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( ! $this->user ) {
 			return null;
 		}
-		$query = add_query_arg(
-			array(
-				'username' => $this->user,
-				'lat'      => $this->latitude,
-				'lng'      => $this->longitude,
-			),
-			'http://api.geonames.org/srtm1'
+		$args = array(
+			'username' => $this->user,
+			'lat'      => $this->latitude,
+			'lng'      => $this->longitude,
 		);
-		$args  = array(
-			'headers'             => array(
-				'Accept' => 'application/json',
-			),
-			'timeout'             => 10,
-			'limit_response_size' => 1048576,
-			'redirection'         => 1,
-			// Use an explicit user-agent for Simple Location
-			'user-agent'          => 'Simple Location for WordPress',
-		);
-
-		$response = wp_remote_get( $query, $args );
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		$url  = 'http://api.geonames.org/srtm1';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
 		}
-		$code = wp_remote_retrieve_response_code( $response );
-		if ( ( $code / 100 ) !== 2 ) {
-			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
-		}
-		$json = json_decode( $response['body'], true );
 		if ( array_key_exists( 'srtm1', $json ) ) {
 			return round( $json['srtm1'], 2 );
 		}
@@ -87,34 +69,16 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( ! $this->user ) {
 			return null;
 		}
-		$query = add_query_arg(
-			array(
-				'username' => $this->user,
-				'lat'      => $this->latitude,
-				'lng'      => $this->longitude,
-			),
-			'https://secure.geonames.org/findNearbyPlaceNameJSON'
+		$args = array(
+			'username' => $this->user,
+			'lat'      => $this->latitude,
+			'lng'      => $this->longitude,
 		);
-		$args  = array(
-			'headers'             => array(
-				'Accept' => 'application/json',
-			),
-			'timeout'             => 10,
-			'limit_response_size' => 1048576,
-			'redirection'         => 1,
-			// Use an explicit user-agent for Simple Location
-			'user-agent'          => 'Simple Location for WordPress',
-		);
-
-		$response = wp_remote_get( $query, $args );
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		$url  = 'https://secure.geonames.org/findNearbyPlaceNameJSON';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
 		}
-		$code = wp_remote_retrieve_response_code( $response );
-		if ( ( $code / 100 ) !== 2 ) {
-			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
-		}
-		$json = json_decode( $response['body'], true );
 		$json = $json['geonames'][0];
 		$addr = array(
 			'latitude'  => $this->latitude,
