@@ -284,7 +284,7 @@ class REST_Geo {
 		);
 		$return  = array();
 		$weather = Loc_Config::weather_provider();
-		if ( isset( $params['station'] ) ) {
+		if ( ! empty( $params['station'] ) ) {
 			$weather->set( array( 'station_id' => $params['station'] ) );
 		} elseif ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$weather->set( $params );
@@ -297,7 +297,10 @@ class REST_Geo {
 				return new WP_Error( 'missing_geo', __( 'Missing Coordinates or Station for Weather Lookup', 'simple-location' ), array( 'status' => 400 ) );
 		}
 		$conditions = $weather->get_conditions();
-		$return     = array_filter( $return );
+		if ( is_wp_error( $conditions ) ) {
+			return $conditions;
+		}
+		$return = array_filter( $return );
 		if ( is_array( $conditions ) ) {
 			$return = array_merge( $conditions, $return );
 		}

@@ -73,7 +73,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			'appid' => $this->api,
 			'units' => 'metric',
 		);
-		if ( $this->station_id && ! $this->latitude ) {
+		if ( ! empty( $this->station_id ) && empty( $this->latitude ) ) {
 			return $this->get_station_data();
 		}
 		if ( $this->latitude && $this->longitude ) {
@@ -153,7 +153,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			'appid' => $this->api,
 			'units' => 'metric',
 		);
-		if ( $this->station_id ) {
+		if ( ! empty( $this->station_id ) ) {
 			if ( $this->cache_key ) {
 				$conditions = get_transient( $this->cache_key . '_' . md5( $this->station_id ) );
 				if ( $conditions ) {
@@ -201,7 +201,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			}
 			return array_filter( $return );
 		}
-		return false;
+		return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
 	}
 
 	private function icon_map( $id ) {
