@@ -3,8 +3,11 @@ module.exports = function(grunt) {
     // Project configuration.
     grunt.initConfig({
         eslint: {
+	    options: {
+		fix: true
+	    },
             location: {
-                src: ['js/location.js']
+                src: ['js/location.js', 'js/zones.js' ]
             }
         },
         
@@ -39,33 +42,22 @@ module.exports = function(grunt) {
                 }
             }
         },
-        curl: {
-            'data/airports.csv': 'http://ourairports.com/data/airports.csv'
-        },
-
-        makepot: {
-            target: {
-                options: {
-                    mainFile: 'simple-location.php',
-                    domainPath: '/languages',
-                    potFilename: 'simple-location.pot',
-                    type: 'wp-plugin',
-                    exclude: [
-                        'build/.*'
-                    ],
-                    updateTimestamp: true
-                }
-            }
-        }
+        downloadfile: {
+	    options: {
+	       overwriteEverytime: true
+            },
+	    files: {
+              'data/airports.csv': 'https://ourairports.com/data/airports.csv'
+            } 
+       }
     });
 
     // Load plugins.
     grunt.loadNpmTasks('grunt-wp-readme-to-markdown');
-    grunt.loadNpmTasks('grunt-wp-i18n');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-eslint');
-    grunt.loadNpmTasks('grunt-curl');
+    grunt.loadNpmTasks('grunt-downloadfile');
 
     // Default task(s).
-    grunt.registerTask('default', ['wp_readme_to_markdown', 'makepot', 'eslint', 'sass' ]);
+    grunt.registerTask('default', ['wp_readme_to_markdown', 'eslint', 'sass' ]);
 };

@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 4.0.5
+ * Version: 4.0.6
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -23,7 +23,7 @@ if ( ! defined( 'SLOC_PER_PAGE' ) ) {
 
 
 class Simple_Location_Plugin {
-	public static $version = '4.0.5';
+	public static $version = '4.0.6';
 
 	public static function activate() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
@@ -108,6 +108,8 @@ class Simple_Location_Plugin {
 			'class-weather-provider-nwsus.php', // National Weather Service (US)
 			'class-weather-provider-weatherstack.php', // weatherstack.com
 			'class-weather-provider-weatherbit.php', // weatherbit.com
+			'class-weather-provider-here.php', // HERE
+			'class-weather-provider-metoffice.php', // Met Office
 			'class-map-provider-mapbox.php', // MapBox
 			'class-map-provider-google.php', // Google
 			'class-map-provider-bing.php', // Bing
@@ -118,6 +120,7 @@ class Simple_Location_Plugin {
 			'class-geo-provider-nominatim.php', // Nominatim
 			'class-geo-provider-mapquest.php', /// MapQuest Nominatim
 			'class-geo-provider-google.php', // Google
+			'class-geo-provider-here.php', // HERE
 			'class-geo-provider-bing.php', // Bing
 			'class-geo-provider-locationiq.php', // LocationIQ
 			'class-geo-provider-geonames.php', // Geonames

@@ -47,33 +47,15 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( empty( $this->api ) ) {
 			return null;
 		}
-		$query = add_query_arg(
-			array(
-				'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-				'key'       => $this->api,
-			),
-			'https://maps.googleapis.com/maps/api/elevation/json'
+		$args = array(
+			'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+			'key'       => $this->api,
 		);
-		$args  = array(
-			'headers'             => array(
-				'Accept' => 'application/json',
-			),
-			'timeout'             => 10,
-			'limit_response_size' => 1048576,
-			'redirection'         => 1,
-			// Use an explicit user-agent for Simple Location
-			'user-agent'          => 'Simple Location for WordPress',
-		);
-
-		$response = wp_remote_get( $query, $args );
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		$url  = 'https://maps.googleapis.com/maps/api/elevation/json';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
 		}
-		$code = wp_remote_retrieve_response_code( $response );
-		if ( ( $code / 100 ) !== 2 ) {
-			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
-		}
-		$json = json_decode( $response['body'], true );
 		if ( isset( $json['error_message'] ) ) {
 			return new WP_Error( $json['status'], $json['error_message'] );
 		}
@@ -87,37 +69,19 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Google', 'simple-location' ) );
 		}
-		$query = add_query_arg(
-			array(
-				'latlng' => $this->latitude . ',' . $this->longitude,
-				// 'language'      => get_bloginfo( 'language' ),
-				//'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
-				// 'result_type'   => 'street_address',
-				'key'    => $this->api,
-			),
-			'https://maps.googleapis.com/maps/api/geocode/json?'
+		$args = array(
+			'latlng' => $this->latitude . ',' . $this->longitude,
+			// 'language'      => get_bloginfo( 'language' ),
+			//'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
+			// 'result_type'   => 'street_address',
+			'key'    => $this->api,
 		);
-		$args  = array(
-			'headers'             => array(
-				'Accept' => 'application/json',
-			),
-			'timeout'             => 10,
-			'limit_response_size' => 1048576,
-			'redirection'         => 1,
-			// Use an explicit user-agent for Simple Location
-			'user-agent'          => 'Simple Location for WordPress',
-		);
-
-		$response = wp_remote_get( $query, $args );
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		$url  = 'https://maps.googleapis.com/maps/api/geocode/json?';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
 		}
-		$code = wp_remote_retrieve_response_code( $response );
-		if ( ( $code / 100 ) !== 2 ) {
-			return new WP_Error( 'invalid_response', wp_remote_retrieve_body( $response ), array( 'status' => $code ) );
-		}
-		$json = json_decode( $response['body'], true );
-		$raw  = $json;
+		$raw = $json;
 		if ( isset( $json['results'] ) ) {
 			$data = wp_is_numeric_array( $json['results'] ) ? array_shift( $json['results'] ) : $json['results'];
 		} else {

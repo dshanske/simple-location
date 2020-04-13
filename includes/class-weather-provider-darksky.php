@@ -10,8 +10,9 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	 * @param array $args
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Dark Sky', 'simple-location' );
-		$this->slug = 'darksky';
+		$this->name   = __( 'Dark Sky', 'simple-location' );
+		$this->slug   = 'darksky';
+		$this->region = false;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_darksky_api' );
 		}

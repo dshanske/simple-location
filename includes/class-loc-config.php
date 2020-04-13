@@ -246,12 +246,31 @@ class Loc_Config {
 		<div class="wrap">
 			<h2><?php esc_html_e( 'Simple Location', 'simple-location' ); ?> </h2>
 		<h2 class="nav-tab-wrapper">
-		
+
 		<?php self::tab_link( 'general', __( 'General', 'simple-location' ), $active_tab ); ?>
 		<?php self::tab_link( 'providers', __( 'Providers', 'simple-location' ), $active_tab ); ?>
 		<?php self::tab_link( 'zones', __( 'Zones', 'simple-location' ), $active_tab ); ?>
+		<?php
+		if ( WP_DEBUG ) {
+			self::tab_link( 'debug', __( 'Debug', 'simple-location' ), $active_tab );
+		}
+		?>
 		</h2>
 		<hr />
+		<?php
+		if ( 'debug' === $active_tab ) {
+			?>
+			 
+			<p> <?php esc_html_e( 'Test the raw responses from the lookup features. This feature only appears if you have WP_DEBUG enabled.', 'simple-location' ); ?> </p>
+			<?php
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/geocode-form.php' );
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/weather-form.php' );
+			?>
+			</div>
+			<?php
+			return;
+		}
+		?>
 		<form method="post" action="options.php">
 			<?php
 			switch ( $active_tab ) {

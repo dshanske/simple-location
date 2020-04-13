@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.0.5  
+**Stable tag:** 4.0.6  
 **Requires at least:** 4.9  
-**Tested up to:** 5.3.2  
+**Tested up to:** 5.4  
 **Requires PHP:** 5.4  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -65,11 +65,12 @@ that can be set to a specific location, a user, station ID, or airport code. Sta
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
 * Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include Wikimedia, MapBox, Google, Mapquest's Open Static Map, HERE, LocationIQ, and Bing
-* Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ and Geonames.
+* Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ and Geonames.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
 location of a three letter airport code, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
-* Weather Providers retrieve weather data about your location and include OpenWeatherMap, Dark Sky, Weatherstack, WeatherBit and the US National Weather Service. Dark Sky, WeatherBit, and Weatherstack do not support stations.
-
+* Weather Providers retrieve weather data about your location and include OpenWeatherMap, Dark Sky, Weatherstack, WeatherBit, HERE and the US National Weather Service. HERE, Dark Sky, WeatherBit, and Weatherstack do not support stations.
+** The National Weather Service(US) uses their station lookup API to find the closest weather station, and uses weather from there. Therefore, if this returns no options, if you are outside the US, it will return no weather.
+** The Met Office(UK) uses the distance from your current location to the nearest UK weather station and finds the closest one. However, if the nearest station is more than 100km away, it will return nothing.
 
 ## Frequently Asked Questions ##
 
@@ -88,6 +89,7 @@ API Keys are required to use certain services.
 * [Weatherbit](https://www.weatherbit.io/api/weather-current)
 * [GeoNames](https://www.geonames.org) - requires a username
 * [LocationIQ](https://locationiq.com/)
+* [Met Office UK](https://www.metoffice.gov.uk/services/data/datapoint)
 
 At this time, the only map service available without an API key is Wikimedia maps
 Nominatim does not require an API key, but it does ask for an email address, which will be the admin email of the site
@@ -163,6 +165,12 @@ The plugin offers providers for:
 
 ## Upgrade Notice ##
 
+### 4.1.0 ###
+
+Dark Sky has been acquired by Apple and no longer permits you to apply for an API key. If you already have one, the functionality in this plugin will work, according to them, until end of 2021 after
+which it will be removed from this plugin. The plugin offers several other weather providers. The Met Office weather plugin has not been tested in live use as the developer is not in the UK. It
+is also not as detailed as some of the other options in what data it provides.
+
 ### 4.0.0 ###
 
 The Compass API/URL information is now stored in the user profile. When publishing, it will pull this information in from the current logged in user. This was previously stored globally. When using UTC offsets over
@@ -182,6 +190,14 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.0.6 ( 2020-04-12 ) ###
+* Update HERE to use API Key over prior app id system
+* Update HERE Map Service to use new endpoint
+* Add HERE Weather and Geolocation Service
+* Added support for Met Office UK...using the nearest station
+* Add debugger tab for geocode lookup and weather lookup
+* Misc development fixes to remove duplicative code
 
 ### 4.0.5 ( 2020-03-18 ) ###
 * Fix issue with timezone handling of photo EXIF data by allowing either timezone string or object

@@ -29,6 +29,35 @@ abstract class Sloc_Provider {
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
+	public function fetch_json( $url, $query ) {
+		$fetch = add_query_arg( $query, $url );
+		$args  = array(
+			'headers'             => array(
+				'Accept' => 'application/json',
+			),
+			'timeout'             => 10,
+			'limit_response_size' => 1048576,
+			'redirection'         => 1,
+			// Use an explicit user-agent for Simple Location
+			'user-agent'          => 'Simple Location for WordPress',
+		);
+
+		$response = wp_remote_get( $fetch, $args );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = wp_remote_retrieve_body( $response );
+		if ( ( $code / 100 ) !== 2 ) {
+			return new WP_Error( 'invalid_response', $body, array( 'status' => $code ) );
+		}
+		$json = json_decode( $body, true );
+		if ( empty( $json ) ) {
+			return new WP_Error( 'not_json_response', $body, array( 'type' => wp_remote_retrieve_header( $response, 'Content-Type' ) ) );
+		}
+		return $json;
+	}
+
 	/*
 	 *
 	 * @param $array Input Array

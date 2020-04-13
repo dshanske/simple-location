@@ -10,16 +10,12 @@ class Map_Provider_Here extends Map_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_here_api' );
 		}
-		if ( ! isset( $args['appid'] ) ) {
-			$args['appid'] = get_option( 'sloc_here_appid' );
-		}
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_here_style' );
 		}
 		if ( ! isset( $args['type'] ) ) {
 			$this->type = get_option( 'sloc_here_type' );
 		}
-		$this->appid = $args['appid'];
 
 		$option = get_option( 'sloc_map_provider' );
 		if ( 'here' === $option ) {
@@ -36,16 +32,6 @@ class Map_Provider_Here extends Map_Provider {
 			array(
 				'type'         => 'string',
 				'description'  => 'HERE Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-		register_setting(
-			'sloc_providers', // option group
-			'sloc_here_appid', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Here Maps APP ID',
 				'show_in_rest' => false,
 				'default'      => '',
 			)
@@ -82,16 +68,6 @@ class Map_Provider_Here extends Map_Provider {
 			'sloc_api', // settings section
 			array(
 				'label_for' => 'sloc_here_api',
-			)
-		);
-		add_settings_field(
-			'hereapp', // id
-			__( 'HERE Application ID', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_here_appid',
 			)
 		);
 		add_settings_field(
@@ -157,17 +133,20 @@ class Map_Provider_Here extends Map_Provider {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$url = 'https://image.maps.api.here.com/mia/1.6/';
+		$url = 'https://image.maps.ls.hereapi.com/mia/1.6/';
 		$map = add_query_arg(
 			array(
-				'app_code' => $this->api,
-				'app_id'   => $this->appid,
-				'lat'      => $this->latitude,
-				'lon'      => $this->longitude,
-				'w'        => $this->width,
-				'h'        => $this->height,
-				'style'    => $this->style,
-				't'        => $this->type,
+				'apiKey' => $this->api,
+				'f'      => 0,
+				'ppi'    => 320,
+				'c'      => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+				//'lat'      => $this->latitude,
+				//'lon'      => $this->longitude,
+				'w'      => $this->width,
+				'h'      => $this->height,
+				'style'  => $this->style,
+				't'      => $this->type,
+				'z'      => $this->map_zoom,
 			),
 			$url
 		);
@@ -175,7 +154,7 @@ class Map_Provider_Here extends Map_Provider {
 	}
 
 	public function get_archive_map( $locations ) {
-		if ( empty( $this->api ) || empty( $this->appid ) || empty( $locations ) ) {
+		if ( empty( $this->api ) || empty( $locations ) ) {
 			return '';
 		}
 
@@ -185,17 +164,16 @@ class Map_Provider_Here extends Map_Provider {
 		}
 		$polyline = Polyline::encode( $locations );
 
-		$url = 'https://image.maps.api.here.com/mia/1.6/route';
+		$url = 'https://image.maps.ls.hereapi.com/mia/1.6/route';
 		$map = add_query_arg(
 			array(
-				'app_code' => $this->api,
-				'app_id'   => $this->appid,
-				'style'    => $this->style,
-				't'        => $this->type,
-				'w'        => $this->width,
-				'h'        => $this->height,
-				'r0'       => implode( ',', $markers ),
-				'm0'       => implode( ',', $markers ),
+				'apiKey' => $this->api,
+				'style'  => $this->style,
+				't'      => $this->type,
+				'w'      => $this->width,
+				'h'      => $this->height,
+				'r0'     => implode( ',', $markers ),
+				'm0'     => implode( ',', $markers ),
 			),
 			$url
 		);

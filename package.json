@@ -9,15 +9,14 @@
     "url": "https://github.com/dshanske/simple-location/issues"
   },
   "devDependencies": {
-    "eslint-config-wordpress": "^2.0.0",
+    "@wordpress/eslint-plugin": "^4.1.0",
     "grunt": "^1.0.2",
     "grunt-contrib-sass": "~1.0.0",
-    "grunt-curl": "^2.5.0",
-    "grunt-eslint": "^20.1.0",
-    "grunt-wp-i18n": "~0.5.4",
-    "grunt-wp-readme-to-markdown": "~2.0.1",
-    "luxon": "^1.21.1"
+    "grunt-downloadfile": "^2.1.1",
+    "grunt-eslint": "^22.0.0",
+    "grunt-wp-i18n": "^1.0.3",
+    "grunt-wp-readme-to-markdown": ">=2.0.1",
+    "luxon": "^1.23.0"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
