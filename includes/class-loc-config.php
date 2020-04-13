@@ -259,6 +259,10 @@ class Loc_Config {
 		<hr />
 		<?php
 		if ( 'debug' === $active_tab ) {
+			?>
+			 
+			<p> <?php esc_html_e( 'Test the raw responses from the lookup features. This feature only appears if you have WP_DEBUG enabled.', 'simple-location' ); ?> </p>
+			<?php
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/geocode-form.php' );
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/weather-form.php' );
 			?>
