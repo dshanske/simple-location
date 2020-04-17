@@ -532,7 +532,12 @@ class Loc_Config {
 		if ( ! isset( $args['type'] ) ) {
 			$args['type'] = 'text';
 		}
-		printf( '<input name="%1s" size="50" autocomplete="off" class="regular-text" type="%2s" value="%3s" />', $name, esc_attR( $args['type'] ), get_option( $name ) ); // phpcs:ignore
+		printf( '<input name="%1s" size="50" autocomplete="off" class="regular-text" type="%2s" value="%3s" />', $name, esc_attr( $args['type'] ), get_option( $name ) ); // phpcs:ignore
+	}
+
+	public static function textarea_callback( array $args ) {
+		$name = $args['label_for'];
+		printf( '<textarea name="%1s" class="regular-text">%2$s</textarea>', $name, get_option( $name ) ); // phpcs:ignore
 	}
 
 	public static function provider_callback( $args ) {

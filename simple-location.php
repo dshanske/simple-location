@@ -110,6 +110,7 @@ class Simple_Location_Plugin {
 			'class-weather-provider-weatherbit.php', // weatherbit.com
 			'class-weather-provider-here.php', // HERE
 			'class-weather-provider-metoffice.php', // Met Office
+			'class-weather-provider-aeris.php', // Aeris Weather
 			'class-map-provider-mapbox.php', // MapBox
 			'class-map-provider-google.php', // Google
 			'class-map-provider-bing.php', // Bing

@@ -51,6 +51,10 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		);
 	}
 
+	public function is_station() {
+		return true;
+	}
+
 	public function set( $lat, $lng = null, $alt = null ) {
 		if ( ! $lng && is_array( $lat ) ) {
 			if ( isset( $lat['station_id'] ) ) {
