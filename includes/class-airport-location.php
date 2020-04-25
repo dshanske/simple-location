@@ -1,5 +1,6 @@
 <?php
-/* Provides Information about an Airport
+/*
+ Provides Information about an Airport
  * Functionality borrowed from https://github.com/aaronpk/Atlas
  * airports.csv is from
  * http://ourairports.com/data/

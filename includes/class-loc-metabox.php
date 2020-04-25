@@ -72,7 +72,8 @@ class Loc_Metabox {
 
 	/* Create location meta boxes to be displayed on the post editor screen. */
 	public static function add_meta_boxes() {
-		/*	add_meta_box(
+		/*
+		  add_meta_box(
 			'locationbox-meta',      // Unique ID
 			esc_html__( 'Location', 'simple-location' ),    // Title
 			array( 'Loc_Metabox', 'metabox' ),   // Callback function

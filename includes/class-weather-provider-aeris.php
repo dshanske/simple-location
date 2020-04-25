@@ -42,6 +42,16 @@ class Weather_Provider_Aeris extends Weather_Provider {
 				'default'      => '',
 			)
 		);
+		register_setting(
+			'sloc_providers', // option group
+			'sloc_aeris_pws', // option name
+			array(
+				'type'         => 'number',
+				'description'  => 'Include Personal Weather Stations in AerisWeather Data',
+				'show_in_rest' => false,
+				'default'      => 0,
+			)
+		);
 	}
 
 	public static function admin_init() {
@@ -63,6 +73,16 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			'sloc_api', // settings section
 			array(
 				'label_for' => 'sloc_aeris_client_secret',
+			)
+		);
+		add_settings_field(
+			'aerisweatherpws', // id
+			__( 'Include Personal Weather Stations in AerisWeather Provider', 'simple-location' ), // setting title
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback
+			'sloc_providers', // settings page
+			'sloc_api', // settings section
+			array(
+				'label_for' => 'sloc_aeris_pws',
 			)
 		);
 	}
@@ -107,8 +127,10 @@ class Weather_Provider_Aeris extends Weather_Provider {
 				'client_id'     => $client_id,
 				'client_secret' => $client_secret,
 				'p'             => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-				'filter'        => 'allstations',
 			);
+			if ( 1 === (int) get_option( 'sloc_aeris_pws' ) ) {
+				$args['filter'] = 'allstations';
+			}
 
 			$url  = 'https://api.aerisapi.com/observations/closest';
 			$json = $this->fetch_json( $url, $args );
@@ -160,7 +182,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 
 		$return['icon'] = $this->icon_map( $observation['weatherCoded'] );
 
-		$calc              = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );
+		$calc              = new Astronomical_Calculator( $return['latitude'], $return['longitude'], $return['altitude'] );
 		$return['sunrise'] = $calc->get_iso8601( null );
 		$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
 

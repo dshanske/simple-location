@@ -72,7 +72,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		$args = array(
 			'latlng' => $this->latitude . ',' . $this->longitude,
 			// 'language'      => get_bloginfo( 'language' ),
-			//'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
+			// 'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
 			// 'result_type'   => 'street_address',
 			'key'    => $this->api,
 		);

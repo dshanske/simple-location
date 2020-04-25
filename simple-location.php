@@ -119,7 +119,7 @@ class Simple_Location_Plugin {
 			'class-map-provider-wikimedia.php', // Wikimedia
 			'class-map-provider-locationiq.php', // LocationIQ
 			'class-geo-provider-nominatim.php', // Nominatim
-			'class-geo-provider-mapquest.php', /// MapQuest Nominatim
+			'class-geo-provider-mapquest.php', // MapQuest Nominatim
 			'class-geo-provider-google.php', // Google
 			'class-geo-provider-here.php', // HERE
 			'class-geo-provider-bing.php', // Bing

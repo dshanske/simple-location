@@ -74,7 +74,6 @@ abstract class Sloc_Provider {
 
 	/**
 	 * Get Name
-	 *
 	 */
 	public function get_name() {
 		return $this->name;
@@ -83,7 +82,6 @@ abstract class Sloc_Provider {
 
 	/**
 	 * Get Description
-	 *
 	 */
 	public function get_description() {
 		return $this->description;
@@ -91,7 +89,6 @@ abstract class Sloc_Provider {
 
 	/**
 	 * Get Slug
-	 *
 	 */
 	public function get_slug() {
 		return $this->slug;

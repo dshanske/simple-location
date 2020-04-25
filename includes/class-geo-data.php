@@ -738,7 +738,8 @@ class WP_Geo_Data {
 			$geodata['user_ID'] = $object->ID;
 		}
 
-		/*	if ( empty( $geodata['address'] ) ) {
+		/*
+		  if ( empty( $geodata['address'] ) ) {
 			if ( empty( $geodata['longitude'] ) ) {
 				return null;
 			}
@@ -985,7 +986,6 @@ class WP_Geo_Data {
  * closed due privacy concerns. Updated to match location storage for this just in case
  * and to use their function over my original one.
  *
- *
  * @param array|string $coordinate The coordinate to convert to degrees format.
  * @return float|false Coordinate in degrees format or false if failure
  */
@@ -1004,7 +1004,6 @@ if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
 
 /**
  * Convert the exif date format to a datetime object
- *
  *
  * @param string $str
  * @param string|DateTimeZone $timezone A timezone or offset string. Default is the WordPress timezone

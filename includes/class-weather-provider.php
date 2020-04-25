@@ -113,7 +113,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 		return $return;
 	}
 
-	/* Passes temperature and returns it either same or converted with units
+	/*
+	 Passes temperature and returns it either same or converted with units
 	 */
 	private function get_temp( $temperature ) {
 		if ( 'imperial' === $this->units ) {

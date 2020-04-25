@@ -63,7 +63,8 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions( $time = null ) {
-		/* if ( empty( $this->api ) ) {
+		/*
+		 if ( empty( $this->api ) ) {
 			return array();
 		} */
 		$return = array();

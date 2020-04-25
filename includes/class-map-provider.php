@@ -84,7 +84,6 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Return a URL for a static map
 	 *
 	 * @return string URL of MAP
-	 *
 	 */
 	abstract public function get_the_static_map();
 
@@ -94,7 +93,6 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * @param $locations Array of latitude and longitudes
 	 * @return string URL of MAP
-	 *
 	 */
 	abstract public function get_archive_map( $locations );
 
@@ -102,7 +100,6 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Return a URL for a link to a map
 	 *
 	 * @return string URL of link to a map
-	 *
 	 */
 	abstract public function get_the_map_url();
 

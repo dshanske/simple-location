@@ -43,7 +43,6 @@ abstract class Geo_Provider extends Sloc_Provider {
 
 	/**
 	 * Get Name
-	 *
 	 */
 	public function get_name() {
 		return $this->name;
@@ -51,7 +50,6 @@ abstract class Geo_Provider extends Sloc_Provider {
 
 	/**
 	 * Return elevation based on longitude and latitude
-	 *
 	 */
 	abstract public function elevation();
 
@@ -86,10 +84,10 @@ abstract class Geo_Provider extends Sloc_Provider {
 	}
 
 		/**
-	 * Return Timezone Data for a Set of Coordinates
-	 *
-	 * @return array|boolean Return Timezone Data or False if Failed
-	 */
+		 * Return Timezone Data for a Set of Coordinates
+		 *
+		 * @return array|boolean Return Timezone Data or False if Failed
+		 */
 
 	protected function timezone() {
 		$timezone = Loc_Timezone::timezone_for_location( $this->latitude, $this->longitude );
