@@ -4,8 +4,9 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3192a5fe685e2d64610083d474fbb273",
-    "packages": [
+    "content-hash": "3458e2872d92a99cf420d962645ffee7",
+    "packages": [],
+    "packages-dev": [
         {
             "name": "composer/installers",
             "version": "v1.9.0",
@@ -144,53 +145,6 @@
             "time": "2020-04-07T06:57:05+00:00"
         },
         {
-            "name": "emcconville/google-map-polyline-encoding-tool",
-            "version": "v1.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/emcconville/google-map-polyline-encoding-tool.git",
-                "reference": "dbf3816936620b88f0fc4000fddd94b5ce13eadb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/emcconville/google-map-polyline-encoding-tool/zipball/dbf3816936620b88f0fc4000fddd94b5ce13eadb",
-                "reference": "dbf3816936620b88f0fc4000fddd94b5ce13eadb",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "4.1.*",
-                "satooshi/php-coveralls": "dev-master",
-                "squizlabs/php_codesniffer": "2.0.0a2"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/Polyline.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GNU"
-            ],
-            "authors": [
-                {
-                    "name": "Eric McConville",
-                    "email": "emcconville@emcconville.com"
-                }
-            ],
-            "description": "A simple class to handle polyline-encoding for Google Maps",
-            "keywords": [
-                "google",
-                "maps"
-            ],
-            "time": "2016-04-05T01:18:39+00:00"
-        }
-    ],
-    "packages-dev": [
-        {
             "name": "dealerdirect/phpcodesniffer-composer-installer",
             "version": "v0.6.2",
             "source": {
@@ -311,6 +265,51 @@
                 "instantiate"
             ],
             "time": "2019-10-21T16:45:58+00:00"
+        },
+        {
+            "name": "emcconville/google-map-polyline-encoding-tool",
+            "version": "v1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/emcconville/google-map-polyline-encoding-tool.git",
+                "reference": "dbf3816936620b88f0fc4000fddd94b5ce13eadb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/emcconville/google-map-polyline-encoding-tool/zipball/dbf3816936620b88f0fc4000fddd94b5ce13eadb",
+                "reference": "dbf3816936620b88f0fc4000fddd94b5ce13eadb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.1.*",
+                "satooshi/php-coveralls": "dev-master",
+                "squizlabs/php_codesniffer": "2.0.0a2"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Polyline.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GNU"
+            ],
+            "authors": [
+                {
+                    "name": "Eric McConville",
+                    "email": "emcconville@emcconville.com"
+                }
+            ],
+            "description": "A simple class to handle polyline-encoding for Google Maps",
+            "keywords": [
+                "google",
+                "maps"
+            ],
+            "time": "2016-04-05T01:18:39+00:00"
         },
         {
             "name": "gettext/gettext",

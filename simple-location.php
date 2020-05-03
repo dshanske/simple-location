@@ -8,11 +8,13 @@
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
  * Domain Path:  /languages
+ *
+ * @package Simple_Location
  */
 
 add_action( 'plugins_loaded', array( 'Simple_Location_Plugin', 'init' ) );
 
-// Activation and Deactivation Hooks
+// Activation and Deactivation Hooks.
 register_activation_hook( __FILE__, array( 'Simple_Location_Plugin', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactivate' ) );
 
@@ -21,20 +23,59 @@ if ( ! defined( 'SLOC_PER_PAGE' ) ) {
 }
 
 
-
+/**
+ * Simple Location Base Class.
+ *
+ * Loads plugin.
+ *
+ * @since 1.0.0
+ */
 class Simple_Location_Plugin {
+	 /**
+	  * Version number
+	  *
+	  * @since 1.0.0
+	  * @var string
+	  */
 	public static $version = '4.0.6';
 
+
+	/**
+	 * Plugin Activation Function.
+	 *
+	 * Triggered on Plugin Activation to add rewrite rules.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function activate() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
 		WP_Geo_Data::rewrite();
 		flush_rewrite_rules();
 	}
 
+
+	/**
+	 * Plugin Deactivation Function.
+	 *
+	 * Triggered on Plugin Deactivation to flush rewrite rules.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function deactivate() {
 		flush_rewrite_rules();
 	}
 
+
+	/**
+	 * Load files.
+	 *
+	 * Checks for the existence of and loads files.
+
+	 * @param array  $files An array of filenames.
+	 * @param string $dir The directory the files can be found in, relative to the current directory.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function load( $files, $dir = 'includes/' ) {
 		if ( empty( $files ) ) {
 			return;
@@ -49,38 +90,46 @@ class Simple_Location_Plugin {
 		}
 	}
 
+
+	/**
+	 * Plugin Initializaton Function.
+	 *
+	 * Meant to be attached to plugins_loaded hook.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function init() {
 
 		load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 		// Load stylesheets.
-		add_action( 'wp_enqueue_scripts', array( 'Simple_Location_Plugin', 'style_load' ) );
+		add_action( 'wp_enqueue_scripts', array( static::class, 'style_load' ) );
 
-		// Settings Link
-		add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( 'Simple_Location_Plugin', 'settings_link' ) );
+		// Settings Link.
+		add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( static::class, 'settings_link' ) );
 
-		// Add Privacy Policy
-		add_action( 'admin_init', array( 'Simple_Location_Plugin', 'privacy_declaration' ) );
+		// Add Privacy Policy.
+		add_action( 'admin_init', array( static::class, 'privacy_declaration' ) );
 
-		// Core Load Files
+		// Core Load Files.
 		$core = array(
-			'class-geo-data.php', // Register Metadata Functions
-			'class-venue-taxonomy.php', // Venue Taxonomy
-			'class-sloc-provider.php', // Base Provider Class
-			'class-map-provider.php', // Map Provider Class
-			'class-geo-provider.php', // Geo Provider Class
-			'class-weather-provider.php', // Weather Provider Class
-			'class-location-provider.php', // Location Provider Class
-			'class-sloc-weather-widget.php', // Weather Widget
-			'class-sloc-station-widget.php', // Weather Station Widget
-			'class-sloc-airport-widget.php', // Airport Weather Widget
-			'class-sloc-lastseen-widget.php', // Last Location Seen Widget
-			'class-rest-geo.php', // REST endpoint for Geo
-			'class-loc-config.php', // Configuration and Settings Page
-			'class-loc-metabox.php', // Location Metabox
-			'class-loc-view.php', // Location View functionality
+			'class-geo-data.php', // Register Metadata Functions.
+			'class-venue-taxonomy.php', // Venue Taxonomy.
+			'class-sloc-provider.php', // Base Provider Class.
+			'class-map-provider.php', // Map Provider Class.
+			'class-geo-provider.php', // Geo Provider Class.
+			'class-weather-provider.php', // Weather Provider Class.
+			'class-location-provider.php', // Location Provider Class.
+			'class-sloc-weather-widget.php', // Weather Widget.
+			'class-sloc-station-widget.php', // Weather Station Widget.
+			'class-sloc-airport-widget.php', // Airport Weather Widget.
+			'class-sloc-lastseen-widget.php', // Last Location Seen Widget.
+			'class-rest-geo.php', // REST endpoint for Geo.
+			'class-loc-config.php', // Configuration and Settings Page.
+			'class-loc-metabox.php', // Location Metabox.
+			'class-loc-view.php', // Location View functionality.
 			'class-timezone-result.php',
-			'class-astronomical-calculator.php', // Calculates sunrise sunset etc
+			'class-astronomical-calculator.php', // Calculates sunrise sunset etc.
 			'class-location-plugins.php',
 			'class-location-zones.php',
 			'class-loc-timezone.php',
@@ -89,46 +138,54 @@ class Simple_Location_Plugin {
 			'compat-functions.php',
 		);
 
-		// Load Core Files
+		// Load Core Files.
 		self::load( $core );
-		add_action( 'widgets_init', array( 'Simple_Location_Plugin', 'widgets_init' ) );
+		add_action( 'widgets_init', array( static::class, 'widgets_init' ) );
 
 		$libraries = array(
-			'Polyline.php', // Polyline Encoding Library
+			'Polyline.php', // Polyline Encoding Library.
 		);
 		self::load( $libraries, 'lib/' );
 
-		// Load Providers
+		// Load Providers.
 		$providers = array(
-			'class-location-provider-dummy.php', // Dummy Location Provider
-			'class-location-provider-airport.php', // Airport Location Provider
-			'class-location-provider-compass.php', // Compass https://github.com/aaronpk/Compass Location Provder
-			'class-weather-provider-openweathermap.php', // Open Weather Map
-			'class-weather-provider-darksky.php', // Dark Sky
-			'class-weather-provider-nwsus.php', // National Weather Service (US)
-			'class-weather-provider-weatherstack.php', // weatherstack.com
-			'class-weather-provider-weatherbit.php', // weatherbit.com
-			'class-weather-provider-here.php', // HERE
-			'class-weather-provider-metoffice.php', // Met Office
-			'class-weather-provider-aeris.php', // Aeris Weather
-			'class-map-provider-mapbox.php', // MapBox
-			'class-map-provider-google.php', // Google
-			'class-map-provider-bing.php', // Bing
-			'class-map-provider-mapquest.php', // MapQuest
-			'class-map-provider-here.php', // HERE
-			'class-map-provider-wikimedia.php', // Wikimedia
-			'class-map-provider-locationiq.php', // LocationIQ
-			'class-geo-provider-nominatim.php', // Nominatim
-			'class-geo-provider-mapquest.php', // MapQuest Nominatim
-			'class-geo-provider-google.php', // Google
-			'class-geo-provider-here.php', // HERE
-			'class-geo-provider-bing.php', // Bing
-			'class-geo-provider-locationiq.php', // LocationIQ
-			'class-geo-provider-geonames.php', // Geonames
+			'class-location-provider-dummy.php', // Dummy Location Provider.
+			'class-location-provider-airport.php', // Airport Location Provider.
+			'class-location-provider-compass.php', // Compass https://github.com/aaronpk/Compass Location Provder.
+			'class-weather-provider-openweathermap.php', // Open Weather Map.
+			'class-weather-provider-darksky.php', // Dark Sky.
+			'class-weather-provider-nwsus.php', // National Weather Service (US).
+			'class-weather-provider-weatherstack.php', // weatherstack.com.
+			'class-weather-provider-weatherbit.php', // weatherbit.com.
+			'class-weather-provider-here.php', // HERE.
+			'class-weather-provider-metoffice.php', // Met Office.
+			'class-weather-provider-aeris.php', // Aeris Weather.
+			'class-map-provider-mapbox.php', // MapBox.
+			'class-map-provider-google.php', // Google.
+			'class-map-provider-bing.php', // Bing.
+			'class-map-provider-mapquest.php', // MapQuest.
+			'class-map-provider-here.php', // HERE.
+			'class-map-provider-wikimedia.php', // Wikimedia.
+			'class-map-provider-locationiq.php', // LocationIQ.
+			'class-geo-provider-nominatim.php', // Nominatim.
+			'class-geo-provider-mapquest.php', // MapQuest Nominatim.
+			'class-geo-provider-google.php', // Google.
+			'class-geo-provider-here.php', // HERE.
+			'class-geo-provider-bing.php', // Bing.
+			'class-geo-provider-locationiq.php', // LocationIQ.
+			'class-geo-provider-geonames.php', // Geonames.
 		);
 		self::load( $providers );
 	}
 
+
+	/**
+	 * Widgets Initializaton Function.
+	 *
+	 * Registers Widgets.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function widgets_init() {
 		register_widget( 'Sloc_Weather_Widget' );
 		register_widget( 'Sloc_Station_Widget' );
@@ -148,12 +205,23 @@ class Simple_Location_Plugin {
 	}
 
 	/**
-	 * Loads the Stylesheet for the Plugin.
+	 * Stylesheet Load Function.
+	 *
+	 * Meant to be attached to plugins_loaded hook.
+	 *
+	 * @since 1.0.0
 	 */
 	public static function style_load() {
 		wp_enqueue_style( 'simple-location', plugin_dir_url( __FILE__ ) . 'css/location.min.css', array(), self::$version );
 	}
 
+	/**
+	 * Privacy Declaration.
+	 *
+	 * Adds a privacy policy declaration to the WordPress Privacy system.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function privacy_declaration() {
 		if ( function_exists( 'wp_add_privacy_policy_content' ) ) {
 			$content = __(
@@ -170,13 +238,34 @@ class Simple_Location_Plugin {
 
 }
 
+
 if ( ! function_exists( 'ifset' ) ) {
+
+	/**
+	 * Compat for the null coaslescing operator.
+	 *
+	 * Returns $var if set otherwise $default.
+	 *
+	 * @param mixed $var A variable.
+	 * @param mixed $default Return if $var is not set. Defaults to false.
+	 * @return mixed $return The returned value.
+	 */
 	function ifset( &$var, $default = false ) {
 		return isset( $var ) ? $var : $default;
 	}
 }
 
 if ( ! function_exists( 'ifset_round' ) ) {
+	/**
+	 * Returns if set and round.
+	 *
+	 * Returns $var, rounding it if it is a float if set otherwise $default.
+	 *
+	 * @param mixed $var A variable.
+	 * @param mixed $precision Rounds floats to a precision. Defaults to 0.
+	 * @param mixed $default Returned if var is not set. Defaults to false.
+	 * @return mixed $return The returned value.
+	 */
 	function ifset_round( &$var, $precision = 0, $default = false ) {
 		$return = ifset( $var, $default );
 		if ( is_float( $return ) ) {

@@ -1,17 +1,61 @@
 <?php
+/**
+ * Plugin Configuration.
+ *
+ * @package Simple_Location
+ */
 
 add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10 );
 add_filter( 'plugins_loaded', array( 'Loc_Config', 'init' ), 11 );
 add_action( 'admin_menu', array( 'Loc_Config', 'admin_menu' ), 10 );
 
+/**
+ * Plugin Configuration Class.
+ *
+ * Registers Settings and Handles Forms.
+ *
+ * @since 1.0.0
+ */
 class Loc_Config {
 
-	private static $maps     = array(); // Store Map Providers
-	private static $geo      = array(); // Reverse Lookup Provider
-	private static $location = array(); // Geolocation Provider
-	private static $weather  = array(); // Weather Provider
+	 /**
+	  * Store Map Providers.
+	  *
+	  * @since 1.0.0
+	  * @var array
+	  */
+	private static $maps = array();
+
+	 /**
+	  * Store Reverse Lookup Providers.
+	  *
+	  * @since 1.0.0
+	  * @var array
+	  */
+	private static $geo = array();
+
+	 /**
+	  * Store Geolocation Providers.
+	  *
+	  * @since 1.0.0
+	  * @var array
+	  */
+	private static $location = array();
+
+	 /**
+	  * Store Weather Providers.
+	  *
+	  * @since 1.0.0
+	  * @var array
+	  */
+	private static $weather = array();
+
+
+
 	/**
-	 * Add Settings to the Discussions Page
+	 * Register Settings Configuration.
+	 *
+	 * @since 1.0.0
 	 */
 	public static function init() {
 		self::register_general_settings();
@@ -19,45 +63,51 @@ class Loc_Config {
 		self::register_map_settings();
 	}
 
+
+	/**
+	 * Register General Settings.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function register_general_settings() {
 		register_setting(
-			'simloc', // option group
-			'geo_public', // option name
+			'simloc', // option group.
+			'geo_public', // option name.
 			array(
 				'type'         => 'number',
 				'description'  => 'Default Setting for Geodata',
 				'show_in_rest' => true,
 				'default'      => 1,
-				// WordPress Geodata defaults to public but this allows a global override for new posts
+				// WordPress Geodata defaults to public but this allows a global override for new posts.
 			)
 		);
 		register_setting(
-			'simloc', // option group
-			'sloc_last_report', // option name
+			'simloc', // option group.
+			'sloc_last_report', // option name.
 			array(
 				'type'         => 'boolean',
 				'description'  => 'Update Authors Last Reported Location on New Post',
 				'show_in_rest' => true,
 				'default'      => true,
-				// If this is true then each time a post is made with location properties it will update the user location
+				// If this is true then each time a post is made with location properties it will update the user location.
 			)
 		);
 
 		register_setting(
-			'simloc', // option group
-			'sloc_auto_micropub', // option name
+			'simloc', // option group.
+			'sloc_auto_micropub', // option name.
 			array(
 				'type'         => 'boolean',
 				'description'  => 'Add Location from Geolocation Provider Automatically on Micropub Posts',
 				'show_in_rest' => true,
 				'default'      => false,
-				// If this is true then each time a post is made without location it will add it set automatically to private
+				// If this is true then each time a post is made without location it will add it set automatically to private.
 			)
 		);
 
 		register_setting(
-			'simloc', // option group
-			'sloc_map_display', // option name
+			'simloc', // option group.
+			'sloc_map_display', // option name.
 			array(
 				'type'         => 'boolean',
 				'description'  => 'Show Maps on Home and Archive Pages. Only on single if false',
@@ -67,8 +117,8 @@ class Loc_Config {
 		);
 
 		register_setting(
-			'simloc', // option group
-			'sloc_measurements', // option name
+			'simloc', // option group.
+			'sloc_measurements', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Units to Display',
@@ -78,10 +128,16 @@ class Loc_Config {
 		);
 	}
 
+
+	/**
+	 * Register Provider Settings.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function register_provider_settings() {
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_map_provider', // option name
+			'sloc_providers', // option group.
+			'sloc_map_provider', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Map Provider',
@@ -90,8 +146,8 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_geo_provider', // option name
+			'sloc_providers', // option group.
+			'sloc_geo_provider', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Geo Lookup Provider',
@@ -100,8 +156,8 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_geolocation_provider', // option name
+			'sloc_providers', // option group.
+			'sloc_geolocation_provider', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Geolocation Provider',
@@ -110,8 +166,8 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_weather_provider', // option name
+			'sloc_providers', // option group.
+			'sloc_weather_provider', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Weather Provider',
@@ -121,6 +177,12 @@ class Loc_Config {
 		);
 	}
 
+
+	/**
+	 * Register Map Settings.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function register_map_settings() {
 		global $content_width;
 		if ( $content_width && $content_width > 1 ) {
@@ -129,8 +191,8 @@ class Loc_Config {
 			$width = 1024;
 		}
 		register_setting(
-			'simloc', // option group
-			'sloc_width', // option name
+			'simloc', // option group.
+			'sloc_width', // option name.
 			array(
 				'type'         => 'number',
 				'description'  => 'Simple Location Map Width',
@@ -139,8 +201,8 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // option group
-			'sloc_aspect', // option name
+			'simloc', // option group.
+			'sloc_aspect', // option name.
 			array(
 				'type'         => 'number',
 				'description'  => 'Simple Location Map Aspect Ratio',
@@ -149,8 +211,8 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // option group
-			'sloc_zoom', // option name
+			'simloc', // option group.
+			'sloc_zoom', // option name.
 			array(
 				'type'         => 'number',
 				'description'  => 'Simple Location Map Zoom',
@@ -159,8 +221,8 @@ class Loc_Config {
 			)
 		);
 		register_setting(
-			'simloc', // option group
-			'sloc_altitude', // option name
+			'simloc', // option group.
+			'sloc_altitude', // option name.
 			array(
 				'type'         => 'number',
 				'description'  => 'Simple Location Height After Which Altitude would be displayed(in meters)',
@@ -171,6 +233,15 @@ class Loc_Config {
 
 	}
 
+
+	/**
+	 * Register a Provider.
+	 *
+	 * @param object $object Provider.
+	 * @return boolean True if successful.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function register_provider( $object ) {
 		if ( ! $object instanceof Sloc_Provider ) {
 			return false;
@@ -187,22 +258,34 @@ class Loc_Config {
 		return true;
 	}
 
+
+	/**
+	 * Determine default for measurement.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function measurement_default() {
-		// I cannot foresee every need for imperial but can cover US
+		// I cannot foresee every need but the US defaults to imperial.
 		if ( 'en_US' === get_locale() ) {
 			return 'imperial';
 		}
 		return 'si';
 	}
 
+
+	/**
+	 * Setup administrative menu.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function admin_menu() {
 		// If the IndieWeb Plugin is installed use its menu.
 		if ( class_exists( 'IndieWeb_Plugin' ) ) {
 			$hook = add_submenu_page(
 				'indieweb',
-				__( 'Simple Location', 'simple-location' ), // page title
-				__( 'Location', 'simple-location' ), // menu title
-				'manage_options', // access capability
+				__( 'Simple Location', 'simple-location' ), // page title.
+				__( 'Location', 'simple-location' ), // menu title.
+				'manage_options', // access capability.
 				'simloc',
 				array( 'Loc_Config', 'simloc_options' )
 			);
@@ -217,6 +300,12 @@ class Loc_Config {
 		}
 	}
 
+
+	/**
+	 * Generate Options Page.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function simloc_options() {
 		$posts = get_posts(
 			array(
@@ -293,11 +382,27 @@ class Loc_Config {
 		<?php
 	}
 
+
+	/**
+	 * Echoes link for tab on page
+	 *
+	 * @param string $tab The id of the tab.
+	 * @param string $name The label of the tab.
+	 * @param string $active Which tab is active.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function tab_link( $tab, $name, $active = 'general' ) {
 		$url    = add_query_arg( 'tab', $tab, menu_page_url( 'simloc', false ) );
 		$active = ( $active === $tab ) ? ' nav-tab-active' : '';
 		printf( '<a href="%1$s" class="nav-tab%2$s">%3$s</a>', esc_url( $url ), esc_attr( $active ), esc_html( $name ) );
 	}
+
+	/**
+	 * Initialize Settings Fields.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function admin_init() {
 		$map_provider      = get_option( 'sloc_map_provider' );
 		$weather_provider  = get_option( 'sloc_weather_provider' );
@@ -311,54 +416,54 @@ class Loc_Config {
 			'simloc'
 		);
 		add_settings_field(
-			'geo_public', // id
-			__( 'Default Visibility for Location', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_general', // settings section
+			'geo_public', // id.
+			__( 'Default Visibility for Location', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_general', // settings section.
 			array(
 				'label_for' => 'geo_public',
 				'providers' => self::geo_public(),
 			)
 		);
 		add_settings_field(
-			'sloc_last_report', // id
-			__( 'When Making a New Post, update the Author with Posts Location', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'checkbox_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_general', // settings section
+			'sloc_last_report', // id.
+			__( 'When Making a New Post, update the Author with Posts Location', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_general', // settings section.
 			array(
 				'label_for' => 'sloc_last_report',
 			)
 		);
 
 		add_settings_field(
-			'sloc_map_display', // id
-			__( 'Show Maps on Home and Archive Pages Not Just Single Posts', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'checkbox_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_general', // settings section
+			'sloc_map_display', // id.
+			__( 'Show Maps on Home and Archive Pages Not Just Single Posts', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_general', // settings section.
 			array(
 				'label_for' => 'sloc_map_display',
 			)
 		);
 
 		add_settings_field(
-			'sloc_auto_micropub', // id
-			__( 'Automatically lookup location from supported geolocation provider for Micropub posts', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'checkbox_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_general', // settings section
+			'sloc_auto_micropub', // id.
+			__( 'Automatically lookup location from supported geolocation provider for Micropub posts', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_general', // settings section.
 			array(
 				'label_for' => 'sloc_auto_micropub',
 			)
 		);
 		add_settings_field(
-			'sloc_measurements', // id
-			__( 'Unit of Measure', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'measure_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_general', // settings section
+			'sloc_measurements', // id.
+			__( 'Unit of Measure', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'measure_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_general', // settings section.
 			array(
 				'label_for' => 'sloc_measurements',
 			)
@@ -371,11 +476,11 @@ class Loc_Config {
 		);
 
 		add_settings_field(
-			'sloc_map_provider', // id
-			__( 'Map Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'sloc_providers', // option group
-			'sloc_providers', // settings section
+			'sloc_map_provider', // id.
+			__( 'Map Provider', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
 			array(
 				'label_for'   => 'sloc_map_provider',
 				'description' => __( 'Provides maps to display on posts and pages', 'simple-location' ),
@@ -383,11 +488,11 @@ class Loc_Config {
 			)
 		);
 		add_settings_field(
-			'sloc_geo_provider', // id
-			__( 'Geo Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'sloc_providers', // option group
-			'sloc_providers', // settings section
+			'sloc_geo_provider', // id.
+			__( 'Geo Provider', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
 			array(
 				'label_for'   => 'sloc_geo_provider',
 				'description' => __( 'Services that Look up an address from coordinates or vice versa', 'simple-location' ),
@@ -395,11 +500,11 @@ class Loc_Config {
 			)
 		);
 		add_settings_field(
-			'sloc_geolocation_provider', // id
-			__( 'Geolocation Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'sloc_providers', // option group
-			'sloc_providers', // settings section
+			'sloc_geolocation_provider', // id.
+			__( 'Geolocation Provider', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
 			array(
 				'label_for'   => 'sloc_geolocation_provider',
 				'description' => __( 'Services that allow your site to figure out your location', 'simple-location' ),
@@ -407,11 +512,11 @@ class Loc_Config {
 			)
 		);
 		add_settings_field(
-			'sloc_weather_provider', // id
-			__( 'Weather Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'provider_callback' ), // display callback
-			'sloc_providers', // option group
-			'sloc_providers', // settings section
+			'sloc_weather_provider', // id.
+			__( 'Weather Provider', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
 			array(
 				'label_for'   => 'sloc_weather_provider',
 				'description' => __( 'Retrieves Weather Data about a Location', 'simple-location' ),
@@ -427,22 +532,22 @@ class Loc_Config {
 		);
 
 		add_settings_field(
-			'width', // id
-			__( 'Default Map Width', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'number_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
+			'width', // id.
+			__( 'Default Map Width', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'number_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_map', // settings section.
 			array(
 				'label_for' => 'sloc_width',
 			)
 		);
 
 		add_settings_field(
-			'aspect', // id
-			__( 'Default Map Aspect Ratio', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'values_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
+			'aspect', // id.
+			__( 'Default Map Aspect Ratio', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'values_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_map', // settings section.
 			array(
 				'label_for' => 'sloc_aspect',
 				'list'      => self::get_default_aspect_ratio(),
@@ -450,11 +555,11 @@ class Loc_Config {
 		);
 
 		add_settings_field(
-			'zoom', // id
-			__( 'Default Map Zoom Level', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'values_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_map', // settings section
+			'zoom', // id.
+			__( 'Default Map Zoom Level', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'values_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_map', // settings section.
 			array(
 				'label_for' => 'sloc_zoom',
 				'list'      => self::get_zoom_levels(),
@@ -462,11 +567,11 @@ class Loc_Config {
 		);
 
 		add_settings_field(
-			'altitude', // id
-			__( 'Altitude will Display if Above This Height(in meters)', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'number_callback' ), // display callback
-			'simloc', // settings page
-			'sloc_general', // settings section
+			'altitude', // id.
+			__( 'Altitude will Display if Above This Height(in meters)', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'number_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_general', // settings section.
 			array(
 				'label_for' => 'sloc_altitude',
 			)
@@ -487,6 +592,14 @@ class Loc_Config {
 		);
 	}
 
+
+	/**
+	 * Tries to display easy to understand strings for zoom levels.
+	 *
+	 * @return array $levels List of Zoom Levels with Names.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function get_zoom_levels() {
 		return array(
 			'20' => __( 'Building', 'simple-location' ),
@@ -502,6 +615,14 @@ class Loc_Config {
 		);
 	}
 
+
+	/**
+	 * Preset Aspect Ratios
+	 *
+	 * @return array $aspects An array of aspect ratios with textual labels.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function get_default_aspect_ratio() {
 		return apply_filters(
 			'default_sloc_aspect_ratios',
@@ -515,6 +636,17 @@ class Loc_Config {
 		);
 	}
 
+
+	/**
+	 * Echos a checkbox.
+	 *
+	 * @param array $args {
+	 *  Arguments for a checkbox.
+	 *  @type string $label_for Label for Checkbox.
+	 * }
+	 *
+	 * @since 1.0.0
+	 */
 	public static function checkbox_callback( array $args ) {
 		$name    = $args['label_for'];
 		$checked = get_option( $name );
@@ -522,11 +654,34 @@ class Loc_Config {
 		printf( '<input name="%1s" type="checkbox" value="1" %2s />', $name, checked( 1, $checked, false ) ); // phpcs:ignore
 	}
 
+
+	/**
+	 * Echos a number input.
+	 *
+	 * @param array $args {
+	 *  Arguments for a numberic input.
+	 *  @type string $label_for Label for a Number.
+	 * }
+	 *
+	 * @since 1.0.0
+	 */
 	public static function number_callback( array $args ) {
 		$name = $args['label_for'];
 		printf( '<input name="%1s" type="number" min="0" step="1" size="4" class="small-text" value="%2s" />', $name, get_option( $name ) ); // phpcs:ignore
 	}
 
+
+	/**
+	 * Echos a text input.
+	 *
+	 * @param array $args {
+	 *  Arguments for a text input.
+	 *  @type string $label_for Label for Text Input.
+	 *  @type string $type Allows for text or url or other inputs.
+	 * }
+	 *
+	 * @since 1.0.0
+	 */
 	public static function string_callback( array $args ) {
 		$name = $args['label_for'];
 		if ( ! isset( $args['type'] ) ) {
@@ -535,11 +690,35 @@ class Loc_Config {
 		printf( '<input name="%1s" size="50" autocomplete="off" class="regular-text" type="%2s" value="%3s" />', $name, esc_attr( $args['type'] ), get_option( $name ) ); // phpcs:ignore
 	}
 
+
+	/**
+	 * Echos a textarea.
+	 *
+	 * @param array $args {
+	 *  Arguments for a textarea.
+	 *  @type string $label_for Label for textarea.
+	 * }
+	 *
+	 * @since 1.0.0
+	 */
 	public static function textarea_callback( array $args ) {
 		$name = $args['label_for'];
 		printf( '<textarea name="%1s" class="regular-text">%2$s</textarea>', $name, get_option( $name ) ); // phpcs:ignore
 	}
 
+
+	/**
+	 * Echos a select box of providers.
+	 *
+	 * @param array $args {
+	 *  Arguments for a checkbox.
+	 *  @type string $label_for Label for Select Box.
+	 *  @type string $description A description of what the selection is for.
+	 *  @type array $providers An array of providers.
+	 * }
+	 *
+	 * @since 1.0.0
+	 */
 	public static function provider_callback( $args ) {
 		$name        = $args['label_for'];
 		$description = ifset( $args['description'], '' );
@@ -558,10 +737,23 @@ class Loc_Config {
 		}
 	}
 
+
+	/**
+	 * See WP_Geo_Data::geo_public().
+	 *
+	 * @since 1.0.0
+	 */
 	public static function geo_public() {
 		return WP_Geo_Data::geo_public();
 	}
 
+
+	/**
+	 * Return list of map providers.
+	 *
+	 * @return array Array of providers.
+	 * @since 1.0.0
+	 */
 	public static function map_providers() {
 		$return = array();
 		foreach ( static::$maps as $map ) {
@@ -570,6 +762,13 @@ class Loc_Config {
 		return $return;
 	}
 
+
+	/**
+	 * Return list of geo providers.
+	 *
+	 * @return array Array of providers.
+	 * @since 1.0.0
+	 */
 	public static function geo_providers() {
 		$return = array();
 		foreach ( static::$geo as $g ) {
@@ -578,6 +777,13 @@ class Loc_Config {
 		return $return;
 	}
 
+
+	/**
+	 * Return list of geolocation providers.
+	 *
+	 * @return array Array of providers.
+	 * @since 1.0.0
+	 */
 	public static function geolocation_providers() {
 		$return = array(
 			'HTML5' => __( 'Ask your Web Browser for Your Location(requires HTTPS)', 'simple-location' ),
@@ -588,7 +794,13 @@ class Loc_Config {
 		return $return;
 	}
 
-
+	/**
+	 * Return list of weather providers.
+	 *
+	 * @param boolean $station Does this provider support stations.
+	 * @return array Array of providers.
+	 * @since 1.0.0
+	 */
 	public static function weather_providers( $station = false ) {
 		$return = array();
 		foreach ( static::$weather as $weather ) {
@@ -601,6 +813,13 @@ class Loc_Config {
 		return $return;
 	}
 
+
+	/**
+	 * Echo measurement unit choices.
+	 *
+	 * @param array $args Not currently used.
+	 * @since 1.0.0
+	 */
 	public static function measure_callback( array $args ) {
 		$text = get_option( 'sloc_measurements' );
 		echo '<select name="sloc_measurements">';
@@ -610,6 +829,16 @@ class Loc_Config {
 	}
 
 
+	/**
+	 * Echo list of styles.
+	 *
+	 * @param array $args {
+	 *  Arguments for the style list.
+	 *  @type string $label_for Label for Select Box.
+	 *  @type object $provider Provider object.
+	 * }
+	 * @since 1.0.0
+	 */
 	public static function style_callback( array $args ) {
 		$name     = $args['label_for'];
 		$provider = $args['provider'];
@@ -622,6 +851,17 @@ class Loc_Config {
 		self::select_callback( $name, $text, $styles );
 	}
 
+
+	/**
+	 * Echo list of values.
+	 *
+	 * @param array $args {
+	 *  Arguments for the value list.
+	 *  @type string $label_for Label for Select Box.
+	 *  @type array $list List of values.
+	 * }
+	 * @since 1.0.0
+	 */
 	public static function values_callback( array $args ) {
 		$name = $args['label_for'];
 		$list = $args['list'];
@@ -633,6 +873,15 @@ class Loc_Config {
 		self::select_callback( $name, $text, $list );
 	}
 
+
+	/**
+	 * Echo a select list.
+	 *
+	 * @param string $name Name of Select.
+	 * @param string $text Option to be selected.
+	 * @param array  $values Possible values and label of the options.
+	 * @since 1.0.0
+	 */
 	public static function select_callback( $name, $text, $values ) {
 		echo '<select name="' . esc_attr( $name ) . '">';
 		foreach ( $values as $key => $value ) {
@@ -641,9 +890,21 @@ class Loc_Config {
 		echo '</select><br /><br />';
 	}
 
+
+	/**
+	 * General settings header.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function sloc_general_settings() {
 	}
 
+
+	/**
+	 * Provider settings header.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function sloc_provider_settings() {
 		?>
 		<h4><?php esc_html_e( 'Simple Location Depends on Third Party Services', 'simple-location' ); ?></h4>
@@ -652,16 +913,34 @@ class Loc_Config {
 	}
 
 
+	/**
+	 * Map settings header.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function sloc_map_settings() {
 		esc_html_e( 'These settings dictate the display of maps', 'simple-location' );
 	}
 
+
+	/**
+	 * API settings header.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function sloc_api_settings() {
 		esc_html_e( 'In order for a specific service to work, you must add their API key below', 'simple-location' );
 	}
 
 
 
+	/**
+	 * Returns the current map provider.
+	 *
+	 * @return Map_Provider $return Map Provider.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function map_provider() {
 		$option = get_option( 'sloc_map_provider' );
 		if ( isset( static::$maps[ $option ] ) ) {
@@ -670,6 +949,14 @@ class Loc_Config {
 		return null;
 	}
 
+
+	/**
+	 * Returns the current reverse geo provider.
+	 *
+	 * @return Geo_Provider $return Geo Provider.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function geo_provider() {
 		$option = get_option( 'sloc_geo_provider' );
 		if ( isset( static::$geo[ $option ] ) ) {
@@ -678,6 +965,15 @@ class Loc_Config {
 		return null;
 	}
 
+
+	/**
+	 * Returns the current Geolocation provider.
+	 *
+	 * @param string $provider Name of Provider to Be Returned. Optional.
+	 * @return Geolocation_Provider $return Geolocation Provider.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function geolocation_provider( $provider = null ) {
 		if ( ! $provider ) {
 			$provider = get_option( 'sloc_geolocation_provider' );
@@ -691,6 +987,15 @@ class Loc_Config {
 		return null;
 	}
 
+
+	/**
+	 * Returns the current weather provider.
+	 *
+	 * @param string $provider Name of Provider to Be Returned. Optional.
+	 * @return Weather_Provider $return Weather Provider.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function weather_provider( $provider = null ) {
 		if ( ! $provider ) {
 			$provider = get_option( 'sloc_weather_provider' );
@@ -702,6 +1007,15 @@ class Loc_Config {
 	}
 }
 
+
+/**
+ * Re\gister a provider.
+ *
+ * @param Sloc_Provider $object Sloc Provider.
+ * @return boolean If successful return true.
+ *
+ * @since 1.0.0
+ */
 function register_sloc_provider( $object ) {
 	return Loc_Config::register_provider( $object );
 }

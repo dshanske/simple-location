@@ -17,11 +17,11 @@
 		"installer-name": "simple-location"
      },
     "require": {
-	"php": ">=5.4.0",
-	"composer/installers": "~1.0",
-      "emcconville/google-map-polyline-encoding-tool": "^1.3"
+	"php": ">=5.4.0"
     },
     "require-dev": {
+	"composer/installers": "~1.0",
+        "emcconville/google-map-polyline-encoding-tool": "^1.3",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.6",
 	"squizlabs/php_codesniffer": "^2.2 || ^3.0.2",
         "phpcompatibility/php-compatibility": "*",
@@ -30,7 +30,7 @@
       "php-parallel-lint/php-parallel-lint": "^1.2",
       "wp-cli/i18n-command": "^2.2",
       "sebastian/phpcpd": "^5.0",
-      "phpunit/phpunit": "^7.0"
+      "phpunit/phpunit": "^5.0 || ^6.0 || ^7.0"
     },
     "prefer-stable" : true,
     "scripts": {

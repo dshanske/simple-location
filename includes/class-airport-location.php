@@ -1,13 +1,45 @@
 <?php
-/*
- Provides Information about an Airport
+/**
+ * Provides Information about an Airport.
+ *
  * Functionality borrowed from https://github.com/aaronpk/Atlas
  * airports.csv is from
  * http://ourairports.com/data/
  * http://ourairports.com/data/airports.csv
+ *
+ * @package Simple_Location
  */
 
+/**
+ * Retrieves Airport Location Data.
+ *
+ * Extracts information from a rather large csv file to return information about an airport.
+ *
+ * @since 1.0.0
+ */
 class Airport_Location {
+
+	/**
+	 * Given an airport code return an array of information.
+	 *
+	 * Retusn.
+
+	 * @param string $code A 3 letter IATA airport code.
+	 * @return null|array $airport {
+	 *  An array of details about the airport.
+	 *
+	 *  @type string $code Provided Airport Code.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type float $elevation Elevation in meters.
+	 *  @type string $name Name of Airport.
+	 *  @type string $type Type of Airport.
+				small_airport, medium_airport, large_airport, heliport
+	 *  @type string $home_link URL of Airport Homepage.
+	 *  @type string $wikipedia_link URL of the Airport Homepage
+	 * }
+	 * @since 4.0.0
+	 */
 	public static function get( $code ) {
 		$airport = wp_cache_get( $code, 'airports' );
 		if ( $airport ) {

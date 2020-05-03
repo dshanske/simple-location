@@ -8,10 +8,25 @@
  */
 
 add_action( 'init', array( 'WP_Geo_Data', 'init' ), 1 );
-// Jetpack added Location support in 2017 remove it due conflict https://github.com/Automattic/jetpack/pull/9573 which created conflict
+// Jetpack added Location support in 2017 remove it due conflict https://github.com/Automattic/jetpack/pull/9573 which created conflict.
 add_filter( 'jetpack_tools_to_include', array( 'WP_Geo_Data', 'jetpack_remove' ), 11 );
 
+
+/**
+ * Handles Geo Functionality for WordPress objects.
+ *
+ * @since 1.0.0
+ */
 class WP_Geo_Data {
+
+
+	/**
+	 * Geo Data Initialization Function.
+	 *
+	 * Meant to be attached to init hook. Sets up all the geodata enhancements.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function init() {
 		$cls = get_called_class();
 		self::register_meta();
@@ -22,7 +37,7 @@ class WP_Geo_Data {
 		add_action( 'pre_get_posts', array( $cls, 'filter_location_posts' ) );
 		add_action( 'pre_get_comments', array( $cls, 'pre_get_comments' ) );
 
-		// Grab geo data from EXIF, if it's available
+		// Grab geo data from EXIF, if it's available.
 		$wp_version = get_bloginfo( 'version' );
 		if ( version_compare( $wp_version, '5.0', '>=' ) ) {
 			add_action( 'wp_read_image_metadata', array( $cls, 'exif_data' ), 10, 5 );
@@ -48,22 +63,32 @@ class WP_Geo_Data {
 
 		add_action( 'rest_api_init', array( $cls, 'rest_location' ) );
 
-		// Add Dropdown
+		// Add Dropdown.
 		add_action( 'restrict_manage_posts', array( $cls, 'geo_posts_dropdown' ), 12, 2 );
-		add_action( 'restrict_manage_comments', array( $cls, 'geo_comments_dropdown' ), 12, 2 );
+		add_action( 'restrict_manage_comments', array( $cls, 'geo_comments_dropdown' ), 12 );
 		add_filter( 'manage_posts_columns', array( $cls, 'add_location_admin_column' ) );
 		add_action( 'manage_posts_custom_column', array( $cls, 'manage_location_admin_column' ), 10, 2 );
 
 		add_filter( 'bulk_actions-edit-post', array( $cls, 'register_bulk_edit_location' ), 10 );
 		add_filter( 'handle_bulk_actions-edit-post', array( $cls, 'handle_bulk_edit_location' ), 10, 3 );
 
-		// Add the Same Post Type Support JetPack uses
+		// Add the Same Post Type Support JetPack uses.
 		add_post_type_support( 'post', 'geo-location' );
 		add_post_type_support( 'page', 'geo-location' );
 		add_post_type_support( 'attachment', 'geo-location' );
 
 	}
 
+
+	/**
+	 * Removes the Pagination from the Map Archive Page.
+	 *
+	 * Filter query variables.
+	 *
+	 * @param WP_Query $query Query Object.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function remove_maps_pagination( $query ) {
 		if ( ! array_key_exists( 'map', $query->query_vars ) ) {
 			return;
@@ -73,6 +98,15 @@ class WP_Geo_Data {
 		$query->set( 'order', 'ASC' );
 	}
 
+	/**
+	 * Routes Requests for the Query Variable Map to a Special Template.
+	 *
+	 * Routes Requests for the Query Varible Map to a Special Template.
+	 *
+	 * @param string $original_template The template that would normally be returned.
+	 * @return string $return The original template or the map archive
+	 * @since 4.0.0
+	 */
 	public static function map_archive_template( $original_template ) {
 		if ( false === get_query_var( 'map', false ) ) {
 			return $original_template;
@@ -94,12 +128,28 @@ class WP_Geo_Data {
 		return $original_template;
 	}
 
+	/**
+	 * Get a list of post IDs in the current query.
+	 *
+	 * This gets a list of all the IDs in the current query.
+	 *
+	 * @return $post_ids array of post ids.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function location_list() {
 		global $wp_query;
 		$post_ids = wp_list_pluck( $wp_query->posts, 'ID' );
 		return $post_ids;
 	}
 
+	/**
+	 * Get a list of all the posts with a public location
+	 *
+	 * In order to generate an archive map.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function get_archive_public_location_list() {
 		global $wp_query;
 		$locations = array();
@@ -123,12 +173,34 @@ class WP_Geo_Data {
 		return $locations;
 	}
 
+
+	/**
+	 * Register Bulk Edit of Location.
+	 *
+	 * Adds options to bulk edit location.
+	 *
+	 * @param array $actions List of Registered Bulk Edit Actions.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function register_bulk_edit_location( $actions ) {
 		$actions['location_public']  = __( 'Public Location', 'simple-location' );
 		$actions['location_private'] = __( 'Private Location', 'simple-location' );
 		return $actions;
 	}
 
+
+	/**
+	 * Bulk Edit Location Handler.
+	 *
+	 * Allows for Bulk Updating the location visibility.
+	 *
+	 * @param string $redirect_to Where to redirect once complete.
+	 * @param string $doaction The Action Being Requested.
+	 * @param array  $post_ids The list of Post IDs to act on.
+	 * @return string $redirect_to Return the Redirect_To Parameter
+	 * @since 1.0.0
+	 */
 	public static function handle_bulk_edit_location( $redirect_to, $doaction, $post_ids ) {
 		if ( in_array( $doaction, array( 'location_public', 'location_private' ), true ) ) {
 			$visibility = str_replace( 'location_', '', $doaction );
@@ -142,11 +214,29 @@ class WP_Geo_Data {
 
 
 
+	/**
+	 * This registers an admin column in the post edit screen.
+	 *
+	 * Allows a column for location visibility.
+	 *
+	 * @param array $columns Columns passed through from filter.
+	 * @return array $columns Column with extra property added.
+	 * @since 1.0.0
+	 */
 	public static function add_location_admin_column( $columns ) {
 		$columns['location'] = __( 'Location', 'simple-location' );
 		return $columns;
 	}
 
+	/**
+	 * Returns location visibility for the post edit screen column.
+	 *
+	 * Gets the location visibility property and echos it.
+	 *
+	 * @param string $column Which column is being rendered.
+	 * @param int    $post_id The post id for the row.
+	 * @since 1.0.0
+	 */
 	public static function manage_location_admin_column( $column, $post_id ) {
 		if ( 'location' === $column ) {
 			$geo_public = self::geo_public();
@@ -159,6 +249,16 @@ class WP_Geo_Data {
 		}
 	}
 
+
+	/**
+	 * Removes JetPacks Geolocation Features as they conflict with this plugin.
+	 *
+	 * Does an array search to find and remove geo-location.php.
+	 *
+	 * @param array $tools The tools being loaded by JetPack.
+	 * @return array $tools The tools array less the geolocation module.
+	 * @since 1.0.0
+	 */
 	public static function jetpack_remove( $tools ) {
 		$index = array_search( 'geo-location.php', $tools, true );
 		if ( false !== $index ) {
@@ -168,6 +268,15 @@ class WP_Geo_Data {
 	}
 
 
+
+	/**
+	 * Returns the strings for the visibility parameters.
+	 *
+	 * Returns translated strings for the geo_public property.
+	 *
+	 * @return array $return Array of possible geo_public values.
+	 * @since 1.0.0
+	 */
 	public static function geo_public() {
 		return array(
 			'private'   => esc_html__( 'Private', 'simple-location' ),
@@ -176,6 +285,17 @@ class WP_Geo_Data {
 		);
 	}
 
+
+	/**
+	 * Sets visibility property on any metadata capable object.
+	 *
+	 * Allows visibility to be set on posts, comments, terms, etc.
+	 *
+	 * @param string $type Object Type.
+	 * @param int    $id Post ID, Comment ID, User ID, etc.
+	 * @param string $status Visibility to be set.
+	 * @since 1.0.0
+	 */
 	public static function set_visibility( $type, $id, $status ) {
 		switch ( $status ) {
 			case '0':
@@ -197,6 +317,16 @@ class WP_Geo_Data {
 		update_metadata( $type, $id, 'geo_public', $status );
 	}
 
+	/**
+	 * Retrieves visibility property on any metadata capable object.
+	 *
+	 * Gets visibility from posts, comments, terms, etc.
+	 *
+	 * @param string $type Object Type.
+	 * @param int    $id Post ID, Comment ID, User ID, etc.
+	 * @return false|string $status Visibility.
+	 * @since 1.0.0
+	 */
 	public static function get_visibility( $type = null, $id = null ) {
 		$status = false;
 		if ( ! is_null( $type ) && ! is_null( $id ) ) {
@@ -223,6 +353,17 @@ class WP_Geo_Data {
 		}
 	}
 
+
+	/**
+	 * Offers a formatted list of visibility options for a select form object.
+	 *
+	 * Allows for echo or return.
+	 *
+	 * @param string  $public The value to set the select field to.
+	 * @param boolean $echo True to echo, false to return.
+	 * @return string $return Optional. Returns the created string.
+	 * @since 1.0.0
+	 */
 	public static function geo_public_select( $public, $echo = false ) {
 		$choices = self::geo_public();
 		$return  = '';
@@ -236,6 +377,18 @@ class WP_Geo_Data {
 
 	}
 
+
+	/**
+	 * Generates a dropdown
+	 *
+	 * Allows visibility to be filtered on post edit screen.
+	 *
+	 * @param string $post_type The post type slug.
+	 * @param string $which     The location of the extra table nav markup:
+	 *                          'top' or 'bottom' for WP_Posts_List_Table,
+	 *                          'bar' for WP_Media_List_Table.
+	 * @since 1.0.0
+	 */
 	public static function geo_posts_dropdown( $post_type, $which ) {
 		if ( 'post' !== $post_type ) {
 			return;
@@ -259,6 +412,14 @@ class WP_Geo_Data {
 		echo '</select>';
 	}
 
+
+	/**
+	 * Generates a comment dropdown.
+	 *
+	 * Allows visibility to be filtered on comment edit screen.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function geo_comments_dropdown() {
 		$selected = 'none';
 		if ( isset( $_REQUEST['geo'] ) ) {
@@ -279,10 +440,26 @@ class WP_Geo_Data {
 		echo '</select>';
 	}
 
+
+	/**
+	 * Echos the georss namespace for RSS feeds
+	 *
+	 * Added to the RSS templates.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function georss_namespace() {
 		echo PHP_EOL . 'xmlns:georss="http://www.georss.org/georss" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" ';
 	}
 
+
+	/**
+	 * Adds georss to an RSS feed.
+	 *
+	 * Adds georss to a single post on a RSS feed.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function georss_item() {
 		$geo = self::get_geodata();
 		if ( ! $geo ) {
@@ -308,6 +485,18 @@ class WP_Geo_Data {
 		}
 	}
 
+
+	/**
+	 * Adds geodata to a jsonfeed.
+	 *
+	 * Adds geodata in JSON format to a jsonfeed item.
+	 *
+	 * @param array   $feed_item A single post rendered for jsonfeed.
+	 * @param WP_Post $post The post object.
+	 * @return $feed_item The feed item with geojson added if applicable.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function json_feed_item( $feed_item, $post ) {
 		$geo = self::get_geodata( $post );
 		if ( ! $geo ) {
@@ -331,6 +520,14 @@ class WP_Geo_Data {
 		return $feed_item;
 	}
 
+
+	/**
+	 * Generates meta tags representing a location.
+	 *
+	 * Adds geo and ICBM meta tags to a single page.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function meta_tags() {
 		if ( ! is_single() ) {
 			return;
@@ -362,6 +559,16 @@ class WP_Geo_Data {
 		}
 	}
 
+
+	/**
+	 * Echos the uploaded date to the attachment edit page.
+	 *
+	 * Adds the uploaded date, if present to the attachment submit metabox.
+	 *
+	 * @param WP_Post $post The attachment.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function attachment_submitbox_metadata( $post ) {
 		$published = get_post_meta( $post->ID, 'mf2_published', true );
 		$date      = new DateTime( $published );
@@ -381,6 +588,18 @@ class WP_Geo_Data {
 		}
 	}
 
+
+	/**
+	 * Displays the Latitude, Longitude, and Address Description on the Attachment Page.
+	 *
+	 * Adds the fields for location data from an attachment.
+	 *
+	 * @param array   $form_fields See attachment_fields_to_edit filter in WordPress.
+	 * @param WP_Post $post Attachment post object.
+	 * @return array $form_fields Updated with extra fields.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function attachment_fields_to_edit( $form_fields, $post ) {
 		$geodata                    = self::get_geodata( $post );
 		$form_fields['geo_address'] = array(
@@ -412,6 +631,17 @@ class WP_Geo_Data {
 		return $form_fields;
 	}
 
+	/**
+	 * Takes data from image meta and moves it to the appropriate keys in the attachments post meta.
+	 *
+	 * This includes moving the created date and location to their own keys and looking up the location and setting the address description.
+	 *
+	 * @param array $meta Image metadata.
+	 * @param int   $post_id The attachment ID.
+	 * @return array $meta The updated metadata.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function attachment( $meta, $post_id ) {
 		if ( ! isset( $meta['image_meta'] ) ) {
 			return $meta;
@@ -453,8 +683,21 @@ class WP_Geo_Data {
 		return $meta;
 	}
 
-	/* Calculates the distance in meters between two coordinates */
 
+
+	/**
+	 * Calculates the distance in meters between two coordinates.
+	 *
+	 * Returns the distance between lat/lng1 and lat/lng2.
+	 *
+	 * @param float $lat1 Latitude 1.
+	 * @param float $lng1 Longitude 1.
+	 * @param float $lat2 Latitude 2.
+	 * @param float $lng2 Longitude 2.
+	 * @return float $meters Distance in meters between the two points.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function gc_distance( $lat1, $lng1, $lat2, $lng2 ) {
 		$lat1 = floatval( $lat1 );
 		$lng1 = floatval( $lng1 );
@@ -463,22 +706,52 @@ class WP_Geo_Data {
 		return ( 6378100 * acos( cos( deg2rad( $lat1 ) ) * cos( deg2rad( $lat2 ) ) * cos( deg2rad( $lng2 ) - deg2rad( $lng1 ) ) + sin( deg2rad( $lat1 ) ) * sin( deg2rad( $lat2 ) ) ) );
 	}
 
-	/* Advises if new coordinates are within x meters of center */
+	/**
+	 * Advises if the two points are within a radius.
+	 *
+	 * Returns if the distance is less than meters specified.
+	 *
+	 * @param float $lat1 Latitude 1.
+	 * @param float $lng1 Longitude 1.
+	 * @param float $lat2 Latitude 2.
+	 * @param float $lng2 Longitude 2.
+	 * @param int   $meters Meters.
+	 * @return boolean $radius Are the two points within $meters of center.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function in_radius( $lat1, $lng1, $lat2, $lng2, $meters = 50 ) {
 		return ( self::gc_distance( $lat1, $lng1, $lat2, $lng2 ) <= $meters );
 	}
 
+
+	/**
+	 * Enhance EXIF data.
+	 *
+	 * The EXIF data extracted by WordPress By Default Does Not Include location data and the date information is incorrect.
+	 *
+	 * @param array  $meta Image Metadata.
+	 * @param string $file Path to Image File.
+	 * @param int    $image_type Type of Image.
+	 * @param array  $iptc IPTC Data.
+	 * @param array  $exif EXIF Data.
+	 * @return array $meta Updated metadata.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function exif_data( $meta, $file, $image_type, $iptc = null, $exif = null ) {
 		if ( ! is_array( $exif ) && is_callable( 'exif_read_data' ) && in_array( $image_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ), true ) ) {
 			$exif = @exif_read_data( $file );
 		}
-		// If there is no Exif Version set return
+		// If there is no Exif Version set return.
 		if ( ! $exif['ExifVersion'] ) {
 			return $meta;
 		}
-		$version             = (int) $exif['ExifVersion'];
+		$version = (int) $exif['ExifVersion'];
+		// The changes between EXIF Versions mean different approaches are required.
 		$meta['ExifVersion'] = sanitize_text_field( $exif['ExifVersion'] );
 		if ( $version < 232 ) {
+			// Prior to Version 232, GPS coordinates were stored in several fields.
 			if ( ! empty( $exif['GPSLongitude'] ) && count( $exif['GPSLongitude'] ) === 3 && ! empty( $exif['GPSLongitudeRef'] ) ) {
 				$meta['location']['longitude'] = round( ( 'W' === $exif['GPSLongitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLongitude'] ), 7 );
 			}
@@ -487,6 +760,7 @@ class WP_Geo_Data {
 			}
 			$datetime = null;
 			if ( 231 === $version ) {
+				// In Version 231 the timezone offset was stored in a separate field.
 				foreach (
 					array(
 						'DateTimeOriginal'  => 'UndefinedTag:0x9011',
@@ -500,8 +774,9 @@ class WP_Geo_Data {
 					}
 				}
 			} else {
+				// Otherwise the timezone will be derived from the location.
 				if ( ! empty( $meta['location'] ) ) {
-					// Try to get the right timezone from the location
+					// Try to get the right timezone from the location.
 					$timezone = Loc_Timezone::timezone_for_location( $meta['location']['latitude'], $meta['location']['longitude'] );
 				} else {
 					$timezone = wp_timezone();
@@ -513,38 +788,68 @@ class WP_Geo_Data {
 				}
 			}
 			if ( $datetime ) {
+				// By default WordPress sets a timestamp that is wrong because it does not factor in timezone. This issues a correct timestamp.
 				$meta['created_timestamp'] = $datetime->getTimestamp();
-				$meta['created']           = $datetime->format( DATE_W3C );
+				// Also stores an ISO8601 formatted string.
+				$meta['created'] = $datetime->format( DATE_W3C );
 			}
 		} elseif ( 232 === $version ) {
+			// As of Version 232, the timezone is stored along with the datetime.
 			if ( ! empty( $exif['DateTimeOriginal'] ) ) {
 				$datetime = new DateTime( $exif['DateTimeOriginal'] );
 			} elseif ( ! empty( $exif['DateTimeDigitized'] ) ) {
 				$datetime = new DateTime( $exif['DateTimeDigitized'] );
 			}
 			if ( $datetime ) {
-				$meta['created']           = $datetime->getTimestamp();
+				// By default WordPress sets a timestamp that is wrong because it does not factor in timezone. This issues a correct timestamp.
+				$meta['created'] = $datetime->getTimestamp();
+				// Also stores an ISO8601 formatted string.
 				$meta['created_timestamp'] = $datetime->format( DATE_W3C );
 			}
 		}
 		if ( ! empty( $exif['GPSAltitude'] ) ) {
+			// Photos may also store an altitude.
 			$meta['location']['altitude'] = wp_exif_frac2dec( $exif['GPSAltitude'] ) * ( 1 === $exif['GPSAltitudeRef'] ? -1 : 1 );
 		}
 		return $meta;
 	}
 
+	/**
+	 * Adds rewrite endpoints.
+	 *
+	 * This adds rewrite endpoints for the plugin.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function rewrite() {
 		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES );
 		add_rewrite_endpoint( 'map', EP_ALL_ARCHIVES );
 	}
 
+
+	/**
+	 * Registers query variables.
+	 *
+	 * Registers a query variable.
+	 *
+	 * @param array $vars Query Variables.
+	 * @return array $vars Returns the updated array.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function query_var( $vars ) {
 		$vars[] = 'geo';
 		$vars[] = 'map';
 		return $vars;
 	}
 
-	// Return meta query arguments based on input
+	/**
+	 * Return meta query arguments based on input.
+	 *
+	 * @param array $geo WP_Query arguments.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function filter_geo_query( $geo ) {
 		$args   = array(
 			'relation' => 'OR',
@@ -582,6 +887,14 @@ class WP_Geo_Data {
 		}
 	}
 
+
+	/**
+	 * Filters Location in Posts.
+	 *
+	 * @param WP_Query $query Query Object.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function filter_location_posts( $query ) {
 		if ( ! array_key_exists( 'geo', $query->query_vars ) ) {
 			return;
@@ -594,6 +907,14 @@ class WP_Geo_Data {
 		}
 	}
 
+
+	/**
+	 * Filters Location in Comments.
+	 *
+	 * @param WP_Query $query Query Object.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function pre_get_comments( $query ) {
 		if ( ! isset( $_REQUEST['geo'] ) ) {
 			return;
@@ -606,16 +927,59 @@ class WP_Geo_Data {
 		}
 	}
 
+	/**
+	 * Sanitize Floats.
+	 *
+	 * @param float $input Float input.
+	 * @return $input Sanitized Float Input.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function sanitize_float( $input ) {
 		return filter_var( $input, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION );
 	}
 
+
+
+	/**
+	 * Sanitize and round coordinates.
+	 *
+	 * @param string $coordinate Coordinate.
+	 * @return float $coordinate Sanitized, rounded and converted coordinate.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function clean_coordinate( $coordinate ) {
 		$pattern = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
 		preg_match( $pattern, $coordinate, $matches );
 		return round( (float) $matches[0], 7 );
 	}
 
+
+
+	/**
+	 * Set GeoData on an Object.
+	 *
+	 * @param mixed $object Can be WP_Comment, WP_User, WP_Post, WP_Term, or int which will be considered a post id.
+	 * @param array $geodata {
+	 *  An array of details about a location.
+	 *
+	 *  @type float $latitude Decimal Latitude.
+	 *  @type float $longitude Decimal Longitude.
+	 *  @type float $altitude Altitude in Meters.
+	 *  @type string $address Textual Description of location.
+	 *  @type int $map_zoom Zoom for Map Display.
+	 *  @type float $speed Speed in Meters.
+	 *  @type float $heading If set, between 0 and 360 degrees.
+	 *  @type string $wikipedia_link URL of the Airport Homepage
+	 *  @type string $visibility Can be either public, private, or protected.
+	 *  @type string $timezone Timezone string.
+	 *  @type array $weather Array of Weather Properties.
+	 * }
+	 * @return WP_Error|boolean Return success or WP_Error.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function set_geodata( $object = null, $geodata ) {
 		if ( ! is_array( $geodata ) ) {
 			return false;
@@ -630,7 +994,7 @@ class WP_Geo_Data {
 		if ( ! $object ) {
 			$object = get_post();
 		}
-		// If numeric assume post_ID
+		// If numeric assume post_ID.
 		if ( is_numeric( $object ) ) {
 			$object = get_post( $object );
 		}
@@ -671,6 +1035,17 @@ class WP_Geo_Data {
 		return true;
 	}
 
+
+	/**
+	 * Get Geo Meta Data on an Object.
+	 *
+	 * @param string  $type Object type.
+	 * @param int     $id Object ID.
+	 * @param boolean $full Return just location and visibility or everything.
+	 * @return array $geodata See get_geodata and set_geodata for full list.
+	 *
+	 * @since 1.0.0
+	 */
 	private static function get_geometadata( $type, $id, $full = true ) {
 		$geodata               = array();
 		$geodata['longitude']  = get_metadata( $type, $id, 'geo_longitude', true );
@@ -691,16 +1066,48 @@ class WP_Geo_Data {
 		return array_filter( $geodata );
 	}
 
+	/**
+	 * Does this object have location data.
+	 *
+	 * @param mixed $object Object type.
+	 * @return WP_Error|boolean Return success or WP_Error.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function has_location( $object = null ) {
 		$data = self::get_geodata( $object );
 		return ! is_null( $data );
 	}
 
+
+	/**
+	 * Set GeoData on an Object.
+	 *
+	 * @param mixed   $object Can be WP_Comment, WP_User, WP_Post, WP_Term, or int which will be considered a post id.
+	 * @param boolean $full Return all or just some of the data.
+	 * @return array $geodata {
+	 *  An array of details about a location.
+	 *
+	 *  @type float $latitude Decimal Latitude.
+	 *  @type float $longitude Decimal Longitude.
+	 *  @type float $altitude Altitude in Meters.
+	 *  @type string $address Textual Description of location.
+	 *  @type int $map_zoom Zoom for Map Display.
+	 *  @type float $speed Speed in Meters.
+	 *  @type float $heading If set, between 0 and 360 degrees.
+	 *  @type string $wikipedia_link URL of the Airport Homepage
+	 *  @type string $visibility Can be either public, private, or protected.
+	 *  @type string $timezone Timezone string.
+	 *  @type array $weather Array of Weather Properties.
+	 * }
+	 *
+	 * @since 1.0.0
+	 */
 	public static function get_geodata( $object = null, $full = true ) {
 		if ( ! $object ) {
 			$object = get_post();
 		}
-		// If numeric assume post_ID
+		// If numeric assume post_ID.
 		if ( is_numeric( $object ) ) {
 			$object = get_post( $object );
 		}
@@ -710,7 +1117,7 @@ class WP_Geo_Data {
 				return null;
 			}
 			$geodata['ID'] = $object->ID;
-			// Remove Old Metadata
+			// Remove Old Metadata.
 			delete_post_meta( $object->ID, 'geo_map' );
 			delete_post_meta( $object->ID, 'geo_full' );
 			delete_post_meta( $object->ID, 'geo_lookup' );
@@ -738,33 +1145,15 @@ class WP_Geo_Data {
 			$geodata['user_ID'] = $object->ID;
 		}
 
-		/*
-		  if ( empty( $geodata['address'] ) ) {
-			if ( empty( $geodata['longitude'] ) ) {
-				return null;
-			}
-			$map = Loc_Config::geo_provider();
-			$map->set( $geodata );
-			$adr = $map->reverse_lookup();
-			if ( array_key_exists( 'display-name', $adr ) ) {
-				$geodata['address'] = trim( $adr['display-name'] );
-				if ( ! empty( $geodata['address'] ) ) {
-					if ( $object instanceof WP_Comment ) {
-						update_post_meta( $object->comment_ID, 'geo_address', $geodata['address'] );
-						update_post_meta( $object->comment_ID, 'geo_timezone', $adr['timezone'] );
-					}
-					if ( $object instanceof WP_Post ) {
-						update_post_meta( $object->ID, 'geo_address', $geodata['address'] );
-						update_post_meta( $object->ID, 'geo_timezone', $adr['timezone'] );
-					}
-				}
-			}
-			$geodata['adr'] = $adr;
-		} */
-
 		return $geodata;
 	}
 
+
+	/**
+	 * Registers Geo Metadata.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function register_meta() {
 		$args = array(
 			'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
@@ -860,6 +1249,12 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_address', $args );
 	}
 
+
+	/**
+	 * Registers REST Fields.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function rest_location() {
 		register_rest_field(
 			array( 'post', 'comment', 'user', 'term' ),
@@ -908,6 +1303,14 @@ class WP_Geo_Data {
 
 	}
 
+	/**
+	 * Registers Geo Metadata.
+	 *
+	 * @param object $object Object.
+	 * @param string $object_type Post, comment, user, or term.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function object( $object, $object_type ) {
 		if ( ! is_object( $object ) ) {
 			return null;
@@ -926,6 +1329,17 @@ class WP_Geo_Data {
 		}
 	}
 
+	/**
+	 * Adds longitude as a field to the REST API.
+	 *
+	 * @param mixed           $object The object being acted on.
+	 * @param string          $attr Not Used but Required by Filter.
+	 * @param WP_Rest_Request $request REST Request Object.
+	 * @param string          $object_type Object Type.
+	 * @return string Return data.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
@@ -938,6 +1352,17 @@ class WP_Geo_Data {
 		return 'private';
 	}
 
+	/**
+	 * Adds latitude as a field to the REST API.
+	 *
+	 * @param mixed           $object The object being acted on.
+	 * @param string          $attr Not used but required by filter.
+	 * @param WP_Rest_Request $request REST Request Object.
+	 * @param string          $object_type Object Type.
+	 * @return string Return data.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
@@ -950,6 +1375,18 @@ class WP_Geo_Data {
 		return 'private';
 	}
 
+
+	/**
+	 * Adds address as a field to the REST API.
+	 *
+	 * @param mixed           $object Object.
+	 * @param string          $attr Not used but required by filter.
+	 * @param WP_Rest_Request $request REST Request Object.
+	 * @param string          $object_type Object Type.
+	 * @return string Return data.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function rest_get_address( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
@@ -962,12 +1399,33 @@ class WP_Geo_Data {
 		return 'private';
 	}
 
+
+	/**
+	 * Adds visiility as a field to the REST API.
+	 *
+	 * @param mixed           $object Object type.
+	 * @param string          $attr Not used but required by filter.
+	 * @param WP_Rest_Request $request REST Request Object.
+	 * @param string          $object_type Object type.
+	 * @return string Return data.
+	 *
+	 * @since 1.0.0
+	 */
 	public static function rest_get_visibility( $object, $attr, $request, $object_type ) {
 		$object     = self::object( $object, $object_type );
 		$visibility = self::get_visibility( $object_type, $object );
 		return $visibility;
 	}
 
+
+	/**
+	 * Sanitizes address fields
+	 *
+	 * @param string $data The address.
+	 * @return string $data Sanitized version of
+	 *
+	 * @since 1.0.0
+	 */
 	public static function sanitize_address( $data ) {
 		$data = wp_kses_post( $data );
 		$data = trim( $data );
@@ -979,17 +1437,17 @@ class WP_Geo_Data {
 
 }
 
-/**
- * Convert the EXIF geographical longitude and latitude from degrees, minutes
- * and seconds to degrees format.
- * This is based on a Trac Ticket - https://core.trac.wordpress.org/ticket/9257
- * closed due privacy concerns. Updated to match location storage for this just in case
- * and to use their function over my original one.
- *
- * @param array|string $coordinate The coordinate to convert to degrees format.
- * @return float|false Coordinate in degrees format or false if failure
- */
 if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
+	/**
+	 * Convert the EXIF geographical longitude and latitude from degrees, minutes
+	 * and seconds to degrees format.
+	 * This is based on a Trac Ticket - https://core.trac.wordpress.org/ticket/9257
+	 * closed due privacy concerns. Updated to match location storage for this just in case
+	 * and to use their function over my original one.
+	 *
+	 * @param array|string $coordinate The coordinate to convert to degrees format.
+	 * @return float|false Coordinate in degrees format or false if failure
+	 */
 	function wp_exif_gps_convert( $coordinate ) {
 		if ( is_array( $coordinate ) ) {
 			@list( $degree, $minute, $second ) = $coordinate;
@@ -1002,14 +1460,14 @@ if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
 }
 
 
-/**
- * Convert the exif date format to a datetime object
- *
- * @param string $str
- * @param string|DateTimeZone $timezone A timezone or offset string. Default is the WordPress timezone
- * @return DateTime
- */
 if ( ! function_exists( 'wp_exif_datetime' ) ) {
+	/**
+	 * Convert the exif date format to a datetime object
+	 *
+	 * @param string              $str EXIF string.
+	 * @param string|DateTimeZone $timezone A timezone or offset string. Default is the WordPress timezone.
+	 * @return DateTime
+	 */
 	function wp_exif_datetime( $str, $timezone = null ) {
 		if ( is_string( $timezone ) ) {
 			$timezone = new DateTimeZone( $timezone );
@@ -1021,6 +1479,15 @@ if ( ! function_exists( 'wp_exif_datetime' ) ) {
 	}
 }
 
+/**
+ * Convert decimal location to a textual representation
+ *
+ * @param float        $latitude Latitude.
+ * @param float        $longitude Longitude.
+ * @param float|string $altitude Altitude. Optional.
+
+ * @return string Textual Representation of Location.
+ */
 function dec_to_dms( $latitude, $longitude, $altitude = '' ) {
 	$latitudedirection  = $latitude < 0 ? 'S' : 'N';
 	$longitudedirection = $longitude < 0 ? 'W' : 'E';
