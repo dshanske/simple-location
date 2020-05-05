@@ -1,5 +1,15 @@
 <?php
-// HERE Geocode API Provider
+/**
+ * Reverse Geolocation Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Reverse Geolocation using HERE API.
+ *
+ * @since 1.0.0
+ */
 class Geo_Provider_Here extends Geo_Provider {
 
 	public function __construct( $args = array() ) {

@@ -1,5 +1,15 @@
 <?php
-// Geonames Geocode API Provider
+/**
+ * Reverse Geolocation Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Reverse Geolocation using Bing API.
+ *
+ * @since 1.0.0
+ */
 class Geo_Provider_Geonames extends Geo_Provider {
 
 	public function __construct( $args = array() ) {

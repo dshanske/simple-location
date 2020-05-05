@@ -1,5 +1,15 @@
 <?php
+/**
+ * Location Provider.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Location Provider using Airport Codes.
+ *
+ * @since 1.0.0
+ */
 class Location_Provider_Airport extends Location_Provider {
 
 	public function __construct( $args = array() ) {

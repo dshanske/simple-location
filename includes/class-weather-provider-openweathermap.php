@@ -1,5 +1,15 @@
 <?php
+/**
+ * Weather Provider.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Weather Provider using OpenWeatherMap API.
+ *
+ * @since 1.0.0
+ */
 class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 
 	/**

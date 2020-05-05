@@ -1,5 +1,15 @@
 <?php
-// MapQuest Map Provider
+/**
+ * Map Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Map Provider using MapQuest API.
+ *
+ * @since 1.0.0
+ */
 class Map_Provider_Mapquest extends Map_Provider {
 
 

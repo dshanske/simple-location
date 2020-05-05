@@ -1,5 +1,15 @@
 <?php
+/**
+ * Location Provider.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Location Provider that always returns the location of a specific user.
+ *
+ * @since 1.0.0
+ */
 class Location_Provider_Dummy extends Location_Provider {
 
 	public function __construct( $args = array() ) {

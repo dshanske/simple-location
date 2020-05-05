@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Compatibility Functions.
+ *
+ * @package Simple_Location
+ */
 
 if ( ! function_exists( 'current_datetime' ) ) {
 	/**

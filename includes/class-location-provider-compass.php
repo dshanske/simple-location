@@ -1,5 +1,16 @@
 <?php
+/**
+ * Location Provider.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Location Provider using Compass.
+ * https://github.com/aaronpk/compass
+ *
+ * @since 1.0.0
+ */
 class Location_Provider_Compass extends Location_Provider {
 
 	public function __construct( $args = array() ) {

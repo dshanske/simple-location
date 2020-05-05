@@ -1,5 +1,15 @@
 <?php
-// HERE Map Provider
+/**
+ * Map Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Map Provider using HERE Map API.
+ *
+ * @since 1.0.0
+ */
 class Map_Provider_Here extends Map_Provider {
 
 	protected $appid;

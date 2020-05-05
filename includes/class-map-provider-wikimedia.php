@@ -1,5 +1,15 @@
 <?php
-// Wikimedia  Map Provider
+/**
+ * Map Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Map Provider using Wikimedia Map API.
+ *
+ * @since 1.0.0
+ */
 class Map_Provider_Wikimedia extends Map_Provider {
 
 

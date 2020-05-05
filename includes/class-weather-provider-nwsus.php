@@ -1,5 +1,15 @@
 <?php
+/**
+ * Weather Provider.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Weather Provider using National Weather Service(US) API.
+ *
+ * @since 1.0.0
+ */
 class Weather_Provider_NWSUS extends Weather_Provider {
 
 	/**

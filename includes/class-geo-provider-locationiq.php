@@ -1,5 +1,15 @@
 <?php
-// LocationIQ Geocode API Provider
+/**
+ * Reverse Geolocation Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Reverse Geolocation using LocationIQ API.
+ *
+ * @since 1.0.0
+ */
 class Geo_Provider_LocationIQ extends Geo_Provider {
 
 	public function __construct( $args = array() ) {
