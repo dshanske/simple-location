@@ -185,10 +185,31 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 
 	/**
-	 * Return array of current conditions.
+	 * Return array of current conditions. All fields optional.
+	 *
+	 * All floats rounded to 2 decimal points.
 	 *
 	 * @param string|int|DateTime $time ISO8601, timestamp, or DateTime.
-	 * @return array Current Conditions in Array.
+	 * @return array {
+	 *  Current Conditions in Array.
+	 *  @type float $temperature Temperature in Celsius.
+	 *  @type float $humidity Humidity as a percentage between 0 and 100.
+	 *  @type float $pressure Pressure in hPa/mbar
+	 *  @type int $cloudiness Cloudiness as a percentage between 0 and 100.
+	 *  @type array $wind {
+	 *      @type int $speed Speed in per hour.
+	 *      @type float $degree Degree between 0 and 360.
+	 *  }
+	 *  @type float $rain Rainfall in millimeters.
+	 *  @type float $visibility Visibility in meters.
+	 *  @type float $radiation Estimated Solar Radiation in W/m^2.
+	 *  @type float $uv UV Index. 0-11+.
+	 *  @type float $snow Snowfall in millimeters.
+	 *  @type string $summary Textual Description of Weather.
+	 *  @type string $icon Slug for icon to display.
+	 *  @type string $sunrise ISO8601 string reflecting sunrise time.
+	 *  @type string $sunset ISO8601 string reflecting sunset time.
+	 * }
 	 */
 	abstract public function get_conditions( $time );
 
