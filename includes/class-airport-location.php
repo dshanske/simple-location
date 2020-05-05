@@ -72,6 +72,7 @@ class Airport_Location {
 					if ( 'keywords' === $key ) {
 						$airport[ $key ] = explode( ',', $line[ $value ] );
 						$airport[ $key ] = array_map( 'trim', $airport[ $key ] );
+						$airport[ $key ] = array_filter( $airport[ $key ] );
 					} elseif ( 'iata_code' === $key ) {
 						$airport['code'] = $line[ $value ];
 					} elseif ( 'latitude_deg' === $key ) {

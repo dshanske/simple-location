@@ -139,6 +139,38 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 
 	/**
+	 * Converts millimeters to inches.
+	 *
+	 * @param float $mm Millimeters.
+	 * @return float Inches.
+	 */
+	public static function mm_to_inches( $mm ) {
+		return floatval( $mm ) / 25.4;
+	}
+
+	/**
+	 * Converts inches to millimeters.
+	 *
+	 * @param float $inch Inches.
+	 * @return float Millimeters.
+	 */
+	public static function inches_to_mm( $inch ) {
+		return floatval( $inch ) * 25.4;
+	}
+
+
+	/**
+	 * Converts feet to meters.
+	 *
+	 * @param float $feet Feet.
+	 * @return float Meters.
+	 */
+	public static function feet_tometers( $feet ) {
+		return floatval( $feet ) / 3.2808399;
+	}
+
+
+	/**
 	 * Converts meters to feet.
 	 *
 	 * @param float $meters Meters.
@@ -146,6 +178,27 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 */
 	public static function meters_to_feet( $meters ) {
 		return floatval( $meters ) * 3.2808399;
+	}
+
+
+	/**
+	 * Converts meters to miles.
+	 *
+	 * @param float $meters Meters.
+	 * @return float Miles.
+	 */
+	public static function meters_to_miles( $meters ) {
+		return floatval( $meters ) / 1609;
+	}
+
+	/**
+	 * Converts miles to meters.
+	 *
+	 * @param float $miles Miles.
+	 * @return float Meters.
+	 */
+	public static function miles_tometers( $miles ) {
+		return floatval( $miles ) * 1609;
 	}
 
 	/**
