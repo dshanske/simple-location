@@ -58,6 +58,22 @@ class REST_Geo {
 		);
 		register_rest_route(
 			'sloc_geo/1.0',
+			'/airport',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'airport' ),
+					'args'     => array(
+						'iata_code'    => array(),
+						'municipality' => array(),
+						'ident'        => array(),
+						'gps_code'     => array(),
+					),
+				),
+			)
+		);
+		register_rest_route(
+			'sloc_geo/1.0',
 			'/geocode',
 			array(
 				array(
@@ -305,6 +321,28 @@ class REST_Geo {
 			$return = array_merge( $conditions, $return );
 		}
 		return $return;
+	}
+
+
+	// Callback handler for airport
+	public static function airport( $request ) {
+		$params = $request->get_params();
+		$return = array();
+		if ( isset( $params['iata_code'] ) ) {
+			$return = Airport_Location::get( $params['iata_code'], 'iata_code' );
+		} elseif ( isset( $params['ident'] ) ) {
+			$return = Airport_Location::get( $params['ident'], 'ident' );
+		} elseif ( isset( $params['gps_code'] ) ) {
+			$return = Airport_Location::get( $params['gps_code'], 'gps_code' );
+		} elseif ( isset( $params['municipality'] ) ) {
+			$return = Airport_Location::get( $params['municipality'], 'municipality' );
+		}
+
+		if ( $return ) {
+			return $return;
+		} else {
+			return new WP_Error( 'airport_not_found', __( 'This Airport Code was Not Found', 'simple-location' ) );
+		}
 	}
 
 	// Callback handler for timezone
