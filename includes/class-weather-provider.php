@@ -197,8 +197,29 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @param float $miles Miles.
 	 * @return float Meters.
 	 */
-	public static function miles_tometers( $miles ) {
+	public static function miles_to_meters( $miles ) {
 		return floatval( $miles ) * 1609;
+	}
+
+
+	/**
+	 * Converts hPa to inHg.
+	 *
+	 * @param float $hpa HectoPascals.
+	 * @return float Inches of Mercury.
+	 */
+	public static function hpa_to_inhg( $hpa ) {
+		return floatval( $hpa ) * 0.03;
+	}
+
+	/**
+	 * Converts inHg to hPa
+	 *
+	 * @param float $inhg Inches of Mercury.
+	 * @return float HectoPascals.
+	 */
+	public static function inhg_to_hpa( $inhg ) {
+		return floatval( $inhg ) / 0.03;
 	}
 
 	/**
