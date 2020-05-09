@@ -242,6 +242,75 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	}
 
 	private function icon_map( $id ) {
+		$id = explode( ':', $id );
+		if ( 3 !== count( $id ) ) {
+			return '';
+		}
+		$coverage  = $id[0];
+		$intensity = $id[1];
+		$weather   = $id[2];
+		switch ( $weather ) {
+			case 'A': // Hail.
+				return 'wi-hail';
+			case 'BD':  // Blowing dust.
+				return 'wi-dust';
+			case 'BN': // Blowing sand
+				return 'wi-sandstorm';
+			case 'BR': // Mist.
+				return 'wi-umbrella';
+			case 'BS': // Blowing snow.
+				return 'wi-snow-wind';
+			case 'BY': // Blowing spray.
+				return 'wi-rain-wind';
+			case 'F': // Fog.
+				return 'wi-fog';
+			case 'FR':  // Frost.
+				return 'wi-snowflake-cold';
+			case 'H': // Haze.
+				return 'wi-day-haze';
+			case 'IF': // Ice fog.
+			case 'IC': // Ice crystals.
+				return 'icy';
+			case 'IP': // Ice pellets / Sleet.
+				return 'wi-sleet';
+			case 'K': // Smoke.
+				return 'wi-smoke';
+			case 'L': // Drizzle.
+			case 'R': // Rain.
+			case 'RW': // Rain showers.
+				return 'wi-rain';
+			case 'RS': // Rain/snow mix.
+			case 'WM': // Wintry mix (snow, sleet, rain).
+				return 'wi-rain-mix';
+			case 'SI': // Snow/sleet mix.
+			case 'S': // Snow.
+			case 'SW': // Snow showers.
+				return 'wi-snow';
+			case 'T': // Thunderstorms.
+				return 'wi-thunderstorm';
+			case 'UP': // Unknown precipitation. May occur in an automated observation station, which cannot determine the precipitation type falling.
+				return 'wi-sprinkle';
+			case 'VA': // Volcanic ash.
+				return 'wi-volcano';
+			case 'WP': // Waterspouts.
+				return 'wi-water';
+			case 'ZF': // Freezing fog.
+				return 'wi-fog';
+			case 'ZL': // Freezing drizzle.
+			case 'ZR': // Freezing rain.
+			case 'ZY': // Freezing spray.
+				return 'wi-raindrop';
+			case 'FW': // Fair/Mostly sunny. Cloud coverage is 7-32% of the sky.
+				return 'wi-day-sunny';
+			case 'SC': // Partly cloudy. Cloud coverage is 32-70% of the sky.
+				return 'wi-day-cloudy';
+			case 'BK': // Mostly Cloudy. Cloud coverage is 70-95% of the sky.
+				return 'wi-cloudy';
+			case 'OV': // Cloudy/Overcast. Cloud coverage is 95-100% of the sky.
+				return 'wi-cloud';
+			case 'CL': // Clear. Cloud coverage is 0-7% of the sky.
+				return 'wi-day-sunny';
+		}
 		return '';
 	}
 

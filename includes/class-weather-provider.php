@@ -271,7 +271,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type float $pressure Pressure in hPa/mbar
 	 *  @type int $cloudiness Cloudiness as a percentage between 0 and 100.
 	 *  @type array $wind {
-	 *      @type int $speed Speed in per hour.
+	 *      @type int $speed Speed in meters per hour.
 	 *      @type float $degree Degree between 0 and 360.
 	 *  }
 	 *  @type float $rain Rainfall in millimeters.
@@ -373,6 +373,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'wi-fire'              => __( 'Fire', 'simple-location' ),
 			'wi-flood'             => __( 'Flood', 'simple-location' ),
 			'cloudy-meatball'      => __( 'Cloudy with a Chance of Meatballs', 'simple-location' ),
+			'icy'                  => __( 'Icy', 'simple-locations' ),
 		);
 
 		$day   = array(
@@ -427,6 +428,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		);
 		$misc  = array(
 			'wi-barometer'            => __( 'Barometer', 'simple-location' ),
+			'wi-barometer-sea-level'  => __( 'Barometer(Sea Level)', 'simple-location' ),
 			'wi-thermometer'          => __( 'Thermometer', 'simple-location' ),
 			'wi-thermometer-exterior' => __( 'Thermometer - Exterior', 'simple-location' ),
 			'wi-thermometer-internal' => __( 'Thermometer - Internal', 'simple-location' ),

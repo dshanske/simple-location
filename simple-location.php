@@ -133,7 +133,6 @@ class Simple_Location_Plugin {
 			'class-location-plugins.php',
 			'class-location-zones.php',
 			'class-loc-timezone.php',
-			'class-post-timezone.php',
 			'class-airport-location.php',
 			'compat-functions.php',
 		);
