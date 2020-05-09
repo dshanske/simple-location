@@ -51,8 +51,8 @@ class Airport_Location {
 	 * @since 4.0.0
 	 */
 	public static function get( $search, $field = 'iata_code' ) {
-		$airport = wp_cache_get( $search . '_' . $field, 'airports' );
-		if ( $airport ) {
+		$airport = get_transient( 'airports_' . $search . '_' . $field );
+		if ( false !== $airport ) {
 			return $airport;
 		}
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/airports.csv';
@@ -66,7 +66,7 @@ class Airport_Location {
 		$line   = fgetcsv( $fp );
 		while ( $line ) {
 			$line = fgetcsv( $fp );
-			if ( 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
+			if ( is_array( $line ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
 				$airport = array();
 				foreach ( $keys as $key => $value ) {
 					if ( 'keywords' === $key ) {
@@ -97,7 +97,11 @@ class Airport_Location {
 				}
 			}
 		}
-		wp_cache_set( $search . '_' . $field, $airport, 'airports', 86400 );
+		set_transient(
+			'airports_' . $search . '_' . $field,
+			$airport,
+			DAY_IN_SECONDS
+		);
 		return $return;
 	}
 } // End Class

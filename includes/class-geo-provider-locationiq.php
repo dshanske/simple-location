@@ -162,6 +162,11 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 		$addr                 = array_filter( $addr );
 		$addr['display-name'] = $this->display_name( $addr );
 
+		$tz = $this->timezone();
+		if ( $tz ) {
+			$addr = array_merge( $addr, $tz );
+		}
+
 		if ( WP_DEBUG ) {
 			$addr['raw'] = $json;
 		}
