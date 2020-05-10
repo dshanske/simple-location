@@ -12,6 +12,21 @@
  */
 class Geo_Provider_Here extends Geo_Provider {
 
+	/**
+	 * Constructor for the Abstract Class.
+	 *
+	 * The default version of this just sets the parameters.
+	 *
+	 * @param array $args {
+	 *  Arguments.
+	 *  @type string $api API Key.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type float $altitude Altitude.
+	 *  @type string $address Formatted Address String
+	 *  @type int $reverse_zoom Reverse Zoom. Default 18.
+	 *  @type string $user User name.
+	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'HERE', 'simple-location' );
 		$this->slug = 'here';
@@ -27,10 +42,15 @@ class Geo_Provider_Here extends Geo_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_here_api', // option name
+			'sloc_providers', // Option group.
+			'sloc_here_api', // Option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'HERE Maps API Key',
@@ -40,26 +60,40 @@ class Geo_Provider_Here extends Geo_Provider {
 		);
 	}
 
+	/**
+	 * Admin Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		add_settings_field(
-			'hereapi', // id
-			__( 'HERE API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'hereapi', // ID.
+			__( 'HERE API Key', 'simple-location' ), // Setting title.
+			array( 'Loc_Config', 'string_callback' ), // Display callback.
+			'sloc_providers', // Settings page.
+			'sloc_api', // Settings section.
 			array(
 				'label_for' => 'sloc_here_api',
 			)
 		);
 	}
 
+	/**
+	 * Returns elevation, but HERE has no elevation API.
+	 *
+	 * @return float $elevation Elevation.
+	 *
+	 * @since 1.0.0
+	 */
 	public function elevation() {
 		return 0;
 	}
 
-
-
-
+	/**
+	 * Return an address.
+	 *
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
 	public function reverse_lookup() {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
@@ -83,6 +117,12 @@ class Geo_Provider_Here extends Geo_Provider {
 		$addr['longitude'] = $this->longitude;
 	}
 
+	/**
+	 * Convert address properties to mf2
+	 *
+	 * @param  array $json Raw JSON.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
 	private function address_to_mf2( $json ) {
 		$addr['display-name']   = $json['label'];
 		$addr['street-address'] = ifset( $json['street'] );

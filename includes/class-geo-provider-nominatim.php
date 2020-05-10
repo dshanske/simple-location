@@ -12,17 +12,43 @@
  */
 class Geo_Provider_Nominatim extends Geo_Provider {
 
+	/**
+	 * Constructor for the Abstract Class.
+	 *
+	 * The default version of this just sets the parameters.
+	 *
+	 * @param array $args {
+	 *  Arguments.
+	 *  @type string $api API Key.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type float $altitude Altitude.
+	 *  @type string $address Formatted Address String
+	 *  @type int $reverse_zoom Reverse Zoom. Default 18.
+	 *  @type string $user User name.
+	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'OpenStreetMap Nominatim', 'simple-location' );
 		$this->slug = 'nominatim';
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Returns elevation but there is no Nominatim Elevation API.
+	 *
+	 * @return float $elevation Elevation.
+	 *
+	 * @since 1.0.0
+	 */
 	public function elevation() {
 		return 0;
 	}
 
-
+	/**
+	 * Return an address.
+	 *
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
 	public function reverse_lookup() {
 		$args = array(
 			'format'          => 'json',
@@ -44,6 +70,12 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 		return $this->address_to_mf( $address );
 	}
 
+	/**
+	 * Convert address properties to mf2
+	 *
+	 * @param  array $address Raw JSON.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
 	private function address_to_mf( $address ) {
 		if ( 'us' === $address['country_code'] ) {
 			$region = self::ifnot(
