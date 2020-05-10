@@ -150,6 +150,7 @@ class Simple_Location_Plugin {
 		$providers = array(
 			'class-location-provider-dummy.php', // Dummy Location Provider.
 			'class-location-provider-airport.php', // Airport Location Provider.
+			'class-location-provider-address.php', // Address Lookup Location Provider.
 			'class-location-provider-compass.php', // Compass https://github.com/aaronpk/Compass Location Provder.
 			'class-weather-provider-openweathermap.php', // Open Weather Map.
 			'class-weather-provider-darksky.php', // Dark Sky.
