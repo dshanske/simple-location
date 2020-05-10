@@ -101,10 +101,15 @@ class Geo_Provider_Bing extends Geo_Provider {
 			}
 		}
 
-		$addr                   = array(
-			'latitude'  => $this->latitude,
-			'longitude' => $this->longitude,
-		);
+		$return              = $this->address_to_mf2( $json );
+		$return['latitude']  = $this->latitude;
+		$return['longitude'] = $this->longitude;
+		return $return;
+	}
+
+
+	private function address_to_mf2( $json ) {
+		$addr                   = array();
 		$addr['display-name']   = $json['name'];
 		$addr['street-address'] = ifset( $json['address']['addressLine'] );
 		$addr['locality']       = ifset( $json['address']['locality'] );
@@ -122,6 +127,44 @@ class Geo_Provider_Bing extends Geo_Provider {
 		}
 		return $addr;
 	}
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		if ( empty( $this->api ) ) {
+			return null;
+		}
+		$args = array(
+			'q'      => $address,
+			'inclnb' => 1,
+			'key'    => $this->api,
+		);
+		$url  = 'http://dev.virtualearth.net/REST/v1/Locations/';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( isset( $json['error_message'] ) ) {
+				return new WP_Error( $json['status'], $json['error_message'] );
+		}
+		if ( isset( $json['resourceSets'] ) ) {
+			$json = $json['resourceSets'][0];
+			if ( isset( $json['resources'] ) && is_array( $json['resources'] ) ) {
+				$json = $json['resources'][0];
+			}
+		}
+
+		$return              = $this->address_to_mf2( $json );
+		$return['latitude']  = ifset( $json['point']['coordinates'][0] );
+		$return['longitude'] = ifset( $json['point']['coordinates'][1] );
+
+		return array_filter( $return );
+	}
+
 }
 
 register_sloc_provider( new Geo_Provider_Bing() );

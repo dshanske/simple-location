@@ -89,12 +89,16 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		$json = $json['geonames'][0];
-		$addr = array(
-			'latitude'  => $this->latitude,
-			'longitude' => $this->longitude,
-		);
+		$json              = $json['geonames'][0];
+		$addr              = $this->address_to_mf2( $json );
+		$addr['latitude']  = $this->latitude;
+		$addr['longitude'] = $this->longitude;
+		return $addr;
+	}
 
+
+	private function address_to_mf2( $json ) {
+		$addr                   = array();
 		$addr['street-address'] = ifset( $json['toponymName'] );
 		$addr['locality']       = ifset( $json['adminName1'] );
 		// $addr['region']         = ifset( $json[] );
@@ -111,7 +115,37 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( WP_DEBUG ) {
 			$addr['raw'] = $json;
 		}
-		return $addr;
+		return array_filter( $addr );
+	}
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		if ( ! $this->user ) {
+			return null;
+		}
+		$args = array(
+			'username' => $this->user,
+			'q'        => $address,
+			'type'     => 'json',
+			'lang'     => get_bloginfo( 'language' ),
+			'style'    => 'FULL',
+		);
+		$url  = 'https://secure.geonames.org/search';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		$json                = $json['geonames'][0];
+		$return              = $this->address_to_mf2( $json );
+		$return['latitude']  = ifset( $json['lat'] );
+		$return['longitude'] = ifset( $json['lng'] );
+		$return['altitude']  = ifset( $json['elevation'] );
+		return array_filter( $return );
 	}
 }
 

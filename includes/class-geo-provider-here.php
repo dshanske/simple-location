@@ -77,11 +77,13 @@ class Geo_Provider_Here extends Geo_Provider {
 		if ( ! isset( $json['items'] ) || empty( $json['items'] ) ) {
 			return new WP_Error( 'invalid_response', __( 'No results', 'simple-location' ) );
 		}
-		$json                   = $json['items'][0]['address'];
-		$addr                   = array(
-			'latitude'  => $this->latitude,
-			'longitude' => $this->longitude,
-		);
+		$json              = $json['items'][0]['address'];
+		$addr              = $this->address_to_mf2( $json );
+		$addr['latitude']  = $this->latitude;
+		$addr['longitude'] = $this->longitude;
+	}
+
+	private function address_to_mf2( $json ) {
 		$addr['display-name']   = $json['label'];
 		$addr['street-address'] = ifset( $json['street'] );
 		$addr['locality']       = ifset( $json['city'] );
@@ -89,7 +91,6 @@ class Geo_Provider_Here extends Geo_Provider {
 		$addr['country-name']   = ifset( $json['countryName'] );
 		$addr['country-code']   = ifset( $json['countryCode'] );
 		$addr['postal-code']    = ifset( $json['postalCode'] );
-		$addr['label']          = ifset( $json['Label'] );
 
 		$tz = $this->timezone();
 		if ( $tz ) {
@@ -100,6 +101,39 @@ class Geo_Provider_Here extends Geo_Provider {
 		}
 		return $addr;
 	}
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		if ( empty( $this->api ) ) {
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
+		}
+		$args = array(
+			'apiKey' => $this->api,
+			'q'      => $address,
+
+		);
+		$url  = 'https://revgeocode.search.hereapi.com/v1/geocode';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( ! isset( $json['items'] ) || empty( $json['items'] ) ) {
+			return new WP_Error( 'invalid_response', __( 'No results', 'simple-location' ) );
+		}
+		$json   = $json['items'][0];
+		$return = $this->address_to_mf2( $json['address'] );
+		if ( isset( $json['position'] ) ) {
+			$return['latitude']  = $json['position']['lat'];
+			$return['longitude'] = $json['position']['lng'];
+		}
+		return $return;
+	}
+
 }
 
 register_sloc_provider( new Geo_Provider_Here() );

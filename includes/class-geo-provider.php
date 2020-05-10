@@ -28,15 +28,6 @@ abstract class Geo_Provider extends Sloc_Provider {
 	  */
 	protected $user;
 
-
-	 /**
-	  * Address.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
-	protected $address;
-
 	 /**
 	  * Timezone.
 	  *
@@ -72,6 +63,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 *  @type float $latitude Latitude.
 	 *  @type float $longitude Longitude.
 	 *  @type float $altitude Altitude.
+	 *  @type string $address Formatted Address String
 	 *  @type int $reverse_zoom Reverse Zoom. Default 18.
 	 *  @type string $user User name.
 	 */
@@ -109,6 +101,14 @@ abstract class Geo_Provider extends Sloc_Provider {
 	abstract public function reverse_lookup();
 
 	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	abstract public function geocode( $address );
+
+	/**
 	 * Generate Display Name for a Reverse Address Lookup.
 	 *
 	 * @param array $reverse Array of MF2 Address Properties.
@@ -117,6 +117,9 @@ abstract class Geo_Provider extends Sloc_Provider {
 	protected function display_name( $reverse ) {
 		if ( ! is_array( $reverse ) ) {
 			return false;
+		}
+		if ( isset( $reverse['display_name'] ) ) {
+			return apply_filters( 'location_display_name', $reverse['display_name'], $reverse );
 		}
 		$text   = array();
 		$text[] = ifset( $reverse['name'] );

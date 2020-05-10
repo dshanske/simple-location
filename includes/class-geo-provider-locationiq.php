@@ -56,9 +56,6 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 		return 0;
 	}
 
-
-
-
 	public function reverse_lookup() {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
@@ -75,7 +72,10 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 			return $json;
 		}
 		$address = $json['address'];
+		return $this->address_to_mf( $address );
+	}
 
+	private function address_to_mf( $address ) {
 		if ( 'us' === $address['country_code'] ) {
 			$region = self::ifnot(
 				$address,
@@ -145,6 +145,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 				)
 			),
 			'country-code'     => strtoupper( $address['country_code'] ),
+
 			'latitude'         => $this->latitude,
 			'longitude'        => $this->longitude,
 			'raw'              => $address,
@@ -158,19 +159,51 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 			);
 			$addr['country-name'] = $codes[ $addr['country-code'] ];
 		}
-
 		$addr                 = array_filter( $addr );
 		$addr['display-name'] = $this->display_name( $addr );
-
-		$tz = $this->timezone();
+		$tz                   = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
 		}
-
-		if ( WP_DEBUG ) {
-			$addr['raw'] = $json;
-		}
 		return $addr;
+	}
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		if ( empty( $this->api ) ) {
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
+		}
+		$args = array(
+			'key'            => $this->api,
+			'format'         => 'json',
+			'addressdetails' => 1,
+			'extratags'      => 1,
+			'q'              => $address,
+		);
+
+		$json = $this->fetch_json( 'https://us1.locationiq.com/v1/search.php', $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+
+		if ( wp_is_numeric_array( $json ) ) {
+			$json = $json[0];
+		}
+
+		$address             = $json['address'];
+		$return              = $this->address_to_mf( $address );
+		$return['latitude']  = ifset( $json['lat'] );
+		$return['longitude'] = ifset( $json['lon'] );
+		if ( isset( $json['extratags'] ) ) {
+			$return['url']   = ifset( $json['extratags']['website'] );
+			$return['photo'] = ifset( $json['extratags']['image'] );
+		}
+		return array_filter( $return );
 	}
 }
 

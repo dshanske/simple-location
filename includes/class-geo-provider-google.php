@@ -97,10 +97,12 @@ class Geo_Provider_Google extends Geo_Provider {
 		} else {
 			return array();
 		}
-		$addr                 = array(
-			'latitude'  => $this->latitude,
-			'longitude' => $this->longitude,
-		);
+		$addr              = $this->address_to_mf2( $data );
+		$addr['latitude']  = $this->latitude;
+		$addr['longitude'] = $this->longitude;
+	}
+
+	private function address_to_mf2( $data ) {
 		$addr['display-name'] = ifset( $data['formatted_address'] );
 		$addr['plus-code']    = ifset( $data['plus_code']['global_code'] );
 		if ( isset( $data['address_components'] ) ) {
@@ -139,9 +141,40 @@ class Geo_Provider_Google extends Geo_Provider {
 			$addr = array_merge( $addr, $tz );
 		}
 		if ( WP_DEBUG ) {
-			$addr['raw'] = $raw;
+			$addr['raw'] = $data;
 		}
 		return $addr;
+	}
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		if ( empty( $this->api ) ) {
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Google', 'simple-location' ) );
+		}
+		$args = array(
+			'key'     => $this->api,
+			'address' => $address,
+
+		);
+		$url  = 'https://maps.googleapis.com/maps/api/geocode/json';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( wp_is_numeric_array( $json['results'] ) ) {
+			$json = $json['results'][0];
+		}
+		$return = $this->address_to_mf2( $json );
+		if ( isset( $json['geometry'] ) ) {
+			$return['latitude']  = $json['geometry']['location']['lat'];
+			$return['longitude'] = $json['geometry']['location']['lng'];
+		}
+		return $return;
 	}
 }
 

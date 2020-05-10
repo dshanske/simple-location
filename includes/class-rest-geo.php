@@ -286,6 +286,9 @@ class REST_Geo {
 				$reverse_adr['altitude'] = $reverse->elevation();
 			}
 			return array_filter( $reverse_adr );
+		} else if ( isset( $params['address'] ) ) {
+			$geocode = Loc_Config::geo_provider();
+			return $geocode->geocode( $params['address'] );
 		}
 		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
 	}
