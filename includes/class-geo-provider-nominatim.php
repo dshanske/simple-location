@@ -41,6 +41,10 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			return $json;
 		}
 		$address = $json['address'];
+		return $this->address_to_mf( $address );
+	}
+
+	private function address_to_mf( $address ) {
 		if ( 'us' === $address['country_code'] ) {
 			$region = self::ifnot(
 				$address,
@@ -110,6 +114,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 				)
 			),
 			'country-code'     => strtoupper( $address['country_code'] ),
+
 			'latitude'         => $this->latitude,
 			'longitude'        => $this->longitude,
 			'raw'              => $address,
@@ -130,6 +135,45 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			$addr = array_merge( $addr, $tz );
 		}
 		return $addr;
+	}
+
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		$args = array(
+			'q'               => $address,
+			'format'          => 'jsonv2',
+			'extratags'       => '1',
+			'addressdetails'  => '1',
+			'namedetails'     => '1',
+			'accept-language' => get_bloginfo( 'language' ),
+		);
+		$url  = 'https://nominatim.openstreetmap.org/search';
+
+		$json = $this->fetch_json( $url, $args );
+
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( wp_is_numeric_array( $json ) ) {
+			$json = $json[0];
+		}
+
+		$address             = $json['address'];
+		$return              = $this->address_to_mf( $address );
+		$return['latitude']  = ifset( $json['lat'] );
+		$return['longitude'] = ifset( $json['lon'] );
+		if ( isset( $json['extratags'] ) ) {
+			$return['url']   = ifset( $json['extratags']['website'] );
+			$return['photo'] = ifset( $json['extratags']['image'] );
+		}
+
+		return array_filter( $return );
 	}
 
 }

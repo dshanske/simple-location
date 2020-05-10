@@ -99,7 +99,10 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			return $json;
 		}
 		$address = $json['address'];
+		return $this->address_to_mf( $address );
+	}
 
+	private function address_to_mf( $address ) {
 		if ( 'us' === $address['country_code'] ) {
 			$region = self::ifnot(
 				$address,
@@ -169,6 +172,7 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 				)
 			),
 			'country-code'     => strtoupper( $address['country_code'] ),
+
 			'latitude'         => $this->latitude,
 			'longitude'        => $this->longitude,
 			'raw'              => $address,
@@ -182,7 +186,6 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			);
 			$addr['country-name'] = $codes[ $addr['country-code'] ];
 		}
-
 		$addr                 = array_filter( $addr );
 		$addr['display-name'] = $this->display_name( $addr );
 		$tz                   = $this->timezone();
@@ -191,6 +194,47 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 		}
 		return $addr;
 	}
+
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		if ( empty( $this->api ) ) {
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API Key for Mapquest', 'simple-location' ) );
+		}
+		$args = array(
+			'q'               => $address,
+			'format'          => 'json',
+			'extratags'       => '1',
+			'addressdetails'  => '1',
+			'accept-language' => get_bloginfo( 'language' ),
+			'key'             => $this->api,
+		);
+		$url  = 'https://open.mapquestapi.com/nominatim/v1/search.php';
+
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( wp_is_numeric_array( $json ) ) {
+			$json = $json[0];
+		}
+		$address             = $json['address'];
+		$return              = $this->address_to_mf( $address );
+		$return['latitude']  = ifset( $json['lat'] );
+		$return['longitude'] = ifset( $json['lon'] );
+		if ( isset( $json['extratags'] ) ) {
+			$return['url']   = ifset( $json['extratags']['website'] );
+			$return['photo'] = ifset( $json['extratags']['image'] );
+		}
+
+		return array_filter( $return );
+	}
+
 
 }
 
