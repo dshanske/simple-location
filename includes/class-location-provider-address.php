@@ -21,7 +21,7 @@ class Location_Provider_Address extends Location_Provider {
 	 *  Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name       = __( 'Set Location from Address', 'simple-location' );
+		$this->name       = __( 'Set Location from Address Looked Up using Geo Provider', 'simple-location' );
 		$this->slug       = 'address';
 		$this->background = false;
 		parent::__construct( $args );

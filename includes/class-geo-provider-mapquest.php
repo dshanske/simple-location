@@ -220,15 +220,13 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			'longitude'        => $this->longitude,
 			'raw'              => $address,
 		);
+
 		if ( is_null( $addr['country-name'] ) ) {
-			$codes                = json_decode(
-				wp_remote_retrieve_body(
-					wp_remote_get( 'http://country.io/names.json' )
-				),
-				true
-			);
+			$file                 = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
+			$codes                = json_decode( file_get_contents( $file ), true );
 			$addr['country-name'] = $codes[ $addr['country-code'] ];
 		}
+
 		$addr                 = array_filter( $addr );
 		$addr['display-name'] = $this->display_name( $addr );
 		$tz                   = $this->timezone();
