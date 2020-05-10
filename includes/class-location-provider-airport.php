@@ -44,7 +44,12 @@ class Location_Provider_Airport extends Location_Provider {
 		} elseif ( 4 === strlen( $code ) ) {
 			$airport = Airport_Location::get( $code, 'ident' );
 		} else {
-			return new WP_Error( 'empty', __( 'Something was passed but not a 3 letter code', 'simple-location' ) );
+			$this->annotation = __( 'Something was passed but not an airport code', 'simple-location' );
+			return new WP_Error( 'empty', __( 'Something was passed but not an airport code', 'simple-location' ) );
+		}
+		if ( is_wp_error( $airport ) ) {
+			$this->annotation = __( 'No Match Found', 'simple-location' );
+			return new WP_Error( 'no_match', __( 'Something was passed but not an airport code', 'simple-location' ) );
 		}
 		$this->latitude   = $airport['latitude'];
 		$this->longitude  = $airport['longitude'];

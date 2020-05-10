@@ -36,6 +36,7 @@ class Location_Provider_Address extends Location_Provider {
 	 */
 	public function retrieve( $time = null, $args = array() ) {
 		if ( ! array_key_exists( 'address', $args ) ) {
+			$this->annotation = __( 'No Address Passed' );
 			return new WP_Error( 'empty', __( 'No address passed through', 'simple-location' ) );
 		}
 		if ( ! is_string( $args['address'] ) ) {
@@ -44,6 +45,10 @@ class Location_Provider_Address extends Location_Provider {
 		$address = trim( $args['address'] );
 		$geocode = Loc_Config::geo_provider();
 		$address = $geocode->geocode( $address );
+		if ( is_wp_error( $address ) ) {
+			$this->annotation = __( 'No Item Found' );
+			return;
+		}
 
 		$this->latitude   = $address['latitude'];
 		$this->longitude  = $address['longitude'];
