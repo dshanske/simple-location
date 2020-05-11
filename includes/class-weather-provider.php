@@ -318,7 +318,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 				$this->station_id = $lat['station_id'];
 			}
 		}
-		parent::set( $lat, $lng, $alt );
+		return parent::set( $lat, $lng, $alt );
 	}
 
 
@@ -390,7 +390,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'wi-fire'              => __( 'Fire', 'simple-location' ),
 			'wi-flood'             => __( 'Flood', 'simple-location' ),
 			'cloudy-meatball'      => __( 'Cloudy with a Chance of Meatballs', 'simple-location' ),
-			'icy'                  => __( 'Icy', 'simple-locations' ),
+			'icy'                  => __( 'Icy', 'simple-location' ),
 		);
 
 		$day   = array(

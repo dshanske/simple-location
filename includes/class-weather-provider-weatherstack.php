@@ -17,7 +17,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	 *
 	 * The default version of this just sets the parameters
 	 *
-	 * @param array $args
+	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Weatherstack', 'simple-location' );
@@ -43,8 +43,8 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	 */
 	public static function init() {
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_weatherstack_api', // option name
+			'sloc_providers', // option group.
+			'sloc_weatherstack_api', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Weatherstack API Key',
@@ -62,11 +62,11 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	 */
 	public static function admin_init() {
 		add_settings_field(
-			'weatherstackapi', // id
-			__( 'Weatherstack API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'weatherstackapi', // id.
+			__( 'Weatherstack API Key', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'string_callback' ), // display callback.
+			'sloc_providers', // settings page.
+			'sloc_api', // settings section.
 			array(
 				'label_for' => 'sloc_weatherstack_api',
 			)
@@ -85,6 +85,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @param int $time Time. Optional.
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions( $time = null ) {
@@ -113,7 +114,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 				'timeout'             => 10,
 				'limit_response_size' => 1048576,
 				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location
+				// Use an explicit user-agent for Simple Location.
 				'user-agent'          => 'Simple Location for WordPress',
 			);
 
@@ -166,7 +167,8 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	/**
 	 * Return array of station data.
 	 *
-	 * @param string $id Weather type ID.
+	 * @param string  $id Weather type ID.
+	 * @param boolean $is_day Is It Daytime.
 	 * @return string Icon ID.
 	 */
 	private function icon_map( $id, $is_day ) {
