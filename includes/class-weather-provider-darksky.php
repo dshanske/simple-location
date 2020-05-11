@@ -17,7 +17,7 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	 *
 	 * The default version of this just sets the parameters
 	 *
-	 * @param array $args
+	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
 		$this->name   = __( 'Dark Sky', 'simple-location' );
@@ -36,10 +36,15 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_darksky_api', // option name
+			'sloc_providers', // option group.
+			'sloc_darksky_api', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'DarkSky API Key',
@@ -49,19 +54,29 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 		);
 	}
 
+	/**
+	 * Admin Load of Settings Fields.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		add_settings_field(
-			'sloc_darksky_api', // id
-			__( 'Dark Sky API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'sloc_darksky_api', // id.
+			__( 'Dark Sky API Key', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'string_callback' ), // display callback.
+			'sloc_providers', // settings page.
+			'sloc_api', // settings section.
 			array(
 				'label_for' => 'sloc_darksky_api',
 			)
 		);
 	}
 
+	/**
+	 * Does This Provider Offer Station Data.
+	 *
+	 * @return boolean If supports station data return true.
+	 */
 	public function is_station() {
 		return false;
 	}
@@ -69,6 +84,7 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @param int $time Time to retrieve weather. Optional.
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions( $time = null ) {
@@ -97,7 +113,7 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 				'timeout'             => 10,
 				'limit_response_size' => 1048576,
 				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location
+				// Use an explicit user-agent for Simple Location.
 				'user-agent'          => 'Simple Location for WordPress',
 			);
 
@@ -145,6 +161,12 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 		return false;
 	}
 
+	/**
+	 * Return array of station data.
+	 *
+	 * @param string $id Weather type ID.
+	 * @return string Icon ID.
+	 */
 	private function icon_map( $id ) {
 		switch ( $id ) {
 			case 'clear-day':

@@ -17,7 +17,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 *
 	 * The default version of this just sets the parameters
 	 *
-	 * @param array $args
+	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
 		$this->name   = __( 'National Weather Service(US)', 'simple-location' );
@@ -26,15 +26,11 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		parent::__construct( $args );
 	}
 
-	public function set( $lat, $lng = null, $alt = null ) {
-		if ( ! $lng && is_array( $lat ) ) {
-			if ( isset( $lat['station_id'] ) ) {
-				$this->station_id = $lat['station_id'];
-			}
-		}
-			parent::set( $lat, $lng, $alt );
-	}
-
+	/**
+	 * Does This Provider Offer Station Data.
+	 *
+	 * @return boolean If supports station data return true.
+	 */
 	public function is_station() {
 		return true;
 	}
@@ -42,6 +38,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @param int $time Time. Optional.
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions( $time = null ) {
@@ -64,7 +61,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 				'timeout'             => 10,
 				'limit_response_size' => 1048576,
 				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location
+				// Use an explicit user-agent for Simple Location.
 				'user-agent'          => 'Simple Location for WordPress',
 			);
 
@@ -104,6 +101,13 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		return false;
 	}
 
+	/**
+	 * Return a value property inside a key.
+	 *
+	 * @param array  $properties Properies.
+	 * @param string $key Key.
+	 * @return mixed Value.
+	 */
 	private function get_value( $properties, $key ) {
 		if ( isset( $properties[ $key ] ) ) {
 			return $properties[ $key ]['value'];
@@ -111,6 +115,11 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		return null;
 	}
 
+	/**
+	 * Return info on the current station.
+	 *
+	 * @return array Info on Site.
+	 */
 	public function get_station_data() {
 		$return = array( 'station_id' => $this->station_id );
 
@@ -122,7 +131,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			'timeout'             => 10,
 			'limit_response_size' => 1048576,
 			'redirection'         => 1,
-			// Use an explicit user-agent for Simple Location
+			// Use an explicit user-agent for Simple Location.
 			'user-agent'          => 'Simple Location for WordPress',
 		);
 
@@ -158,7 +167,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		if ( ! empty( $wind ) ) {
 			$return['wind'] = $wind;
 		}
-		$return['pressure'] = round( self::get_value( $properties, 'barometricPressure' ) / 1000, 2 ); // Convert Pa to hPa/mBar
+		$return['pressure'] = round( self::get_value( $properties, 'barometricPressure' ) / 1000, 2 ); // Convert Pa to hPa/mBar.
 		$return['summary']  = ifset( $properties['textDescription'] );
 		if ( isset( $return['summary'] ) ) {
 			$return['icon'] = self::icon_map( $return['summary'] );
@@ -178,7 +187,12 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		return array_filter( $return );
 	}
 
-
+	/**
+	 * Return array of station data.
+	 *
+	 * @param string $id Weather type ID.
+	 * @return string Icon ID.
+	 */
 	private function icon_map( $id ) {
 		switch ( $id ) {
 			case 'Cloudy':

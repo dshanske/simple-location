@@ -64,7 +64,7 @@ abstract class Sloc_Provider {
 	 /**
 	  * Altitude.
 	  *
-	  *  Denotes the height of the position, specified in meters above the [WGS84] ellipsoid. If the implementation cannot provide altitude information, the value of this attribute must be null. 
+	  *  Denotes the height of the position, specified in meters above the [WGS84] ellipsoid. If the implementation cannot provide altitude information, the value of this attribute must be null.
 	  *
 	  * @since 1.0.0
 	  * @var float

@@ -17,7 +17,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 *
 	 * The default version of this just sets the parameters
 	 *
-	 * @param array $args
+	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'OpenWeatherMap', 'simple-location' );
@@ -35,10 +35,15 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_openweathermap_api', // option name
+			'sloc_providers', // option group.
+			'sloc_openweathermap_api', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'OpenWeatherMap API Key',
@@ -48,35 +53,37 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		);
 	}
 
+	/**
+	 * Init Function To Add Settings Fields.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		add_settings_field(
-			'openweatherapi', // id
-			__( 'OpenWeatherMap API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'openweatherapi', // id.
+			__( 'OpenWeatherMap API Key', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'string_callback' ), // display callback.
+			'sloc_providers', // settings page.
+			'sloc_api', // settings section.
 			array(
 				'label_for' => 'sloc_openweathermap_api',
 			)
 		);
 	}
 
+	/**
+	 * Does This Provider Offer Station Data.
+	 *
+	 * @return boolean If supports station data return true.
+	 */
 	public function is_station() {
 		return true;
-	}
-
-	public function set( $lat, $lng = null, $alt = null ) {
-		if ( ! $lng && is_array( $lat ) ) {
-			if ( isset( $lat['station_id'] ) ) {
-				$this->station_id = $lat['station_id'];
-			}
-		}
-		parent::set( $lat, $lng, $alt );
 	}
 
 	/**
 	 * Return array of current conditions
 	 *
+	 * @param int $time Time. Optional.
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions( $time = null ) {
@@ -108,7 +115,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				'timeout'             => 10,
 				'limit_response_size' => 1048576,
 				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location
+				// Use an explicit user-agent for Simple Location.
 				'user-agent'          => 'Simple Location for WordPress',
 			);
 
@@ -162,6 +169,11 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		}
 	}
 
+	/**
+	 * Return info on the current station.
+	 *
+	 * @return array Info on Site.
+	 */
 	public function get_station_data() {
 		$data = array(
 			'appid' => $this->api,
@@ -178,7 +190,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			$url                = 'http://api.openweathermap.org/data/3.0/measurements?';
 			$data['station_id'] = $this->station_id;
 			$data['type']       = 'h';
-			// An hour ago
+			// An hour ago.
 			$data['from']  = time() - 3600;
 			$data['to']    = time();
 			$data['limit'] = '1';
@@ -218,6 +230,12 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
 	}
 
+	/**
+	 * Return array of station data.
+	 *
+	 * @param string $id Weather type ID.
+	 * @return string Icon ID.
+	 */
 	private function icon_map( $id ) {
 		if ( in_array( $id, array( 200, 201, 202, 230, 231, 232 ), true ) ) {
 			return 'wi-thunderstorm';

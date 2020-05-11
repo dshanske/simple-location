@@ -304,6 +304,23 @@ abstract class Weather_Provider extends Sloc_Provider {
 		return $return;
 	}
 
+	/**
+	 * Set and Validate Coordinates.
+	 *
+	 * @param array|float $lat Latitude or array of all three properties.
+	 * @param float       $lng Longitude. Optional if first property is an array.
+	 * @param float       $alt Altitude. Optional.
+	 * @return boolean Return False if Validation Failed
+	 */
+	public function set( $lat, $lng = null, $alt = null ) {
+		if ( ! $lng && is_array( $lat ) ) {
+			if ( isset( $lat['station_id'] ) ) {
+				$this->station_id = $lat['station_id'];
+			}
+		}
+		parent::set( $lat, $lng, $alt );
+	}
+
 
 	/**
 	 * Passes temperature and returns it either same of converted into preferred units.

@@ -36,6 +36,11 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		register_setting(
 			'sloc_providers', // option group
@@ -50,6 +55,11 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 
 	}
 
+	/**
+	 * Init Function To Add Settings Fields.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		add_settings_field(
 			'weatherstackapi', // id
@@ -63,6 +73,11 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 		);
 	}
 
+	/**
+	 * Does This Provider Offer Station Data.
+	 *
+	 * @return boolean If supports station data return true.
+	 */
 	public function is_station() {
 		return false;
 	}
@@ -148,6 +163,12 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 		return false;
 	}
 
+	/**
+	 * Return array of station data.
+	 *
+	 * @param string $id Weather type ID.
+	 * @return string Icon ID.
+	 */
 	private function icon_map( $id, $is_day ) {
 		$id = (int) $id;
 		switch ( $id ) {

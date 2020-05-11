@@ -17,7 +17,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 *
 	 * The default version of this just sets the parameters
 	 *
-	 * @param array $args
+	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
 		$this->name   = __( 'Aeris Weather', 'simple-location' );
@@ -31,10 +31,15 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_aeris_client_id', // option name
+			'sloc_providers', // Option group.
+			'sloc_aeris_client_id', // Option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'AerisWeather Client ID',
@@ -43,8 +48,8 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			)
 		);
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_aeris_client_secret', // option name
+			'sloc_providers', // Option group.
+			'sloc_aeris_client_secret', // Option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'AerisWeather Client Secret',
@@ -53,8 +58,8 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			)
 		);
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_aeris_pws', // option name
+			'sloc_providers', // Option group.
+			'sloc_aeris_pws', // Option name.
 			array(
 				'type'         => 'number',
 				'description'  => 'Include Personal Weather Stations in AerisWeather Data',
@@ -64,48 +69,49 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		);
 	}
 
+	/**
+	 * Admin Init to Add Settings Field.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		add_settings_field(
-			'aerisweatherid', // id
-			__( 'AerisWeather Client ID', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'aerisweatherid', // ID.
+			__( 'AerisWeather Client ID', 'simple-location' ), // Setting title.
+			array( 'Loc_Config', 'string_callback' ), // Display callback.
+			'sloc_providers', // Settings page.
+			'sloc_api', // Settings section.
 			array(
 				'label_for' => 'sloc_aeris_client_id',
 			)
 		);
 		add_settings_field(
-			'aerisweathersecret', // id
-			__( 'AerisWeather Client Secret', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'aerisweathersecret', // ID.
+			__( 'AerisWeather Client Secret', 'simple-location' ), // Setting title.
+			array( 'Loc_Config', 'string_callback' ), // Display callback.
+			'sloc_providers', // Settings page.
+			'sloc_api', // Settings section.
 			array(
 				'label_for' => 'sloc_aeris_client_secret',
 			)
 		);
 		add_settings_field(
-			'aerisweatherpws', // id
-			__( 'Include Personal Weather Stations in AerisWeather Provider', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'checkbox_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'aerisweatherpws', // ID.
+			__( 'Include Personal Weather Stations in AerisWeather Provider', 'simple-location' ), // Setting title.
+			array( 'Loc_Config', 'checkbox_callback' ), // Display callback.
+			'sloc_providers', // Settings page.
+			'sloc_api', // Settings section.
 			array(
 				'label_for' => 'sloc_aeris_pws',
 			)
 		);
 	}
 
-	public function set( $lat, $lng = null, $alt = null ) {
-		if ( ! $lng && is_array( $lat ) ) {
-			if ( isset( $lat['station_id'] ) ) {
-				$this->station_id = $lat['station_id'];
-			}
-		}
-		parent::set( $lat, $lng, $alt );
-	}
-
+	/**
+	 * Does This Provider Offer Station Data.
+	 *
+	 * @return boolean If supports station data return true.
+	 */
 	public function is_station() {
 		return true;
 	}
@@ -113,6 +119,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @param int $time Time. Optional.
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions( $time = null ) {
@@ -158,6 +165,12 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		}
 	}
 
+	/**
+	 * Convert Data into common format
+	 *
+	 * @param string $json Raw JSON.
+	 * @return array Current Conditions in Array
+	 */
 	public function convert_data( $json ) {
 		$return               = array();
 		$return['station_id'] = ifset( $json['id'] );
@@ -199,6 +212,11 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		return array_filter( $return );
 	}
 
+	/**
+	 * Return array of station data.
+	 *
+	 * @return array Current Conditions in Array
+	 */
 	public function get_station_data() {
 		$client_id     = get_option( 'sloc_aeris_client_id' );
 		$client_secret = get_option( 'sloc_aeris_client_secret' );
@@ -241,6 +259,12 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
 	}
 
+	/**
+	 * Return array of station data.
+	 *
+	 * @param string $id Weather type ID.
+	 * @return string Icon ID.
+	 */
 	private function icon_map( $id ) {
 		$id = explode( ':', $id );
 		if ( 3 !== count( $id ) ) {
@@ -254,7 +278,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 				return 'wi-hail';
 			case 'BD':  // Blowing dust.
 				return 'wi-dust';
-			case 'BN': // Blowing sand
+			case 'BN': // Blowing sand.
 				return 'wi-sandstorm';
 			case 'BR': // Mist.
 				return 'wi-umbrella';
