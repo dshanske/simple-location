@@ -1,11 +1,19 @@
 <?php
 /**
+ * Adds endpoint for accessing Simple Location providers.
  *
- *
- * Passes and Returns Geodata
+ * @package Simple_Location
  */
 
+/**
+ * Passes Data from the Various Providers via an API.
+ *
+ * @since 1.0.0
+ */
 class REST_Geo {
+	/**
+	 * Adds the registration function to the REST API Init.
+	 */
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
@@ -153,7 +161,11 @@ class REST_Geo {
 	}
 
 
-	// Callback Handler for Map Retrieval
+	/**
+	 * Callback handler for Map Retrieval
+	 *
+	 * @param WP_Rest_Request $request REST Request.
+	 */
 	public static function map( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
 		$params = $request->get_params();
@@ -182,7 +194,11 @@ class REST_Geo {
 		return new WP_Error( 'missing_geo', __( 'Missing Coordinates for Reverse Lookup', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
-	// Callback Handler for Geolocation Retrieval
+	/**
+	 * Callback handler for Geolocation Retrieval.
+	 *
+	 * @param WP_Rest_Request $request REST Request.
+	 */
 	public static function lookup( $request ) {
 		$params      = $request->get_params();
 		$time        = ifset( $params['time'], null );
@@ -200,7 +216,11 @@ class REST_Geo {
 		return new WP_Error( 'no_provider', __( 'No Geolocation Provider Available', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
-	// Callback for updating user location
+	/**
+	 * Callback handler for updating user location.
+	 *
+	 * @param WP_Rest_Request $request REST Request.
+	 */
 	public static function user( $request ) {
 		$json = $request->get_json_params();
 		if ( is_array( $json ) && array_key_exists( 'locations', $json ) ) {
@@ -245,6 +265,11 @@ class REST_Geo {
 		}
 	}
 
+	/**
+	 * Callback handler for Geolocation Retrieval.
+	 *
+	 * @param WP_Rest_Request $request REST Request.
+	 */
 	public static function geocode( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
 		$params = $request->get_params();
@@ -293,7 +318,11 @@ class REST_Geo {
 		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
 	}
 
-	// Callback Handler for Weather
+	/**
+	 * Callback handler for Weather Retrieval.
+	 *
+	 * @param WP_Rest_Request $request REST Request.
+	 */
 	public static function weather( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
 		$params  = $request->get_params();
@@ -326,8 +355,11 @@ class REST_Geo {
 		return $return;
 	}
 
-
-	// Callback handler for airport
+	/**
+	 * Callback handler for Airport Lookup.
+	 *
+	 * @param WP_Rest_Request $request REST Request.
+	 */
 	public static function airport( $request ) {
 		$params = $request->get_params();
 		$return = array();
@@ -348,7 +380,11 @@ class REST_Geo {
 		}
 	}
 
-	// Callback handler for timezone
+	/**
+	 * Callback handler for Looking Up Timezone Information.
+	 *
+	 * @param WP_Rest_Request $request REST Request.
+	 */
 	public static function timezone( $request ) {
 		$params = $request->get_params();
 		$return = array();

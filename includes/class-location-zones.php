@@ -1,16 +1,32 @@
 <?php
+/**
+ * Creates and Supports Zones.
+ *
+ * @package Simple_Location
+ */
+
 add_action( 'init', array( 'Location_Zones', 'init' ) );
 add_action( 'admin_init', array( 'Location_Zones', 'admin_init' ) );
 
+/**
+ * Configures location based zones..
+ *
+ * @since 1.0.0
+ */
 class Location_Zones {
 
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		$cls = get_called_class();
 		add_action( 'admin_enqueue_scripts', array( $cls, 'enqueue' ) );
 
 		register_setting(
-			'sloc_zones', // option group
-			'sloc_zones', // option name
+			'sloc_zones', // option group.
+			'sloc_zones', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Zones',
@@ -20,25 +36,37 @@ class Location_Zones {
 		);
 	}
 
+	/**
+	 * Init Function To Add Settings Fields.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		$cls = get_called_class();
 		add_settings_section(
 			'sloc_zone_section',
 			__( 'Geofencing Zones Settings', 'simple-location' ),
 			array( $cls, 'sloc_zones' ),
-			'sloc_zones' // option group
+			'sloc_zones' // option group.
 		);
 		add_settings_field(
-			'sloc_zones', // id
-			__( 'Zones', 'simple-location' ), // setting title
-			array( $cls, 'zone_callback' ), // display callback
-			'sloc_zones', // option group
-			'sloc_zone_section', // settings section
+			'sloc_zones', // id.
+			__( 'Zones', 'simple-location' ), // setting title.
+			array( $cls, 'zone_callback' ), // display callback.
+			'sloc_zones', // option group.
+			'sloc_zone_section', // settings section.
 			array()
 		);
 	}
 
-
+	/**
+	 * Checks if provided data in $_POST is inside a zone.
+	 *
+	 * Used when saving in the admin. Overwrites the address and visibility data in an object
+	 *
+	 * @param string $meta_type Can be post, user, term, or comment.
+	 * @param int    $object_id The ID of the object.
+	 */
 	public static function save_zone( $meta_type, $object_id ) {
 		if ( isset( $_POST['latitude'] ) || isset( $_POST['longitude'] ) || isset( $_POST['address'] ) ) {
 			$zone = self::in_zone( $_POST['latitude'], $_POST['longitude'] );
@@ -55,6 +83,11 @@ class Location_Zones {
 		}
 	}
 
+	/**
+	 * Callback for the zone settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function sloc_zones() {
 		esc_html_e(
 			'Enter Name, Latitude, Longitude, and Radius for each Zone. When a location is within the radius of this zone, the description will be set to the name of the zone,
@@ -63,6 +96,11 @@ class Location_Zones {
 		);
 	}
 
+	/**
+	 * Echoes the form for the zone settings.
+	 *
+	 * @param array $args Arguments.
+	 */
 	public static function zone_callback( $args ) {
 		$name   = 'sloc_zones';
 		$custom = get_option( $name );
@@ -85,6 +123,13 @@ class Location_Zones {
 		printf( '<span class="button button-secondary" id="delete-location-zone-button">%s</span>', esc_html__( 'Remove', 'simple-location' ) );
 	}
 
+	/**
+	 * If the array key exists return it, otherwise return empty string.
+	 *
+	 * @param array      $array Array.
+	 * @param int|string $key Key.
+	 * @return mixed The value or empty string.
+	 */
 	public static function ifset( $array, $key ) {
 		if ( array_key_exists( $key, $array ) ) {
 			return $array[ $key ];
@@ -92,6 +137,18 @@ class Location_Zones {
 		return '';
 	}
 
+	/**
+	 * Echoes an entry of the zone form.
+	 *
+	 * @param int   $int Array key.
+	 * @param array $value {
+	 *  The fields of the zone.
+	 *  @type string $name Zone Name.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type foat $radius Radius.
+	 * }
+	 */
 	private static function zone_inputs( $int, $value = array() ) {
 		$output = '<input type="text" name="%1$s[%2$s][%3$s]" id="%4$s" value="%5$s" placeholder="%6$s" />';
 		$name   = 'sloc_zones';
@@ -105,6 +162,11 @@ class Location_Zones {
 		echo '</li>';
 	}
 
+	/**
+	 * Hooked onto action to enqueue script.
+	 *
+	 * @param string $hook_suffix Not used.
+	 */
 	public static function enqueue( $hook_suffix ) {
 		wp_enqueue_script(
 			'sloc_zones',
@@ -115,6 +177,13 @@ class Location_Zones {
 		);
 	}
 
+	/**
+	 * Checks if a Location is inside a zone.
+	 *
+	 * @param float $lat Latitude.
+	 * @param float $lng Longitude.
+	 * @return string Name of Zone or empty string if not in zone.
+	 */
 	public static function in_zone( $lat, $lng ) {
 		$zones = get_option( 'sloc_zones', array() );
 		foreach ( $zones as $zone ) {
