@@ -389,8 +389,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'wi-earthquake'        => __( 'Earthquake', 'simple-location' ),
 			'wi-fire'              => __( 'Fire', 'simple-location' ),
 			'wi-flood'             => __( 'Flood', 'simple-location' ),
-			'cloudy-meatball'      => __( 'Cloudy with a Chance of Meatballs', 'simple-location' ),
-			'icy'                  => __( 'Icy', 'simple-location' ),
+			'fa-cloudy-meatball'      => __( 'Cloudy with a Chance of Meatballs', 'simple-location' ),
+			'fa-icy'                  => __( 'Icy', 'simple-location' ),
+			'fa-smog'                  => __( 'Smog( Alt )', 'simple-location' ),
 		);
 
 		$day   = array(

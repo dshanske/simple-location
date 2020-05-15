@@ -60,6 +60,10 @@ class Sloc_Airport_Widget extends WP_Widget {
 		if ( isset( $instance['airport'] ) ) {
 			$location = Airport_Location::get( $instance['airport'] );
 			$weather = Loc_View::get_weather_by_location( $location['latitude'], $location['longitude'] ); // phpcs:ignore
+			if ( is_wp_error( $weather ) ) {
+				echo $weather->get_error_message();
+				return;
+			}
 
 			if ( ! isset( $weather['icon'] ) ) {
 				$weather['icon'] = 'wi-thermometer';
