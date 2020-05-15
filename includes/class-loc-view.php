@@ -13,9 +13,89 @@ class Loc_View {
 		}
 	}
 
-	public static function get_icon() {
-		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M443.683 4.529L27.818 196.418C-18.702 217.889-3.39 288 47.933 288H224v175.993c0 51.727 70.161 66.526 91.582 20.115L507.38 68.225c18.905-40.961-23.752-82.133-63.697-63.696z"/></svg>';
-		return '<span class="sloc-icon-location" style="display: inline-block; max-width: 1rem; margin-right: 0.1rem;"  aria-label="' . __( 'Location: ', 'simple-location' ) . '" aria-hidden="true" />' . $svg . '</span>';
+
+	/**
+	 * Returns list of available icons.
+	 *
+	 * @return array List of Icon Options.
+	 */
+	public static function get_iconlist() {
+		return array(
+			'fa-location-arrow'   => __( 'Location Arrow', 'simple-location' ),
+			'fa-compass'          => __( 'Compass', 'simple-location' ),
+			'fa-map'              => __( 'Map', 'simple-location' ),
+			'fa-map-marker'       => __( 'Map Marker', 'simple-location' ),
+			'fa-passport'         => __( 'Passport', 'simple-location' ),
+			'fa-home'             => __( 'Home', 'simple-location' ),
+			'fa-globe-asia'       => __( 'Globe - Asia', 'simple-location' ),
+			'fa-globe-americas'   => __( 'Globe - Americas', 'simple-location' ),
+			'fa-globe-europe'     => __( 'Globe - Europe', 'simple-location' ),
+			'fa-globe-africa'     => __( 'Globe - Africa', 'simple-location' ),
+			'fa-plane'            => __( 'Plane', 'simple-location' ),
+			'fa-train'            => __( 'Train', 'simple-location' ),
+			'fa-taxi'             => __( 'Taxi', 'simple-location' ),
+			'fa-tram'             => __( 'Tram', 'simple-location' ),
+			'fa-bus'              => __( 'Bus', 'simple-location' ),
+			'fa-bus-alt'          => __( 'Bus (Alt)', 'simple-location' ),
+			'fa-car'              => __( 'Car', 'simple-location' ),
+			'fa-helicopter'       => __( 'Helicopter', 'simple-location' ),
+			'fa-horse'            => __( 'Horse', 'simple-location' ),
+			'fa-ship'             => __( 'Ship', 'simple-location' ),
+			'fa-running'          => __( 'Running', 'simple-location' ),
+			'fa-shuttlevan'       => __( 'Shuttle Van', 'simple-location' ),
+			'fa-subway'           => __( 'Subway', 'simple-location' ),
+			'fa-suitcase'         => __( 'Suitcase', 'simple-location' ),
+			'fa-suitcase-rolling' => __( 'Suitcase - Rolling', 'simple-location' ),
+			'fa-walking'          => __( 'Walking', 'simple-location' ),
+			'fa-running'          => __( 'Running', 'simple-location' ),
+
+		);
+	}
+
+	/**
+	 * Generates Pulldown list of Icons.
+	 *
+	 * @param string  $icon Icon to be Selected.
+	 * @param boolean $echo Echo or Return.
+	 * @return string Select Option. Optional.
+	 */
+	public static function icon_select( $icon, $echo = false ) {
+		$choices = self::get_iconlist();
+		if ( ! $icon ) {
+			$icon = 'fa-location-arrow';
+		}
+		$return = '';
+		foreach ( $choices as $value => $text ) {
+			$return .= sprintf( '<option value="%1s" %2s>%3s</option>', esc_attr( $value ), selected( $icon, $value, false ), esc_html( $text ) );
+		}
+		if ( ! $echo ) {
+			return $return;
+		}
+		echo $return; // phpcs:ignore
+	}
+
+	/**
+	 * Return the marked up icon standardized to the fonts.
+	 *
+	 * @param string $icon Name of Icon.
+	 * @param string $summary Description of Icon. Optional.
+	 * @return string marked up icon
+	 */
+	public static function get_icon( $icon = 'fa-location-arrow', $summary = null ) {
+		if ( 'none' === $icon ) {
+			return '';
+		}
+		if ( ! $summary ) {
+			$summary = $icon;
+		}
+		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), $icon );
+		if ( file_exists( $svg ) ) {
+			$svg = file_get_contents( $svg );
+		}
+		if ( $svg ) {
+			return PHP_EOL . sprintf( '<span class="sloc-location-icon sloc-icon-%1$s" style="display: inline-block; max-height: 1.5rem; margin-right: 0.1rem;" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), $svg );
+		}
+		return '';
 	}
 
 	public static function display_altitude( $altitude ) {
@@ -101,7 +181,7 @@ class Loc_View {
 			$c[] = $args['address'];
 		}
 		if ( $args['icon'] ) {
-			array_unshift( $c, self::get_icon() );
+			array_unshift( $c, self::get_icon( $loc['icon'] ) );
 		}
 		if ( isset( $loc['weather'] ) && $args['weather'] ) {
 			$c[] = self::get_the_weather( $loc['weather'] );

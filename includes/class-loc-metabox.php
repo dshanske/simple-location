@@ -170,13 +170,16 @@ class Loc_Metabox {
 
 	public static function save_meta( $meta_type, $object_id ) {
 		// phpcs:disable
-		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading', 'timezone' );
+		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading', 'timezone', 'location_icon' );
 		foreach ( $lon_params as $param ) {
 			if ( 'map_zoom' === $param ) {
 				$maparam = 'zoom';
+			} else if ( 'location_icon' === $param ) {
+				$maparam = 'icon';
 			} else {
 				$maparam = $param;
 			}
+			
 			if ( ! empty( $_POST[ $param ] ) && 'NaN' !== $_POST[ $param ] ) {
 				update_metadata( $meta_type, $object_id, 'geo_' . $maparam, $_POST[ $param ] );
 			} else {

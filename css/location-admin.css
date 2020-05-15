@@ -26,5 +26,14 @@
 #locationsidebox .location-ajax:hover::before {
   color: firebrick;
 }
+#locationsidebox .sloc-location-icon {
+  vertical-align: middle;
+  display: inline-block;
+}
+#locationsidebox .sloc-location-icon svg {
+  vertical-align: middle;
+  width: 1.5rem;
+  fill: currentColor;
+}
 
 /*# sourceMappingURL=location-admin.css.map */

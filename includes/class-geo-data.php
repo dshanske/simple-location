@@ -967,6 +967,7 @@ class WP_Geo_Data {
 	 *  @type float $latitude Decimal Latitude.
 	 *  @type float $longitude Decimal Longitude.
 	 *  @type float $altitude Altitude in Meters.
+	 *  @type string $icon Icon.
 	 *  @type string $address Textual Description of location.
 	 *  @type int $map_zoom Zoom for Map Display.
 	 *  @type float $speed Speed in Meters.
@@ -985,7 +986,7 @@ class WP_Geo_Data {
 			return false;
 		}
 		$type    = null;
-		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visibility', 'timezone' ) );
+		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visibility', 'timezone', 'icon' ) );
 		if ( isset( $geodata['map_zoom'] ) ) {
 			$geodata['zoom'] = $geodata['map_zoom'];
 			unset( $geodata['map_zoom'] );
@@ -1052,6 +1053,10 @@ class WP_Geo_Data {
 		$geodata['latitude']   = get_metadata( $type, $id, 'geo_latitude', true );
 		$geodata['altitude']   = get_metadata( $type, $id, 'geo_altitude', true );
 		$geodata['address']    = get_metadata( $type, $id, 'geo_address', true );
+		$geodata['icon']    = get_metadata( $type, $id, 'geo_icon', true );
+		if ( empty( $geodata['icon'] ) ) {
+			$geodata['icon'] = 'fa-location-arrow';
+		}
 		$geodata['visibility'] = self::get_visibility( $type, $id );
 
 		if ( $full ) {
@@ -1247,6 +1252,19 @@ class WP_Geo_Data {
 		register_meta( 'comment', 'geo_address', $args );
 		register_meta( 'user', 'geo_address', $args );
 		register_meta( 'term', 'geo_address', $args );
+
+		$args = array(
+			'sanitize_callback' => array( 'WP_Geo_Data', 'esc_attr' ),
+			'type'              => 'string',
+			'description'       => 'Geodata Icon',
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		register_meta( 'post', 'geo_icon', $args );
+		register_meta( 'comment', 'geo_icon', $args );
+		register_meta( 'user', 'geo_icon', $args );
+		register_meta( 'term', 'geo_icon', $args );
+
 	}
 
 

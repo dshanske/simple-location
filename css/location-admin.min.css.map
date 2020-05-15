@@ -1,7 +1,1 @@
-{
-"version": 3,
-"mappings": "AAAA,iBAAkB,CACjB,OAAO,CAAE,gBAAgB,CAI1B,0CAA2C,CACnC,UAAU,CAAE,OAAO,CAG3B,8EAAkF,CAC1E,WAAW,CAAE,IAAI,CAKxB,+BAAe,CACd,gBAAgB,CAAE,WAAW,CAC7B,MAAM,CAAE,IAAI,CACZ,WAAW,CAAE,GAAG,CAChB,OAAO,CAAE,CAAC,CACV,MAAM,CAAE,OAAO,CAEf,uCAAU,CACT,KAAK,CAAE,YAAY,CACnB,UAAU,CAAE,WAAW,CAGxB,6CAAgB,CACf,KAAK,CAAE,SAAS",
-"sources": ["../sass/_side-box.scss"],
-"names": [],
-"file": "location-admin.min.css"
-}
+{"version":3,"sourceRoot":"","sources":["../sass/_side-box.scss"],"names":[],"mappings":"AAAA,kBACC,yBAID,2CACQ,mBAGR,+EACQ,iBAKP,gCACC,6BACA,YACA,gBACA,UACA,eAEA,wCACC,mBACA,uBAGD,8CACC,cAGF,qCACQ,sBACP,qBACA,yCACC,sBACA,aACA","file":"location-admin.min.css"}
