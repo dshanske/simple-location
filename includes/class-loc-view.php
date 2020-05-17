@@ -86,7 +86,8 @@ class Loc_View {
 			return '';
 		}
 		if ( ! $summary ) {
-			$summary = $icon;
+			$list    = self::get_iconlist();
+			$summary = array_key_exists( $icon, $list ) ? $list[ $icon ] : $icon;
 		}
 		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), $icon );
 		if ( file_exists( $svg ) ) {
