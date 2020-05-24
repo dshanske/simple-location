@@ -104,4 +104,63 @@ class Airport_Location {
 		);
 		return $return;
 	}
+
+
+	/**
+	 * Return an array of information.
+	 *
+	 * @param string $search Value to Search For.
+	 * @param string $field Field to Search. Defaults to IATA Code.
+	 * @return null|array $airport {
+	 *  An array of details about the airport. Or for certain fields, an array of matching airports.
+	 *  See https://ourairports.com/help/data-dictionary.html#airports.
+	 *
+	 *  @type int $id Openflights Identifier for Airline.
+	 *  @type string $name Name of Airline.
+	 *  @type string $alias Alias of the airline.
+	 *  @type string $iata_code Two letter IATA airline code, if available.
+	 *  @type string $icao_code Three letter ICAO airline code, if available.
+	 *  @type string $callsign Airline callsign.
+	 *  @type string $country Two letter ISO 3166-1 country codes.
+	 *  @type string $active Y or N, however information is dated.
+	 * }
+	 * @since 4.0.0
+	 */
+	public static function get_airline( $search, $field = 'iata_code' ) {
+		$keys    = array(
+			'id'        => 0,
+			'name'      => 1,
+			'alias'     => 2,
+			'iata_code' => 3,
+			'icao_code' => 4,
+			'callsign'  => 5,
+			'country'   => 6,
+			'active'    => 7,
+		);
+		$airline = get_transient( 'airline_' . $search . '_' . $field );
+		if ( false !== $airline ) {
+			return $airline;
+		}
+		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/airlines.csv';
+		if ( ! file_exists( $file ) ) {
+			return new WP_Error( 'filesystem_error', "File doesn't exist" );
+		}
+		$fp   = fopen( $file, 'r' ); // phpcs:ignore
+		rewind( $fp );
+		$return = array();
+		$line   = fgetcsv( $fp );
+		while ( $line ) {
+			$line = fgetcsv( $fp );
+			if ( is_array( $line ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
+				$airport = array_filter( $line );
+				set_transient(
+					'airline_' . $search . '_' . $field,
+					$airline,
+					DAY_IN_SECONDS
+				);
+				return $airport;
+			}
+		}
+
+	}
 } // End Class
