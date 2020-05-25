@@ -235,4 +235,76 @@ abstract class Sloc_Provider {
 		}
 		return false;
 	}
+
+	/**
+	 * Converts millimeters to inches.
+	 *
+	 * @param float $mm Millimeters.
+	 * @return float Inches.
+	 */
+	public static function mm_to_inches( $mm ) {
+		return floatval( $mm ) / 25.4;
+	}
+
+	/**
+	 * Converts inches to millimeters.
+	 *
+	 * @param float $inch Inches.
+	 * @return float Millimeters.
+	 */
+	public static function inches_to_mm( $inch ) {
+		return floatval( $inch ) * 25.4;
+	}
+
+
+	/**
+	 * Converts feet to meters.
+	 *
+	 * @param float $feet Feet.
+	 * @return float Meters.
+	 */
+	public static function feet_to_meters( $feet ) {
+		return floatval( $feet ) / 3.2808399;
+	}
+
+
+	/**
+	 * Converts meters to feet.
+	 *
+	 * @param float $meters Meters.
+	 * @return float Feet.
+	 */
+	public static function meters_to_feet( $meters ) {
+		return floatval( $meters ) * 3.2808399;
+	}
+
+	/**
+	 * Converts meters to miles.
+	 *
+	 * @param float $meters Meters.
+	 * @return float Miles.
+	 */
+	public static function meters_to_miles( $meters ) {
+		return floatval( $meters ) / 1609;
+	}
+
+	/**
+	 * Converts miles to meters.
+	 *
+	 * @param float $miles Miles.
+	 * @return float Meters.
+	 */
+	public static function miles_to_meters( $miles ) {
+		return floatval( $miles ) * 1609;
+	}
+
+	/**
+	 * Converts miles per hour to meters per second.
+	 *
+	 * @param float $miles Miles per hour.
+	 * @return float Meters per second.
+	 */
+	public static function miph_to_mps( $miles ) {
+		return round( $miles * 0.44704 );
+	}
 }

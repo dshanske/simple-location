@@ -1048,12 +1048,12 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	private static function get_geometadata( $type, $id, $full = true ) {
-		$geodata               = array();
-		$geodata['longitude']  = get_metadata( $type, $id, 'geo_longitude', true );
-		$geodata['latitude']   = get_metadata( $type, $id, 'geo_latitude', true );
-		$geodata['altitude']   = get_metadata( $type, $id, 'geo_altitude', true );
-		$geodata['address']    = get_metadata( $type, $id, 'geo_address', true );
-		$geodata['icon']    = get_metadata( $type, $id, 'geo_icon', true );
+		$geodata              = array();
+		$geodata['longitude'] = get_metadata( $type, $id, 'geo_longitude', true );
+		$geodata['latitude']  = get_metadata( $type, $id, 'geo_latitude', true );
+		$geodata['altitude']  = get_metadata( $type, $id, 'geo_altitude', true );
+		$geodata['address']   = get_metadata( $type, $id, 'geo_address', true );
+		$geodata['icon']      = get_metadata( $type, $id, 'geo_icon', true );
 		if ( empty( $geodata['icon'] ) ) {
 			$geodata['icon'] = 'fa-location-arrow';
 		}

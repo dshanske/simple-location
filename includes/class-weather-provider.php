@@ -137,71 +137,6 @@ abstract class Weather_Provider extends Sloc_Provider {
 		return ( $temp - 32 ) / 1.8;
 	}
 
-
-	/**
-	 * Converts millimeters to inches.
-	 *
-	 * @param float $mm Millimeters.
-	 * @return float Inches.
-	 */
-	public static function mm_to_inches( $mm ) {
-		return floatval( $mm ) / 25.4;
-	}
-
-	/**
-	 * Converts inches to millimeters.
-	 *
-	 * @param float $inch Inches.
-	 * @return float Millimeters.
-	 */
-	public static function inches_to_mm( $inch ) {
-		return floatval( $inch ) * 25.4;
-	}
-
-
-	/**
-	 * Converts feet to meters.
-	 *
-	 * @param float $feet Feet.
-	 * @return float Meters.
-	 */
-	public static function feet_tometers( $feet ) {
-		return floatval( $feet ) / 3.2808399;
-	}
-
-
-	/**
-	 * Converts meters to feet.
-	 *
-	 * @param float $meters Meters.
-	 * @return float Feet.
-	 */
-	public static function meters_to_feet( $meters ) {
-		return floatval( $meters ) * 3.2808399;
-	}
-
-
-	/**
-	 * Converts meters to miles.
-	 *
-	 * @param float $meters Meters.
-	 * @return float Miles.
-	 */
-	public static function meters_to_miles( $meters ) {
-		return floatval( $meters ) / 1609;
-	}
-
-	/**
-	 * Converts miles to meters.
-	 *
-	 * @param float $miles Miles.
-	 * @return float Meters.
-	 */
-	public static function miles_to_meters( $miles ) {
-		return floatval( $miles ) * 1609;
-	}
-
-
 	/**
 	 * Converts hPa to inHg.
 	 *
@@ -389,9 +324,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'wi-earthquake'        => __( 'Earthquake', 'simple-location' ),
 			'wi-fire'              => __( 'Fire', 'simple-location' ),
 			'wi-flood'             => __( 'Flood', 'simple-location' ),
-			'fa-cloudy-meatball'      => __( 'Cloudy with a Chance of Meatballs', 'simple-location' ),
-			'fa-icy'                  => __( 'Icy', 'simple-location' ),
-			'fa-smog'                  => __( 'Smog( Alt )', 'simple-location' ),
+			'fa-cloudy-meatball'   => __( 'Cloudy with a Chance of Meatballs', 'simple-location' ),
+			'fa-icy'               => __( 'Icy', 'simple-location' ),
+			'fa-smog'              => __( 'Smog( Alt )', 'simple-location' ),
 		);
 
 		$day   = array(

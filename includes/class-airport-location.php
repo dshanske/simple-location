@@ -127,7 +127,7 @@ class Airport_Location {
 	 * @since 4.0.0
 	 */
 	public static function get_airline( $search, $field = 'iata_code' ) {
-		$keys    = array(
+		$keys = array(
 			'id'        => 0,
 			'name'      => 1,
 			'alias'     => 2,
@@ -137,6 +137,7 @@ class Airport_Location {
 			'country'   => 6,
 			'active'    => 7,
 		);
+		
 		$airline = get_transient( 'airline_' . $search . '_' . $field );
 		if ( false !== $airline ) {
 			return $airline;
@@ -152,13 +153,17 @@ class Airport_Location {
 		while ( $line ) {
 			$line = fgetcsv( $fp );
 			if ( is_array( $line ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
-				$airport = array_filter( $line );
+				$airline = array();
+				foreach ( $keys as $key => $value ) {
+					$airline[ $key ] = $line[ $value ];
+				}
+				$airline = array_filter( $airline );
 				set_transient(
 					'airline_' . $search . '_' . $field,
 					$airline,
 					DAY_IN_SECONDS
 				);
-				return $airport;
+				return $airline;
 			}
 		}
 
