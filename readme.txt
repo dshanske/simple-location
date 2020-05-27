@@ -1,10 +1,10 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.0.6
+Stable tag: 4.1.1
 Requires at least: 4.9
 Tested up to: 5.4
-Requires PHP: 5.4
+Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -190,6 +190,17 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.1.1 ( 2020-05-27 ) =
+* AerisWeather is now a provider
+* Add docblocks
+* PHP5.6 now minimum
+* Add additional icons
+* Optimizations, refactoring, and bugfix
+* Add the ability to change the location icon to various alternatives.
+* Add support for retrieving airline data
+* Improve airport data support
+* Standardize units of measure
 
 = 4.0.6 ( 2020-04-12 ) =
 * Update HERE to use API Key over prior app id system
