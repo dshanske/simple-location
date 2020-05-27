@@ -153,15 +153,38 @@ abstract class Location_Provider extends Sloc_Provider {
 		$return['time']              = $this->time;
 		$return['zoom']              = self::derive_zoom();
 		$return['activity']          = $this->activity;
-		$return['annotation']        = $this->annotation;
-		$return['other']             = $this->other;
-		$return                      = array_filter( $return );
+		$iconlist                    = Loc_View::get_iconlist();
+		if ( ! empty( $this->activity ) ) {
+			switch ( $this->activity ) {
+				case 'plane':
+					$return['icon'] = 'fa-plane';
+					break;
+				case 'train':
+					$return['icon'] = 'fa-train';
+					break;
+				case 'walking':
+					$return['icon'] = 'fa-walking';
+					break;
+				case 'running':
+					$return['icon'] = 'fa-running';
+					break;
+				case 'driving':
+					$return['icon'] = 'fa-driving';
+					break;
+				case 'cycling':
+					$return['icon'] = 'fa-biking';
+					break;
+
+			}
+		}
+		$return['annotation'] = $this->annotation;
+		$return['other']      = $this->other;
+		$return               = array_filter( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
 		}
 		return false;
 	}
-
 
 	/**
 	 * Derive Zoom based on Accuracy levels.
@@ -287,4 +310,37 @@ abstract class Location_Provider extends Sloc_Provider {
 	 * @return array|boolean Array with h-geo mf2 false if null
 	 */
 	abstract public function retrieve( $time = null, $args = array() );
+
+	/**
+	 * Returns a list of activity settings and their prettified strings.
+	 *
+	 * @return array Associative array with options as the key and strings as the values.
+	 */
+	public function get_activity_list() {
+		return array(
+			'unknown' => __( 'Unknown Activity', 'simple-location' ),
+			'still'   => __( 'Still', 'simple-location' ),
+			'car'     => __( 'Car', 'simple-location' ),
+			'bus'     => __( 'Bus', 'simple-location' ),
+			'train'   => __( 'Train', 'simple-location' ),
+			'subway'  => __( 'Subway', 'simple-location' ),
+			'tram'    => __( 'Tram/Trolley/Light Rail', 'simple-location' ),
+			'plane'   => __( 'Plane', 'simple-location' ),
+			'walking' => __( 'Walking', 'simple-location' ),
+			'running' => __( 'Running', 'simple-location' ),
+			'taxi'    => __( 'Taxi', 'simple-location' ),
+			'horse'   => __( 'Horse', 'simple-location' ),
+			'bike'    => __( 'Bike', 'simple-location' ),
+
+		);
+	}
+
+	/**
+	 *
+	 * @param float $knots Knots.
+	 * @return float $meters Meters.
+	 */
+	public static function knots_to_meters( $knots ) {
+		return round( $knots * 0.51444444 );
+	}
 }

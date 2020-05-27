@@ -127,7 +127,7 @@ class Map_Provider_Here extends Map_Provider {
 		);
 	}
 
-	public function get_types() {
+	public static function get_types() {
 		return array(
 			0 => __( 'Normal map view in day light mode', 'simple-location' ),
 			1 => __( 'Satellite map view in day light mode', 'simple-location' ),

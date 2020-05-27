@@ -184,7 +184,15 @@ class Location_Provider_Compass extends Location_Provider {
 	 *  @type int|string $number Indicating the flight, train, etc number.
 	 */
 	private function set_activity( $properties ) {
-		if ( array_key_exists( 'activity', $properties ) ) {
+		if ( array_key_exists( 'motion', $properties ) ) {
+			if ( is_string( $properties['motion'] ) ) {
+				$this->activity = $properties['motion'];
+			} elseif ( is_array( $properties['motion'] ) ) {
+				if ( 1 === count( $properties['motion'] ) ) {
+					$this->activity = $properties['motion'][0];
+				}
+			}
+		} elseif ( array_key_exists( 'activity', $properties ) ) {
 			if ( is_string( $properties['activity'] ) ) {
 				$this->activity = $properties['activity'];
 			}
