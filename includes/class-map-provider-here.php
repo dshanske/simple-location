@@ -1,5 +1,15 @@
 <?php
-// HERE Map Provider
+/**
+ * Map Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Map Provider using HERE Map API.
+ *
+ * @since 1.0.0
+ */
 class Map_Provider_Here extends Map_Provider {
 
 	protected $appid;
@@ -117,7 +127,7 @@ class Map_Provider_Here extends Map_Provider {
 		);
 	}
 
-	public function get_types() {
+	public static function get_types() {
 		return array(
 			0 => __( 'Normal map view in day light mode', 'simple-location' ),
 			1 => __( 'Satellite map view in day light mode', 'simple-location' ),
@@ -140,8 +150,8 @@ class Map_Provider_Here extends Map_Provider {
 				'f'      => 0,
 				'ppi'    => 320,
 				'c'      => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-				//'lat'      => $this->latitude,
-				//'lon'      => $this->longitude,
+				// 'lat'      => $this->latitude,
+				// 'lon'      => $this->longitude,
 				'w'      => $this->width,
 				'h'      => $this->height,
 				'style'  => $this->style,

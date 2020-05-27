@@ -104,9 +104,13 @@ jQuery( document ).ready( function( $ ) {
 		$( '#heading' ).val( position.coords.heading );
 		$( '#speed' ).val( position.coords.speed );
 		$( '#altitude' ).val( position.coords.altitude );
+
 		if ( position.coords.hasOwnProperty( 'annotation' ) ) {
 			$( '#address' ).val( position.coords.annotation );
 			$( '#location-label' ).text( position.coords.annotation );
+		}
+		if ( position.coords.hasOwnProperty( 'icon' ) ) {
+			$( '#location_icon' ).val( position.coords.icon );
 		}
 		if ( position.coords.hasOwnProperty( 'zoom' ) ) {
 			$( '#map_zoom' ).val( position.coords.zoom );

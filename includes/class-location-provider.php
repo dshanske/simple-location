@@ -1,28 +1,129 @@
 <?php
+/**
+ * Base Location Provider Class.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Returns location from an external location provider.
+ *
+ * Uses properties from https://www.w3.org/TR/geolocation-API/
+ *
+ * @since 1.0.0
+ */
 abstract class Location_Provider extends Sloc_Provider {
 
-	protected $api;
+
+	 /**
+	  * User name.
+	  *
+	  * @since 1.0.0
+	  * @var string
+	  */
 	protected $user;
-	protected $latitude;
-	protected $longitude;
-	protected $accuracy; // AKA Horizontal Accuracy
-	protected $altitude_accuracy; // AKA Vertical Accuracy
-	protected $altitude;
+
+	 /**
+	  * Accuracy. AKA as Horizontal Accuracy.
+	  *
+	  * The accuracy level of the latitude and longitude coordinates. It is specified in meters. Must be a non-negative real number.
+	  *
+	  * @since 1.0.0
+	  * @var double
+	  */
+	protected $accuracy;
+
+	 /**
+	  * Altitude Accuracy. AKA Verticial Accuracy.
+	  *
+	  * Specified in meters. If not available, must be null. If available, must be a non-negative real number.
+	  *
+	  * @since 1.0.0
+	  * @var double
+	  */
+	protected $altitude_accuracy;
+
+	 /**
+	  * Heading.
+	  *
+	  * The direction of travel and is specified in degrees, where 0° ≤ heading < 360°, counting clockwise relative to the true north.
+	  * If the implementation cannot provide heading information, the value of this attribute must be null. If stationary (i.e. the value of the speed attribute is 0), then the value of the heading attribute must be NaN.
+	  *
+	  * @since 1.0.0
+	  * @var int
+	  */
 	protected $heading;
+
+	 /**
+	  * Speed.
+	  *
+	  * Magnitude of the horizontal component of the current velocity and is specified in meters per second. If not available, must be null.
+	  * Otherwise, the value must be a non-negative real number.
+	  *
+	  * @since 1.0.0
+	  * @var float
+	  */
 	protected $speed;
-	protected $time       = null;
-	protected $activity   = null;
-	protected $annotation = ''; // Any annotation
-	protected $other      = array(); // Extra data
-	protected $background = false; // Background determines if this source allows background updates
+
+	 /**
+	  * Time.
+	  *
+	  * @since 1.0.0
+	  * @var string
+	  */
+	protected $time = null;
+
+	 /**
+	  * Activity.
+	  *
+	  * String representation of the current activity.
+	  *
+	  * @since 1.0.0
+	  * @var string
+	  */
+	protected $activity = null;
+
+
+	 /**
+	  * Annotation.
+	  *
+	  * Any annotations on the location.
+	  *
+	  * @since 1.0.0
+	  * @var string
+	  */
+	protected $annotation = '';
+
+
+	 /**
+	  * Extra parameters passed.
+	  *
+	  * Any extra data provided by the provider.
+	  *
+	  * @since 1.0.0
+	  * @var array
+	  */
+	protected $other = array();
+
+	 /**
+	  * Support for Whether this Provider Allows for Background Updates.
+	  *
+	  * If a provider does not allow background updates information may be stale.
+	  *
+	  * @since 1.0.0
+	  * @var boolean
+	  */
+	protected $background = false;
 
 	/**
-	 * Constructor for the Abstract Class
+	 * Constructor for the Abstract Class.
 	 *
-	 * The default version of this just sets the parameters
+	 * The default version of this just sets the parameters.
 	 *
-	 * @param string $key API Key if Needed
+	 * @param array $args {
+	 *  Arguments.
+	 *  @type string $api API Key.
+	 *  @type string $user Username.
 	 */
 	public function __construct( $args = array() ) {
 		$defaults   = array(
@@ -36,9 +137,9 @@ abstract class Location_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Get Coordinates
+	 * Get Coordinates.
 	 *
-	 * @return array|boolean Array with Latitude and Longitude false if null
+	 * @return array|boolean Array with all properties, false if null.
 	 */
 	public function get() {
 		$return                      = array();
@@ -52,15 +153,44 @@ abstract class Location_Provider extends Sloc_Provider {
 		$return['time']              = $this->time;
 		$return['zoom']              = self::derive_zoom();
 		$return['activity']          = $this->activity;
-		$return['annotation']        = $this->annotation;
-		$return['other']             = $this->other;
-		$return                      = array_filter( $return );
+		$iconlist                    = Loc_View::get_iconlist();
+		if ( ! empty( $this->activity ) ) {
+			switch ( $this->activity ) {
+				case 'plane':
+					$return['icon'] = 'fa-plane';
+					break;
+				case 'train':
+					$return['icon'] = 'fa-train';
+					break;
+				case 'walking':
+					$return['icon'] = 'fa-walking';
+					break;
+				case 'running':
+					$return['icon'] = 'fa-running';
+					break;
+				case 'driving':
+					$return['icon'] = 'fa-driving';
+					break;
+				case 'cycling':
+					$return['icon'] = 'fa-biking';
+					break;
+
+			}
+		}
+		$return['annotation'] = $this->annotation;
+		$return['other']      = $this->other;
+		$return               = array_filter( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
 		}
 		return false;
 	}
 
+	/**
+	 * Derive Zoom based on Accuracy levels.
+	 *
+	 * @return int Derived Zoom or Default Zoom.
+	 */
 	public function derive_zoom() {
 		if ( $this->altitude > 1000 ) {
 			return 9;
@@ -76,9 +206,9 @@ abstract class Location_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Get Coordinates in Geo URI
+	 * Get Coordinates in Geo URI.
 	 *
-	 * @return string|boolean GEOURI false if null
+	 * @return string|boolean GEOURI false if null.
 	 */
 	public function get_geouri() {
 		if ( empty( $this->latitude ) && empty( $this->longitude ) ) {
@@ -96,9 +226,9 @@ abstract class Location_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Get Coordinates in GeoJSON
+	 * Get Coordinates in GeoJSON.
 	 *
-	 * @return array|boolean Array in GeoJSON format false if null
+	 * @return array|boolean Array in GeoJSON format false if null.
 	 */
 	public function get_geojson() {
 		if ( empty( $this->latitude ) && empty( $this->longitude ) ) {
@@ -127,9 +257,9 @@ abstract class Location_Provider extends Sloc_Provider {
 
 
 	/**
-	 * Get Coordinates in H-Geo MF2 Format
+	 * Get Coordinates in H-Geo MF2 Format.
 	 *
-	 * @return array|boolean Array with h-geo mf2 false if null
+	 * @return array|boolean Array with h-geo mf2 false if null.
 	 */
 	public function get_mf2() {
 		$properties              = array();
@@ -138,7 +268,7 @@ abstract class Location_Provider extends Sloc_Provider {
 		$properties['altitude']  = $this->altitude;
 		$properties['heading']   = $this->heading;
 		$properties['speed']     = $this->speed;
-		$properties['name']      = $this->annotation; // If there is an annotation set that as the name
+		$properties['name']      = $this->annotation; // If there is an annotation set that as the name.
 		$properties              = array_filter( $properties );
 		if ( empty( $properties ) ) {
 			return false;
@@ -152,22 +282,65 @@ abstract class Location_Provider extends Sloc_Provider {
 		);
 	}
 
-
+	/**
+	 * Set User name.
+	 *
+	 * @param string $user Username.
+	 */
 	public function set_user( $user ) {
 		$this->user = $user;
 	}
 
+
+	/**
+	 * Return background property.
+	 *
+	 * @return boolean Return whether this allows background updates.
+	 */
 	public function background() {
 		return $this->background;
 	}
 
 
 	/**
-	 * Get Coordinates in H-Geo MF2 Format
+	 * Get Coordinates in H-Geo MF2 Format.
 	 *
-	 * @param int $time An ISO8601 time string
-	 * @param array $args Optional arguments to be passed
+	 * @param string|int|DateTime $time An ISO8601 time string, unix timestamp, or DateTime.
+	 * @param array               $args Optional arguments to be passed.
 	 * @return array|boolean Array with h-geo mf2 false if null
 	 */
 	abstract public function retrieve( $time = null, $args = array() );
+
+	/**
+	 * Returns a list of activity settings and their prettified strings.
+	 *
+	 * @return array Associative array with options as the key and strings as the values.
+	 */
+	public function get_activity_list() {
+		return array(
+			'unknown' => __( 'Unknown Activity', 'simple-location' ),
+			'still'   => __( 'Still', 'simple-location' ),
+			'car'     => __( 'Car', 'simple-location' ),
+			'bus'     => __( 'Bus', 'simple-location' ),
+			'train'   => __( 'Train', 'simple-location' ),
+			'subway'  => __( 'Subway', 'simple-location' ),
+			'tram'    => __( 'Tram/Trolley/Light Rail', 'simple-location' ),
+			'plane'   => __( 'Plane', 'simple-location' ),
+			'walking' => __( 'Walking', 'simple-location' ),
+			'running' => __( 'Running', 'simple-location' ),
+			'taxi'    => __( 'Taxi', 'simple-location' ),
+			'horse'   => __( 'Horse', 'simple-location' ),
+			'bike'    => __( 'Bike', 'simple-location' ),
+
+		);
+	}
+
+	/**
+	 *
+	 * @param float $knots Knots.
+	 * @return float $meters Meters.
+	 */
+	public static function knots_to_meters( $knots ) {
+		return round( $knots * 0.51444444 );
+	}
 }

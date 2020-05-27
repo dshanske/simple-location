@@ -1,18 +1,54 @@
 <?php
-// Nominatim API Provider
+/**
+ * Reverse Geolocation Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Reverse Geolocation using Nominatim API.
+ *
+ * @since 1.0.0
+ */
 class Geo_Provider_Nominatim extends Geo_Provider {
 
+	/**
+	 * Constructor for the Abstract Class.
+	 *
+	 * The default version of this just sets the parameters.
+	 *
+	 * @param array $args {
+	 *  Arguments.
+	 *  @type string $api API Key.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type float $altitude Altitude.
+	 *  @type string $address Formatted Address String
+	 *  @type int $reverse_zoom Reverse Zoom. Default 18.
+	 *  @type string $user User name.
+	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'OpenStreetMap Nominatim', 'simple-location' );
 		$this->slug = 'nominatim';
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Returns elevation but there is no Nominatim Elevation API.
+	 *
+	 * @return float $elevation Elevation.
+	 *
+	 * @since 1.0.0
+	 */
 	public function elevation() {
 		return 0;
 	}
 
-
+	/**
+	 * Return an address.
+	 *
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
 	public function reverse_lookup() {
 		$args = array(
 			'format'          => 'json',
@@ -31,6 +67,16 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			return $json;
 		}
 		$address = $json['address'];
+		return $this->address_to_mf( $address );
+	}
+
+	/**
+	 * Convert address properties to mf2
+	 *
+	 * @param  array $address Raw JSON.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	private function address_to_mf( $address ) {
 		if ( 'us' === $address['country_code'] ) {
 			$region = self::ifnot(
 				$address,
@@ -100,17 +146,14 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 				)
 			),
 			'country-code'     => strtoupper( $address['country_code'] ),
+
 			'latitude'         => $this->latitude,
 			'longitude'        => $this->longitude,
 			'raw'              => $address,
 		);
 		if ( is_null( $addr['country-name'] ) ) {
-			$codes                = json_decode(
-				wp_remote_retrieve_body(
-					wp_remote_get( 'http://country.io/names.json' )
-				),
-				true
-			);
+			$file                 = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
+			$codes                = json_decode( file_get_contents( $file ), true );
 			$addr['country-name'] = $codes[ $addr['country-code'] ];
 		}
 		$addr                 = array_filter( $addr );
@@ -120,6 +163,45 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			$addr = array_merge( $addr, $tz );
 		}
 		return $addr;
+	}
+
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		$args = array(
+			'q'               => $address,
+			'format'          => 'jsonv2',
+			'extratags'       => '1',
+			'addressdetails'  => '1',
+			'namedetails'     => '1',
+			'accept-language' => get_bloginfo( 'language' ),
+		);
+		$url  = 'https://nominatim.openstreetmap.org/search';
+
+		$json = $this->fetch_json( $url, $args );
+
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( wp_is_numeric_array( $json ) ) {
+			$json = $json[0];
+		}
+
+		$address             = $json['address'];
+		$return              = $this->address_to_mf( $address );
+		$return['latitude']  = ifset( $json['lat'] );
+		$return['longitude'] = ifset( $json['lon'] );
+		if ( isset( $json['extratags'] ) ) {
+			$return['url']   = ifset( $json['extratags']['website'] );
+			$return['photo'] = ifset( $json['extratags']['image'] );
+		}
+
+		return array_filter( $return );
 	}
 
 }

@@ -1,7 +1,33 @@
 <?php
-// Google Geocode API Provider
+/**
+ * Reverse Geolocation Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Reverse Geolocation using Google API.
+ *
+ * @since 1.0.0
+ */
 class Geo_Provider_Google extends Geo_Provider {
 
+
+	/**
+	 * Constructor for the Abstract Class.
+	 *
+	 * The default version of this just sets the parameters.
+	 *
+	 * @param array $args {
+	 *  Arguments.
+	 *  @type string $api API Key.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type float $altitude Altitude.
+	 *  @type string $address Formatted Address String
+	 *  @type int $reverse_zoom Reverse Zoom. Default 18.
+	 *  @type string $user User name.
+	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Google', 'simple-location' );
 		$this->slug = 'google';
@@ -17,23 +43,33 @@ class Geo_Provider_Google extends Geo_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Admin Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		add_settings_field(
-			'googleapi', // id
-			__( 'Google Maps API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'googleapi', // ID.
+			__( 'Google Maps API Key', 'simple-location' ), // Setting title.
+			array( 'Loc_Config', 'string_callback' ), // Display callback.
+			'sloc_providers', // Settings page.
+			'sloc_api', // Settings section.
 			array(
 				'label_for' => 'sloc_google_api',
 			)
 		);
 	}
 
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_google_api', // option name
+			'sloc_providers', // Option group.
+			'sloc_google_api', // Option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Google Maps API Key',
@@ -43,6 +79,13 @@ class Geo_Provider_Google extends Geo_Provider {
 		);
 	}
 
+	/**
+	 * Returns elevation.
+	 *
+	 * @return float $elevation Elevation.
+	 *
+	 * @since 1.0.0
+	 */
 	public function elevation() {
 		if ( empty( $this->api ) ) {
 			return null;
@@ -65,6 +108,11 @@ class Geo_Provider_Google extends Geo_Provider {
 		return round( $json['results'][0]['elevation'], 2 );
 	}
 
+	/**
+	 * Return an address.
+	 *
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
 	public function reverse_lookup() {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Google', 'simple-location' ) );
@@ -72,7 +120,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		$args = array(
 			'latlng' => $this->latitude . ',' . $this->longitude,
 			// 'language'      => get_bloginfo( 'language' ),
-			//'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
+			// 'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
 			// 'result_type'   => 'street_address',
 			'key'    => $this->api,
 		);
@@ -87,10 +135,18 @@ class Geo_Provider_Google extends Geo_Provider {
 		} else {
 			return array();
 		}
-		$addr                 = array(
-			'latitude'  => $this->latitude,
-			'longitude' => $this->longitude,
-		);
+		$addr              = $this->address_to_mf2( $data );
+		$addr['latitude']  = $this->latitude;
+		$addr['longitude'] = $this->longitude;
+	}
+
+	/**
+	 * Convert address properties to mf2
+	 *
+	 * @param  array $data Raw JSON.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	private function address_to_mf2( $data ) {
 		$addr['display-name'] = ifset( $data['formatted_address'] );
 		$addr['plus-code']    = ifset( $data['plus_code']['global_code'] );
 		if ( isset( $data['address_components'] ) ) {
@@ -129,9 +185,40 @@ class Geo_Provider_Google extends Geo_Provider {
 			$addr = array_merge( $addr, $tz );
 		}
 		if ( WP_DEBUG ) {
-			$addr['raw'] = $raw;
+			$addr['raw'] = $data;
 		}
 		return $addr;
+	}
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		if ( empty( $this->api ) ) {
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Google', 'simple-location' ) );
+		}
+		$args = array(
+			'key'     => $this->api,
+			'address' => $address,
+
+		);
+		$url  = 'https://maps.googleapis.com/maps/api/geocode/json';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( wp_is_numeric_array( $json['results'] ) ) {
+			$json = $json['results'][0];
+		}
+		$return = $this->address_to_mf2( $json );
+		if ( isset( $json['geometry'] ) ) {
+			$return['latitude']  = $json['geometry']['location']['lat'];
+			$return['longitude'] = $json['geometry']['location']['lng'];
+		}
+		return $return;
 	}
 }
 

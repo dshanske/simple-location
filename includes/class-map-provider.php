@@ -1,21 +1,89 @@
 <?php
+/**
+ * Base Map Provider Class.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Retrieves Maps.
+ *
+ * @since 1.0.0
+ */
 abstract class Map_Provider extends Sloc_Provider {
 
+	 /**
+	  * Map Zoom Level.
+	  *
+	  * @since 1.0.0
+	  * @var int
+	  */
 	protected $map_zoom;
+
+	 /**
+	  * Map Height.
+	  *
+	  * @since 1.0.0
+	  * @var int
+	  */
 	protected $height;
+
+	 /**
+	  * Map Width.
+	  *
+	  * @since 1.0.0
+	  * @var int
+	  */
 	protected $width;
+
+	 /**
+	  * Map Style.
+	  *
+	  * @since 1.0.0
+	  * @var string
+	  */
 	protected $style;
+
+	 /**
+	  * Username if appropriate.
+	  *
+	  * @since 1.0.0
+	  * @var int
+	  */
 	protected $user;
+
+	 /**
+	  * Static Map URL.
+	  *
+	  * @since 1.0.0
+	  * @var string
+	  */
 	protected $static;
+
+	 /**
+	  * Location Information.
+	  *
+	  * @since 1.0.0
+	  * @var string
+	  */
 	protected $location;
 
 	/**
-	 * Constructor for the Abstract Class
+	 * Constructor for the Abstract Class.
 	 *
-	 * The default version of this just sets the parameters
+	 * The default version of this just sets the parameters.
 	 *
-	 * @param string $key API Key if Needed
+	 * @param array $args {
+	 *  Arguments.
+	 *  @type string $api API Key.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type float $altitude Altitude.
+	 *  @type int $width Width.
+	 *  @type int $height Height.
+	 *  @type string $user Username.
+	 *  @type string $style Style of Map.
+	 *  @type int $map_zoom Map Zoom Level.
 	 */
 	public function __construct( $args = array() ) {
 		global $content_width;
@@ -54,6 +122,14 @@ abstract class Map_Provider extends Sloc_Provider {
 		$this->set( $r['latitude'], $r['longitude'], $r['altitude'] );
 	}
 
+	/**
+	 * Set and Validate Coordinates.
+	 *
+	 * @param array|float $args Latitude or array of all three properties.
+	 * @param float       $lng Longitude. Optional if first property is an array.
+	 * @param float       $alt Altitude. Optional.
+	 * @return boolean Return False if Validation Failed
+	 */
 	public function set( $args, $lng = null, $alt = null ) {
 		if ( is_array( $args ) ) {
 			if ( isset( $args['height'] ) ) {
@@ -69,56 +145,53 @@ abstract class Map_Provider extends Sloc_Provider {
 				$this->location = $args['location'];
 			}
 		}
-		parent::set( $args, $lng, $alt );
+		return parent::set( $args, $lng, $alt );
 	}
 
 
 	/**
-	 * Return an array of styles with key being id and value being display name
+	 * Return an array of styles with key being id and value being display name.
 	 *
 	 * @return array
 	 */
 	abstract public function get_styles();
 
 	/**
-	 * Return a URL for a static map
+	 * Return a URL for a static map.
 	 *
-	 * @return string URL of MAP
-	 *
+	 * @return string $url URL of MAP.
 	 */
 	abstract public function get_the_static_map();
 
 
 	/**
-	 * Return a URL for a static map with multiple locations
+	 * Return a URL for a static map with multiple locations.
 	 *
-	 * @param $locations Array of latitude and longitudes
-	 * @return string URL of MAP
-	 *
+	 * @param array $locations Array of latitude and longitudes.
+	 * @return string $url URL of MAP.
 	 */
 	abstract public function get_archive_map( $locations );
 
 	/**
-	 * Return a URL for a link to a map
+	 * Return a URL for a link to a map.
 	 *
-	 * @return string URL of link to a map
-	 *
+	 * @return string $url URL of link to a map.
 	 */
 	abstract public function get_the_map_url();
 
 	/**
-	 * Return HTML code for a map
+	 * Return HTML code for a map.
 	 *
-	 * @param boolean $static Return Static or Dynamic Map
-	 * @return string HTML marked up map
+	 * @param boolean $static Return Static or Dynamic Map.
+	 * @return string HTML marked up map.
 	 */
 	abstract public function get_the_map( $static = false );
 
 	/**
-	 * Given coordinates echo the output of get_the_map
+	 * Given coordinates echo the output of get_the_map.
 	 *
-	 * @param boolean $static Return Static or Dynamic Map
-	 * @return echos the output
+	 * @param boolean $static Return Static or Dynamic Map.
+	 * @return echos the output.
 	 */
 	public function the_map( $static = false ) {
 		return $this->get_the_map( $static );

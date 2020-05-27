@@ -47,7 +47,9 @@ module.exports = function(grunt) {
 	       overwriteEverytime: true
             },
 	    files: {
-              'data/airports.csv': 'https://ourairports.com/data/airports.csv'
+              'data/airports.csv': 'https://ourairports.com/data/airports.csv',
+	      'data/countries.json': 'http://country.io/names.json',
+	      'data/airlines.csv': 'https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat',
             } 
        }
     });

@@ -1,21 +1,15 @@
 .sloc-display {
-    .icon-location {
-        fill: currentColor;
-        padding-left: 2px;
-        padding-right: 2px;
-        width: 16px;
-        height: 16px;
+	display: block;
+}
+
+
+.sloc-location-icon {
         vertical-align: middle;
-        top: -0.0625em;
-        color: black
-    }
-	.svg-icon {
-		fill: currentColor;
+	display: inline-block;
+	svg {
 		vertical-align: middle;
-		top: -0.0625em;
-		width: 16px;
-		height: 16px;
-		color: black;
+		width: 1rem;
+		fill: currentColor;
 	}
 }
 

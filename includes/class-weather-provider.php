@@ -1,20 +1,81 @@
 <?php
+/**
+ * Base Weather Provider Class.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Returns weather data.
+ *
+ * @since 1.0.0
+ */
 abstract class Weather_Provider extends Sloc_Provider {
 
-	protected $style;
-	protected $region; // If this weather provider is limited to a region
-	protected $station_id; // Most weather sites permit a station ID to be set
-	protected $units; // Unit of measurement: imperial, si, etc
-	protected $cache_key; // If set this will cache the retrieved informatin
-	protected $cache_time; // This will dictate for how long
+	 /**
+	  * Region.
+	  *
+	  * If null applies to all regions.
+	  * Can also be a string or array of strings representing two letter country codes.
+	  *
+	  * @since 4.0.7
+	  * @var string|array|null
+	  */
+	protected $region;
+
+	 /**
+	  * Station ID.
+	  *
+	  * Many weather sites permit a station ID to be set.
+	  *
+	  * @since 1.0.0
+	  * @var $string
+	  */
+	protected $station_id;
+
+	 /**
+	  * Units. si, imperial, etc.
+	  *
+	  * @since 1.0.0
+	  * @var $string
+	  */
+	protected $units;
+
+	 /**
+	  * Cache Key.
+	  *
+	  * If set this will cache the retrieved information.
+	  *
+	  * @since 1.0.0
+	  * @var $string
+	  */
+	protected $cache_key;
+
+	 /**
+	  * Cache Time.
+	  *
+	  * Cache time in seconds.
+	  *
+	  * @since 1.0.0
+	  * @var $int
+	  */
+	protected $cache_time;
 
 	/**
-	 * Constructor for the Abstract Class
+	 * Constructor for the Abstract Class.
 	 *
-	 * The default version of this just sets the parameters
+	 * The default version of this just sets the parameters.
 	 *
-	 * @param string $args Arguments
+	 * @param array $args {
+	 *  Arguments.
+	 *  @type string $api API Key.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type string $station_id Station ID.
+	 *  @type string $cache_key Cache Key.
+	 *  @type int $cache_time Cache in Seconds.
+	 *  @type string $units Units of Measurement.
+	 * }
 	 */
 	public function __construct( $args = array() ) {
 		$defaults         = array(
@@ -25,11 +86,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'cache_key'  => null, // 'slocw',
 			'cache_time' => 600,
 			'units'      => get_option( 'sloc_measurements', Loc_Config::measurement_default() ),
-			'style'      => '',
 		);
 		$defaults         = apply_filters( 'sloc_weather_provider_defaults', $defaults );
 		$r                = wp_parse_args( $args, $defaults );
-		$this->style      = $r['style'];
 		$this->api        = $r['api'];
 		$this->station_id = $r['station_id'];
 		$this->units      = $r['units'];
@@ -38,27 +97,71 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
-	// Does this provider allow for station data
+
+	/**
+	 * Does This Provider Offer Station Data.
+	 *
+	 * @return boolean If supports station data return true.
+	 */
 	public function is_station() {
 		return true;
 	}
 
+
+	/**
+	 * Return Station ID if set.
+	 *
+	 * @return string|null Station ID.
+	 */
 	public function get_station() {
 		return $this->station_id;
 	}
 
+	/**
+	 * Converts celsius to fahrenheit.
+	 *
+	 * @param float $temp Temperature in Celsius.
+	 * @return float Temperature in Fahrenheit.
+	 */
 	public static function celsius_to_fahrenheit( $temp ) {
 		return ( $temp * 9 / 5 ) + 32;
 	}
 
+	/**
+	 * Converts fahrenheit to celsius.
+	 *
+	 * @param float $temp Temperature in Fahrenheit.
+	 * @return float Temperature in Celsius.
+	 */
 	public static function fahrenheit_to_celsius( $temp ) {
 		return ( $temp - 32 ) / 1.8;
 	}
 
-	public static function meters_to_feet( $meters ) {
-		return floatval( $meters ) * 3.2808399;
+	/**
+	 * Converts hPa to inHg.
+	 *
+	 * @param float $hpa HectoPascals.
+	 * @return float Inches of Mercury.
+	 */
+	public static function hpa_to_inhg( $hpa ) {
+		return floatval( $hpa ) * 0.03;
 	}
 
+	/**
+	 * Converts inHg to hPa
+	 *
+	 * @param float $inhg Inches of Mercury.
+	 * @return float HectoPascals.
+	 */
+	public static function inhg_to_hpa( $inhg ) {
+		return floatval( $inhg ) / 0.03;
+	}
+
+	/**
+	 * Return temperature units.
+	 *
+	 * @return string Units.
+	 */
 	public function temp_unit() {
 		switch ( $this->units ) {
 			case 'imperial':
@@ -69,8 +172,10 @@ abstract class Weather_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Return the marked up  icon standardized to the fontse
+	 * Return the marked up icon standardized to the fonts.
 	 *
+	 * @param string $icon Name of Icon.
+	 * @param string $summary Description of Icon. Optional.
 	 * @return string marked up icon
 	 */
 	public static function get_icon( $icon, $summary = null ) {
@@ -89,18 +194,39 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 
 	/**
-	 * Return array of current conditions
+	 * Return array of current conditions. All fields optional.
 	 *
-	 * @param string $time ISO8601 timestamp
-	 * @return array Current Conditions in Array
+	 * All floats rounded to 2 decimal points.
+	 *
+	 * @param string|int|DateTime $time ISO8601, timestamp, or DateTime.
+	 * @return array {
+	 *  Current Conditions in Array.
+	 *  @type float $temperature Temperature in Celsius.
+	 *  @type float $humidity Humidity as a percentage between 0 and 100.
+	 *  @type float $pressure Pressure in hPa/mbar
+	 *  @type int $cloudiness Cloudiness as a percentage between 0 and 100.
+	 *  @type array $wind {
+	 *      @type int $speed Speed in meters per hour.
+	 *      @type float $degree Degree between 0 and 360.
+	 *  }
+	 *  @type float $rain Rainfall in millimeters.
+	 *  @type float $visibility Visibility in meters.
+	 *  @type float $radiation Estimated Solar Radiation in W/m^2.
+	 *  @type float $uv UV Index. 0-11+.
+	 *  @type float $snow Snowfall in millimeters.
+	 *  @type string $summary Textual Description of Weather.
+	 *  @type string $icon Slug for icon to display.
+	 *  @type string $sunrise ISO8601 string reflecting sunrise time.
+	 *  @type string $sunset ISO8601 string reflecting sunset time.
+	 * }
 	 */
 	abstract public function get_conditions( $time );
 
-		/**
-		 * Return summary of current conditions
-		 *
-		 * @return string Summary of Current conditions
-		 */
+	/**
+	 * Return summary of current conditions.
+	 *
+	 * @return string Summary of Current conditions.
+	 */
 	public function get_current_condition() {
 		$return     = '';
 		$conditions = $this->get_conditions();
@@ -113,7 +239,29 @@ abstract class Weather_Provider extends Sloc_Provider {
 		return $return;
 	}
 
-	/* Passes temperature and returns it either same or converted with units
+	/**
+	 * Set and Validate Coordinates.
+	 *
+	 * @param array|float $lat Latitude or array of all three properties.
+	 * @param float       $lng Longitude. Optional if first property is an array.
+	 * @param float       $alt Altitude. Optional.
+	 * @return boolean Return False if Validation Failed
+	 */
+	public function set( $lat, $lng = null, $alt = null ) {
+		if ( ! $lng && is_array( $lat ) ) {
+			if ( isset( $lat['station_id'] ) ) {
+				$this->station_id = $lat['station_id'];
+			}
+		}
+		return parent::set( $lat, $lng, $alt );
+	}
+
+
+	/**
+	 * Passes temperature and returns it either same of converted into preferred units.
+	 *
+	 * @param float $temperature Temperature in celsius.
+	 * @return string Marked up temperature in proper untis.
 	 */
 	private function get_temp( $temperature ) {
 		if ( 'imperial' === $this->units ) {
@@ -123,19 +271,23 @@ abstract class Weather_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Return the current temperature with units
+	 * Returns current temperature from conditions.
 	 *
-	 * @return string
+	 * @return string Marked up temperature in proper untis.
 	 */
 	public function get_current_temperature() {
-			$conditions = $this->get_conditions();
+		$conditions = $this->get_conditions();
 		if ( isset( $conditions['temperature'] ) ) {
-				return $this->get_temp( $conditions['temperature'] );
+			return $this->get_temp( $conditions['temperature'] );
 		}
-			return '';
+		return '';
 	}
 
-
+	/**
+	 * Returns list of available icons.
+	 *
+	 * @return array List of Icon Options.
+	 */
 	public static function get_iconlist() {
 		$neutral = array(
 			'wi-cloud'             => __( 'Cloud', 'simple-location' ),
@@ -172,6 +324,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'wi-earthquake'        => __( 'Earthquake', 'simple-location' ),
 			'wi-fire'              => __( 'Fire', 'simple-location' ),
 			'wi-flood'             => __( 'Flood', 'simple-location' ),
+			'fa-cloudy-meatball'   => __( 'Cloudy with a Chance of Meatballs', 'simple-location' ),
+			'fa-icy'               => __( 'Icy', 'simple-location' ),
+			'fa-smog'              => __( 'Smog( Alt )', 'simple-location' ),
 		);
 
 		$day   = array(
@@ -226,6 +381,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		);
 		$misc  = array(
 			'wi-barometer'            => __( 'Barometer', 'simple-location' ),
+			'wi-barometer-sea-level'  => __( 'Barometer(Sea Level)', 'simple-location' ),
 			'wi-thermometer'          => __( 'Thermometer', 'simple-location' ),
 			'wi-thermometer-exterior' => __( 'Thermometer - Exterior', 'simple-location' ),
 			'wi-thermometer-internal' => __( 'Thermometer - Internal', 'simple-location' ),
@@ -282,6 +438,13 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 	}
 
+	/**
+	 * Generates Pulldown list of Icons.
+	 *
+	 * @param string  $icon Icon to be Selected.
+	 * @param boolean $echo Echo or Return.
+	 * @return string Select Option. Optional.
+	 */
 	public static function icon_select( $icon, $echo = false ) {
 		$choices = self::get_iconlist();
 		if ( ! $icon ) {
@@ -297,7 +460,5 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 		echo $return; // phpcs:ignore
 	}
-
-
 
 }

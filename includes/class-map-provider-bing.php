@@ -1,5 +1,15 @@
 <?php
-// Bing Map Provider
+/**
+ * Map Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Map Provider using Bing Map API.
+ *
+ * @since 1.0.0
+ */
 class Map_Provider_Bing extends Map_Provider {
 
 

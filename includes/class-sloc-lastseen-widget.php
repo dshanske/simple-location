@@ -37,7 +37,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 			$geodata = WP_Geo_Data::get_geodata( $user );
 			if ( 1 === (int) $instance['showtime'] ) {
 				$format   = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
-				$timezone = Post_Timezone::get_timezone( $user );
+				$timezone = Loc_Timezone::get_timezone( $user );
 				echo Weather_Provider::get_icon( 'wi-time-1', __( 'Local Time', 'simple-location' ) ); // phpcs:ignore
 				printf( '<time datetime="%1$s">%2$s</time>', esc_attr( wp_date( DATE_W3C, null, $timezone ) ), esc_html( wp_date( $format, null, $timezone ) ) );
 			}

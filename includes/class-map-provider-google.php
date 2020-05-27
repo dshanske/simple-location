@@ -1,5 +1,15 @@
 <?php
-// Google Map Provider
+/**
+ * Map Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Map Provider using Google Map API.
+ *
+ * @since 1.0.0
+ */
 class Map_Provider_Google extends Map_Provider {
 
 

@@ -1,7 +1,32 @@
 <?php
-// Geonames Geocode API Provider
+/**
+ * Reverse Geolocation Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Reverse Geolocation using Bing API.
+ *
+ * @since 1.0.0
+ */
 class Geo_Provider_Geonames extends Geo_Provider {
 
+	/**
+	 * Constructor for the Abstract Class.
+	 *
+	 * The default version of this just sets the parameters.
+	 *
+	 * @param array $args {
+	 *  Arguments.
+	 *  @type string $api API Key.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type float $altitude Altitude.
+	 *  @type string $address Formatted Address String
+	 *  @type int $reverse_zoom Reverse Zoom. Default 18.
+	 *  @type string $user User name.
+	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Geonames', 'simple-location' );
 		$this->slug = 'geonames';
@@ -17,6 +42,11 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		register_setting(
 			'sloc_providers',
@@ -30,9 +60,14 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		);
 	}
 
+	/**
+	 * Admin Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		add_settings_field(
-			'geonamesuser', // id
+			'geonamesuser', // ID.
 			__( 'Geonames User', 'simple-location' ),
 			array( 'Loc_Config', 'string_callback' ),
 			'sloc_providers',
@@ -43,6 +78,13 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		);
 	}
 
+	/**
+	 * Returns elevation.
+	 *
+	 * @return float $elevation Elevation.
+	 *
+	 * @since 1.0.0
+	 */
 	public function elevation() {
 		if ( ! $this->user ) {
 			return null;
@@ -63,8 +105,11 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		return null;
 	}
 
-
-
+	/**
+	 * Return an address.
+	 *
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
 	public function reverse_lookup() {
 		if ( ! $this->user ) {
 			return null;
@@ -79,12 +124,21 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		$json = $json['geonames'][0];
-		$addr = array(
-			'latitude'  => $this->latitude,
-			'longitude' => $this->longitude,
-		);
+		$json              = $json['geonames'][0];
+		$addr              = $this->address_to_mf2( $json );
+		$addr['latitude']  = $this->latitude;
+		$addr['longitude'] = $this->longitude;
+		return $addr;
+	}
 
+	/**
+	 * Convert address properties to mf2
+	 *
+	 * @param  array $json Raw JSON.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	private function address_to_mf2( $json ) {
+		$addr                   = array();
 		$addr['street-address'] = ifset( $json['toponymName'] );
 		$addr['locality']       = ifset( $json['adminName1'] );
 		// $addr['region']         = ifset( $json[] );
@@ -101,7 +155,37 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( WP_DEBUG ) {
 			$addr['raw'] = $json;
 		}
-		return $addr;
+		return array_filter( $addr );
+	}
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		if ( ! $this->user ) {
+			return null;
+		}
+		$args = array(
+			'username' => $this->user,
+			'q'        => $address,
+			'type'     => 'json',
+			'lang'     => get_bloginfo( 'language' ),
+			'style'    => 'FULL',
+		);
+		$url  = 'https://secure.geonames.org/search';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		$json                = $json['geonames'][0];
+		$return              = $this->address_to_mf2( $json );
+		$return['latitude']  = ifset( $json['lat'] );
+		$return['longitude'] = ifset( $json['lng'] );
+		$return['altitude']  = ifset( $json['elevation'] );
+		return array_filter( $return );
 	}
 }
 

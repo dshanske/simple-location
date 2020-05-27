@@ -1,7 +1,34 @@
 <?php
-// Bing Geocode API Provider
+/**
+ * Reverse Geolocation Provider.
+ *
+ * @package Simple_Location
+ */
+
+/**
+ * Reverse Geolocation using Bing API.
+ *
+ * @since 1.0.0
+ */
 class Geo_Provider_Bing extends Geo_Provider {
 
+
+
+	/**
+	 * Constructor for the Abstract Class.
+	 *
+	 * The default version of this just sets the parameters.
+	 *
+	 * @param array $args {
+	 *  Arguments.
+	 *  @type string $api API Key.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type float $altitude Altitude.
+	 *  @type string $address Formatted Address String
+	 *  @type int $reverse_zoom Reverse Zoom. Default 18.
+	 *  @type string $user User name.
+	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Bing', 'simple-location' );
 		$this->slug = 'bing';
@@ -17,11 +44,15 @@ class Geo_Provider_Bing extends Geo_Provider {
 		parent::__construct( $args );
 	}
 
-
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_bing_api', // option name
+			'sloc_providers', // Option group.
+			'sloc_bing_api', // Option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Bing Maps API Key',
@@ -31,19 +62,32 @@ class Geo_Provider_Bing extends Geo_Provider {
 		);
 	}
 
+
+	/**
+	 * Admin Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		add_settings_field(
-			'bingapi', // id
-			__( 'Bing API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'bingapi', // ID.
+			__( 'Bing API Key', 'simple-location' ), // Setting title.
+			array( 'Loc_Config', 'string_callback' ), // Display callback.
+			'sloc_providers', // Settings page.
+			'sloc_api', // Settings section.
 			array(
 				'label_for' => 'sloc_bing_api',
 			)
 		);
 	}
 
+	/**
+	 * Returns elevation.
+	 *
+	 * @return float $elevation Elevation.
+	 *
+	 * @since 1.0.0
+	 */
 	public function elevation() {
 		if ( empty( $this->api ) ) {
 			return null;
@@ -70,8 +114,11 @@ class Geo_Provider_Bing extends Geo_Provider {
 			return round( $json['elevations'][0], 2 );
 	}
 
-
-
+	/**
+	 * Return an address.
+	 *
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
 	public function reverse_lookup() {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
@@ -91,10 +138,21 @@ class Geo_Provider_Bing extends Geo_Provider {
 			}
 		}
 
-		$addr                   = array(
-			'latitude'  => $this->latitude,
-			'longitude' => $this->longitude,
-		);
+		$return              = $this->address_to_mf2( $json );
+		$return['latitude']  = $this->latitude;
+		$return['longitude'] = $this->longitude;
+		return $return;
+	}
+
+
+	/**
+	 * Convert address properties to mf2
+	 *
+	 * @param  array $json Raw JSON.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	private function address_to_mf2( $json ) {
+		$addr                   = array();
 		$addr['display-name']   = $json['name'];
 		$addr['street-address'] = ifset( $json['address']['addressLine'] );
 		$addr['locality']       = ifset( $json['address']['locality'] );
@@ -112,6 +170,44 @@ class Geo_Provider_Bing extends Geo_Provider {
 		}
 		return $addr;
 	}
+
+	/**
+	 * Geocode address.
+	 *
+	 * @param  string $address String representation of location.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	public function geocode( $address ) {
+		if ( empty( $this->api ) ) {
+			return null;
+		}
+		$args = array(
+			'q'      => $address,
+			'inclnb' => 1,
+			'key'    => $this->api,
+		);
+		$url  = 'http://dev.virtualearth.net/REST/v1/Locations/';
+		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( isset( $json['error_message'] ) ) {
+				return new WP_Error( $json['status'], $json['error_message'] );
+		}
+		if ( isset( $json['resourceSets'] ) ) {
+			$json = $json['resourceSets'][0];
+			if ( isset( $json['resources'] ) && is_array( $json['resources'] ) ) {
+				$json = $json['resources'][0];
+			}
+		}
+
+		$return              = $this->address_to_mf2( $json );
+		$return['latitude']  = ifset( $json['point']['coordinates'][0] );
+		$return['longitude'] = ifset( $json['point']['coordinates'][1] );
+
+		return array_filter( $return );
+	}
+
 }
 
 register_sloc_provider( new Geo_Provider_Bing() );

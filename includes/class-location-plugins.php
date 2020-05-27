@@ -1,4 +1,9 @@
 <?php
+/**
+ * Extra Plugin Configuration.
+ *
+ * @package Simple_Location
+ */
 
 /**
  * Simple Location Plugins Class

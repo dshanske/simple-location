@@ -1,5 +1,16 @@
 <?php
+/**
+ * Location Provider.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Location Provider using Compass.
+ * https://github.com/aaronpk/compass
+ *
+ * @since 1.0.0
+ */
 class Location_Provider_Compass extends Location_Provider {
 
 	public function __construct( $args = array() ) {
@@ -69,15 +80,17 @@ class Location_Provider_Compass extends Location_Provider {
 			return false;
 		}
 		$coord           = $response['geometry']['coordinates'];
-		$this->longitude = $coord[0];
-		$this->latitude  = $coord[1];
-		$this->altitude  = isset( $coord[2] ) ? round( $coord[2], 2 ) : null;
+		$this->longitude = WP_Geo_Data::clean_coordinate( $coord[0] );
+		$this->latitude  = WP_Geo_Data::clean_coordinate( $coord[1] );
 		$properties      = array_filter( $response['properties'] );
 		$this->heading   = array_key_exists( 'heading', $properties ) ? $properties['heading'] : null;
-		$this->speed     = array_key_exists( 'speed', $properties ) ? $properties['speed'] : null;
+		$this->speed     = $this->set_speed( $properties );
+
+		$this->altitude = isset( $coord[2] ) ? round( $coord[2], 2 ) : null;
 		// Altitude is stored by Overland as a property not in the coordinates
 		if ( is_null( $this->altitude ) && array_key_exists( 'altitude', $properties ) ) {
-			$this->altitude = $properties['altitude'];
+			$this->altitude = round( $properties['altitude'], 2 );
+			unset( $properties['altitude'] );
 		}
 		$this->accuracy          = self::ifnot(
 			$properties,
@@ -93,64 +106,131 @@ class Location_Provider_Compass extends Location_Provider {
 				'vertical_accuracy',
 			)
 		);
-		if ( array_key_exists( 'activity', $properties ) ) {
+
+		if ( array_key_exists( 'airline', $properties ) ) {
+			$properties['operator'] = trim( strtoupper( $properties['airline'] ) );
+		}
+
+		if ( array_key_exists( 'operator', $properties ) ) {
+			if ( 2 === strlen( $properties['operator'] ) ) {
+				$airline = Airport_Location::get_airline( $properties['operator'] );
+			} elseif ( 3 === strlen( $properties['operator'] ) ) {
+				$airline = Airport_Location::get_airline( $properties['operator'], 'icao_code' );
+			}
+			if ( is_array( $airline ) && array_key_exists( 'name', $airline ) ) {
+				$properties['operator'] = $airline['name'];
+			}
+		}
+		if ( ! array_key_exists( 'number', $properties ) ) {
+			// Back compat for storing old options over number.
+			if ( array_key_exists( 'flight', $properties ) ) {
+				$properties['number'] = $properties['flight'];
+				unset( $properties['flight'] );
+			} elseif ( array_key_exists( 'flight_number', $properties ) ) {
+				$properties['number'] = $properties['flight_number'];
+				unset( $properties['flight_number'] );
+			}
+		}
+
+		if ( array_key_exists( 'number', $properties ) ) {
+			if ( ! is_numeric( $properties['number'] ) ) {
+					$properties['number'] = strtoupper( $properties['number'] );
+					$prefixes             = array( 'EIN', 'EI', 'JBU', 'WN' ); // Just happen to be the ones I have done before.
+				foreach ( $prefixes as $prefix ) {
+					$properties['number'] = str_replace( $prefix, '', $properties['number'] );
+				}
+			}
+		}
+		$this->set_activity( $properties );
+
+		// Above handles standard properties the remaining code handles non-standard properties if present.
+
+		$this->other( $properties );
+	}
+
+	/**
+	 * Set Speed Parameter
+	 *
+	 * @param array $properties Property Array
+	 *
+	 * @return null|float Speed.
+	 */
+	private function set_speed( $properties ) {
+		$speed = array_key_exists( 'speed', $properties ) ? $properties['speed'] : null;
+		if ( is_null( $speed ) ) {
+			if ( array_key_exists( 'ground_speed_knots', $properties ) ) {
+				// Convert from knots to meters per second.
+				$speed = $this->knots_to_meters( $properties['ground_speed_knots'] );
+			} elseif ( array_key_exists( 'ground_speed', $properties ) ) {
+				// Convert from miles per hour to meters per second.
+				$speed = $this->miph_to_mps( $properties['ground_speed'] );
+			}
+		}
+		return $speed;
+	}
+
+	/**
+	 * Set Activity Property Based on a variety of fields
+	 *
+	 * @param array $properties {
+	 *  List of Extra Activity Related Properties from Compass Input.
+	 *  @type array|string $motion. Motion type.
+	 *  @type string $source This can be which website or software it came from or simply the transit type. Optional.
+	 *  @type string $origin Origin of the travel.
+	 *  @type string $destination Destination for the travel.
+	 *  @type string $aircraft Aircraft type if available. Optional.
+	 *  @type string $departure Scheduled Time of Departure.
+	 *  @type string $arrival Scheduled Time of Arrival.
+	 *  @type int|string $number Indicating the flight, train, etc number.
+	 */
+	private function set_activity( $properties ) {
+		if ( array_key_exists( 'motion', $properties ) ) {
+			if ( is_string( $properties['motion'] ) ) {
+				$this->activity = $properties['motion'];
+			} elseif ( is_array( $properties['motion'] ) ) {
+				if ( 1 === count( $properties['motion'] ) ) {
+					$this->activity = $properties['motion'][0];
+				}
+			}
+		} elseif ( array_key_exists( 'activity', $properties ) ) {
 			if ( is_string( $properties['activity'] ) ) {
 				$this->activity = $properties['activity'];
 			}
 		}
-		if ( is_null( $this->altitude ) && array_key_exists( 'altitude', $properties ) ) {
-			$this->altitude = $properties['altitude'];
-		}
 		// A lot of this is specific to my tasker implementation that tracks airline activity
 		if ( array_key_exists( 'source', $properties ) && is_null( $this->activity ) ) {
-			switch ( $properties['source'] ) {
-				case 'flight':
-					$this->activity = __( 'Flight', 'simple-location' );
-					break;
-				case 'train':
-					$this->activity = __( 'Train', 'simple-location' );
-					break;
-			}
-			if ( array_key_exists( 'airline', $properties ) ) {
-				$properties['airline'] = strtoupper( $properties['airline'] );
-			}
-			if ( 'flight' === $properties['source'] && empty( $this->annotation ) ) {
-				$annotate = array();
-				if ( array_key_exists( 'airline', $properties ) ) {
-					$annotate[] = $properties['airline'];
-				}
-				if ( array_key_exists( 'number', $properties ) ) {
-					$properties['flight_number'] = $properties['number'];
-					unset( $properties['number'] );
-				}
-				if ( array_key_exists( 'flight_number', $properties ) ) {
-					if ( ! is_numeric( $properties['flight_number'] ) ) {
-						$properties['flight_number'] = strtoupper( $properties['flight_number'] );
-						$prefixes                    = array( 'EIN', 'EI', 'JBU', 'WN' );
-						foreach ( $prefixes as $prefix ) {
-							$properties['flight_number'] = str_replace( $prefix, '', $properties['flight_number'] );
-						}
-					}
-					$annotate[] = $properties['flight_number'];
-				}
-				if ( array_key_exists( 'origin', $properties ) && array_key_exists( 'destination', $properties ) ) {
-					$origin      = Airport_Location::get( $properties['origin'] );
-					$destination = Airport_Location::get( $properties['destination'] );
-					$annotate[]  = sprintf( '%1$s - %2$s', $origin['name'], $destination['name'] );
-				}
-				$this->annotation = implode( ' ', $annotate );
-			}
-		}
-		if ( is_null( $this->speed ) ) {
-			if ( array_key_exists( 'ground_speed_knots', $properties ) ) {
-				// Convert from knots to meters per second
-				$this->speed = round( $properties['ground_speed_knots'] * 0.51444444 );
-			} elseif ( array_key_exists( 'ground_speed', $properties ) ) {
-				// Convert from miles per hour to meters per second
-				$this->speed = round( $properties['ground_speed'] * 0.44704 );
+			if ( in_array( $properties['source'], array( 'flight wifi', 'flight', 'flightaware.com' ), true ) ) {
+				$this->activity = 'plane';
+			} elseif ( in_array( $properties['source'], $this->get_activity_list(), true ) ) {
+				$this->activity = $properties['source'];
+			} else {
+				$this->activity = 'unknown';
 			}
 		}
 
+		if ( 'plane' === $this->activity && empty( $this->annotation ) ) {
+			$annotate = array();
+			if ( array_key_exists( 'operator', $properties ) ) {
+				$annotate[] = $properties['operator'];
+			}
+			if ( array_key_exists( 'number', $properties ) ) {
+				$annotate[] = $properties['number'];
+			}
+			if ( array_key_exists( 'origin', $properties ) && array_key_exists( 'destination', $properties ) ) {
+				$origin      = Airport_Location::get( $properties['origin'] );
+				$destination = Airport_Location::get( $properties['destination'] );
+				$annotate[]  = sprintf( '%1$s - %2$s', $origin['name'], $destination['name'] );
+			}
+			$this->annotation = implode( ' ', $annotate );
+		}
+	}
+
+	/**
+	 * Convert extra properties for storage
+	 *
+	 * @param array $properties Property Array
+	 */
+	private function other( $properties ) {
 		// Store other properties in other
 		$this->other = array_filter(
 			$this->array_strip_assoc(
@@ -169,7 +249,6 @@ class Location_Provider_Compass extends Location_Provider {
 				)
 			)
 		);
-
 	}
 
 

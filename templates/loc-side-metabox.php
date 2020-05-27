@@ -52,6 +52,14 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
             <?php _e( 'Altitude:', 'simple-location' ); ?>
             <input class="widefat" type="number" name="altitude" id="altitude" step="0.01" value="<?php echo ifset( $geodata['altitude'], '' ); ?>" />
         </label>
+        <p class="field-row">
+            <label for="location_icon">
+                <?php _e( 'Icon:', 'simple-location' ); ?>
+            </label>
+            <select name="location_icon" id="location_icon">
+                <?php Loc_View::icon_select( ifset( $geodata['icon'] ), true ); ?>" />
+            </select>
+        </p>
 
         <label for="map_zoom"><?php _e( 'Map Zoom:', 'simple-location' ); ?></label>
         <input type="number" name="map_zoom" id="map_zoom" class="widefat" max="20" min="1" value="<?php echo ifset( $geodata['map_zoom'], '' ); ?>" />

@@ -1,5 +1,15 @@
 <?php
+/**
+ * Weather Provider.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Weather Provider using WeatherBit API.
+ *
+ * @since 1.0.0
+ */
 class Weather_Provider_Weatherbit extends Weather_Provider {
 
 	/**
@@ -7,7 +17,7 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 	 *
 	 * The default version of this just sets the parameters
 	 *
-	 * @param array $args
+	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Weatherbit', 'simple-location' );
@@ -26,10 +36,15 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Init Function To Register Settings.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function init() {
 		register_setting(
-			'sloc_providers', // option group
-			'sloc_weatherbit_api', // option name
+			'sloc_providers', // option group.
+			'sloc_weatherbit_api', // option name.
 			array(
 				'type'         => 'string',
 				'description'  => 'Weatherbit API Key',
@@ -40,19 +55,29 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 
 	}
 
+	/**
+	 * Init Function To Add Settings fields.
+	 *
+	 * @since 4.0.0
+	 */
 	public static function admin_init() {
 		add_settings_field(
-			'weatherbitapi', // id
-			__( 'Weatherbit API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
+			'weatherbitapi', // id.
+			__( 'Weatherbit API Key', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'string_callback' ), // display callback.
+			'sloc_providers', // settings page.
+			'sloc_api', // settings section.
 			array(
 				'label_for' => 'sloc_weatherbit_api',
 			)
 		);
 	}
 
+	/**
+	 * Does This Provider Offer Station Data.
+	 *
+	 * @return boolean If supports station data return true.
+	 */
 	public function is_station() {
 		return false;
 	}
@@ -60,12 +85,13 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
-	 * @return array Current Conditions in Array
+	 * @param int $time Time. Optional.
+	 * @return array Current Conditions in Array.
 	 */
 	public function get_conditions( $time = null ) {
-		/* if ( empty( $this->api ) ) {
+		if ( empty( $this->api ) ) {
 			return array();
-		} */
+		}
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {
 			if ( $this->cache_key ) {
@@ -90,7 +116,7 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 				'timeout'             => 10,
 				'limit_response_size' => 1048576,
 				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location
+				// Use an explicit user-agent for Simple Location.
 				'user-agent'          => 'Simple Location for WordPress',
 			);
 			$response = wp_remote_get( $url, $args );
@@ -134,65 +160,72 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 		return false;
 	}
 
+	/**
+	 * Return array of station data.
+	 *
+	 * @param string  $id Weather type ID.
+	 * @param boolean $is_day Is it daytime.
+	 * @return string Icon ID.
+	 */
 	private function icon_map( $id, $is_day ) {
 		$id = (int) $id;
 		switch ( $id ) {
-			case 200: // Thunderstorm with light rain
-			case 201: // Thunderstorm with rain
-			case 202: // Thunderstorm with heavy rain
-			case 230: // Thunderstorm with light drizzle
-			case 231: // Thunderstorm with drizzle
-			case 232: // Thunderstorm with heavy drizzle
+			case 200: // Thunderstorm with light rain.
+			case 201: // Thunderstorm with rain.
+			case 202: // Thunderstorm with heavy rain.
+			case 230: // Thunderstorm with light drizzle.
+			case 231: // Thunderstorm with drizzle.
+			case 232: // Thunderstorm with heavy drizzle.
 				return $is_day ? 'wi-day-thunderstorm' : 'wi-night-thunderstorm';
-			case 233: // Thunderstorm with Hail
+			case 233: // Thunderstorm with Hail.
 				return $is_day ? 'wi-day-hail' : 'wi-night-hail';
-			case 300: // Light drizzle
-			case 301: // Drizzle
+			case 300: // Light drizzle.
+			case 301: // Drizzle.
 				return $is_day ? 'wi-day-sprinkle' : 'wi-night-sprinkle';
-			case 302: // Heavy Drizzle
-			case 500: // Light Rain
-			case 501: // Moderate Rain
+			case 302: // Heavy Drizzle.
+			case 500: // Light Rain.
+			case 501: // Moderate Rain.
 				return $is_day ? 'wi-day-rain' : 'wi-night-rain';
-			case 502: // Heavy Rain
-			case 511: // Freezing Rain
-			case 520: // Light shower rain
-			case 521: // Shower Rain
-			case 522: // Heavy Shower Rain
+			case 502: // Heavy Rain.
+			case 511: // Freezing Rain.
+			case 520: // Light shower rain.
+			case 521: // Shower Rain.
+			case 522: // Heavy Shower Rain.
 				return $is_day ? 'wi-day-showers' : 'wi-night-showers';
-			case 600: // Light Snow
-			case 601: // Snow
-			case 602: // Heavy Snow
+			case 600: // Light Snow.
+			case 601: // Snow.
+			case 602: // Heavy Snow.
 				return $is_day ? 'wi-day-snow' : 'wi-night-snow';
-			case 610: // Mix Snow-Rain
+			case 610: // Mix Snow-Rain.
 				return $is_day ? 'wi-day-rain-mix' : 'wi-night-rain-mix';
-			case 611: // Sleet
-			case 612: // Heavy Sleet
+			case 611: // Sleet.
+			case 612: // Heavy Sleet.
 				return $is_day ? 'wi-day-sleet' : 'wi-night-sleet';
-			case 621: // Snow Shower
+			case 621: // Snow Shower.
 				return $is_day ? 'wi-day-sleet-storm' : 'wi-night-sleet-storm';
-			case 622: // Heavy Snow Shower
+			case 622: // Heavy Snow Shower.
 				return $is_day ? 'wi-day-snow-wind' : 'wi-night-snow-wind';
-			case 623: // Flurries
+			case 623: // Flurries.
 				return $is_day ? 'wi-day-snow' : 'wi-night-snow';
-			case 700: // Mist
+			case 700: // Mist.
 				return 'wi-sprinkle';
-			case 711: // Smoke
+			case 711: // Smoke.
 				return 'wi-smoke';
-			case 721: // Haze
+			case 721: // Haze.
 				return 'wi-day-haze';
-			case 731: // Sand-dust
+			case 731: // Sand-dust.
 				return 'wi-dust';
-			case 741: // Fog
-			case 751: // Freezing Fog
+			case 741: // Fog.
+			case 751: // Freezing Fog.
 				return $is_day ? 'wi-day-fog' : 'wi-night-fog';
-			case 800: // Clear Sky
+			case 800: // Clear Sky.
 				return $is_day ? 'wi-day-sunny' : 'wi-night-clear';
-			case 801: // Few Clouds
-			case 802: // Scattered Clouds
-			case 803: // Broken Clouds
-			case 804: // Overcast clouds
+			case 801: // Few Clouds.
+			case 802: // Scattered Clouds.
+			case 803: // Broken Clouds.
+			case 804: // Overcast clouds.
 				return $is_day ? 'wi-day-cloudy' : 'wi-night-cloudy';
-			case 900: // Unknown Precipitation
+			case 900: // Unknown Precipitation.
 				return 'wi-rain';
 			default:
 				return '';
