@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.1.1  
+**Stable tag:** 4.1.2  
 **Requires at least:** 4.9  
 **Tested up to:** 5.4  
 **Requires PHP:** 5.6  
@@ -190,6 +190,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.1.2 ( 2020-06-12 ) ###
+* Fix fatal error on user page
 
 ### 4.1.1 ( 2020-05-27 ) ###
 * AerisWeather is now a provider

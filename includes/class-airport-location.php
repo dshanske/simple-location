@@ -137,7 +137,7 @@ class Airport_Location {
 			'country'   => 6,
 			'active'    => 7,
 		);
-		
+
 		$airline = get_transient( 'airline_' . $search . '_' . $field );
 		if ( false !== $airline ) {
 			return $airline;
