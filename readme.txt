@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.1.2
+Stable tag: 4.1.3
 Requires at least: 4.9
-Tested up to: 5.4
+Tested up to: 5.4.2
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -190,6 +190,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.1.3 ( 2020-06-24 ) =
+* Fix issue where airport widget would only accept IATA codes(3 letters), not ICAO codes(4 letters).
 
 = 4.1.2 ( 2020-06-12 ) =
 * Fix fatal error on user page

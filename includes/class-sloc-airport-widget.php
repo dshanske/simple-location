@@ -149,7 +149,7 @@ class Sloc_Airport_Widget extends WP_Widget {
 		<p>
 		<?php esc_html_e( 'Displays current weather at an airport', 'simple-location' ); ?>
 		</p>
-		<p><p><label for="airport"><?php esc_html_e( 'Airport ID: ', 'simple-location' ); ?></label>
+		<p><p><label for="airport"><?php esc_html_e( 'Airport ID(3 or 4 letters): ', 'simple-location' ); ?></label>
 			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'airport' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'airport' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['airport'] ) ); ?>" />
 			</p>
 		<?php
