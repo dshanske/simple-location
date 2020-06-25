@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Simple Location plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.1.2\n"
+"Project-Id-Version: Simple Location 4.1.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-06-12T00:20:22+00:00\n"
+"POT-Creation-Date: 2020-06-25T03:40:28+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: simple-location\n"
@@ -34,6 +34,10 @@ msgstr ""
 
 #. Author URI of the plugin
 msgid "https://david.shanske.com"
+msgstr ""
+
+#: includes/class-airport-location.php:102
+msgid "Unable To Find Airport Code"
 msgstr ""
 
 #: includes/class-geo-data.php:187
@@ -571,21 +575,21 @@ msgid "Weather: "
 msgstr ""
 
 #: includes/class-loc-view.php:249
-#: includes/class-sloc-airport-widget.php:90
+#: includes/class-sloc-airport-widget.php:99
 #: includes/class-sloc-station-widget.php:91
 #: includes/class-sloc-weather-widget.php:63
 msgid "F"
 msgstr ""
 
 #: includes/class-loc-view.php:253
-#: includes/class-sloc-airport-widget.php:94
+#: includes/class-sloc-airport-widget.php:103
 #: includes/class-sloc-station-widget.php:95
 #: includes/class-sloc-weather-widget.php:67
 msgid "C"
 msgstr ""
 
 #: includes/class-loc-view.php:269
-#: includes/class-sloc-airport-widget.php:101
+#: includes/class-sloc-airport-widget.php:110
 #: includes/class-sloc-station-widget.php:102
 #: includes/class-sloc-weather-widget.php:74
 #: includes/class-weather-provider.php:390
@@ -593,7 +597,7 @@ msgid "Humidity"
 msgstr ""
 
 #: includes/class-loc-view.php:272
-#: includes/class-sloc-airport-widget.php:104
+#: includes/class-sloc-airport-widget.php:113
 #: includes/class-sloc-station-widget.php:105
 #: includes/class-sloc-weather-widget.php:77
 #: templates/loc-side-metabox.php:160
@@ -601,7 +605,7 @@ msgid "Cloudiness"
 msgstr ""
 
 #: includes/class-loc-view.php:275
-#: includes/class-sloc-airport-widget.php:107
+#: includes/class-sloc-airport-widget.php:116
 #: includes/class-sloc-station-widget.php:108
 #: includes/class-sloc-weather-widget.php:80
 #: templates/loc-side-metabox.php:82
@@ -915,19 +919,19 @@ msgstr ""
 msgid "Adds current weather conditions at an airport"
 msgstr ""
 
-#: includes/class-sloc-airport-widget.php:137
+#: includes/class-sloc-airport-widget.php:146
 #: includes/class-sloc-lastseen-widget.php:101
 #: includes/class-sloc-station-widget.php:138
 #: includes/class-sloc-weather-widget.php:124
 msgid "Title: "
 msgstr ""
 
-#: includes/class-sloc-airport-widget.php:141
+#: includes/class-sloc-airport-widget.php:150
 msgid "Displays current weather at an airport"
 msgstr ""
 
-#: includes/class-sloc-airport-widget.php:143
-msgid "Airport ID: "
+#: includes/class-sloc-airport-widget.php:152
+msgid "Airport ID(3 or 4 letters): "
 msgstr ""
 
 #: includes/class-sloc-lastseen-widget.php:14

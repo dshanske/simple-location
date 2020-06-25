@@ -58,7 +58,16 @@ class Sloc_Airport_Widget extends WP_Widget {
 			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
 		if ( isset( $instance['airport'] ) ) {
-			$location = Airport_Location::get( $instance['airport'] );
+			if ( 3 === strlen( $instance['airport'] ) ) {
+				$location = Airport_Location::get( $instance['airport'] );
+			} elseif ( 4 === strlen( $instance['airport'] ) ) {
+				$location = Airport_Location::get( $instance['airport'], 'ident' );
+			}
+			if ( is_wp_error( $location ) ) {
+				echo $location->get_error_message();
+				return;
+			}
+
 			$weather = Loc_View::get_weather_by_location( $location['latitude'], $location['longitude'] ); // phpcs:ignore
 			if ( is_wp_error( $weather ) ) {
 				echo $weather->get_error_message();
@@ -140,7 +149,7 @@ class Sloc_Airport_Widget extends WP_Widget {
 		<p>
 		<?php esc_html_e( 'Displays current weather at an airport', 'simple-location' ); ?>
 		</p>
-		<p><p><label for="airport"><?php esc_html_e( 'Airport ID: ', 'simple-location' ); ?></label>
+		<p><p><label for="airport"><?php esc_html_e( 'Airport ID(3 or 4 letters): ', 'simple-location' ); ?></label>
 			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'airport' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'airport' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['airport'] ) ); ?>" />
 			</p>
 		<?php
