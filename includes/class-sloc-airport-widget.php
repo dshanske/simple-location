@@ -58,7 +58,16 @@ class Sloc_Airport_Widget extends WP_Widget {
 			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
 		if ( isset( $instance['airport'] ) ) {
-			$location = Airport_Location::get( $instance['airport'] );
+			if ( 3 === strlen( $instance['airport'] ) ) {
+				$location = Airport_Location::get( $instance['airport'] );
+			} elseif ( 4 === strlen( $instance['airport'] ) ) {
+				$location = Airport_Location::get( $instance['airport'], 'ident' );
+			}
+			if ( is_wp_error( $location ) ) {
+				echo $location->get_error_message();
+				return;
+			}
+
 			$weather = Loc_View::get_weather_by_location( $location['latitude'], $location['longitude'] ); // phpcs:ignore
 			if ( is_wp_error( $weather ) ) {
 				echo $weather->get_error_message();

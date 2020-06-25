@@ -97,6 +97,10 @@ class Airport_Location {
 				}
 			}
 		}
+
+		if ( empty( $return ) ) {
+			return new WP_Error( 'unable_to_find', __( 'Unable To Find Airport Code', 'simple-location' ), $return );
+		}
 		set_transient(
 			'airports_' . $search . '_' . $field,
 			$airport,
