@@ -822,8 +822,23 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function rewrite() {
+		global $wp_rewrite;
 		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES );
 		add_rewrite_endpoint( 'map', EP_ALL_ARCHIVES );
+
+		// Allow Map Template to be Used for Users
+		add_rewrite_rule(
+			$wp_rewrite->author_base . '/([a-z0-9\-]+)/map/?$',
+			'index.php?map=1&author_name=$matches[1]',
+			'top'
+		);
+
+		// Allow Map Template to be Used for Taxonomies
+		add_rewrite_rule(
+			'([a-z]+)/([a-z0-9\-]+)/map/?$',
+			'index.php?$matches[1]=$matches[2]&map=1',
+			'top'
+		);
 	}
 
 
