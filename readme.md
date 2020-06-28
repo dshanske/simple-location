@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.1.3  
+**Stable tag:** 4.1.4  
 **Requires at least:** 4.9  
 **Tested up to:** 5.4.2  
 **Requires PHP:** 5.6  
@@ -190,6 +190,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.1.4 ( 2020-06-28 ) ###
+* Fix error message when timezone result has no timezone string
+* Add ability to do map views of taxonomies and user archives
 
 ### 4.1.3 ( 2020-06-24 ) ###
 * Fix issue where airport widget would only accept IATA codes(3 letters), not ICAO codes(4 letters).
