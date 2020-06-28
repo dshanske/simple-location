@@ -31,6 +31,9 @@ class Timezone_Result {
 	}
 
 	public function __toString() {
-		return $this->name;
+		if ( is_string( $this->name ) ) {
+			return $this->name;
+		}
+		return wp_timezone_string();
 	}
 }
