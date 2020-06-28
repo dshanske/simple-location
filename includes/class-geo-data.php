@@ -158,7 +158,7 @@ class WP_Geo_Data {
 		}
 		foreach ( $wp_query->posts as $post ) {
 			$location = self::get_geodata( $post, false );
-			if ( 'public' === $location['visibility'] ) {
+			if ( 'public' === $location['visibility'] && array_key_exists( 'latitude', $location ) ) {
 				$locations[] = array_values(
 					wp_array_slice_assoc(
 						$location,
