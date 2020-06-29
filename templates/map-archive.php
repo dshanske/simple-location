@@ -27,15 +27,6 @@ get_header();
 			}
 ?>
 		</ul>
-<?php
-					// Previous/next page navigation.
-								the_posts_pagination(
-									array(
-										'prev_text'          => __( 'Previous page', 'simple-location' ),
-										'next_text'          => __( 'Next page', 'simple-location' ),
-										'before_page_number' => '<span class="meta-nav screen-reader-text">' . __( 'Page', 'simple-location' ) . ' </span>',
-									)																															);
-?>
 		</main><!-- .site-main -->
 	</div><!-- .content-area -->
 <?php
