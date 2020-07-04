@@ -133,7 +133,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 		$map = add_query_arg(
 			array(
 				'apiKey' => $this->api,
-				'center' => sprintf( 'lonlat:%1$s,%2$s', $locations[0][1], $locations[0][0] ),
+				'area' => 'rect:' . implode( ',', WP_Geo_Data::bounding_box( $locations, true ) ),
 				'format' => 'jpeg',
 				'width'  => $this->width,
 				'height' => $this->height,
