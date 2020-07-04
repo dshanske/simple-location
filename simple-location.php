@@ -166,6 +166,7 @@ class Simple_Location_Plugin {
 			'class-map-provider-mapquest.php', // MapQuest.
 			'class-map-provider-here.php', // HERE.
 			'class-map-provider-locationiq.php', // LocationIQ.
+			'class-map-provider-geoapify.php', // Geoapify.
 			'class-geo-provider-nominatim.php', // Nominatim.
 			'class-geo-provider-mapquest.php', // MapQuest Nominatim.
 			'class-geo-provider-google.php', // Google.
@@ -173,6 +174,7 @@ class Simple_Location_Plugin {
 			'class-geo-provider-bing.php', // Bing.
 			'class-geo-provider-locationiq.php', // LocationIQ.
 			'class-geo-provider-geonames.php', // Geonames.
+			'class-geo-provider-openroute.php', // OpenRoute.
 		);
 		self::load( $providers );
 	}
