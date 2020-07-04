@@ -3,19 +3,31 @@
 /**
  * adds widget to display weather station data with per-provider support
  */
-class Sloc_Station_Widget extends WP_Widget {
+class Sloc_Station_Widget extends Sloc_Weather_Widget {
 
 	/**
 	 * widget constructor
 	 */
 	public function __construct() {
-		parent::__construct(
+		WP_Widget::__construct(
 			'Sloc_Station_Widget',
 			__( 'Weather Station', 'simple-location' ),
 			array(
 				'description' => __( 'Adds current weather conditions', 'simple-location' ),
 			)
 		);
+	}
+
+	/**
+	 * widget data updater
+	 *
+	 * @param mixed $new_instance new widget data
+	 * @param mixed $old_instance current widget data
+	 *
+	 * @return mixed widget data
+	 */
+	public function update( $new_instance, $old_instance ) {
+		return $new_instance;
 	}
 
 	public static function provider_list( $option, $name, $id ) {
@@ -32,17 +44,6 @@ class Sloc_Station_Widget extends WP_Widget {
 		}
 	}
 
-
-	private static function markup_parameter( $value, $property, $unit, $type ) {
-		return sprintf(
-			'<li class="sloc-%1$s">%4$s: %2$s%3$s</li>',
-			$property,
-			round( $value ),
-			$unit,
-			$type
-		);
-	}
-
 	/**
 	 * widget worker
 	 *
@@ -52,7 +53,6 @@ class Sloc_Station_Widget extends WP_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
-		$measurements = get_option( 'sloc_measurements' );
 		echo $args['before_widget']; // phpcs:ignore
 		if ( ! empty( $instance['title'] ) ) {
 			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
@@ -67,63 +67,10 @@ class Sloc_Station_Widget extends WP_Widget {
 			if ( ! isset( $weather['icon'] ) ) {
 				$weather['icon'] = 'wi-thermometer';
 			}
-
-			$class    = 'sloc-weather-widget';
-			$return   = array( PHP_EOL );
-			$return[] = '<h2>';
-			$return[] = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
-			if ( ! empty( $weather['summary'] ) ) {
-				$return[] = $weather['summary'];
-			}
-			$return[] = '</h2>';
-
-			if ( isset( $weather['station_id'] ) ) {
-				if ( isset( $weather['name'] ) ) {
-					$return[] = $weather['name'];
-				}
-			}
-			$return[] = '<ul>';
-			if ( isset( $weather['temperature'] ) ) {
-				$units = ifset( $weather['units'] );
-				if ( ! $units ) {
-					switch ( $measurements ) {
-						case 'imperial':
-							$units                  = __( 'F', 'simple-location' );
-							$weather['temperature'] = round( Weather_Provider::celsius_to_fahrenheit( $weather['temperature'] ) );
-							break;
-						default:
-							$units = __( 'C', 'simple-location' );
-					}
-				}
-				$return[] = sprintf( '<li>%1$s&deg;%2$s</li>', $weather['temperature'], $units );
-			}
-
-			if ( isset( $weather['humidity'] ) ) {
-				$return[] = self::markup_parameter( $weather['humidity'], 'humidity', '%', __( 'Humidity', 'simple-location' ) );
-			}
-			if ( isset( $weather['cloudiness'] ) ) {
-				$return[] = self::markup_parameter( $weather['cloudiness'], 'cloudiness', '%', __( 'Cloudiness', 'simple-location' ) );
-			}
-			if ( isset( $weather['visibility'] ) ) {
-				$return[] = self::markup_parameter( $weather['visibility'], 'visibility', 'm', __( 'Visibility', 'simple-location' ) );
-			}
-			$return[] = '</ul>';
-			echo implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
 		}
+
+		echo self::weather_list( $weather );
 		echo $args['after_widget']; // phpcs:ignore
-
-	}
-
-	/**
-	 * widget data updater
-	 *
-	 * @param mixed $new_instance new widget data
-	 * @param mixed $old_instance current widget data
-	 *
-	 * @return mixed widget data
-	 */
-	public function update( $new_instance, $old_instance ) {
-		return $new_instance;
 	}
 
 	/**

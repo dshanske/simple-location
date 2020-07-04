@@ -27,34 +27,70 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
-		$measurements = get_option( 'sloc_measurements' );
 		echo $args['before_widget']; // phpcs:ignore
 		if ( ! empty( $instance['title'] ) ) {
 				echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
 		$w = Loc_Config::weather_provider();
 		if ( isset( $instance['user'] ) && '-1' !== $instance['user'] ) {
-			echo Loc_View::get_weather_by_user( $instance['user'] ); // phpcs:ignore
-			return;
+			$weather = Loc_View::get_weather_by_user( $instance['user'] ); // phpcs:ignore
 		} elseif ( ! empty( $instance['latitude'] ) && ! empty( $instance['longitude'] ) ) {
 			$w->set( $instance['latitude'], $instance['longitude'] );
+			$weather = $w->get_conditions();
 		} else {
+			echo 'no';
 			return;
 		}
-		$weather = $w->get_conditions();
 		if ( ! isset( $weather['icon'] ) ) {
 			$weather['icon'] = 'wi-thermometer';
 		}
 
-		$class    = 'sloc-weather-widget';
-		$return   = array( PHP_EOL );
-		$return[] = '<h2>';
-		$return[] = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
+		echo self::weather_list( $weather );
+		echo $args['after_widget']; // phpcs:ignore
+	}
+
+
+
+	/**
+	 * Marks up a measurement.
+	 *
+	 * @param array Measurements {
+	 *  @type float $value Value of measurement.
+	 *  @type string $property The class property to be used.
+	 *  @type string $unit The symbol or name for the unit
+	 *  @type string $name The display name of the property
+	 *  @type string $icon The property icon.
+	 * }
+	 * @return string Marked up parameter.
+	 */
+	protected static function markup_parameter( $params ) {
+		return sprintf(
+			'<li class="sloc-%1$s">%5$s%4$s: %2$s%3$s</li>',
+			$params['property'],
+			round( $params['value'], 2 ),
+			$params['unit'],
+			$params['name'],
+			Weather_Provider::get_icon( $params['icon'] )
+		);
+	}
+
+	protected static function weather_list( $weather, $icon = 'fa-map' ) {
+		$measurements = get_option( 'sloc_measurements' );
+		$return       = array( PHP_EOL );
+		$return[]     = '<h2>';
+		$return[]     = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
 		if ( ! empty( $weather['summary'] ) ) {
-			$return[] = sprintf( '<span class="p-weather">%1$s</span>', $weather['summary'] );
+			$return[] = $weather['summary'];
 		}
 		$return[] = '</h2>';
-		$return[] = '<ul>';
+
+		$return[] = '<ul class="sloc-weather-display">';
+
+		if ( isset( $weather['name'] ) ) {
+			$return[] = sprintf( '<li>%1$s%2$s</li>', Weather_Provider::get_icon( $icon ), $weather['name'] );
+		} elseif ( isset( $weather['station_id'] ) ) {
+			$return[] = sprintf( '<li>%1$s%2$s</li>', Weather_Provider::get_icon( $icon ), $weather['station_id'] );
+		}
 		if ( isset( $weather['temperature'] ) ) {
 			$units = ifset( $weather['units'] );
 			if ( ! $units ) {
@@ -67,37 +103,109 @@ class Sloc_Weather_Widget extends WP_Widget {
 						$units = __( 'C', 'simple-location' );
 				}
 			}
-			$return[] = sprintf( '<li>%1$s&deg;%2$s</li>', $weather['temperature'], $units );
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['temperature'],
+					'property' => 'temperature',
+					'unit'     => '&deg;' . $units,
+					'name'     => __( 'Temperature', 'simple-location' ),
+					'icon'     => 'wi-thermometer',
+				)
+			);
 		}
 
 		if ( isset( $weather['humidity'] ) ) {
-			$return[] = self::markup_parameter( $weather['humidity'], 'humidity', '%', __( 'Humidity', 'simple-location' ) );
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['humidity'],
+					'property' => 'humidity',
+					'unit'     => '%',
+					'name'     => __( 'Humidity', 'simple-location' ),
+					'icon'     => 'wi-humidity',
+				)
+			);
+		}
+		if ( isset( $weather['pressure'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['pressure'],
+					'property' => 'pressure',
+					'unit'     => 'hPa',
+					'name'     => __( 'Pressure', 'simple-location' ),
+					'icon'     => 'wi-barometer',
+				)
+			);
 		}
 		if ( isset( $weather['cloudiness'] ) ) {
-			$return[] = self::markup_parameter( $weather['cloudiness'], 'cloudiness', '%', __( 'Cloudiness', 'simple-location' ) );
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['cloudiness'],
+					'property' => 'cloudiness',
+					'unit'     => '%',
+					'name'     => __( 'Cloudiness', 'simple-location' ),
+					'icon'     => 'wi-cloudy',
+				)
+			);
 		}
 		if ( isset( $weather['visibility'] ) ) {
-			$return[] = self::markup_parameter( $weather['visibility'], 'visibility', 'm', __( 'Visibility', 'simple-location' ) );
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['visibility'],
+					'property' => 'visibility',
+					'unit'     => 'm',
+					'name'     => __( 'Visibility', 'simple-location' ),
+					'icon'     => 'wi-visibility',
+				)
+			);
 		}
-		$return[] = '</ul>';
-		if ( isset( $weather['station_id'] ) ) {
-			if ( isset( $weather['name'] ) ) {
-				$return[] = sprintf( '<p>%1$s</p>', $weather['name'] );
-			}
+		if ( isset( $weather['wind'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['wind']['speed'],
+					'property' => 'wind-speed',
+					'unit'     => 'm/hr',
+					'name'     => __( 'Wind Speed', 'simple-location' ),
+					'icon'     => 'wi-windy',
+				)
+			);
 		}
-		echo implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
-		echo $args['after_widget']; // phpcs:ignore
+		if ( isset( $weather['rain'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['rain'],
+					'property' => 'rain',
+					'unit'     => 'mm/hr',
+					'name'     => __( 'Rain', 'simple-location' ),
+					'icon'     => 'wi-rain',
+				)
+			);
+		}
+		if ( isset( $weather['snow'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['snow'],
+					'property' => 'snow',
+					'unit'     => 'mm/hr',
+					'name'     => __( 'Snow', 'simple-location' ),
+					'icon'     => 'wi-snow',
+				)
+			);
 
-	}
+		}
+		if ( isset( $weather['uv'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['uv'],
+					'property' => 'uv',
+					'unit'     => '',
+					'name'     => __( 'UV Index', 'simple-location' ),
+					'icon'     => 'wi-uv',
+				)
+			);
+		}
+			$return[] = '</ul>';
 
-	private static function markup_parameter( $value, $property, $unit, $type ) {
-		return sprintf(
-			'<li class="sloc-%1$s">%4$s: %2$s%3$s</li>',
-			$property,
-			$value,
-			$unit,
-			$type
-		);
+			return implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
 	}
 
 	/**

@@ -683,6 +683,38 @@ class WP_Geo_Data {
 		return $meta;
 	}
 
+	/**
+	 * Calculates the bounding box of a set of coordinates
+	 *
+	 * @param array   $locations An array of lat,lng.
+	 * @param boolean $flip Whether to put lng first.
+	 * @return array An array of coordinates, min and max.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function bounding_box( $locations, $flip = false ) {
+		$lats = array();
+		$lngs = array();
+		foreach ( $locations as $location ) {
+			$lats[] = $location[0];
+			$lngs[] = $location[1];
+		}
+		if ( ! $flip ) {
+			return array(
+				min( $lats ),
+				min( $lngs ),
+				max( $lats ),
+				max( $lngs ),
+			);
+		} else {
+			return array(
+				min( $lngs ),
+				min( $lats ),
+				max( $lngs ),
+				max( $lats ),
+			);
+		}
+	}
 
 
 	/**
@@ -826,14 +858,14 @@ class WP_Geo_Data {
 		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES );
 		add_rewrite_endpoint( 'map', EP_ALL_ARCHIVES );
 
-		// Allow Map Template to be Used for Users
+		// Allow Map Template to be Used for Users.
 		add_rewrite_rule(
 			$wp_rewrite->author_base . '/([a-z0-9\-]+)/map/?$',
 			'index.php?map=1&author_name=$matches[1]',
 			'top'
 		);
 
-		// Allow Map Template to be Used for Taxonomies
+		// Allow Map Template to be Used for Taxonomies.
 		add_rewrite_rule(
 			'([a-z]+)/([a-z0-9\-]+)/map/?$',
 			'index.php?$matches[1]=$matches[2]&map=1',
