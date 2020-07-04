@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Simple Location plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.1.4\n"
+"Project-Id-Version: Simple Location 4.1.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-06-28T18:55:41+00:00\n"
+"POT-Creation-Date: 2020-07-04T23:31:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: simple-location\n"
@@ -40,6 +40,31 @@ msgstr ""
 msgid "Unable To Find Airport Code"
 msgstr ""
 
+#: includes/class-astronomical-calculator.php:286
+msgid "New"
+msgstr ""
+
+#: includes/class-astronomical-calculator.php:291
+msgid "Waxing Crescent"
+msgstr ""
+
+#: includes/class-astronomical-calculator.php:296
+msgid "First Quarter"
+msgstr ""
+
+#: includes/class-astronomical-calculator.php:302
+#: includes/class-weather-provider.php:407
+msgid "Full Moon"
+msgstr ""
+
+#: includes/class-astronomical-calculator.php:307
+msgid "Waning Gibbous"
+msgstr ""
+
+#: includes/class-astronomical-calculator.php:312
+msgid "Third Quarter"
+msgstr ""
+
 #: includes/class-geo-data.php:187
 msgid "Public Location"
 msgstr ""
@@ -50,7 +75,7 @@ msgstr ""
 
 #: includes/class-geo-data.php:227
 #: includes/class-geo-data.php:607
-#: includes/class-geo-data.php:1320
+#: includes/class-geo-data.php:1352
 #: includes/class-loc-config.php:287
 #: includes/class-loc-metabox.php:86
 #: includes/class-loc-metabox.php:98
@@ -59,7 +84,7 @@ msgid "Location"
 msgstr ""
 
 #: includes/class-geo-data.php:247
-#: includes/class-sloc-weather-widget.php:135
+#: includes/class-sloc-weather-widget.php:243
 #: includes/class-weather-provider.php:453
 #: templates/loc-side-metabox.php:34
 #: templates/loc-side-metabox.php:96
@@ -127,11 +152,11 @@ msgstr ""
 msgid "Creation Time"
 msgstr ""
 
-#: includes/class-geo-data.php:1037
+#: includes/class-geo-data.php:1069
 msgid "Invalid Input"
 msgstr ""
 
-#: includes/class-geo-data.php:1298
+#: includes/class-geo-data.php:1330
 #: includes/class-location-zones.php:158
 #: templates/geocode-form.php:3
 #: templates/loc-user-metabox.php:20
@@ -140,7 +165,7 @@ msgstr ""
 msgid "Latitude"
 msgstr ""
 
-#: includes/class-geo-data.php:1309
+#: includes/class-geo-data.php:1341
 #: includes/class-location-zones.php:159
 #: templates/geocode-form.php:4
 #: templates/loc-user-metabox.php:27
@@ -149,11 +174,11 @@ msgstr ""
 msgid "Longitude"
 msgstr ""
 
-#: includes/class-geo-data.php:1331
+#: includes/class-geo-data.php:1363
 msgid "Location Visibility"
 msgstr ""
 
-#: includes/class-geo-data.php:1541
+#: includes/class-geo-data.php:1573
 msgid "m"
 msgstr ""
 
@@ -238,6 +263,20 @@ msgstr ""
 
 #: includes/class-geo-provider-nominatim.php:31
 msgid "OpenStreetMap Nominatim"
+msgstr ""
+
+#: includes/class-geo-provider-openroute.php:31
+msgid "OpenRoute"
+msgstr ""
+
+#: includes/class-geo-provider-openroute.php:71
+msgid "OpenRoute API Key"
+msgstr ""
+
+#: includes/class-geo-provider-openroute.php:90
+#: includes/class-geo-provider-openroute.php:115
+#: includes/class-geo-provider-openroute.php:204
+msgid "You have not set an API key for OpenRoute"
 msgstr ""
 
 #: includes/class-loc-config.php:339
@@ -575,39 +614,29 @@ msgid "Weather: "
 msgstr ""
 
 #: includes/class-loc-view.php:249
-#: includes/class-sloc-airport-widget.php:99
-#: includes/class-sloc-station-widget.php:91
-#: includes/class-sloc-weather-widget.php:63
+#: includes/class-sloc-weather-widget.php:99
 msgid "F"
 msgstr ""
 
 #: includes/class-loc-view.php:253
-#: includes/class-sloc-airport-widget.php:103
-#: includes/class-sloc-station-widget.php:95
-#: includes/class-sloc-weather-widget.php:67
+#: includes/class-sloc-weather-widget.php:103
 msgid "C"
 msgstr ""
 
 #: includes/class-loc-view.php:269
-#: includes/class-sloc-airport-widget.php:110
-#: includes/class-sloc-station-widget.php:102
-#: includes/class-sloc-weather-widget.php:74
+#: includes/class-sloc-weather-widget.php:123
 #: includes/class-weather-provider.php:390
 msgid "Humidity"
 msgstr ""
 
 #: includes/class-loc-view.php:272
-#: includes/class-sloc-airport-widget.php:113
-#: includes/class-sloc-station-widget.php:105
-#: includes/class-sloc-weather-widget.php:77
+#: includes/class-sloc-weather-widget.php:145
 #: templates/loc-side-metabox.php:160
 msgid "Cloudiness"
 msgstr ""
 
 #: includes/class-loc-view.php:275
-#: includes/class-sloc-airport-widget.php:116
-#: includes/class-sloc-station-widget.php:108
-#: includes/class-sloc-weather-widget.php:80
+#: includes/class-sloc-weather-widget.php:156
 #: templates/loc-side-metabox.php:82
 #: templates/loc-side-metabox.php:153
 msgid "Visibility"
@@ -741,6 +770,78 @@ msgstr ""
 msgid "Street-level imagery"
 msgstr ""
 
+#: includes/class-map-provider-geoapify.php:17
+msgid "GeoApify"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:61
+msgid "GeoApify API Key"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:71
+msgid "Geoapify Style"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:85
+msgid "OSM Carto"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:86
+msgid "OSM Bright"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:87
+msgid "OSM Bright Grey"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:88
+msgid "OSM Bright Smooth"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:89
+msgid "Klokantech Basic"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:90
+msgid "Positron"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:91
+msgid "Positron Blue"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:92
+msgid "Positron Red"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:93
+msgid "Dark Matter"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:94
+msgid "Dark Matter Brown"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:95
+msgid "Dark Matter Dark Grey"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:96
+msgid "Dark Matter Dark Purple"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:97
+msgid "Dark Matter Purple Roads"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:98
+msgid "Dark Matter Yellow Roads"
+msgstr ""
+
+#: includes/class-map-provider-geoapify.php:105
+msgid "You have not set an API key for GeoApify"
+msgstr ""
+
 #: includes/class-map-provider-google.php:17
 msgid "Google Maps"
 msgstr ""
@@ -870,16 +971,8 @@ msgstr ""
 msgid "Dark"
 msgstr ""
 
-#: includes/class-map-provider-wikimedia.php:17
-msgid "Wikimedia Maps"
-msgstr ""
-
-#: includes/class-map-provider-wikimedia.php:25
-msgid "Map with Labels"
-msgstr ""
-
-#: includes/class-map-provider-wikimedia.php:26
-msgid "Map without Labels"
+#: includes/class-map-provider-yandex.php:17
+msgid "Yandex"
 msgstr ""
 
 #: includes/class-rest-geo.php:194
@@ -919,18 +1012,18 @@ msgstr ""
 msgid "Adds current weather conditions at an airport"
 msgstr ""
 
-#: includes/class-sloc-airport-widget.php:146
-#: includes/class-sloc-lastseen-widget.php:101
-#: includes/class-sloc-station-widget.php:138
-#: includes/class-sloc-weather-widget.php:124
+#: includes/class-sloc-airport-widget.php:86
+#: includes/class-sloc-lastseen-widget.php:124
+#: includes/class-sloc-station-widget.php:85
+#: includes/class-sloc-weather-widget.php:232
 msgid "Title: "
 msgstr ""
 
-#: includes/class-sloc-airport-widget.php:150
+#: includes/class-sloc-airport-widget.php:90
 msgid "Displays current weather at an airport"
 msgstr ""
 
-#: includes/class-sloc-airport-widget.php:152
+#: includes/class-sloc-airport-widget.php:92
 msgid "Airport ID(3 or 4 letters): "
 msgstr ""
 
@@ -942,50 +1035,50 @@ msgstr ""
 msgid "Displays the location, time, or map of a users location."
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:41
+#: includes/class-sloc-lastseen-widget.php:43
 msgid "Local Time"
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:47
+#: includes/class-sloc-lastseen-widget.php:53
 #: includes/class-weather-provider.php:396
 msgid "Sunrise"
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:48
+#: includes/class-sloc-lastseen-widget.php:60
 #: includes/class-weather-provider.php:397
 msgid "Sunset"
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:61
-msgid "No current location information available"
+#: includes/class-sloc-lastseen-widget.php:68
+msgid "Moon Phase"
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:75
+#: includes/class-sloc-lastseen-widget.php:98
 msgid "No User Set"
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:106
+#: includes/class-sloc-lastseen-widget.php:129
 msgid "Displays last reported user location. Reporting can be set manually in the user profile, updated based on the last post with a location, or updated using a webhook"
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:108
-#: includes/class-sloc-weather-widget.php:129
+#: includes/class-sloc-lastseen-widget.php:131
+#: includes/class-sloc-weather-widget.php:237
 msgid "User: "
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:119
+#: includes/class-sloc-lastseen-widget.php:142
 msgid "Show Local Time: "
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:123
-msgid "Show Astrological Info: "
+#: includes/class-sloc-lastseen-widget.php:146
+msgid "Show Astronomical Info: "
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:127
+#: includes/class-sloc-lastseen-widget.php:150
 msgid "Show Text: "
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:131
+#: includes/class-sloc-lastseen-widget.php:154
 msgid "Show Map: "
 msgstr ""
 
@@ -998,11 +1091,11 @@ msgstr ""
 msgid "Adds current weather conditions"
 msgstr ""
 
-#: includes/class-sloc-station-widget.php:142
+#: includes/class-sloc-station-widget.php:89
 msgid "Displays current weather at a weather station"
 msgstr ""
 
-#: includes/class-sloc-station-widget.php:145
+#: includes/class-sloc-station-widget.php:92
 msgid "Station ID: "
 msgstr ""
 
@@ -1011,15 +1104,45 @@ msgstr ""
 msgid "Weather"
 msgstr ""
 
-#: includes/class-sloc-weather-widget.php:127
+#: includes/class-sloc-weather-widget.php:111
+msgid "Temperature"
+msgstr ""
+
+#: includes/class-sloc-weather-widget.php:134
+#: templates/loc-side-metabox.php:146
+msgid "Pressure"
+msgstr ""
+
+#: includes/class-sloc-weather-widget.php:167
+#: templates/loc-side-metabox.php:139
+msgid "Wind Speed"
+msgstr ""
+
+#: includes/class-sloc-weather-widget.php:178
+#: includes/class-weather-provider.php:299
+#: templates/loc-side-metabox.php:167
+msgid "Rain"
+msgstr ""
+
+#: includes/class-sloc-weather-widget.php:189
+#: includes/class-weather-provider.php:301
+#: templates/loc-side-metabox.php:174
+msgid "Snow"
+msgstr ""
+
+#: includes/class-sloc-weather-widget.php:201
+msgid "UV Index"
+msgstr ""
+
+#: includes/class-sloc-weather-widget.php:235
 msgid "Displays current weather based on user location set in user profile. If set for none will use latitude and longitude set"
 msgstr ""
 
-#: includes/class-sloc-weather-widget.php:141
+#: includes/class-sloc-weather-widget.php:249
 msgid "Latitude: "
 msgstr ""
 
-#: includes/class-sloc-weather-widget.php:143
+#: includes/class-sloc-weather-widget.php:251
 msgid "Longitude: "
 msgstr ""
 
@@ -1238,18 +1361,8 @@ msgstr ""
 msgid "Rain-Mix"
 msgstr ""
 
-#: includes/class-weather-provider.php:299
-#: templates/loc-side-metabox.php:167
-msgid "Rain"
-msgstr ""
-
 #: includes/class-weather-provider.php:300
 msgid "Rain and Windy"
-msgstr ""
-
-#: includes/class-weather-provider.php:301
-#: templates/loc-side-metabox.php:174
-msgid "Snow"
 msgstr ""
 
 #: includes/class-weather-provider.php:302
@@ -1620,10 +1733,6 @@ msgstr ""
 msgid "First Quarter Moon"
 msgstr ""
 
-#: includes/class-weather-provider.php:407
-msgid "Full Moon"
-msgstr ""
-
 #: includes/class-weather-provider.php:408
 msgid "New Moon"
 msgstr ""
@@ -1736,11 +1845,11 @@ msgstr ""
 msgid "Waxing Gibbous 6"
 msgstr ""
 
-#: simple-location.php:202
+#: simple-location.php:204
 msgid "Settings"
 msgstr ""
 
-#: simple-location.php:227
+#: simple-location.php:229
 msgid ""
 "Location and weather data is optionally stored for all posts, attachments, and comments. Location data is extracted from uploaded images along with other metadata. This\n"
 "\t\t\t\tdata can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it."
@@ -1815,14 +1924,6 @@ msgstr ""
 msgid "Wind Degree"
 msgstr ""
 
-#: templates/loc-side-metabox.php:139
-msgid "Wind Speed"
-msgstr ""
-
-#: templates/loc-side-metabox.php:146
-msgid "Pressure"
-msgstr ""
-
 #: templates/loc-user-metabox.php:6
 msgid "Last Reported Location"
 msgstr ""
@@ -1843,18 +1944,6 @@ msgstr ""
 #: templates/loc-user-metabox.php:43
 #: templates/loc-user-metabox.php:47
 msgid "Altitude"
-msgstr ""
-
-#: templates/map-archive.php:34
-msgid "Previous page"
-msgstr ""
-
-#: templates/map-archive.php:35
-msgid "Next page"
-msgstr ""
-
-#: templates/map-archive.php:36
-msgid "Page"
 msgstr ""
 
 #: templates/weather-form.php:2

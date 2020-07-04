@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.1.4  
+**Stable tag:** 4.1.5  
 **Requires at least:** 4.9  
 **Tested up to:** 5.4.2  
 **Requires PHP:** 5.6  
@@ -90,13 +90,16 @@ API Keys are required to use certain services.
 * [GeoNames](https://www.geonames.org) - requires a username
 * [LocationIQ](https://locationiq.com/)
 * [Met Office UK](https://www.metoffice.gov.uk/services/data/datapoint)
+* [OpenRoute Service](https://openrouteservice.org/)
+* [GeoApify](https://geoapify.com)
 
-At this time, the only map service available without an API key is Wikimedia maps
+At this time, all map services require an API key except Yandex, which permits limited non-commercial use.
 Nominatim does not require an API key, but it does ask for an email address, which will be the admin email of the site
 If not provided there will be no map displayed regardless of setting, reverse geo lookup will not work 
 Without a weather provider this service will not work. 
 
-API Keys may have free limits, or may incur fees if overused. This plugin only uses a request when you post, which is usually well within the free tier which is usually thousands of requests.
+API Keys may have free limits, or may incur fees if overused. This plugin only uses a request when you post, which is usually well within the free tier which is usually thousands of requests. In all cases, you must comply 
+with the provider's terms of use.
 
 The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin if installed.
 
@@ -165,6 +168,10 @@ The plugin offers providers for:
 
 ## Upgrade Notice ##
 
+### 4.1.5 ###
+
+Wikimedia Maps has turned off third-party access and advised they have no plans to return it. So this service is now removed. Added some new services to cover.
+
 ### 4.1.0 ###
 
 Dark Sky has been acquired by Apple and no longer permits you to apply for an API key. If you already have one, the functionality in this plugin will work, according to them, until end of 2021 after
@@ -190,6 +197,15 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.1.5 ( 2020-07-04 ) ###
+* Wikimedia Maps is now deprecated. Their decision, not mine.
+* OpenRoute Service is added as a geoprovider.
+* GeoApify is added as a map provider.
+* Yandex added as a map provider. Does not require an API key for limited use.
+* Weather widgets all redesigned with new layout. Station and Airport widget now inherited from weather widget so same design in each.
+* Last Seen Widget Redesigned.
+* Moon Phase added to Last Seen Widget.
 
 ### 4.1.4 ( 2020-06-28 ) ###
 * Fix error message when timezone result has no timezone string
