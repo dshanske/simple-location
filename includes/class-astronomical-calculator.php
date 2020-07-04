@@ -219,4 +219,102 @@ class Astronomical_Calculator {
 		}
 		return false;
 	}
+
+	/** Returns current moonphase data.
+	 *
+	 * Placeholder. Would like to redo this to something more exacting.
+	 *
+	 * @param int $timestamp Unix timestamp.
+	 * @return array Moon Phase.
+	 *
+	 * @since 4.1.5
+	 */
+	public function get_moon_phase( $timestamp = null ) {
+		// The duration in days of a lunar cycle
+		 $lunardays = 29.53058770576;
+		 // Seconds in lunar cycle
+		 $lunarsecs = $lunardays * ( 24 * 60 * 60 );
+		 // Date time of first new moon in year 2000
+		 $new2000 = 947182440;
+
+		// Calculate seconds between date and new moon 2000
+		$totalsecs = $timestamp - $new2000;
+
+		 // Calculate modulus to drop completed cycles
+		 // Note: for real numbers use fmod() instead of % operator
+		 $currentsecs = fmod( $totalsecs, $lunarsecs );
+
+		/*
+		 Array with start and end of each phase
+		 * In this array 'new', 'first-quarter', 'full' and
+		 * 'third-quarter' each get a duration of 2 days.
+		 */
+		$phases = array(
+			array( 'new', 0, 1 ),
+			array( 'waxing-crescent', 1, 6.38264692644 ),
+			array( 'first-quarter', 6.38264692644, 8.38264692644 ),
+			array( 'waxing-gibbous', 8.38264692644, 13.76529385288 ),
+			array( 'full', 13.76529385288, 15.76529385288 ),
+			array( 'waning-gibbous', 15.76529385288, 21.14794077932 ),
+			array( 'third-quarter', 21.14794077932, 23.14794077932 ),
+			array( 'waning-crescent', 23.14794077932, 28.53058770576 ),
+			array( 'new', 28.53058770576, 29.53058770576 ),
+		);
+
+		 // If negative number (date before new moon 2000) add $lunarsecs
+		if ( $currentsecs < 0 ) {
+			$currentsecs += $lunarsecs;
+		}
+
+		 // Calculate the fraction of the moon cycle
+		 $currentfrac = $currentsecs / $lunarsecs;
+
+		// Calculate days in current cycle (moon age)
+		 $currentdays = $currentfrac * $lunardays;
+
+		// Find current phase in the array
+		for ( $i = 0; $i < 9; $i++ ) {
+			if ( ( $currentdays >= $phases[ $i ][1] ) && ( $currentdays <= $phases[ $i ][2] ) ) {
+				$thephase = $phases[ $i ][0];
+				break;
+			}
+		}
+
+		 $phasedata = array(
+			 'new'             => array(
+				 'name' => 'new-moon',
+				 'text' => __( 'New', 'simple-location' ),
+				 'icon' => 'wi-moon-new',
+			 ),
+			 'waxing-crescent' => array(
+				 'name' => 'waxing-crescent-moon',
+				 'text' => __( 'Waxing Crescent', 'simple-location' ),
+				 'icon' => 'wi-moon-waxing-crescent-6',
+			 ),
+			 'first-quarter'   => array(
+				 'name' => 'first-quarter-moon',
+				 'text' => __( 'First Quarter', 'simple-location' ),
+				 'icon' => 'wi-moon-first-quarter',
+			 ),
+
+			 'full'            => array(
+				 'name' => 'full-moon',
+				 'text' => __( 'Full Moon', 'simple-location' ),
+				 'icon' => 'wi-moon-full',
+			 ),
+			 'waning-gibbous'  => array(
+				 'name' => 'waning-gibbous-moon',
+				 'text' => __( 'Waning Gibbous', 'simple-location' ),
+				 'icon' => 'wi-moon-waning-gibbous-1',
+			 ),
+			 'third-quarter'  => array(
+				 'name' => 'third-quarter-moon',
+				 'text' => __( 'Third Quarter', 'simple-location' ),
+				 'icon' => 'wi-moon-third-quarter',
+			 ),
+		 );
+
+		 return $phasedata[ $thephase ];
+	}
+
 }
