@@ -18,6 +18,11 @@
   max-width: 100%;
 }
 
+ul.sloc-lastseen-data {
+  list-style-position: inside;
+  list-style: none;
+}
+
 .sloc-weather {
   display: block;
 }
@@ -30,6 +35,11 @@
   vertical-align: middle;
   width: 1.5rem;
   fill: currentColor;
+}
+
+ul.sloc-weather-display {
+  list-style-position: inside;
+  list-style: none;
 }
 
 /*# sourceMappingURL=location.css.map */
