@@ -133,13 +133,13 @@ class Map_Provider_Geoapify extends Map_Provider {
 		$map = add_query_arg(
 			array(
 				'apiKey' => $this->api,
-				'area' => 'rect:' . implode( ',', WP_Geo_Data::bounding_box( $locations, true ) ),
+				'area'   => 'rect:' . implode( ',', WP_Geo_Data::bounding_box( $locations, true ) ),
 				'format' => 'jpeg',
 				'width'  => $this->width,
 				'height' => $this->height,
 				'zoom'   => $this->map_zoom,
 				'style'  => $this->style,
-				'marker' => implode( '|', $markers )
+				'marker' => implode( '|', $markers ),
 			),
 			'https://maps.geoapify.com/v1/staticmap'
 		);
