@@ -158,6 +158,17 @@ class Sloc_Weather_Widget extends WP_Widget {
 				)
 			);
 		}
+		if ( isset( $weather['wind'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['wind']['speed'],
+					'property' => 'wind-speed',
+					'unit'     => 'm/hr',
+					'name'     => __( 'Wind Speed', 'simple-location' ),
+					'icon'     => 'wi-windy',
+				)
+			);
+		}
 		if ( isset( $weather['rain'] ) ) {
 			$return[] = self::markup_parameter(
 				array(
