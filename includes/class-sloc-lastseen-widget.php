@@ -51,14 +51,14 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 				printf(
 					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
 					Weather_Provider::get_icon( 'wi-sunrise', __( 'Sunrise', 'simple-location' ) ),
-					esc_html( 'Sunrise', 'simple-location' ),
+					esc_html__( 'Sunrise', 'simple-location' ),
 					esc_attr( $calc->get_iso8601( null, 'sunrise' ) ),
 					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunrise' ) )
 				);
 				printf(
 					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
 					Weather_Provider::get_icon( 'wi-sunset', __( 'Sunset', 'simple-location' ) ),
-					esc_html( 'Sunset', 'simple-location' ),
+					esc_html__( 'Sunset', 'simple-location' ),
 					esc_attr( $calc->get_iso8601( null, 'sunset' ) ),
 					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunset' ) )
 				);
@@ -66,8 +66,8 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 				printf(
 					'<li>%1$s%2$s: %3$s</li>',
 					Weather_Provider::get_icon( $moonphase['icon'], __( 'Moon Phase', 'simple-location' ) ),
-					esc_html( 'Moon Phase', 'simple-location' ),
-					esc_html( $moonphase['text'] ),
+					esc_html__( 'Moon Phase', 'simple-location' ),
+					esc_html( $moonphase['text'] )
 				);
 			}
 			if ( 1 === (int) $instance['showtext'] ) {
@@ -81,7 +81,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 				if ( ! empty( $location ) ) {
 					printf( '<li>%1$s</li>', $location ); // phpcs:ignore
 				} else {
-					printf( '<li>%1$s</li>', esc_html( 'No current location information available', 'simple-location' ) );
+					printf( '<li>%1$s</li>', esc_html__( 'No current location information available', 'simple-location' ) );
 				}
 			}
 			if ( 1 === (int) $instance['showmap'] ) {
