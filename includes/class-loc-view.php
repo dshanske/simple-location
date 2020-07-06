@@ -146,6 +146,9 @@ class Loc_View {
 		$args     = wp_parse_args( $args, $defaults );
 		$args     = array_merge( $loc, $args );
 		$map      = Loc_Config::map_provider();
+		if ( ! isset( $map ) ) {
+			return '';
+		}
 		$map->set( $loc );
 		$wrap  = '<%1$s class="%2$s">%3$s</%1$s>';
 		$class = is_array( $args['wrapper-class'] ) ? $args['wrapper-class'] : explode( ' ', $args['wrapper-class'] );
