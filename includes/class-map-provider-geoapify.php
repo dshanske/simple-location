@@ -147,7 +147,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	}
 
 	public function get_the_map_url() {
-		return '';
+		return sprintf( 'https://www.openstreetmap.org/?mlat=%1$s&mlon=%2$s#map=%3$s/%1$s/%2$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
 	// Return code for map
