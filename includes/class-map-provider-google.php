@@ -121,7 +121,7 @@ class Map_Provider_Google extends Map_Provider {
 
 		$map = add_query_arg(
 			array(
-				'markers'  => 'color:red%7Clabel:P%7C|' . implode( '|', $markers ),
+				'markers'  => 'size:tiny%7Ccolor:red%7Clabel:P%7C|' . implode( '|', $markers ),
 				'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
 				'maptype'  => $this->style,
 				'language' => get_bloginfo( 'language' ),

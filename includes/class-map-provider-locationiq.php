@@ -93,8 +93,8 @@ class Map_Provider_LocationIQ extends Map_Provider {
 				'key'     => $this->api,
 				'format'  => 'png',
 				'size'    => sprintf( '%1$sx%2$s', $this->width, $this->height ),
-				'markers' => sprintf( 'size:small|color:red|%1$s', implode( '|', $markers ) ),
-				'path'    => sprintf( 'weight:2|color:blue|fillcolor:%23add8e6|%1$s', implode( '|', $markers ) ),
+				'markers' => sprintf( 'icon:small-red-blank|size:small|color:red|%1$s', implode( '|', $markers ) ),
+				'path'    => sprintf( 'weight:2|color:blue%1$s', implode( '|', $markers ) ),
 			),
 			'https://maps.locationiq.com/v2/staticmap'
 		);
