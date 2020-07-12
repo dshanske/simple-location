@@ -205,10 +205,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 
 		$return['icon'] = $this->icon_map( $observation['weatherCoded'] );
 
-		$calc              = new Astronomical_Calculator( $return['latitude'], $return['longitude'], $return['altitude'] );
-		$return['sunrise'] = $calc->get_iso8601( null );
-		$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
-
+		$return = $this->extra_data( $return );
 		return array_filter( $return );
 	}
 

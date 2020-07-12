@@ -76,7 +76,17 @@ class Map_Provider_Yandex extends Map_Provider {
 	}
 
 	public function get_the_map_url() {
-		return '';
+		$map = add_query_arg(
+			array(
+				'lang' => get_bloginfo( 'language' ),
+				'll'   => sprintf( '%1$s,%2$s', $this->longitude, $this->latitude ),
+				'size' => sprintf( '%1$s,%2$s', $this->width, $this->height ),
+				'z'    => $this->map_zoom,
+				'pt'   => sprintf( '%1$s,%2$s,pm2rdl', $this->longitude, $this->latitude ),
+			),
+			'https://yandex.com/maps'
+		);
+		return $map;
 	}
 
 	// Return code for map

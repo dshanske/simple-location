@@ -152,9 +152,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			$return['uv']             = ifset( $response['uv_index'] );
 			$return['icon']           = $this->icon_map( $response['weather_code'], ifset( $response['is_day'] ) );
 
-			$calc              = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );
-			$return['sunrise'] = $calc->get_iso8601( null );
-			$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
+			$return = $this->extra_data( $return );
 
 			if ( $this->cache_key ) {
 				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );

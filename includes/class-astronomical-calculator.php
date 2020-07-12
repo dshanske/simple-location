@@ -5,10 +5,15 @@
  * @package Simple_Location
  */
 
+define( 'PI', M_PI );
+define( 'RAD', PI / 180 );
+define( 'E', RAD * 23.4397 ); // obliquity of the Earth
+
 /**
  * Astronomical Calculator Class.
  *
  * Uses PHP Functionality and Formulas to Calculate Sunset Accurately based on Location and Elevation
+ * Moon calculations derived from https://github.com/gregseth/suncalc-php
  */
 class Astronomical_Calculator {
 
@@ -94,6 +99,12 @@ class Astronomical_Calculator {
 			case 'sunset':
 				$function = 'date_sunset';
 				break;
+			case 'moonset':
+				$moon = $this->get_moon_times( $timestamp );
+				return $moon['moonset'];
+			case 'moonrise':
+				$moon = $this->get_moon_times( $timestamp );
+				return $moon['moonrise'];
 			default:
 				$function = 'date_sunrise';
 		}
@@ -204,117 +215,377 @@ class Astronomical_Calculator {
 	 * Calculates if the provided time is daytime or not.
 	 *
 	 * @param int $timestamp Unix timestamp.
-	 * @return boolean $is_daytime Return true if daytime.
+	 * @return string 'true' or 'false'
 	 *
 	 * @since 4.0.0
 	 */
 	public function is_daytime( $timestamp = null ) {
 		if ( ! $timestamp ) {
-			$timestamp = null;
+			$timestamp = time();
 		}
 		$sunrise = $this->get_timestamp( $timestamp, 'sunrise' );
 		$sunset  = $this->get_timestamp( $timestamp, 'sunset' );
 		if ( self::between( $timestamp, $sunrise, $sunset ) ) {
-			return true;
+			return 'true';
 		}
-		return false;
+		return 'false';
 	}
 
-	/** Returns current moonphase data.
+	/**
+	 * Convert a timestamp to Julian.
 	 *
-	 * Placeholder. Would like to redo this to something more exacting.
+	 * @param int $timestamp UNIX Timestamp.
+	 * @return int Julian Days since EPOCH.
+	 */
+	public function to_julian( $timestamp ) {
+		return ( $timestamp / DAY_IN_SECONDS ) + 2440587.5;
+	}
+
+	/**
+	 * Convert a timestamp to number of days since year 2000.
+	 *
+	 * @param int $timestamp Unix Time Stamp.
+	 * @return int Julian days since J2000.
+	 */
+	public function to_days( $timestamp ) {
+		return $this->to_julian( $timestamp ) - 2451545;
+	}
+
+
+	/**
+	 * Calculate Solar Mean Anomaly.
+	 *
+	 * @param int $days Julian Day since J2000.
+	 * @return float Declination.
+	 */
+	public function solar_mean_anomaly( $days ) {
+		return RAD * ( 357.5291 + 0.98560028 * $days );
+	}
+
+
+	/**
+	 * Calculate Right Ascension.
+	 *
+	 * @param float $lng Longitude.
+	 * @param float $lat Latitude.
+	 * @return float Right Ascension.
+	 */
+	public function right_ascension( $lng, $lat ) {
+		return atan2( sin( $lng ) * cos( E ) - tan( $lat ) * sin( E ), cos( $lng ) );
+	}
+
+
+	/**
+	 * Calculate Declination.
+	 *
+	 * @param float $lng Longitude.
+	 * @param float $lat Latitude.
+	 * @return float Declination.
+	 */
+	public function declination( $lng, $lat ) {
+		return asin( sin( $lat ) * cos( E ) + cos( $lat ) * sin( E ) * sin( $lng ) );
+	}
+
+	/**
+	 * Calculate Ecliptic Longitude of the Sun.
+	 *
+	 * @param float $anomaly Mean Anomaly.
+	 * @return float Ecliptic Longitude.
+	 */
+	public function ecliptic_longitude( $anomaly ) {
+		$center     = RAD * ( 1.9148 * sin( $anomaly ) + 0.02 * sin( 2 * $anomaly ) + 0.0003 * sin( 3 * $anomaly ) ); // equation of center.
+		$perihelion = RAD * 102.9372; // perihelion of the Earth.
+
+		return $anomaly + $center + $perihelion + PI;
+	}
+
+	/**
+	 * Geocentric Ecliptical Coordinates of the sun.
+	 *
+	 * @param int $days Julian Days.
+	 * @return array Coordinates of the Sun on the Julian Day.
+	 */
+	public function sun_coords( $days ) {
+		$anomaly = $this->solar_mean_anomaly( $days );
+		$lng     = $this->ecliptic_longitude( $anomaly );
+
+		return array(
+			'dec' => $this->declination( $lng, 0 ),
+			'ra'  => $this->right_ascension( $lng, 0 ),
+		);
+	}
+
+	/**
+	 * Geocentric Ecliptical Coordinates of the moon.
+	 *
+	 * @param int $days Julian Days.
+	 * @return array Coordinates of the Moon on the Julian Day.
+	 */
+	protected function moon_coords( $days ) {
+		$lng     = RAD * ( 218.316 + 13.176396 * $days ); // Ecliptic longitude.
+		$anomaly = RAD * ( 134.963 + 13.064993 * $days ); // Mean anomaly.
+		$f       = RAD * ( 93.272 + 13.229350 * $days );  // Mean distance.
+
+		$lng      = $lng + RAD * 6.289 * sin( $anomaly ); // Convert ecliptic longitude to longitude.
+		$lat      = RAD * 5.128 * sin( $f );     // Latitude.
+		$distance = 385001 - 20905 * cos( $anomaly );  // Distance to the moon in km.
+
+		return array(
+			'dec'  => $this->declination( $lng, $lat ),
+			'ra'   => $this->right_ascension( $lng, $lat ),
+			'dist' => $distance,
+		);
+	}
+
+	/** Returns current moon illumination data.
 	 *
 	 * @param int $timestamp Unix timestamp.
-	 * @return array Moon Phase.
+	 * @return array Moon Phase Information.
 	 *
-	 * @since 4.1.5
+	 * @since 4.1.6
 	 */
-	public function get_moon_phase( $timestamp = null ) {
-		// The duration in days of a lunar cycle
-		 $lunardays = 29.53058770576;
-		 // Seconds in lunar cycle
-		 $lunarsecs = $lunardays * ( 24 * 60 * 60 );
-		 // Date time of first new moon in year 2000
-		 $new2000 = 947182440;
+	public function get_moon_illumination( $timestamp = null ) {
+		if ( is_null( $timestamp ) ) {
+			$timestamp = time();
+		}
+		$days = $this->to_days( $timestamp );
+		$sun  = $this->sun_coords( $days );
+		$moon = $this->moon_coords( $days );
 
-		// Calculate seconds between date and new moon 2000
-		$totalsecs = $timestamp - $new2000;
+		$sdist = 149598000; // distance from Earth to Sun in km.
 
-		 // Calculate modulus to drop completed cycles
-		 // Note: for real numbers use fmod() instead of % operator
-		 $currentsecs = fmod( $totalsecs, $lunarsecs );
+		$phi   = acos( sin( $sun['dec'] ) * sin( $moon['dec'] ) + cos( $sun['dec'] ) * cos( $moon['dec'] ) * cos( $sun['ra'] - $moon['ra'] ) );
+		$inc   = atan2( $sdist * sin( $phi ), $moon['dist'] - $sdist * cos( $phi ) );
+		$angle = atan2( cos( $sun['dec'] ) * sin( $sun['ra'] - $moon['ra'] ), sin( $sun['dec'] ) * cos( $moon['dec'] ) - cos( $sun['dec'] ) * sin( $moon['dec'] ) * cos( $sun['ra'] - $moon['ra'] ) );
 
-		/*
-		 Array with start and end of each phase
-		 * In this array 'new', 'first-quarter', 'full' and
-		 * 'third-quarter' each get a duration of 2 days.
-		 */
-		$phases = array(
-			array( 'new', 0, 1 ),
-			array( 'waxing-crescent', 1, 6.38264692644 ),
-			array( 'first-quarter', 6.38264692644, 8.38264692644 ),
-			array( 'waxing-gibbous', 8.38264692644, 13.76529385288 ),
-			array( 'full', 13.76529385288, 15.76529385288 ),
-			array( 'waning-gibbous', 15.76529385288, 21.14794077932 ),
-			array( 'third-quarter', 21.14794077932, 23.14794077932 ),
-			array( 'waning-crescent', 23.14794077932, 28.53058770576 ),
-			array( 'new', 28.53058770576, 29.53058770576 ),
+		return array_merge(
+			$moon,
+			array(
+				'fraction' => ( 1 + cos( $inc ) ) / 2,
+				'phase'    => 0.5 + 0.5 * $inc * ( $angle < 0 ? -1 : 1 ) / PI,
+				'angle'    => $angle,
+			)
 		);
+	}
 
-		 // If negative number (date before new moon 2000) add $lunarsecs
-		if ( $currentsecs < 0 ) {
-			$currentsecs += $lunarsecs;
+
+
+	/** Returns current moon data.
+	 *
+	 * @param int $timestamp Unix timestamp.
+	 * @return array Moon Data.
+	 *
+	 * @since 4.1.6
+	 */
+	public function get_moon_data( $timestamp = null ) {
+		if ( is_null( $timestamp ) ) {
+			$timestamp = time();
 		}
-
-		 // Calculate the fraction of the moon cycle
-		 $currentfrac = $currentsecs / $lunarsecs;
-
-		// Calculate days in current cycle (moon age)
-		 $currentdays = $currentfrac * $lunardays;
-
-		// Find current phase in the array
-		for ( $i = 0; $i < 9; $i++ ) {
-			if ( ( $currentdays >= $phases[ $i ][1] ) && ( $currentdays <= $phases[ $i ][2] ) ) {
-				$thephase = $phases[ $i ][0];
-				break;
-			}
-		}
-
-		 $phasedata = array(
-			 'new'             => array(
-				 'name' => 'new-moon',
-				 'text' => __( 'New', 'simple-location' ),
-				 'icon' => 'wi-moon-new',
-			 ),
-			 'waxing-crescent' => array(
+		$moon = $this->get_moon_illumination( $timestamp );
+		if ( 0 === $moon['phase'] ) {
+			$return = array(
+				'name' => 'new-moon',
+				'text' => __( 'New', 'simple-location' ),
+				'icon' => 'wi-moon-new',
+			);
+		} elseif ( 0 < $moon['phase'] && 0.25 > $moon['phase'] ) {
+			 $return = array(
 				 'name' => 'waxing-crescent-moon',
 				 'text' => __( 'Waxing Crescent', 'simple-location' ),
 				 'icon' => 'wi-moon-waxing-crescent-6',
-			 ),
-			 'first-quarter'   => array(
-				 'name' => 'first-quarter-moon',
-				 'text' => __( 'First Quarter', 'simple-location' ),
-				 'icon' => 'wi-moon-first-quarter',
-			 ),
-
-			 'full'            => array(
+			 );
+		} elseif ( 0.25 < $moon['phase'] && 0.5 > $moon['phase'] ) {
+			$return = array(
+				'name' => 'first-quarter-moon',
+				'text' => __( 'First Quarter', 'simple-location' ),
+				'icon' => 'wi-moon-first-quarter',
+			);
+		} elseif ( 0.5 === $moon['phase'] ) {
+			 $return = array(
 				 'name' => 'full-moon',
 				 'text' => __( 'Full Moon', 'simple-location' ),
 				 'icon' => 'wi-moon-full',
-			 ),
-			 'waning-gibbous'  => array(
+			 );
+		} elseif ( 0.5 < $moon['phase'] && 0.75 > $moon['phase'] ) {
+			 $return = array(
 				 'name' => 'waning-gibbous-moon',
 				 'text' => __( 'Waning Gibbous', 'simple-location' ),
 				 'icon' => 'wi-moon-waning-gibbous-1',
-			 ),
-			 'third-quarter'  => array(
+			 );
+		} elseif ( 0.75 === $moon['phase'] ) {
+			 $return = array(
 				 'name' => 'third-quarter-moon',
 				 'text' => __( 'Third Quarter', 'simple-location' ),
 				 'icon' => 'wi-moon-third-quarter',
-			 ),
-		 );
-
-		 return $phasedata[ $thephase ];
+			 );
+		} elseif ( 0.75 < $moon['phase'] && 1 > $moon['phase'] ) {
+			 $return = array(
+				 'name' => 'waning-crescent-moon',
+				 'text' => __( 'Waning Crescent', 'simple-location' ),
+				 'icon' => 'wi-moon-waning-crescent-1',
+			 );
+		}
+		return array_merge( $moon, $return );
 	}
 
+
+	/** Returns current moon data.
+	 *
+	 * @param int   $timestamp Unix timestamp.
+	 * @param float $hours Hours to adjust.
+	 * @return int Adds hours to a timestamp.
+	 *
+	 * @since 4.1.6
+	 */
+	public function hours_later( $timestamp, $hours ) {
+		return $timestamp + round( $hours * 3600 );
+	}
+
+
+	/** Returns the azimuth.
+	 *
+	 * @param float $sidereal_time Sidereal Time.
+	 * @param float $phi Geographic Latitude.
+	 * @param float $dec Declination.
+	 * @return float Azimith
+	 *
+	 * @since 4.1.6
+	 */
+	public function azimuth( $sidereal_time, $phi, $dec ) {
+		return atan2( sin( $sidereal_time ), cos( $sidereal_time ) * sin( $phi ) - tan( $dec ) * cos( $phi ) );
+	}
+
+
+	/** Returns the altitude.
+	 *
+	 * @param float $sidereal_time Sidereal Time.
+	 * @param float $phi Geographic Latitude.
+	 * @param float $dec Declination.
+	 * @return float Altitude.
+	 *
+	 * @since 4.1.6
+	 */
+	public function altitude( $sidereal_time, $phi, $dec ) {
+		return asin( sin( $phi ) * sin( $dec ) + cos( $phi ) * cos( $dec ) * cos( $sidereal_time ) );
+	}
+
+
+	/** Returns the azimuth.
+	 *
+	 * @param float $d Julian Days since J2000.
+	 * @param float $lw Geographic Longitude.
+	 * @return float Sidereal Time.
+	 *
+	 * @since 4.1.6
+	 */
+	public function sidereal_time( $d, $lw ) {
+		return RAD * ( 280.16 + 360.9856235 * $d ) - $lw;
+	}
+
+
+	/** Returns current moon position.
+	 *
+	 * @param int $timestamp Unix timestamp.
+	 * @return array Moon Position Data.
+	 *
+	 * @since 4.1.6
+	 */
+	public function get_moon_position( $timestamp = null ) {
+		$lw   = RAD * -$this->longitude; // Geographic Longitude.
+		$phi  = RAD * $this->latitude; // Geographic Latitude.
+		$days = $this->to_days( $timestamp );
+
+		$coords        = $this->moon_coords( $days );
+		$sidereal_time = $this->sidereal_time( $days, $lw ) - $coords['ra']; // Sidereal Time.
+		$altitude      = $this->altitude( $sidereal_time, $phi, $coords['dec'] );
+
+		// altitude correction for refraction.
+		$altitude = $altitude + RAD * 0.017 / tan( $altitude + RAD * 10.26 / ( $altitude + RAD * 5.10 ) );
+
+		return array(
+			'azimuth'  => $this->azimuth( $sidereal_time, $phi, $coords['dec'] ),
+			'altitude' => $altitude,
+			'dist'     => $coords['dist'],
+		);
+	}
+
+	/** Returns current moon times.
+	 *
+	 * @param int $timestamp Unix timestamp.
+	 * @return array Moon times.
+	 *
+	 * @since 4.1.6
+	 */
+	public function get_moon_times( $timestamp = null ) {
+		$datetime = new DateTime();
+		$datetime->setTimezone( new DateTimeZone( 'UTC' ) );
+		$datetime->setTimestamp( $timestamp );
+		$datetime->setTime( 0, 0, 0 );
+		$timestamp = $datetime->getTimestamp();
+
+		$hc   = 0.133 * RAD;
+		$h0   = $this->get_moon_position( $timestamp )['altitude'] - $hc;
+		$rise = 0;
+		$set  = 0;
+
+		// go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set).
+		for ( $i = 1; $i <= 24; $i += 2 ) {
+			$h1 = $this->get_moon_position( $this->hours_later( $timestamp, $i ), $this->latitude, $this->longitude )['altitude'] - $hc;
+			$h2 = $this->get_moon_position( $this->hours_later( $timestamp, $i + 1 ), $this->latitude, $this->longitude )['altitude'] - $hc;
+
+			$a     = ( $h0 + $h2 ) / 2 - $h1;
+			$b     = ( $h2 - $h0 ) / 2;
+			$xe    = -$b / ( 2 * $a );
+			$ye    = ( $a * $xe + $b ) * $xe + $h1;
+			$d     = $b * $b - 4 * $a * $h1;
+			$roots = 0;
+
+			if ( $d >= 0 ) {
+				$dx     = sqrt( $d ) / ( abs( $a ) * 2 );
+				$x1     = $xe - $dx;
+					$x2 = $xe + $dx;
+				if ( abs( $x1 ) <= 1 ) {
+					$roots++;
+				}
+				if ( abs( $x2 ) <= 1 ) {
+					$roots++;
+				}
+				if ( $x1 < -1 ) {
+					$x1 = $x2;
+				}
+			}
+
+			if ( 1 === $roots ) {
+				if ( $h0 < 0 ) {
+					$rise = $i + $x1;
+				} else {
+					$set = $i + $x1;
+				}
+			} elseif ( 2 === $roots ) {
+				$rise = $i + ( $ye < 0 ? $x2 : $x1 );
+				$set  = $i + ( $ye < 0 ? $x1 : $x2 );
+			}
+
+			if ( 0 !== $rise && 0 !== $set ) {
+				break;
+			}
+
+			$h0 = $h2;
+		}
+
+		$result = array();
+
+		if ( 0 !== $rise ) {
+			$result['moonrise'] = $this->hours_later( $timestamp, $rise );
+		}
+		if ( 0 !== $set ) {
+			$result['moonset'] = $this->hours_later( $timestamp, $set );
+		}
+
+		if ( 0 === $rise && 0 === $set ) {
+			$result[ $ye > 0 ? 'alwaysUp' : 'alwaysDown' ] = true;
+		}
+
+		return $result;
+	}
 }

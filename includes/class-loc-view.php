@@ -35,6 +35,7 @@ class Loc_View {
 			'fa-train'            => __( 'Train', 'simple-location' ),
 			'fa-taxi'             => __( 'Taxi', 'simple-location' ),
 			'fa-tram'             => __( 'Tram', 'simple-location' ),
+			'fa-biking'           => __( 'Biking', 'simple-location' ),
 			'fa-bus'              => __( 'Bus', 'simple-location' ),
 			'fa-bus-alt'          => __( 'Bus (Alt)', 'simple-location' ),
 			'fa-car'              => __( 'Car', 'simple-location' ),
@@ -146,6 +147,9 @@ class Loc_View {
 		$args     = wp_parse_args( $args, $defaults );
 		$args     = array_merge( $loc, $args );
 		$map      = Loc_Config::map_provider();
+		if ( is_null( $map ) ) {
+			return __( 'Error: Invalid Map Provider', 'simple-location' );
+		}
 		$map->set( $loc );
 		$wrap  = '<%1$s class="%2$s">%3$s</%1$s>';
 		$class = is_array( $args['wrapper-class'] ) ? $args['wrapper-class'] : explode( ' ', $args['wrapper-class'] );

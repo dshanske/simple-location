@@ -151,9 +151,7 @@ class Weather_Provider_HERE extends Weather_Provider {
 			if ( isset( $current['visibility'] ) ) {
 				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
-			$calc              = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );
-			$return['sunrise'] = $calc->get_iso8601( null );
-			$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
+			$return = $this->extra_data( $return );
 
 			if ( $this->cache_key ) {
 				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );

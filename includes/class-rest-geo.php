@@ -405,6 +405,8 @@ class REST_Geo {
 			return new WP_Error( 'timezone_not_found', __( 'Could Not Determine Timezone', 'simple-location' ) );
 		}
 		$calc = new Astronomical_Calculator( $params['latitude'], $params['longitude'], $params['altitude'] );
+		$moon = $calc->get_moon_data();
+
 		return array_merge(
 			$return,
 			array(
@@ -416,6 +418,9 @@ class REST_Geo {
 				'seconds'   => $timezone->seconds,
 				'sunrise'   => $calc->get_iso8601( null, 'sunrise' ),
 				'sunset'    => $calc->get_iso8601( null, 'sunset' ),
+				'moonrise'   => $calc->get_iso8601( null, 'moonrise' ),
+				'moonset'    => $calc->get_iso8601( null, 'moonset' ),
+				'moonphase'  => $moon['text']
 			)
 		);
 	}

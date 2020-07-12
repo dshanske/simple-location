@@ -183,6 +183,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			$return['name']     = ifset( $response['properties']['name'] );
 			$return['timezone'] = ifset( $response['properties']['timeZone'] );
 		}
+		$return = $this->extra_data( $return );
 
 		return array_filter( $return );
 	}

@@ -106,7 +106,7 @@ class Map_Provider_Bing extends Map_Provider {
 		);
 		$map = add_query_arg(
 			array(
-				'pushpin' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+				'pushpin' => sprintf( '%1$s,%2$s;45', $this->latitude, $this->longitude ),
 				'mapSize' => sprintf( '%1$s,%2$s', $this->width, $this->height ),
 				'key'     => $this->api,
 			),
@@ -116,7 +116,26 @@ class Map_Provider_Bing extends Map_Provider {
 	}
 
 	public function get_archive_map( $locations ) {
-		return '';
+		if ( empty( $this->api ) || empty( $locations ) ) {
+			return '';
+		}
+
+		$markers = array();
+		$path    = array();
+		$polyline = Polyline::encode( $locations );
+		$markers  = array();
+		foreach ( $locations as $location ) {
+			$markers[]  = sprintf( '%1$s,%2$s;51', $location[0], $location[1] );
+		}
+		$map = add_query_arg(
+			array(
+				'dc' => sprintf( 'l,,3;enc:%1$s', $polyline ),
+				'mapArea' => implode( ',', WP_Geo_Data::bounding_box( $locations ) ),
+				'key' => $this->api
+			),
+			sprintf( 'https://dev.virtualearth.net/REST/v1/Imagery/Map/%1$s/', $this->style ),
+		);
+		return $map . '&pp=' . implode( '&pp=', $markers );
 	}
 
 	public function get_the_map_url() {

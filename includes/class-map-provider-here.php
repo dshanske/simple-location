@@ -148,10 +148,7 @@ class Map_Provider_Here extends Map_Provider {
 			array(
 				'apiKey' => $this->api,
 				'f'      => 0,
-				'ppi'    => 320,
 				'c'      => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-				// 'lat'      => $this->latitude,
-				// 'lon'      => $this->longitude,
 				'w'      => $this->width,
 				'h'      => $this->height,
 				'style'  => $this->style,

@@ -62,12 +62,27 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 					esc_attr( $calc->get_iso8601( null, 'sunset' ) ),
 					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunset' ) )
 				);
-				$moonphase = $calc->get_moon_phase();
 				printf(
-					'<li>%1$s%2$s: %3$s</li>',
-					Weather_Provider::get_icon( $moonphase['icon'], __( 'Moon Phase', 'simple-location' ) ),
+					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+					Weather_Provider::get_icon( 'wi-moonrise', __( 'Moonrise', 'simple-location' ) ),
+					esc_html__( 'Moonrise', 'simple-location' ),
+					esc_attr( $calc->get_iso8601( null, 'moonrise' ) ),
+					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonrise' ) )
+				);
+				printf(
+					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+					Weather_Provider::get_icon( 'wi-moonset', __( 'Moonset', 'simple-location' ) ),
+					esc_html__( 'Moonset', 'simple-location' ),
+					esc_attr( $calc->get_iso8601( null, 'moonset' ) ),
+					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonset' ) )
+				);
+				$moon = $calc->get_moon_data();
+				printf(
+					'<li>%1$s%2$s: %3$s(%4$s)</li>',
+					Weather_Provider::get_icon( $moon['icon'], __( 'Moon Phase', 'simple-location' ) ),
 					esc_html__( 'Moon Phase', 'simple-location' ),
-					esc_html( $moonphase['text'] )
+					esc_html( $moon['text'] ),
+					esc_html( round( $moon['fraction'] * 100 ) . '%' )
 				);
 			}
 			if ( 1 === (int) $instance['showtext'] ) {

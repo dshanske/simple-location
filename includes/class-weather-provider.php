@@ -97,6 +97,31 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
+	/**
+	 * Extra Parameters for location.
+	 *
+	 * @return array {
+	 *  Arguments.
+	 *  @type string $day 'true' if daytime, 'false' if night.
+	 *  @type string $sunset Sunset in iso8601 format.
+	 *  @type string $sunrise Sunrise in iso8601 format.
+	 *  @type string $moonset Moonset in iso8601 format.
+	 *  @type string $moonrise Moonrise in iso8601 format.
+	 *  @type string $localtime Local time.
+	 * }
+	 */
+	public function extra_data( $return ) {
+		$calc              = new Astronomical_Calculator( $return['latitude'], $return['longitude'], $return['altitude'] );
+		$return['sunrise'] = $calc->get_iso8601( null );
+		$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
+		$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
+		$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
+		$return['day'] = $calc->is_daytime();
+		$datetime = new DateTime( null, new DateTimeZone( Loc_Timezone::timezone_for_location( $return['latitude'], $return['longitude'] ) ) );
+		$return['localtime'] = $datetime->format( DATE_W3C );
+		return array_filter( $return );
+	}
+
 
 	/**
 	 * Does This Provider Offer Station Data.
