@@ -100,6 +100,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Extra Parameters for location.
 	 *
+	 * @param array $return Weather data.
+	 * @param int   $timestamp Unix timestamp. Optional.
 	 * @return array {
 	 *  Arguments.
 	 *  @type string $day 'true' if daytime, 'false' if night.
@@ -110,14 +112,22 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type string $localtime Local time.
 	 * }
 	 */
-	public function extra_data( $return ) {
-		$calc              = new Astronomical_Calculator( $return['latitude'], $return['longitude'], $return['altitude'] );
-		$return['sunrise'] = $calc->get_iso8601( null );
-		$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
+	public function extra_data( $return, $timestamp = null ) {
+		$calc               = new Astronomical_Calculator( $return['latitude'], $return['longitude'], $return['altitude'] );
+		$return['sunrise']  = $calc->get_iso8601( null );
+		$return['sunset']   = $calc->get_iso8601( null, 'sunset' );
 		$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
 		$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
-		$return['day'] = $calc->is_daytime();
-		$datetime = new DateTime( null, new DateTimeZone( Loc_Timezone::timezone_for_location( $return['latitude'], $return['longitude'] ) ) );
+		$return['day']      = $calc->is_daytime();
+		$timezone           = Loc_Timezone::timezone_for_location( $return['latitude'], $return['longitude'] );
+		if ( $timezone instanceof Timezone_Result ) {
+			$timezone = $timezone->timezone;
+		}
+		$datetime = new DateTime( null, $timezone );
+		if ( ! is_null( $timestamp ) ) {
+			$datetime->setTimestamp( $timestamp );
+		}
+
 		$return['localtime'] = $datetime->format( DATE_W3C );
 		return array_filter( $return );
 	}

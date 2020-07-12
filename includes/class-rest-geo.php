@@ -336,7 +336,6 @@ class REST_Geo {
 			$weather->set( array( 'station_id' => $params['station'] ) );
 		} elseif ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$weather->set( $params );
-			$timezone = Loc_Timezone::timezone_for_location( $params['latitude'], $params['longitude'] );
 			$return   = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],

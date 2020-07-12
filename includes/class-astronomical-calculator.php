@@ -76,7 +76,10 @@ class Astronomical_Calculator {
 		$this->longitude = $longitude;
 		$this->elevation = intval( $elevation );
 		$this->zenith    = $this->get_zenith();
-		$this->timezone  = new DateTimeZone( Loc_Timezone::timezone_for_location( $latitude, $longitude ) );
+		$this->timezone  = Loc_Timezone::timezone_for_location( $latitude, $longitude );
+		if ( $this->timezone instanceof Timezone_Result ) {
+			$this->timezone = $this->timezone->timezone;
+		}
 	}
 
 

@@ -810,6 +810,9 @@ class WP_Geo_Data {
 				if ( ! empty( $meta['location'] ) ) {
 					// Try to get the right timezone from the location.
 					$timezone = Loc_Timezone::timezone_for_location( $meta['location']['latitude'], $meta['location']['longitude'] );
+					if ( $timezone instanceof Timezone_Result ) {
+						$timezone = $timezone->timezone;
+					}
 				} else {
 					$timezone = wp_timezone();
 				}
