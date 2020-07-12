@@ -183,13 +183,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			$return['name']     = ifset( $response['properties']['name'] );
 			$return['timezone'] = ifset( $response['properties']['timeZone'] );
 		}
-
-		$return['sunrise'] = $calc->get_iso8601( null );
-		$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
-		$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
-		$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
-		$return['day'] = $calc->is_daytime();
-
+		$return = $this->extra_data( $return );
 
 		return array_filter( $return );
 	}

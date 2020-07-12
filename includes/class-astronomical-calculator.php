@@ -215,20 +215,20 @@ class Astronomical_Calculator {
 	 * Calculates if the provided time is daytime or not.
 	 *
 	 * @param int $timestamp Unix timestamp.
-	 * @return boolean $is_daytime Return true if daytime.
+	 * @return string 'true' or 'false'
 	 *
 	 * @since 4.0.0
 	 */
 	public function is_daytime( $timestamp = null ) {
 		if ( ! $timestamp ) {
-			$timestamp = null;
+			$timestamp = time();
 		}
 		$sunrise = $this->get_timestamp( $timestamp, 'sunrise' );
 		$sunset  = $this->get_timestamp( $timestamp, 'sunset' );
 		if ( self::between( $timestamp, $sunrise, $sunset ) ) {
-			return true;
+			return 'true';
 		}
-		return false;
+		return 'false';
 	}
 
 	/**
