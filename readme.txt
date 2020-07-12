@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.1.6
+Stable tag: 4.1.7
 Requires at least: 4.9
 Tested up to: 5.4.2
 Requires PHP: 5.6
@@ -209,6 +209,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.1.7 ( 2020-07-12 ) =
+* Minor fix for failure in previous release which is not showing up in testing.
 
 = 4.1.6 ( 2020-07-12 ) =
 * Introduce Custom Map Endpoint, based on a [fork](https://github.com/dshanske/Static-Maps-API-PHP) of a library by @aaronpk
