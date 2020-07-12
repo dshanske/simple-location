@@ -208,6 +208,8 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$calc              = new Astronomical_Calculator( $return['latitude'], $return['longitude'], $return['altitude'] );
 		$return['sunrise'] = $calc->get_iso8601( null );
 		$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
+		$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
+		$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
 
 		return array_filter( $return );
 	}

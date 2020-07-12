@@ -267,6 +267,10 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		}
 		$return['summary'] = $this->weather_type( ifset( $properties['W'] ) );
 		$return['icon']    = self::icon_map( ifset( $properties['W'] ) );
+		$return['sunrise'] = $calc->get_iso8601( null );
+		$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
+		$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
+		$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
 
 		return array_filter( $return );
 	}

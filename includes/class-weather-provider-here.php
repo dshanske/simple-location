@@ -154,6 +154,8 @@ class Weather_Provider_HERE extends Weather_Provider {
 			$calc              = new Astronomical_Calculator( $this->latitude, $this->longitude, $this->altitude );
 			$return['sunrise'] = $calc->get_iso8601( null );
 			$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
+			$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
+			$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
 
 			if ( $this->cache_key ) {
 				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
