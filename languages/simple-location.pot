@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-07-12T03:16:31+00:00\n"
+"POT-Creation-Date: 2020-07-12T03:18:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: simple-location\n"
@@ -550,100 +550,104 @@ msgid "Tram"
 msgstr ""
 
 #: includes/class-loc-view.php:38
+msgid "Biking"
+msgstr ""
+
+#: includes/class-loc-view.php:39
 #: includes/class-location-provider.php:324
 msgid "Bus"
 msgstr ""
 
-#: includes/class-loc-view.php:39
+#: includes/class-loc-view.php:40
 msgid "Bus (Alt)"
 msgstr ""
 
-#: includes/class-loc-view.php:40
+#: includes/class-loc-view.php:41
 #: includes/class-location-provider.php:323
 msgid "Car"
 msgstr ""
 
-#: includes/class-loc-view.php:41
+#: includes/class-loc-view.php:42
 msgid "Helicopter"
 msgstr ""
 
-#: includes/class-loc-view.php:42
+#: includes/class-loc-view.php:43
 #: includes/class-location-provider.php:332
 msgid "Horse"
 msgstr ""
 
-#: includes/class-loc-view.php:43
+#: includes/class-loc-view.php:44
 msgid "Ship"
 msgstr ""
 
-#: includes/class-loc-view.php:44
-#: includes/class-loc-view.php:50
+#: includes/class-loc-view.php:45
+#: includes/class-loc-view.php:51
 #: includes/class-location-provider.php:330
 msgid "Running"
 msgstr ""
 
-#: includes/class-loc-view.php:45
+#: includes/class-loc-view.php:46
 msgid "Shuttle Van"
 msgstr ""
 
-#: includes/class-loc-view.php:46
+#: includes/class-loc-view.php:47
 #: includes/class-location-provider.php:326
 msgid "Subway"
 msgstr ""
 
-#: includes/class-loc-view.php:47
+#: includes/class-loc-view.php:48
 msgid "Suitcase"
 msgstr ""
 
-#: includes/class-loc-view.php:48
+#: includes/class-loc-view.php:49
 msgid "Suitcase - Rolling"
 msgstr ""
 
-#: includes/class-loc-view.php:49
+#: includes/class-loc-view.php:50
 #: includes/class-location-provider.php:329
 msgid "Walking"
 msgstr ""
 
 #. translators: Prefaces the address 1. with the private status
-#: includes/class-loc-view.php:125
+#: includes/class-loc-view.php:126
 msgid "Hidden: %1$s"
 msgstr ""
 
-#: includes/class-loc-view.php:141
+#: includes/class-loc-view.php:142
 msgid "Location: "
 msgstr ""
 
-#: includes/class-loc-view.php:150
+#: includes/class-loc-view.php:151
 msgid "Error: Invalid Map Provider"
 msgstr ""
 
-#: includes/class-loc-view.php:212
+#: includes/class-loc-view.php:213
 msgid "Weather: "
 msgstr ""
 
-#: includes/class-loc-view.php:252
+#: includes/class-loc-view.php:253
 #: includes/class-sloc-weather-widget.php:99
 msgid "F"
 msgstr ""
 
-#: includes/class-loc-view.php:256
+#: includes/class-loc-view.php:257
 #: includes/class-sloc-weather-widget.php:103
 msgid "C"
 msgstr ""
 
-#: includes/class-loc-view.php:272
+#: includes/class-loc-view.php:273
 #: includes/class-sloc-weather-widget.php:123
 #: includes/class-weather-provider.php:415
 msgid "Humidity"
 msgstr ""
 
-#: includes/class-loc-view.php:275
+#: includes/class-loc-view.php:276
 #: includes/class-sloc-weather-widget.php:145
 #: templates/loc-side-metabox.php:160
 msgid "Cloudiness"
 msgstr ""
 
-#: includes/class-loc-view.php:278
+#: includes/class-loc-view.php:279
 #: includes/class-sloc-weather-widget.php:156
 #: templates/loc-side-metabox.php:82
 #: templates/loc-side-metabox.php:153

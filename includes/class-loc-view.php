@@ -35,6 +35,7 @@ class Loc_View {
 			'fa-train'            => __( 'Train', 'simple-location' ),
 			'fa-taxi'             => __( 'Taxi', 'simple-location' ),
 			'fa-tram'             => __( 'Tram', 'simple-location' ),
+			'fa-biking'           => __( 'Biking', 'simple-location' ),
 			'fa-bus'              => __( 'Bus', 'simple-location' ),
 			'fa-bus-alt'          => __( 'Bus (Alt)', 'simple-location' ),
 			'fa-car'              => __( 'Car', 'simple-location' ),
