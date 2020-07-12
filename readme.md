@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.1.5  
+**Stable tag:** 4.1.6  
 **Requires at least:** 4.9  
 **Tested up to:** 5.4.2  
 **Requires PHP:** 5.6  
@@ -64,8 +64,8 @@ that can be set to a specific location, a user, station ID, or airport code. Sta
 
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
-* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include Wikimedia, MapBox, Google, Mapquest's Open Static Map, HERE, LocationIQ, and Bing
-* Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ and Geonames.
+* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include Wikimedia, MapBox, Google, Mapquest's Open Static Map, HERE, LocationIQ, Geoapify, Yandex and Bing.
+* Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ, OpenRoute and Geonames.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
 location of a three letter airport code, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
 * Weather Providers retrieve weather data about your location and include OpenWeatherMap, Dark Sky, Weatherstack, WeatherBit, HERE and the US National Weather Service. HERE, Dark Sky, WeatherBit, and Weatherstack do not support stations.
@@ -103,6 +103,17 @@ with the provider's terms of use.
 
 The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin if installed.
 
+### Why are my maps served from the provider instead of saved as images to my site? ###
+
+The terms of service of most map providers expressly forbid this. While the likelihood of one of these providers coming after an individual is slim, this would be a violation of WordPress plugin guidelines.
+This is why the plugin does not save maps to the media library. The only self-serve option being offered at this time is to self-host a caching static map API endpoint.
+
+### What is the custom map provider? ###
+
+The custom map provider is an endpoint you provide yourself. You can install and use the repository [here](https://github.com/dshanske/Static-Maps-API-PHP), which is a fork of a project by [Aaron Parecki](https://aaronparecki.com).
+The custom provider was designed around the parameters in this code. All the commercial static map APIs used assemble the pieces of a map from public tile servers, which
+is what this code does. While the code allows for multiple tile sources, please ensure compliance with their licenses. At the least, most of them require attribution. 
+
 ### Is this compatible with the WordPress mobile apps? ###
 
 Simple Location uses WordPress Geodata to store location, as does the WordPress app. So setting location with the app should allow it to be displayed by Simple Location. The only major difference
@@ -127,6 +138,7 @@ There are REST API endpoints to retrieve the data so it can be used in the admin
 * /weather which will return the weather for a latitude/longitude or station ID
 * /geocode which will return the address information for a latitude/longitude and optionally add the weather
 * /lookup which will return the current location for a user based on the location provider
+* /airport allows search for an airport by IATA code, ICAO code, or Municipality. Used for the airport location search
 * /map which will return static map data for the provided latitude and longitude
 
 ### What is Compass? ###
@@ -197,6 +209,12 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.1.6 ( 2020-07-12 ) ###
+* Introduce Custom Map Endpoint, based on a [fork](https://github.com/dshanske/Static-Maps-API-PHP) of a library by @aaronpk
+* Clean up markers and other settings on the map provider to look more consistent.
+* Moon phase code redone, and moonrise/moonset added
+* Fix is_day code
 
 ### 4.1.5 ( 2020-07-04 ) ###
 * Wikimedia Maps is now deprecated. Their decision, not mine.
