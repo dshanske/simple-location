@@ -157,6 +157,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
 			$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
 			$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
+			$return['day'] = $calc->is_daytime();
 
 			if ( $this->cache_key ) {
 				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );

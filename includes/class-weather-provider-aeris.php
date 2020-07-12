@@ -210,6 +210,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$return['sunset']  = $calc->get_iso8601( null, 'sunset' );
 		$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
 		$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
+		$return['day'] = $calc->is_daytime();
 
 		return array_filter( $return );
 	}
