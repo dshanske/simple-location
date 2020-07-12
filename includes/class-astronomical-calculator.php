@@ -79,6 +79,8 @@ class Astronomical_Calculator {
 		$this->timezone  = Loc_Timezone::timezone_for_location( $latitude, $longitude );
 		if ( $this->timezone instanceof Timezone_Result ) {
 			$this->timezone = $this->timezone->timezone;
+		} elseif ( is_null( $this->timezone ) ) {
+			$this->timezone = wp_timezone();
 		}
 	}
 
