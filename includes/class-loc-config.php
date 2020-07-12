@@ -945,6 +945,8 @@ class Loc_Config {
 		$option = get_option( 'sloc_map_provider' );
 		if ( isset( static::$maps[ $option ] ) ) {
 			return static::$maps[ $option ];
+		} else {
+			delete_option( 'sloc_map_provider' );
 		}
 		return null;
 	}
@@ -961,6 +963,8 @@ class Loc_Config {
 		$option = get_option( 'sloc_geo_provider' );
 		if ( isset( static::$geo[ $option ] ) ) {
 			return static::$geo[ $option ];
+		} else {
+			delete_option( 'sloc_geo_provider' );
 		}
 		return null;
 	}
@@ -983,6 +987,8 @@ class Loc_Config {
 		}
 		if ( isset( static::$location [ $provider ] ) ) {
 			return static::$location[ $provider ];
+		} else {
+			delete_option( 'sloc_geolocation_provider' );
 		}
 		return null;
 	}
@@ -1002,6 +1008,8 @@ class Loc_Config {
 		}
 		if ( isset( static::$weather[ $provider ] ) ) {
 			return static::$weather[ $provider ];
+		} else {
+			delete_option( 'sloc_weather_provider' );
 		}
 		return null;
 	}
