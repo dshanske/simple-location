@@ -45,7 +45,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			$weather['icon'] = 'wi-thermometer';
 		}
 
-		echo self::weather_list( $weather );
+		echo self::weather_list( $weather, 'fa-map', $instance );
 		echo $args['after_widget']; // phpcs:ignore
 	}
 
@@ -74,7 +74,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		);
 	}
 
-	protected static function weather_list( $weather, $icon = 'fa-map' ) {
+	protected static function weather_list( $weather, $icon = 'fa-map', $instance = null ) {
 		$measurements = get_option( 'sloc_measurements' );
 		$return       = array( PHP_EOL );
 		$return[]     = '<h2>';
@@ -203,6 +203,47 @@ class Sloc_Weather_Widget extends WP_Widget {
 				)
 			);
 		}
+
+		if ( isset( $instance['showastro'] ) && 1 === (int) $instance['showastro'] ) {
+			$calc = new Astronomical_Calculator( $weather['latitude'], $weather['longitude'], ifset( $weather['altitude'], 0 ) );
+			$return[] = sprintf(
+				'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+					Weather_Provider::get_icon( 'wi-sunrise', __( 'Sunrise', 'simple-location' ) ),
+					esc_html__( 'Sunrise', 'simple-location' ),
+					esc_attr( $calc->get_iso8601( null, 'sunrise' ) ),
+					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunrise' ) )
+				);
+			$return[] = sprintf(
+					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+					Weather_Provider::get_icon( 'wi-sunset', __( 'Sunset', 'simple-location' ) ),
+					esc_html__( 'Sunset', 'simple-location' ),
+					esc_attr( $calc->get_iso8601( null, 'sunset' ) ),
+					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunset' ) )
+				);
+			$return[] = sprintf(
+					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+					Weather_Provider::get_icon( 'wi-moonrise', __( 'Moonrise', 'simple-location' ) ),
+					esc_html__( 'Moonrise', 'simple-location' ),
+					esc_attr( $calc->get_iso8601( null, 'moonrise' ) ),
+					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonrise' ) )
+				);
+			$return[] = sprintf(
+					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+					Weather_Provider::get_icon( 'wi-moonset', __( 'Moonset', 'simple-location' ) ),
+					esc_html__( 'Moonset', 'simple-location' ),
+					esc_attr( $calc->get_iso8601( null, 'moonset' ) ),
+					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonset' ) )
+				);
+			$moon = $calc->get_moon_data();
+			$return[] = sprintf(
+					'<li>%1$s%2$s: %3$s(%4$s)</li>',
+					Weather_Provider::get_icon( $moon['icon'], __( 'Moon Phase', 'simple-location' ) ),
+					esc_html__( 'Moon Phase', 'simple-location' ),
+					esc_html( $moon['text'] ),
+					esc_html( round( $moon['fraction'] * 100 ) . '%' )
+				);
+		}
+
 			$return[] = '</ul>';
 
 			return implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
@@ -251,6 +292,10 @@ class Sloc_Weather_Widget extends WP_Widget {
 			<label for="longitude"><?php esc_html_e( 'Longitude: ', 'simple-location' ); ?></label>
 			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'longitude' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'longitude' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['longitude'] ) ); ?>" />
 			</p>
+		<p><label for="showastro"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
+		<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="hidden" value="0" />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
+		</p>
 		<?php
 	}
 }

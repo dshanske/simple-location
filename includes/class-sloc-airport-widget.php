@@ -69,7 +69,7 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 				$weather['name'] = $location['name'];
 			}
 		}
-		echo self::weather_list( $weather, 'fa-plane' );
+		echo self::weather_list( $weather, 'fa-plane', $instance );
 		echo $args['after_widget']; // phpcs:ignore
 
 	}
@@ -92,6 +92,10 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 		<p><p><label for="airport"><?php esc_html_e( 'Airport ID(3 or 4 letters): ', 'simple-location' ); ?></label>
 			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'airport' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'airport' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['airport'] ) ); ?>" />
 			</p>
+		<p><label for="showastro"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
+		<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="hidden" value="0" />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
+		</p>
 		<?php
 	}
 }
