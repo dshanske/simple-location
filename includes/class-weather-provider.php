@@ -113,7 +113,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * }
 	 */
 	public function extra_data( $return, $timestamp = null ) {
-		$calc               = new Astronomical_Calculator( $return['latitude'], $return['longitude'], $return['altitude'] );
+		$calc               = new Astronomical_Calculator( ifset( $return['latitude'], $this->latitude ), ifset( $return['longitude'], $this->longitude ), ifset( $return['altitude'], $this->altitude ) );
 		$return['sunrise']  = $calc->get_iso8601( null );
 		$return['sunset']   = $calc->get_iso8601( null, 'sunset' );
 		$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
