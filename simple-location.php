@@ -168,6 +168,7 @@ class Simple_Location_Plugin {
 			'class-map-provider-locationiq.php', // LocationIQ.
 			'class-map-provider-geoapify.php', // Geoapify.
 			'class-map-provider-yandex.php', // Yandex.
+			'class-map-provider-staticmap.php', // Custom Provider.
 			'class-geo-provider-nominatim.php', // Nominatim.
 			'class-geo-provider-mapquest.php', // MapQuest Nominatim.
 			'class-geo-provider-google.php', // Google.
