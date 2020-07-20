@@ -267,7 +267,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		}
 		$return['summary'] = $this->weather_type( ifset( $properties['W'] ) );
 		$return['icon']    = self::icon_map( ifset( $properties['W'] ) );
-		$return = $this->extra_data( $return );
+		$return            = $this->extra_data( $return );
 
 		return array_filter( $return );
 	}

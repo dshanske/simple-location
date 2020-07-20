@@ -578,7 +578,10 @@ class Astronomical_Calculator {
 			$h0 = $h2;
 		}
 
-		$result = array();
+		$result = array(
+			'moonrise' => 0,
+			'moonset'  => 0,
+		);
 
 		if ( 0 !== $rise ) {
 			$result['moonrise'] = $this->hours_later( $timestamp, $rise );

@@ -148,7 +148,7 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 			$return['snow']           = ifset_round( $response['snow'], 2 );
 			$return['summary']        = ifset( $response['weather']['description'] );
 			$return['icon']           = $this->icon_map( $response['weather']['code'], ifset( $response['pod'] ) === 'd' );
-			
+
 			$return = $this->extra_data( $return );
 
 			if ( $this->cache_key ) {

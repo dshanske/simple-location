@@ -167,7 +167,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		if ( ! empty( $wind ) ) {
 			$return['wind'] = $wind;
 		}
-		$return['pressure'] = round( self::get_value( $properties, 'barometricPressure' ) / 1000, 2 ); // Convert Pa to hPa/mBar.
+		$return['pressure'] = round( self::get_value( $properties, 'barometricPressure' ), 2 );
 		$return['summary']  = ifset( $properties['textDescription'] );
 		if ( isset( $return['summary'] ) ) {
 			$return['icon'] = self::icon_map( $return['summary'] );
