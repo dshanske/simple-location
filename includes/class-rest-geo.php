@@ -336,7 +336,7 @@ class REST_Geo {
 			$weather->set( array( 'station_id' => $params['station'] ) );
 		} elseif ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$weather->set( $params );
-			$return   = array(
+			$return = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],
 			);
@@ -417,9 +417,9 @@ class REST_Geo {
 				'seconds'   => $timezone->seconds,
 				'sunrise'   => $calc->get_iso8601( null, 'sunrise' ),
 				'sunset'    => $calc->get_iso8601( null, 'sunset' ),
-				'moonrise'   => $calc->get_iso8601( null, 'moonrise' ),
-				'moonset'    => $calc->get_iso8601( null, 'moonset' ),
-				'moonphase'  => $moon['text']
+				'moonrise'  => $calc->get_iso8601( null, 'moonrise' ),
+				'moonset'   => $calc->get_iso8601( null, 'moonset' ),
+				'moonphase' => $moon['text'],
 			)
 		);
 	}
