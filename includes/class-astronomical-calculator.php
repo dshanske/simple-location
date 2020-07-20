@@ -579,8 +579,8 @@ class Astronomical_Calculator {
 		}
 
 		$result = array(
-			'moonrise' => '',
-			'moonset'  => '',
+			'moonrise' => 0,
+			'moonset'  => 0,
 		);
 
 		if ( 0 !== $rise ) {
