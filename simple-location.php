@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 4.1.8
+ * Version: 4.1.9
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -37,7 +37,7 @@ class Simple_Location_Plugin {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	public static $version = '4.1.8';
+	public static $version = '4.1.9';
 
 
 	/**
@@ -255,6 +255,24 @@ if ( ! function_exists( 'ifset' ) ) {
 	 */
 	function ifset( &$var, $default = false ) {
 		return isset( $var ) ? $var : $default;
+	}
+}
+
+if ( ! function_exists( 'array_key_return' ) ) {
+
+	/**
+	 * Returns $key in $array if set otherwise $default.
+	 *
+	 * @param string|number $key Key.
+	 * @param array         $array An array.
+	 * @param mixed         $default Return if $var is not set. Defaults to false.
+	 * @return mixed $return The returned value.
+	 */
+	function array_key_return( $key, &$array, $default = false ) {
+		if ( ! is_array( $array ) ) {
+			return $default;
+		}
+		return array_key_exists( $key, $array ) ? $array[ $key ] : $default;
 	}
 }
 
