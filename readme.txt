@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.1.8
+Stable tag: 4.1.9
 Requires at least: 4.9
-Tested up to: 5.4.2
+Tested up to: 5.5
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -209,6 +209,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.1.9 ( 2020-08-15 ) =
+* Minor bug fixes and check to ensure compatible with WordPress 5.5
+* Dependency refresh
 
 = 4.1.8 ( 2020-07-12 ) =
 * Add additional sanity checks due reports of errors caused by removal of provider.
