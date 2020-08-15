@@ -12,6 +12,12 @@ class VisibilityTest extends WP_UnitTestCase {
 		$this->assertEquals( 'private', WP_Geo_Data::get_visibility( 'comment', $comment ) );
 	}
 
+	public function test_set_and_get_user_visibility() {
+		$user = $this->factory()->user->create();
+		WP_Geo_Data::set_visibility( 'user', $user, 'private' );
+		$this->assertEquals( 'private', WP_Geo_Data::get_visibility( 'user', $user ) );
+	}
+
 	public function test_get_default_visibility() {
 		$option = delete_option( 'geo_public' );
 		$get = WP_Geo_Data::get_visibility();
