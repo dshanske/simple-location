@@ -258,6 +258,24 @@ if ( ! function_exists( 'ifset' ) ) {
 	}
 }
 
+if ( ! function_exists( 'array_key_return' ) ) {
+
+	/**
+	 * Returns $key in $array if set otherwise $default.
+	 *
+	 * @param string|number $key Key.
+	 * @param array         $array An array.
+	 * @param mixed         $default Return if $var is not set. Defaults to false.
+	 * @return mixed $return The returned value.
+	 */
+	function array_key_return( $key, &$array, $default = false ) {
+		if ( ! is_array( $array ) ) {
+			return $default;
+		}
+		return array_key_exists( $key, $array ) ? $array[ $key ] : $default;
+	}
+}
+
 if ( ! function_exists( 'ifset_round' ) ) {
 	/**
 	 * Returns if set and round.

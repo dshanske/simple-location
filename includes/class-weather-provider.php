@@ -113,13 +113,16 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * }
 	 */
 	public function extra_data( $return, $timestamp = null ) {
-		$calc               = new Astronomical_Calculator( ifset( $return['latitude'], $this->latitude ), ifset( $return['longitude'], $this->longitude ), ifset( $return['altitude'], $this->altitude ) );
+		$latitude           = array_key_return( 'latitude', $return, $this->latitude );
+		$longitude          = array_key_return( 'longitude', $return, $this->longitude );
+		$altitude           = array_key_return( 'altitude', $return, $this->altitude );
+		$calc               = new Astronomical_Calculator( $latitude, $longitude, $altitude );
 		$return['sunrise']  = $calc->get_iso8601( null );
 		$return['sunset']   = $calc->get_iso8601( null, 'sunset' );
 		$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
 		$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
 		$return['day']      = $calc->is_daytime();
-		$timezone           = Loc_Timezone::timezone_for_location( $return['latitude'], $return['longitude'] );
+		$timezone           = Loc_Timezone::timezone_for_location( $latitude, $longitude );
 		if ( $timezone instanceof Timezone_Result ) {
 			$timezone = $timezone->timezone;
 		}
