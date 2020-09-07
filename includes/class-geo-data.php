@@ -603,11 +603,11 @@ class WP_Geo_Data {
 	public static function attachment_fields_to_edit( $form_fields, $post ) {
 		$geodata                    = self::get_geodata( $post );
 		$form_fields['geo_address'] = array(
-			'value'        => $geodata['address'],
+			'value'        => ifset( $geodata['address'] ),
 			'label'        => __( 'Location', 'simple-location' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
-			'html'         => sprintf( '<span>%1$s</span>', $geodata['address'] ),
+			'html'         => sprintf( '<span>%1$s</span>', ifset( $geodata['address'] ) ),
 		);
 		if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			$form_fields['location'] = array(
