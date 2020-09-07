@@ -43,7 +43,7 @@ class REST_Geo {
 						'visibility' => array(),
 
 					),
-					'permission_callback' => function() {
+					'permission_callback' => function( $request ) {
 						return current_user_can( 'read' );
 					},
 				),
@@ -54,13 +54,14 @@ class REST_Geo {
 			'/timezone',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'timezone' ),
-					'args'     => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'timezone' ),
+					'args'                => array(
 						'longitude' => array(),
 						'latitude'  => array(),
 						'airport'   => array(),
 					),
+					'permission_callback' => '__return_true',
 				),
 			)
 		);
@@ -69,14 +70,15 @@ class REST_Geo {
 			'/airport',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'airport' ),
-					'args'     => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'airport' ),
+					'args'                => array(
 						'iata_code'    => array(),
 						'municipality' => array(),
 						'ident'        => array(),
 						'gps_code'     => array(),
 					),
+					'permission_callback' => '__return_true',
 				),
 			)
 		);
@@ -96,7 +98,7 @@ class REST_Geo {
 						'height'    => array(),
 						'width'     => array(),
 					),
-					'permission_callback' => function() {
+					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
@@ -114,7 +116,7 @@ class REST_Geo {
 						'latitude'  => array(),
 						'station'   => array(),
 					),
-					'permission_callback' => function() {
+					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
@@ -128,7 +130,7 @@ class REST_Geo {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'lookup' ),
 					'args'                => array(),
-					'permission_callback' => function() {
+					'permission_callback' => function( $request ) {
 						return current_user_can( 'read' );
 					},
 				),
@@ -152,7 +154,7 @@ class REST_Geo {
 						'width'     => array(),
 						'zoom'      => array(),
 					),
-					'permission_callback' => function() {
+					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
