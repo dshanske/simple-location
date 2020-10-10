@@ -212,9 +212,11 @@ class Loc_View {
 		$loc = WP_Geo_Data::get_geodata( $object );
 		if ( isset( $loc ) && ( 'public' === $loc['visibility'] ) && ( isset( $loc['latitude'] ) ) && ( isset( $loc['longitude'] ) ) ) {
 			$map = Loc_Config::map_provider();
-			$loc = array_merge( $loc, $args );
-			$map->set( $loc );
-			return $map->get_the_map();
+			if ( $map instanceof Map_Provider ) {
+				$loc = array_merge( $loc, $args );
+				$map->set( $loc );
+				return $map->get_the_map();
+			}
 		}
 		return '';
 	}
