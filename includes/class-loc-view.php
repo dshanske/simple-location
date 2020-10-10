@@ -15,6 +15,15 @@ class Loc_View {
 
 
 	/**
+	 * Returns the default icon.
+	 *
+	 * @return string Default Icon.
+	 */
+	public static function get_default_icon() {
+		return 'fa-location-arrow';
+	}
+
+	/**
 	 * Returns list of available icons.
 	 *
 	 * @return array List of Icon Options.
@@ -63,7 +72,7 @@ class Loc_View {
 	public static function icon_select( $icon, $echo = false ) {
 		$choices = self::get_iconlist();
 		if ( ! $icon ) {
-			$icon = 'fa-location-arrow';
+			$icon = self::get_default_icon();
 		}
 		$return = '';
 		foreach ( $choices as $value => $text ) {
@@ -82,7 +91,10 @@ class Loc_View {
 	 * @param string $summary Description of Icon. Optional.
 	 * @return string marked up icon
 	 */
-	public static function get_icon( $icon = 'fa-location-arrow', $summary = null ) {
+	public static function get_icon( $icon = null, $summary = null ) {
+		if ( is_null( $icon ) ) {
+			$icon = self::get_default_icon();
+		}
 		if ( 'none' === $icon ) {
 			return '';
 		}

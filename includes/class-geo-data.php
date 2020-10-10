@@ -1105,7 +1105,7 @@ class WP_Geo_Data {
 		$geodata['address']   = get_metadata( $type, $id, 'geo_address', true );
 		$geodata['icon']      = get_metadata( $type, $id, 'geo_icon', true );
 		if ( empty( $geodata['icon'] ) ) {
-			$geodata['icon'] = 'fa-location-arrow';
+			$geodata['icon'] = Loc_View::get_default_icon();
 		}
 		$geodata['visibility'] = self::get_visibility( $type, $id );
 

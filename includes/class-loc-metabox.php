@@ -175,6 +175,10 @@ class Loc_Metabox {
 			if ( 'map_zoom' === $param ) {
 				$maparam = 'zoom';
 			} else if ( 'location_icon' === $param ) {
+				if ( Loc_View::get_default_icon() === $_POST[ $param ] ) {
+					delete_metadata( $meta_type, $object_id, 'geo_icon' );
+					continue;
+				}
 				$maparam = 'icon';
 			} else {
 				$maparam = $param;
