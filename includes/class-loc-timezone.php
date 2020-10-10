@@ -17,6 +17,28 @@ class Loc_Timezone {
 		add_filter( 'rest_prepare_post', array( $cls, 'rest_prepare_post' ), 10, 3 );
 	}
 
+	/**
+	 * Compare two DateTimeZone objects by offset
+	 *
+	 * @param DateTimeZone $tz1 First Timezone.
+	 * @param DateTimeZone $tz2 Second Timezone.
+	 * @return boolean
+	 **/
+	public static function compare_timezones( $tz1, $tz2, $datetime = null ) {
+		if ( ! $tz1 instanceof DateTimeZone || ! $tz2 instanceof DateTimeZone ) {
+			return false;
+		}
+		if ( is_string( $datetime ) ) {
+			$datetime = new DateTimeImmutable( $datetime );
+		} elseif ( ! $datetime ) {
+			$datetime = new DateTimeImmutable( $now );
+		}
+		$dt1 = $datetime->setTimezone( $tz1 );
+		$dt2 = $datetime->setTimezone( $tz2 );
+		return ( $dt1->getOffset() == $dt2->getOffset() );
+	}
+
+
 	public static function timezone_for_location( $lat, $lng, $date = false ) {
 		$start = microtime( true );
 
@@ -334,7 +356,8 @@ class Loc_Timezone {
 			}
 		}
 		if ( isset( $_POST['post_timezone'] ) ) {
-			if ( wp_timezone_string() !== $_POST['post_timezone'] ) {
+			if ( ! self::compare_timezones( new DateTimeZone( $_POST['post_timezone'] ), wp_timezone() ) ) {
+				// if ( wp_timezone_string() !== $_POST['post_timezone'] ) {
 				update_post_meta( $post_id, 'geo_timezone', $_POST['post_timezone'] );
 				return;
 			} else {

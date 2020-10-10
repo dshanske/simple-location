@@ -170,7 +170,7 @@ class Loc_Metabox {
 
 	public static function save_meta( $meta_type, $object_id ) {
 		// phpcs:disable
-		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading', 'timezone', 'location_icon' );
+		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading', 'location_icon' );
 		foreach ( $lon_params as $param ) {
 			if ( 'map_zoom' === $param ) {
 				$maparam = 'zoom';
@@ -184,6 +184,17 @@ class Loc_Metabox {
 				update_metadata( $meta_type, $object_id, 'geo_' . $maparam, $_POST[ $param ] );
 			} else {
 				delete_metadata( $meta_type, $object_id, 'geo_' . $maparam );
+			}
+		}
+
+		if ( isset( $_POST['timezone'] ) ) {
+			
+			// if ( wp_timezone_string() !== $_POST['timezone'] ) {
+			if ( ! Loc_Timezone::compare_timezones( wp_timezone(), new DateTimeZone( $_POST['timezone'] ) ) ) {
+				update_post_meta( $post_id, 'geo_timezone', $_POST['timezone'] );
+				return;
+			} else {
+				delete_post_meta( $post_id, 'geo_timezone' );
 			}
 		}
 
