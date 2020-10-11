@@ -20,17 +20,45 @@ class REST_Geo {
 
 
 	/**
-	 * Trims, sanitizes, and converts coordinate parametes to
+	 * Trims, sanitizes, and converts coordinate parameters.
 	 *
-	 * The value must be a float.
+	 * The value must be a float stored as a string.
 	 *
-	 * @param float           $value   The value passed.
+	 * @param string          $value   The value passed.
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @param string          $param   The parameter that is being sanitized.
 	 * @return int|bool|WP_Error
 	 */
 	public static function sanitize_coordinates( $value, $request, $param ) {
 		return WP_Geo_Data::clean_coordinate( $value );
+	}
+
+	/**
+	 * Trims and converts string to float.
+	 *
+	 * @param string          $value   The value passed.
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @param string          $param   The parameter that is being sanitized.
+	 * @return int|bool|WP_Error
+	 */
+	public static function sanitize_float( $value, $request, $param ) {
+		// Remove whitespace.
+		$value = trim( $value );
+		return is_float( $value ) ? floatval( $value ) : false;
+	}
+
+	/**
+	 * Trims and converts string to int.
+	 *
+	 * @param string          $value   The value passed.
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @param string          $param   The parameter that is being sanitized.
+	 * @return int|bool|WP_Error
+	 */
+	public static function sanitize_int( $value, $request, $param ) {
+		// Remove whitespace.
+		$value = trim( $value );
+		return is_numeric( $value ) ? intval( $value ) : false;
 	}
 
 	/**
@@ -53,11 +81,21 @@ class REST_Geo {
 							'required'          => true,
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
-						'altitude'   => array(),
-						'accuracy'   => array(),
-						'speed'      => array(),
-						'heading'    => array(),
-						'visibility' => array(),
+						'altitude'   => array(
+							'sanitize_callback' => array( $this, 'sanitize_float' ),
+						),
+						'accuracy'   => array(
+							'sanitize_callback' => array( $this, 'sanitize_float' ),
+						),
+						'speed'      => array(
+							'sanitize_callback' => array( $this, 'sanitize_float' ),
+						),
+						'heading'    => array(
+							'sanitize_callback' => array( $this, 'sanitize_float' ),
+						),
+						'visibility' => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 
 					),
 					'permission_callback' => function( $request ) {
@@ -80,7 +118,9 @@ class REST_Geo {
 						'latitude'  => array(
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
-						'airport'   => array(),
+						'airport'   => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 					'permission_callback' => '__return_true',
 				),
@@ -94,10 +134,18 @@ class REST_Geo {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'airport' ),
 					'args'                => array(
-						'iata_code'    => array(),
-						'municipality' => array(),
-						'ident'        => array(),
-						'gps_code'     => array(),
+						'iata_code'    => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'municipality' => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'ident'        => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'gps_code'     => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 					'permission_callback' => '__return_true',
 				),
@@ -117,11 +165,21 @@ class REST_Geo {
 						'latitude'  => array(
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
-						'altitude'  => array(),
-						'address'   => array(),
-						'weather'   => array(),
-						'height'    => array(),
-						'width'     => array(),
+						'altitude'  => array(
+							'sanitize_callback' => array( $this, 'sanitize_number' ),
+						),
+						'address'   => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'weather'   => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'height'    => array(
+							'sanitize_callback' => array( $this, 'sanitize_int' ),
+						),
+						'width'     => array(
+							'sanitize_callback' => array( $this, 'sanitize_int' ),
+						),
 					),
 					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
@@ -143,13 +201,15 @@ class REST_Geo {
 						'latitude'  => array(
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
-						'station'   => array(),
+						'station'   => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
-			),
+			)
 		);
 			register_rest_route(
 				'sloc_geo/1.0',
@@ -181,9 +241,15 @@ class REST_Geo {
 							'required'          => true,
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
-						'height'    => array(),
-						'width'     => array(),
-						'zoom'      => array(),
+						'height'    => array(
+							'sanitize_callback' => array( $this, 'sanitize_int' ),
+						),
+						'width'     => array(
+							'sanitize_callback' => array( $this, 'sanitize_int' ),
+						),
+						'zoom'      => array(
+							'sanitize_callback' => array( $this, 'sanitize_int' ),
+						),
 					),
 					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
