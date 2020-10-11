@@ -27,9 +27,9 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	 * @return mixed widget data
 	 */
 	public function update( $new_instance, $old_instance ) {
-		foreach( $new_instance as $key => $value ) {
+		foreach ( $new_instance as $key => $value ) {
 			if ( is_string( $value ) ) {
-				$new_instance[$key] = trim( $value );
+				$new_instance[ $key ] = trim( $value );
 			}
 		}
 		return $new_instance;
