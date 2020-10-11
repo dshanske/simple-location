@@ -157,7 +157,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 
 			if ( isset( $current['weather'] ) ) {
 				if ( wp_is_numeric_array( $current['weather'] ) ) {
-					$response['weather'] = $response['weather'][0];
+					$current['weather'] = $current['weather'][0];
 				}
 				$return['summary'] = $current['weather']['description'];
 				$return['icon']    = $this->icon_map( (int) $current['weather']['id'] );
