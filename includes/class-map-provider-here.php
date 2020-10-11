@@ -194,10 +194,7 @@ class Map_Provider_Here extends Map_Provider {
 
 	// Return code for map
 	public function get_the_map( $static = true ) {
-		$map  = $this->get_the_static_map();
-		$link = $this->get_the_map_url();
-		$c    = '<a target="_blank" href="' . $link . '"><img class="sloc-map" src="' . $map . '" /></a>';
-		return $c;
+		return $this->get_the_static_map_html();
 	}
 
 }

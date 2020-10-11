@@ -204,7 +204,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			);
 		}
 
-		if ( isset( $instance['showastro'] ) && 1 === (int) $instance['showastro'] && isset( $weather['latitude'] ) ) {
+		if ( isset( $instance['showastro'] ) && 1 === (int) $instance['showastro'] && array_key_exists( 'latitude', $weather ) && array_key_exists( 'longitude', $weather ) ) {
 			$calc     = new Astronomical_Calculator( $weather['latitude'], $weather['longitude'], ifset( $weather['altitude'], 0 ) );
 			$return[] = sprintf(
 				'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
@@ -258,6 +258,11 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @return mixed widget data
 	 */
 	public function update( $new_instance, $old_instance ) {
+		foreach( $new_instance as $key => $value ) {
+			if ( is_string( $value ) ) {
+				$new_instance[$key] = trim( $value );
+			}
+		}
 		return $new_instance;
 	}
 

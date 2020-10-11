@@ -1000,6 +1000,7 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function clean_coordinate( $coordinate ) {
+		$coordinate = trim( $coordinate );
 		$pattern = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
 		preg_match( $pattern, $coordinate, $matches );
 		return round( (float) $matches[0], 7 );
@@ -1105,7 +1106,7 @@ class WP_Geo_Data {
 		$geodata['address']   = get_metadata( $type, $id, 'geo_address', true );
 		$geodata['icon']      = get_metadata( $type, $id, 'geo_icon', true );
 		if ( empty( $geodata['icon'] ) ) {
-			$geodata['icon'] = 'fa-location-arrow';
+			$geodata['icon'] = Loc_View::get_default_icon();
 		}
 		$geodata['visibility'] = self::get_visibility( $type, $id );
 

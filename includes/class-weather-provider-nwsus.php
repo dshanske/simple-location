@@ -163,6 +163,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$wind                  = array();
 		$wind['degree']        = self::get_value( $properties, 'windDirection' );
 		$wind['speed']         = self::get_value( $properties, 'windSpeed' );
+		$wind['gust']          = self::get_value( $properties, 'windGust' );
 		$wind                  = array_filter( $wind );
 		if ( ! empty( $wind ) ) {
 			$return['wind'] = $wind;

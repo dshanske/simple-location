@@ -168,13 +168,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 
 	// Return code for map
 	public function get_the_map( $static = true ) {
-		$map = $this->get_the_static_map();
-		if ( is_wp_error( $map ) ) {
-			return $map->get_error_message();
-		}
-		$link = $this->get_the_map_url();
-		$c    = '<a target="_blank" href="' . $link . '"><img class="sloc-map" src="' . $map . '" /></a>';
-		return $c;
+		return $this->get_the_static_map_html();
 	}
 
 }
