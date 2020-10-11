@@ -104,7 +104,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 					return $conditions;
 				}
 			}
-			$url         = 'https://api.openweathermap.org/data/2.5/weather?';
+			$url         = 'https://api.openweathermap.org/data/2.5/onecall?';
 			$data['lat'] = $this->latitude;
 			$data['lon'] = $this->longitude;
 			$url         = add_query_arg( $data, $url );
@@ -128,34 +128,39 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			if ( WP_DEBUG ) {
 				$return['raw'] = $response;
 			}
-			if ( isset( $response['main'] ) ) {
-				$return['temperature'] = round( $response['main']['temp'], 1 );
-				$return['humidity']    = round( $response['main']['humidity'], 1 );
-				$return['pressure']    = round( $response['main']['pressure'], 1 );
+			if ( ! isset( $response['current'] ) ) {
+				return $return;
 			}
-			if ( isset( $response['clouds'] ) ) {
-				$return['cloudiness'] = $response['clouds']['all'];
+			$current = $response['current'];
+
+			$return['temperature'] = round( $current['temp'], 1 );
+			$return['humidity']    = round( $current['humidity'], 1 );
+			$return['pressure']    = round( $current['pressure'], 1 );
+			$return['cloudiness']  = $current['clouds'];
+			$return['visibility']  = $current['visibility'];
+			$return['uv']          = $current['uvi'];
+
+			if ( isset( $current['rain'] ) ) {
+				$return['rain'] = round( $current['rain']['1h'], 2 );
 			}
-			if ( isset( $response['wind'] ) ) {
-				$return['wind']           = array();
-				$return['wind']['speed']  = round( $response['wind']['speed'] );
-				$return['wind']['degree'] = ifset_round( $response['wind']['deg'], 1 );
+			if ( isset( $current['snow'] ) ) {
+				$return['snow'] = round( $current['snow']['1h'], 2 );
 			}
-			if ( isset( $response['weather'] ) ) {
-				if ( wp_is_numeric_array( $response['weather'] ) ) {
+
+			$return['wind'] = array_filter(
+				array(
+					'speed'  => round( $current['wind_speed'] ),
+					'degree' => round( $current['wind_deg'], 1 ),
+					'gust'   => ifset_round( $current['wind_gust'], 1 ),
+				)
+			);
+
+			if ( isset( $current['weather'] ) ) {
+				if ( wp_is_numeric_array( $current['weather'] ) ) {
 					$response['weather'] = $response['weather'][0];
 				}
-				$return['summary'] = $response['weather']['description'];
-				$return['icon']    = $this->icon_map( (int) $response['weather']['id'] );
-			}
-			if ( isset( $response['rain'] ) ) {
-				$return['rain'] = round( $response['rain']['1h'], 2 );
-			}
-			if ( isset( $response['snow'] ) ) {
-				$return['snow'] = round( $response['snow']['1h'], 2 );
-			}
-			if ( isset( $response['visibility'] ) ) {
-				$return['visibility'] = round( $response['visibility'], 1 );
+				$return['summary'] = $current['weather']['description'];
+				$return['icon']    = $this->icon_map( (int) $current['weather']['id'] );
 			}
 
 			$return = $this->extra_data( $return );
