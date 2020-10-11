@@ -1000,6 +1000,7 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function clean_coordinate( $coordinate ) {
+		$coordinate = trim( $coordinate );
 		$pattern = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
 		preg_match( $pattern, $coordinate, $matches );
 		return round( (float) $matches[0], 7 );

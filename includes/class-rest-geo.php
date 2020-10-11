@@ -18,6 +18,21 @@ class REST_Geo {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
+
+	/**
+	 * Trims, sanitizes, and converts coordinate parametes to
+	 *
+	 * The value must be a float.
+	 *
+	 * @param float           $value   The value passed.
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @param string          $param   The parameter that is being sanitized.
+	 * @return int|bool|WP_Error
+	 */
+	public static function sanitize_coordinates( $value, $request, $param ) {
+		return WP_Geo_Data::clean_coordinate( $value );
+	}
+
 	/**
 	 * Register the Route.
 	 */
@@ -31,10 +46,12 @@ class REST_Geo {
 					'callback'            => array( $this, 'user' ),
 					'args'                => array(
 						'longitude'  => array(
-							'required' => true,
+							'required'          => true,
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
 						'latitude'   => array(
-							'required' => true,
+							'required'          => true,
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
 						'altitude'   => array(),
 						'accuracy'   => array(),
@@ -57,8 +74,12 @@ class REST_Geo {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'timezone' ),
 					'args'                => array(
-						'longitude' => array(),
-						'latitude'  => array(),
+						'longitude' => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
+						'latitude'  => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
 						'airport'   => array(),
 					),
 					'permission_callback' => '__return_true',
@@ -90,8 +111,12 @@ class REST_Geo {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'geocode' ),
 					'args'                => array(
-						'longitude' => array(),
-						'latitude'  => array(),
+						'longitude' => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
+						'latitude'  => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
 						'altitude'  => array(),
 						'address'   => array(),
 						'weather'   => array(),
@@ -112,30 +137,34 @@ class REST_Geo {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'weather' ),
 					'args'                => array(
-						'longitude' => array(),
-						'latitude'  => array(),
+						'longitude' => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
+						'latitude'  => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
 						'station'   => array(),
 					),
 					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
-			)
+			),
 		);
-		register_rest_route(
-			'sloc_geo/1.0',
-			'/lookup',
-			array(
+			register_rest_route(
+				'sloc_geo/1.0',
+				'/lookup',
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'lookup' ),
-					'args'                => array(),
-					'permission_callback' => function( $request ) {
-						return current_user_can( 'read' );
-					},
-				),
-			)
-		);
+					array(
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => array( $this, 'lookup' ),
+						'args'                => array(),
+						'permission_callback' => function( $request ) {
+							return current_user_can( 'read' );
+						},
+					),
+				)
+			);
 		register_rest_route(
 			'sloc_geo/1.0',
 			'/map',
@@ -145,10 +174,12 @@ class REST_Geo {
 					'callback'            => array( $this, 'map' ),
 					'args'                => array(
 						'longitude' => array(
-							'required' => true,
+							'required'          => true,
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
 						'latitude'  => array(
-							'required' => true,
+							'required'          => true,
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
 						'height'    => array(),
 						'width'     => array(),
