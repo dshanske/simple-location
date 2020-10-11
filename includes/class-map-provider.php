@@ -187,6 +187,32 @@ abstract class Map_Provider extends Sloc_Provider {
 	 */
 	abstract public function get_the_map( $static = false );
 
+
+	// Return HTML Code for Static Map.
+	public function get_the_static_map_html( $srcset = true ) {
+		$orig = $this->get_the_static_map();
+		$link = $this->get_the_map_url();
+		$height = $this->height;
+		$width = $this->width;
+
+		if ( $srcset ) {
+			$srcset = array();
+			foreach( array( '0.5', '1', '2', '3' ) as $mult ) {
+				$this->height = round( $height * floatval( $mult ) );
+				$this->width = round( $width * floatval( $mult) );
+				$image = $this->get_the_static_map();
+				if ( is_wp_error( $image ) ) {
+					return $image->get_error_message();
+				}
+				$srcset[] = sprintf( '%1$s %2$sx', $image, $mult );
+
+			}	
+			$srcset = implode( ',', $srcset );
+			return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" srcset="%3$s" width="%4$s" height="%5$s" loading="lazy" /></a>', $link, $orig, $srcset, $width, $height );
+		}
+		return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" width="%3$s" height="%4$s" loading="lazy" /></a>', $link, $orig, $width, $height );
+	}
+
 	/**
 	 * Given coordinates echo the output of get_the_map.
 	 *

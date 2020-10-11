@@ -162,11 +162,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	}
 
 	public function get_the_map( $static = true ) {
-		if ( $static ) {
-			$map  = sprintf( '<img class="sloc-map" src="%s">', $this->get_the_static_map() );
-			$link = $this->get_the_map_url();
-			return '<a target="_blank" href="' . $link . '">' . $map . '</a>';
-		}
+		return $this->get_the_static_map_html( false );
 	}
 
 	public function get_archive_map( $locations ) {
