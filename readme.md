@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.1.9  
+**Stable tag:** 4.1.10  
 **Requires at least:** 4.9  
 **Tested up to:** 5.5  
 **Requires PHP:** 5.6  
@@ -209,6 +209,16 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.1.10 ( 2020-10-xx ) ###
+* Do not store timezone string if the offset matches the site timezone.
+* Do not store icon if it is the default icon.
+* Check for valid map provider before attempting to use it.
+* Sanitize REST API inputs
+* Trim whitespace on widget inputs
+* Switch OpenWeather Map to use the OneCall API.
+* Adjust NWS and OpenWeatherMap to Store Wind Gust Info.
+* Centralize static map img tag code and add lazy loading flag and srcset option.
 
 ### 4.1.9 ( 2020-08-15 ) ###
 * Minor bug fixes and check to ensure compatible with WordPress 5.5
