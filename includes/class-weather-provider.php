@@ -246,6 +246,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type array $wind {
 	 *      @type int $speed Speed in meters per hour.
 	 *      @type float $degree Degree between 0 and 360.
+	 *	@type int $guest Wind Gust in meters per hour.
 	 *  }
 	 *  @type float $rain Rainfall in millimeters.
 	 *  @type float $visibility Visibility in meters.
