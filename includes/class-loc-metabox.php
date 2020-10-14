@@ -191,10 +191,9 @@ class Loc_Metabox {
 			}
 		}
 
-		if ( isset( $_POST['timezone'] ) ) {
-			
+		if ( isset( $_POST['timezone'] ) && ! empty( $_POST['timezone'] ) ) {
 			// if ( wp_timezone_string() !== $_POST['timezone'] ) {
-			if ( ! Loc_Timezone::compare_timezones( wp_timezone(), new DateTimeZone( $_POST['timezone'] ) ) ) {
+			if ( ! Loc_Timezone::compare_timezones( wp_timezone(), timezone_open( $_POST['timezone'] ) ) ) {
 				update_post_meta( $post_id, 'geo_timezone', $_POST['timezone'] );
 				return;
 			} else {

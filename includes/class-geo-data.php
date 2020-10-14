@@ -1539,8 +1539,10 @@ if ( ! function_exists( 'wp_exif_datetime' ) ) {
 	 */
 	function wp_exif_datetime( $str, $timezone = null ) {
 		if ( is_string( $timezone ) ) {
-			$timezone = new DateTimeZone( $timezone );
-		} elseif ( ! $timezone instanceof DateTimeZone ) {
+			$timezone = timezone_open( $timezone );
+		}
+		
+		if ( ! $timezone instanceof DateTimeZone ) {
 			$timezone = wp_timezone();
 		}
 		$datetime = new DateTime( $str, $timezone );

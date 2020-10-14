@@ -31,7 +31,7 @@ class Loc_Timezone {
 		if ( is_string( $datetime ) ) {
 			$datetime = new DateTimeImmutable( $datetime );
 		} elseif ( ! $datetime ) {
-			$datetime = new DateTimeImmutable( $now );
+			$datetime = new DateTimeImmutable( 'now' );
 		}
 		$dt1 = $datetime->setTimezone( $tz1 );
 		$dt2 = $datetime->setTimezone( $tz2 );
