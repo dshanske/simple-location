@@ -119,6 +119,8 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				'user-agent'          => 'Simple Location for WordPress',
 			);
 
+			$return = array();
+
 			$response = wp_remote_get( $url, $args );
 			if ( is_wp_error( $response ) ) {
 				return $response;
