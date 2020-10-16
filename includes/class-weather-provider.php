@@ -135,6 +135,16 @@ abstract class Weather_Provider extends Sloc_Provider {
 		return array_filter( $return );
 	}
 
+	/**
+	 * Set caching configuration
+	 *
+	 * @param int $cache_time The Cache time in seconds.
+	 * @param string $cache_key The key to save cached info to. Optional
+	 */
+	public function set_cache( $cache_time, $cache_key = 'slocw' ) {
+		$this->cache_time = intval( $cache_time );
+		$this->cache_key = sanitize_key( $cache_key );
+	}
 
 	/**
 	 * Does This Provider Offer Station Data.

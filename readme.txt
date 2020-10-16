@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.1.10
+Stable tag: 4.1.11
 Requires at least: 4.9
 Tested up to: 5.5
 Requires PHP: 5.6
@@ -210,7 +210,11 @@ will now be required to show maps for services that require API keys.
 
 == Changelog ==
 
-= 4.1.10 ( 2020-10-xx ) =
+= 4.1.11 ( 2020-10-16 ) =
+* Do additional error checking to ensure timezone notices do not appear.
+* Start process of fixing caching.
+
+= 4.1.10 ( 2020-10-11 ) =
 * Do not store timezone string if the offset matches the site timezone.
 * Do not store icon if it is the default icon.
 * Check for valid map provider before attempting to use it.

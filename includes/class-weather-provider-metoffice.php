@@ -210,11 +210,20 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	 *
 	 * @return array Current Conditions.
 	 */
-	public function get_station_data() {
+	public function get_station_data() {	
+		if ( $this->cache_key ) {
+			$conditions = get_transient( $this->cache_key . '_' . md5( $this->station_id ) );
+			if ( $conditions ) {
+				return $conditions;
+			}
+		}
+
 		$return             = array(
 			'station_id'   => $this->station_id,
 			'station_data' => $this->station(),
 		);
+
+
 		$return['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
 
 		$url  = sprintf( 'http://datapoint.metoffice.gov.uk/public/data/val/wxobs/all/json/%1$s?res=hourly&key=%2$s', $this->station_id, $this->api );
@@ -267,9 +276,13 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		}
 		$return['summary'] = $this->weather_type( ifset( $properties['W'] ) );
 		$return['icon']    = self::icon_map( ifset( $properties['W'] ) );
-		$return            = $this->extra_data( $return );
+		$return            = array_filter( $this->extra_data( $return ) );
 
-		return array_filter( $return );
+		if ( $this->cache_key ) {
+			set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
+		}
+
+		return $return;
 	}
 
 	/**
