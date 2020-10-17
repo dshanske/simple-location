@@ -197,10 +197,10 @@ abstract class Sloc_Provider {
 	public function set( $lat, $lng = null, $alt = null ) {
 		if ( ! $lng && is_array( $lat ) ) {
 			if ( isset( $lat['latitude'] ) && isset( $lat['longitude'] ) ) {
-				$this->latitude  = $lat['latitude'];
-				$this->longitude = $lat['longitude'];
+				$this->latitude  = WP_Geo_Data::clean_coordinate( $lat['latitude'] );
+				$this->longitude = WP_Geo_Data::clean_coordinate( $lat['longitude'] );
 				if ( isset( $lat['altitude'] ) && is_numeric( $lat['altitude'] ) ) {
-					$this->altitude = $lat['altitude'];
+					$this->altitude = floatval( $lat['altitude'] );
 				}
 				return true;
 			} else {
@@ -211,10 +211,10 @@ abstract class Sloc_Provider {
 		if ( ( ! is_numeric( $lat ) ) && ( ! is_numeric( $lng ) ) ) {
 			return false;
 		}
-		$this->latitude  = $lat;
-		$this->longitude = $lng;
+		$this->latitude  = WP_Geo_Data::clean_coordinate( $lat );
+		$this->longitude = WP_Geo_Data::clean_coordinate( $lng );
 		if ( is_numeric( $alt ) ) {
-			$this->altitude = $altt;
+			$this->altitude = floatval( $alt );
 		}
 		return true;
 	}
