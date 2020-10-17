@@ -308,13 +308,16 @@ class Loc_View {
 		);
 	}
 
-	public static function get_weather_data( $lat, $lng ) {
+	public static function get_weather_data( $lat, $lng, $cache_time = null ) {
 		$weather = Loc_Config::weather_provider();
 		$weather->set( $lat, $lng );
+		if ( is_numeric( $cache_time ) ) {
+			$weather->set_cache_time( $cache_time );
+		}
 		return $weather->get_conditions();
 	}
 
-	public static function get_weather_by_user( $user ) {
+	public static function get_weather_by_user( $user, $cache_time = null ) {
 		if ( is_numeric( $user ) && 0 !== $user ) {
 			$user = new WP_User( $user );
 		}
@@ -325,16 +328,21 @@ class Loc_View {
 		if ( ! isset( $loc['latitude'] ) ) {
 			return '';
 		}
-		return self::get_weather_by_location( $loc['latitude'], $loc['longitude'] );
+		return self::get_weather_by_location( $loc['latitude'], $loc['longitude'], $cache_time );
 	}
 
-	public static function get_weather_by_location( $lat, $lng ) {
-		return self::get_weather_data( $lat, $lng );
+	public static function get_weather_by_location( $lat, $lng, $cache_time = null ) {
+		return self::get_weather_data( $lat, $lng, $cache_time );
 	}
 
-	public static function get_weather_by_station( $station, $provider = null ) {
+	public static function get_weather_by_station( $station, $provider = null, $cache_time = null ) {
 		$provider = Loc_Config::weather_provider( $provider );
 		$provider->set( array( 'station_id' => $station ) );
+
+		if ( is_numeric( $cache_time ) ) {
+			$provider->set_cache_time( $cache_time );
+		}
+
 		return $provider->get_conditions();
 	}
 

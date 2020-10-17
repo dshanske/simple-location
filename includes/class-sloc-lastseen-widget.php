@@ -31,6 +31,13 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 		if ( ! empty( $instance['title'] ) ) {
 				echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
+
+		if ( isset( $instance['cache_time'] ) ) {
+			$cache_time = $instance['cache_time'];
+		} else {
+			$cache_time = null;
+		}
+
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			echo '<ul class="sloc-lastseen-data">';
 			$user    = new WP_User( $instance['user'] );

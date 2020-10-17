@@ -32,6 +32,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 				echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
 		$w = Loc_Config::weather_provider();
+		if ( isset( $instance['cache_time'] ) ) {
+			$w->set_cache_time( $instance['cache_time'] );
+		}
 		if ( isset( $instance['user'] ) && '-1' !== $instance['user'] ) {
 			$weather = Loc_View::get_weather_by_user( $instance['user'] ); // phpcs:ignore
 		} elseif ( ! empty( $instance['latitude'] ) && ! empty( $instance['longitude'] ) ) {
@@ -203,6 +206,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 				)
 			);
 		}
+		if ( isset( $weather['_expires_at'] ) ) {
+			$return[] = printf( '<!-- %1$s: %2$s -->', __( 'Current Conditions Cache Expires At', 'simple-location' ), $weather['_expires_at'] );
+		}
 
 		if ( isset( $instance['showastro'] ) && 1 === (int) $instance['showastro'] && array_key_exists( 'latitude', $weather ) && array_key_exists( 'longitude', $weather ) ) {
 			$calc     = new Astronomical_Calculator( $weather['latitude'], $weather['longitude'], ifset( $weather['altitude'], 0 ) );
@@ -244,9 +250,8 @@ class Sloc_Weather_Widget extends WP_Widget {
 			);
 		}
 
-			$return[] = '</ul>';
-
-			return implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
+		$return[] = '</ul>';
+		return implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
 	}
 
 	/**
@@ -261,6 +266,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 		foreach ( $new_instance as $key => $value ) {
 			if ( is_string( $value ) ) {
 				$new_instance[ $key ] = trim( $value );
+			}
+			if ( is_numeric( $value ) ) {
+				$new_instance[ $key ] = intval( $key );
 			}
 		}
 		return $new_instance;
@@ -300,6 +308,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 		<p><label for="showastro"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="hidden" value="0" />
 			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
+		</p>
+		<p><label for="cache_time"><?php esc_html_e( 'Cache Time: ', 'simple-location' ); ?></label>
+			<input type="number" name="<?php echo esc_attr( $this->get_field_name( 'cache_time' ) ); ?>" id="<?php $this->get_field_id( 'cache_time' ); ?>" value="<?php echo esc_attr( ifset( $instance['cache_time'] ) ); ?>" />
 		</p>
 		<?php
 	}

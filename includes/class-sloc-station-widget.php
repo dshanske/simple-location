@@ -62,8 +62,15 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 		if ( ! empty( $instance['title'] ) ) {
 			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
 		}
+
+		if ( isset( $instance['cache_time'] ) ) {
+			$cache_time = $instance['cache_time'];
+		} else {
+			$cache_time = null;
+		}
+
 		if ( isset( $instance['station'] ) ) {
-			$weather = Loc_View::get_weather_by_station( $instance['station'], $instance['provider'] ); // phpcs:ignore
+			$weather = Loc_View::get_weather_by_station( $instance['station'], $instance['provider'], $cache_time ); // phpcs:ignore
 			if ( is_wp_error( $weather ) ) {
 				echo esc_html( $weather->get_error_message() );
 				echo $args['after_widget']; // phpcs:ignore
@@ -100,6 +107,9 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 		<p><label for="showastro"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="hidden" value="0" />
 			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
+		</p>
+		<p><label for="cache_time"><?php esc_html_e( 'Cache Time: ', 'simple-location' ); ?></label>
+			<input type="number" name="<?php echo esc_attr( $this->get_field_name( 'cache_time' ) ); ?>" id="<?php $this->get_field_id( 'cache_time' ); ?>" value="<?php echo esc_attr( ifset( $instance['cache_time'] ) ); ?>" />
 		</p>
 		<?php
 	}
