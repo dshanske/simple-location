@@ -94,12 +94,11 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 		}
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {
-			if ( $this->cache_key ) {
-				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
-				if ( $conditions ) {
-					return $conditions;
-				}
+			$conditions = $this->get_cache();
+			if ( $conditions ) {
+				return $conditions;
 			}
+
 			$data = array(
 				'access_key' => $this->api,
 				'query'      => $this->latitude . ',' . $this->longitude,
@@ -152,12 +151,10 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			$return['uv']             = ifset( $response['uv_index'] );
 			$return['icon']           = $this->icon_map( $response['weather_code'], ifset( $response['is_day'] ) );
 
-			$return = $this->extra_data( $return );
+			$return = array_filter( $this->extra_data( $return ) );
+			$this->set_cache( $return );
 
-			if ( $this->cache_key ) {
-				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
-			}
-			return array_filter( $return );
+			return $return;
 		}
 		return false;
 	}

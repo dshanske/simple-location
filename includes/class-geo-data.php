@@ -1541,7 +1541,7 @@ if ( ! function_exists( 'wp_exif_datetime' ) ) {
 		if ( is_string( $timezone ) ) {
 			$timezone = timezone_open( $timezone );
 		}
-		
+
 		if ( ! $timezone instanceof DateTimeZone ) {
 			$timezone = wp_timezone();
 		}

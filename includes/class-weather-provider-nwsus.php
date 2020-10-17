@@ -47,11 +47,9 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			return $this->get_station_data();
 		}
 		if ( $this->latitude && $this->longitude ) {
-			if ( $this->cache_key ) {
-				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
-				if ( $conditions ) {
-					return $conditions;
-				}
+			$conditions = $this->get_cache();
+			if ( $conditions ) {
+				return $conditions;
 			}
 			$url  = sprintf( 'https://api.weather.gov/points/%1$s,%2$s', $this->latitude, $this->longitude );
 			$args = array(
@@ -96,7 +94,13 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			);
 
 			$this->station_id = $sitelist[0]['properties']['stationIdentifier'];
-			return self::get_station_data();
+			$return           = self::get_station_data();
+			if ( $return ) {
+				// Set the Caching Based on the Latitude and Longitude as that is what Was Called.
+				$this->station_id = null;
+				$this->set_cache( $return );
+				return $return;
+			}
 		}
 		return false;
 	}
@@ -139,11 +143,8 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
-		$response = wp_remote_retrieve_body( $response );
-		$response = json_decode( $response, true );
-		if ( WP_DEBUG ) {
-			$return['raw'] = $response;
-		}
+		$response   = wp_remote_retrieve_body( $response );
+		$response   = json_decode( $response, true );
 		$properties = ifset( $response['properties'] );
 		if ( isset( $response['geometry'] ) ) {
 			$return['latitude']  = $response['geometry']['coordinates'][1];
@@ -185,8 +186,10 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			$return['timezone'] = ifset( $response['properties']['timeZone'] );
 		}
 		$return = array_filter( $this->extra_data( $return ) );
-		if ( $this->cache_key ) {
-			set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
+		$this->set_cache( $return );
+
+		if ( WP_DEBUG ) {
+			$return['raw'] = $response;
 		}
 		return $return;
 	}

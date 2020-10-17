@@ -92,12 +92,11 @@ class Weather_Provider_HERE extends Weather_Provider {
 		}
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {
-			if ( $this->cache_key ) {
-				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
-				if ( $conditions ) {
-					return $conditions;
-				}
+			$conditions = $this->get_cache();
+			if ( $conditions ) {
+				return $conditions;
 			}
+
 			$data = array(
 				'apiKey'         => $this->api,
 				'product'        => 'observation',
@@ -124,9 +123,6 @@ class Weather_Provider_HERE extends Weather_Provider {
 			}
 			$response = wp_remote_retrieve_body( $response );
 			$response = json_decode( $response, true );
-			if ( WP_DEBUG ) {
-				$return['raw'] = $response;
-			}
 			if ( ! isset( $response['observations'] ) ) {
 				return $return;
 			}
@@ -151,12 +147,14 @@ class Weather_Provider_HERE extends Weather_Provider {
 			if ( isset( $current['visibility'] ) ) {
 				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
-			$return = $this->extra_data( $return );
+			$return = array_filter( $this->extra_data( $return ) );
 
-			if ( $this->cache_key ) {
-				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
+			$this->set_cache( $return );
+
+			if ( WP_DEBUG ) {
+				$return['raw'] = $response;
 			}
-			return array_filter( $return );
+			return $return;
 		}
 		return false;
 	}

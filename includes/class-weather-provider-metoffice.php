@@ -127,6 +127,11 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 			return self::get_station_data();
 		}
 		if ( $this->latitude && $this->longitude ) {
+			$conditions = $this->get_cache();
+			if ( $conditions ) {
+				return $conditions;
+			}
+
 			$sitelist = $this->get_sitelist();
 			foreach ( $sitelist as $key => $value ) {
 				$sitelist[ $key ]['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $value['latitude'], $value['longitude'] ) );
@@ -139,7 +144,11 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 			);
 			if ( 100000 > $sitelist[0]['distance'] ) {
 				$this->station_id = $sitelist[0]['id'];
-				return self::get_station_data();
+				$return           = self::get_station_data();
+
+				unset( $this->station_id );
+				$this->set_cache( $return );
+				return $return;
 			}
 		}
 		return new WP_Error( 'failed', __( 'Failure', 'simple-location' ) );
@@ -210,19 +219,16 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	 *
 	 * @return array Current Conditions.
 	 */
-	public function get_station_data() {	
-		if ( $this->cache_key ) {
-			$conditions = get_transient( $this->cache_key . '_' . md5( $this->station_id ) );
-			if ( $conditions ) {
-				return $conditions;
-			}
+	public function get_station_data() {
+		$conditions = $this->get_cache();
+		if ( $conditions ) {
+			return $conditions;
 		}
 
-		$return             = array(
+		$return = array(
 			'station_id'   => $this->station_id,
 			'station_data' => $this->station(),
 		);
-
 
 		$return['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
 
@@ -278,9 +284,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		$return['icon']    = self::icon_map( ifset( $properties['W'] ) );
 		$return            = array_filter( $this->extra_data( $return ) );
 
-		if ( $this->cache_key ) {
-			set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
-		}
+		$this->set_cache( $return );
 
 		return $return;
 	}

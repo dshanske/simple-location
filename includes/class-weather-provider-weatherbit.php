@@ -94,12 +94,11 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 		}
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {
-			if ( $this->cache_key ) {
-				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
-				if ( $conditions ) {
-					return $conditions;
-				}
+			$conditions = $this->get_cache();
+			if ( $conditions ) {
+				return $conditions;
 			}
+
 			$data = array(
 				'key'   => $this->api,
 				'lat'   => $this->latitude,
@@ -149,12 +148,10 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 			$return['summary']        = ifset( $response['weather']['description'] );
 			$return['icon']           = $this->icon_map( $response['weather']['code'], ifset( $response['pod'] ) === 'd' );
 
-			$return = $this->extra_data( $return );
+			$return = array_filter( $this->extra_data( $return ) );
 
-			if ( $this->cache_key ) {
-				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
-			}
-			return array_filter( $return );
+			$this->set_cache( $return );
+			return $return;
 		}
 		return false;
 	}

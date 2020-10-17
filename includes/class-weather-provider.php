@@ -42,19 +42,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 	protected $units;
 
 	 /**
-	  * Cache Key.
-	  *
-	  * If set this will cache the retrieved information.
-	  *
-	  * @since 1.0.0
-	  * @var $string
-	  */
-	protected $cache_key;
-
-	 /**
 	  * Cache Time.
 	  *
-	  * Cache time in seconds.
+	  * Cache time in seconds. Defaults to 0.
 	  *
 	  * @since 1.0.0
 	  * @var $int
@@ -72,7 +62,6 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type float $latitude Latitude.
 	 *  @type float $longitude Longitude.
 	 *  @type string $station_id Station ID.
-	 *  @type string $cache_key Cache Key.
 	 *  @type int $cache_time Cache in Seconds.
 	 *  @type string $units Units of Measurement.
 	 * }
@@ -83,8 +72,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'latitude'   => null,
 			'longitude'  => null,
 			'station_id' => null,
-			'cache_key'  => null, // 'slocw',
-			'cache_time' => 600,
+			'cache_time' => 0,
 			'units'      => get_option( 'sloc_measurements', Loc_Config::measurement_default() ),
 		);
 		$defaults         = apply_filters( 'sloc_weather_provider_defaults', $defaults );
@@ -92,8 +80,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$this->api        = $r['api'];
 		$this->station_id = $r['station_id'];
 		$this->units      = $r['units'];
-		$this->cache_key  = $r['cache_key'];
-		$this->cache_time = $r['cache_time'];
+		$this->cache_time = intval( $r['cache_time'] );
 		$this->set( $r['latitude'], $r['longitude'] );
 	}
 
@@ -136,14 +123,62 @@ abstract class Weather_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Set caching configuration
+	 * Set caching time
 	 *
 	 * @param int $cache_time The Cache time in seconds.
-	 * @param string $cache_key The key to save cached info to. Optional
 	 */
-	public function set_cache( $cache_time, $cache_key = 'slocw' ) {
+	public function set_cache_time( $cache_time ) {
 		$this->cache_time = intval( $cache_time );
-		$this->cache_key = sanitize_key( $cache_key );
+	}
+
+	/**
+	 * Get cache.
+	 *
+	 * @return false|array Return cached value or false.
+	 */
+	public function get_cache() {
+		if ( 0 === $this->cache_time ) {
+			return false;
+		}
+
+		$cache = get_transient( $this->cache_key() );
+		return $cache;
+	}
+
+	/**
+	 * Set cache.
+	 *
+	 * @param array $value Value to Be Cached.
+	 * @return boolean
+	 */
+	public function set_cache( $value ) {
+		if ( 0 === $this->cache_time ) {
+			return false;
+		}
+		if ( ! is_array( $value ) ) {
+			return false;
+		}
+		$datetime             = date_create_from_format( 'U', time() + $this->cache_time, wp_timezone() );
+		$value['_expires_at'] = $datetime->format( DATE_W3C );
+
+		$cache = set_transient( $this->cache_key(), $value, $this->cache_time );
+		return $cache;
+	}
+
+	/**
+	 * Generate cache key
+	 *
+	 * @return string Cache Key.
+	 **/
+	private function cache_key() {
+		$key = array();
+		if ( ! empty( $this->station_id ) ) {
+			return implode( '_', array( get_called_class(), md5( $this->station_id ) ) );
+		}
+		if ( ! empty( $this->latitude ) && ! empty( $this->longitude ) ) {
+			return implode( '_', get_called_class(), md5( implode( ',', array( $this->latitude, $this->longitude ) ) ) );
+		}
+		return false;
 	}
 
 	/**
@@ -256,7 +291,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type array $wind {
 	 *      @type int $speed Speed in meters per hour.
 	 *      @type float $degree Degree between 0 and 360.
-	 *  	@type int $gust Wind Gust in meters per hour.
+	 *      @type int $gust Wind Gust in meters per hour.
 	 *  }
 	 *  @type float $rain Rainfall in millimeters.
 	 *  @type float $visibility Visibility in meters.

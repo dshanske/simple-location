@@ -98,12 +98,11 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			return $this->get_station_data();
 		}
 		if ( $this->latitude && $this->longitude ) {
-			if ( $this->cache_key ) {
-				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
-				if ( $conditions ) {
-					return $conditions;
-				}
+			$conditions = $this->get_cache();
+			if ( $conditions ) {
+				return $conditions;
 			}
+
 			$url         = 'https://api.openweathermap.org/data/2.5/onecall?';
 			$data['lat'] = $this->latitude;
 			$data['lon'] = $this->longitude;
@@ -165,12 +164,11 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				$return['icon']    = $this->icon_map( (int) $current['weather']['id'] );
 			}
 
-			$return = $this->extra_data( $return );
+			$return = array_filter( $this->extra_data( $return ) );
 
-			if ( $this->cache_key ) {
-				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
-			}
-			return array_filter( $return );
+			$this->set_cache( $return );
+
+			return $return;
 		}
 	}
 
@@ -185,11 +183,9 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			'units' => 'metric',
 		);
 		if ( ! empty( $this->station_id ) ) {
-			if ( $this->cache_key ) {
-				$conditions = get_transient( $this->cache_key . '_' . md5( $this->station_id ) );
-				if ( $conditions ) {
-					return $conditions;
-				}
+			$conditions = $this->get_cache();
+			if ( $conditions ) {
+				return $conditions;
 			}
 
 			$url                = 'http://api.openweathermap.org/data/3.0/measurements?';
@@ -227,10 +223,10 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			if ( isset( $response['pressure'] ) ) {
 				$return['pressure'] = round( $response['pressure']['average'], 1 );
 			}
-			if ( $this->cache_key ) {
-				set_transient( $this->cache_key . '_' . md5( $this->station_id ), $return, $this->cache_time );
-			}
-			return array_filter( $return );
+			$return = array_filter( $return );
+			$this->set_cache( $return );
+
+			return $return;
 		}
 		return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
 	}

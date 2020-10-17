@@ -133,11 +133,9 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			return $this->get_station_data();
 		}
 		if ( $this->latitude && $this->longitude ) {
-			if ( $this->cache_key ) {
-				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
-				if ( $conditions ) {
-					return $conditions;
-				}
+			$conditions = $this->get_cache();
+			if ( $conditions ) {
+				return $conditions;
 			}
 
 			$args = array(
@@ -155,12 +153,13 @@ class Weather_Provider_Aeris extends Weather_Provider {
 				return $json;
 			}
 			$return = $this->convert_data( $json['response'][0] );
-			if ( $this->cache_key ) {
-				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
-			}
+
+			$this->set_cache( $return );
+
 			if ( WP_DEBUG ) {
 				$return['raw'] = $json;
 			}
+
 			return $return;
 		}
 	}
@@ -223,37 +222,39 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			return array();
 		}
 
-		if ( ! empty( $this->station_id ) ) {
-			if ( $this->cache_key ) {
-				$conditions = get_transient( $this->cache_key . '_' . md5( $this->station_id ) );
-				if ( $conditions ) {
-					return $conditions;
-				}
-			}
-
-			$args = array(
-				'client_id'     => $client_id,
-				'client_secret' => $client_secret,
-				'p'             => $this->station_id,
-			);
-
-			$url = 'https://api.aerisapi.com/observations/closest';
-
-			$json = $this->fetch_json( $url, $args );
-			if ( array_key_exists( 'success', $json ) && 'false' === $json['success'] ) {
-				return $json;
-			}
-			$return = $this->convert_data( $json['response'][0] );
-			if ( WP_DEBUG ) {
-				$return['raw'] = $json;
-			}
-
-			if ( $this->cache_key ) {
-				set_transient( $this->cache_key . '_' . md5( $this->station_id ), $return, $this->cache_time );
-			}
-			return $return;
+		if ( empty( $this->station_id ) ) {
+			return new WP_Error( 'unable_to_retrieve', __( 'No Station ID Provided', 'simple-location' ) );
 		}
-		return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
+
+		$conditions = $this->get_cache();
+		if ( $conditions ) {
+			return $conditions;
+		}
+
+		$args = array(
+			'client_id'     => $client_id,
+			'client_secret' => $client_secret,
+			'p'             => $this->station_id,
+		);
+
+		$url = 'https://api.aerisapi.com/observations/closest';
+
+		$json = $this->fetch_json( $url, $args );
+		if ( array_key_exists( 'success', $json ) && 'false' === $json['success'] ) {
+			return $json;
+		}
+
+		$return = $this->convert_data( $json['response'][0] );
+		if ( empty( $return ) ) {
+			return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
+		}
+
+		if ( WP_DEBUG ) {
+			$return['raw'] = $json;
+		}
+
+		$this->set_cache( $return );
+		return $return;
 	}
 
 	/**
