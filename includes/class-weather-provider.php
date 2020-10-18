@@ -158,7 +158,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 		if ( ! is_array( $value ) ) {
 			return false;
 		}
-		$datetime             = date_create_from_format( 'U', time() + $this->cache_time, wp_timezone() );
+		$datetime = date_create_from_format( 'U', time() + $this->cache_time );
+		$datetime->setTimezone( wp_timezone() );
 		$value['_expires_at'] = $datetime->format( DATE_W3C );
 
 		$cache = set_transient( $this->cache_key(), $value, $this->cache_time );
@@ -176,7 +177,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			return implode( '_', array( get_called_class(), md5( $this->station_id ) ) );
 		}
 		if ( ! empty( $this->latitude ) && ! empty( $this->longitude ) ) {
-			return implode( '_', get_called_class(), md5( implode( ',', array( $this->latitude, $this->longitude ) ) ) );
+			return implode( '_', array( get_called_class(), md5( implode( ',', array( $this->latitude, $this->longitude ) ) ) ) );
 		}
 		return false;
 	}

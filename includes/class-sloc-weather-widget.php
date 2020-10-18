@@ -267,9 +267,6 @@ class Sloc_Weather_Widget extends WP_Widget {
 			if ( is_string( $value ) ) {
 				$new_instance[ $key ] = trim( $value );
 			}
-			if ( is_numeric( $value ) ) {
-				$new_instance[ $key ] = intval( $key );
-			}
 		}
 		return $new_instance;
 	}

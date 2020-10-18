@@ -38,6 +38,64 @@ class Location_Provider_Compass extends Location_Provider {
 		return $array;
 	}
 
+	public function query( $start, $end ) {
+		if ( is_string( $start ) ) {
+			$start = new DateTime( $start );
+		}
+
+		if ( is_string( $end ) ) {
+			$end = new DateTime( $end );
+		}
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return;
+		}
+		$compass = get_user_meta( $user_id, 'compass_url', true );
+		if ( ! $compass ) {
+			return;
+		}
+		$api = get_user_meta( $user_id, 'compass_api', true );
+		if ( ! $api ) {
+			return;
+		}
+		$url = sprintf( '%1$s/api/query/', $compass );
+		$url = add_query_arg(
+			array(
+				'token'  => $api,
+				'format' => 'linestring',
+				'start'  => $start->format( 'Y-m-d\TH:i:s' ),
+				'end'    => $end->format( 'Y-m-d\TH:i:s' ),
+			),
+			$api
+		);
+
+		$args = array(
+			'headers'             => array(
+				'Accept' => 'application/json',
+			),
+			'timeout'             => 10,
+			'limit_response_size' => 1048576,
+			'redirection'         => 1,
+			// Use an explicit user-agent for Simple Location
+			'user-agent'          => 'Simple Location for WordPress',
+		);
+
+		$response = wp_remote_get( $url, $args );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+		$response = wp_remote_retrieve_body( $response );
+		$response = json_decode( $response, true );
+		if ( ! isset( $response['coordinates'] ) ) {
+			return false;
+		}
+		$response = $response['coordinates'];
+
+		// Invert the array to keep the latitude first, unlike geojson where longitude is first.
+		$response = array_map( 'array_reverse', $response );
+		return $response;
+	}
+
 	public function retrieve( $time = null, $args = array() ) {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
