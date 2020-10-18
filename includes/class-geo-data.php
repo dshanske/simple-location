@@ -1037,7 +1037,7 @@ class WP_Geo_Data {
 			return false;
 		}
 		$type    = null;
-		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visibility', 'timezone', 'icon' ) );
+		$geodata = wp_array_slice_assoc( $geodata, array( 'latitude', 'longitude', 'address', 'trip', 'map_zoom', 'weather', 'altitude', 'speed', 'heading', 'visibility', 'timezone', 'icon' ) );
 		if ( isset( $geodata['map_zoom'] ) ) {
 			$geodata['zoom'] = $geodata['map_zoom'];
 			unset( $geodata['map_zoom'] );
@@ -1103,6 +1103,7 @@ class WP_Geo_Data {
 		$geodata['longitude'] = get_metadata( $type, $id, 'geo_longitude', true );
 		$geodata['latitude']  = get_metadata( $type, $id, 'geo_latitude', true );
 		$geodata['altitude']  = get_metadata( $type, $id, 'geo_altitude', true );
+		$geodata['trip']      = get_metadata( $type, $id, 'geo_trip', true );
 		$geodata['address']   = get_metadata( $type, $id, 'geo_address', true );
 		$geodata['icon']      = get_metadata( $type, $id, 'geo_icon', true );
 		if ( empty( $geodata['icon'] ) ) {
@@ -1116,7 +1117,7 @@ class WP_Geo_Data {
 			$geodata['weather']  = get_metadata( $type, $id, 'geo_weather', true );
 		}
 		$geodata = array_filter( $geodata );
-		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) && empty( $geodata['trip'] ) {
 			return null;
 		}
 		return array_filter( $geodata );
@@ -1245,6 +1246,17 @@ class WP_Geo_Data {
 		register_meta( 'comment', 'geo_altitude', $args );
 		register_meta( 'user', 'geo_altitude', $args );
 		register_meta( 'term', 'geo_altitude', $args );
+
+		$args = array(
+			'type'         => 'array',
+			'description'  => 'Trip',
+			'single'       => true,
+			'show_in_rest' => false,
+		);
+		register_meta( 'post', 'geo_trip', $args );
+		register_meta( 'comment', 'geo_trip', $args );
+		register_meta( 'user', 'geo_trip', $args );
+		register_meta( 'term', 'geo_trip', $args );
 
 		$args = array(
 			'type'         => 'array',
