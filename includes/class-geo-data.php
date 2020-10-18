@@ -1117,7 +1117,7 @@ class WP_Geo_Data {
 			$geodata['weather']  = get_metadata( $type, $id, 'geo_weather', true );
 		}
 		$geodata = array_filter( $geodata );
-		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) && empty( $geodata['trip'] ) {
+		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) && empty( $geodata['trip'] ) ) {
 			return null;
 		}
 		return array_filter( $geodata );
