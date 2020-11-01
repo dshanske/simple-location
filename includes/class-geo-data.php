@@ -545,7 +545,7 @@ class WP_Geo_Data {
 				esc_attr( $geo['address'] )
 			);
 		}
-		if ( $geo['latitude'] && 'protected' !== $geo['visibility'] ) {
+		if ( isset( $geo['latitude'] ) && 'protected' !== $geo['visibility'] ) {
 			printf(
 				'<meta name="geo.position" content="%s;%s" />' . PHP_EOL,
 				esc_attr( $geo['latitude'] ),
@@ -718,6 +718,60 @@ class WP_Geo_Data {
 
 
 	/**
+	 * Calculate the area of a triangle
+	 *
+	 * @param array $a First point
+	 * @param array $b Middle point
+	 * @param array $c Last point
+	 *
+	 * @return float
+	 */
+	protected static function area_of_triangle( $a, $b, $c ) {
+		list( $ax, $ay ) = $a;
+		list( $bx, $by ) = $b;
+		list( $cx, $cy ) = $c;
+		$area            = $ax * ( $by - $cy );
+		$area           += $bx * ( $cy - $ay );
+		$area           += $cx * ( $ay - $by );
+		return abs( $area / 2 );
+	}
+
+	/**
+	 * Reduce points with Visvalingam-Whyatt algorithm.
+	 *
+	 * @param array $points Points
+	 * @param int   $target Desired count of points
+	 *
+	 * @return array Reduced set of points
+	 */
+	public static function simplify_bw( $points, $target ) {
+		// Refuse to reduce if points are less than target.
+		if ( count( $points ) <= $target ) {
+			return $points;
+		}
+		$kill = count( $points ) - $target;
+		while ( $kill-- > 0 ) {
+			$idx      = 1;
+			$min_area = self::area_of_triangle( $points[0], $points[1], $points[2] );
+			foreach ( range( 2, array_key_last_index( $points, -2 ) ) as $segment ) {
+				$area = self::area_of_triangle(
+					$points[ $segment - 1 ],
+					$points[ $segment ],
+					$points[ $segment + 1 ]
+				);
+				if ( $area < $min_area ) {
+					$min_area = $area;
+					$idx      = $segment;
+				}
+			}
+			array_splice( $points, $idx, 1 );
+		}
+
+		return $points;
+	}
+
+
+	/**
 	 * Calculates the distance in meters between two coordinates.
 	 *
 	 * Returns the distance between lat/lng1 and lat/lng2.
@@ -756,6 +810,88 @@ class WP_Geo_Data {
 		return ( self::gc_distance( $lat1, $lng1, $lat2, $lng2 ) <= $meters );
 	}
 
+
+	/**
+	 * Reduce points with Ramer–Douglas–Peucker algorithm.
+	 *
+	 * @param array $points Points
+	 * @param int   $tolerance Tolerance.
+	 *
+	 * @return array Reduced set of points
+	 */
+	public static function simplify_rdp( $points, $tolerance ) {
+		// if this is a multilinestring, then we call ourselves one each segment individually, collect the list, and return that list of simplified lists
+		if ( is_array( $points[0][0] ) ) {
+			$multi = array();
+			foreach ( $points as $subvertices ) {
+				$multi[] = self::simplify_rdp( $subvertices, $tolerance );
+			}
+			return $multi;
+		}
+		$tolerance2 = $tolerance * $tolerance;
+
+		// okay, so this is a single linestring and we simplify it individually
+		return self::segment_rdp( $points, $tolerance2 );
+	}
+
+	/**
+	 * Reduce single linestring with Ramer–Douglas–Peucker algorithm.
+	 *
+	 * @param array $segment Single line segment
+	 * @param int   $tolerance Tolerance Squared.
+	 *
+	 * @return array Reduced set of points
+	 */
+	public static function segment_rdp( $segment, $tolerance_squared ) {
+		if ( count( $segment ) <= 2 ) {
+			return $segment; // segment is too small to simplify, hand it back as-is
+		}
+
+		// find the maximum distance (squared) between this line $segment and each vertex
+		// distance is solved as described at UCSD page linked above
+		// cheat: vertical lines (directly north-south) have no slope so we fudge it with a very tiny nudge to one vertex; can't imagine any units where this will matter
+		$startx = (float) $segment[0][0];
+		$starty = (float) $segment[0][1];
+		$endx   = (float) $segment[ count( $segment ) - 1 ][0];
+		$endy   = (float) $segment[ count( $segment ) - 1 ][1];
+
+		if ( $endx === $startx ) {
+			$startx += 0.00001;
+		}
+
+		$m = ( $endy - $starty ) / ( $endx - $startx ); // slope, as in y = mx + b
+		$b = $starty - ( $m * $startx );              // y-intercept, as in y = mx + b
+
+		$max_distance_squared = 0;
+		$max_distance_index   = null;
+		for ( $i = 1, $l = count( $segment ); $i <= $l - 2; $i++ ) {
+			$x1 = $segment[ $i ][0];
+			$y1 = $segment[ $i ][1];
+
+			$closestx = ( ( $m * $y1 ) + ( $x1 ) - ( $m * $b ) ) / ( ( $m * $m ) + 1 );
+			$closesty = ( $m * $closestx ) + $b;
+			$distsqr  = ( $closestx - $x1 ) * ( $closestx - $x1 ) + ( $closesty - $y1 ) * ( $closesty - $y1 );
+
+			if ( $distsqr > $max_distance_squared ) {
+				$max_distance_squared = $distsqr;
+				$max_distance_index   = $i;
+			}
+		}
+
+		// cleanup and disposition
+		// if the max distance is below tolerance, we can bail, giving a straight line between the start vertex and end vertex   (all points are so close to the straight line)
+		if ( $max_distance_squared <= $tolerance_squared ) {
+			return array( $segment[0], $segment[ count( $segment ) - 1 ] );
+		}
+
+		// but if we got here then a vertex falls outside the tolerance
+		// split the line segment into two smaller segments at that "maximum error vertex" and simplify those
+		$slice1 = array_slice( $segment, 0, $max_distance_index );
+		$slice2 = array_slice( $segment, $max_distance_index );
+		$segs1  = self::segment_rdp( $slice1, $tolerance_squared );
+		$segs2  = self::segment_rdp( $slice2, $tolerance_squared );
+		return array_merge( $segs1, $segs2 );
+	}
 
 	/**
 	 * Enhance EXIF data.

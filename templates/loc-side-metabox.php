@@ -7,6 +7,14 @@ if ( 'comment' === $screen->id ) {
 }
 $weather = ifset( $geodata['weather'], array() );
 $wind    = ifset( $weather['wind'], array() );
+$trip    = ifset( $geodata['trip'], array() );
+if ( array_key_exists( 'start', $trip ) && array_key_exists( 'end', $trip ) ) {
+	$start = new DateTime( $trip['start'] );
+	$trip['date'] = $start->format( 'Y-m-d' );
+	$trip['start'] = $start->format( 'H:i:s' );
+	$end = new DateTime( $trip['end'] );
+	$trip['end'] = $end->format( 'H:i:s' );
+}
 $public =  array_key_exists( 'visibility', $geodata ) ? $geodata['visibility'] : get_option( 'geo_public' );
 $choices = WP_Geo_Data::geo_public();
 $map_return = '';
@@ -77,6 +85,41 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
         </p>
 	</div><!-- #location-fields -->
 </div><!-- .location-section -->
+
+<?php 
+$location = Loc_Config::geolocation_provider();
+if ( 'compass' === $location->get_slug() ) { 
+?>
+
+<div class="location-section location-section-trip">
+	<span class="dashicons-before dashicons-car" id="location-visibility-title" title="<?php esc_html_e( 'Trip', 'simple-location' ); ?>"> <?php esc_html_e( 'Trip:', 'simple-location' ); ?></span>
+	<span id="trip-label"><?php echo isset( $geodata['trip'] ) ? __( 'Set', 'simple-location' ) : __( 'None', 'simple-location' ); ?></span>
+	<a href="#location-trip" class="edit-location-trip hide-if-no-js" role="button"><span aria-hidden="true">Edit</a><span class="screen-reader-text">Trip</span>
+	<div id="trip-data" class="field-row hide-if-js">
+	        <p class="field-row">	
+        	    <label for="trip_date">
+ 	               <?php _e( 'Trip Date: ', 'simple-location' ); ?>
+	            </label>
+        	    <input type="date" name="trip_date" id="trip_date" value="<?php echo ifset( $trip['date'] ); ?>" class="widefat" />
+	        </p>
+	        <p class="field-row">	
+        	    <label for="trip_start">
+ 	               <?php _e( 'Start Time: ', 'simple-location' ); ?>
+	            </label>
+        	    <input type="time" name="trip_start" id="trip_start" value="<?php echo ifset( $trip['start'] ); ?>" class="widefat" />
+	        </p>
+	        <p class="field-row">	
+        	    <label for="trip_end">
+ 	               <?php _e( 'End Time: ', 'simple-location' ); ?>
+	            </label>
+        	    <input type="time" name="trip_end" id="trip_end" value="<?php echo ifset( $trip['end'] ); ?>" class="widefat" />
+	        </p>
+	        <a href="#location-trip" class="save-location-trip hide-if-no-js button">OK</a>
+        	<a href="#location-trip" class="cancel-location-trip hide-if-no-js button-cancel">Cancel</a>
+	</div>
+</div>
+<?php } ?>
+
 
 <div class="location-section location-section-visibility">
 	<span class="dashicons-before dashicons-hidden" id="location-visibility-title" title="<?php esc_html_e( 'Visibility', 'simple-location' ); ?>"> <?php esc_html_e( 'Visibility:', 'simple-location' ); ?></span>
