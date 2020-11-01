@@ -243,3 +243,22 @@ if ( ! function_exists( 'wp_date' ) ) {
 		return $date;
 	}
 }
+
+if ( ! function_exists( 'array_key_last' ) ) {
+	function array_key_last( array $array ) {
+		if ( ! empty( $array ) ) {
+			return key( array_slice( $array, -1, 1, true ) );
+		}
+	}
+}
+
+if ( ! function_exists( 'array_key_last_index' ) ) {
+	function array_key_last_index( array $array, $index = -1 ) {
+		if ( ! empty( $array ) ) {
+			return key( array_slice( $array, $index, 1, true ) );
+		}
+	}
+}
+
+
+
