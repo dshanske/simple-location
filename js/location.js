@@ -394,6 +394,29 @@ jQuery( document ).ready( function( $ ) {
 		event.preventDefault();
 	} );
 
+	$postTripData = $( '#trip-data' );
+
+	$postTripData.siblings( 'a.edit-location-trip' ).click( function( event ) {
+		if ( $postTripData.is( ':hidden' ) ) {
+			$postTripData.slideDown( 'fast', function() {
+				$postTripData.find( 'select' ).focus();
+			} );
+			$( this ).hide();
+		}
+		event.preventDefault();
+	} );
+
+	$postTripData.find( '.cancel-location-trip' ).click( function( event ) {
+		$postTripData.slideUp( 'fast' ).siblings( 'a.edit-location-trip' ).show().focus();
+		event.preventDefault();
+	} );
+
+	$postTripData.find( '.save-location-trip' ).click( function( event ) {
+		$postTripData.slideUp( 'fast' ).siblings( 'a.edit-location-trip' ).show().focus();
+		event.preventDefault();
+	} );
+
+
 	$postWeatherFields = $( '#weather-fields' );
 
 	$postWeatherFields.siblings( 'a.edit-weather' ).click( function( event ) {
