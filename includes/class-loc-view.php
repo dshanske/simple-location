@@ -215,9 +215,7 @@ class Loc_View {
 			if ( ! $map instanceof Map_Provider ) {
 				return '';
 			}
-			if ( isset( $loc['trip'] ) ) {
-				return $map->get_archive_map( $loc['trip'] );
-			} else if ( isset( $loc['latitude'] ) && ( isset( $loc['longitude'] ) ) ) {
+			if ( isset( $loc['latitude'] ) && ( isset( $loc['longitude'] ) ) ) {
 				$loc = array_merge( $loc, $args );
 				$map->set( $loc );
 				return $map->get_the_map();
