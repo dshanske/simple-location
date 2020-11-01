@@ -65,8 +65,9 @@ class Location_Provider_Compass extends Location_Provider {
 				'format' => 'linestring',
 				'start'  => $start->format( 'Y-m-d\TH:i:s' ),
 				'end'    => $end->format( 'Y-m-d\TH:i:s' ),
+				'tz'     => wp_timezone_string(),
 			),
-			$api
+			$url
 		);
 
 		$args = array(
@@ -86,14 +87,33 @@ class Location_Provider_Compass extends Location_Provider {
 		}
 		$response = wp_remote_retrieve_body( $response );
 		$response = json_decode( $response, true );
+		if ( ! isset( $response['linestring'] ) ) {
+			return false;
+		}
+		$response = $response['linestring'];
 		if ( ! isset( $response['coordinates'] ) ) {
 			return false;
 		}
 		$response = $response['coordinates'];
 
-		// Invert the array to keep the latitude first, unlike geojson where longitude is first.
-		$response = array_map( 'array_reverse', $response );
+		// Drop Altitude if present and round.
+		$response = array_map(
+			function( $array ) {
+				return array(
+					0 => WP_Geo_Data::clean_coordinate( $array[0] ),
+					1 => WP_Geo_Data::clean_coordinate( $array[1] ),
+				);
+			},
+			$response
+		);
 		return $response;
+	}
+
+	private function drop_altitude( $array ) {
+		if ( 3 === count( $array ) ) {
+			unset( $array[2] );
+		}
+		return $array;
 	}
 
 	public function retrieve( $time = null, $args = array() ) {
