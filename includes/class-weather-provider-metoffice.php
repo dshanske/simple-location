@@ -150,6 +150,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 				$this->set_cache( $return );
 				return $return;
 			}
+			return self::get_fallback_conditions( $time );
 		}
 		return new WP_Error( 'failed', __( 'Failure', 'simple-location' ) );
 	}
