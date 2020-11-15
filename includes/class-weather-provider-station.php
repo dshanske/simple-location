@@ -32,16 +32,6 @@ class Weather_Provider_Station extends Weather_Provider {
 				'default'      => array(),
 			)
 		);
-		register_setting(
-			'sloc_providers', // option group
-			'sloc_station_url', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Custom Station URL',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
 	}
 
 	public static function admin_init() {
@@ -58,16 +48,6 @@ class Weather_Provider_Station extends Weather_Provider {
 			'sloc_stations', // option group.
 			'sloc_stations', // settings section.
 			array()
-		);
-		add_settings_field(
-			'sloc_station_url', // id
-			__( 'Custom Station URL', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_stations', // settings page
-			'sloc_stations', // settings sectiona
-			array(
-				'label_for' => 'sloc_station_url',
-			)
 		);
 	}
 
