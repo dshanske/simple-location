@@ -280,25 +280,44 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Return array of current conditions. All fields optional.
 	 *
-	 * All floats rounded to 2 decimal points.
+	 * All floats rounded to 2 decimal points. Fields describing the location
+	 * are expected if this is a station return.
 	 *
 	 * @param string|int|DateTime $time ISO8601, timestamp, or DateTime.
 	 * @return array {
 	 *  Current Conditions in Array.
+	 *  @type float $latitude Latitude.
+	 *  @type float $longitude Longitude.
+	 *  @type float $altitude Altitude.
+	 *  @type string $name Name of the Location.
 	 *  @type float $temperature Temperature in Celsius.
+	 *  @type float $heatindex Heat Index in Celsius.
+	 *  @type float $windchill Wind Chill in Celsius.
+	 *  @type float $dewpoint Dewpoint in Celsius.
 	 *  @type float $humidity Humidity as a percentage between 0 and 100.
-	 *  @type float $pressure Pressure in hPa/mbar
+	 *  @type float $pressure Atomospheric Pressure at mean sea level in hPa/mbar
 	 *  @type int $cloudiness Cloudiness as a percentage between 0 and 100.
 	 *  @type array $wind {
-	 *      @type int $speed Speed in meters per hour.
+	 *      @type int $speed Speed in meters per second.
 	 *      @type float $degree Degree between 0 and 360.
-	 *      @type int $gust Wind Gust in meters per hour.
+	 *      @type int $gust Wind Gust in meters per second.
 	 *  }
-	 *  @type float $rain Rainfall in millimeters.
+	 *  @type float $rain Rainfall in millimeters for the last hour.
+	 *  @type float $snow Snowfall in millimeters for the last hour.
 	 *  @type float $visibility Visibility in meters.
 	 *  @type float $radiation Estimated Solar Radiation in W/m^2.
+	 *  @type int   $illuminance in Lux.
 	 *  @type float $uv UV Index. 0-11+.
-	 *  @type float $snow Snowfall in millimeters.
+	 *  @type int $aqi Air Quality Index.
+	 *  @type float $pm1_0 Particular Matter smaller than 1 micrometer  measured in ug/m3.
+	 *  @type float $pm2_5 Particular Matter smaller than 2.5 micrometers measured in ug/m3.
+	 *  @type float $pm10_0 Particular Matter smaller than 10 micrometers  measured in ug/m3.
+	 *  @type int   $co Carbon Monoxide in ppm(parts per million).
+	 *  @type int   $co2 Carbon Dioxide in ppm.
+	 *  @type int   $nh3 Ammonia in ppm/
+	 *  @type int   $o3 Ozone in ppm.
+	 *  @type int   $pb  Lead in ppm.
+	 *  @type int   $so2 Sulfur Dioxide in ppm.
 	 *  @type string $summary Textual Description of Weather.
 	 *  @type string $icon Slug for icon to display.
 	 *  @type string $sunrise ISO8601 string reflecting sunrise time.

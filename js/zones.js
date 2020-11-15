@@ -8,5 +8,13 @@ jQuery( document ).ready( function( $ ) {
 	$( '#delete-location-zone-button' ).click( function( event ) {
 		$( '#location-zones li:last-of-type' ).remove();
 	} );
+	$( '#add-location-stations-button' ).click( function( event ) {
+		const n = $( '#location-stations > li' ).length;
+		const s = '<li><input type="text" placeholder="Station ID" name="sloc_stations[' + n + '][id]" /><input placeholder="URL" type="text" name="sloc_stations[' + n + '][url]" /></li>';
+		$( s ).appendTo( '#location-stations' );
+	} );
+	$( '#delete-location-stations-button' ).click( function( event ) {
+		$( '#location-stations li:last-of-type' ).remove();
+	} );
 } );
 
