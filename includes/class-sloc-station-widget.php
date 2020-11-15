@@ -76,9 +76,6 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 				echo $args['after_widget']; // phpcs:ignore
 				return;
 			}
-			if ( ! isset( $weather['icon'] ) ) {
-				$weather['icon'] = 'wi-thermometer';
-			}
 		}
 
 		echo self::weather_list( $weather, 'fa-map', $instance );

@@ -44,9 +44,6 @@ class Sloc_Weather_Widget extends WP_Widget {
 			echo 'no';
 			return;
 		}
-		if ( ! isset( $weather['icon'] ) ) {
-			$weather['icon'] = 'wi-thermometer';
-		}
 
 		echo self::weather_list( $weather, 'fa-map', $instance );
 		echo $args['after_widget']; // phpcs:ignore
@@ -81,7 +78,11 @@ class Sloc_Weather_Widget extends WP_Widget {
 		$measurements = get_option( 'sloc_measurements' );
 		$return       = array( PHP_EOL );
 		$return[]     = '<h2>';
-		$return[]     = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
+		
+		if ( ! empty( $weather['icon'] ) ) {
+			$return[]     = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
+		}
+
 		if ( ! empty( $weather['summary'] ) ) {
 			$return[] = $weather['summary'];
 		}
@@ -166,7 +167,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 				array(
 					'value'    => $weather['wind']['speed'],
 					'property' => 'wind-speed',
-					'unit'     => 'm/hr',
+					'unit'     => 'm/s',
 					'name'     => __( 'Wind Speed', 'simple-location' ),
 					'icon'     => 'wi-windy',
 				)

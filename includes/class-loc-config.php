@@ -339,6 +339,7 @@ class Loc_Config {
 		<?php self::tab_link( 'general', __( 'General', 'simple-location' ), $active_tab ); ?>
 		<?php self::tab_link( 'providers', __( 'Providers', 'simple-location' ), $active_tab ); ?>
 		<?php self::tab_link( 'zones', __( 'Zones', 'simple-location' ), $active_tab ); ?>
+		<?php self::tab_link( 'stations', __( 'Stations', 'simple-location' ), $active_tab ); ?>
 		<?php
 		if ( WP_DEBUG ) {
 			self::tab_link( 'debug', __( 'Debug', 'simple-location' ), $active_tab );
@@ -370,6 +371,10 @@ class Loc_Config {
 				case 'zones':
 					settings_fields( 'sloc_zones' );
 					do_settings_sections( 'sloc_zones' );
+					break;
+				case 'stations':
+					settings_fields( 'sloc_stations' );
+					do_settings_sections( 'sloc_stations' );
 					break;
 				default:
 					settings_fields( 'simloc' );
@@ -931,7 +936,6 @@ class Loc_Config {
 	public static function sloc_api_settings() {
 		esc_html_e( 'In order for a specific service to work, you must add their API key below', 'simple-location' );
 	}
-
 
 
 	/**
