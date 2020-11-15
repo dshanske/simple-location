@@ -327,6 +327,34 @@ abstract class Weather_Provider extends Sloc_Provider {
 	abstract public function get_conditions( $time );
 
 	/**
+	 * Return array of current conditions. All fields optional.
+	 *
+	 * All floats rounded to 2 decimal points. Fields describing the location
+	 * are expected if this is a station return.
+	 *
+	 * @param string|int|DateTime $time ISO8601, timestamp, or DateTime.
+	 * @return WP_Error|array Return the fallback set of conditions.
+	 */
+	protected function get_fallback_conditions( $time ) {
+		// Fallback Weather Provider
+		$fallback = get_option( 'sloc_fallback_weather_provider' );
+		$provider = $this->get_slug();
+
+		// Sanity Check.
+		if ( $fallback !== $provider && $fallback !== 'none' ) {
+			$weather = Loc_Config::weather_provider( $fallback );
+			$weather->set( $this->latitude, $this->longitude );
+			$conditions = $weather->get_conditions( $time );
+			if ( ! empty( $conditions ) ) {
+		        	// if debug mode is on remove the raw data from storage
+				unset( $conditions['raw'] );
+                	}
+			return $conditions;
+		}
+		return new WP_Error( 'failed', __( 'Failure', 'simple-location' ) );
+	}
+
+	/**
 	 * Return summary of current conditions.
 	 *
 	 * @return string Summary of Current conditions.

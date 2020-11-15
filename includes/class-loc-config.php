@@ -172,7 +172,17 @@ class Loc_Config {
 				'type'         => 'string',
 				'description'  => 'Weather Provider',
 				'show_in_rest' => false,
-				'default'      => 'openweathermap',
+				'default'      => 'nws',
+			)
+		);
+		register_setting(
+			'sloc_providers', // option group.
+			'sloc_fallback_weather_provider', // option name.
+			array(
+				'type'         => 'string',
+				'description'  => 'Fallback Weather Provider',
+				'show_in_rest' => false,
+				'default'      => 'none',
 			)
 		);
 	}
@@ -528,6 +538,19 @@ class Loc_Config {
 				'providers'   => self::weather_providers(),
 			)
 		);
+		add_settings_field(
+			'sloc_fallback_weather_provider', // id.
+			__( 'Fallback Weather Provider', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
+			array(
+				'label_for'   => 'sloc_fallback_weather_provider',
+				'description' => __( 'Fallback Option if the Primary Provider Fails', 'simple-location' ),
+				'providers'   => Loc_Config::weather_providers(),
+				'none'        => 1
+			)
+		);
 
 		add_settings_section(
 			'sloc_map',
@@ -728,7 +751,11 @@ class Loc_Config {
 		$name        = $args['label_for'];
 		$description = ifset( $args['description'], '' );
 		$text        = get_option( $name );
+		$none        = array_key_exists( 'none', $args ) ? $args['none'] : 0;
 		$providers   = $args['providers'];
+		if ( $none ) {
+			$providers['none'] = __( 'None' );
+		}
 		if ( count( $providers ) > 1 ) {
 			printf( '<select name="%1$s">', esc_attr( $name ) );
 			foreach ( $providers as $key => $value ) {

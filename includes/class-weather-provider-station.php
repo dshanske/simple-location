@@ -58,7 +58,7 @@ class Weather_Provider_Station extends Weather_Provider {
 	 */
 	public static function stations_section() {
 		esc_html_e(
-			'Enter Station ID and URL for each station. The URL may contain a query string application key.',
+			'Enter Station ID, URL, latitude, and longitude for each station. The URL may contain a query string application key. When using the custom station provider as your default weather provider, it will look for a station within 10km of your current location',
 			'simple-location'
 		);
 	}
@@ -123,6 +123,8 @@ class Weather_Provider_Station extends Weather_Provider {
 		// phpcs:disable
 		printf( $output, $name, $int, 'id', esc_attr( $name ), esc_attr( self::key( $value, 'id' ) ), esc_html__( 'Station ID', 'simple-location' ) );
 		printf( $output, $name, $int, 'url', esc_attr( $name ), esc_url( self::key( $value, 'url' ) ), esc_html__( 'URL', 'simple-location' ) );
+		printf( $output, $name, $int, 'latitude', esc_attr( $name ), esc_attr( self::key( $value, 'latitude' ) ), esc_html__( 'Latitude', 'simple-location' ) );
+		printf( $output, $name, $int, 'longitude', esc_attr( $name ), esc_attr( self::key( $value, 'longitude' ) ), esc_html__( 'Longitude', 'simple-location' ) );
 		// phpcs:enable
 		echo '</li>';
 	}
@@ -155,7 +157,32 @@ class Weather_Provider_Station extends Weather_Provider {
 		if ( ! empty( $this->station_id ) ) {
 			return self::get_station_data();
 		}
-		return new WP_Error( 'failed', __( 'Failure', 'simple-location' ) );
+		if ( $this->latitude && $this->longitude ) {
+			$conditions = $this->get_cache();
+			if ( $conditions ) {
+				return $conditions;
+			}
+
+			$sitelist = get_option( 'sloc_stations' );
+			foreach ( $sitelist as $key => $value ) {
+				$sitelist[ $key ]['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $value['latitude'], $value['longitude'] ) );
+			}
+			usort(
+				$sitelist,
+				function( $a, $b ) {
+					return $a['distance'] > $b['distance'];
+				}
+			);
+			if ( 100000 > $sitelist[0]['distance'] ) {
+				$this->station_id = $sitelist[0]['id'];
+				$return           = self::get_station_data();
+
+				unset( $this->station_id );
+				$this->set_cache( $return );
+				return $return;
+			}
+		}
+		return self::get_fallback_conditions( $time );
 	}
 
 
@@ -169,18 +196,19 @@ class Weather_Provider_Station extends Weather_Provider {
 		$return   = array();
 		$stations = get_option( 'sloc_stations' );
 		$endpoint = null;
-		foreach ( $stations as $station ) {
+		foreach ( $stations as $key => $station ) {
 			if ( $this->station_id === trim( $station['id'] ) ) {
-				$endpoint = trim( $station['url'] );
-				break;
+				$return = $this->fetch_json( $station['url'], array() );
+				if ( ! is_wp_error( $return ) ) {
+					if ( array_key_exists( 'latitude', $return ) && array_key_exists( 'longitude', $return ) && empty( $station['latitude'] ) && empty( $station['longitude'] ) ) {
+						$station['latitude']  = $return['latitude'];
+						$station['longitude'] = $return['longitude'];
+						$stations[ $key ]     = $station;
+						update_option( 'sloc_stations', $stations );
+					}
+					return array_filter( $this->extra_data( $return ) );
+				}
 			}
-		}
-		if ( ! $endpoint ) {
-			return $return;
-		}
-		$return = $this->fetch_json( $endpoint, array() );
-		if ( ! is_wp_error( $return ) ) {
-			$return = array_filter( $this->extra_data( $return ) );
 		}
 		return $return;
 	}
