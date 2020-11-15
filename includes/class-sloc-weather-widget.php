@@ -207,6 +207,63 @@ class Sloc_Weather_Widget extends WP_Widget {
 				)
 			);
 		}
+		if ( isset( $weather['radiation'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['radiation'],
+					'property' => 'radiation',
+					'unit'     => 'W/M2',
+					'name'     => __( 'Radiation', 'simple-location' ),
+					'icon'     => 'fa-radiation',
+				)
+			);
+		}
+		if ( isset( $weather['aqi'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['aqi'],
+					'property' => 'aqi',
+					'unit'     => '',
+					'name'     => __( 'Air Quality Index', 'simple-location' ),
+					'icon'     => 'wi-aqi',
+				)
+			);
+		}
+		if ( isset( $weather['pm1_0'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['pm1_0'],
+					'property' => 'pm1_0',
+					'unit'     => 'ug/m3',
+					'name'     => __( 'Particulate Matter(1mg)', 'simple-location' ),
+					'icon'     => 'wi-dust',
+				)
+			);
+		}
+		if ( isset( $weather['pm2_5'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['pm2_5'],
+					'property' => 'pm2_5',
+					'unit'     => 'ug/m3',
+					'name'     => __( 'Particulate Matter(2.5mg)', 'simple-location' ),
+					'icon'     => 'wi-dust',
+				)
+			);
+		}
+		if ( isset( $weather['pm10_0'] ) ) {
+			$return[] = self::markup_parameter(
+				array(
+					'value'    => $weather['pm10_0'],
+					'property' => 'pm10_0',
+					'unit'     => 'ug/m3',
+					'name'     => __( 'Particulate Matter(10mg)', 'simple-location' ),
+					'icon'     => 'wi-dust',
+				)
+			);
+		}
+
+
 		if ( isset( $weather['_expires_at'] ) ) {
 			$return[] = printf( '<!-- %1$s: %2$s -->', __( 'Current Conditions Cache Expires At', 'simple-location' ), $weather['_expires_at'] );
 		}

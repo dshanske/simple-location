@@ -206,6 +206,15 @@ class Weather_Provider_Station extends Weather_Provider {
 						$stations[ $key ]     = $station;
 						update_option( 'sloc_stations', $stations );
 					}
+					// Eliminate not applicable values and in select categories hide empty values.
+					foreach( $return as $k => $prop ) {
+						if ( is_string( $prop ) && 'N/A' === trim( $prop ) ) {
+							unset( $return[$k] );
+						}
+						if ( in_array( $k, array( 'rain', 'snow', 'pm1_0', 'pm10_0', 'pm2_5' ) ) && 0 === (int) $prop ) {
+							unset( $return[$k] );
+						}	
+					}
 					return array_filter( $this->extra_data( $return ) );
 				}
 			}
