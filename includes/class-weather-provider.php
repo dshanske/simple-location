@@ -346,9 +346,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 			$weather->set( $this->latitude, $this->longitude );
 			$conditions = $weather->get_conditions( $time );
 			if ( ! empty( $conditions ) ) {
-		        	// if debug mode is on remove the raw data from storage
+					// if debug mode is on remove the raw data from storage
 				unset( $conditions['raw'] );
-                	}
+			}
 			return $conditions;
 		}
 		return new WP_Error( 'failed', __( 'Failure', 'simple-location' ) );

@@ -547,8 +547,8 @@ class Loc_Config {
 			array(
 				'label_for'   => 'sloc_fallback_weather_provider',
 				'description' => __( 'Fallback Option if the Primary Provider Fails', 'simple-location' ),
-				'providers'   => Loc_Config::weather_providers(),
-				'none'        => 1
+				'providers'   => self::weather_providers(),
+				'none'        => 1,
 			)
 		);
 

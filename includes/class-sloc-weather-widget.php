@@ -78,9 +78,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 		$measurements = get_option( 'sloc_measurements' );
 		$return       = array( PHP_EOL );
 		$return[]     = '<h2>';
-		
+
 		if ( ! empty( $weather['icon'] ) ) {
-			$return[]     = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
+			$return[] = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
 		}
 
 		if ( ! empty( $weather['summary'] ) ) {
@@ -262,7 +262,6 @@ class Sloc_Weather_Widget extends WP_Widget {
 				)
 			);
 		}
-
 
 		if ( isset( $weather['_expires_at'] ) ) {
 			$return[] = printf( '<!-- %1$s: %2$s -->', __( 'Current Conditions Cache Expires At', 'simple-location' ), $weather['_expires_at'] );

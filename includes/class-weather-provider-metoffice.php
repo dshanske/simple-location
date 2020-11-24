@@ -272,11 +272,13 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		}
 
 		$return['temperature'] = ifset( $properties['T'] );
+		$return['dewpoint']    = ifset( $properties['Dp'] );
 		$return['humidity']    = ifset( $properties['H'] );
 		$return['visibility']  = ifset( $properties['V'] );
 		$return['pressure']    = ifset( $properties['P'] );
 		$wind                  = array();
-		$wind['speed']         = ifset( $properties['S'] );
+		$wind['speed']         = self::mph_to_mps( ifset( $properties['S'] ) );
+		$wind['gust']          = self::mph_to_mps( ifset( $properties['G'] ) );
 		$wind                  = array_filter( $wind );
 		if ( ! empty( $wind ) ) {
 			$return['wind'] = $wind;

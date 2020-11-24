@@ -204,6 +204,9 @@ class REST_Geo {
 						'station'   => array(
 							'sanitize_callback' => 'sanitize_text_field',
 						),
+						'provider'  => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
@@ -424,13 +427,14 @@ class REST_Geo {
 	 */
 	public static function weather( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
-		$params  = $request->get_params();
-		$args    = array(
+		$params   = $request->get_params();
+		$args     = array(
 			'cache_key'  => 'slocw',
 			'cache_time' => 600,
 		);
-		$return  = array();
-		$weather = Loc_Config::weather_provider();
+		$return   = array();
+		$provider = empty( $params['provider'] ) ? null : $params['provider'];
+		$weather  = Loc_Config::weather_provider( $provider );
 		if ( ! empty( $params['station'] ) ) {
 			$weather->set( array( 'station_id' => $params['station'] ) );
 		} elseif ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {

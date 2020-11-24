@@ -186,21 +186,24 @@ class Weather_Provider_Aeris extends Weather_Provider {
 
 		$observation           = $json['ob'];
 		$return['temperature'] = round( $observation['tempC'], 1 );
+		$return['dewpoint']    = ifset_round( $observation['dewpointC'], 1 );
+		$return['heatindex']   = ifset_round( $observation['heatindexC'], 1 );
+		$return['windchill']   = ifset_round( $observation['windchillC'], 1 );
 		$return['humidity']    = round( $observation['humidity'], 1 );
-		$return['pressure']    = ifset_round( $observation['pressureMB'], 1 );
+		$return['pressure']    = ifset_round( $observation['spressureMB'], 1 );
 		$return['summary']     = ifset( $observation['weather'] );
 		$return['cloudiness']  = ifset( $observation['sky'] );
 
 		$return['wind']           = array();
-		$return['wind']['speed']  = round( $observation['windSpeedKPH'] );
+		$return['wind']['speed']  = self::kmh_to_ms( ifset_round( $observation['windSpeedKPH'] ) );
+		$return['wind']['gust']   = self::kmh_to_ms( ifset_round( $observation['windGustKPH'] ) );
 		$return['wind']['degree'] = ifset_round( $observation['windDirDEG'], 1 );
 		$return['wind']           = array_filter( $return['wind'] );
 		$return['rain']           = ifset_round( $observation['precipMM'], 2 );
-		$return['snow']           = ifset_round( $observation['snowDepthCM'], 2 );
+		$return['snow']           = self::cm_to_mm( ifset_round( $observation['snowDepthCM'], 2 ) );
+		$return['radiation']      = ifset_round( $observation['solradWM2'], 2 );
 		$return['uv']             = ifset_round( $observation['uvi'], 2 );
-		if ( array_key_exists( 'visibilityKM', $observation ) ) {
-			$return['visibility'] = $observation['visibilityKM'] * 1000;
-		}
+		$return['visibility']     = self::km_to_meters( ifset_round( $observation['visibilityKM'] ) );
 
 		$return['icon'] = $this->icon_map( $observation['weatherCoded'] );
 

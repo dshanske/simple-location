@@ -135,16 +135,14 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 				$return['humidity'] = round( $response['humidity'], 2 );
 			}
 			$return['pressure'] = ifset( $response['pressure'] );
-			if ( isset( $response['cloudcover'] ) ) {
-				$return['cloudiness'] = $response['cloudcover'];
-			}
 
 			$return['wind']           = array();
-			$return['wind']['speed']  = ifset_round( $response['wind_speed'] );
+			$return['wind']['speed']  = self::kmh_to_ms( ifset_round( $response['wind_speed'] ) );
 			$return['wind']['degree'] = ifset_round( $response['wind_degree'] );
 			$return['wind']           = array_filter( $return['wind'] );
 			$return['rain']           = ifset_round( $response['precip'], 2 );
-			$return['visibility']     = ifset_round( $response['visibility'], 2 );
+			$return['cloudiness']     = ifset( $response['cloudcover'] );
+			$return['visibility']     = self::km_to_meters( ifset_round( $response['visibility'], 2 ) );
 			$summary                  = ifset( $response['weather_descriptions'] );
 			$summary                  = is_array( $summary ) ? implode( ' ', $summary ) : '';
 			$return['summary']        = $summary;

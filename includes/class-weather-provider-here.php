@@ -131,23 +131,22 @@ class Weather_Provider_HERE extends Weather_Provider {
 				return $return;
 			}
 			$return['temperature'] = ifset_round( $current['temperature'], 1 );
-			if ( isset( $current['humidity'] ) ) {
-				$return['humidity'] = round( $current['humidity'], 1 );
-			}
+			$return['dewpoint']    = ifset_round( $current['dewPoint'], 1 );
+
+			$return['humidity'] = ifset_round( $current['humidity'], 1 );
+
 			$return['pressure']       = ifset_round( $current['barometerPressure'], 1 );
 			$return['uv']             = ifset_round( $current['uvIndex'], 1 );
 			$return['wind']           = array();
-			$return['wind']['speed']  = ifset_round( $current['windSpeed'] );
+			$return['wind']['speed']  = self::kmh_to_ms( ifset_round( $current['windSpeed'] ) );
 			$return['wind']['degree'] = ifset_round( $current['windDirection'], 1 );
 			$return['wind']           = array_filter( $return['wind'] );
-			$return['rain']           = ifset_round( $current['rainFall'], 2 );
+			$return['rain']           = self::cm_to_mm( ifset_round( $current['precipitation1H'], 2 ) );
 			$return['snow']           = ifset_round( $current['snowFall'], 2 );
 			$return['summary']        = ifset( $current['description'] );
 			$return['icon']           = $this->icon_map( $current['icon'] );
-			if ( isset( $current['visibility'] ) ) {
-				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
-			}
-			$return = array_filter( $this->extra_data( $return ) );
+			$return['visibility']     = self::km_to_meters( ifset_round( $current['visibility'], 1 ) );
+			$return                   = array_filter( $this->extra_data( $return ) );
 
 			$this->set_cache( $return );
 

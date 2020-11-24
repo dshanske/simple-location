@@ -299,6 +299,46 @@ abstract class Sloc_Provider {
 	}
 
 	/**
+	 * Converts kilometers to meters.
+	 *
+	 * @param float $km Kilometers.
+	 * @return float Meters.
+	 */
+	public static function km_to_meters( $km ) {
+		return floatval( $km ) * 1000;
+	}
+
+	/**
+	 * Converts km/h to m/s
+	 *
+	 * @param float $kmh km/h.
+	 * @return float m/s.
+	 */
+	public static function kmh_to_ms( $kmh ) {
+		return floatval( $kmh ) / 3.6;
+	}
+
+	/**
+	 * Converts m to mm.
+	 *
+	 * @param float $m meters.
+	 * @return float millmeters.
+	 */
+	public static function m_to_mm( $m ) {
+		return floatval( $m ) * 1000;
+	}
+
+	/**
+	 * Converts cm to mm.
+	 *
+	 * @param float $cm centimeters.
+	 * @return float millmeters.
+	 */
+	public static function cm_to_mm( $cm ) {
+		return floatval( $cm ) * 10;
+	}
+
+	/**
 	 * Converts miles per hour to meters per second.
 	 *
 	 * @param float $miles Miles per hour.
@@ -306,5 +346,16 @@ abstract class Sloc_Provider {
 	 */
 	public static function miph_to_mps( $miles ) {
 		return round( $miles * 0.44704 );
+	}
+
+
+	/**
+	 * Converts meters per hour to meters per second.
+	 *
+	 * @param float $mph Meters per hour.
+	 * @return float Meters per second.
+	 */
+	public static function mph_to_mps( $mph ) {
+		return round( $mph / 3600 );
 	}
 }

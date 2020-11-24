@@ -158,18 +158,21 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		}
 		$return['altitude']    = self::get_value( $properties, 'elevation' );
 		$return['temperature'] = self::get_value( $properties, 'temperature' );
+		$return['windchill']   = self::get_value( $properties, 'windChill' );
+		$return['dewpoint']    = self::get_value( $properties, 'dewpoint' );
+		$return['heatindex']   = self::get_value( $properties, 'heatIndex' );
 		$return['humidity']    = self::get_value( $properties, 'relativeHumidity' );
-		$return['rain']        = self::get_value( $properties, 'precipitationLastHour' );
+		$return['rain']        = self::m_to_mm( self::get_value( $properties, 'precipitationLastHour' ) );
 		$return['visibility']  = self::get_value( $properties, 'visibility' );
 		$wind                  = array();
 		$wind['degree']        = self::get_value( $properties, 'windDirection' );
-		$wind['speed']         = self::get_value( $properties, 'windSpeed' );
+		$wind['speed']         = self::kmh_to_ms( self::get_value( $properties, 'windSpeed' ) );
 		$wind['gust']          = self::get_value( $properties, 'windGust' );
 		$wind                  = array_filter( $wind );
 		if ( ! empty( $wind ) ) {
 			$return['wind'] = $wind;
 		}
-		$return['pressure'] = round( self::get_value( $properties, 'barometricPressure' ), 2 );
+		$return['pressure'] = round( self::get_value( $properties, 'barometricPressure' ) / 100, 2 );
 		$return['summary']  = ifset( $properties['textDescription'] );
 		if ( isset( $return['summary'] ) ) {
 			$return['icon'] = self::icon_map( $return['summary'] );
