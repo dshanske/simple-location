@@ -173,10 +173,10 @@ class Weather_Provider_Station extends Weather_Provider {
 					return $a['distance'] > $b['distance'];
 				}
 			);
-			if ( 100000 > $sitelist[0]['distance'] ) {
+			if ( 10000 > $sitelist[0]['distance'] ) {
 				$this->station_id = $sitelist[0]['id'];
 				$return           = self::get_station_data();
-
+				$return['distance'] = $sitelist[0]['distance'];
 				unset( $this->station_id );
 				$this->set_cache( $return );
 				return $return;
