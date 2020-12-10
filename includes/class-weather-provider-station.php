@@ -58,7 +58,7 @@ class Weather_Provider_Station extends Weather_Provider {
 	 */
 	public static function stations_section() {
 		esc_html_e(
-			'Enter Station ID, URL, latitude, and longitude for each station. The URL may contain a query string application key. When using the custom station provider as your default weather provider, it will look for a station within 10km of your current location',
+			'Enter Station ID, URL, latitude, and longitude for each station. The URL may contain a query string application key. When using the custom station provider as your default weather provider, it will look for a station within 10km of your current location. Provider expects a json return with the properties outlined in the code.',
 			'simple-location'
 		);
 	}

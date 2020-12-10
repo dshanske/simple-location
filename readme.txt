@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.2.0
+Stable tag: 4.2.1
 Requires at least: 4.9
 Tested up to: 5.6
 Requires PHP: 5.6
@@ -220,6 +220,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.2.1 ( 2020-12-10 ) =
+* Custom station provider said it would use the station within 10km, but was actually set to 100km. Fixed.
 
 = 4.2.0 ( 2020-11-24 ) =
 * Introduce custom weather station provider
