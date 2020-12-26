@@ -170,6 +170,7 @@ class Loc_Metabox {
 
 	public static function save_meta( $meta_type, $object_id ) {
 		// phpcs:disable
+		$units              = get_option( 'sloc_measurements' );
 		$lon_params = array( 'latitude', 'longitude', 'address', 'map_zoom', 'altitude', 'speed', 'heading', 'location_icon' );
 		foreach ( $lon_params as $param ) {
 			if ( 'map_zoom' === $param ) {
@@ -220,6 +221,9 @@ class Loc_Metabox {
 			$weather['wind'] = $wind;
 		}
 		$weather = array_filter( $weather );
+		if ( 'imperial' === $units ) {
+			$weather = Weather_Provider::imperial_to_metric( $weather );
+		}
 		if ( ! empty( $weather ) ) {
 			update_metadata( $meta_type, $object_id, 'geo_weather', $weather );
 		} else {

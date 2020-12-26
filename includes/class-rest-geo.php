@@ -180,6 +180,9 @@ class REST_Geo {
 						'width'     => array(
 							'sanitize_callback' => array( $this, 'sanitize_int' ),
 						),
+						'units'     => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
@@ -205,6 +208,9 @@ class REST_Geo {
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'provider'  => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'units'     => array(
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
@@ -407,6 +413,9 @@ class REST_Geo {
 				$weather->set( $params );
 				$time                   = ifset( $params['time'], null );
 				$reverse_adr['weather'] = $weather->get_conditions( $time );
+				if ( array_key_exists( 'units', $params ) && 'imperial' === $params['units'] ) {
+					$reverse_adr['weather'] = $weather->metric_to_imperial( $reverse_adr['weather'] );
+				}
 			}
 
 			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
@@ -447,6 +456,10 @@ class REST_Geo {
 				return new WP_Error( 'missing_geo', __( 'Missing Coordinates or Station for Weather Lookup', 'simple-location' ), array( 'status' => 400 ) );
 		}
 		$conditions = $weather->get_conditions();
+		if ( array_key_exists( 'units', $params ) && 'imperial' === $params['units'] ) {
+			$conditions = $weather->metric_to_imperial( $conditions );
+		}
+
 		if ( is_wp_error( $conditions ) ) {
 			return $conditions;
 		}

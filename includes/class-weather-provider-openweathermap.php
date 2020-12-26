@@ -135,13 +135,13 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			$current = $response['current'];
 
 			$return['temperature'] = round( $current['temp'], 1 );
-			$return['dewpoint'] = round( $current['dew_point'], 1 );
+			$return['dewpoint']    = round( $current['dew_point'], 1 );
 
-			$return['humidity']    = round( $current['humidity'], 1 );
-			$return['pressure']    = round( $current['pressure'], 1 );
-			$return['cloudiness']  = $current['clouds'];
-			$return['visibility']  = $current['visibility'];
-			$return['uv']          = $current['uvi'];
+			$return['humidity']   = round( $current['humidity'], 1 );
+			$return['pressure']   = round( $current['pressure'], 1 );
+			$return['cloudiness'] = $current['clouds'];
+			$return['visibility'] = $current['visibility'];
+			$return['uv']         = $current['uvi'];
 
 			if ( isset( $current['rain'] ) ) {
 				$return['rain'] = round( $current['rain']['1h'], 2 );

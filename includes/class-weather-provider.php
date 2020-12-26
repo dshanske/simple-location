@@ -208,7 +208,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @return float Temperature in Fahrenheit.
 	 */
 	public static function celsius_to_fahrenheit( $temp ) {
-		return ( $temp * 9 / 5 ) + 32;
+		return round( ( $temp * 9 / 5 ) + 32, 2 );
 	}
 
 	/**
@@ -218,7 +218,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @return float Temperature in Celsius.
 	 */
 	public static function fahrenheit_to_celsius( $temp ) {
-		return ( $temp - 32 ) / 1.8;
+		return round( ( $temp - 32 ) / 1.8, 2 );
 	}
 
 	/**
@@ -228,7 +228,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @return float Inches of Mercury.
 	 */
 	public static function hpa_to_inhg( $hpa ) {
-		return floatval( $hpa ) * 0.03;
+		return round( $hpa * 0.03, 2 );
 	}
 
 	/**
@@ -238,7 +238,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @return float HectoPascals.
 	 */
 	public static function inhg_to_hpa( $inhg ) {
-		return floatval( $inhg ) / 0.03;
+		return round( $inhg / 0.03, 2 );
 	}
 
 	/**
@@ -383,6 +383,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 		if ( ! $lng && is_array( $lat ) ) {
 			if ( isset( $lat['station_id'] ) ) {
 				$this->station_id = $lat['station_id'];
+			}
+			if ( isset( $lat['units'] ) ) {
+				$this->units = $lat['units'];
 			}
 		}
 		return parent::set( $lat, $lng, $alt );
@@ -591,6 +594,94 @@ abstract class Weather_Provider extends Sloc_Provider {
 			return $return;
 		}
 		echo $return; // phpcs:ignore
+	}
+
+	/**
+	 * Convert array of metric to Imperial Measurements.
+	 *
+	 * @param array $conditions Conditions.
+	 * @return array {
+	 *  Below outlines only the datapoints that will be converted.
+	 *  @type float $temperature Temperature in Fahrenheit.
+	 *  @type float $heatindex Heat Index in Fahrenheit.
+	 *  @type float $windchill Wind Chill in Fahrenheit.
+	 *  @type float $dewpoint Dewpoint in Fahrenheit.
+	 *  @type float $pressure Atomospheric Pressure at mean sea level in inHg.
+	 *  @type array $wind {
+	 *      @type int $speed Speed in miles per hour
+	 *      @type int $gust Wind Gust in miles per hour.
+	 *  }
+	 *  @type float $rain Rainfall in inches for the last hour.
+	 *  @type float $snow Snowfall in inches for the last hour.
+	 *  @type float $visibility Visibility in miles.
+	 * }
+	 */
+	public static function metric_to_imperial( $conditions ) {
+		foreach ( array( 'temperature', 'heatindex', 'windchill', 'dewpoint' ) as $temp ) {
+			if ( array_key_exists( $temp, $conditions ) ) {
+				$conditions[ $temp ] = self::celsius_to_fahrenheit( $conditions[ $temp ] );
+			}
+		}
+
+		if ( array_key_exists( 'pressure', $conditions ) ) {
+			$conditions['pressure'] = self::hpa_to_inhg( $conditions['pressure'] );
+		}
+		if ( array_key_exists( 'visibility', $conditions ) ) {
+			$conditions['visibility'] = self::meters_to_miles( $conditions['visibility'] );
+		}
+
+		if ( array_key_exists( 'wind', $conditions ) ) {
+			foreach ( array( 'speed', 'guest' ) as $speed ) {
+				if ( array_key_exists( $speed, $conditions['wind'] ) ) {
+					$conditions[ $speed ] = self::mps_to_miph( $conditions[ $speed ] );
+				}
+			}
+		}
+
+		foreach ( array( 'rain', 'snow' ) as $fall ) {
+			if ( array_key_exists( $fall, $conditions ) ) {
+				$conditions[ $fall ] = self::mm_to_inches( $conditions[ $fall ] );
+			}
+		}
+
+		return $conditions;
+	}
+
+	/**
+	 * Convert array of imperial to metric measurements.
+	 *
+	 * @param array $conditions Conditions.
+	 * @return array $conditions
+	 */
+	public static function imperial_to_metric( $conditions ) {
+		foreach ( array( 'temperature', 'heatindex', 'windchill', 'dewpoint' ) as $temp ) {
+			if ( array_key_exists( $temp, $conditions ) ) {
+				$conditions[ $temp ] = self::fahrenheit_to_celsius( $conditions[ $temp ] );
+			}
+		}
+
+		if ( array_key_exists( 'pressure', $conditions ) ) {
+			$conditions['pressure'] = self::inhg_to_hpa( $conditions['pressure'] );
+		}
+		if ( array_key_exists( 'visibility', $conditions ) ) {
+			$conditions['visibility'] = self::miles_to_meters( $conditions['visibility'] );
+		}
+
+		if ( array_key_exists( 'wind', $conditions ) ) {
+			foreach ( array( 'speed', 'guest' ) as $speed ) {
+				if ( array_key_exists( $speed, $conditions['wind'] ) ) {
+					$conditions[ $speed ] = self::miph_to_mps( $conditions[ $speed ] );
+				}
+			}
+		}
+
+		foreach ( array( 'rain', 'snow' ) as $fall ) {
+			if ( array_key_exists( $fall, $conditions ) ) {
+				$conditions[ $fall ] = self::inches_to_mm( $conditions[ $fall ] );
+			}
+		}
+
+		return $conditions;
 	}
 
 }

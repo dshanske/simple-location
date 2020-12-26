@@ -143,6 +143,7 @@ jQuery( document ).ready( function( $ ) {
 				height: 200,
 				width: 200,
 				time,
+				units: slocOptions.units,
 			},
 			success( response ) {
 				if ( 'undefined' === typeof response ) {

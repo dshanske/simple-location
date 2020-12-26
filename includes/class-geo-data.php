@@ -1026,6 +1026,7 @@ class WP_Geo_Data {
 	public static function query_var( $vars ) {
 		$vars[] = 'geo';
 		$vars[] = 'map';
+		$vars[] = 'sloc_units';
 		return $vars;
 	}
 

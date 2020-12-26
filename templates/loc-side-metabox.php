@@ -6,6 +6,12 @@ if ( 'comment' === $screen->id ) {
 	$geodata = WP_Geo_Data::get_geodata();
 }
 $weather = ifset( $geodata['weather'], array() );
+
+$units   = get_option( 'sloc_measurements' );
+if ( 'imperial' === $units ) {
+	$weather = Weather_Provider::metric_to_imperial( $weather );
+}
+
 $wind    = ifset( $weather['wind'], array() );
 $trip    = ifset( $geodata['trip'], array() );
 
@@ -119,7 +125,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
     <div id="weather-fields" class="field-row hide-if-js">
         <p class="field-row">
             <label for="temperature">
-                <?php _e( 'Temperature(C): ', 'simple-location' ); ?>
+                <?php _e( 'Temperature: ', 'simple-location' ); ?>
             </label>
             <input type="number" name="temperature" step="0.1" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
         </p>
@@ -165,7 +171,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
             <label for="pressure">
                 <?php _e( 'Pressure', 'simple-location' ); ?>
             </label>
-            <input class="widefat" type="number" name="pressure" id="pressure" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
+            <input class="widefat" type="number" name="pressure" id="pressure" step="0.1" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
         </p>
 
         <p class="field-row">
