@@ -49,31 +49,6 @@ class Sloc_Weather_Widget extends WP_Widget {
 		echo $args['after_widget']; // phpcs:ignore
 	}
 
-
-
-	/**
-	 * Marks up a measurement.
-	 *
-	 * @param array Measurements {
-	 *  @type float $value Value of measurement.
-	 *  @type string $property The class property to be used.
-	 *  @type string $unit The symbol or name for the unit
-	 *  @type string $name The display name of the property
-	 *  @type string $icon The property icon.
-	 * }
-	 * @return string Marked up parameter.
-	 */
-	protected static function markup_parameter( $params ) {
-		return sprintf(
-			'<li class="sloc-%1$s">%5$s%4$s: %2$s%3$s</li>',
-			$params['property'],
-			round( $params['value'], 2 ),
-			$params['unit'],
-			$params['name'],
-			Weather_Provider::get_icon( $params['icon'] )
-		);
-	}
-
 	protected static function weather_list( $weather, $icon = 'fa-map', $instance = null ) {
 		$measurements = get_option( 'sloc_measurements' );
 		$return       = array( PHP_EOL );
