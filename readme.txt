@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.2.1
+Stable tag: 4.2.2
 Requires at least: 4.9
 Tested up to: 5.6
 Requires PHP: 5.6
@@ -44,7 +44,18 @@ zone will result in the visibility being set to protected and the name being set
 Venues are locations stored as a custom taxonomy in WordPress using the Term Metadata functionality added in Version 4.4 of WordPress. Venues as taxonomies
 have the advantage of supporting an archive page of all posts from that location and giving the location a permalink on your site. 
 
-To add anything more than a basic location you will have to create a venue. This functionality is still pending.
+To add anything more than a basic location you will have to create a venue. This functionality has been pending for several versions, but is unimplemented.
+
+== Weather ==
+
+Weather consists of at minimum the current conditions and temperature but includes future parameters for use such as pressure, wind speed, wind direction degree, etc. Weather widgets are available 
+that can be set to a specific location, a user, station ID, or airport code. Station ID is available from supported providers for weather stations, for example from a Personal Weather Station(PWS).
+
+== Stations ==
+
+Stations allow for using a custom data source for weather data. This source should be a URL that returns a JSON object. When using the Custom Station provider for weather, it 
+will look for when one of the stations defined is within 10km of your current location. It will then use the return as the current weather conditions. Please note that the
+return must be in the format documented in the code. 
 
 == WordPress GeoData ==
 
@@ -55,10 +66,6 @@ also provides for properties of altitude, accuracy, altitudeAccuracy, speed, and
 
 Timezone is also stored as a property and is derived from the location by default or set manually.
 
-== Weather ==
-
-Weather consists of at minimum the current conditions and temperature but includes future parameters for use such as pressure, wind speed, wind direction degree, etc. Weather widgets are available 
-that can be set to a specific location, a user, station ID, or airport code. Station ID is available from supported providers for weather stations, for example from a Personal Weather Station(PWS).
 
 == Providers ==
 
@@ -68,10 +75,10 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 * Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ, OpenRoute and Geonames.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
 location of a three letter airport code, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
-* Weather Providers retrieve weather data about your location and include OpenWeatherMap, Dark Sky, Weatherstack, WeatherBit, HERE and the US National Weather Service. HERE, Dark Sky, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs 
-that must return the properties as they are stored in WordPress.
+* Weather Providers retrieve weather data about your location and include OpenWeatherMap, Dark Sky, Weatherstack, WeatherBit, HERE and the US National Weather Service. HERE, Dark Sky, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs that must return the properties as they are stored in WordPress.
 ** The National Weather Service(US) uses their station lookup API to find the closest weather station, and uses weather from there. Therefore, if this returns no options, if you are outside the US, it will return no weather.
 ** The Met Office(UK) uses the distance from your current location to the nearest UK weather station and finds the closest one. However, if the nearest station is more than 100km away, it will return nothing.
+** For Weather services like the NWS, Met Office, and the Custom Provider, where coverage is not worldwide, if nothing is found, a fallback provider can be set and used.
 
 == Frequently Asked Questions ==
 
@@ -155,7 +162,7 @@ There are REST API endpoints to retrieve the data so it can be used in the admin
 = What is Compass? =
 
 [Compass](https://github.com/aaronpk/Compass) is a GPS tracking server that stores data in flat files. The instructions for installation are available in the GitHub repository. GPS
-data can be sent to it from iOS or Android devices using various apps. 
+data can be sent to it from iOS or Android devices using various apps.
 
 = How can I show a list of posts tagged with a location? =
 
@@ -174,7 +181,7 @@ They do not offer the features this plugin does and their goal is a minimal impl
 
 = Why am I seeing location on private posts with the notation Hidden? =
 
-This appears to users who can edit private posts when logged in.
+This appears to users who can edit private posts when logged in. It does not appear when not logged in.
 
 = How can I report issues or request support? =
 
@@ -220,6 +227,14 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.2.2 ( 2020-12-xx ) =
+* Measurements are always stored in metric units, and were displayed on the front end in imperial units when set.
+** This version will now show it in imperial on the backend and convert to metric for storage after the fact.
+* ?sloc_units=imperial or ?sloc_units=metric will override the display to show one or the other if added to any URL
+* The units displayed will now show in the labels if edited in the Post UI.
+* All weather markup now uses a common function and label list.
+
 
 = 4.2.1 ( 2020-12-10 ) =
 * Custom station provider said it would use the station within 10km, but was actually set to 100km. Fixed.
