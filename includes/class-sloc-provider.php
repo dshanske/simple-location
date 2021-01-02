@@ -369,4 +369,15 @@ abstract class Sloc_Provider {
 	public static function mph_to_mps( $mph ) {
 		return round( $mph / 3600, 2 );
 	}
+
+	/**
+	 * Converts degrees to compass direction.
+	 *
+	 * @param float $degrees Degrees.
+	 * @return string Compass Direction.
+	 */
+	public static function degrees_to_direction( $degrees ) {
+		$directions = array( 'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N' );
+		return $directions[ round( $degrees / 22.5 ) ];
+	}
 }
