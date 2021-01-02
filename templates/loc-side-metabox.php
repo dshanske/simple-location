@@ -8,10 +8,10 @@ if ( 'comment' === $screen->id ) {
 $weather = ifset( $geodata['weather'], array() );
 
 $units   = get_option( 'sloc_measurements' );
-if ( 'imperial' === $units ) {
+$imperial = ( 'imperial' === $units );
+if ( $imperial ) {
 	$weather = Weather_Provider::metric_to_imperial( $weather );
 }
-
 $wind    = ifset( $weather['wind'], array() );
 $trip    = ifset( $geodata['trip'], array() );
 
@@ -125,14 +125,14 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
     <div id="weather-fields" class="field-row hide-if-js">
         <p class="field-row">
             <label for="temperature">
-                <?php _e( 'Temperature: ', 'simple-location' ); ?>
+                <?php echo Weather_Provider::get_form_label( 'temperature', $imperial ); ?>
             </label>
             <input type="number" name="temperature" step="0.1" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
         </p>
 
         <p class="field-row">
             <label for="humidity">
-                <?php _e( 'Humidity: ', 'simple-location' ); ?>
+                <?php echo Weather_Provider::get_form_label( 'humidity', $imperial ); ?>
             </label>
             <input type="number" name="humidity" id="humidity" step="0.1" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
         </p>
@@ -155,49 +155,49 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 
         <p class="field-row">
             <label for="wind_degree">
-                <?php _e( 'Wind Degree', 'simple-location' ); ?>
+                <?php echo Weather_Provider::get_form_label( 'wind-degree', $imperial ); ?>
             </label>
             <input class="widefat" type="number" min="0" max="360" name="wind_degree" id="wind_degree" value="<?php echo ifset( $wind['degree'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="wind_speed">
-                <?php _e( 'Wind Speed', 'simple-location' ); ?>
+                <?php echo Weather_Provider::get_form_label( 'wind-speed', $imperial ); ?>
             </label>
             <input class="widefat" type="number" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="pressure">
-                <?php _e( 'Pressure', 'simple-location' ); ?>
+                <?php echo Weather_Provider::get_form_label( 'pressure', $imperial ); ?>
             </label>
             <input class="widefat" type="number" name="pressure" id="pressure" step="0.1" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="weather_visibility">
-                <?php _e( 'Visibility', 'simple-location' ); ?>
+                <?php echo Weather_Provider::get_form_label( 'visibility', $imperial ); ?>
             </label>
             <input class="widefat" type="number" name="weather_visibility" id="weather_visibility" value="<?php echo ifset( $weather['visibility'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="cloudiness">
-                <?php _e( 'Cloudiness', 'simple-location' ); ?>
+                <?php echo Weather_Provider::get_form_label( 'cloudiness', $imperial ); ?>
             </label>
             <input class="widefat" type="number" min="0" max="100" name="cloudiness" id="cloudiness" value="<?php echo ifset( $weather['cloudiness'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="rain">
-                <?php _e( 'Rain', 'simple-location' ); ?>
+                <?php echo Weather_Provider::get_form_label( 'rain', $imperial ); ?>
             </label>
             <input class="widefat" type="number" name="rain" step="0.01" id="rain" value="<?php echo ifset( $weather['rain'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="snow">
-                <?php _e( 'Snow', 'simple-location' ); ?>
+                <?php echo Weather_Provider::get_form_label( 'snow', $imperial ); ?>
             </label>
             <input class="widefat" type="number" name="snow" step="0.01" id="snow" value="<?php echo ifset( $weather['snow'], '' ); ?>" />
         </p>

@@ -577,6 +577,17 @@ abstract class Weather_Provider extends Sloc_Provider {
 		return false;
 	}
 
+	/** 
+	 *
+	 */
+	public static function get_form_label( $property, $imperial ) {
+		$props = self::get_names( $property, $imperial );
+		if ( ! $props ) {
+			return '';
+		}
+		return sprintf( '%1$s(%2$s):', $props['name'], $props['unit'] );
+	}
+
 	/**
 	 * Return array of current conditions. All fields optional.
 	 *
