@@ -113,7 +113,7 @@ class Loc_View {
 	}
 
 	public static function display_altitude( $altitude ) {
-		$aunits = get_option( 'sloc_measurements' );
+		$aunits = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
 		switch ( $aunits ) {
 			case 'imperial':
 				$altitude = round( $altitude * 3.281 );
@@ -269,7 +269,7 @@ class Loc_View {
 		}
 		$units = ifset( $weather['units'] );
 		if ( ! $units ) {
-			$units = get_option( 'sloc_measurements' ); 
+			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
 		}
 		if ( 'imperial' === $units ) {
 			$weather = Weather_Provider::metric_to_imperial( $weather );
@@ -289,7 +289,7 @@ class Loc_View {
 	private static function get_weather_extras( $weather ) {
 		$units = ifset( $weather['units'] );
 		if ( ! $units ) {
-			$units = get_option( 'sloc_measurements' ); 
+			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
 		}
 		if ( 'imperial' === $units ) {
 			$weather = Weather_Provider::metric_to_imperial( $weather );
@@ -321,7 +321,7 @@ class Loc_View {
 				'markup' => true, // Mark the value up with microformats.
 				'container' => 'li', // Wrap in this element.
 				'label'     => 'false', // Show the name of the property.
-				'units'     => get_option( 'sloc_measurements' ),
+				'units'     => get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ), 
 				'round'     => false, // False to not round, true to round to integer, a numeric value to round to a specific precision.
 			);
 		$args = wp_parse_args( $args, $defaults );

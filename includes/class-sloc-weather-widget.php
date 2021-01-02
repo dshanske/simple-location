@@ -50,7 +50,8 @@ class Sloc_Weather_Widget extends WP_Widget {
 	}
 
 	protected static function weather_list( $weather, $icon = 'fa-map', $instance = null ) {
-		$measurements = get_option( 'sloc_measurements' );
+
+		$measurements = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
 		$return       = array( PHP_EOL );
 		$return[]     = '<h2>';
 
@@ -73,7 +74,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		if( array_key_exists( 'units', $weather ) ) {
 			$units = $weather['units'];
 		} else {
-			$units = get_option( 'sloc_measurements' );
+			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
 		}
 		if ( 'imperial' === $units ) {
 			$weather = Weather_Provider::metric_to_imperial( $weather );
