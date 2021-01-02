@@ -95,174 +95,31 @@ class Sloc_Weather_Widget extends WP_Widget {
 		} elseif ( isset( $weather['station_id'] ) ) {
 			$return[] = sprintf( '<li>%1$s%2$s</li>', Weather_Provider::get_icon( $icon ), $weather['station_id'] );
 		}
-		if ( isset( $weather['temperature'] ) ) {
-			$units = ifset( $weather['units'] );
-			if ( ! $units ) {
-				switch ( $measurements ) {
-					case 'imperial':
-						$units                  = __( 'F', 'simple-location' );
-						$weather['temperature'] = round( Weather_Provider::celsius_to_fahrenheit( $weather['temperature'] ) );
-						break;
-					default:
-						$units = __( 'C', 'simple-location' );
-				}
+		if( array_key_exists( 'units', $weather ) ) {
+			$units = $weather['units'];
+		} else {
+			$units = get_option( 'sloc_measurements' );
+		}
+		if ( 'imperial' === $units ) {
+			$weather = Weather_Provider::metric_to_imperial( $weather );
+		}
+
+		// Unpack wind.
+		if ( array_key_exists( 'wind', $weather ) ) {
+			foreach( $weather['wind'] as $key => $value ) {
+				$weather[ 'wind-' . $key ] = $value;
 			}
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['temperature'],
-					'property' => 'temperature',
-					'unit'     => '&deg;' . $units,
-					'name'     => __( 'Temperature', 'simple-location' ),
-					'icon'     => 'wi-thermometer',
-				)
-			);
+			unset( $weather['wind'] );
 		}
 
-		if ( isset( $weather['humidity'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['humidity'],
-					'property' => 'humidity',
-					'unit'     => '%',
-					'name'     => __( 'Humidity', 'simple-location' ),
-					'icon'     => 'wi-humidity',
-				)
+		$args = array(
+				'units' => $units,
+				'markup' => false
 			);
+		foreach( $weather as $key => $value ) {
+			$return[] = Loc_View::markup_value( $key, $value, $args );
 		}
-		if ( isset( $weather['pressure'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['pressure'],
-					'property' => 'pressure',
-					'unit'     => 'hPa',
-					'name'     => __( 'Pressure', 'simple-location' ),
-					'icon'     => 'wi-barometer',
-				)
-			);
-		}
-		if ( isset( $weather['cloudiness'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['cloudiness'],
-					'property' => 'cloudiness',
-					'unit'     => '%',
-					'name'     => __( 'Cloudiness', 'simple-location' ),
-					'icon'     => 'wi-cloudy',
-				)
-			);
-		}
-		if ( isset( $weather['visibility'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['visibility'],
-					'property' => 'visibility',
-					'unit'     => 'm',
-					'name'     => __( 'Visibility', 'simple-location' ),
-					'icon'     => 'wi-visibility',
-				)
-			);
-		}
-		if ( isset( $weather['wind'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['wind']['speed'],
-					'property' => 'wind-speed',
-					'unit'     => 'm/s',
-					'name'     => __( 'Wind Speed', 'simple-location' ),
-					'icon'     => 'wi-windy',
-				)
-			);
-		}
-		if ( isset( $weather['rain'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['rain'],
-					'property' => 'rain',
-					'unit'     => 'mm/hr',
-					'name'     => __( 'Rain', 'simple-location' ),
-					'icon'     => 'wi-rain',
-				)
-			);
-		}
-		if ( isset( $weather['snow'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['snow'],
-					'property' => 'snow',
-					'unit'     => 'mm/hr',
-					'name'     => __( 'Snow', 'simple-location' ),
-					'icon'     => 'wi-snow',
-				)
-			);
-
-		}
-		if ( isset( $weather['uv'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['uv'],
-					'property' => 'uv',
-					'unit'     => '',
-					'name'     => __( 'UV Index', 'simple-location' ),
-					'icon'     => 'wi-uv',
-				)
-			);
-		}
-		if ( isset( $weather['radiation'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['radiation'],
-					'property' => 'radiation',
-					'unit'     => 'W/M2',
-					'name'     => __( 'Radiation', 'simple-location' ),
-					'icon'     => 'fa-radiation',
-				)
-			);
-		}
-		if ( isset( $weather['aqi'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['aqi'],
-					'property' => 'aqi',
-					'unit'     => '',
-					'name'     => __( 'Air Quality Index', 'simple-location' ),
-					'icon'     => 'wi-aqi',
-				)
-			);
-		}
-		if ( isset( $weather['pm1_0'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['pm1_0'],
-					'property' => 'pm1_0',
-					'unit'     => 'ug/m3',
-					'name'     => __( 'Particulate Matter(1mg)', 'simple-location' ),
-					'icon'     => 'wi-dust',
-				)
-			);
-		}
-		if ( isset( $weather['pm2_5'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['pm2_5'],
-					'property' => 'pm2_5',
-					'unit'     => 'ug/m3',
-					'name'     => __( 'Particulate Matter(2.5mg)', 'simple-location' ),
-					'icon'     => 'wi-dust',
-				)
-			);
-		}
-		if ( isset( $weather['pm10_0'] ) ) {
-			$return[] = self::markup_parameter(
-				array(
-					'value'    => $weather['pm10_0'],
-					'property' => 'pm10_0',
-					'unit'     => 'ug/m3',
-					'name'     => __( 'Particulate Matter(10mg)', 'simple-location' ),
-					'icon'     => 'wi-dust',
-				)
-			);
-		}
-
+		
 		if ( isset( $weather['_expires_at'] ) ) {
 			$return[] = printf( '<!-- %1$s: %2$s -->', __( 'Current Conditions Cache Expires At', 'simple-location' ), $weather['_expires_at'] );
 		}

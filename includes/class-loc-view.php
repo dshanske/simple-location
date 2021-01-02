@@ -186,7 +186,11 @@ class Loc_View {
 				}
 			}
 			if ( ! array_key_exists( 'address', $loc ) ) {
-				$loc['address'] = dec_to_dms( $loc['latitude'], $loc['longitude'], ifset( $loc['altitude'] ) );
+				if( ! array_key_exists( 'latitude' , $loc ) ) {
+					$loc['address'] = '';	
+				} else { 
+					$loc['address'] = dec_to_dms( $loc['latitude'], $loc['longitude'], ifset( $loc['altitude'] ) );
+				}
 			}
 
 			if ( isset( $loc['altitude'] ) ) {
@@ -265,49 +269,81 @@ class Loc_View {
 		}
 		$units = ifset( $weather['units'] );
 		if ( ! $units ) {
-			switch ( get_option( 'sloc_measurements' ) ) {
-				case 'imperial':
-					$units                  = __( 'F', 'simple-location' );
-					$weather['temperature'] = Weather_Provider::celsius_to_fahrenheit( $weather['temperature'] );
-					break;
-				default:
-					$units = __( 'C', 'simple-location' );
-			}
+			$units = get_option( 'sloc_measurements' ); 
 		}
-		return sprintf(
-			'<span class="sloc-temp p-temperature h-measure">
-		<data class="p-num" value="%1$s">%1$s</data>
-		<data class="p-unit" value="&deg;%2$s">&deg;%2$s</data></span>',
-			round( $weather['temperature'] ),
-			$units
-		);
+		if ( 'imperial' === $units ) {
+			$weather = Weather_Provider::metric_to_imperial( $weather );
+		}
+
+		return self::markup_value( 'temperature', $weather['temperature'], array( 'container' => 'span' ) );
 	}
 
 	private static function get_weather_extras( $weather ) {
-		$measurements = get_option( 'sloc_measurements' );
+		$units = ifset( $weather['units'] );
+		if ( ! $units ) {
+			$units = get_option( 'sloc_measurements' ); 
+		}
+		if ( 'imperial' === $units ) {
+			$weather = Weather_Provider::metric_to_imperial( $weather );
+		}
+
 		$return       = array();
-		if ( isset( $weather['humidity'] ) ) {
-			$return[] = self::markup_parameter( $weather['humidity'], 'humidity', '%', __( 'Humidity', 'simple-location' ) );
-		}
-		if ( isset( $weather['cloudiness'] ) ) {
-			$return[] = self::markup_parameter( $weather['cloudiness'], 'cloudiness', '%', __( 'Cloudiness', 'simple-location' ) );
-		}
-		if ( isset( $weather['visibility'] ) ) {
-			$return[] = self::markup_parameter( $weather['visibility'], 'visibility', 'm', __( 'Visibility', 'simple-location' ) );
+		foreach( array( 'humidity', 'cloudiness', 'visibility' ) as $param ) {
+			$return[] = self::markup_value( $param, $weather[ $param ] );
 		}
 		return '<ul>' . implode( '', $return ) . '</ul>';
 	}
 
-	private static function markup_parameter( $value, $property, $unit, $type ) {
+	/**
+	 * Marks up a measurement.
+	 *
+	 * @param string  $property Property.
+	 * @param mixed   $value Value of the Property.
+	 * @param boolean $markup Add Microformats Markup.
+	 * @return string Marked up value.
+	 */
+	public static function markup_value( $property, $value, $args = array() ) {
+		$defaults = array( 
+				'markup' => true, // Mark the value up with microformats.
+				'container' => 'li', // Wrap in this element.
+				'label'     => 'false', // Show the name of the property.
+				'units'     => get_option( 'sloc_measurements' ),
+				'round'     => false, // False to not round, true to round to integer, a numeric value to round to a specific precision.
+			);
+		$args = wp_parse_args( $args, $defaults );
+		$params = Weather_Provider::get_names( $property, $args['units'] );
+		if ( ! $params ) {
+			return '';
+		}
+
+		if ( is_numeric( $args['round'] ) ) {
+			$value = round( $value, $args['round'] );
+		} else if ( true === $args['round'] ) {
+			$value = round( $value );
+		}
+
+		if ( $args['markup'] ) {
+			return sprintf(
+				'<%1$s class="sloc-%2$s p-%2$s h-measure">
+				<data class="p-type" value="%5$s"></data>
+				<data class="p-num" value="%3$s">%3$s</data>
+				<data class="p-unit" value="%4$s">%4$s</data></%1$s>',
+				$args['container'],
+				$property,
+				$value,
+				$params['unit'],
+				$params['label']
+			);
+		}
+
 		return sprintf(
-			'<li class="sloc-%1$s p-%1$s h-measure">
-			<data class="p-type" value="%2$s">%4$s</data>
-			<data class="p-num" value="%2$s">%2$s</data>
-			<data class="p-unit" value="%3$s">%3$s</data></li>',
+			'<%1$s class="sloc-%2$s">%6$s%5$s: %3$s%4$s</%1$s>',
+			$args['container'],
 			$property,
-			$value,
-			$unit,
-			$type
+			round( $value, 2 ),
+			$params['unit'],
+			$params['name'],
+			self::get_icon( $params['icon'] )
 		);
 	}
 
