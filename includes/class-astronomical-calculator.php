@@ -596,4 +596,83 @@ class Astronomical_Calculator {
 
 		return $result;
 	}
+
+	public function clear_sky_radiation( $ra ) {
+		return ( 0.75 + 0.00002 * $this->elevation ) * $ra;
+	}
+
+	/*
+			interval: The time interval over which the radiation is to be calculated in hours
+		Returns the (average?) solar radiation over the time interval in MJ/m^2/hr
+	*/
+	public function sun_radiation( $interval ) {
+		// Solar constant in MJ/m^2/hr
+		$gsc = 4.92;
+
+		$delta = 0.409 * sin( 2.0 * pi() * ( date( 'z' ) + 1 ) / 365 - 1.39 );
+
+		$earth_distance = 1.0 + 0.033 * cos( 2.0 * pi() * ( date( 'z' ) + 1 ) / 365.0 );
+
+		$tod_utc     = gmdate( 'H' );
+		$start_utc   = $tod_utc - $interval;
+		$stop_utc    = $tod_utc;
+		$start_omega = self::hour_angle( $start_utc );
+		$stop_omega  = self::hour_angle( $stop_utc );
+
+		$latitude_radians = deg2rad( $this->latitude );
+
+		$part1 = ( $stop_omega - $start_omega ) * sin( $latitude_radians ) * sin( $delta );
+		$part2 = cos( $latitude_radians ) * cos( $delta ) * ( sin( $stop_omega ) - sin( $start_omega ) );
+
+		$ra = ( 12.0 / pi() ) * $gsc * $earth_distance * ( $part1 + $part2 );
+
+		if ( $ra < 0 ) {
+				$ra = 0;
+		}
+		return $ra;
+	}
+
+	/*
+			"""Solar hour angle at a given time in radians.
+
+			t_utc: The time in UTC.
+
+					Returns hour angle in radians. 0 <= omega < 2*pi
+	*/
+	public function hour_angle( $t_utc ) {
+		$b     = 2 * pi() * ( ( date( 'z' ) + 1 ) - 81 ) / 364.0;
+		$sc    = 0.1645 * sin( 2 * $b ) - 0.1255 * cos( $b ) - 0.025 * sin( $b );
+		$omega = ( pi() / 12.0 ) * ( $t_utc + $this->longitude / 15.0 + $sc - 12 );
+		if ( $omega < 0 ) {
+			$omega += 2.0 * pi();
+		}
+		return $omega;
+	}
+
+	/*
+	 * Uses mean wm/2 for the last hour to estimate cloudiness.
+	 *
+	 */
+	public function cloudiness( $wm2, $humidity ) {
+		$clear = self::clear_sky_radiation( $this->sun_radiation( 1.0 ) );
+		$mean  = $wm2 * 0.0036;
+		if ( $clear ) {
+			// Return Cloudiness as a percentage number.
+			return round( $mean / $clear * 100 );
+		} else {
+			// If it is nighttime you cannot tell how cloudy it is this way, therefore estimate based on humidity.
+			if ( $humidity > 80 ) {
+				// Humid - Lots of Clouds.
+				return 70;
+			} elseif ( $humidity > 40 ) {
+				// Somewhat humid. Modest cloud clover.
+				return 50;
+			} else {
+				// Low humidity no clouds.
+				return 20;
+			}
+		}
+
+	}
+
 }
