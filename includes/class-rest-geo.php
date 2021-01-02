@@ -166,7 +166,7 @@ class REST_Geo {
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
 						'altitude'  => array(
-							'sanitize_callback' => array( $this, 'sanitize_number' ),
+							'sanitize_callback' => array( $this, 'sanitize_float' ),
 						),
 						'address'   => array(
 							'sanitize_callback' => 'sanitize_text_field',
