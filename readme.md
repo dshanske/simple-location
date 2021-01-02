@@ -228,7 +228,7 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
-### 4.2.2 ( 2020-12-xx ) ###
+### 4.2.2 ( 2021-01-02 ) ###
 * Measurements are always stored in metric units, and were displayed on the front end in imperial units when set.
 ** This version will now show it in imperial on the backend and convert to metric for storage after the fact.
 * ?sloc_units=imperial or ?sloc_units=metric will override the display to show one or the other if added to any URL
