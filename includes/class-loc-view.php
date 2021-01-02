@@ -275,7 +275,15 @@ class Loc_View {
 			$weather = Weather_Provider::metric_to_imperial( $weather );
 		}
 
-		return self::markup_value( 'temperature', $weather['temperature'], array( 'container' => 'span' ) );
+		return self::markup_value( 
+						'temperature', 
+						$weather['temperature'], 
+						array( 
+							'container' => 'span',
+							'round' => true,
+							'units' => $units
+						) 
+				);
 	}
 
 	private static function get_weather_extras( $weather ) {
@@ -289,7 +297,13 @@ class Loc_View {
 
 		$return       = array();
 		foreach( array( 'humidity', 'cloudiness', 'visibility' ) as $param ) {
-			$return[] = self::markup_value( $param, $weather[ $param ] );
+			$return[] = self::markup_value( 
+							$param,
+							$weather[ $param ],
+							array( 
+								'units' => $units 
+							) 
+				);
 		}
 		return '<ul>' . implode( '', $return ) . '</ul>';
 	}
@@ -311,6 +325,7 @@ class Loc_View {
 				'round'     => false, // False to not round, true to round to integer, a numeric value to round to a specific precision.
 			);
 		$args = wp_parse_args( $args, $defaults );
+		$args['units'] = ( $args['units'] === 'imperial' );
 		$params = Weather_Provider::get_names( $property, $args['units'] );
 		if ( ! $params ) {
 			return '';
