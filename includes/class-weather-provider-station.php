@@ -215,6 +215,10 @@ class Weather_Provider_Station extends Weather_Provider {
 							unset( $return[ $k ] );
 						}
 					}
+
+					if ( isset( $return['summary'] ) ) {
+						$return['icon'] = self::icon_map( $return['summary'] );
+					}
 					$return = array_filter( $this->extra_data( $return ) );
 					break;
 				}
@@ -224,8 +228,79 @@ class Weather_Provider_Station extends Weather_Provider {
 		return $return;
 	}
 
+	/**
+	 * Return array of station data.
+	 *
+	 * @param string $id Weather type ID.
+	 * @return string Icon ID.
+	 */
 	private function icon_map( $id ) {
-		return null;
+		switch ( $id ) {
+			case 'Sunny':
+			case 'Mostly Sunny':
+				return 'wi-day-sunny';
+			case 'Cloudy':
+				return 'wi-cloudy';
+			case 'A few clouds':
+			case 'Few clouds':
+				return 'wi-cloud';
+			case 'Partly Cloudy':
+				return 'wi-day-cloudy';
+			case 'Mostly Cloudy':
+				return 'wi-cloudy';
+			case 'Overcast':
+				return 'wi-cloudy';
+			case 'Fair/clear and windy':
+				return 'wi-windy';
+			case 'A few clouds and windy':
+				return 'wi-cloudy-windy';
+			case 'Partly cloudy and windy':
+				return 'wi-cloudy-windy';
+			case 'Mostly cloudy and windy':
+				return 'wi-cloudy-windy';
+			case 'Overcast and windy':
+				return 'wi-cloudy-windy';
+			case 'Snow':
+				return 'wi-snow';
+			case 'Rain/snow':
+				return 'wi-snow';
+			case 'Rain/sleet':
+			case 'Rain/sleet':
+			case 'Freezing rain':
+			case 'Rain/freezing rain':
+			case 'Freezing rain/snow':
+			case 'Sleet':
+				return 'wi-sleet';
+			case 'Rain':
+			case 'Rain showers (high cloud cover)':
+			case 'Rain showers (low cloud cover)':
+				return 'wi-rain';
+			case 'Thunderstorm (high cloud cover)':
+			case 'Thunderstorm (medium cloud cover)':
+			case 'Thunderstorm (low cloud cover)':
+				return 'wi-thunderstorm';
+			case 'Tornado':
+				return 'wi-tornado';
+			case 'Hurricane conditions':
+				return 'wi-hurricane';
+			case 'Tropical storm conditions':
+				return 'wi-storm-showers';
+			case 'Dust':
+				return 'wi-dust';
+			case 'Smoke':
+				return 'wi-smoke';
+			case 'Haze':
+				return 'wi-day-haze';
+			case 'Hot':
+				return 'wi-hot';
+			case 'Cold':
+			case 'Blizzard':
+				return 'wi-snow';
+			case 'Fog/mist':
+				return 'wi-fog';
+			default:
+				return '';
+		}
 	}
 
 }

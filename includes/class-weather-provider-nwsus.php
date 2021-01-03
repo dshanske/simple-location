@@ -208,6 +208,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			case 'Cloudy':
 				return 'wi-cloudy';
 			case 'A few clouds':
+			case 'Few clouds':
 				return 'wi-cloud';
 			case 'Partly Cloudy':
 				return 'wi-day-cloudy';
