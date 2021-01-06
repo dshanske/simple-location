@@ -141,13 +141,20 @@ class Location_Provider_Compass extends Location_Provider {
 			'user-agent'          => 'Simple Location for WordPress',
 		);
 		if ( $time ) {
-			$this->time = $time;
-			$url        = add_query_arg( 'before', $time, $url );
+			$time       = new DateTime( $time );
+			$timezone   = $time->getTimezone();
+			$this->time = $time->format( DATE_W3C );
+			$url        = add_query_arg( 'before', $time->format( DATE_W3C ), $url );
 		}
 		$response = wp_remote_get( $url, $args );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( 200 !== $code ) {
+			return new WP_Error( $code, wp_remote_retrieve_response_message( $response ), array( 'time' => $time ) );
+		}
+
 		$response = wp_remote_retrieve_body( $response );
 		$response = json_decode( $response, true );
 		if ( ! isset( $response['data'] ) ) {

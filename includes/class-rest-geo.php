@@ -316,7 +316,12 @@ class REST_Geo {
 				$geolocation = Loc_Config::geolocation_provider( 'dummy' );
 			}
 			$geolocation->set_user( get_current_user_id() );
-			$geolocation->retrieve( $time, $params );
+			$return = $geolocation->retrieve( $time, $params );
+			
+			if ( is_wp_error( $return ) ) {
+				return $return;
+			}
+
 			return $geolocation->get();
 		} elseif ( 'null' === $geolocation ) {
 			return $geolocation;
