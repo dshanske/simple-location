@@ -141,10 +141,10 @@ class Location_Provider_Compass extends Location_Provider {
 			'user-agent'          => 'Simple Location for WordPress',
 		);
 		if ( $time ) {
-			$time       = new DateTime( $time );
-			$timezone   = $time->getTimezone();
+			$time = new DateTime( $time );
+			$time->setTimezone( new DateTimeZone( 'GMT' ) );
 			$this->time = $time->format( DATE_W3C );
-			$url        = add_query_arg( 'before', $time->format( DATE_W3C ), $url );
+			$url        = add_query_arg( 'before', $time->format( 'Y-m-d\TH:i:s' ), $url );
 		}
 		$response = wp_remote_get( $url, $args );
 		if ( is_wp_error( $response ) ) {
@@ -152,7 +152,14 @@ class Location_Provider_Compass extends Location_Provider {
 		}
 		$code = wp_remote_retrieve_response_code( $response );
 		if ( 200 !== $code ) {
-			return new WP_Error( $code, wp_remote_retrieve_response_message( $response ), array( 'time' => $time ) );
+			return new WP_Error(
+				$code,
+				wp_remote_retrieve_response_message( $response ),
+				array(
+					'time' => $time,
+					'url'  => $url,
+				)
+			);
 		}
 
 		$response = wp_remote_retrieve_body( $response );
