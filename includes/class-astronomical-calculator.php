@@ -100,6 +100,15 @@ class Astronomical_Calculator {
 		if ( ! $timestamp ) {
 			$timestamp = time();
 		}
+
+		if ( ! is_numeric( $timestamp ) && is_string( $timestamp ) ) {
+			$timestamp = new DateTime( $timestamp );
+		}
+
+		if ( $timestamp instanceof DateTime ) {
+			$timestamp = $timestamp->getTimestamp();
+		}
+
 		switch ( $type ) {
 			case 'sunset':
 				$function = 'date_sunset';

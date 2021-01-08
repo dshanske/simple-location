@@ -93,18 +93,15 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 		}
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {
-			if ( $this->cache_key ) {
-				$conditions = get_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ) );
-				if ( $conditions ) {
-					return $conditions;
-				}
-			}
 			$data = array(
 				'units'   => 'si',
 				'exclude' => 'minutely,hourly,daily,alerts,flags',
 				'lang'    => get_bloginfo( 'language' ),
 			);
-			$url  = sprintf( 'https://api.darksky.net/forecast/%1$s/%2$s,%3$s', $this->api, $this->latitude, $this->longitude );
+
+			$datetime = $this->datetime( $time );
+
+			$url  = sprintf( 'https://api.darksky.net/forecast/%1$s/%2$s,%3$s,%4$s', $this->api, $this->latitude, $this->longitude, $datetime->getTimestamp() );
 			$url  = add_query_arg( $data, $url );
 			$args = array(
 				'headers'             => array(
@@ -141,6 +138,8 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 			$return['wind']           = array();
 			$return['wind']['speed']  = ifset_round( $current['windSpeed'] );
 			$return['wind']['degree'] = ifset_round( $current['windBearing'], 1 );
+			$return['wind']['gust']   = ifset_round( $current['windGuest'], 1 );
+			$return['uvi']            = ifset( $current['uvIndex'] );
 			$return['wind']           = array_filter( $return['wind'] );
 			$return['rain']           = ifset_round( $current['precipIntensity'], 2 );
 			$return['snow']           = ifset_round( $current['precipAccumulation'], 2 );
@@ -150,11 +149,8 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
 
-			$return = $this->extra_data( $return );
+			$return = $this->extra_data( $return, $time );
 
-			if ( $this->cache_key ) {
-				set_transient( $this->cache_key . '_' . md5( $this->latitude . ',' . $this->longitude ), $return, $this->cache_time );
-			}
 			return array_filter( $return );
 		}
 		return false;

@@ -104,18 +104,24 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$longitude          = array_key_return( 'longitude', $return, $this->longitude );
 		$altitude           = array_key_return( 'altitude', $return, $this->altitude );
 		$calc               = new Astronomical_Calculator( $latitude, $longitude, $altitude );
-		$return['sunrise']  = $calc->get_iso8601( null );
-		$return['sunset']   = $calc->get_iso8601( null, 'sunset' );
-		$return['moonrise'] = $calc->get_iso8601( null, 'moonrise' );
-		$return['moonset']  = $calc->get_iso8601( null, 'moonset' );
+		$return['sunrise']  = $calc->get_iso8601( $timestamp );
+		$return['sunset']   = $calc->get_iso8601( $timestamp, 'sunset' );
+		$return['moonrise'] = $calc->get_iso8601( $timestamp, 'moonrise' );
+		$return['moonset']  = $calc->get_iso8601( $timestamp, 'moonset' );
 		$return['day']      = $calc->is_daytime();
 		$timezone           = Loc_Timezone::timezone_for_location( $latitude, $longitude );
 		if ( $timezone instanceof Timezone_Result ) {
 			$timezone = $timezone->timezone;
 		}
-		$datetime = new DateTime( null, $timezone );
-		if ( ! is_null( $timestamp ) ) {
-			$datetime->setTimestamp( $timestamp );
+		if ( $timestamp instanceof DateTime ) {
+			$datetime = $timestamp;
+		} else if ( is_numeric( $timestamp ) ) {
+			$datetime = new DateTime( null, $timezone );
+			if ( ! is_null( $timestamp ) ) {
+				$datetime->setTimestamp( $timestamp );
+			}
+		} else { 
+			$datetime = new DateTime();
 		}
 
 		$return['localtime'] = $datetime->format( DATE_W3C );
@@ -883,6 +889,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * }
 	 */
 	public static function metric_to_imperial( $conditions ) {
+		if ( ! is_array( $conditions ) ) {
+			return $conditions;
+		}
 		foreach ( array( 'temperature', 'heatindex', 'windchill', 'dewpoint' ) as $temp ) {
 			if ( array_key_exists( $temp, $conditions ) ) {
 				$conditions[ $temp ] = self::celsius_to_fahrenheit( $conditions[ $temp ] );
@@ -920,6 +929,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @return array $conditions
 	 */
 	public static function imperial_to_metric( $conditions ) {
+		if ( ! is_array( $conditions ) ) {
+			return $conditions;
+		}
 		foreach ( array( 'temperature', 'heatindex', 'windchill', 'dewpoint' ) as $temp ) {
 			if ( array_key_exists( $temp, $conditions ) ) {
 				$conditions[ $temp ] = self::fahrenheit_to_celsius( $conditions[ $temp ] );

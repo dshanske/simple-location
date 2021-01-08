@@ -128,6 +128,11 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		if ( empty( $client_id ) || empty( $client_secret ) ) {
 			return array();
 		}
+		$datetime = $this->datetime( $time );
+
+		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
+			return array( 'time' => $time, 'datetime' => $datetime );
+		}
 
 		if ( ! empty( $this->station_id ) && empty( $this->latitude ) ) {
 			return $this->get_station_data();
@@ -153,6 +158,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 				return $json;
 			}
 			$return = $this->convert_data( $json['response'][0] );
+			$return = $this->extra_data( $return, $time );
 
 			$this->set_cache( $return );
 
@@ -207,7 +213,6 @@ class Weather_Provider_Aeris extends Weather_Provider {
 
 		$return['icon'] = $this->icon_map( $observation['weatherCoded'] );
 
-		$return = $this->extra_data( $return );
 		return array_filter( $return );
 	}
 

@@ -380,4 +380,26 @@ abstract class Sloc_Provider {
 		$directions = array( 'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N' );
 		return $directions[ round( $degrees / 22.5 ) ];
 	}
+
+	/**
+	 * Takes a time input and tries to convert it into a DateTime object.
+	 *
+	 * @param mixed $time Time.
+	 * @return DateTime Date Time object.
+	 *
+	 */
+	 public static function datetime( $time ) {
+	 	if ( is_numeric( $time ) ) {
+			$datetime = new DateTime();
+			$datetime->setTimestamp( $time );
+			return $datetime;
+		}
+		if ( is_string( $time ) ) {
+			return new DateTime( $time );
+		}
+		if ( $time instanceof DateTime ) {
+			return $time;
+		}
+		return new DateTime();
+	 }
 }
