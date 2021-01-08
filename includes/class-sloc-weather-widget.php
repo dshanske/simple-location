@@ -46,9 +46,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 		}
 		if ( is_wp_error( $weather ) ) {
 			echo $weather->get_error_message();
-		} else if ( is_array( $weather ) ) {
+		} elseif ( is_array( $weather ) ) {
 			echo self::weather_list( $weather, 'fa-map', $instance );
-		} else if ( is_string( $weather ) ) {
+		} elseif ( is_string( $weather ) ) {
 			echo esc_html( $weather );
 		}
 		echo $args['after_widget']; // phpcs:ignore
@@ -56,7 +56,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 
 	protected static function weather_list( $weather, $icon = 'fa-map', $instance = null ) {
 
-		$measurements = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
+		$measurements = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		$return       = array( PHP_EOL );
 		$return[]     = '<h2>';
 
@@ -76,10 +76,10 @@ class Sloc_Weather_Widget extends WP_Widget {
 		} elseif ( isset( $weather['station_id'] ) ) {
 			$return[] = sprintf( '<li>%1$s%2$s</li>', Weather_Provider::get_icon( $icon ), $weather['station_id'] );
 		}
-		if( array_key_exists( 'units', $weather ) ) {
+		if ( array_key_exists( 'units', $weather ) ) {
 			$units = $weather['units'];
 		} else {
-			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
+			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		}
 		if ( 'imperial' === $units ) {
 			$weather = Weather_Provider::metric_to_imperial( $weather );
@@ -87,20 +87,20 @@ class Sloc_Weather_Widget extends WP_Widget {
 
 		// Unpack wind.
 		if ( array_key_exists( 'wind', $weather ) ) {
-			foreach( $weather['wind'] as $key => $value ) {
+			foreach ( $weather['wind'] as $key => $value ) {
 				$weather[ 'wind-' . $key ] = $value;
 			}
 			unset( $weather['wind'] );
 		}
 
 		$args = array(
-				'units' => $units,
-				'markup' => false
-			);
-		foreach( $weather as $key => $value ) {
+			'units'  => $units,
+			'markup' => false,
+		);
+		foreach ( $weather as $key => $value ) {
 			$return[] = Loc_View::markup_value( $key, $value, $args );
 		}
-		
+
 		if ( isset( $weather['_expires_at'] ) ) {
 			$return[] = printf( '<!-- %1$s: %2$s -->', __( 'Current Conditions Cache Expires At', 'simple-location' ), $weather['_expires_at'] );
 		}

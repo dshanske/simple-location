@@ -92,6 +92,16 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 		if ( empty( $this->api ) ) {
 			return array();
 		}
+
+		$datetime = $this->datetime( $time );
+
+		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
+			return array(
+				'time'     => $time,
+				'datetime' => $datetime,
+			);
+		}
+
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {
 			$conditions = $this->get_cache();

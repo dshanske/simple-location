@@ -622,7 +622,7 @@ class Astronomical_Calculator {
 
 		$earth_distance = 1.0 + 0.033 * cos( 2.0 * pi() * ( date( 'z' ) + 1 ) / 365.0 );
 
-		$tod_utc = (int) gmdate( 'H' ) + (int) gmdate( 'M' ) / 60.0 + (int) gmdate( 'S' ) / 3600.0;
+		$tod_utc     = (int) gmdate( 'H' ) + (int) gmdate( 'M' ) / 60.0 + (int) gmdate( 'S' ) / 3600.0;
 		$start_utc   = $tod_utc - $interval;
 		$stop_utc    = $tod_utc;
 		$start_omega = self::hour_angle( $start_utc );

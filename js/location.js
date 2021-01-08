@@ -41,8 +41,6 @@ jQuery( document ).ready( function( $ ) {
 		};
 		if ( attemptedDate < currentDate ) {
 			time = attemptedDate.toISO();
-			console.log( time );
-			weather = 'no';
 		}
 		if ( 'HTML5' === slocOptions.lookup ) { // eslint-disable-line camelcase
 			if ( ( '' === $( '#latitude' ).val() ) && ( '' === $( '#longitude' ).val() ) ) {

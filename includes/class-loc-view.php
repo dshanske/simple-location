@@ -113,7 +113,7 @@ class Loc_View {
 	}
 
 	public static function display_altitude( $altitude ) {
-		$aunits = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
+		$aunits = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		switch ( $aunits ) {
 			case 'imperial':
 				$altitude = round( $altitude * 3.281 );
@@ -186,9 +186,9 @@ class Loc_View {
 				}
 			}
 			if ( ! array_key_exists( 'address', $loc ) ) {
-				if( ! array_key_exists( 'latitude' , $loc ) ) {
-					$loc['address'] = '';	
-				} else { 
+				if ( ! array_key_exists( 'latitude', $loc ) ) {
+					$loc['address'] = '';
+				} else {
 					$loc['address'] = dec_to_dms( $loc['latitude'], $loc['longitude'], ifset( $loc['altitude'] ) );
 				}
 			}
@@ -269,41 +269,41 @@ class Loc_View {
 		}
 		$units = ifset( $weather['units'] );
 		if ( ! $units ) {
-			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
+			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		}
 		if ( 'imperial' === $units ) {
 			$weather = Weather_Provider::metric_to_imperial( $weather );
 		}
 
-		return self::markup_value( 
-						'temperature', 
-						$weather['temperature'], 
-						array( 
-							'container' => 'span',
-							'round' => true,
-							'units' => $units
-						) 
-				);
+		return self::markup_value(
+			'temperature',
+			$weather['temperature'],
+			array(
+				'container' => 'span',
+				'round'     => true,
+				'units'     => $units,
+			)
+		);
 	}
 
 	private static function get_weather_extras( $weather ) {
 		$units = ifset( $weather['units'] );
 		if ( ! $units ) {
-			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ); 
+			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		}
 		if ( 'imperial' === $units ) {
 			$weather = Weather_Provider::metric_to_imperial( $weather );
 		}
 
-		$return       = array();
-		foreach( array( 'humidity', 'cloudiness', 'visibility' ) as $param ) {
-			$return[] = self::markup_value( 
-							$param,
-							$weather[ $param ],
-							array( 
-								'units' => $units 
-							) 
-				);
+		$return = array();
+		foreach ( array( 'humidity', 'cloudiness', 'visibility' ) as $param ) {
+			$return[] = self::markup_value(
+				$param,
+				$weather[ $param ],
+				array(
+					'units' => $units,
+				)
+			);
 		}
 		return '<ul>' . implode( '', $return ) . '</ul>';
 	}
@@ -317,23 +317,23 @@ class Loc_View {
 	 * @return string Marked up value.
 	 */
 	public static function markup_value( $property, $value, $args = array() ) {
-		$defaults = array( 
-				'markup' => true, // Mark the value up with microformats.
-				'container' => 'li', // Wrap in this element.
-				'label'     => 'false', // Show the name of the property.
-				'units'     => get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ), 
-				'round'     => false, // False to not round, true to round to integer, a numeric value to round to a specific precision.
-			);
-		$args = wp_parse_args( $args, $defaults );
+		$defaults      = array(
+			'markup'    => true, // Mark the value up with microformats.
+			'container' => 'li', // Wrap in this element.
+			'label'     => 'false', // Show the name of the property.
+			'units'     => get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ),
+			'round'     => false, // False to not round, true to round to integer, a numeric value to round to a specific precision.
+		);
+		$args          = wp_parse_args( $args, $defaults );
 		$args['units'] = ( $args['units'] === 'imperial' );
-		$params = Weather_Provider::get_names( $property, $args['units'] );
+		$params        = Weather_Provider::get_names( $property, $args['units'] );
 		if ( ! $params ) {
 			return '';
 		}
 
 		if ( is_numeric( $args['round'] ) ) {
 			$value = round( $value, $args['round'] );
-		} else if ( true === $args['round'] ) {
+		} elseif ( true === $args['round'] ) {
 			$value = round( $value );
 		}
 

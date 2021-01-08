@@ -317,7 +317,7 @@ class REST_Geo {
 			}
 			$geolocation->set_user( get_current_user_id() );
 			$return = $geolocation->retrieve( $time, $params );
-			
+
 			if ( is_wp_error( $return ) ) {
 				return $return;
 			}

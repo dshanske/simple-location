@@ -42,7 +42,15 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions( $time = null ) {
-		$return = array();
+		$return   = array();
+		$datetime = $this->datetime( $time );
+
+		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
+			return array(
+				'time'     => $time,
+				'datetime' => $datetime,
+			);
+		}
 		if ( $this->station_id && ! $this->latitude ) {
 			return $this->get_station_data();
 		}

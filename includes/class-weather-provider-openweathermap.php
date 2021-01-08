@@ -90,6 +90,14 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		if ( empty( $this->api ) ) {
 			return array();
 		}
+		$datetime = $this->datetime( $time );
+
+		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
+			return array(
+				'time'     => $time,
+				'datetime' => $datetime,
+			);
+		}
 		$data = array(
 			'appid' => $this->api,
 			'units' => 'metric',

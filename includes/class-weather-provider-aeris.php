@@ -131,7 +131,10 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$datetime = $this->datetime( $time );
 
 		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
-			return array( 'time' => $time, 'datetime' => $datetime );
+			return array(
+				'time'     => $time,
+				'datetime' => $datetime,
+			);
 		}
 
 		if ( ! empty( $this->station_id ) && empty( $this->latitude ) ) {

@@ -155,9 +155,9 @@ class Weather_Provider_Station extends Weather_Provider {
 	public function get_conditions( $time = null ) {
 		$return = array();
 
-		if ( ! empty ( $time ) ) {
+		if ( ! empty( $time ) ) {
 			$datetime = $this->datetime( $time );
-			$abs = abs( $datetime->getTimestamp() - time() );
+			$abs      = abs( $datetime->getTimestamp() - time() );
 			if ( 3600 < $abs ) {
 				return self::get_fallback_conditions( $time );
 			}

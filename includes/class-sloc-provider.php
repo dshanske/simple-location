@@ -386,10 +386,9 @@ abstract class Sloc_Provider {
 	 *
 	 * @param mixed $time Time.
 	 * @return DateTime Date Time object.
-	 *
 	 */
-	 public static function datetime( $time ) {
-	 	if ( is_numeric( $time ) ) {
+	public static function datetime( $time ) {
+		if ( is_numeric( $time ) ) {
 			$datetime = new DateTime();
 			$datetime->setTimestamp( $time );
 			return $datetime;
@@ -401,5 +400,5 @@ abstract class Sloc_Provider {
 			return $time;
 		}
 		return new DateTime();
-	 }
+	}
 }
