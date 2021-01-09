@@ -101,11 +101,12 @@ abstract class Sloc_Provider {
 	 *
 	 * @param string $url URL to fetch.
 	 * @param array  $query Query parameters.
+	 * @param array  $headers Headers.
 	 * @return WP_Error|array Either the associated array response or error.
 	 *
 	 * @since 4.0.6
 	 */
-	public function fetch_json( $url, $query ) {
+	public function fetch_json( $url, $query, $headers = null ) {
 		$fetch = add_query_arg( $query, $url );
 		$args  = array(
 			'headers'             => array(
@@ -117,6 +118,10 @@ abstract class Sloc_Provider {
 			// Use an explicit user-agent for Simple Location.
 			'user-agent'          => 'Simple Location for WordPress',
 		);
+
+		if ( is_array( $headers ) ) {
+			$args['headers'] = array_merge( $args['headers'], $headers );
+		}
 
 		$response = wp_remote_get( $fetch, $args );
 		if ( is_wp_error( $response ) ) {
