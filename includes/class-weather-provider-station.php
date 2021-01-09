@@ -228,7 +228,7 @@ class Weather_Provider_Station extends Weather_Provider {
 					if ( isset( $return['summary'] ) ) {
 						$return['icon'] = self::icon_map( $return['summary'] );
 					}
-					$return = array_filter( $this->extra_data( $return, $time ) );
+					$return = array_filter( $this->extra_data( $return, null ) );
 					break;
 				}
 			}
