@@ -213,6 +213,7 @@ class REST_Geo {
 						'units'     => array(
 							'sanitize_callback' => 'sanitize_text_field',
 						),
+						'time' => array()
 					),
 					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
@@ -446,6 +447,10 @@ class REST_Geo {
 			'cache_key'  => 'slocw',
 			'cache_time' => 600,
 		);
+		$time = null;
+		if ( array_key_exists( 'time', $params ) ) {
+			$time = $params['time'];
+		}
 		$return   = array();
 		$provider = empty( $params['provider'] ) ? null : $params['provider'];
 		$weather  = Loc_Config::weather_provider( $provider );
@@ -460,7 +465,7 @@ class REST_Geo {
 		} else {
 				return new WP_Error( 'missing_geo', __( 'Missing Coordinates or Station for Weather Lookup', 'simple-location' ), array( 'status' => 400 ) );
 		}
-		$conditions = $weather->get_conditions();
+		$conditions = $weather->get_conditions( $time );
 		if ( array_key_exists( 'units', $params ) && 'imperial' === $params['units'] ) {
 			$conditions = $weather->metric_to_imperial( $conditions );
 		}
