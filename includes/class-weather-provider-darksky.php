@@ -26,7 +26,6 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_darksky_api' );
 		}
-		$args['cache_key'] = '';
 
 		$option = get_option( 'sloc_weather_provider' );
 		if ( 'darksky' === $option ) {
@@ -101,8 +100,9 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 
 			$datetime = $this->datetime( $time );
 
-			$url  = sprintf( 'https://api.darksky.net/forecast/%1$s/%2$s,%3$s,%4$s', $this->api, $this->latitude, $this->longitude, $datetime->getTimestamp() );
-			$url  = add_query_arg( $data, $url );
+			$url = sprintf( 'https://api.darksky.net/forecast/%1$s/%2$s,%3$s,%4$s', $this->api, $this->latitude, $this->longitude, $datetime->getTimestamp() );
+			$url = add_query_arg( $data, $url );
+
 			$args = array(
 				'headers'             => array(
 					'Accept' => 'application/json',
@@ -114,12 +114,8 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 				'user-agent'          => 'Simple Location for WordPress',
 			);
 
-			$response = wp_remote_get( $url, $args );
-			if ( is_wp_error( $response ) ) {
-				return $response;
-			}
-			$response = wp_remote_retrieve_body( $response );
-			$response = json_decode( $response, true );
+			$response = $this->fetch_json( $url, $args );
+
 			if ( WP_DEBUG ) {
 				$return['raw'] = $response;
 			}
