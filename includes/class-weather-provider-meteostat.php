@@ -129,7 +129,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			$this->set_cache( $return );
 			return $return;
 		}
-		return self::get_fallback_conditions( $time );
+		return self::get_fallback_conditions( $datetime );
 
 		$conditions = $this->get_cache();
 		if ( $conditions ) {
@@ -149,15 +149,21 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			return $conditions;
 		}
 
+		if ( empty( $this->station_id ) ) {
+			return new WP_Error( 'station_empty', __( 'Station ID Not Set', 'simple-location' ) );
+		}
+
 		$return = array(
 			'station_id'   => $this->station_id,
 			'station_data' => $this->station,
 		);
+		if ( ! empty( $this->station ) & array_key_exists( 'latitude', $this->station ) ) {
+			$return['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
+		}
 
-		$return['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
-		$time               = $this->datetime( $time );
-		$time               = $time->setTimezone( new DateTimeZone( 'GMT' ) );
-		$tomorrow           = clone $time;
+		$time     = $this->datetime( $time );
+		$time     = $time->setTimezone( new DateTimeZone( 'GMT' ) );
+		$tomorrow = clone $time;
 		$tomorrow->add( new DateInterval( 'P1D' ) );
 		$args = array(
 			'station' => $this->station_id,
@@ -217,8 +223,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		$return['rain']           = ifset_round( $json['prcp'], 2 );
 		$return['snow']           = self::cm_to_mm( ifset_round( $json['snow'], 2 ) );
 		$return['summary']        = ifset( $json['coco'] );
-
-		$return['icon'] = $this->icon_map( $json['icon'] );
+		$return['icon']           = $this->icon_map( $json['coco'] );
 
 		return array_filter( $return );
 	}
@@ -262,10 +267,10 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	/**
 	 * Return array of station data.
 	 *
-	 * @param string $id Weather type ID.
+	 * @param string $code Weather type ID.
 	 * @return string Icon ID.
 	 */
-	private function icon_map( $id ) {
+	private function icon_map( $code ) {
 		$conditions = array(
 			1  => 'wi-night-clear',
 			3  => 'wi-cloudy',
