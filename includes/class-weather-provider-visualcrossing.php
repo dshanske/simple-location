@@ -125,7 +125,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 			if ( array_key_exists( $datetime->format( 'G' ), $json ) ) {
 				$json = $json[ $datetime->format( 'G' ) ];
 			} else {
-				return array(a);
+				return array();
 			}
 		}
 
