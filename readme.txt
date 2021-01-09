@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.2.2
+Stable tag: 4.3.0
 Requires at least: 4.9
 Tested up to: 5.6
 Requires PHP: 5.6
@@ -100,6 +100,8 @@ API Keys are required to use certain services.
 * [Met Office UK](https://www.metoffice.gov.uk/services/data/datapoint)
 * [OpenRoute Service](https://openrouteservice.org/)
 * [GeoApify](https://geoapify.com)
+* [Visual Crossing](https://www.visualcrossing.com/)
+* [Meteostat](https://meteostat.net/) 
 
 At this time, all map services require an API key except Yandex, which permits limited non-commercial use.
 Nominatim does not require an API key, but it does ask for an email address, which will be the admin email of the site
@@ -126,6 +128,10 @@ is what this code does. While the code allows for multiple tile sources, please 
 
 This allows you to use a custom endpoint that returns current weather conditions in json, using the property names used by this plugin, which can be found outlined in the class-weather-provider.php file. The configuration for this
 takes a URL and an ID. So you could run a script that generates a static page anywhere from any source with this data.
+
+= Which providers support historic weather data? =
+
+Currently, only Visual Crossing and Dark Sky(soon to be discontinued), support historic weather data on their basic plan. Meteostat consists solely of historical data and has no current data.
 
 = What is the fallback weather provider? =
 
@@ -227,6 +233,16 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.3.0 ( 2021-01-09 ) =
+* Support for historic weather data in providers who offer it, see readme for details.
+* Addition of Visual Crossing as a provider. Visual Crossing is the first provider which in addition to 1000 queries per day, offers a pay per use model past that as opposed to a monthly subscription.
+* Addition of Meteostat as a provider. Meteostat is free for use, but is set up for historical weather data only.
+
+= 4.2.3 ( 2021-01-03 ) =
+* Additional error checking
+* Improved mapping for the Custom Station provider
+
 
 = 4.2.2 ( 2021-01-02 ) =
 * Measurements are always stored in metric units, and were displayed on the front end in imperial units when set.
