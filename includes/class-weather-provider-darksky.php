@@ -140,7 +140,7 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 			$return['rain']           = ifset_round( $current['precipIntensity'], 2 );
 			$return['snow']           = ifset_round( $current['precipAccumulation'], 2 );
 			$return['summary']        = ifset( $current['summary'] );
-			$return['icon']           = $this->icon_map( $current['icon'] );
+			$return['icon']           = $this->icon_map( ifset( $current['icon'] ) );
 			if ( isset( $current['visibility'] ) ) {
 				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
