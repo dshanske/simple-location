@@ -183,6 +183,9 @@ class REST_Geo {
 						'units'     => array(
 							'sanitize_callback' => 'sanitize_text_field',
 						),
+						'provider'  => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
@@ -387,9 +390,10 @@ class REST_Geo {
 	public static function geocode( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
 		$params = $request->get_params();
+		$provider = empty( $params['provider'] ) ? null : $params['provider'];
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$zone    = Location_Zones::in_zone( $params['latitude'], $params['longitude'] );
-			$reverse = Loc_Config::geo_provider();
+			$reverse = Loc_Config::geo_provider( $provider );
 			$reverse->set( $params );
 			$map      = Loc_Config::map_provider();
 			$map_args = array(

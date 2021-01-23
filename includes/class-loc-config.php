@@ -986,14 +986,17 @@ class Loc_Config {
 	/**
 	 * Returns the current reverse geo provider.
 	 *
+	 * @param string $provider Name of Provider to Be Returned. Optional.
 	 * @return Geo_Provider $return Geo Provider.
 	 *
 	 * @since 1.0.0
 	 */
-	public static function geo_provider() {
-		$option = get_option( 'sloc_geo_provider' );
-		if ( isset( static::$geo[ $option ] ) ) {
-			return static::$geo[ $option ];
+	public static function geo_provider( $provider = null ) {
+		if ( ! $provider ) {
+			$provider = get_option( 'sloc_geo_provider' );
+		}
+		if ( isset( static::$geo[ $provider ] ) ) {
+			return static::$geo[ $provider ];
 		} else {
 			delete_option( 'sloc_geo_provider' );
 		}
