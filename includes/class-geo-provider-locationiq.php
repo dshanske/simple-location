@@ -6,11 +6,11 @@
  */
 
 /**
- * Reverse Geolocation using LocationIQ API.
+ * Reverse Geolocation using LocationIQ API which uses the Nominatim Mapping
  *
  * @since 1.0.0
  */
-class Geo_Provider_LocationIQ extends Geo_Provider {
+class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -39,7 +39,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
-		parent::__construct( $args );
+		Geo_Provider::__construct( $args );
 	}
 
 	/**
@@ -99,10 +99,14 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
 		}
 		$args = array(
-			'key'    => $this->api,
-			'format' => 'json',
-			'lat'    => $this->latitude,
-			'lon'    => $this->longitude,
+			'key'             => $this->api,
+			'format'          => 'json',
+			'lat'             => $this->latitude,
+			'lon'             => $this->longitude,
+			'statecode'       => 1,
+			'accept-language' => get_bloginfo( 'language' ),
+			'extratags'       => 1,
+			'addressdetails'  => 1,
 		);
 
 		$json = $this->fetch_json( 'https://us1.locationiq.com/v1/reverse.php', $args );
@@ -111,101 +115,6 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 		}
 		$address = $json['address'];
 		return $this->address_to_mf( $address );
-	}
-
-	/**
-	 * Convert address properties to mf2
-	 *
-	 * @param  array $address Raw JSON.
-	 * @return array $reverse microformats2 address elements in an array.
-	 */
-	private function address_to_mf( $address ) {
-		if ( 'us' === $address['country_code'] ) {
-			$region = self::ifnot(
-				$address,
-				array(
-					'state',
-					'county',
-				)
-			);
-		} else {
-			$region = self::ifnot(
-				$address,
-				array(
-					'county',
-					'state',
-				)
-			);
-		}
-		$street  = ifset( $address['house_number'], '' ) . ' ';
-		$street .= self::ifnot(
-			$address,
-			array(
-				'road',
-				'highway',
-				'footway',
-			)
-		);
-		$addr    = array(
-			'name'             => self::ifnot(
-				$address,
-				array(
-					'attraction',
-					'building',
-					'hotel',
-					'address29',
-					'address26',
-				)
-			),
-			'street-address'   => $street,
-			'extended-address' => self::ifnot(
-				$address,
-				array(
-					'boro',
-					'neighbourhood',
-					'suburb',
-				)
-			),
-			'locality'         => self::ifnot(
-				$address,
-				array(
-					'hamlet',
-					'village',
-					'town',
-					'city',
-				)
-			),
-			'region'           => $region,
-			'country-name'     => self::ifnot(
-				$address,
-				array(
-					'country',
-				)
-			),
-			'postal-code'      => self::ifnot(
-				$address,
-				array(
-					'postcode',
-				)
-			),
-			'country-code'     => strtoupper( $address['country_code'] ),
-
-			'latitude'         => $this->latitude,
-			'longitude'        => $this->longitude,
-			'raw'              => $address,
-		);
-
-		if ( is_null( $addr['country-name'] ) ) {
-			$addr['country-name'] = self::country_name( $addr['country-code'] );
-		}
-
-		$addr                 = array_filter( $addr );
-		$addr['display-name'] = $this->display_name( $addr );
-		$tz                   = $this->timezone();
-		if ( $tz ) {
-			$addr = array_merge( $addr, $tz );
-		}
-		return $addr;
 	}
 
 	/**
@@ -219,11 +128,15 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
 		}
 		$args = array(
-			'key'            => $this->api,
-			'format'         => 'json',
-			'addressdetails' => 1,
-			'extratags'      => 1,
-			'q'              => $address,
+			'key'             => $this->api,
+			'format'          => 'json',
+			'addressdetails'  => 1,
+			'extratags'       => 1,
+			'dedupe'          => 1,
+			'limit'           => 1,
+			'statecode'       => 1,
+			'q'               => $address,
+			'accept-language' => get_bloginfo( 'language' ),
 		);
 
 		$json = $this->fetch_json( 'https://us1.locationiq.com/v1/search.php', $args );

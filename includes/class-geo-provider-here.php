@@ -101,6 +101,7 @@ class Geo_Provider_Here extends Geo_Provider {
 		$args = array(
 			'apiKey' => $this->api,
 			'at'     => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+			'lang'   => get_bloginfo( 'language' ),
 
 		);
 		$url  = 'https://revgeocode.search.hereapi.com/v1/revgeocode';
@@ -111,10 +112,11 @@ class Geo_Provider_Here extends Geo_Provider {
 		if ( ! isset( $json['items'] ) || empty( $json['items'] ) ) {
 			return new WP_Error( 'invalid_response', __( 'No results', 'simple-location' ) );
 		}
-		$json              = $json['items'][0]['address'];
+		$json              = $json['items'][0];
 		$addr              = $this->address_to_mf2( $json );
 		$addr['latitude']  = $this->latitude;
 		$addr['longitude'] = $this->longitude;
+		return array_filter( $addr );
 	}
 
 	/**
@@ -124,13 +126,21 @@ class Geo_Provider_Here extends Geo_Provider {
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
 	private function address_to_mf2( $json ) {
-		$addr['display-name']   = $json['label'];
-		$addr['street-address'] = ifset( $json['street'] );
-		$addr['locality']       = ifset( $json['city'] );
-		$addr['region']         = ifset( $json['state'] );
-		$addr['country-name']   = ifset( $json['countryName'] );
-		$addr['country-code']   = ifset( $json['countryCode'] );
-		$addr['postal-code']    = ifset( $json['postalCode'] );
+		$addr = array();
+		if ( array_key_exists( 'address', $json ) ) {
+			$location = 	$json['address'];
+			$addr['name']   = ifset( $json['title'] );
+			$addr['street-address'] = ifset( $location['street'] );
+			$addr['locality']       = ifset( $location['city'] );
+			$addr['region']         = ifset( $location['state'] );
+			$addr['country-name']   = ifset( $location['countryName'] );
+			$addr['country-code']   = ifset( $location['countryCode'] );
+			$addr['postal-code']    = ifset( $location['postalCode'] );
+		}
+
+		if ( ! array_key_exists( 'display-name', $addr ) ) {
+			$addr['display-name'] = $this->display_name( $addr );
+		}
 
 		$tz = $this->timezone();
 		if ( $tz ) {
@@ -155,6 +165,7 @@ class Geo_Provider_Here extends Geo_Provider {
 		$args = array(
 			'apiKey' => $this->api,
 			'q'      => $address,
+			'lang'   => get_bloginfo( 'language' ),
 
 		);
 		$url  = 'https://revgeocode.search.hereapi.com/v1/geocode';
@@ -166,7 +177,7 @@ class Geo_Provider_Here extends Geo_Provider {
 			return new WP_Error( 'invalid_response', __( 'No results', 'simple-location' ) );
 		}
 		$json   = $json['items'][0];
-		$return = $this->address_to_mf2( $json['address'] );
+		$return = $this->address_to_mf2( $json );
 		if ( isset( $json['position'] ) ) {
 			$return['latitude']  = $json['position']['lat'];
 			$return['longitude'] = $json['position']['lng'];

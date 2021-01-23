@@ -185,6 +185,9 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
 		}
+		if ( ! array_key_exists( 'display-name', $addr ) ) {
+			$addr['display-name'] = $this->display_name( $addr );
+		}
 		return $addr;
 	}
 
