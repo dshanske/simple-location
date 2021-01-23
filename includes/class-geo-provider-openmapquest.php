@@ -10,7 +10,7 @@
  *
  * @since 1.0.0
  */
-class Geo_Provider_Mapquest extends Geo_Provider {
+class Geo_Provider_OpenMapquest extends Geo_Provider_Nominatim {
 
 
 	/**
@@ -30,7 +30,7 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Open Search(Nominatim) via Mapquest', 'simple-location' );
-		$this->slug = 'mapquest';
+		$this->slug = 'openmapquest';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_mapquest_api' );
 		}
@@ -40,7 +40,7 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
-		parent::__construct( $args );
+		Geo_Provider::__construct( $args );
 	}
 
 	/**
@@ -135,107 +135,9 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		$address = $json['address'];
-		return $this->address_to_mf( $address );
+
+		return $this->address_to_mf( $json );
 	}
-
-	/**
-	 * Convert address properties to mf2
-	 *
-	 * @param  array $address Raw JSON.
-	 * @return array $reverse microformats2 address elements in an array.
-	 */
-	private function address_to_mf( $address ) {
-		if ( 'us' === $address['country_code'] ) {
-			$region = self::ifnot(
-				$address,
-				array(
-					'state',
-					'county',
-				)
-			);
-		} else {
-			$region = self::ifnot(
-				$address,
-				array(
-					'county',
-					'state',
-				)
-			);
-		}
-		$street  = ifset( $address['house_number'], '' ) . ' ';
-		$street .= self::ifnot(
-			$address,
-			array(
-				'road',
-				'highway',
-				'footway',
-			)
-		);
-		$addr    = array(
-			'name'             => self::ifnot(
-				$address,
-				array(
-					'attraction',
-					'building',
-					'hotel',
-					'address29',
-					'address26',
-				)
-			),
-			'street-address'   => $street,
-			'extended-address' => self::ifnot(
-				$address,
-				array(
-					'boro',
-					'neighbourhood',
-					'suburb',
-				)
-			),
-			'locality'         => self::ifnot(
-				$address,
-				array(
-					'hamlet',
-					'village',
-					'town',
-					'city',
-				)
-			),
-			'region'           => $region,
-			'country-name'     => self::ifnot(
-				$address,
-				array(
-					'country',
-				)
-			),
-			'postal-code'      => self::ifnot(
-				$address,
-				array(
-					'postcode',
-				)
-			),
-			'country-code'     => strtoupper( $address['country_code'] ),
-
-			'latitude'         => $this->latitude,
-			'longitude'        => $this->longitude,
-			'raw'              => $address,
-		);
-
-		if ( is_null( $addr['country-name'] ) ) {
-			$file                 = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
-			$codes                = json_decode( file_get_contents( $file ), true );
-			$addr['country-name'] = $codes[ $addr['country-code'] ];
-		}
-
-		$addr                 = array_filter( $addr );
-		$addr['display-name'] = $this->display_name( $addr );
-		$tz                   = $this->timezone();
-		if ( $tz ) {
-			$addr = array_merge( $addr, $tz );
-		}
-		return $addr;
-	}
-
 
 	/**
 	 * Geocode address.
@@ -279,4 +181,4 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 
 }
 
-register_sloc_provider( new Geo_Provider_Mapquest() );
+register_sloc_provider( new Geo_Provider_OpenMapquest() );

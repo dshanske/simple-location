@@ -66,17 +66,21 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		$address = $json['address'];
-		return $this->address_to_mf( $address );
+		return $this->address_to_mf( $json );
 	}
 
 	/**
 	 * Convert address properties to mf2
 	 *
-	 * @param  array $address Raw JSON.
+	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
-	private function address_to_mf( $address ) {
+	protected function address_to_mf( $json ) {
+		if ( ! array_key_exists( 'address', $json ) ) {
+			return array();
+		}
+
+		$address = $json['address'];
 		if ( 'us' === $address['country_code'] ) {
 			$region = self::ifnot(
 				$address,
@@ -89,12 +93,24 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			$region = self::ifnot(
 				$address,
 				array(
+					'region', 
 					'county',
 					'state',
+					'state_district',
 				)
 			);
 		}
-		$street  = ifset( $address['house_number'], '' ) . ' ';
+		$street  = self::ifnot( 
+			$address,
+			array(
+				'house_number',
+				'house_name'
+			)
+		);
+		if ( ! empty( $street ) ) {
+			$street .= ' ';
+		}
+
 		$street .= self::ifnot(
 			$address,
 			array(
@@ -108,10 +124,32 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 				$address,
 				array(
 					'attraction',
+					'tourism',
 					'building',
 					'hotel',
 					'address29',
 					'address26',
+					'emergency', 
+					'historic', 
+					'military', 
+					'natural', 
+					'landuse', 
+					'place', 
+					'railway', 
+					'man_made', 
+					'aerialway', 
+					'boundary', 
+					'amenity', 
+					'aeroway', 
+					'club', 
+					'craft', 
+					'leisure', 
+					'office', 
+					'mountain_pass', 
+					'shop', 
+					'bridge', 
+					'tunnel', 
+					'waterway'
 				)
 			),
 			'street-address'   => $street,
@@ -119,8 +157,14 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 				$address,
 				array(
 					'boro',
+					'borough',
 					'neighbourhood',
+					'city_district',
+					'district',
 					'suburb',
+					'subdivision',
+					'allotments',
+					'quarter'
 				)
 			),
 			'locality'         => self::ifnot(
@@ -130,6 +174,9 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 					'village',
 					'town',
 					'city',
+					'municipality', 
+					'croft',
+					'isolated_dwlling'
 				)
 			),
 			'region'           => $region,
@@ -149,15 +196,21 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 
 			'latitude'         => $this->latitude,
 			'longitude'        => $this->longitude,
-			'raw'              => $address,
+			'raw'              => $json,
 		);
 		if ( is_null( $addr['country-name'] ) ) {
 			$file                 = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
 			$codes                = json_decode( file_get_contents( $file ), true );
 			$addr['country-name'] = $codes[ $addr['country-code'] ];
 		}
+		if ( isset( $json['extratags'] ) ) {
+			$addr['url']   = ifset( $json['extratags']['website'] );
+			$addr['photo'] = ifset( $json['extratags']['image'] );
+		}
 		$addr                 = array_filter( $addr );
-		$addr['display-name'] = $this->display_name( $addr );
+		if ( ! array_key_exists( 'display-name', $addr ) ) {
+			$addr['display-name'] = $this->display_name( $addr );
+		}
 		$tz                   = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );

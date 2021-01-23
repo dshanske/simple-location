@@ -394,6 +394,9 @@ class REST_Geo {
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$zone    = Location_Zones::in_zone( $params['latitude'], $params['longitude'] );
 			$reverse = Loc_Config::geo_provider( $provider );
+			if ( ! $reverse ) {
+				return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
+			}
 			$reverse->set( $params );
 			$map      = Loc_Config::map_provider();
 			$map_args = array(
@@ -411,12 +414,12 @@ class REST_Geo {
 				);
 			} else {
 				$reverse_adr               = $reverse->reverse_lookup();
-				$reverse_adr['map_url']    = $map->get_the_static_map();
-				$reverse_adr['map_link']   = $map->get_the_map_url();
-				$reverse_adr['map_return'] = $map->get_the_map();
 				if ( is_wp_error( $reverse_adr ) ) {
 					return $reverse_adr;
 				}
+				$reverse_adr['map_url']    = $map->get_the_static_map();
+				$reverse_adr['map_link']   = $map->get_the_map_url();
+				$reverse_adr['map_return'] = $map->get_the_map();
 			}
 			if ( isset( $params['weather'] ) && ( 'no' !== $params['weather'] ) ) {
 				$weather = Loc_Config::weather_provider();
