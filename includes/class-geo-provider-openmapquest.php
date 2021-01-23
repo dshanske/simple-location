@@ -6,7 +6,7 @@
  */
 
 /**
- * Reverse Geolocation using MapQuest API.
+ * Reverse Geolocation using MapQuest Open APIs.
  *
  * @since 1.0.0
  */

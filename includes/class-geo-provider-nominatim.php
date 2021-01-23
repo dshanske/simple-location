@@ -125,6 +125,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 				array(
 					'attraction',
 					'tourism',
+					'place_of_worship',
 					'building',
 					'hotel',
 					'address29',
@@ -199,9 +200,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			'raw'              => $json,
 		);
 		if ( is_null( $addr['country-name'] ) ) {
-			$file                 = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
-			$codes                = json_decode( file_get_contents( $file ), true );
-			$addr['country-name'] = $codes[ $addr['country-code'] ];
+			$addr['country-name'] = self::country_name( $addr['country-code'] );
 		}
 		if ( isset( $json['extratags'] ) ) {
 			$addr['url']   = ifset( $json['extratags']['website'] );

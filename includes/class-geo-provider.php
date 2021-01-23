@@ -135,6 +135,21 @@ abstract class Geo_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Turn Country Code into Country Name.
+	 *
+	 * @param string $code Country Code.
+	 * @return string|boolean Country Name or false is failed.
+	 */
+	 protected function country_name( $code ) {
+		$file                 = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
+		$codes                = json_decode( file_get_contents( $file ), true );
+		if ( array_key_exists( $code, $codes ) ) {
+			return $codes[ $code ];
+		}
+		return false;
+	}
+
+	/**
 	 * Return Timezone Data for a Set of Coordinates.
 	 *
 	 * @return array|boolean Return Timezone Data or False if Failed

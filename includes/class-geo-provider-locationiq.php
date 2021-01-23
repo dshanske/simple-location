@@ -196,9 +196,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider {
 		);
 
 		if ( is_null( $addr['country-name'] ) ) {
-			$file                 = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
-			$codes                = json_decode( file_get_contents( $file ), true );
-			$addr['country-name'] = $codes[ $addr['country-code'] ];
+			$addr['country-name'] = self::country_name( $addr['country-code'] );
 		}
 
 		$addr                 = array_filter( $addr );
