@@ -129,15 +129,10 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		$raw = $json;
-		if ( isset( $json['results'] ) ) {
-			$data = wp_is_numeric_array( $json['results'] ) ? array_shift( $json['results'] ) : $json['results'];
-		} else {
-			return array();
-		}
-		$addr              = $this->address_to_mf2( $data );
+		$addr              = $this->address_to_mf2( $json );
 		$addr['latitude']  = $this->latitude;
 		$addr['longitude'] = $this->longitude;
+		return $addr;
 	}
 
 	/**
@@ -147,10 +142,16 @@ class Geo_Provider_Google extends Geo_Provider {
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
 	private function address_to_mf2( $data ) {
+		$addr = array();
+		if ( WP_DEBUG ) {
+			$addr['raw'] = $data;
+		}
+
 		$addr['display-name'] = ifset( $data['formatted_address'] );
 		$addr['plus-code']    = ifset( $data['plus_code']['global_code'] );
-		if ( isset( $data['address_components'] ) ) {
-			foreach ( $data['address_components'] as $component ) {
+		$result               = ifset( $data['results'][0] );
+		if ( isset( $result['address_components'] ) ) {
+			foreach ( $result['address_components'] as $component ) {
 				if ( in_array( 'administrative_area_level_1', $component['types'], true ) ) {
 					$addr['region'] = $component['long_name'];
 				}
@@ -183,9 +184,6 @@ class Geo_Provider_Google extends Geo_Provider {
 		$tz = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
-		}
-		if ( WP_DEBUG ) {
-			$addr['raw'] = $data;
 		}
 		return $addr;
 	}

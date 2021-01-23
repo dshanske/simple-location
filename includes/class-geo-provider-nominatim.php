@@ -93,18 +93,18 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			$region = self::ifnot(
 				$address,
 				array(
-					'region', 
+					'region',
 					'county',
 					'state',
 					'state_district',
 				)
 			);
 		}
-		$street  = self::ifnot( 
+		$street = self::ifnot(
 			$address,
 			array(
 				'house_number',
-				'house_name'
+				'house_name',
 			)
 		);
 		if ( ! empty( $street ) ) {
@@ -130,27 +130,27 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 					'hotel',
 					'address29',
 					'address26',
-					'emergency', 
-					'historic', 
-					'military', 
-					'natural', 
-					'landuse', 
-					'place', 
-					'railway', 
-					'man_made', 
-					'aerialway', 
-					'boundary', 
-					'amenity', 
-					'aeroway', 
-					'club', 
-					'craft', 
-					'leisure', 
-					'office', 
-					'mountain_pass', 
-					'shop', 
-					'bridge', 
-					'tunnel', 
-					'waterway'
+					'emergency',
+					'historic',
+					'military',
+					'natural',
+					'landuse',
+					'place',
+					'railway',
+					'man_made',
+					'aerialway',
+					'boundary',
+					'amenity',
+					'aeroway',
+					'club',
+					'craft',
+					'leisure',
+					'office',
+					'mountain_pass',
+					'shop',
+					'bridge',
+					'tunnel',
+					'waterway',
 				)
 			),
 			'street-address'   => $street,
@@ -165,7 +165,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 					'suburb',
 					'subdivision',
 					'allotments',
-					'quarter'
+					'quarter',
 				)
 			),
 			'locality'         => self::ifnot(
@@ -175,9 +175,9 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 					'village',
 					'town',
 					'city',
-					'municipality', 
+					'municipality',
 					'croft',
-					'isolated_dwlling'
+					'isolated_dwlling',
 				)
 			),
 			'region'           => $region,
@@ -206,11 +206,11 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			$addr['url']   = ifset( $json['extratags']['website'] );
 			$addr['photo'] = ifset( $json['extratags']['image'] );
 		}
-		$addr                 = array_filter( $addr );
+		$addr = array_filter( $addr );
 		if ( ! array_key_exists( 'display-name', $addr ) ) {
 			$addr['display-name'] = $this->display_name( $addr );
 		}
-		$tz                   = $this->timezone();
+		$tz = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
 		}
