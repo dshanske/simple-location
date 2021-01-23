@@ -436,7 +436,7 @@ class REST_Geo {
 			}
 			return array_filter( $reverse_adr );
 		} elseif ( isset( $params['address'] ) ) {
-			$geocode = Loc_Config::geo_provider();
+			$geocode = Loc_Config::geo_provider( $provider );
 			return $geocode->geocode( $params['address'] );
 		}
 		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
