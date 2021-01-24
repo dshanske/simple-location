@@ -149,7 +149,7 @@ class Geo_Provider_OpenRoute extends Geo_Provider {
 			'extended-address' => self::ifnot(
 				$address,
 				array(
-					'boro',
+					'borough',
 					'neighbourhood',
 					'suburb',
 				)

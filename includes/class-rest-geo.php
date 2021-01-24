@@ -216,7 +216,7 @@ class REST_Geo {
 						'units'     => array(
 							'sanitize_callback' => 'sanitize_text_field',
 						),
-						'time' => array()
+						'time'      => array(),
 					),
 					'permission_callback' => function( $request ) {
 						return current_user_can( 'publish_posts' );
@@ -389,7 +389,7 @@ class REST_Geo {
 	 */
 	public static function geocode( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
-		$params = $request->get_params();
+		$params   = $request->get_params();
 		$provider = empty( $params['provider'] ) ? null : $params['provider'];
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$zone    = Location_Zones::in_zone( $params['latitude'], $params['longitude'] );
@@ -413,7 +413,7 @@ class REST_Geo {
 					'visibility'   => 'protected',
 				);
 			} else {
-				$reverse_adr               = $reverse->reverse_lookup();
+				$reverse_adr = $reverse->reverse_lookup();
 				if ( is_wp_error( $reverse_adr ) ) {
 					return $reverse_adr;
 				}
@@ -449,12 +449,12 @@ class REST_Geo {
 	 */
 	public static function weather( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
-		$params   = $request->get_params();
-		$args     = array(
+		$params = $request->get_params();
+		$args   = array(
 			'cache_key'  => 'slocw',
 			'cache_time' => 600,
 		);
-		$time = null;
+		$time   = null;
 		if ( array_key_exists( 'time', $params ) ) {
 			$time = $params['time'];
 		}
