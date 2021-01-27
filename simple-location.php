@@ -180,6 +180,7 @@ class Simple_Location_Plugin {
 			'class-geo-provider-bing.php', // Bing.
 			'class-geo-provider-locationiq.php', // LocationIQ.
 			'class-geo-provider-geonames.php', // Geonames.
+			'class-geo-provider-pelias.php', // Pelias.
 			'class-geo-provider-openroute.php', // OpenRoute.
 		);
 		self::load( $providers );

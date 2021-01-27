@@ -102,7 +102,6 @@ class Geo_Provider_Here extends Geo_Provider {
 			'apiKey' => $this->api,
 			'at'     => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
 			'lang'   => get_bloginfo( 'language' ),
-
 		);
 		$url  = 'https://revgeocode.search.hereapi.com/v1/revgeocode';
 		$json = $this->fetch_json( $url, $args );
@@ -128,14 +127,44 @@ class Geo_Provider_Here extends Geo_Provider {
 	private function address_to_mf2( $json ) {
 		$addr = array();
 		if ( array_key_exists( 'address', $json ) ) {
-			$location = 	$json['address'];
-			$addr['name']   = ifset( $json['title'] );
-			$addr['street-address'] = ifset( $location['street'] );
-			$addr['locality']       = ifset( $location['city'] );
-			$addr['region']         = ifset( $location['state'] );
-			$addr['country-name']   = ifset( $location['countryName'] );
-			$addr['country-code']   = ifset( $location['countryCode'] );
-			$addr['postal-code']    = ifset( $location['postalCode'] );
+			$location              = $json['address'];
+			$number                = self::ifnot(
+				$location,
+				array(
+					'houseNumber',
+				)
+			);
+			$street               .= self::ifnot(
+				$location,
+				array(
+					'street',
+				)
+			);
+			$addr['street']        = $street;
+			$addr['street_number'] = $number;
+
+			$addr['name']             = ifset( $json['title'] );
+			$addr['street-address']   = $street;
+			$addr['extended-address'] = self::ifnot(
+				$location,
+				array(
+					'district',
+				)
+			);
+
+			$addr['locality']     = ifset( $location['city'] );
+			$addr['region']       = ifset( $location['state'] );
+			$addr['region-code']  = ifset( $location['stateCode'] );
+			$addr['country-name'] = ifset( $location['countryName'] );
+			$addr['country-code'] = self::country_code_iso3( ifset( $location['countryCode'] ) );
+			$addr['postal-code']  = ifset( $location['postalCode'] );
+
+			// Adjust position of house number/name based on country practice.
+			if ( self::house_number( $county_code ) ) {
+				$addr['street-address'] = $street . ' ' . $number;
+			} else {
+				$addr['street-address'] = $number . ' ' . $street;
+			}
 		}
 
 		if ( ! array_key_exists( 'display-name', $addr ) ) {

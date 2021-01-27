@@ -118,20 +118,71 @@ abstract class Geo_Provider extends Sloc_Provider {
 		if ( ! is_array( $reverse ) ) {
 			return false;
 		}
+		$reverse = array_filter( $reverse );
 		if ( isset( $reverse['display_name'] ) ) {
 			return apply_filters( 'location_display_name', $reverse['display_name'], $reverse );
 		}
-		$text   = array();
-		$text[] = ifset( $reverse['name'] );
-		if ( ! array_key_exists( 'street-address', $reverse ) ) {
+		$text = array();
+		if ( array_key_exists( 'name', $reverse ) ) {
+			$text[] = $reverse['name'];
+		} elseif ( ! array_key_exists( 'street-address', $reverse ) ) {
 			$text[] = ifset( $reverse['extended-address'] );
+		} else {
+			$text[] = ifset( $reverse['street-address'] );
 		}
+
 		$text[] = ifset( $reverse['locality'] );
-		$text[] = ifset( $reverse['region'] );
-		$text[] = ifset( $reverse['country-name'] );
+		$text   = array_filter( $text );
+		if ( empty( $text ) ) {
+			$text[] = ifset( $reverse['region'] );
+		} else {
+			if ( array_key_exists( 'region-code', $reverse ) ) {
+				$text[] = $reverse['region-code'];
+			} else {
+				$text[] = ifset( $reverse['region'] );
+			}
+		}
+
+		if ( array_key_exists( 'country-code', $reverse ) ) {
+			$text[] = $reverse['country-code'];
+		} else {
+			$text[] = ifset( $reverse['country-name'] );
+		}
 		$text   = array_filter( $text );
 		$return = join( ', ', $text );
 		return apply_filters( 'location_display_name', $return, $reverse );
+	}
+
+	/**
+	 * Is Country One Where the Street Number Comes First?
+	 *
+	 * @param $code Country Code.
+	 * @return boolean True if yes.
+	 */
+	protected function house_number( $code ) {
+		return ! in_array(
+			$code,
+			array(
+				'BE',
+				'BG',
+				'BR',
+				'CH',
+				'CL',
+				'CN',
+				'CZ',
+				'DE',
+				'DK',
+				'ES',
+				'FI',
+				'HR',
+				'IT',
+				'NL',
+				'NO',
+				'PL',
+				'SE',
+				'SK',
+			)
+		);
 	}
 
 	/**
@@ -141,8 +192,112 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @return string|boolean Country Name or false is failed.
 	 */
 	protected function country_name( $code ) {
+		$code = strtoupper( trim( $code ) );
+		if ( 2 !== strlen( $code ) ) {
+			return false;
+		}
 		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
 		$codes = json_decode( file_get_contents( $file ), true );
+		if ( array_key_exists( $code, $codes ) ) {
+			return $codes[ $code ];
+		}
+		return false;
+	}
+
+	/**
+	 * Turn Country Name into ISO2 Country Code.
+	 *
+	 * @param string $name Country Name.
+	 * @return string|boolean Country Code or false is failed.
+	 */
+	protected function country_code( $name ) {
+		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
+		$codes = json_decode( file_get_contents( $file ), true );
+		$name  = trim( $name );
+		foreach ( $codes as $key => $value ) {
+			if ( $name === $value ) {
+				return $key;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Turn ISO3 into ISO2 Country Code.
+	 *
+	 * @param string $iso3 ISO3 Country Code.
+	 * @return string|boolean ISO2 Country Code or false is failed.
+	 */
+	protected function country_code_iso3( $iso3 ) {
+		$iso3 = trim( $iso3 );
+		if ( 3 !== strlen( $iso3 ) ) {
+			return false;
+		}
+		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries-iso3.json';
+		$codes = json_decode( file_get_contents( $file ), true );
+		foreach ( $codes as $key => $value ) {
+			if ( $iso3 === $value ) {
+				return $key;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Turn a Region Name into a Region Code.
+	 *
+	 * @param string $name Region Name.
+	 * @param string $country Country Code.
+	 * @return string|boolean Region Code or false is failed.
+	 */
+	protected function region_code( $name, $country ) {
+		$name    = trim( $name );
+		$country = strtoupper( trim( $country ) );
+		$codes   = array();
+
+		if ( 'US' === $country ) {
+			// Special Case Alternatives for DC
+			if ( 'Washington, D.C.' === $name ) {
+				return 'DC';
+			}
+			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/states-us.json';
+			$codes = json_decode( file_get_contents( $file ), true );
+		}
+
+		if ( 'CA' === $country ) {
+			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/provinces-ca.json';
+			$codes = json_decode( file_get_contents( $file ), true );
+		}
+
+		foreach ( $codes as $key => $value ) {
+			if ( $name === $value ) {
+				return $key;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Turn a Region Code into Region Name.
+	 *
+	 * @param string $code Region Code.
+	 * @param string $country Country Code.
+	 * @return string|boolean Region Name or false is failed.
+	 */
+	protected function region_name( $code, $country ) {
+		$code  = strtoupper( trim( $code ) );
+		$codes = array();
+
+		if ( 'US' === $country ) {
+			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/states-us.json';
+			$codes = json_decode( file_get_contents( $file ), true );
+		}
+
+		if ( 'CA' === $country ) {
+			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/provinces-ca.json';
+			$codes = json_decode( file_get_contents( $file ), true );
+		}
+
 		if ( array_key_exists( $code, $codes ) ) {
 			return $codes[ $code ];
 		}

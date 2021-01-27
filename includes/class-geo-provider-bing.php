@@ -124,7 +124,9 @@ class Geo_Provider_Bing extends Geo_Provider {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
 		}
 		$args = array(
-			'key' => $this->api,
+			'key'    => $this->api,
+			'incl'   => 'ciso2',
+			'inclnb' => '1',
 		);
 		$url  = sprintf( 'https://dev.virtualearth.net/REST/v1/Locations/%1$s,%2$s', $this->latitude, $this->longitude );
 		$json = $this->fetch_json( $url, $args );
@@ -152,19 +154,42 @@ class Geo_Provider_Bing extends Geo_Provider {
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
 	private function address_to_mf2( $json ) {
-		$addr                   = array();
-		$addr['display-name']   = $json['name'];
-		$addr['street-address'] = ifset( $json['address']['addressLine'] );
-		$addr['locality']       = ifset( $json['address']['locality'] );
-		$addr['region']         = ifset( $json['address']['adminDistrict'] );
-		$addr['country-name']   = ifset( $json['address']['countryRegion'] );
-		$addr['postal-code']    = ifset( $json['address']['postalCode'] );
-		$addr['label']          = ifset( $json['address']['landmark'] );
+		$addr                     = array();
+		$addr['name']             = self::ifnot(
+			$json,
+			array(
+				'landmark',
+			)
+		);
+		$addr['street-address']   = ifset( $json['address']['addressLine'] );
+		$addr['extended-address'] = ifset( $json['address']['neighborhood'] );
+		$addr['locality']         = ifset( $json['address']['locality'] );
+		$addr['country-name']     = ifset( $json['address']['countryRegion'] );
+		$addr['country-code']     = ifset( $json['address']['countryRegionIso2'] );
+		$addr['region-code']      = ifset( $json['address']['adminDistrict'] );
+		$addr['region']           = self::region_name( $addr['region-code'], $addr['country-code'] );
+
+		if ( empty( $addr['region'] ) ) {
+			$addr['region'] = self::ifnot(
+				$json['address'],
+				array(
+					'adminDistrict',
+					'adminDistrict2',
+				)
+			);
+		}
+		$addr['postal-code'] = ifset( $json['address']['postalCode'] );
+		$addr['label']       = ifset( $json['address']['landmark'] );
 
 		$tz = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
 		}
+
+		if ( ! array_key_exists( 'display-name', $addr ) ) {
+			$addr['display-name'] = $this->display_name( $addr );
+		}
+
 		if ( WP_DEBUG ) {
 			$addr['raw'] = $json;
 		}

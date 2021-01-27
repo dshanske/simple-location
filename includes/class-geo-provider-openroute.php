@@ -10,7 +10,7 @@
  *
  * @since 1.0.0
  */
-class Geo_Provider_OpenRoute extends Geo_Provider {
+class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -39,7 +39,7 @@ class Geo_Provider_OpenRoute extends Geo_Provider {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
-		parent::__construct( $args );
+		Geo_Provider::__construct( $args );
 	}
 
 	/**
@@ -116,81 +116,16 @@ class Geo_Provider_OpenRoute extends Geo_Provider {
 		}
 		$args = array(
 			'api_key'   => $this->api,
-			'format'    => 'json',
 			'point.lat' => $this->latitude,
 			'point.lon' => $this->longitude,
-			'size'      => 1,
+		// 'size'      => 1,
 		);
 
 		$json = $this->fetch_json( 'https://api.openrouteservice.org/geocode/reverse', $args );
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		$address = $json['features'][0];
-		return $this->address_to_mf( $address );
-	}
-
-	/**
-	 * Convert address properties to mf2
-	 *
-	 * @param  array $address Raw JSON.
-	 * @return array $reverse microformats2 address elements in an array.
-	 */
-	private function address_to_mf( $address ) {
-		$address = $address['properties'];
-		$addr    = array(
-			'name'             => self::ifnot(
-				$address,
-				array(
-					'label',
-				)
-			),
-			'street-address'   => $street,
-			'extended-address' => self::ifnot(
-				$address,
-				array(
-					'borough',
-					'neighbourhood',
-					'suburb',
-				)
-			),
-			'locality'         => self::ifnot(
-				$address,
-				array(
-					'locality',
-				)
-			),
-			'region'           => self::ifnot(
-				$address,
-				array(
-					'region',
-				)
-			),
-			'country-name'     => self::ifnot(
-				$address,
-				array(
-					'country',
-				)
-			),
-			'postal-code'      => self::ifnot(
-				$address,
-				array(
-					'postalcode',
-				)
-			),
-
-			'latitude'         => $this->latitude,
-			'longitude'        => $this->longitude,
-			'raw'              => $address,
-		);
-
-		$addr                 = array_filter( $addr );
-		$addr['display-name'] = $this->label;
-		$tz                   = $this->timezone();
-		if ( $tz ) {
-			$addr = array_merge( $addr, $tz );
-		}
-		return $addr;
+		return $this->address_to_mf( $json );
 	}
 
 	/**
@@ -217,7 +152,7 @@ class Geo_Provider_OpenRoute extends Geo_Provider {
 			$json = $json[0];
 		}
 		$address             = $json['features'][0];
-		$return              = $this->address_to_mf( $address );
+		$return              = $this->address_to_mf( $json );
 		$return['latitude']  = $address['geometry']['coordinates'][1];
 		$return['longitude'] = $address['geometry']['coordinates'][0];
 		return array_filter( $return );

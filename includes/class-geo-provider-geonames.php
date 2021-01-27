@@ -119,12 +119,12 @@ class Geo_Provider_Geonames extends Geo_Provider {
 			'lat'      => $this->latitude,
 			'lng'      => $this->longitude,
 		);
-		$url  = 'https://secure.geonames.org/findNearbyPlaceNameJSON';
+		$url  = 'http://api.geonames.org/extendedFindNearbyJSON';
 		$json = $this->fetch_json( $url, $args );
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		$json              = $json['geonames'][0];
+
 		$addr              = $this->address_to_mf2( $json );
 		$addr['latitude']  = $this->latitude;
 		$addr['longitude'] = $this->longitude;
@@ -138,22 +138,49 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
 	private function address_to_mf2( $json ) {
-		$addr                   = array();
-		$addr['street-address'] = ifset( $json['toponymName'] );
-		$addr['locality']       = ifset( $json['adminName1'] );
-		// $addr['region']         = ifset( $json[] );
-		$addr['country-name'] = ifset( $json['countryName'] );
-		$display              = array();
-		foreach ( array( 'street-address', 'locality', 'country-name' ) as $prop ) {
-			$display[] = ifset( $addr[ $prop ] );
+		$addr = array();
+		if ( WP_DEBUG ) {
+			$addr['raw'] = $json;
 		}
-		$addr['display-name'] = implode( ', ', $display );
+		if ( array_key_exists( 'address', $json ) ) {
+			$json = $json['address'];
+		} elseif ( array_key_exists( 'geonames', $json ) ) {
+			$json = $json['geonames'];
+			$json = end( $json );
+		}
+
+		$addr['locality']     = self::ifnot(
+			$json,
+			array(
+				'adminName2',
+				'toponymName',
+			)
+		);
+		$addr['region-code']  = ifset( $json['adminCode1'] );
+		$addr['region']       = ifset( $json['adminName1'] );
+		$addr['country-code'] = ifset( $json['countryCode'] );
+		$addr['country-name'] = isset( $json['countryName'] ) ? $json['countryName'] : self::country_name( $addr['country-code'] );
+		$addr['postal-code']  = ifset( $json['postalcode'] );
+
+		$number = ifset( $json['streetNumber'] );
+		$street = ifset( $json['street'] );
+
+		// Adjust position of house number/name based on country practice.
+		if ( self::house_number( $county_code ) ) {
+			$street_address = $street . ' ' . $number;
+		} else {
+			$street_address = $number . ' ' . $street;
+		}
+
+		$addr['street-address'] = trim( $street_address );
+		$addr['street']         = $street;
+		$addr['street-number']  = $number;
+
+		$addr                 = array_filter( $addr );
+		$addr['display-name'] = self::display_name( $addr );
 		$tz                   = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
-		}
-		if ( WP_DEBUG ) {
-			$addr['raw'] = $json;
 		}
 		return array_filter( $addr );
 	}

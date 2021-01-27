@@ -167,14 +167,15 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			'country-code'     => ifset( $location['adminArea1'] ),
 		);
 
-		if ( 'US' === $return['country-code'] ) {
-			$return['region'] = self::ifnot(
+		if ( 'US' === $return['country-code'] || 'CA' === $return['country-code'] ) {
+			$return['region-code'] = self::ifnot(
 				$location,
 				array(
 					'adminArea3',
 					'adminArea4',
 				)
 			);
+			$return['region']      = self::region_name( $return['region-code'], $return['country-code'] );
 		} else {
 			$return['region'] = self::ifnot(
 				$location,
@@ -192,6 +193,10 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 
 		if ( WP_DEBUG ) {
 			$return['raw'] = $json;
+		}
+
+		if ( ! array_key_exists( 'display-name', $return ) ) {
+			$return['display-name'] = $this->display_name( $return );
 		}
 
 		return array_filter( $return );

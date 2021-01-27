@@ -51,9 +51,10 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	 */
 	public function reverse_lookup() {
 		$args = array(
-			'format'          => 'json',
+			'format'          => 'jsonv2',
 			'extratags'       => '1',
 			'addressdetails'  => '1',
+			'namedetails'     => '1',
 			'lat'             => $this->latitude,
 			'lon'             => $this->longitude,
 			'zoom'            => $this->reverse_zoom,
@@ -100,39 +101,59 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 				)
 			);
 		}
-		$street = self::ifnot(
+
+		if ( ! empty( $region ) ) {
+			$region_code = self::region_code( $region, $address['country_code'] );
+		}
+
+		$country_code = strtoupper( ifset( $address['country_code'] ) );
+
+		$number = self::ifnot(
 			$address,
 			array(
 				'house_number',
 				'house_name',
 			)
 		);
-		if ( ! empty( $street ) ) {
-			$street .= ' ';
-		}
 
-		$street .= self::ifnot(
+		$street = self::ifnot(
 			$address,
 			array(
 				'road',
 				'highway',
 				'footway',
+				'pedestrian',
 			)
 		);
-		$addr    = array(
+		// Adjust position of house number/name based on country practice.
+		if ( self::house_number( $county_code ) ) {
+			$street_address = $street . ' ' . $number;
+		} else {
+			$street_address = $number . ' ' . $street;
+		}
+		$street_address = trim( $street_address );
+
+		$addr = array(
 			'name'             => self::ifnot(
 				$address,
 				array(
 					'attraction',
+					'library',
+					'parking',
 					'tourism',
 					'place_of_worship',
 					'building',
 					'hotel',
+					'historic',
+					'military',
+					'office',
+					'club',
+					'craft',
+					'leisure',
+					'shop',
 					'address29',
 					'address26',
 					'emergency',
-					'historic',
-					'military',
 					'natural',
 					'landuse',
 					'place',
@@ -142,24 +163,22 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 					'boundary',
 					'amenity',
 					'aeroway',
-					'club',
-					'craft',
-					'leisure',
-					'office',
 					'mountain_pass',
-					'shop',
 					'bridge',
 					'tunnel',
 					'waterway',
 				)
 			),
-			'street-address'   => $street,
+			'street-number'    => $number,
+			'street'           => $street,
+			'street-address'   => $street_address,
 			'extended-address' => self::ifnot(
 				$address,
 				array(
 					'boro',
 					'borough',
 					'neighbourhood',
+					'neighborhood',
 					'city_district',
 					'district',
 					'suburb',
@@ -181,6 +200,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 				)
 			),
 			'region'           => $region,
+			'region-code'      => array_key_exists( 'state_code', $address ) ? strtoupper( $address['state_code'] ) : $region_code,
 			'country-name'     => self::ifnot(
 				$address,
 				array(
@@ -193,7 +213,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 					'postcode',
 				)
 			),
-			'country-code'     => strtoupper( $address['country_code'] ),
+			'country-code'     => $country_code,
 
 			'latitude'         => $this->latitude,
 			'longitude'        => $this->longitude,

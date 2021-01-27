@@ -113,8 +113,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		$address = $json['address'];
-		return $this->address_to_mf( $address );
+		return $this->address_to_mf( $json );
 	}
 
 	/**

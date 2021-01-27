@@ -49,6 +49,7 @@ module.exports = function(grunt) {
 	    files: {
               'data/airports.csv': 'https://ourairports.com/data/airports.csv',
 	      'data/countries.json': 'http://country.io/names.json',
+	      'data/countries-iso3.json': 'http://country.io/iso3.json',
 	      'data/airlines.csv': 'https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat',
             } 
        }

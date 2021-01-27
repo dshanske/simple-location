@@ -118,11 +118,10 @@ class Geo_Provider_Google extends Geo_Provider {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Google', 'simple-location' ) );
 		}
 		$args = array(
-			'latlng' => $this->latitude . ',' . $this->longitude,
-			// 'language'      => get_bloginfo( 'language' ),
-			// 'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
-			// 'result_type'   => 'street_address',
-			'key'    => $this->api,
+			'latlng'        => $this->latitude . ',' . $this->longitude,
+			'language'      => get_bloginfo( 'language' ),
+			'location_type' => 'ROOFTOP|RANGE_INTERPOLATED',
+			'key'           => $this->api,
 		);
 		$url  = 'https://maps.googleapis.com/maps/api/geocode/json?';
 		$json = $this->fetch_json( $url, $args );
@@ -153,7 +152,8 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( isset( $result['address_components'] ) ) {
 			foreach ( $result['address_components'] as $component ) {
 				if ( in_array( 'administrative_area_level_1', $component['types'], true ) ) {
-					$addr['region'] = $component['long_name'];
+					$addr['region']      = $component['long_name'];
+					$addr['region-code'] = $component['short_name'];
 				}
 				if ( in_array( 'country', $component['types'], true ) ) {
 					$addr['country-name'] = $component['long_name'];
@@ -166,14 +166,10 @@ class Geo_Provider_Google extends Geo_Provider {
 					$addr['locality'] = $component['long_name'];
 				}
 				if ( in_array( 'street_number', $component['types'], true ) ) {
-					$addr['street-address'] = $component['long_name'];
+					$number = $component['short_name'];
 				}
 				if ( in_array( 'route', $component['types'], true ) ) {
-					if ( isset( $addr['street-address'] ) ) {
-						$addr['street-address'] .= ' ' . $component['long_name'];
-					} else {
-						$addr['street-address'] = $component['long_name'];
-					}
+					$street = $component['short_name'];
 				}
 				if ( in_array( 'postal_code', $component['types'], true ) ) {
 					$addr['postal-code'] = $component['long_name'];
@@ -181,10 +177,21 @@ class Geo_Provider_Google extends Geo_Provider {
 			}
 		}
 
+		// Adjust position of house number/name based on country practice.
+		if ( self::house_number( $county_code ) ) {
+			$street_address = $street . ' ' . $number;
+		} else {
+			$street_address = $number . ' ' . $street;
+		}
+		$addr['street-address'] = trim( $street_address );
+		$addr['street']         = $street;
+		$addr['street_number']  = $number;
+
 		$tz = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
 		}
+		$addr = array_filter( $addr );
 		if ( ! array_key_exists( 'display-name', $addr ) ) {
 			$addr['display-name'] = $this->display_name( $addr );
 		}
