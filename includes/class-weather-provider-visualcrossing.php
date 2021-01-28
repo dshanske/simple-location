@@ -120,7 +120,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 		$json = array_filter( $json );
 		if ( array_key_exists( 'currentConditions', $json ) ) {
 			$json = $json['currentConditions'];
-		} elseif ( array_key_exists( 'days', $json ) ) {	
+		} elseif ( array_key_exists( 'days', $json ) ) {
 			$json = $json['days'][0]['hours'];
 			if ( array_key_exists( $datetime->format( 'G' ), $json ) ) {
 				$json = $json[ $datetime->format( 'G' ) ];

@@ -161,9 +161,9 @@ class Geo_Provider_Here extends Geo_Provider {
 
 			// Adjust position of house number/name based on country practice.
 			if ( self::house_number( $county_code ) ) {
-				$addr['street-address'] = $street . ' ' . $number;
-			} else {
 				$addr['street-address'] = $number . ' ' . $street;
+			} else {
+				$addr['street-address'] = $street . ' ' . $number;
 			}
 		}
 
