@@ -107,6 +107,17 @@ class Loc_Config {
 
 		register_setting(
 			'simloc', // option group.
+			'sloc_country', // option name.
+			array(
+				'type'         => 'string',
+				'description'  => 'Home Country',
+				'show_in_rest' => true,
+				'default'      => 'US',
+			)
+		);
+
+		register_setting(
+			'simloc', // option group.
 			'sloc_map_display', // option name.
 			array(
 				'type'         => 'boolean',
@@ -471,6 +482,17 @@ class Loc_Config {
 			'sloc_general', // settings section.
 			array(
 				'label_for' => 'sloc_auto_micropub',
+			)
+		);
+
+		add_settings_field(
+			'sloc_country', // id.
+			__( 'Home Country', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'country_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_general', // settings section.
+			array(
+				'label_for' => 'sloc_country',
 			)
 		);
 		add_settings_field(
@@ -860,6 +882,22 @@ class Loc_Config {
 		echo '</select><br /><br />';
 	}
 
+	/**
+	 * Echo list of countries.
+	 *
+	 * @param array $args {
+	 *  Arguments for the country list.
+	 *  @type string $label_for Label for Select Box.
+	 * }
+	 * @since 1.0.0
+	 */
+	public static function country_callback( array $args ) {
+		$name     = $args['label_for'];
+		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
+		$codes = json_decode( file_get_contents( $file ), true );
+		$text = get_option( $name );
+		self::select_callback( $name, $text, $codes );
+	}
 
 	/**
 	 * Echo list of styles.

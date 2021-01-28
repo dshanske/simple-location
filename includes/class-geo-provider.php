@@ -142,9 +142,10 @@ abstract class Geo_Provider extends Sloc_Provider {
 				$text[] = ifset( $reverse['region'] );
 			}
 		}
-
 		if ( array_key_exists( 'country-code', $reverse ) ) {
-			$text[] = $reverse['country-code'];
+			if ( $reverse['country-code'] !== get_option( 'sloc_country' ) ) {
+				$text[] = $reverse['country-code'];
+			}
 		} else {
 			$text[] = ifset( $reverse['country-name'] );
 		}
