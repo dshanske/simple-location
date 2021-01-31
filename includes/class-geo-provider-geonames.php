@@ -159,10 +159,10 @@ class Geo_Provider_Geonames extends Geo_Provider {
 			)
 		);
 		$addr['region']   = ifset( $json['adminName1'] );
-		if ( array_key_exists( 'adminCodes1', $json ) ) {
-			$addr['region-code'] = $json['adminCodes1']['ISO3166_2'];
-		} elseif ( array_key_exists( 'adminCode1', $json ) ) {
+		if ( array_key_exists( 'adminCode1', $json ) && ! is_numeric( $json['adminCode1'] ) ) {
 			$addr['region-code'] = $json['adminCode1'];
+		} elseif ( array_key_exists( 'adminCodes1', $json ) && ! is_numeric( $json['adminCodes1']['ISO3166_2'] ) ) {
+			$addr['region-code'] = $json['adminCodes1']['ISO3166_2'];
 		} else {
 			$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] );
 		}

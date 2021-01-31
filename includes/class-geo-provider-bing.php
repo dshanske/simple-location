@@ -166,7 +166,13 @@ class Geo_Provider_Bing extends Geo_Provider {
 		$addr['locality']         = ifset( $json['address']['locality'] );
 		$addr['country-name']     = ifset( $json['address']['countryRegion'] );
 		$addr['country-code']     = ifset( $json['address']['countryRegionIso2'] );
-		$addr['region-code']      = ifset( $json['address']['adminDistrict'] );
+		$addr['region-code']      = self::ifnot( 
+						$json['address'],
+						array(
+							'adminDistrict',
+							'adminDistrict2'
+						)
+					);
 		$addr['region']           = self::region_name( $addr['region-code'], $addr['country-code'] );
 
 		if ( empty( $addr['region'] ) ) {
