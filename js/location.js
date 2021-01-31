@@ -166,6 +166,13 @@ jQuery( document ).ready( function( $ ) {
 						$( '#altitude' ).val( response.altitude );
 					}
 
+					if ( 'term_id' in response ) {
+						if( $('#location_dropdown').find( 'option[value="+response.term_id+"]').length > 0 ) {
+							$('#location_dropdown').append( new Option( response.term_name, response.term_id, false, false ) );
+						}
+						$('#location_dropdown').val(response['term_id']).change();
+					}
+
 					if ( 'visibility' in response ) {
 						$( '#location-visibility' ).val( response[ 'visibility' ] ); // eslint-disable-line dot-notation
 						$( '#location-visibility-label' ).text( slocOptions.visibility_options[ $( '#location-visibility' ).val() ] ); // eslint-disable-line camelcase

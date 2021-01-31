@@ -182,7 +182,7 @@ class Geo_Provider_Pelias extends Geo_Provider {
 		$country_code = self::country_code_iso3( $country_code );
 
 		// Adjust position of house number/name based on country practice.
-		if ( self::house_number( $county_code ) ) {
+		if ( self::house_number( $country_code ) ) {
 			$street_address = $number . ' ' . $street;
 		} else {
 			$street_address = $street . ' ' . $number;

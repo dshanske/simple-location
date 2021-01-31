@@ -115,6 +115,7 @@ class Simple_Location_Plugin {
 		$core = array(
 			'class-geo-data.php', // Register Metadata Functions.
 			'class-venue-taxonomy.php', // Venue Taxonomy.
+			'class-location-taxonomy.php', // Venue Taxonomy.
 			'class-sloc-provider.php', // Base Provider Class.
 			'class-map-provider.php', // Map Provider Class.
 			'class-geo-provider.php', // Geo Provider Class.

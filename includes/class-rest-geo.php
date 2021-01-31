@@ -420,6 +420,12 @@ class REST_Geo {
 				$reverse_adr['map_url']    = $map->get_the_static_map();
 				$reverse_adr['map_link']   = $map->get_the_map_url();
 				$reverse_adr['map_return'] = $map->get_the_map();
+				$term = Location_Taxonomy::update_location( $reverse_adr );
+				if ( $term ) {
+					$reverse_adr['term_id'] = $term;
+					$term = get_term( $term, 'location' );
+					$reverse_adr['term_name'] = $term->name;
+				}
 			}
 			if ( isset( $params['weather'] ) && ( 'no' !== $params['weather'] ) ) {
 				$weather = Loc_Config::weather_provider();

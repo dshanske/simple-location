@@ -126,7 +126,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			)
 		);
 		// Adjust position of house number/name based on country practice.
-		if ( self::house_number( $county_code ) ) {
+		if ( self::house_number( $country_code ) ) {
 			$street_address = $number . ' ' . $street;
 		} else {
 			$street_address = $street . ' ' . $number;
