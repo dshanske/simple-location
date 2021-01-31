@@ -148,19 +148,25 @@ class Geo_Provider_Geonames extends Geo_Provider {
 			$json = $json['geonames'];
 			$json = end( $json );
 		}
+		$addr['country-code'] = ifset( $json['countryCode'] );
+		$addr['country-name'] = isset( $json['countryName'] ) ? $json['countryName'] : self::country_name( $addr['country-code'] );
 
-		$addr['locality']     = self::ifnot(
+		$addr['locality'] = self::ifnot(
 			$json,
 			array(
 				'adminName2',
 				'toponymName',
 			)
 		);
-		$addr['region-code']  = ifset( $json['adminCode1'] );
-		$addr['region']       = ifset( $json['adminName1'] );
-		$addr['country-code'] = ifset( $json['countryCode'] );
-		$addr['country-name'] = isset( $json['countryName'] ) ? $json['countryName'] : self::country_name( $addr['country-code'] );
-		$addr['postal-code']  = ifset( $json['postalcode'] );
+		$addr['region']   = ifset( $json['adminName1'] );
+		if ( array_key_exists( 'adminCodes1', $json ) ) {
+			$addr['region-code'] = $json['adminCodes1']['ISO3166_2'];
+		} elseif ( array_key_exists( 'adminCode1', $json ) ) {
+			$addr['region-code'] = $json['adminCode1'];
+		} else {
+			$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] );
+		}
+		$addr['postal-code'] = ifset( $json['postalcode'] );
 
 		$number = ifset( $json['streetNumber'] );
 		$street = ifset( $json['street'] );

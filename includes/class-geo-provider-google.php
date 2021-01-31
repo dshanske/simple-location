@@ -152,8 +152,10 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( isset( $result['address_components'] ) ) {
 			foreach ( $result['address_components'] as $component ) {
 				if ( in_array( 'administrative_area_level_1', $component['types'], true ) ) {
-					$addr['region']      = $component['long_name'];
-					$addr['region-code'] = $component['short_name'];
+					$addr['region'] = $component['long_name'];
+					if ( $component['short_name'] !== $component['long_name'] ) {
+						$addr['region-code'] = $component['short_name'];
+					}
 				}
 				if ( in_array( 'country', $component['types'], true ) ) {
 					$addr['country-name'] = $component['long_name'];
@@ -192,6 +194,9 @@ class Geo_Provider_Google extends Geo_Provider {
 			$addr = array_merge( $addr, $tz );
 		}
 		$addr = array_filter( $addr );
+		if ( ! array_key_exists( 'region-code', $addr ) && array_key_exists( 'region', $addr ) ) {
+			$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] );
+		}
 		if ( ! array_key_exists( 'display-name', $addr ) ) {
 			$addr['display-name'] = $this->display_name( $addr );
 		}

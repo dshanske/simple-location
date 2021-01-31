@@ -170,13 +170,14 @@ class Geo_Provider_Bing extends Geo_Provider {
 		$addr['region']           = self::region_name( $addr['region-code'], $addr['country-code'] );
 
 		if ( empty( $addr['region'] ) ) {
-			$addr['region'] = self::ifnot(
+			$addr['region']      = self::ifnot(
 				$json['address'],
 				array(
 					'adminDistrict',
 					'adminDistrict2',
 				)
 			);
+			$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] );
 		}
 		$addr['postal-code'] = ifset( $json['address']['postalCode'] );
 		$addr['label']       = ifset( $json['address']['landmark'] );

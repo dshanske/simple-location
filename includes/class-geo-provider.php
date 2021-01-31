@@ -263,16 +263,35 @@ abstract class Geo_Provider extends Sloc_Provider {
 			}
 			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/states-us.json';
 			$codes = json_decode( file_get_contents( $file ), true );
-		}
-
-		if ( 'CA' === $country ) {
+		} elseif ( 'CA' === $country ) {
 			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/provinces-ca.json';
 			$codes = json_decode( file_get_contents( $file ), true );
+		} else {
+			$file      = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/states.json';
+			$countries = json_decode( file_get_contents( $file ), true );
+			foreach ( $countries as $c ) {
+				if ( $c['iso2'] === $country ) {
+					$regions = $c['states'];
+					foreach ( $regions as $region ) {
+						if ( $name === $region['name'] ) {
+							return $region['state_code'];
+						}
+						foreach ( array( 'District', 'Province', 'State' ) as $title ) {
+							$region['name'] = str_replace( $title, '', $region['name'] );
+							if ( $name === $region['name'] ) {
+								return $region['state_code'];
+							}
+						}
+					}
+				}
+			}
 		}
 
-		foreach ( $codes as $key => $value ) {
-			if ( $name === $value ) {
-				return $key;
+		if ( ! empty( $codes ) ) {
+			foreach ( $codes as $key => $value ) {
+				if ( $name === $value ) {
+					return $key;
+				}
 			}
 		}
 		return false;

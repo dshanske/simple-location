@@ -51,6 +51,7 @@ module.exports = function(grunt) {
 	      'data/countries.json': 'http://country.io/names.json',
 	      'data/countries-iso3.json': 'http://country.io/iso3.json',
 	      'data/airlines.csv': 'https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat',
+	      'data/states.json': 'https://github.com/dr5hn/countries-states-cities-database/raw/master/countries%2Bstates.json',
             } 
        }
     });

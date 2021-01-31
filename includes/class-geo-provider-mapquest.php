@@ -177,13 +177,14 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			);
 			$return['region']      = self::region_name( $return['region-code'], $return['country-code'] );
 		} else {
-			$return['region'] = self::ifnot(
+			$return['region']      = self::ifnot(
 				$location,
 				array(
 					'adminArea4',
 					'adminArea3',
 				)
 			);
+			$return['region-code'] = self::region_code( $return['region'], $return['country-code'] );
 		}
 
 		if ( array_key_exists( 'latLng', $location ) && ! array_key_exists( 'latitude', $return ) ) {

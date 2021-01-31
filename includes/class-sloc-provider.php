@@ -150,7 +150,7 @@ abstract class Sloc_Provider {
 	 */
 	public static function ifnot( $array, $keys ) {
 		foreach ( $keys as $key ) {
-			if ( array_key_exists( $key, $array ) ) {
+			if ( array_key_exists( $key, $array ) && ! empty( $array[ $key ] ) ) {
 				return $array[ $key ];
 			}
 		}
