@@ -167,9 +167,7 @@ jQuery( document ).ready( function( $ ) {
 					}
 
 					if ( 'term_id' in response ) {
-						if( $('#location_dropdown').find( 'option[value="+response.term_id+"]').length > 0 ) {
-							$('#location_dropdown').append( new Option( response.term_name, response.term_id, false, false ) );
-						}
+						$('#location_dropdown').append( new Option( response.term_name, response.term_id, false, false ) );
 						$('#location_dropdown').val(response['term_id']).change();
 					}
 
