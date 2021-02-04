@@ -128,9 +128,11 @@ final class Location_Taxonomy {
 			'show_in_rest'       => false,
 			'show_tagcloud'      => true,
 			'show_in_quick_edit' => false,
-			'show_admin_column'  => true,
+			'show_admin_column'  => false,
 			'meta_box_cb'        => array( static::class, 'taxonomy_select_meta_box' ),
-			'rewrite'            => true,
+			'rewrite'            => array(
+							'hierarchical' => true
+						),
 			'query_var'          => true,
 		);
 		register_taxonomy( 'location', array( 'post' ), $args );
