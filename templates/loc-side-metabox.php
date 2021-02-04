@@ -127,14 +127,14 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
             <label for="temperature">
                 <?php echo Weather_Provider::get_form_label( 'temperature', $imperial ); ?>
             </label>
-            <input type="number" name="temperature" step="0.1" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
+            <input type="number" name="temperature" step="0.01" id="temperature" value="<?php echo ifset( $weather['temperature'], '' ); ?>" class="widefat" />
         </p>
 
         <p class="field-row">
             <label for="humidity">
                 <?php echo Weather_Provider::get_form_label( 'humidity', $imperial ); ?>
             </label>
-            <input type="number" name="humidity" id="humidity" step="0.1" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
+            <input type="number" name="humidity" id="humidity" step="0.01" value="<?php echo ifset( $weather['humidity'], '' ); ?>" class="widefat" />
         </p>
 
         <p class="field-row">
@@ -164,14 +164,14 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
             <label for="wind_speed">
                 <?php echo Weather_Provider::get_form_label( 'wind-speed', $imperial ); ?>
             </label>
-            <input class="widefat" type="number" name="wind_speed" id="wind_speed" value="<?php echo ifset( $wind['speed'], '' ); ?>" />
+            <input class="widefat" type="number" name="wind_speed" id="wind_speed" step="0.01" value="<?php echo ifset( $wind['speed'], '' ); ?>" />
         </p>
 
         <p class="field-row">
             <label for="pressure">
                 <?php echo Weather_Provider::get_form_label( 'pressure', $imperial ); ?>
             </label>
-            <input class="widefat" type="number" name="pressure" id="pressure" step="0.1" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
+            <input class="widefat" type="number" name="pressure" id="pressure" step="0.01" value="<?php echo ifset( $weather['pressure'], '' ); ?>" />
         </p>
 
         <p class="field-row">
