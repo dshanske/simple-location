@@ -63,6 +63,8 @@ class Location_Plugins {
 				$reverse = Loc_Config::geo_provider();
 				$reverse->set( $meta['geo_latitude'], $meta['geo_longitude'] );
 				$reverse_adr = $reverse->reverse_lookup();
+				$term        = Location_Taxonomy::get_location( $reverse_adr );
+				Location_Taxonomy::set_location( $args['ID'], $term );
 				if ( isset( $reverse_adr['display-name'] ) ) {
 					update_post_meta( $args['ID'], 'geo_address', $reverse_adr['display-name'] );
 				}
