@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.3.0  
+**Stable tag:** 4.4.0  
 **Requires at least:** 4.9  
 **Tested up to:** 5.6  
 **Requires PHP:** 5.6  
@@ -39,12 +39,22 @@ with a preset Name and hide the coordinates. This allows you to protect private 
 as protected if the location is in the zone and the location-visibility property is not set. For the post editor in WordPress, looking up the location of an item inside the 
 zone will result in the visibility being set to protected and the name being set to the zone name. This can be overridden.
 
-## Venues ##
+## Locations and Venues ##
 
-Venues are locations stored as a custom taxonomy in WordPress using the Term Metadata functionality added in Version 4.4 of WordPress. Venues as taxonomies
-have the advantage of supporting an archive page of all posts from that location and giving the location a permalink on your site. 
+Locations and venues both use WordPress taxonomies to allow you to generate an archive page of all posts from that location/venue and giving it a permalink on your site. Locations are meant to reflect a more general
+location...for example, "Here are posts I made in California." Venues are meant to reflect a specific location, such as a business or point of interest. "Here are all my posts made at the Dairy Queen."
 
-To add anything more than a basic location you will have to create a venue. This functionality has been pending for several versions, but is unimplemented.
+Locations are divided by administrative areas. The hierarchy for locations is:
+* Country
+* Region - state, county, or province level. 
+* Locality - city, town, or village level
+
+The reverse geocoding system attempts to consistently retrieve the country code, region code, and locality for the location and add them to the location taxonomy. This can be potentially problematic, as if the returns
+from the locations added aren't consistent, it will duplicate and explode the list of terms. This is the same issue that has held back venues.
+
+Locations are matched using the country code, region code, and locality field, and therefore, you can edit the displayed name without any issue. 
+
+The taxonomy for venue functionality has been in the plugin for several versions, but has remained unimplemented due to the difficulty in automating the selection process.
 
 ## Weather ##
 
@@ -204,6 +214,10 @@ The plugin offers providers for:
 
 ## Upgrade Notice ##
 
+### 4.3.0 ###
+
+This update includes support for Locations. Which will be generated when a new location is looked up.
+
 ### 4.1.5 ###
 
 Wikimedia Maps has turned off third-party access and advised they have no plans to return it. So this service is now removed. Added some new services to cover.
@@ -233,6 +247,24 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.0 ( 2021-02-07 ) ###
+* Rename the Mapquest provider to OpenMapquest as there is an alternative Mapquest API.
+* Make the Mapquest open provider and LocationIQ provider a descendant of the nominatim provider as both return the same data.
+* Introduce MapQuest geolocation provider, separate from openmapquest.
+* Fix issue with Google reverse lookup return.
+* Review and update all reverse/geocode lookups from API documentation.
+* Standardize country codes in all returns to the iso2 coding.
+* Add support for converting iso3 to iso2 country codes.
+* Support generating street addresses for countries where the house number appears after the street name.
+* Improve display location name generation from address components.
+* Add Pelias Provider. OpenRoute is actually a hosted instance of the Pelias Geocoder, and now inherits its conversion functionality.
+* Standardize the addition of region codes, special casing the US States and Canadian Provinces, but using a global list as well.
+* If there is no address or locality then display the full region name instead of the code.
+* Add home country option which will hide the country from the location display.
+* Introduce Location Taxonomy.
+* Introduce bulk lookup capability.
+* fix issue where Micropub lookup did not add historic data.
 
 ### 4.3.0 ( 2021-01-09 ) ###
 * Support for historic weather data in providers who offer it, see readme for details.

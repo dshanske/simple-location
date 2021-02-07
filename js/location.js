@@ -167,8 +167,8 @@ jQuery( document ).ready( function( $ ) {
 					}
 
 					if ( 'term_id' in response ) {
-						$('#location_dropdown').append( new Option( response.term_name, response.term_id, false, false ) );
-						$('#location_dropdown').val(response['term_id']).change();
+						$( '#location_dropdown' ).append( new Option( response.term_name, response.term_id, false, false ) );
+						$( '#location_dropdown' ).val( response.term_id ).change();
 					}
 
 					if ( 'visibility' in response ) {
@@ -419,7 +419,6 @@ jQuery( document ).ready( function( $ ) {
 		$postTripData.slideUp( 'fast' ).siblings( 'a.edit-location-trip' ).show().focus();
 		event.preventDefault();
 	} );
-
 
 	$postWeatherFields = $( '#weather-fields' );
 
