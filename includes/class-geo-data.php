@@ -186,6 +186,7 @@ class WP_Geo_Data {
 	public static function register_bulk_edit_location( $actions ) {
 		$actions['location_public']  = __( 'Public Location', 'simple-location' );
 		$actions['location_private'] = __( 'Private Location', 'simple-location' );
+		$actions['lookup_location']  = __( 'Lookup Location', 'simple-location' );
 		return $actions;
 	}
 
@@ -206,6 +207,54 @@ class WP_Geo_Data {
 			$visibility = str_replace( 'location_', '', $doaction );
 			foreach ( $post_ids as $post_id ) {
 				self::set_visibility( 'post', $post_id, $visibility );
+			}
+		}
+		if ( 'lookup_location' === $doaction ) {
+			foreach ( $post_ids as $post_id ) {
+				$post    = get_post( $post_id );
+				$geodata = self::get_geodata( $post, false );
+				if ( ! $geodata ) {
+					$geolocation = Loc_Config::geolocation_provider();
+					if ( ! is_object( $geolocation ) ) {
+						return $redirect_to;
+					}
+					if ( ! $geolocation->background() || ! $post->post_author ) {
+						return $redirect_to;
+					}
+					$geolocation->set_user( $post->post_author );
+					$geolocation->retrieve( get_post_datetime( $post ) );
+					$geodata = $geolocation->get();
+				}
+				if ( ! is_wp_error( $geodata ) && ! empty( $geodata ) ) {
+					// Default for this is to set the location to private.
+					$geodata['visibility'] = 'private';
+					// Determine if we need to look up the location again.
+					$term = Location_Taxonomy::get_location_taxonomy( $post );
+					if ( ! $term || ! array_key_exists( 'address', $geodata ) ) {
+						$reverse = Loc_Config::geo_provider();
+						$reverse->set( $geodata['latitude'], $geodata['longitude'] );
+						$reverse_adr = $reverse->reverse_lookup();
+						if ( ! is_wp_error( $reverse_adr ) ) {
+							$term = Location_Taxonomy::get_location( $reverse_adr );
+							Location_Taxonomy::set_location( $post_id, $term );
+							$zone = Location_Zones::in_zone( $geodata['latitude'], $geodata['longitude'] );
+							if ( ! empty( $zone ) ) {
+								$geodata['address'] = $zone;
+							} elseif ( ! array_key_exists( 'address', $geodata ) && array_key_exists( 'display-name', $reverse_adr ) ) {
+								$geodata['address'] = $reverse_adr['display-name'];
+							}
+						}
+					}
+					if ( ! array_key_exists( 'weather', $geodata ) ) {
+						$weather = Loc_Config::weather_provider();
+						$weather->set( $geodata['latitude'], $geodata['longitude'] );
+						$conditions = $weather->get_conditions( get_post_timestamp( $post ) );
+						if ( ! empty( $conditions ) && ! is_wp_error( $conditions ) ) {
+							$geodata['weather'] = $conditions;
+						}
+					}
+					self::set_geodata( $post, $geodata );
+				}
 			}
 		}
 		return $redirect_to;

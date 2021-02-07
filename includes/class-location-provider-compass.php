@@ -141,7 +141,9 @@ class Location_Provider_Compass extends Location_Provider {
 			'user-agent'          => 'Simple Location for WordPress',
 		);
 		if ( $time ) {
-			$time = new DateTime( $time );
+			if ( is_string( $time ) ) {
+				$time = new DateTime( $time );
+			}
 			$time->setTimezone( new DateTimeZone( 'GMT' ) );
 			$this->time = $time->format( DATE_W3C );
 			$url        = add_query_arg( 'before', $time->format( 'Y-m-d\TH:i:s' ), $url );

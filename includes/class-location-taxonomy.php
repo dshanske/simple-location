@@ -18,8 +18,6 @@ final class Location_Taxonomy {
 		add_action( 'created_location', array( __CLASS__, 'save_data' ), 10 );
 		add_action( 'edited_location', array( __CLASS__, 'save_data' ), 10 );
 		add_action( 'location_pre_add_form', array( __CLASS__, 'pre_add_form' ), 10 );
-		add_filter( 'bulk_actions-edit-post', array( __CLASS__, 'register_bulk_actions' ) );
-		add_filter( 'handle_bulk_actions-edit-post', array( __CLASS__, 'bulk_action_handler' ), 10, 3 );
 		add_action( 'pre_get_posts', array( __CLASS__, 'filter_location_posts' ) );
 	}
 
@@ -52,31 +50,6 @@ final class Location_Taxonomy {
 			$query->set( 'meta_query', array( $public ) );
 		}
 		return $query;
-	}
-
-	public static function register_bulk_actions( $bulk_actions ) {
-		$bulk_actions['update_location'] = __( 'Update Location', 'simple-location' );
-		return $bulk_actions;
-	}
-
-	public static function bulk_action_handler( $redirect_to, $doaction, $post_ids ) {
-		if ( 'update_location' !== 'update_location' ) {
-			return $redirect_to;
-		}
-		foreach ( $post_ids as $post_id ) {
-			$geodata = WP_Geo_Data::get_geodata( $post_id, false );
-			if ( array_key_exists( 'latitude', $geodata ) ) {
-				$reverse = Loc_Config::geo_provider();
-				$reverse->set( $geodata['latitude'], $geodata['longitude'] );
-				$reverse_adr = $reverse->reverse_lookup();
-				$term_id     = self::get_location( $reverse_adr );
-				if ( $term_id ) {
-					self::set_location( $post_id, $term_id );
-				}
-			}
-		}
-		return $redirect_to;
-
 	}
 
 	public static function pre_add_form() {
@@ -516,6 +489,9 @@ final class Location_Taxonomy {
 	}
 
 	public static function set_location( $post_id, $term_id ) {
+		if ( $post_id instanceof WP_Post ) {
+			$post_id = $post->ID;
+		}
 		return wp_set_post_terms( $post_id, $term_id, 'location' );
 	}
 
