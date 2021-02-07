@@ -272,16 +272,21 @@ abstract class Geo_Provider extends Sloc_Provider {
 			foreach ( $countries as $c ) {
 				if ( $c['iso2'] === $country ) {
 					$regions = $c['states'];
+					$matches = array();
 					foreach ( $regions as $region ) {
 						if ( $name === $region['name'] ) {
 							return $region['state_code'];
 						}
-						foreach ( array( 'District', 'Province', 'State' ) as $title ) {
-							$region['name'] = str_replace( $title, '', $region['name'] );
-							if ( $name === $region['name'] ) {
-								return $region['state_code'];
+						// Look at each word.
+						$pieces = explode( ' ', $region['name'] );
+						foreach ( $pieces as $piece ) {
+							if ( 0 === strcasecmp( $piece, $name ) ) {
+								$matches[] = $region;
 							}
 						}
+					}
+					if ( 1 === count( $matches ) ) {
+						return $matches[0];
 					}
 				}
 			}

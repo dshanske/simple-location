@@ -205,7 +205,7 @@ final class Location_Taxonomy {
 			array(
 				'object_subtype'    => 'location',
 				'type'              => 'string',
-				'description'       => __( 'Region Code', 'simple-location' ),
+				'description'       => __( 'Region Code or name if code not available', 'simple-location' ),
 				'single'            => true,
 				'sanitize_callback' => 'sanitize_text_field',
 				'show_in_rest'      => true,
@@ -321,6 +321,21 @@ final class Location_Taxonomy {
 		<?php
 	}
 
+	/**
+	 * Returns region.
+	 * First region code, then region, then false.
+	 *
+	 * @param array $addr Address data.
+	 * @return false|string Region.
+	 */
+	public static function region_return( $addr ) {
+		if ( array_key_exists( 'region-code', $addr ) ) {
+			return $addr['region-code'];
+		} elseif ( array_key_exists( 'region', $addr ) ) {
+			return $addr['region'];
+		}
+		return false;
+	}
 
 	/**
 	 * Return the term_id for the locality if it exists.
@@ -333,7 +348,9 @@ final class Location_Taxonomy {
 			return false;
 		}
 
-		if ( array_key_exists( 'region-code', $addr ) && array( 'country-code', $addr ) && array_key_exists( 'locality', $addr ) ) {
+		$region = self::region_return( $addr );
+
+		if ( $region && array( 'country-code', $addr ) && array_key_exists( 'locality', $addr ) ) {
 			$args  = array(
 				array(
 					'key'   => 'country',
@@ -341,7 +358,7 @@ final class Location_Taxonomy {
 				),
 				array(
 					'key'   => 'region',
-					'value' => $addr['region-code'],
+					'value' => $region,
 				),
 				array(
 					'key'   => 'locality',
@@ -376,7 +393,9 @@ final class Location_Taxonomy {
 			return false;
 		}
 
-		if ( array_key_exists( 'region-code', $addr ) && array( 'country-code', $addr ) ) {
+		$region = self::region_return( $addr );
+
+		if ( $region && array_key_exists( 'country-code', $addr ) ) {
 			$args  = array(
 				array(
 					'key'   => 'country',
@@ -384,7 +403,7 @@ final class Location_Taxonomy {
 				),
 				array(
 					'key'   => 'region',
-					'value' => $addr['region-code'],
+					'value' => $region,
 				),
 				array(
 					'key'     => 'locality',
@@ -479,21 +498,29 @@ final class Location_Taxonomy {
 					add_term_meta( $country, 'country', $addr['country-code'] );
 				}
 			}
-
-			$return = wp_insert_term(
-				$addr['region'],
-				'location',
-				array(
-					'slug'   => $addr['region-code'],
-					'parent' => $country,
-				)
-			);
-
-			if ( is_array( $return ) ) {
-				$region = $return['term_id'];
-				add_term_meta( $region, 'country', $addr['country-code'] );
-				add_term_meta( $region, 'region', $addr['region-code'] );
+			$region = self::region_return( $addr );
+			if ( $region ) {
+				$return = wp_insert_term(
+					$addr['region'],
+					'location',
+					array(
+						'slug'   => $region,
+						'parent' => $country,
+					)
+				);
+				if ( is_array( $return ) ) {
+					$region = $return['term_id'];
+					add_term_meta( $region, 'country', $addr['country-code'] );
+					add_term_meta( $region, 'region', $region );
+				}
+			} else {
+				return $country;
 			}
+		}
+
+		// Cover the possibility only region and country is available.
+		if ( ! array_key_exists( 'locality', $addr ) ) {
+			return $region;
 		}
 
 		$return = wp_insert_term(
@@ -508,7 +535,7 @@ final class Location_Taxonomy {
 			$locality = $return['term_id'];
 			add_term_meta( $locality, 'locality', $addr['locality'] );
 			add_term_meta( $locality, 'country', $addr['country-code'] );
-			add_term_meta( $locality, 'region', $addr['region-code'] );
+			add_term_meta( $locality, 'region', $region );
 
 			return $locality;
 		}
