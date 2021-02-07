@@ -594,8 +594,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$props = self::get_names( $property, $imperial );
 		if ( ! $props ) {
 			return '';
-		}
-		return sprintf( '%1$s(%2$s):', $props['name'], $props['unit'] );
+		} // unit label name icon
+		$label = sprintf( __( '%1$s measured in %2$s', 'simple-location' ), $props['name'], $props['label'] );
+		return sprintf( '%1$s(<span aria-label="%2$s">%3$s</span>):', $props['name'], $label, $props['unit'] );
 	}
 
 	/**
