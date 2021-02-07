@@ -71,6 +71,7 @@ class WP_Geo_Data {
 
 		add_filter( 'bulk_actions-edit-post', array( $cls, 'register_bulk_edit_location' ), 10 );
 		add_filter( 'handle_bulk_actions-edit-post', array( $cls, 'handle_bulk_edit_location' ), 10, 3 );
+		add_action( 'admin_notices', array( $cls, 'bulk_action_admin_notices' ) );
 
 		// Add the Same Post Type Support JetPack uses.
 		add_post_type_support( 'post', 'geo-location' );
@@ -190,6 +191,17 @@ class WP_Geo_Data {
 		return $actions;
 	}
 
+	public static function bulk_action_admin_notices() {
+		if ( isset( $_REQUEST['bulk_lookup_location_count'] ) ) {
+			$count = intval( $_REQUEST['bulk_lookup_location_count'] );
+			if ( 0 === $count ) {
+				$string = __( 'None of the Posts Were Updated.', 'simple-location' );
+			} else {
+				$string = sprintf( _n( 'Updated %s post.', 'Updated %s posts.', $count, 'simple-location' ), $count );
+			}
+			printf( '<div id="message" class="updated fade">%1$s</div>', $string );
+		}
+	}
 
 	/**
 	 * Bulk Edit Location Handler.
@@ -209,11 +221,17 @@ class WP_Geo_Data {
 				self::set_visibility( 'post', $post_id, $visibility );
 			}
 		}
+		if ( empty( $post_ids ) ) {
+			return $redirect_to;
+		}
 		if ( 'lookup_location' === $doaction ) {
+			$return = array();
 			foreach ( $post_ids as $post_id ) {
+				$update  = false;
 				$post    = get_post( $post_id );
-				$geodata = self::get_geodata( $post, false );
+				$geodata = self::get_geodata( $post, true );
 				if ( ! $geodata ) {
+					$update      = true;
 					$geolocation = Loc_Config::geolocation_provider();
 					if ( ! is_object( $geolocation ) ) {
 						return $redirect_to;
@@ -225,17 +243,22 @@ class WP_Geo_Data {
 					$geolocation->retrieve( get_post_datetime( $post ) );
 					$geodata = $geolocation->get();
 				}
-				if ( ! is_wp_error( $geodata ) && ! empty( $geodata ) ) {
+
+				if ( is_wp_error( $geodata ) ) {
+					$redirect_to = add_query_arg( 'lookup_location_error', $geodata->get_error_message() );
+					return $geodata;
+				} elseif ( ! empty( $geodata ) ) {
 					// Default for this is to set the location to private.
 					$geodata['visibility'] = 'private';
 					// Determine if we need to look up the location again.
 					$term = Location_Taxonomy::get_location_taxonomy( $post );
-					if ( ! $term || ! array_key_exists( 'address', $geodata ) ) {
+					if ( empty( $term ) || ! array_key_exists( 'address', $geodata ) ) {
 						$reverse = Loc_Config::geo_provider();
 						$reverse->set( $geodata['latitude'], $geodata['longitude'] );
 						$reverse_adr = $reverse->reverse_lookup();
 						if ( ! is_wp_error( $reverse_adr ) ) {
-							$term = Location_Taxonomy::get_location( $reverse_adr );
+							$update = true;
+							$term   = Location_Taxonomy::get_location( $reverse_adr );
 							Location_Taxonomy::set_location( $post_id, $term );
 							$zone = Location_Zones::in_zone( $geodata['latitude'], $geodata['longitude'] );
 							if ( ! empty( $zone ) ) {
@@ -250,12 +273,17 @@ class WP_Geo_Data {
 						$weather->set( $geodata['latitude'], $geodata['longitude'] );
 						$conditions = $weather->get_conditions( get_post_timestamp( $post ) );
 						if ( ! empty( $conditions ) && ! is_wp_error( $conditions ) ) {
+							$update             = true;
 							$geodata['weather'] = $conditions;
 						}
 					}
-					self::set_geodata( $post, $geodata );
+					if ( true === $update ) {
+						$return[] = $post_id;
+						self::set_geodata( $post, $geodata );
+					}
 				}
 			}
+			$redirect_to = add_query_arg( 'bulk_lookup_location_count', count( $return ), $redirect_to );
 		}
 		return $redirect_to;
 	}

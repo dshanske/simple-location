@@ -552,7 +552,7 @@ final class Location_Taxonomy {
 			'region'   => __( 'Region', 'simple-location' ),
 			'locality' => __( 'Locality', 'simple-location' ),
 		);
-		if ( array_key_exists( $type, $types ) ) {
+		if ( is_string( $type ) && array_key_exists( $type, $types ) ) {
 			return $types[ $type ];
 		}
 		return __( 'None', 'simple-location' );
