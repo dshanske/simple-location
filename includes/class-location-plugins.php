@@ -93,24 +93,19 @@ class Location_Plugins {
 			} elseif ( isset( $meta['geo_accuracy'] ) ) {
 				update_post_meta( $args['ID'], 'geo_zoom', round( log( 591657550.5 / ( $meta['geo_accuracy'] * 45 ), 2 ) ) + 1 );
 			}
-			$current = true;
+			$weather = Loc_Config::weather_provider();
+			$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
 			if ( isset( $input['properties']['published'] ) ) {
 				$published = new DateTime( $input['properties']['published'][0] );
-				$now       = new DateTime();
-				$diff      = abs( $now->getTimestamp() - $published->getTimestamp() );
-				if ( $diff > HOUR_IN_SECONDS ) {
-					$current = false;
-				}
+			} else {
+				$published = new DateTime();
 			}
-			if ( $current ) {
-				$weather = Loc_Config::weather_provider();
-				$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
-				$conditions = $weather->get_conditions();
-				if ( ! empty( $conditions ) ) {
-					// if debug mode is on remove the raw data from storage
-					unset( $conditions['raw'] );
-					update_post_meta( $args['ID'], 'geo_weather', $conditions );
-				}
+
+			$conditions = $weather->get_conditions( $published->getTimestamp() );
+			if ( ! empty( $conditions ) || ! is_wp_error( $conditions ) ) {
+				// if debug mode is on remove the raw data from storage
+				unset( $conditions['raw'] );
+				update_post_meta( $args['ID'], 'geo_weather', $conditions );
 			}
 		}
 	}
@@ -151,7 +146,6 @@ class Location_Plugins {
 			),
 		);
 	}
-
 } // End Class Kind_Plugins
 
 new Location_Plugins();
