@@ -248,8 +248,10 @@ class WP_Geo_Data {
 					$redirect_to = add_query_arg( 'lookup_location_error', $geodata->get_error_message() );
 					return $geodata;
 				} elseif ( ! empty( $geodata ) ) {
-					// Default for this is to set the location to private.
-					$geodata['visibility'] = 'private';
+					// Default for this is to set the location to private if it is not already set.
+					if ( false === get_post_meta( $post_id, 'geo_public', true ) ) {
+						$geodata['visibility'] = 'private';
+					}
 					// Determine if we need to look up the location again.
 					$term = Location_Taxonomy::get_location_taxonomy( $post );
 					if ( empty( $term ) || ! array_key_exists( 'address', $geodata ) ) {
