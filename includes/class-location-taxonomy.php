@@ -19,6 +19,10 @@ final class Location_Taxonomy {
 		add_action( 'edited_location', array( __CLASS__, 'save_data' ), 10 );
 		add_action( 'location_pre_add_form', array( __CLASS__, 'pre_add_form' ), 10 );
 		add_action( 'pre_get_posts', array( __CLASS__, 'filter_location_posts' ) );
+		add_filter( 'manage_location_custom_column', array( __CLASS__, 'manage_column_content' ), 10, 3 );
+		add_filter( 'manage_edit-location_columns', array( __CLASS__, 'manage_column' ), 10 );
+
+		add_filter( 'get_the_archive_title', array( __CLASS__, 'archive_title' ), 10 );
 	}
 
 	/**
@@ -27,6 +31,29 @@ final class Location_Taxonomy {
 	public static function activate_location() {
 		self::register();
 		flush_rewrite_rules();
+	}
+
+	public static function archive_title( $title ) {
+		if ( ! is_tax( 'location' ) ) {
+			return $title;
+		}
+		$term    = get_queried_object();
+		$display = self::display_name( $term->term_id );
+		$type    = self::location_type( self::get_location_type( $term->term_id ) );
+		/* translators: 1. Location Type. 2: Location Name */
+		return sprintf( __( '%1$1s: %2$2s', 'simple-location' ), $type, $display );
+	}
+
+	public static function manage_column( $columns ) {
+		$columns['location-type'] = __( 'Type', 'simple-location' );
+		return $columns;
+	}
+
+	public static function manage_column_content( $content, $column_name, $term_id ) {
+		if ( 'location-type' === $column_name ) {
+			return self::location_type( self::get_location_type( $term_id ) );
+		}
+		return $content;
 	}
 
 	/**
@@ -493,6 +520,60 @@ final class Location_Taxonomy {
 			$post_id = $post->ID;
 		}
 		return wp_set_post_terms( $post_id, $term_id, 'location' );
+	}
+
+	public static function get_location_type( $term_id ) {
+		$term = get_term( $term_id );
+		if ( ! $term instanceof WP_Term ) {
+			return false;
+		}
+		if ( 'location' !== $term->taxonomy ) {
+			return false;
+		}
+		$meta = get_term_meta( $term_id );
+		if ( empty( $meta ) ) {
+			return false;
+		}
+		if ( array_key_exists( 'locality', $meta ) ) {
+			return 'locality';
+		}
+		if ( array_key_exists( 'region', $meta ) ) {
+			return 'region';
+		}
+		if ( array_key_exists( 'country', $meta ) ) {
+			return 'country';
+		}
+		return false;
+	}
+
+	public static function location_type( $type ) {
+		$types = array(
+			'country'  => __( 'Country', 'simple-location' ),
+			'region'   => __( 'Region', 'simple-location' ),
+			'locality' => __( 'Locality', 'simple-location' ),
+		);
+		if ( array_key_exists( $type, $types ) ) {
+			return $types[ $type ];
+		}
+		return __( 'None', 'simple-location' );
+	}
+
+	public static function display_name( $term_id ) {
+		$term     = get_term( $term_id );
+		$return   = array();
+		$return[] = $term->name;
+		while ( 0 !== $term->parent ) {
+			$term = get_term( $term->parent, 'location' );
+			if ( 0 === $term->parent ) {
+				$country = get_term_meta( $term->term_id, 'country', true );
+				if ( $country !== get_option( 'sloc_country' ) ) {
+					$return[] = $term->name;
+				}
+			} else {
+				$return[] = $term->name;
+			}
+		}
+		return implode( ', ', $return );
 	}
 
 
