@@ -173,7 +173,7 @@ final class Location_Taxonomy {
 			'publicly_queryable' => true,
 			'hierarchical'       => true,
 			'show_ui'            => true,
-			'show_in_menu'       => WP_DEBUG,
+			'show_in_menu'       => true,
 			'show_in_nav_menus'  => true,
 			'show_in_rest'       => false,
 			'show_tagcloud'      => true,
