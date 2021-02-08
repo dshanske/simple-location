@@ -1085,7 +1085,12 @@ class WP_Geo_Data {
 
 		// Allow Map Template to be Used for Taxonomies.
 		add_rewrite_rule(
-			'([a-z]+)/([a-z0-9\-]+)/map/?$',
+			sprintf( 'map/([a-z0-9\-]+)/(.+?)/%1$s/([0-9]{1,})/?$', $wp_rewrite->pagination_base ),
+			'index.php?$matches[1]=$matches[2]&map=1',
+			'top'
+		);
+		add_rewrite_rule(
+			'map/([a-z0-9\-]+)/(.+?)/?$',
 			'index.php?$matches[1]=$matches[2]&map=1',
 			'top'
 		);
