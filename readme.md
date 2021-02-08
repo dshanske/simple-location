@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.4.0  
+**Stable tag:** 4.4.1  
 **Requires at least:** 4.9  
-**Tested up to:** 5.6  
+**Tested up to:** 5.6.1  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -187,7 +187,7 @@ You can filter any query or archive by adding `?geo={all|public|text}` to it to 
 ### How can I see a map of all the locations in an archive page? ###
 
 If you add /map to any archive URL, for example, example.com/2019/map it will return a template with a map view of that archive. It uses a default template built into the theme.
-Being as styling this would not be customized to your theme, you can add a map-archive.php file to your theme to customize this.
+Being as styling this would not be customized to your theme, you can add a map-archive.php file to your theme to customize this. For taxonomies, use /map/taxonomy/term.
 
 ### JetPack offers Location Display, why do I need this? ###
 
@@ -197,7 +197,8 @@ They do not offer the features this plugin does and their goal is a minimal impl
 
 ### Why am I seeing location on private posts with the notation Hidden? ###
 
-This appears to users who can edit private posts when logged in. It does not appear when not logged in.
+This appears to users who can read private posts when logged in. It does not appear when not logged in. The same applies to the location taxonomy. If you are not logged in, or 
+are logged in and don't have the read_private_posts permission, you won't see posts with private locations. 
 
 ### How can I report issues or request support? ###
 
@@ -247,6 +248,14 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.1 ( 2021-02-07 ) ###
+* Location was only being shown in DEBUG mode
+* When a match for region code was not found the code was creating a region with a name but no code, which meant duplication. Going forward, it will use the full region name. It will also try additional matching to find the code.
+* When looking up the location on an existing post, it was setting everything to private. Going forward, only if not already set.
+* Display Name function now links each part of the location to the term page for it.
+* Switch rewrite for taxonomy maps to /map/taxonomy instead of taxonomy being at the end.
+* Update custom station provider to check timestamp and support future station historic weather.
 
 ### 4.4.0 ( 2021-02-07 ) ###
 * Rename the Mapquest provider to OpenMapquest as there is an alternative Mapquest API.
