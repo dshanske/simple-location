@@ -585,7 +585,7 @@ final class Location_Taxonomy {
 		return __( 'None', 'simple-location' );
 	}
 
-	public static function display_name( $term_id ) {
+	public static function display_name( $term_id, $links = true ) {
 		$term     = get_term( $term_id );
 		$return   = array();
 		$return[] = $term->name;
@@ -594,10 +594,18 @@ final class Location_Taxonomy {
 			if ( 0 === $term->parent ) {
 				$country = get_term_meta( $term->term_id, 'country', true );
 				if ( $country !== get_option( 'sloc_country' ) ) {
-					$return[] = $term->name;
+					if ( $links ) {
+						$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $term->name );
+					} else {
+						$return[] = $term->name;
+					}
 				}
 			} else {
-				$return[] = $term->name;
+				if ( $links ) {
+					$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $term->name );
+				} else {
+					$return[] = $term->name;
+				}
 			}
 		}
 		return implode( ', ', $return );
