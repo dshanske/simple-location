@@ -299,6 +299,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type float $latitude Latitude.
 	 *  @type float $longitude Longitude.
 	 *  @type float $altitude Altitude.
+	 *  @type int   $timestamp Timestamp.
 	 *  @type string $name Name of the Location.
 	 *  @type float $temperature Temperature in Celsius.
 	 *  @type float $heatindex Heat Index in Celsius.
