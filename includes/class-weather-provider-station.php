@@ -153,20 +153,18 @@ class Weather_Provider_Station extends Weather_Provider {
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions( $time = null ) {
-		$return = array();
-
-		if ( ! empty( $time ) ) {
-			$datetime = $this->datetime( $time );
-			$abs      = abs( $datetime->getTimestamp() - time() );
+		$return   = array();
+		$datetime = $this->datetime( $time );
+		if ( ! empty( $datetime ) ) {
+			$abs = abs( $datetime->getTimestamp() - time() );
 			if ( 3600 < $abs ) {
 				return self::get_fallback_conditions( $time );
 			}
 		}
 
 		if ( ! empty( $this->station_id ) ) {
-			return self::get_station_data();
-		}
-		if ( $this->latitude && $this->longitude ) {
+			$return = self::get_station_data();
+		} elseif ( $this->latitude && $this->longitude ) {
 			$conditions = $this->get_cache();
 			if ( $conditions ) {
 				return $conditions;
@@ -188,6 +186,12 @@ class Weather_Provider_Station extends Weather_Provider {
 				$return['distance'] = $sitelist[0]['distance'];
 				unset( $this->station_id );
 				$this->set_cache( $return );
+				return $return;
+			}
+		}
+
+		if ( array_key_exists( 'timestamp', $return ) ) {
+			if ( 3600 > abs( $datetime->getTimestamp() - $return['timestamp'] ) ) {
 				return $return;
 			}
 		}
