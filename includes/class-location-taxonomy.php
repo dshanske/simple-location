@@ -80,7 +80,7 @@ final class Location_Taxonomy {
 	}
 
 	public static function pre_add_form() {
-		printf( '<p>%1$s</p>', esc_html__( 'Locations allow for 3 levels of hierarchy: Country, region, and locality. You can add a location here and add detail in the edit screen.', 'simple-location' ) );
+		printf( '<p>%1$s</p>', esc_html__( 'Locations allow for 3 levels of hierarchy: Country, region, and locality. Countries have no parent. Regions have a country as a parent. Localities have regions are their parent.', 'simple-location' ) );
 	}
 
 	public static function country_select( $country ) {
@@ -95,43 +95,70 @@ final class Location_Taxonomy {
 
 	public static function create_screen_fields( $taxonomy ) {
 		echo '<div class="form-field">';
-		printf( '<label for="country">%1$s</label>', esc_html( 'Country:', 'simple-location' ) );
-		self::country_select( get_option( 'sloc_country' ) );
-		?> 
-		</div>
-		<?php
+				printf( '<label for="location-code">%1$s</label>', esc_html( 'Location Code:', 'simple-location' ) );
+		printf( '<input class="widefat" type=text" name="location-code" required />' );
+		printf( '<p class="description">%1$s</p>', esc_html_e( 'The code for this location. If no code, you can use the location.', 'simple-location' ) );
+				echo '</div>';
 	}
 
 	public static function edit_screen_fields( $term, $taxonomy ) {
-		$parents = get_ancestors( $term->term_id, 'location', 'taxonomy' );
-		?>
-	<tr class="form-field">
-		<tr>
-		<th><label for="country"><?php esc_html_e( 'Country:', 'simple-location' ); ?></label></th>
-		<td><?php self::country_select( get_term_meta( $term->term_id, 'country', true ) ); ?>
-		<p class="description"><?php esc_html_e( 'Country.', 'simple-location' ); ?></p></td>
-		</td>
-		</tr>
-		<?php if ( 1 <= count( $parents ) ) { ?>
-			<tr>
-			<th><label for="region"><?php esc_html_e( 'Region:', 'simple-location' ); ?></label></th>
-			<td><input class="widefat" type=text" name="region" value="<?php echo get_term_meta( $term->term_id, 'region', true ); ?>" />
-			<p class="description"><?php esc_html_e( 'The state, county, or province for the location.', 'simple-location' ); ?></p></td>
-			</tr> 
-		<?php } ?>
-		<?php if ( 2 === count( $parents ) ) { ?>
-			<th><label for="locality"><?php esc_html_e( 'Locality:', 'simple-location' ); ?></label></th>
-			<td><input class="widefat" type=text" name="locality" value="<?php echo get_term_meta( $term->term_id, 'locality', true ); ?>" />
-			<p class="description"><?php esc_html_e( 'The city, village, or town for the location', 'simple-location' ); ?></p>
-			</td>
-			</tr> 
-		<?php } ?>
-	</tr>
-		<?php
+		$type = self::get_location_type( $term->term_id );
+		echo '<tr class="form-field">';
+
+		switch ( $type ) {
+			case 'country':
+				?>
+				<tr>
+					<th><label for="country"><?php esc_html_e( 'Country:', 'simple-location' ); ?></label></th>
+					<td><?php self::country_select( get_term_meta( $term->term_id, 'country', true ) ); ?>
+						<p class="description"><?php esc_html_e( 'Country.', 'simple-location' ); ?></p></td>
+					</td>
+				</tr>
+				<?php
+				break;
+			case 'region':
+				?>
+				<tr>
+					<th><label for="region"><?php esc_html_e( 'Region:', 'simple-location' ); ?></label></th>
+					<td><input class="widefat" type=text" name="region" value="<?php echo get_term_meta( $term->term_id, 'region', true ); ?>" required />
+						<p class="description"><?php esc_html_e( 'The state, county, or province for the location.', 'simple-location' ); ?></p>
+					</td>
+				</tr> 
+				<?php
+				break;
+			case 'locality':
+				?>
+				<tr>
+					<th><label for="locality"><?php esc_html_e( 'Locality:', 'simple-location' ); ?></label></th>
+					<td><input class="widefat" type=text" name="locality" value="<?php echo get_term_meta( $term->term_id, 'locality', true ); ?>" required />
+						<p class="description"><?php esc_html_e( 'The city, village, or town for the location', 'simple-location' ); ?></p>
+					</td>
+				</tr> 
+				<?php
+				break;
+			default:
+		}
+		echo '</tr>';
 	}
 
 	public static function save_data( $term_id ) {
 		// phpcs:disable
+		$term = get_term( $term_id );
+		if ( 'location' !== $term->taxonomy ) {
+			return;
+		}
+		if ( ! array_key_exists( 'location-code', $_POST ) ) {
+			return;
+		}
+
+		if ( 0 === $term->parent ) {
+			$type = 'country';
+		} else {
+			$type = self::get_location_type( $term->parent );
+		}
+
+		$_POST[ $type ] = $_POST['location-code'];
+
 		foreach( array( 'country', 'region', 'locality' ) as $field ) {
 			if ( ! empty( $_POST[$field] ) ) {
 				update_term_meta( $term_id, $field, $_POST[$field] );
@@ -338,6 +365,38 @@ final class Location_Taxonomy {
 	}
 
 	/**
+	 * Return an array of term_ids for localities in this region.
+	 *
+	 * @param int|string $country_code Term ID or Country Code.
+	 * @return array|false Associative array of Term IDs as key and name as value or false if not found.
+	 */
+	public static function get_region_localities( $region_code, $country_code ) {
+		$region = self::get_region(
+			array(
+				'region_code'  => $region_code,
+				'country_code' => $country_code,
+			)
+		);
+		if ( ! $region ) {
+			return false;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'location',
+				'hide_empty' => 0,
+				'fields'     => 'id=>name',
+				'childless'  => $childless,
+				'parent'     => $region,
+			)
+		);
+		if ( ! empty( $terms ) ) {
+			return $terms;
+		}
+		return false;
+	}
+
+	/**
 	 * Return the term_id for the locality if it exists.
 	 *
 	 * @param array $addr Array of Address Properties
@@ -348,35 +407,67 @@ final class Location_Taxonomy {
 			return false;
 		}
 
-		$region = self::region_return( $addr );
+		if ( ! array_key_exists( 'locality', $addr ) ) {
+			return false;
+		}
 
-		if ( $region && array( 'country-code', $addr ) && array_key_exists( 'locality', $addr ) ) {
-			$args  = array(
-				array(
-					'key'   => 'country',
-					'value' => $addr['country-code'],
-				),
-				array(
-					'key'   => 'region',
-					'value' => $region,
-				),
-				array(
-					'key'   => 'locality',
-					'value' => $addr['locality'],
-				),
-			);
-			$terms = get_terms(
-				array(
-					'taxonomy'   => 'location',
-					'hide_empty' => 0,
-					'meta_query' => $args,
-					'fields'     => 'ids',
-				)
-			);
-			// If found return it.
-			if ( ! empty( $terms ) ) {
-				return $terms[0];
+		$args  = array(
+			array(
+				'key'   => 'locality',
+				'value' => $addr['locality'],
+			),
+		);
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'location',
+				'hide_empty' => 0,
+				'meta_query' => $args,
+				'fields'     => 'ids',
+			)
+		);
+
+		// If you did not find any term that matched return.
+		if ( empty( $terms ) ) {
+			return false;
+		}
+
+		foreach ( $terms as $term_id ) {
+			$data = self::get_location_data( $term_id );
+			if ( $addr['country-code'] === $data['country']['code'] ) {
+				if ( $data['region']['code'] === self::region_return( $addr ) ) {
+					return $term_id;
+				}
 			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Return an array of term_ids for regions in this country.
+	 *
+	 * @param int|string $country_code Term ID or Country Code.
+	 * @return array|false Associative array of Term IDs as key and name as value or false if not found.
+	 */
+	public static function get_country_regions( $country_code ) {
+		if ( is_string( $country_code ) ) {
+			$country_code = self::get_country( $country_code );
+		}
+		if ( ! is_numeric( $country_code ) ) {
+			return false;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'location',
+				'hide_empty' => 0,
+				'fields'     => 'id=>name',
+				'childless'  => $childless,
+				'parent'     => $country_code,
+			)
+		);
+		if ( ! empty( $terms ) ) {
+			return $terms;
 		}
 		return false;
 	}
@@ -393,21 +484,15 @@ final class Location_Taxonomy {
 			return false;
 		}
 
-		$region = self::region_return( $addr );
+		foreach ( array( 'region-code', 'region' ) as $region ) {
+			if ( ! array_key_exists( $region, $addr ) ) {
+				continue;
+			}
 
-		if ( $region && array_key_exists( 'country-code', $addr ) ) {
 			$args  = array(
 				array(
-					'key'   => 'country',
-					'value' => $addr['country-code'],
-				),
-				array(
 					'key'   => 'region',
-					'value' => $region,
-				),
-				array(
-					'key'     => 'locality',
-					'compare' => 'NOT EXISTS',
+					'value' => $addr[ $region ],
 				),
 			);
 			$terms = get_terms(
@@ -416,56 +501,56 @@ final class Location_Taxonomy {
 					'hide_empty' => 0,
 					'meta_query' => $args,
 					'fields'     => 'ids',
-					'childless'  => $childless,
 				)
 			);
-			// If found return it.
-			if ( ! empty( $terms ) ) {
-				return $terms[0];
+			foreach ( $terms as $term ) {
+				$data = self::get_location_data( $type );
+				if ( ! array_key_exists( 'locality', $data ) ) {
+					if ( $addr['country-code'] === $data['country']['code'] ) {
+						return $term;
+					}
+				}
 			}
 		}
+
 		return false;
 	}
 
 	/**
 	 * Return the term_id for the country if it exists.
 	 *
-	 * @param array   $addr Array of Address Properties
+	 * @param string  $country_code Country Code.
 	 * @param bookean $childless Only look for countries that have no regions currently.
+	 * @return false|int Term ID or false if not found.
 	 */
-	public static function get_country( $addr, $childless = false ) {
-		if ( empty( $addr ) ) {
-			return false;
-		}
-
-		if ( array_key_exists( 'country-code', $addr ) ) {
-			$args  = array(
-				array(
-					'key'   => 'country',
-					'value' => $addr['country-code'],
-				),
-				array(
-					'key'     => 'region',
-					'compare' => 'NOT EXISTS',
-				),
-				array(
-					'key'     => 'locality',
-					'compare' => 'NOT EXISTS',
-				),
-			);
-			$terms = get_terms(
-				array(
-					'taxonomy'   => 'location',
-					'hide_empty' => 0,
-					'meta_query' => $args,
-					'fields'     => 'ids',
-					'childless'  => $childless,
-				)
-			);
-			// If found return it.
-			if ( ! empty( $terms ) ) {
-				return $terms[0];
-			}
+	public static function get_country( $country_code, $childless = false ) {
+		$args  = array(
+			array(
+				'key'   => 'country',
+				'value' => $country_code,
+			),
+			array(
+				'key'     => 'region',
+				'compare' => 'NOT EXISTS',
+			),
+			array(
+				'key'     => 'locality',
+				'compare' => 'NOT EXISTS',
+			),
+		);
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'location',
+				'hide_empty' => 0,
+				'meta_query' => $args,
+				'fields'     => 'ids',
+				'childless'  => $childless,
+				'parent'     => 0,
+			)
+		);
+		// If found return it.
+		if ( ! empty( $terms ) ) {
+			return $terms[0];
 		}
 		return false;
 	}
@@ -484,7 +569,7 @@ final class Location_Taxonomy {
 
 		$region = self::get_region( $addr );
 		if ( ! $region ) {
-			$country = self::get_country( $addr );
+			$country = self::get_country( $addr['country-code'] );
 			if ( ! $country ) {
 				$return = wp_insert_term(
 					$addr['country-name'],
@@ -498,20 +583,19 @@ final class Location_Taxonomy {
 					add_term_meta( $country, 'country', $addr['country-code'] );
 				}
 			}
-			$region = self::region_return( $addr );
-			if ( $region ) {
+			$region_code = self::region_return( $addr );
+			if ( $region_code ) {
 				$return = wp_insert_term(
 					$addr['region'],
 					'location',
 					array(
-						'slug'   => $region,
+						'slug'   => $region_code,
 						'parent' => $country,
 					)
 				);
 				if ( is_array( $return ) ) {
 					$region = $return['term_id'];
-					add_term_meta( $region, 'country', $addr['country-code'] );
-					add_term_meta( $region, 'region', $region );
+					add_term_meta( $region, 'region', $region_code );
 				}
 			} else {
 				return $country;
@@ -534,9 +618,6 @@ final class Location_Taxonomy {
 		if ( is_array( $return ) ) {
 			$locality = $return['term_id'];
 			add_term_meta( $locality, 'locality', $addr['locality'] );
-			add_term_meta( $locality, 'country', $addr['country-code'] );
-			add_term_meta( $locality, 'region', $region );
-
 			return $locality;
 		}
 		return false;
@@ -583,6 +664,35 @@ final class Location_Taxonomy {
 			return $types[ $type ];
 		}
 		return __( 'None', 'simple-location' );
+	}
+
+	public static function get_location_data( $term_id ) {
+		$term = get_term( $term_id, 'location' );
+		if ( ! $term instanceof WP_Term ) {
+			return false;
+		}
+
+		$return              = array();
+		$type                = self::get_location_type( $term->term_id );
+			$return[ $type ] = array(
+				'term_id' => $term->term_id,
+				'name'    => $term->name,
+				'code'    => get_term_meta( $term->term_id, $type, true ),
+			);
+			while ( 0 !== $term->parent ) {
+				$term = get_term( $term->parent, 'location' );
+				if ( $term instanceof WP_Term ) {
+					$type = self::get_location_type( $term->term_id );
+					if ( $type ) {
+						$return[ $type ] = array(
+							'term_id' => $term->term_id,
+							'name'    => $term->name,
+							'code'    => get_term_meta( $term->term_id, $type, true ),
+						);
+					}
+				}
+			}
+			return $return;
 	}
 
 	public static function display_name( $term_id, $links = true ) {
