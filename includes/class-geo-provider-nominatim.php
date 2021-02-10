@@ -81,8 +81,10 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			return array();
 		}
 
-		$address = $json['address'];
-		if ( 'us' === $address['country_code'] ) {
+		$address      = $json['address'];
+		$country_code = strtoupper( ifset( $address['country_code'] ) );
+
+		if ( in_array( $country_code, array( 'US', 'FR' ) ) ) {
 			$region = self::ifnot(
 				$address,
 				array(
@@ -103,10 +105,8 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 		}
 
 		if ( ! empty( $region ) ) {
-			$region_code = self::region_code( $region, $address['country_code'] );
+			$region_code = self::region_code( $region, $country_code );
 		}
-
-		$country_code = strtoupper( ifset( $address['country_code'] ) );
 
 		$number = self::ifnot(
 			$address,

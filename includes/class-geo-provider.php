@@ -267,6 +267,17 @@ abstract class Geo_Provider extends Sloc_Provider {
 				return str_replace( $country . '-', '', $code['code'] );
 			}
 		}
+
+		// If it cannot find a match, try to find an inexact match.
+		foreach ( $codes as $code ) {
+			if ( str_contains( $name, $code['name'] ) ) {
+				return str_replace( $country . '-', '', $code['code'] );
+			}
+			// To cover non-latin characters do a string comparison.
+			if ( str_contains( $name, iconv( 'UTF-8', 'ASCII//TRANSLIT', $code['name'] ) ) ) {
+				return str_replace( $country . '-', '', $code['code'] );
+			}
+		}
 		return false;
 	}
 

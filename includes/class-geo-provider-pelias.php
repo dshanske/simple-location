@@ -217,12 +217,17 @@ class Geo_Provider_Pelias extends Geo_Provider {
 				array(
 					'macroregion',
 					'region',
+					'macrocounty',
+					'county',
 				)
 			),
 			'region-code'      => self::ifnot(
 				$address,
 				array(
+					'macroregion_a',
 					'region_a',
+					'macrocounty_a',
+					'county_a',
 				)
 			),
 			'country-name'     => self::ifnot(

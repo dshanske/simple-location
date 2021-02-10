@@ -260,5 +260,17 @@ if ( ! function_exists( 'array_key_last_index' ) ) {
 	}
 }
 
+if ( ! function_exists( 'str_contains' ) ) {
+	/*
+	 * Returns whether haystick contains needle.
+	 * Polyfill for PHP8.0 function
+	 * @param string $haystack String.
+	 * @param string $needle String to find within haystack.
+	 * @return boolean whether it was found.
+	*/
+	function str_contains( $haystack, $needle ) {
+			return '' === $needle || false !== strpos( $haystack, $needle );
+	}
+}
 
 
