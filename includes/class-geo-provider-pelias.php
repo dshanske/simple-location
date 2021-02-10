@@ -215,6 +215,7 @@ class Geo_Provider_Pelias extends Geo_Provider {
 			'region'           => self::ifnot(
 				$address,
 				array(
+					'macroregion',
 					'region',
 				)
 			),
@@ -250,6 +251,9 @@ class Geo_Provider_Pelias extends Geo_Provider {
 		$addr = array_filter( $addr );
 		if ( ! array_key_exists( 'country-code', $addr ) && array_key_exists( 'country-name', $addr ) ) {
 			$addr['country-code'] = self::country_code( $addr['country-name'] );
+		}
+		if ( ! array_key_exists( 'region-code', $addr ) && array_key_exists( 'region', $addr ) ) {
+			$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] );
 		}
 		if ( ! array_key_exists( 'display-name', $addr ) ) {
 			$addr['display-name'] = $this->display_name( $addr );

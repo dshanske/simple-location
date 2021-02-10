@@ -151,13 +151,16 @@ class Geo_Provider_Here extends Geo_Provider {
 					'district',
 				)
 			);
-
-			$addr['locality']     = ifset( $location['city'] );
-			$addr['region']       = ifset( $location['state'] );
-			$addr['region-code']  = ifset( $location['stateCode'] );
-			$addr['country-name'] = ifset( $location['countryName'] );
-			$addr['country-code'] = self::country_code_iso3( ifset( $location['countryCode'] ) );
-			$addr['postal-code']  = ifset( $location['postalCode'] );
+			$addr['country-name']     = ifset( $location['countryName'] );
+			$addr['country-code']     = self::country_code_iso3( ifset( $location['countryCode'] ) );
+			$addr['locality']         = ifset( $location['city'] );
+			$addr['region']           = ifset( $location['state'] );
+			if ( array_key_exists( 'stateCode', $location ) ) {
+				$addr['region-code'] = $location['stateCode'];
+			} else {
+				$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] );
+			}
+			$addr['postal-code'] = ifset( $location['postalCode'] );
 
 			// Adjust position of house number/name based on country practice.
 			if ( self::house_number( $country_code ) ) {

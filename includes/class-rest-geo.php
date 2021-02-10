@@ -389,8 +389,9 @@ class REST_Geo {
 	 */
 	public static function geocode( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
-		$params   = $request->get_params();
-		$provider = empty( $params['provider'] ) ? null : $params['provider'];
+		$params      = $request->get_params();
+		$provider    = empty( $params['provider'] ) ? null : $params['provider'];
+		$term_lookup = array_key_exists( 'term', $params );
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$zone    = Location_Zones::in_zone( $params['latitude'], $params['longitude'] );
 			$reverse = Loc_Config::geo_provider( $provider );
@@ -420,11 +421,12 @@ class REST_Geo {
 				$reverse_adr['map_url']    = $map->get_the_static_map();
 				$reverse_adr['map_link']   = $map->get_the_map_url();
 				$reverse_adr['map_return'] = $map->get_the_map();
-				$term                      = Location_Taxonomy::get_location( $reverse_adr );
+				$term                      = Location_Taxonomy::get_location( $reverse_adr, $term_lookup );
 				if ( $term ) {
-					$reverse_adr['term_id']   = $term;
-					$term                     = get_term( $term, 'location' );
-					$reverse_adr['term_name'] = $term->name;
+					$reverse_adr['term_id']      = $term;
+					$reverse_adr['term_details'] = Location_Taxonomy::get_location_data( $term );
+					$term                        = get_term( $term, 'location' );
+					$reverse_adr['term_name']    = $term->name;
 				}
 			}
 			if ( isset( $params['weather'] ) && ( 'no' !== $params['weather'] ) ) {

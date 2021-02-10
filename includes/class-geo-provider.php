@@ -256,47 +256,15 @@ abstract class Geo_Provider extends Sloc_Provider {
 		$country = strtoupper( trim( $country ) );
 		$codes   = array();
 
-		if ( 'US' === $country ) {
-			// Special Case Alternatives for DC
-			if ( 'Washington, D.C.' === $name ) {
-				return 'DC';
-			}
-			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/states-us.json';
-			$codes = json_decode( file_get_contents( $file ), true );
-		} elseif ( 'CA' === $country ) {
-			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/provinces-ca.json';
-			$codes = json_decode( file_get_contents( $file ), true );
-		} else {
-			$file      = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/states.json';
-			$countries = json_decode( file_get_contents( $file ), true );
-			foreach ( $countries as $c ) {
-				if ( $c['iso2'] === $country ) {
-					$regions = $c['states'];
-					$matches = array();
-					foreach ( $regions as $region ) {
-						if ( $name === $region['name'] ) {
-							return $region['state_code'];
-						}
-						// Look at each word.
-						$pieces = explode( ' ', $region['name'] );
-						foreach ( $pieces as $piece ) {
-							if ( 0 === strcasecmp( $piece, $name ) ) {
-								$matches[] = $region;
-							}
-						}
-					}
-					if ( 1 === count( $matches ) ) {
-						return $matches[0];
-					}
-				}
-			}
+		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-2/' . $country . '.json';
+		if ( ! file_exists( $file ) ) {
+			return false;
 		}
 
-		if ( ! empty( $codes ) ) {
-			foreach ( $codes as $key => $value ) {
-				if ( $name === $value ) {
-					return $key;
-				}
+		$codes = json_decode( file_get_contents( $file ), true );
+		foreach ( $codes as $code ) {
+			if ( $name === $code['name'] ) {
+				return str_replace( $country . '-', '', $code['code'] );
 			}
 		}
 		return false;

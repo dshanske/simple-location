@@ -559,12 +559,17 @@ final class Location_Taxonomy {
 	 * Returns an existing term or creates a new one based on returned address data
 	 *
 	 * @param array $addr Address data.
+	 * @param boolean $term If Term is True Return a New Term if One Does Not Exist
 	 * @return WP_Term|false Returns an existing term or creates a new one.
 	 */
-	public static function get_location( $addr ) {
+	public static function get_location( $addr, $term = false ) {
 		$locality = self::get_locality( $addr );
 		if ( $locality ) {
 			return $locality;
+		}
+
+		if ( ! $term ) {
+			return false;
 		}
 
 		$region = self::get_region( $addr );
