@@ -147,17 +147,15 @@ final class Location_Taxonomy {
 		if ( 'location' !== $term->taxonomy ) {
 			return;
 		}
-		if ( ! array_key_exists( 'location-code', $_POST ) ) {
-			return;
-		}
+		if ( array_key_exists( 'location-code', $_POST ) ) {
+			if ( 0 === $term->parent ) {
+				$type = 'country';
+			} else {
+				$type = self::get_location_type( $term->parent );
+			}
 
-		if ( 0 === $term->parent ) {
-			$type = 'country';
-		} else {
-			$type = self::get_location_type( $term->parent );
+			$_POST[ $type ] = $_POST['location-code'];
 		}
-
-		$_POST[ $type ] = $_POST['location-code'];
 
 		foreach( array( 'country', 'region', 'locality' ) as $field ) {
 			if ( ! empty( $_POST[$field] ) ) {
