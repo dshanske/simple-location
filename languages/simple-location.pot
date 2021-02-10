@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Simple Location plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.4.1\n"
+"Project-Id-Version: Simple Location 4.4.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-02-08T03:30:26+00:00\n"
+"POT-Creation-Date: 2021-02-10T05:13:36+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: simple-location\n"
@@ -102,7 +102,7 @@ msgid "Location"
 msgstr ""
 
 #: includes/class-geo-data.php:326
-#: includes/class-location-taxonomy.php:585
+#: includes/class-location-taxonomy.php:671
 #: includes/class-sloc-weather-widget.php:189
 #: includes/class-weather-provider.php:862
 #: templates/loc-side-metabox.php:42
@@ -216,7 +216,7 @@ msgstr ""
 
 #: includes/class-geo-provider-bing.php:124
 #: includes/class-geo-provider-here.php:99
-#: includes/class-geo-provider-here.php:192
+#: includes/class-geo-provider-here.php:206
 #: includes/class-geo-provider-locationiq.php:99
 #: includes/class-geo-provider-locationiq.php:127
 msgid "You have not set an API key for Bing"
@@ -256,7 +256,7 @@ msgid "HERE API Key"
 msgstr ""
 
 #: includes/class-geo-provider-here.php:112
-#: includes/class-geo-provider-here.php:206
+#: includes/class-geo-provider-here.php:220
 msgid "No results"
 msgstr ""
 
@@ -337,7 +337,7 @@ msgstr ""
 msgid "You did not provide a Pelias URL"
 msgstr ""
 
-#: includes/class-geo-provider-pelias.php:272
+#: includes/class-geo-provider-pelias.php:281
 msgid "You have not set an API key for this Pelias Instance"
 msgstr ""
 
@@ -769,144 +769,148 @@ msgid "Type"
 msgstr ""
 
 #: includes/class-location-taxonomy.php:83
-msgid "Locations allow for 3 levels of hierarchy: Country, region, and locality. You can add a location here and add detail in the edit screen."
+msgid "Locations allow for 3 levels of hierarchy: Country, region, and locality. Countries have no parent. Regions have a country as a parent. Localities have regions are their parent."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:110
-msgid "Country:"
+#: includes/class-location-taxonomy.php:100
+msgid "The code for this location. If no code, you can use the location."
 msgstr ""
 
 #: includes/class-location-taxonomy.php:112
+msgid "Country:"
+msgstr ""
+
+#: includes/class-location-taxonomy.php:114
 msgid "Country."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:117
+#: includes/class-location-taxonomy.php:122
 msgid "Region:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:119
-msgid "The state, county, or province for the location."
+#: includes/class-location-taxonomy.php:124
+msgid "The state, county, or province code for the location(attempts to use ISO3166-2 coding for regions). This can be different than than the name of the region, but is usually the same as the slug(accounting for multiple places with the same name"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:123
+#: includes/class-location-taxonomy.php:132
 msgid "Locality:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:125
+#: includes/class-location-taxonomy.php:134
 msgid "The city, village, or town for the location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:151
+#: includes/class-location-taxonomy.php:178
 msgctxt "taxonomy general name"
 msgid "Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:152
+#: includes/class-location-taxonomy.php:179
 msgctxt "taxonomy singular name"
 msgid "Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:153
+#: includes/class-location-taxonomy.php:180
 msgctxt "search locations"
 msgid "Search Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:154
+#: includes/class-location-taxonomy.php:181
 msgctxt "popular locations"
 msgid "Popular Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:155
+#: includes/class-location-taxonomy.php:182
 msgctxt "all taxonomy items"
 msgid "All Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:156
+#: includes/class-location-taxonomy.php:183
 msgctxt "taxonomy parent item"
 msgid "Parent Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:157
+#: includes/class-location-taxonomy.php:184
 msgctxt "taxonomy parent item with colon"
 msgid "Parent Location:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:158
+#: includes/class-location-taxonomy.php:185
 msgctxt "edit taxonomy item"
 msgid "Edit Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:159
+#: includes/class-location-taxonomy.php:186
 msgctxt "view taxonomy item"
 msgid "View Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:160
+#: includes/class-location-taxonomy.php:187
 msgctxt "update taxonomy item"
 msgid "Update Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:161
+#: includes/class-location-taxonomy.php:188
 msgctxt "add taxonomy item"
 msgid "Add New Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:162
+#: includes/class-location-taxonomy.php:189
 msgctxt "new taxonomy item"
 msgid "New Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:163
+#: includes/class-location-taxonomy.php:190
 msgctxt "separate kinds with commas"
 msgid "Separate locations with commas"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:164
+#: includes/class-location-taxonomy.php:191
 msgctxt "add or remove items"
 msgid "Add or remove location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:165
+#: includes/class-location-taxonomy.php:192
 msgctxt "choose most used"
 msgid "Choose from the most used location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:166
+#: includes/class-location-taxonomy.php:193
 msgctxt "no locations found"
 msgid "No locations found"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:167
+#: includes/class-location-taxonomy.php:194
 msgctxt "no locations"
 msgid "No locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:196
+#: includes/class-location-taxonomy.php:223
 #: includes/class-venue-taxonomy.php:127
 msgid "Country Code"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:208
+#: includes/class-location-taxonomy.php:235
 msgid "Region Code or name if code not available"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:221
+#: includes/class-location-taxonomy.php:248
 msgid "Locality Name"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:304
+#: includes/class-location-taxonomy.php:331
 msgid "No %1$s"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:578
+#: includes/class-location-taxonomy.php:664
 msgid "Country"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:579
+#: includes/class-location-taxonomy.php:665
 msgid "Region"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:580
+#: includes/class-location-taxonomy.php:666
 msgid "Locality"
 msgstr ""
 
@@ -1291,24 +1295,24 @@ msgstr ""
 msgid "Updated"
 msgstr ""
 
-#: includes/class-rest-geo.php:398
+#: includes/class-rest-geo.php:399
 msgid "Provider Not Found"
 msgstr ""
 
-#: includes/class-rest-geo.php:448
+#: includes/class-rest-geo.php:450
 msgid "Missing Arguments"
 msgstr ""
 
-#: includes/class-rest-geo.php:479
+#: includes/class-rest-geo.php:481
 msgid "Missing Coordinates or Station for Weather Lookup"
 msgstr ""
 
-#: includes/class-rest-geo.php:517
-#: includes/class-rest-geo.php:536
+#: includes/class-rest-geo.php:519
+#: includes/class-rest-geo.php:538
 msgid "This Airport Code was Not Found"
 msgstr ""
 
-#: includes/class-rest-geo.php:543
+#: includes/class-rest-geo.php:545
 msgid "Could Not Determine Timezone"
 msgstr ""
 
@@ -2594,10 +2598,14 @@ msgid "Or Lookup By Address"
 msgstr ""
 
 #: templates/geocode-form.php:8
+msgid "Add New Term if Not Found"
+msgstr ""
+
+#: templates/geocode-form.php:9
 msgid "Geocoding Provider"
 msgstr ""
 
-#: templates/geocode-form.php:15
+#: templates/geocode-form.php:16
 #: templates/loc-side-metabox.php:81
 #: templates/weather-form.php:16
 msgid "Lookup"

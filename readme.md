@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.4.1  
+**Stable tag:** 4.4.2  
 **Requires at least:** 4.9  
 **Tested up to:** 5.6.1  
 **Requires PHP:** 5.6  
@@ -12,7 +12,7 @@ Adds geographic location and weather support to WordPress.
 
 ## Description ##
 
-Supports adding geo coordinates or textual description to a post, comment, user, or attachment. Supports adding weather data to a post or to a widget based on location.
+Supports adding geo coordinates, a textual description, and a location taxonomy to a post, comment, user, or attachment. Supports adding weather data to a post or to a widget based on location.
 Offers choice of map displays. It supports retrieving location using the HTML5 geolocation API by default. Clicking the location icon or 'Lookup Location' will retrieve the location. 
 
 As it stores the GeoData in a WordPress standard format, Geodata can also be added from other plugins.
@@ -52,7 +52,7 @@ Locations are divided by administrative areas. The hierarchy for locations is:
 The reverse geocoding system attempts to consistently retrieve the country code, region code, and locality for the location and add them to the location taxonomy. This can be potentially problematic, as if the returns
 from the locations added aren't consistent, it will duplicate and explode the list of terms. This is the same issue that has held back venues.
 
-Locations are matched using the country code, region code, and locality field, and therefore, you can edit the displayed name without any issue. 
+Locations are matched using the country code, region code, and locality field, and therefore, you can edit the displayed name or the region code without issue. Due to matching issues, you may have to make some manual changes.
 
 The taxonomy for venue functionality has been in the plugin for several versions, but has remained unimplemented due to the difficulty in automating the selection process.
 
@@ -215,7 +215,7 @@ The plugin offers providers for:
 
 ## Upgrade Notice ##
 
-### 4.3.0 ###
+### 4.4.0 ###
 
 This update includes support for Locations. Which will be generated when a new location is looked up.
 
@@ -248,6 +248,11 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.2 ( 2021-02-09 ) ###
+* Reworking of the region search code using new data sources to try to get some consistency between providers.
+* Add option to the debugger to not add new term, to allow for testing.
+* Revamp of UI based on feedback to make it less fragile.
 
 ### 4.4.1 ( 2021-02-07 ) ###
 * Location was only being shown in DEBUG mode

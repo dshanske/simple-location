@@ -121,7 +121,7 @@ final class Location_Taxonomy {
 				<tr>
 					<th><label for="region"><?php esc_html_e( 'Region:', 'simple-location' ); ?></label></th>
 					<td><input class="widefat" type=text" name="region" value="<?php echo get_term_meta( $term->term_id, 'region', true ); ?>" required />
-						<p class="description"><?php esc_html_e( 'The state, county, or province for the location.', 'simple-location' ); ?></p>
+						<p class="description"><?php esc_html_e( 'The state, county, or province code for the location(attempts to use ISO3166-2 coding for regions). This can be different than than the name of the region, but is usually the same as the slug(accounting for multiple places with the same name', 'simple-location' ); ?></p>
 					</td>
 				</tr> 
 				<?php
