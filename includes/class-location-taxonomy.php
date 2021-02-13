@@ -401,7 +401,7 @@ final class Location_Taxonomy {
 	 * @return int|false Term ID or false if not found.
 	 */
 	public static function get_locality( $addr ) {
-		if ( empty( $addr ) ) {
+		if ( empty( $addr ) || ! is_array( $addr ) ) {
 			return false;
 		}
 
@@ -431,6 +431,10 @@ final class Location_Taxonomy {
 
 		foreach ( $terms as $term_id ) {
 			$data = self::get_location_data( $term_id );
+			// This should not happen
+			if ( empty( $data ) || ! array_key_exists( 'country', $data ) ) {
+				return false;
+			}
 			if ( $addr['country-code'] === $data['country']['code'] ) {
 				if ( $data['region']['code'] === self::region_return( $addr ) ) {
 					return $term_id;
@@ -502,7 +506,7 @@ final class Location_Taxonomy {
 				)
 			);
 			foreach ( $terms as $term ) {
-				$data = self::get_location_data( $type );
+				$data = self::get_location_data( $term );
 				if ( ! array_key_exists( 'locality', $data ) ) {
 					if ( $addr['country-code'] === $data['country']['code'] ) {
 						return $term;
@@ -558,11 +562,11 @@ final class Location_Taxonomy {
 	 *
 	 * @param array $addr Address data.
 	 * @param boolean $term If Term is True Return a New Term if One Does Not Exist
-	 * @return WP_Term|false Returns an existing term or creates a new one.
+	 * @return int|false Returns an existing term or creates a new one.
 	 */
 	public static function get_location( $addr, $term = false ) {
 		$locality = self::get_locality( $addr );
-		if ( $locality ) {
+		if ( is_numeric( $locality ) && 0 !== $locality ) {
 			return $locality;
 		}
 
@@ -737,6 +741,25 @@ final class Location_Taxonomy {
 		);
 		$args     = wp_parse_args( $args, $defaults );
 		return wp_list_categories( $args );
+	}
+
+	public static function location_data_to_hadr( $data ) {
+		if ( empty( $data ) ) {
+			return array();
+		}
+		$return = array();
+		if ( array_key_exists( 'locality', $data ) ) {
+			$return['locality'] = $data['locality']['name'];
+		}
+		if ( array_key_existS( 'region', $data ) ) {
+			$return['region-code'] = $data['region']['code'];
+			$return['region']      = $data['region']['name'];
+		}
+		if ( array_key_existS( 'country', $data ) ) {
+			$return['country-code'] = $data['country']['code'];
+			$return['country-name'] = $data['country']['name'];
+		}
+		return $return;
 	}
 
 
