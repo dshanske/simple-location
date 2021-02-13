@@ -724,6 +724,21 @@ final class Location_Taxonomy {
 		return implode( ', ', $return );
 	}
 
+	/**
+	 * Wrapper around wp_list_categories for now that outputs a list of the locations.
+	 * May be customized further in future.
+	 */
+
+	public static function list_locations() {
+		$defaults = array(
+			'taxonomy' => 'location',
+			'title_li' => null,
+			'order_by' => 'name',
+		);
+		$args     = wp_parse_args( $args, $defaults );
+		return wp_list_categories( $args );
+	}
+
 
 } // End Class Location_Taxonomy
 
