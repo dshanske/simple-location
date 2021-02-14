@@ -167,7 +167,7 @@ jQuery( document ).ready( function( $ ) {
 						$( '#altitude' ).val( response.altitude );
 					}
 
-					if( 'terms' in response ) {
+					if ( 'terms' in response ) {
 						$( '#location_dropdown' ).replaceWith( response.terms );
 					}
 

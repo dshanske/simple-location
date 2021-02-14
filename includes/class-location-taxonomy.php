@@ -25,14 +25,6 @@ final class Location_Taxonomy {
 		add_filter( 'get_the_archive_title', array( __CLASS__, 'archive_title' ), 10 );
 	}
 
-	/**
-	 * To Be Run on Plugin Activation.
-	 */
-	public static function activate_location() {
-		self::register();
-		flush_rewrite_rules();
-	}
-
 	public static function archive_title( $title ) {
 		if ( ! is_tax( 'location' ) ) {
 			return $title;

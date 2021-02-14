@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.4.2  
+**Stable tag:** 4.4.3  
 **Requires at least:** 4.9  
 **Tested up to:** 5.6.1  
 **Requires PHP:** 5.6  
@@ -53,6 +53,8 @@ The reverse geocoding system attempts to consistently retrieve the country code,
 from the locations added aren't consistent, it will duplicate and explode the list of terms. This is the same issue that has held back venues.
 
 Locations are matched using the country code, region code, and locality field, and therefore, you can edit the displayed name or the region code without issue. Due to matching issues, you may have to make some manual changes.
+
+There is no top level Location page, /location included in the plugin. You can create a page at this location and use a custom template to allow it to show a list of your locations. 
 
 The taxonomy for venue functionality has been in the plugin for several versions, but has remained unimplemented due to the difficulty in automating the selection process.
 
@@ -248,6 +250,12 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.3 ( 2021-02-13 ) ###
+* Fix issue with saving Term Metadata
+* Add list location function to output a list of used locations. Currently wrapper around wp_list_categories
+* When you add a new term it automatically refreshes the entire list of locations so the new term will appear properly in the hierarchy.
+* Additional unit testing.
 
 ### 4.4.2 ( 2021-02-09 ) ###
 * Reworking of the region search code using new data sources to try to get some consistency between providers.
