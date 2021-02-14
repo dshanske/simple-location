@@ -40,6 +40,11 @@ class LocationTest extends WP_UnitTestCase {
 		$term = Location_Taxonomy::get_location( $addr, true );
 		$locality = Location_Taxonomy::get_locality( $addr );
 		$this->assertEquals( $term, $locality );
+		$ancestors = get_ancestors( $term, 'location', 'taxonomy' );
+		$region = Location_Taxonomy::get_region( $addr );
+		$this->assertEquals( $region, $ancestors[0] );
+		$country = Location_Taxonomy::get_country( $addr );
+		$this->assertEquals( $country, $ancestors[1] );
 		wp_delete_term( $term, 'location' );
 	}
 }
