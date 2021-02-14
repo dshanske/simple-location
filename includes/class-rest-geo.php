@@ -425,8 +425,21 @@ class REST_Geo {
 				if ( $term ) {
 					$reverse_adr['term_id']      = $term;
 					$reverse_adr['term_details'] = Location_Taxonomy::get_location_data( $term );
-					$term                        = get_term( $term, 'location' );
-					$reverse_adr['term_name']    = $term->name;
+					$reverse_adr['terms'] = wp_dropdown_categories(
+						array(
+							'echo'             => 0,
+							'taxonomy'         => 'location',
+							'class'            => 'widefat',
+							'hide_empty'       => 0,
+							'name'             => "tax_input[location][]",
+							'id'               => 'location_dropdown',
+							'orderby'          => 'name',
+							'hierarchical'     => true,
+							'selected'         => $term,
+							'show_option_none' => __( 'No Location', 'simple-location' ),
+						)
+					);
+
 				}
 			}
 			if ( isset( $params['weather'] ) && ( 'no' !== $params['weather'] ) ) {

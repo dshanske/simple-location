@@ -751,11 +751,11 @@ final class Location_Taxonomy {
 		if ( array_key_exists( 'locality', $data ) ) {
 			$return['locality'] = $data['locality']['name'];
 		}
-		if ( array_key_existS( 'region', $data ) ) {
+		if ( array_key_exists( 'region', $data ) ) {
 			$return['region-code'] = $data['region']['code'];
 			$return['region']      = $data['region']['name'];
 		}
-		if ( array_key_existS( 'country', $data ) ) {
+		if ( array_key_exists( 'country', $data ) ) {
 			$return['country-code'] = $data['country']['code'];
 			$return['country-name'] = $data['country']['name'];
 		}

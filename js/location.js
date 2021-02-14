@@ -167,14 +167,8 @@ jQuery( document ).ready( function( $ ) {
 						$( '#altitude' ).val( response.altitude );
 					}
 
-					if ( 'term_id' in response ) {
-						
-						if ( ! $('#location_dropdown option').has( 'option[value="+response.term_id"]' ) ) {
-							alert( 'New Location Found' );
-							$( '#location_dropdown' ).append( new Option( response.term_name, response.term_id, false, false ) );
-						}
-						$( '#location_dropdown' ).val( response.term_id );
-						$( '#location_dropdown' ).change();
+					if( 'terms' in response ) {
+						$( '#location_dropdown' ).replaceWith( response.terms );
 					}
 
 					if ( 'visibility' in response ) {
