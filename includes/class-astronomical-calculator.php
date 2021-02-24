@@ -400,43 +400,43 @@ class Astronomical_Calculator {
 			$return = array(
 				'name' => 'new-moon',
 				'text' => __( 'New', 'simple-location' ),
-				'icon' => 'wi-moon-new',
+				'icon' => 'wi-moon-alt-new',
 			);
 		} elseif ( 0 < $moon['phase'] && 0.25 > $moon['phase'] ) {
 			 $return = array(
 				 'name' => 'waxing-crescent-moon',
 				 'text' => __( 'Waxing Crescent', 'simple-location' ),
-				 'icon' => 'wi-moon-waxing-crescent-6',
+				 'icon' => 'wi-moon-alt-waxing-crescent-6',
 			 );
 		} elseif ( 0.25 < $moon['phase'] && 0.5 > $moon['phase'] ) {
 			$return = array(
 				'name' => 'first-quarter-moon',
 				'text' => __( 'First Quarter', 'simple-location' ),
-				'icon' => 'wi-moon-first-quarter',
+				'icon' => 'wi-moon-alt-first-quarter',
 			);
 		} elseif ( 0.5 === $moon['phase'] ) {
 			 $return = array(
 				 'name' => 'full-moon',
 				 'text' => __( 'Full Moon', 'simple-location' ),
-				 'icon' => 'wi-moon-full',
+				 'icon' => 'wi-moon-alt-full',
 			 );
 		} elseif ( 0.5 < $moon['phase'] && 0.75 > $moon['phase'] ) {
 			 $return = array(
 				 'name' => 'waning-gibbous-moon',
 				 'text' => __( 'Waning Gibbous', 'simple-location' ),
-				 'icon' => 'wi-moon-waning-gibbous-1',
+				 'icon' => 'wi-moon-alt-waning-gibbous-1',
 			 );
 		} elseif ( 0.75 === $moon['phase'] ) {
 			 $return = array(
 				 'name' => 'third-quarter-moon',
 				 'text' => __( 'Third Quarter', 'simple-location' ),
-				 'icon' => 'wi-moon-third-quarter',
+				 'icon' => 'wi-moon-alt-third-quarter',
 			 );
 		} elseif ( 0.75 < $moon['phase'] && 1 > $moon['phase'] ) {
 			 $return = array(
 				 'name' => 'waning-crescent-moon',
 				 'text' => __( 'Waning Crescent', 'simple-location' ),
-				 'icon' => 'wi-moon-waning-crescent-1',
+				 'icon' => 'wi-moon-alt-waning-crescent-1',
 			 );
 		}
 		return array_merge( $moon, $return );
