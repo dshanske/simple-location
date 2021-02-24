@@ -17,6 +17,7 @@ add_action( 'plugins_loaded', array( 'Simple_Location_Plugin', 'init' ) );
 // Activation and Deactivation Hooks.
 register_activation_hook( __FILE__, array( 'Simple_Location_Plugin', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Simple_Location_Plugin', 'deactivate' ) );
+add_action( 'upgrader_process_complete', array( 'Simple_Location_Plugin', 'upgrader_process_complete' ), 10, 2 );
 
 if ( ! defined( 'SLOC_PER_PAGE' ) ) {
 			define( 'SLOC_PER_PAGE', 100 );
@@ -63,6 +64,17 @@ class Simple_Location_Plugin {
 	 */
 	public static function deactivate() {
 		flush_rewrite_rules();
+	}
+
+	public static function upgrader_process_complete( $upgrade_object, $options ) {
+		$current_plugin_path_name = plugin_basename( __FILE__ );
+		if ( ( 'update' === $options['action'] ) && ( 'plugin' === $options['type'] ) ) {
+			foreach ( $options['plugins'] as $each_plugin ) {
+				if ( $each_plugin === $current_plugin_path_name ) {
+					flush_rewrite_rules();
+				}
+			}
+		}
 	}
 
 
