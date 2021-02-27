@@ -104,7 +104,7 @@ final class Location_Taxonomy {
 		echo '<select name="region" id="region">';
 		foreach ( $codes as $code => $name ) {
 			$code = str_replace( $country . '-', '', $code );
-			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code ), selected( $region, $code, false ), esc_html( $name ) ); // phpcs:ignore
+			printf( '<option value="%1$s" %2$s>%3$s(%1$s)</option>', esc_attr( $code ), selected( $region, $code, false ), esc_html( $name ) ); // phpcs:ignore
 		}
 		echo '</select>';
 	}
