@@ -86,11 +86,12 @@ final class Location_Taxonomy {
 	}
 
 	public static function create_screen_fields( $taxonomy ) {
-		echo '<div class="form-field">';
+		echo '<div class="form-field form-required">';
 				printf( '<label for="location-code">%1$s</label>', esc_html( 'Location Code:', 'simple-location' ) );
-		printf( '<input class="widefat" type=text" name="location-code" required />' );
-		printf( '<p class="description">%1$s</p>', esc_html_e( 'The code for this location. If no code, you can use the location.', 'simple-location' ) );
-				echo '</div>';
+		printf( '<input class="widefat" type="text" name="location-code" required />' );
+		printf( '<p>%1$s</p>', esc_html__( 'Required. The code for this location. If no code, you can use the location.', 'simple-location' ) );
+		echo '</div>';
+		wp_nonce_field( 'create', 'location_taxonomy_meta' );
 	}
 
 	public static function edit_screen_fields( $term, $taxonomy ) {
@@ -129,32 +130,49 @@ final class Location_Taxonomy {
 				<?php
 				break;
 			default:
+				?>
+				<p class="notice notice-error"><?php esc_html_e( 'Error: Cannot Identify Type. This likely means the parent of this term is a locality. Localities can have no child. Change Parent to Country, Region, or None.', 'simple-location' ); ?> </p>
+				<?php
 		}
 		echo '</tr>';
+		wp_nonce_field( 'edit', 'location_taxonomy_meta' );
 	}
 
 	public static function save_data( $term_id ) {
+		// This option only exists when using one of the two forms.
+		if ( ! array_key_exists( 'location_taxonomy_meta', $_POST ) ) {
+			return;
+		}
+		$nonce = sanitize_text_field( $_POST['location_taxonomy_meta'] );
+		if ( ! wp_verify_nonce( $nonce, 'edit' ) && ! wp_verify_nonce( $nonce, 'create' ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'edit_term', $term_id ) ) {
+			return;
+		}
+
 		// phpcs:disable
 		$term = get_term( $term_id );
+
 		if ( 'location' !== $term->taxonomy ) {
 			return;
 		}
-		if ( array_key_exists( 'location-code', $_POST ) ) {
-			if ( 0 === $term->parent ) {
-				$type = 'country';
-			} else {
-				$type = self::get_location_type( $term->parent );
-			}
 
-			$_POST[ $type ] = $_POST['location-code'];
+		$type = self::get_location_type( $term_id );
+
+		if ( array_key_exists( 'location-code', $_POST ) ) {
+			if ( $type ) {
+				update_term_meta( $term_id, $type, sanitize_text_field( $_POST['location-code'] ) );
+			}
+			return;
+			
 		}
 
-		foreach( array( 'country', 'region', 'locality' ) as $field ) {
-			if ( ! empty( $_POST[$field] ) ) {
-				update_term_meta( $term_id, $field, $_POST[$field] );
-			} else {
-				delete_term_meta( $term_id, $field );
-			}
+		if ( array_key_exists( $type, $_POST ) ) {
+			update_term_meta( $term_id, $type, sanitize_text_field( $_POST[$type] ) );
+		} else {
+			update_term_meta( $term_id, $type, strtoupper( $term->slug ) );
 		}
 		// phpcs:enable
 	}
@@ -523,14 +541,6 @@ final class Location_Taxonomy {
 				'key'   => 'country',
 				'value' => $country_code,
 			),
-			array(
-				'key'     => 'region',
-				'compare' => 'NOT EXISTS',
-			),
-			array(
-				'key'     => 'locality',
-				'compare' => 'NOT EXISTS',
-			),
 		);
 		$terms = get_terms(
 			array(
@@ -637,19 +647,24 @@ final class Location_Taxonomy {
 		if ( 'location' !== $term->taxonomy ) {
 			return false;
 		}
-		$meta = get_term_meta( $term_id );
-		if ( empty( $meta ) ) {
-			return false;
-		}
-		if ( array_key_exists( 'locality', $meta ) ) {
-			return 'locality';
-		}
-		if ( array_key_exists( 'region', $meta ) ) {
-			return 'region';
-		}
-		if ( array_key_exists( 'country', $meta ) ) {
+
+		// If there are no parents it should be assumed to be a country.
+		if ( 0 === $term->parent ) {
 			return 'country';
 		}
+
+		$ancestors = get_ancestors( $term_id, 'location' );
+		// The most ancestors a location should have is 2.
+		if ( 3 <= count( $ancestors ) ) {
+			return false;
+		}
+		if ( 2 === count( $ancestors ) ) {
+			return 'locality';
+		}
+		if ( 1 === count( $ancestors ) ) {
+			return 'region';
+		}
+
 		return false;
 	}
 
