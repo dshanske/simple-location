@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.4.3  
+**Stable tag:** 4.4.4  
 **Requires at least:** 4.9  
 **Tested up to:** 5.6.1  
 **Requires PHP:** 5.6  
@@ -250,6 +250,12 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.4 ( 2021-02-27 ) ###
+* Fix issue where saving terms places other than the admin causes data loss. This also fixes data loss when using a taxonomy merge tool.
+* Switch from querying for the term meta to determining type of location by hierarchy.
+* Check permissions before allowing the edit of the term.
+* Add region select pulldown which will be shown unless the value of the region is not on the list.
 
 ### 4.4.3 ( 2021-02-13 ) ###
 * Fix issue with saving Term Metadata

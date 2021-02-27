@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Simple Location plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.4.3\n"
+"Project-Id-Version: Simple Location 4.4.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-02-14T01:47:37+00:00\n"
+"POT-Creation-Date: 2021-02-27T16:47:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: simple-location\n"
@@ -102,7 +102,7 @@ msgid "Location"
 msgstr ""
 
 #: includes/class-geo-data.php:326
-#: includes/class-location-taxonomy.php:665
+#: includes/class-location-taxonomy.php:699
 #: includes/class-sloc-weather-widget.php:189
 #: includes/class-weather-provider.php:862
 #: templates/loc-side-metabox.php:42
@@ -772,145 +772,149 @@ msgstr ""
 msgid "Locations allow for 3 levels of hierarchy: Country, region, and locality. Countries have no parent. Regions have a country as a parent. Localities have regions are their parent."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:92
-msgid "The code for this location. If no code, you can use the location."
+#: includes/class-location-taxonomy.php:116
+msgid "Required. The code for this location. If no code, you can use the location."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:104
+#: includes/class-location-taxonomy.php:128
 msgid "Country:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:106
+#: includes/class-location-taxonomy.php:130
 msgid "Country."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:114
+#: includes/class-location-taxonomy.php:136
 msgid "Region:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:116
+#: includes/class-location-taxonomy.php:139
 msgid "The state, county, or province code for the location(attempts to use ISO3166-2 coding for regions). This can be different than than the name of the region, but is usually the same as the slug(accounting for multiple places with the same name"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:124
+#: includes/class-location-taxonomy.php:145
 msgid "Locality:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:126
+#: includes/class-location-taxonomy.php:147
 msgid "The city, village, or town for the location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:168
+#: includes/class-location-taxonomy.php:153
+msgid "Error: Cannot Identify Type. This likely means the parent of this term is a locality. Localities can have no child. Change Parent to Country, Region, or None."
+msgstr ""
+
+#: includes/class-location-taxonomy.php:205
 msgctxt "taxonomy general name"
 msgid "Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:169
+#: includes/class-location-taxonomy.php:206
 msgctxt "taxonomy singular name"
 msgid "Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:170
+#: includes/class-location-taxonomy.php:207
 msgctxt "search locations"
 msgid "Search Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:171
+#: includes/class-location-taxonomy.php:208
 msgctxt "popular locations"
 msgid "Popular Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:172
+#: includes/class-location-taxonomy.php:209
 msgctxt "all taxonomy items"
 msgid "All Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:173
+#: includes/class-location-taxonomy.php:210
 msgctxt "taxonomy parent item"
 msgid "Parent Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:174
+#: includes/class-location-taxonomy.php:211
 msgctxt "taxonomy parent item with colon"
 msgid "Parent Location:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:175
+#: includes/class-location-taxonomy.php:212
 msgctxt "edit taxonomy item"
 msgid "Edit Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:176
+#: includes/class-location-taxonomy.php:213
 msgctxt "view taxonomy item"
 msgid "View Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:177
+#: includes/class-location-taxonomy.php:214
 msgctxt "update taxonomy item"
 msgid "Update Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:178
+#: includes/class-location-taxonomy.php:215
 msgctxt "add taxonomy item"
 msgid "Add New Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:179
+#: includes/class-location-taxonomy.php:216
 msgctxt "new taxonomy item"
 msgid "New Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:180
+#: includes/class-location-taxonomy.php:217
 msgctxt "separate kinds with commas"
 msgid "Separate locations with commas"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:181
+#: includes/class-location-taxonomy.php:218
 msgctxt "add or remove items"
 msgid "Add or remove location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:182
+#: includes/class-location-taxonomy.php:219
 msgctxt "choose most used"
 msgid "Choose from the most used location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:183
+#: includes/class-location-taxonomy.php:220
 msgctxt "no locations found"
 msgid "No locations found"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:184
+#: includes/class-location-taxonomy.php:221
 msgctxt "no locations"
 msgid "No locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:213
+#: includes/class-location-taxonomy.php:250
 #: includes/class-venue-taxonomy.php:127
 msgid "Country Code"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:225
+#: includes/class-location-taxonomy.php:262
 msgid "Region Code or name if code not available"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:238
+#: includes/class-location-taxonomy.php:275
 msgid "Locality Name"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:321
+#: includes/class-location-taxonomy.php:358
 msgid "No %1$s"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:658
+#: includes/class-location-taxonomy.php:692
 msgid "Country"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:659
+#: includes/class-location-taxonomy.php:693
 msgid "Region"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:660
+#: includes/class-location-taxonomy.php:694
 msgid "Locality"
 msgstr ""
 
@@ -2581,11 +2585,11 @@ msgstr ""
 msgid "Waxing Gibbous 6"
 msgstr ""
 
-#: simple-location.php:211
+#: simple-location.php:223
 msgid "Settings"
 msgstr ""
 
-#: simple-location.php:236
+#: simple-location.php:248
 msgid ""
 "Location and weather data is optionally stored for all posts, attachments, and comments. Location data is extracted from uploaded images along with other metadata. This\n"
 "\t\t\t\tdata can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it."
