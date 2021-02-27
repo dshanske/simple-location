@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.4.4
+Stable tag: 4.4.5
 Requires at least: 4.9
 Tested up to: 5.6.1
 Requires PHP: 5.6
@@ -250,6 +250,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.4.5 ( 2021-02-27 ) =
+* forgot to commit necessary data files in 4.4.4
 
 = 4.4.4 ( 2021-02-27 ) =
 * Fix issue where saving terms places other than the admin causes data loss. This also fixes data loss when using a taxonomy merge tool.
