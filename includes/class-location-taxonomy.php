@@ -125,33 +125,27 @@ final class Location_Taxonomy {
 		switch ( $type ) {
 			case 'country':
 				?>
-				<tr>
-					<th><label for="country"><?php esc_html_e( 'Country:', 'simple-location' ); ?></label></th>
-					<td><?php self::country_select( get_term_meta( $term->term_id, 'country', true ) ); ?>
-						<p class="description"><?php esc_html_e( 'Country.', 'simple-location' ); ?></p></td>
-					</td>
-				</tr>
+				<th><label for="country"><?php esc_html_e( 'Country:', 'simple-location' ); ?></label></th>
+				<td><?php self::country_select( get_term_meta( $term->term_id, 'country', true ) ); ?>
+					<p class="description"><?php esc_html_e( 'Country.', 'simple-location' ); ?></p></td>
+				</td>
 				<?php
 				break;
 			case 'region':
 				?>
-				<tr>
 				<th><label for="region"><?php esc_html_e( 'Region:', 'simple-location' ); ?></label></th>
 				<td><?php self::region_select( get_term_meta( $term->term_id, 'region', true ), self::get_parent_country( $term->term_id ) ); ?>
 
 				<p class="description"><?php esc_html_e( 'The state, county, or province code for the location(attempts to use ISO3166-2 coding for regions). This can be different than than the name of the region, but is usually the same as the slug(accounting for multiple places with the same name', 'simple-location' ); ?></p>
 				</td>
-				</tr> 
 				<?php
 				break;
 			case 'locality':
 				?>
-				<tr>
-					<th><label for="locality"><?php esc_html_e( 'Locality:', 'simple-location' ); ?></label></th>
-					<td><input class="widefat" type=text" name="locality" value="<?php echo get_term_meta( $term->term_id, 'locality', true ); ?>" required />
-						<p class="description"><?php esc_html_e( 'The city, village, or town for the location', 'simple-location' ); ?></p>
-					</td>
-				</tr> 
+				<th><label for="locality"><?php esc_html_e( 'Locality:', 'simple-location' ); ?></label></th>
+				<td><input class="widefat" type=text" name="locality" value="<?php echo get_term_meta( $term->term_id, 'locality', true ); ?>" required />
+					<p class="description"><?php esc_html_e( 'The city, village, or town for the location', 'simple-location' ); ?></p>
+				</td>
 				<?php
 				break;
 			default:
