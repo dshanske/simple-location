@@ -85,6 +85,30 @@ final class Location_Taxonomy {
 		echo '</select>';
 	}
 
+	public static function region_select( $region, $country ) {
+		$country = strtoupper( trim( $country ) );
+		if ( 2 !== strlen( $country ) ) {
+			return false;
+		}
+		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-2/' . $country . '.json';
+		if ( ! file_exists( $file ) ) {
+			return false;
+		}
+
+		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = wp_list_pluck( $codes, 'name', 'code' );
+		if ( ! array_key_exists( $country . '-' . $region, $codes ) && ! empty( $region ) ) {
+			printf( '<input class="widefat" type=text" name="region" value="%s" required />', $region );
+			return;
+		}
+		echo '<select name="region" id="region">';
+		foreach ( $codes as $code => $name ) {
+			$code = str_replace( $country . '-', '', $code );
+			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code ), selected( $region, $code, false ), esc_html( $name ) ); // phpcs:ignore
+		}
+		echo '</select>';
+	}
+
 	public static function create_screen_fields( $taxonomy ) {
 		echo '<div class="form-field form-required">';
 				printf( '<label for="location-code">%1$s</label>', esc_html( 'Location Code:', 'simple-location' ) );
@@ -112,10 +136,11 @@ final class Location_Taxonomy {
 			case 'region':
 				?>
 				<tr>
-					<th><label for="region"><?php esc_html_e( 'Region:', 'simple-location' ); ?></label></th>
-					<td><input class="widefat" type=text" name="region" value="<?php echo get_term_meta( $term->term_id, 'region', true ); ?>" required />
-						<p class="description"><?php esc_html_e( 'The state, county, or province code for the location(attempts to use ISO3166-2 coding for regions). This can be different than than the name of the region, but is usually the same as the slug(accounting for multiple places with the same name', 'simple-location' ); ?></p>
-					</td>
+				<th><label for="region"><?php esc_html_e( 'Region:', 'simple-location' ); ?></label></th>
+				<td><?php self::region_select( get_term_meta( $term->term_id, 'region', true ), self::get_parent_country( $term->term_id ) ); ?>
+
+				<p class="description"><?php esc_html_e( 'The state, county, or province code for the location(attempts to use ISO3166-2 coding for regions). This can be different than than the name of the region, but is usually the same as the slug(accounting for multiple places with the same name', 'simple-location' ); ?></p>
+				</td>
 				</tr> 
 				<?php
 				break;
@@ -709,6 +734,25 @@ final class Location_Taxonomy {
 			return $return;
 	}
 
+	public static function get_parent_country( $term_id ) {
+		$term = get_term( $term_id );
+		if ( ! $term instanceof WP_Term ) {
+			return false;
+		}
+		if ( 'location' !== $term->taxonomy ) {
+			return false;
+		}
+
+		// If there are no parents it should be assumed to be a country.
+		if ( 0 === $term->parent ) {
+			return get_term_meta( $term_id, 'country', true );
+		}
+
+		$ancestors = get_ancestors( $term_id, 'location' );
+		$term      = get_term( end( $ancestors ) );
+		return get_term_meta( $term->term_id, 'country', true );
+	}
+
 	public static function display_name( $term_id, $links = true ) {
 		$term     = get_term( $term_id );
 		$return   = array();
@@ -768,7 +812,6 @@ final class Location_Taxonomy {
 		}
 		return $return;
 	}
-
 
 } // End Class Location_Taxonomy
 
