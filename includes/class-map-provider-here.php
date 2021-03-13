@@ -169,7 +169,7 @@ class Map_Provider_Here extends Map_Provider {
 		foreach ( $locations as $location ) {
 			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
-		$polyline = Polyline::encode( $locations );
+		$polyline = Sloc_Polyline::encode( $locations );
 
 		$url = 'https://image.maps.ls.hereapi.com/mia/1.6/route';
 		$map = add_query_arg(

@@ -122,7 +122,7 @@ class Map_Provider_Bing extends Map_Provider {
 
 		$markers  = array();
 		$path     = array();
-		$polyline = Polyline::encode( $locations );
+		$polyline = Sloc_Polyline::encode( $locations );
 		$markers  = array();
 		foreach ( $locations as $location ) {
 			$markers[] = sprintf( '%1$s,%2$s;51', $location[0], $location[1] );

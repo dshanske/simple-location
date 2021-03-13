@@ -155,7 +155,7 @@ class Simple_Location_Plugin {
 		add_action( 'widgets_init', array( static::class, 'widgets_init' ) );
 
 		$libraries = array(
-			'Polyline.php', // Polyline Encoding Library.
+			'class-sloc-polyline.php', // Polyline Encoding Library.
 		);
 		self::load( $libraries, 'lib/' );
 

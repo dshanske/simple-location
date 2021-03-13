@@ -178,7 +178,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 		foreach ( $locations as $location ) {
 			$markers[] = sprintf( 'pin-s(%1$s,%2$s)', $location[1], $location[0] );
 		}
-		$polyline = Polyline::encode( $locations );
+		$polyline = Sloc_Polyline::encode( $locations );
 		$map      = sprintf(
 			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/%3$s,path-5+f44-0.5(%4$s)/auto/%5$sx%6$s?access_token=%7$s',
 			$user,

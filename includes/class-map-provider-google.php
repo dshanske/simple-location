@@ -117,7 +117,7 @@ class Map_Provider_Google extends Map_Provider {
 		foreach ( $locations as $location ) {
 			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
-		$polyline = Polyline::encode( $locations );
+		$polyline = Sloc_Polyline::encode( $locations );
 
 		$map = add_query_arg(
 			array(

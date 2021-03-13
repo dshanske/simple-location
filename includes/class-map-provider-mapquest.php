@@ -118,7 +118,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 		foreach ( $locations as $location ) {
 			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
-		$polyline = Polyline::encode( $locations );
+		$polyline = Sloc_Polyline::encode( $locations );
 
 		$url = 'https://open.mapquestapi.com/staticmap/v5/map';
 		$map = add_query_arg(

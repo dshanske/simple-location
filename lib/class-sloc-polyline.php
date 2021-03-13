@@ -4,6 +4,7 @@
  * Polyline
  *
  * PHP Version 5.3
+ * Modified to Fit into Simple Location by @dshanske
  *
  * A simple class to handle polyline-encoding for Google Maps
  *
@@ -41,7 +42,7 @@
  * @license  http://www.gnu.org/licenses/lgpl.html LGPL v3
  * @link     https://github.com/emcconville/google-map-polyline-encoding-tool
  */
-class Polyline
+class Sloc_Polyline
 {
     /**
      * Default precision level of 1e-5.
