@@ -11,10 +11,10 @@ if ( ! function_exists( 'current_datetime' ) ) {
 	 *
 	 * @since 5.3.0 - Backported to Simple Location and DateTime used for pre PHP 5.5 compatibility for new
 	 *
-	 * @return DateTime Date and time object.
+	 * @return DateTimeImmutable Date and time object.
 	 */
 	function current_datetime() {
-		return new DateTime( 'now', wp_timezone() );
+		return new DateTimeImmutable( 'now', wp_timezone() );
 	}
 }
 
@@ -43,15 +43,15 @@ if ( ! function_exists( 'get_post_timestamp' ) ) {
 
 if ( ! function_exists( 'get_post_datetime' ) ) {
 	/**
-	 * Retrieve post published or modified time as a `DateTime` object instance.
+	 * Retrieve post published or modified time as a `DateTimeImmutable` object instance.
 	 *
 	 * The object will be set to the timezone from WordPress settings.
 	 *
-	 * @since 5.3.0 - backported to Simple Location and returns as a DateTime not DateTimeImmutable object for pre PHP 5.5 compat
+	 * @since 5.3.0 - backported to Simple Location
 	 *
 	 * @param int|WP_Post $post  Optional. WP_Post object or ID. Default is global `$post` object.
 	 * @param string      $field Optional. Post field to use. Accepts 'date' or 'modified'.
-	 * @return DateTime|false Time object on success, false on failure.
+	 * @return DateTimeImmutable|false Time object on success, false on failure.
 	 */
 	function get_post_datetime( $post = null, $field = 'date' ) {
 		$post = get_post( $post );
@@ -62,20 +62,20 @@ if ( ! function_exists( 'get_post_datetime' ) ) {
 		if ( empty( $time ) || '0000-00-00 00:00:00' === $time ) {
 			return false;
 		}
-		return date_create_from_format( 'Y-m-d H:i:s', $time, wp_timezone() );
+		return date_create_immutable_from_format( 'Y-m-d H:i:s', $time, wp_timezone() );
 	}
 }
 
 if ( ! function_exists( 'get_comment_datetime' ) ) {
 	/**
-	 * Retrieve comment published time as a `DateTime` object instance.
+	 * Retrieve comment published time as a `DateTimeImmutable` object instance.
 	 *
 	 * The object will be set to the timezone from WordPress settings.
 	 *
 	 * Modified version of the get_post_datetime function from WordPress 5.3
 	 *
 	 * @param int|WP_Comment $comment  Optional. WP_Comment object or ID. Default is global `$comment` object.
-	 * @return DateTime|false Time object on success, false on failure.
+	 * @return DateTimeImmutable|false Time object on success, false on failure.
 	 */
 	function get_comment_datetime( $comment = null ) {
 		$comment = get_comment( $comment );
@@ -86,7 +86,7 @@ if ( ! function_exists( 'get_comment_datetime' ) ) {
 		if ( empty( $time ) || '0000-00-00 00:00:00' === $time ) {
 			return false;
 		}
-		return date_create_from_format( 'Y-m-d H:i:s', $time, wp_timezone() );
+		return date_create_immutable_from_format( 'Y-m-d H:i:s', $time, wp_timezone() );
 	}
 }
 
