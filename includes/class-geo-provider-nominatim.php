@@ -181,7 +181,6 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 					'neighborhood',
 					'city_district',
 					'district',
-					'suburb',
 					'subdivision',
 					'allotments',
 					'quarter',
@@ -196,7 +195,8 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 					'city',
 					'municipality',
 					'croft',
-					'isolated_dwlling',
+					'isolated_dwelling',
+					'suburb',
 				)
 			),
 			'region'           => $region,
