@@ -40,7 +40,6 @@ class Location_Plugins {
 		$published = null;
 		if ( isset( $properties['published'] ) ) {
 			$published = $properties['published'][0];
-			$now       = time();
 		}
 		$geolocation->set_user( get_current_user_id() );
 		$geolocation->retrieve( $published );
