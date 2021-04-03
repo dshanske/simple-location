@@ -290,6 +290,28 @@ final class Location_Taxonomy {
 	}
 
 	/**
+	 * Normalizes address data.
+	 *
+	 * @param array $address Address data.
+	 * @return array Normalized Address Data.
+	 */
+	public static function normalize_address( $address ) {
+		if ( ! array_key_exists( 'country-code', $address ) && array_key_exists( 'country-name', $address ) ) {
+			$address['country-code'] = Geo_Provider::country_code( $address['country-name'] );
+		}
+		if ( ! array_key_exists( 'country-name', $address ) && array_key_exists( 'country-code', $address ) ) {
+			$address['country-code'] = Geo_Provider::country_name( $address['country-code'] );
+		}
+		if ( ! array_key_exists( 'region-code', $address ) && array_key_exists( 'region-name', $address ) ) {
+			$address['region-code'] = Geo_Provider::country_code( $address['region-name'] );
+		}
+		if ( ! array_key_exists( 'region-name', $address ) && array_key_exists( 'region-code', $address ) ) {
+			$address['region-code'] = Geo_Provider::country_name( $address['region-code'] );
+		}
+		return array_filter( $address );
+	}
+
+	/**
 	 * Returns the location term for the current post.
 	 *
 	 * @access public
