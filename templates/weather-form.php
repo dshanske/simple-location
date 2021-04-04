@@ -1,3 +1,11 @@
+<?php
+/**
+ * Weather Debug Form.
+ *
+ * @package Simple_Location
+ */
+
+?>
 <hr />
 <?php $providers = Loc_Config::weather_providers(); ?>
 <h2><?php esc_html_e( 'Weather Lookup', 'simple-location' ); ?></h2>

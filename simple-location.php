@@ -66,6 +66,12 @@ class Simple_Location_Plugin {
 		flush_rewrite_rules();
 	}
 
+	/**
+	 * Upgrade Trigger
+	 *
+	 * Triggered on Plugin Upgrade to Flush Rewrite Rules
+	 *
+	 */
 	public static function upgrader_process_complete( $upgrade_object, $options ) {
 		$current_plugin_path_name = plugin_basename( __FILE__ );
 		if ( ( 'update' === $options['action'] ) && ( 'plugin' === $options['type'] ) ) {

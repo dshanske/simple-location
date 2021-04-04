@@ -191,15 +191,19 @@ class WP_Geo_Data {
 		return $actions;
 	}
 
+	/**
+	 * Add Notice when Bulk Action is run with results.
+	 */
 	public static function bulk_action_admin_notices() {
 		if ( isset( $_REQUEST['bulk_lookup_location_count'] ) ) {
 			$count = intval( $_REQUEST['bulk_lookup_location_count'] );
 			if ( 0 === $count ) {
 				$string = __( 'None of the Posts Were Updated.', 'simple-location' );
 			} else {
+				/* translators: Count of posts updated. */
 				$string = sprintf( _n( 'Updated %s post.', 'Updated %s posts.', $count, 'simple-location' ), $count );
 			}
-			printf( '<div id="message" class="updated fade">%1$s</div>', $string );
+			printf( '<div id="message" class="updated fade">%1$s</div>', esc_html( $string ) );
 		}
 	}
 
@@ -763,7 +767,7 @@ class WP_Geo_Data {
 	}
 
 	/**
-	 * Calculates the bounding box of a set of coordinates
+	 * Calculates the bounding box of a set of coordinates.
 	 *
 	 * @param array   $locations An array of lat,lng.
 	 * @param boolean $flip Whether to put lng first.
@@ -797,11 +801,11 @@ class WP_Geo_Data {
 
 
 	/**
-	 * Calculate the area of a triangle
+	 * Calculate the area of a triangle.
 	 *
-	 * @param array $a First point
-	 * @param array $b Middle point
-	 * @param array $c Last point
+	 * @param array $a First point.
+	 * @param array $b Middle point.
+	 * @param array $c Last point.
 	 *
 	 * @return float
 	 */
@@ -818,10 +822,10 @@ class WP_Geo_Data {
 	/**
 	 * Reduce points with Visvalingam-Whyatt algorithm.
 	 *
-	 * @param array $points Points
-	 * @param int   $target Desired count of points
+	 * @param array $points Points.
+	 * @param int   $target Desired count of points.
 	 *
-	 * @return array Reduced set of points
+	 * @return array Reduced set of points.
 	 */
 	public static function simplify_bw( $points, $target ) {
 		// Refuse to reduce if points are less than target.
@@ -893,13 +897,13 @@ class WP_Geo_Data {
 	/**
 	 * Reduce points with Ramer–Douglas–Peucker algorithm.
 	 *
-	 * @param array $points Points
+	 * @param array $points Points.
 	 * @param int   $tolerance Tolerance.
 	 *
-	 * @return array Reduced set of points
+	 * @return array Reduced set of points.
 	 */
 	public static function simplify_rdp( $points, $tolerance ) {
-		// if this is a multilinestring, then we call ourselves one each segment individually, collect the list, and return that list of simplified lists
+		// if this is a multilinestring, then we call ourselves one each segment individually, collect the list, and return that list of simplified lists.
 		if ( is_array( $points[0][0] ) ) {
 			$multi = array();
 			foreach ( $points as $subvertices ) {
@@ -909,26 +913,28 @@ class WP_Geo_Data {
 		}
 		$tolerance2 = $tolerance * $tolerance;
 
-		// okay, so this is a single linestring and we simplify it individually
+		// okay, so this is a single linestring and we simplify it individually.
 		return self::segment_rdp( $points, $tolerance2 );
 	}
 
 	/**
 	 * Reduce single linestring with Ramer–Douglas–Peucker algorithm.
 	 *
-	 * @param array $segment Single line segment
-	 * @param int   $tolerance Tolerance Squared.
+	 * @param array $segment Single line segment.
+	 * @param int   $tolerance_squared Tolerance Squared.
 	 *
-	 * @return array Reduced set of points
+	 * @return array Reduced set of points.
 	 */
 	public static function segment_rdp( $segment, $tolerance_squared ) {
 		if ( count( $segment ) <= 2 ) {
-			return $segment; // segment is too small to simplify, hand it back as-is
+			return $segment; // segment is too small to simplify, hand it back as-is.
 		}
 
-		// find the maximum distance (squared) between this line $segment and each vertex
-		// distance is solved as described at UCSD page linked above
-		// cheat: vertical lines (directly north-south) have no slope so we fudge it with a very tiny nudge to one vertex; can't imagine any units where this will matter
+		/*
+		 * Find the maximum distance (squared) between this line $segment and each vertex.
+		 * distance is solved as described at UCSD page linked above.
+		 * cheat: vertical lines (directly north-south) have no slope so we fudge it with a very tiny nudge to one vertex; can't imagine any units where this will matter.
+		 */
 		$startx = (float) $segment[0][0];
 		$starty = (float) $segment[0][1];
 		$endx   = (float) $segment[ count( $segment ) - 1 ][0];
@@ -938,8 +944,8 @@ class WP_Geo_Data {
 			$startx += 0.00001;
 		}
 
-		$m = ( $endy - $starty ) / ( $endx - $startx ); // slope, as in y = mx + b
-		$b = $starty - ( $m * $startx );              // y-intercept, as in y = mx + b
+		$m = ( $endy - $starty ) / ( $endx - $startx ); // slope, as in y = mx + b.
+		$b = $starty - ( $m * $startx );              // y-intercept, as in y = mx + b.
 
 		$max_distance_squared = 0;
 		$max_distance_index   = null;
@@ -957,14 +963,19 @@ class WP_Geo_Data {
 			}
 		}
 
-		// cleanup and disposition
-		// if the max distance is below tolerance, we can bail, giving a straight line between the start vertex and end vertex   (all points are so close to the straight line)
+		/*
+		 * Cleanup and disposition.
+		 * if the max distance is below tolerance, we can bail, giving a straight line between the start vertex and end vertex.
+		 * (all points are so close to the straight line).
+		 */
 		if ( $max_distance_squared <= $tolerance_squared ) {
 			return array( $segment[0], $segment[ count( $segment ) - 1 ] );
 		}
 
-		// but if we got here then a vertex falls outside the tolerance
-		// split the line segment into two smaller segments at that "maximum error vertex" and simplify those
+		/*
+		 * But if we got here then a vertex falls outside the tolerance.
+		 * split the line segment into two smaller segments at that "maximum error vertex" and simplify those.
+		 */
 		$slice1 = array_slice( $segment, 0, $max_distance_index );
 		$slice2 = array_slice( $segment, $max_distance_index );
 		$segs1  = self::segment_rdp( $slice1, $tolerance_squared );

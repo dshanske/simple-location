@@ -146,7 +146,7 @@ class Geo_Provider_Pelias extends Geo_Provider {
 		$json    = $json['features'];
 		$address = $json[0]['properties'];
 
-		// Give the result with the highest confidence level. At equal confidence levels prioritize venues over addresses'
+		// Give the result with the highest confidence level. At equal confidence levels prioritize venues over addresses.
 		foreach ( $json as $feature ) {
 			if ( $feature['properties']['confidence'] < $address['confidence'] ) {
 				break;
@@ -154,7 +154,7 @@ class Geo_Provider_Pelias extends Geo_Provider {
 				$address = $feature['properties'];
 				continue;
 			}
-			// Prioritize venue over address
+			// Prioritize venue over address.
 			if ( 'venue' === $feature['properties']['layer'] && 'venue' !== $address['layer'] ) {
 				$address = $feature['properties'];
 				continue;

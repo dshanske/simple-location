@@ -143,7 +143,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 			}
 		}
 		if ( array_key_exists( 'country-code', $reverse ) ) {
-			if ( $reverse['country-code'] !== get_option( 'sloc_country' ) ) {
+			if ( get_option( 'sloc_country' ) !== $reverse['country-code'] ) {
 				$text[] = $reverse['country-code'];
 			}
 		} else {
@@ -155,9 +155,9 @@ abstract class Geo_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Is Country One Where the Street Number Comes First?
+	 * Is Country One Where the Street Number Comes First.
 	 *
-	 * @param $code Country Code.
+	 * @param string $code Country Code.
 	 * @return boolean True if yes.
 	 */
 	protected function house_number( $code ) {

@@ -1,4 +1,9 @@
 <?php
+/**
+ * Map Archive Template.
+ *
+ * @package Simple_Location
+ */
 
 get_header();
 ?>
@@ -12,8 +17,8 @@ get_header();
 					the_archive_description( '<div class="taxonomy-description">', '</div>' );
 				?>
 			</header><!-- .page-header -->
-			<?php $map = Loc_Config::map_provider(); ?>
-		<img class="archive-map sloc-map" src="<?php echo $map->get_archive_map( WP_Geo_Data::get_archive_public_location_list() ); ?>" />
+			<?php $map_provider = Loc_Config::map_provider(); ?>
+		<img class="archive-map sloc-map" src="<?php echo wp_kses_post( $map_provider->get_archive_map( WP_Geo_Data::get_archive_public_location_list() ) ); ?>" />
 		<ul>
 			<?php
 		}
@@ -23,7 +28,7 @@ get_header();
 
 			$location = WP_Geo_Data::get_geodata( get_post(), false );
 			if ( 'public' === $location['visibility'] && array_key_exists( 'address', $location ) ) {
-				printf( '<li class="h-entry"><a class="u-url p-location" href="%1$s">%2$s</a></li>', get_the_permalink(), $location['address'] );
+				printf( '<li class="h-entry"><a class="u-url p-location" href="%1$s">%2$s</a></li>', esc_url( get_the_permalink() ), esc_html( $location['address'] ) );
 			}
 		}
 		?>

@@ -7,7 +7,7 @@
 
 define( 'PI', M_PI );
 define( 'RAD', PI / 180 );
-define( 'E', RAD * 23.4397 ); // obliquity of the Earth
+define( 'E', RAD * 23.4397 ); // obliquity of the Earth.
 
 /**
  * Astronomical Calculator Class.
@@ -606,21 +606,29 @@ class Astronomical_Calculator {
 		return $result;
 	}
 
+	/**
+	 *  Calculates Clear Sky Radiation
+	 *
+	 * @param float $ra RA.
+	 * @return float Clear Sky Radiation.
+	 */
 	public function clear_sky_radiation( $ra ) {
 		return ( 0.75 + 0.00002 * $this->elevation ) * $ra;
 	}
 
-	/*
-			interval: The time interval over which the radiation is to be calculated in hours
-		Returns the (average?) solar radiation over the time interval in MJ/m^2/hr
-	*/
+	/**
+	 *  Calculates Sun Radiation.
+	 *
+	 * @param float $interval The time interval over which the radiation is to be calculated in hours.
+	 * @return float The Average Solar Radiation over the time interval in MJ/m^2/hr.
+	 */
 	public function sun_radiation( $interval ) {
-		// Solar constant in MJ/m^2/hr
+		// Solar constant in MJ/m^2/hr.
 		$gsc = 4.92;
 
-		$delta = 0.409 * sin( 2.0 * pi() * ( date( 'z' ) + 1 ) / 365 - 1.39 );
+		$delta = 0.409 * sin( 2.0 * pi() * ( gmdate( 'z' ) + 1 ) / 365 - 1.39 );
 
-		$earth_distance = 1.0 + 0.033 * cos( 2.0 * pi() * ( date( 'z' ) + 1 ) / 365.0 );
+		$earth_distance = 1.0 + 0.033 * cos( 2.0 * pi() * ( gmdate( 'z' ) + 1 ) / 365.0 );
 
 		$tod_utc     = (int) gmdate( 'H' ) + (int) gmdate( 'M' ) / 60.0 + (int) gmdate( 'S' ) / 3600.0;
 		$start_utc   = $tod_utc - $interval;
@@ -641,15 +649,15 @@ class Astronomical_Calculator {
 		return $ra;
 	}
 
-	/*
-			"""Solar hour angle at a given time in radians.
 
-			t_utc: The time in UTC.
-
-					Returns hour angle in radians. 0 <= omega < 2*pi
-	*/
+	/**
+	 *  Solar Hour Angle at a Given Time in Radians.
+	 *
+	 * @param int $t_utc The Time in UTC.
+	 * @return float Hour Angle in Radians.
+	 */
 	public function hour_angle( $t_utc ) {
-		$b     = 2 * pi() * ( ( date( 'z' ) + 1 ) - 81 ) / 364.0;
+		$b     = 2 * pi() * ( ( gmdate( 'z' ) + 1 ) - 81 ) / 364.0;
 		$sc    = 0.1645 * sin( 2 * $b ) - 0.1255 * cos( $b ) - 0.025 * sin( $b );
 		$omega = ( pi() / 12.0 ) * ( $t_utc + $this->longitude / 15.0 + $sc - 12 );
 		if ( $omega < 0 ) {
@@ -658,9 +666,13 @@ class Astronomical_Calculator {
 		return $omega;
 	}
 
-	/*
-	 * Uses mean wm/2 for the last hour to estimate cloudiness.
+
+	/**
+	 *  Uses mean wm/2 for the last hour to estimate cloudiness.
 	 *
+	 * @param float $wm2 WM/2.
+	 * @param int   $humidity Humidity.
+	 * @return int Cloudiness as a percentage.
 	 */
 	public function cloudiness( $wm2, $humidity ) {
 		$clear = self::clear_sky_radiation( $this->sun_radiation( 1.0 ) );
