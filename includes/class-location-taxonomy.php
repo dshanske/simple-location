@@ -22,10 +22,14 @@ final class Location_Taxonomy {
 		add_filter( 'manage_location_custom_column', array( __CLASS__, 'manage_column_content' ), 10, 3 );
 		add_filter( 'manage_edit-location_columns', array( __CLASS__, 'manage_column' ), 10 );
 		add_filter( 'taxonomy_parent_dropdown_args', array( __CLASS__, 'taxonomy_parent_dropdown_args' ), 10, 3 );
+		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
 
 		add_filter( 'get_the_archive_title', array( __CLASS__, 'archive_title' ), 10 );
 	}
 
+	public static function admin_menu() {
+		remove_meta_box( 'locationdiv', 'post', 'side' );
+	}
 
 	public static function taxonomy_parent_dropdown_args( $dropdown_args, $taxonomy, $context ) {
 		if ( 'location' === $taxonomy ) {
@@ -242,7 +246,6 @@ final class Location_Taxonomy {
 			'show_tagcloud'      => true,
 			'show_in_quick_edit' => false,
 			'show_admin_column'  => true,
-			'meta_box_cb'        => array( static::class, 'taxonomy_select_meta_box' ),
 			'rewrite'            => array(
 				'hierarchical' => true,
 			),
