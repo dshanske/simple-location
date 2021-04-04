@@ -77,6 +77,7 @@ class Location_Plugins {
 			if ( ! isset( $properties['location-visibility'] ) ) {
 				$zone = Location_Zones::in_zone( $meta['geo_latitude'], $meta['geo_longitude'] );
 				if ( ! empty( $zone ) ) {
+					$meta['geo_address'] = $zone;
 					update_post_meta( $args['ID'], 'geo_address', $zone );
 					WP_Geo_Data::set_visibility( 'post', $args['ID'], 'protected' );
 					update_post_meta( $args['ID'], 'geo_zone', $zone );
@@ -136,13 +137,12 @@ class Location_Plugins {
 		}
 
 		// Strip out anything that might not be relevant to an address.
-		$location = wp_array_slice_assoc( 'street-address', 'extended-address', 'post-office-box', 'locality', 'region', 'postal-code', 'country-name', 'country-code', 'region-code', 'latitude', 'longitude', 'altitude', 'name', 'label' );
+		$location = wp_array_slice_assoc( $location, array( 'street-address', 'extended-address', 'post-office-box', 'locality', 'region', 'postal-code', 'country-name', 'country-code', 'region-code', 'latitude', 'longitude', 'altitude', 'name', 'label' ) );
 		foreach ( $location as $key => $value ) {
 			if ( is_array( $value ) && 1 === count( $value ) ) {
 				$location[ $key ] = array_shift( $value );
 			}
 		}
-
 		$location = Location_Taxonomy::normalize_address( $location );
 
 		$term        = Location_Taxonomy::get_location_taxonomy( $args['ID'] );
@@ -151,7 +151,7 @@ class Location_Plugins {
 
 		if ( ! empty( array_intersect( array_keys( $location ), array( 'region', 'country-name' ) ) ) ) {
 			if ( ! $term ) {
-				$term = Location_Taxonomy::get_location( $location );
+				$term = Location_Taxonomy::get_location( $location, true );
 			}
 			Location_Taxonomy::set_location( $args['ID'], $term );
 		} elseif ( isset( $location['latitude'] ) && isset( $location['longitude'] ) ) {
@@ -164,7 +164,7 @@ class Location_Plugins {
 				update_post_meta( $args['ID'], 'geo_altitude', $reverse->elevation() );
 			}
 			if ( ! $term ) {
-				$term = Location_Taxonomy::get_location( $reverse_adr );
+				$term = Location_Taxonomy::get_location( $reverse_adr, true );
 				Location_Taxonomy::set_location( $args['ID'], $term );
 			}
 			if ( ! array_key_exists( 'geo_address', $meta ) || empty( $meta['geo_address'] ) ) {
@@ -173,7 +173,6 @@ class Location_Plugins {
 				}
 			}
 		}
-
 	}
 
 	/**
