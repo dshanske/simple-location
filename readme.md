@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.4.5  
+**Stable tag:** 4.4.6  
 **Requires at least:** 4.9  
-**Tested up to:** 5.6.1  
+**Tested up to:** 5.7  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -250,6 +250,11 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.6 ( 2021-04-05 ) ###
+* Hide localities in parent list. 
+* Set location taxonomy in Micropub.
+* Move location taxonomy into same box as rest of details.
 
 ### 4.4.5 ( 2021-02-27 ) ###
 * forgot to commit necessary data files in 4.4.4
