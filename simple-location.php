@@ -181,6 +181,7 @@ class Simple_Location_Plugin {
 			'class-weather-provider-aeris.php', // Aeris Weather.
 			'class-weather-provider-visualcrossing.php', // Visual Crossing.
 			'class-weather-provider-meteostat.php', // Meteostat.
+			'class-weather-provider-pirateweather.php', // Pirate Weather.
 			'class-weather-provider-station.php', // Custom Station Weather Provider.
 			'class-map-provider-mapbox.php', // MapBox.
 			'class-map-provider-google.php', // Google.
