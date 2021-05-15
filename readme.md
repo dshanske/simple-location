@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.4.6  
+**Stable tag:** 4.4.7  
 **Requires at least:** 4.9  
 **Tested up to:** 5.7  
 **Requires PHP:** 5.6  
@@ -87,7 +87,7 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 * Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ, OpenRoute and Geonames.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
 location of a three letter airport code, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
-* Weather Providers retrieve weather data about your location and include OpenWeatherMap, Dark Sky, Weatherstack, WeatherBit, HERE and the US National Weather Service. HERE, Dark Sky, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs that must return the properties as they are stored in WordPress.
+* Weather Providers retrieve weather data about your location and include OpenWeatherMap, Pirate Weather, Dark Sky, Weatherstack, WeatherBit, HERE and the US National Weather Service. HERE, Pirate Weather, Dark Sky, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs that must return the properties as they are stored in WordPress.
 ** The National Weather Service(US) uses their station lookup API to find the closest weather station, and uses weather from there. Therefore, if this returns no options, if you are outside the US, it will return no weather.
 ** The Met Office(UK) uses the distance from your current location to the nearest UK weather station and finds the closest one. However, if the nearest station is more than 100km away, it will return nothing.
 ** For Weather services like the NWS, Met Office, and the Custom Provider, where coverage is not worldwide, if nothing is found, a fallback provider can be set and used.
@@ -114,6 +114,7 @@ API Keys are required to use certain services.
 * [GeoApify](https://geoapify.com)
 * [Visual Crossing](https://www.visualcrossing.com/)
 * [Meteostat](https://meteostat.net/) 
+* [Pirate Weather](https://pirateweather.net)
 
 At this time, all map services require an API key except Yandex, which permits limited non-commercial use.
 Nominatim does not require an API key, but it does ask for an email address, which will be the admin email of the site
@@ -250,6 +251,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.7 ( 2021-05-14 ) ###
+* Add Pirate Weather( https://pirateweather.net ) as a weather provider. I like to support independents.
 
 ### 4.4.6 ( 2021-04-05 ) ###
 * Hide localities in parent list. 

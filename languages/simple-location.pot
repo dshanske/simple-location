@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-04-05T04:10:28+00:00\n"
+"POT-Creation-Date: 2021-05-15T01:46:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: simple-location\n"
@@ -1781,6 +1781,14 @@ msgstr ""
 msgid "OpenWeatherMap API Key"
 msgstr ""
 
+#: includes/class-weather-provider-pirateweather.php:23
+msgid "Pirate Weather"
+msgstr ""
+
+#: includes/class-weather-provider-pirateweather.php:64
+msgid "Pirate Weather API Key"
+msgstr ""
+
 #: includes/class-weather-provider-station.php:13
 msgid "Custom Station Provider"
 msgstr ""
@@ -2595,11 +2603,11 @@ msgstr ""
 msgid "Waxing Gibbous 6"
 msgstr ""
 
-#: simple-location.php:229
+#: simple-location.php:230
 msgid "Settings"
 msgstr ""
 
-#: simple-location.php:254
+#: simple-location.php:255
 msgid ""
 "Location and weather data is optionally stored for all posts, attachments, and comments. Location data is extracted from uploaded images along with other metadata. This\n"
 "\t\t\t\tdata can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it."
