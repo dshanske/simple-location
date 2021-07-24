@@ -1,9 +1,9 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.4.7  
+**Stable tag:** 4.4.8  
 **Requires at least:** 4.9  
-**Tested up to:** 5.7  
+**Tested up to:** 5.8  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -21,8 +21,6 @@ Automatically saves location data from image metadata when uploaded as well.
 
 Offers the opportunity to change the displayed timezone on a per-post basis for those posts from far off locations and set this based on the coordinates of the location. 
 While Gutenberg compatible, this is not built for Gutenberg.
-
-* If your site is set to a Manual UTC Offset as opposed to a named timezone, the timezone override feature will not work properly if you are running PHP5.4 or less
 
 ## Privacy and Data Notice ##
 
@@ -251,6 +249,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.8 ( 2021-07-23 ) ###
+* Refresh of dependencies and compatibility check with WP5.8
 
 ### 4.4.7 ( 2021-05-14 ) ###
 * Add Pirate Weather( https://pirateweather.net ) as a weather provider. I like to support independents.

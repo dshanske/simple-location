@@ -2,16 +2,16 @@
 # This file is distributed under the same license as the Simple Location plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.4.7\n"
+"Project-Id-Version: Simple Location 4.4.8\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-05-15T01:55:24+00:00\n"
+"POT-Creation-Date: 2021-07-24T03:49:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.4.0\n"
+"X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: simple-location\n"
 
 #. Plugin Name of the plugin
@@ -53,7 +53,7 @@ msgid "First Quarter"
 msgstr ""
 
 #: includes/class-astronomical-calculator.php:420
-#: includes/class-weather-provider.php:816
+#: includes/class-weather-provider.php:822
 msgid "Full Moon"
 msgstr ""
 
@@ -105,7 +105,7 @@ msgstr ""
 #: includes/class-geo-data.php:330
 #: includes/class-location-taxonomy.php:733
 #: includes/class-sloc-weather-widget.php:189
-#: includes/class-weather-provider.php:862
+#: includes/class-weather-provider.php:868
 #: templates/loc-side-metabox.php:51
 #: templates/loc-side-metabox.php:119
 #: templates/loc-side-metabox.php:149
@@ -179,7 +179,7 @@ msgstr ""
 
 #: includes/class-geo-data.php:1559
 #: includes/class-location-zones.php:158
-#: includes/class-weather-provider-station.php:126
+#: includes/class-weather-provider-station.php:138
 #: templates/geocode-form.php:12
 #: templates/loc-user-metabox.php:20
 #: templates/loc-user-metabox.php:24
@@ -189,7 +189,7 @@ msgstr ""
 
 #: includes/class-geo-data.php:1570
 #: includes/class-location-zones.php:159
-#: includes/class-weather-provider-station.php:127
+#: includes/class-weather-provider-station.php:139
 #: templates/geocode-form.php:13
 #: templates/loc-user-metabox.php:27
 #: templates/loc-user-metabox.php:31
@@ -357,7 +357,7 @@ msgid "Zones"
 msgstr ""
 
 #: includes/class-loc-config.php:363
-#: includes/class-weather-provider-station.php:46
+#: includes/class-weather-provider-station.php:58
 msgid "Stations"
 msgstr ""
 
@@ -942,12 +942,12 @@ msgid "Enter Name, Latitude, Longitude, and Radius for this Zone"
 msgstr ""
 
 #: includes/class-location-zones.php:122
-#: includes/class-weather-provider-station.php:89
+#: includes/class-weather-provider-station.php:101
 msgid "Add"
 msgstr ""
 
 #: includes/class-location-zones.php:123
-#: includes/class-weather-provider-station.php:90
+#: includes/class-weather-provider-station.php:102
 msgid "Remove"
 msgstr ""
 
@@ -1386,7 +1386,7 @@ msgstr ""
 #: includes/class-sloc-lastseen-widget.php:61
 #: includes/class-sloc-weather-widget.php:112
 #: includes/class-sloc-weather-widget.php:113
-#: includes/class-weather-provider.php:805
+#: includes/class-weather-provider.php:811
 msgid "Sunrise"
 msgstr ""
 
@@ -1394,7 +1394,7 @@ msgstr ""
 #: includes/class-sloc-lastseen-widget.php:68
 #: includes/class-sloc-weather-widget.php:119
 #: includes/class-sloc-weather-widget.php:120
-#: includes/class-weather-provider.php:806
+#: includes/class-weather-provider.php:812
 msgid "Sunset"
 msgstr ""
 
@@ -1402,7 +1402,7 @@ msgstr ""
 #: includes/class-sloc-lastseen-widget.php:75
 #: includes/class-sloc-weather-widget.php:126
 #: includes/class-sloc-weather-widget.php:127
-#: includes/class-weather-provider.php:818
+#: includes/class-weather-provider.php:824
 msgid "Moonrise"
 msgstr ""
 
@@ -1410,7 +1410,7 @@ msgstr ""
 #: includes/class-sloc-lastseen-widget.php:82
 #: includes/class-sloc-weather-widget.php:133
 #: includes/class-sloc-weather-widget.php:134
-#: includes/class-weather-provider.php:819
+#: includes/class-weather-provider.php:825
 msgid "Moonset"
 msgstr ""
 
@@ -1634,121 +1634,121 @@ msgstr ""
 msgid "Meteostat API"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:153
+#: includes/class-weather-provider-meteostat.php:154
 msgid "Station ID Not Set"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:234
+#: includes/class-weather-provider-meteostat.php:240
 #: templates/loc-side-metabox.php:109
 msgid "Clear"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:235
-#: includes/class-weather-provider.php:703
+#: includes/class-weather-provider-meteostat.php:241
+#: includes/class-weather-provider.php:709
 msgid "Cloudy"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:236
+#: includes/class-weather-provider-meteostat.php:242
 msgid "Overcast"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:237
-#: includes/class-weather-provider.php:712
+#: includes/class-weather-provider-meteostat.php:243
+#: includes/class-weather-provider.php:718
 msgid "Fog"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:238
+#: includes/class-weather-provider-meteostat.php:244
 msgid "Freezing Fog"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:239
+#: includes/class-weather-provider-meteostat.php:245
 msgid "Light Rain"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:240
-#: includes/class-weather-provider.php:708
+#: includes/class-weather-provider-meteostat.php:246
+#: includes/class-weather-provider.php:714
 msgid "Rain"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:241
+#: includes/class-weather-provider-meteostat.php:247
 msgid "Heavy Rain"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:242
+#: includes/class-weather-provider-meteostat.php:248
 msgid "Freezing Rain"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:243
+#: includes/class-weather-provider-meteostat.php:249
 msgid "Heavy Freezing Rain"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:244
-#: includes/class-weather-provider.php:716
+#: includes/class-weather-provider-meteostat.php:250
+#: includes/class-weather-provider.php:722
 msgid "Sleet"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:245
+#: includes/class-weather-provider-meteostat.php:251
 msgid "Heavy Sleet"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:246
+#: includes/class-weather-provider-meteostat.php:252
 msgid "Light Snowfall"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:247
+#: includes/class-weather-provider-meteostat.php:253
 #: includes/class-weather-provider.php:426
 #: includes/class-weather-provider.php:568
 msgid "Snowfall"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:248
+#: includes/class-weather-provider-meteostat.php:254
 msgid "Heavy Snowfall"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:249
+#: includes/class-weather-provider-meteostat.php:255
 msgid "Rain Shower"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:250
+#: includes/class-weather-provider-meteostat.php:256
 msgid "Heavy Rain Shower"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:251
+#: includes/class-weather-provider-meteostat.php:257
 msgid "Sleet Shower"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:252
+#: includes/class-weather-provider-meteostat.php:258
 msgid "Heavy Sleet Shower"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:253
+#: includes/class-weather-provider-meteostat.php:259
 msgid "Snow Shower"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:254
+#: includes/class-weather-provider-meteostat.php:260
 msgid "Heavy Snow Shower"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:255
-#: includes/class-weather-provider.php:714
+#: includes/class-weather-provider-meteostat.php:261
+#: includes/class-weather-provider.php:720
 msgid "Lightning"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:256
-#: includes/class-weather-provider.php:729
+#: includes/class-weather-provider-meteostat.php:262
+#: includes/class-weather-provider.php:735
 msgid "Hail"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:257
-#: includes/class-weather-provider.php:726
+#: includes/class-weather-provider-meteostat.php:263
+#: includes/class-weather-provider.php:732
 msgid "Thunderstorm"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:258
+#: includes/class-weather-provider-meteostat.php:264
 msgid "Heavy Thunderstorm"
 msgstr ""
 
-#: includes/class-weather-provider-meteostat.php:259
+#: includes/class-weather-provider-meteostat.php:265
 msgid "Storm"
 msgstr ""
 
@@ -1761,7 +1761,7 @@ msgid "Met Office API Key"
 msgstr ""
 
 #: includes/class-weather-provider-metoffice.php:163
-#: includes/class-weather-provider.php:628
+#: includes/class-weather-provider.php:634
 msgid "Failure"
 msgstr ""
 
@@ -1789,27 +1789,27 @@ msgstr ""
 msgid "Pirate Weather API Key"
 msgstr ""
 
-#: includes/class-weather-provider-station.php:13
+#: includes/class-weather-provider-station.php:21
 msgid "Custom Station Provider"
 msgstr ""
 
-#: includes/class-weather-provider-station.php:40
+#: includes/class-weather-provider-station.php:52
 msgid "Custom Station Data"
 msgstr ""
 
-#: includes/class-weather-provider-station.php:60
+#: includes/class-weather-provider-station.php:72
 msgid "Enter Station ID, URL, latitude, and longitude for each station. The URL may contain a query string application key. When using the custom station provider as your default weather provider, it will look for a station within 10km of your current location. Provider expects a json return with the properties outlined in the code."
 msgstr ""
 
-#: includes/class-weather-provider-station.php:78
+#: includes/class-weather-provider-station.php:90
 msgid "Enter ID and URL for this Station"
 msgstr ""
 
-#: includes/class-weather-provider-station.php:124
+#: includes/class-weather-provider-station.php:136
 msgid "Station ID"
 msgstr ""
 
-#: includes/class-weather-provider-station.php:125
+#: includes/class-weather-provider-station.php:137
 msgid "URL"
 msgstr ""
 
@@ -1882,7 +1882,7 @@ msgid "percent"
 msgstr ""
 
 #: includes/class-weather-provider.php:383
-#: includes/class-weather-provider.php:799
+#: includes/class-weather-provider.php:805
 msgid "Humidity"
 msgstr ""
 
@@ -2119,495 +2119,496 @@ msgstr ""
 msgid "miles"
 msgstr ""
 
-#: includes/class-weather-provider.php:599
+#. translators: 1. Property Name 2. Units
+#: includes/class-weather-provider.php:604
 msgid "%1$s measured in %2$s"
 msgstr ""
 
-#: includes/class-weather-provider.php:702
+#: includes/class-weather-provider.php:708
 msgid "Cloud"
 msgstr ""
 
-#: includes/class-weather-provider.php:704
+#: includes/class-weather-provider.php:710
 msgid "Cloudy with Gusts"
 msgstr ""
 
-#: includes/class-weather-provider.php:705
+#: includes/class-weather-provider.php:711
 msgid "Cloudy with Wind"
 msgstr ""
 
-#: includes/class-weather-provider.php:706
+#: includes/class-weather-provider.php:712
 msgid "Showers"
 msgstr ""
 
-#: includes/class-weather-provider.php:707
+#: includes/class-weather-provider.php:713
 msgid "Rain-Mix"
 msgstr ""
 
-#: includes/class-weather-provider.php:709
+#: includes/class-weather-provider.php:715
 msgid "Rain and Windy"
 msgstr ""
 
-#: includes/class-weather-provider.php:710
+#: includes/class-weather-provider.php:716
 msgid "Snow"
 msgstr ""
 
-#: includes/class-weather-provider.php:711
+#: includes/class-weather-provider.php:717
 msgid "Snow and Wind"
 msgstr ""
 
-#: includes/class-weather-provider.php:713
+#: includes/class-weather-provider.php:719
 msgid "Hot"
 msgstr ""
 
-#: includes/class-weather-provider.php:715
+#: includes/class-weather-provider.php:721
 msgid "Sandstorm"
 msgstr ""
 
-#: includes/class-weather-provider.php:717
+#: includes/class-weather-provider.php:723
 msgid "Smog"
 msgstr ""
 
-#: includes/class-weather-provider.php:718
+#: includes/class-weather-provider.php:724
 msgid "Smoke"
 msgstr ""
 
-#: includes/class-weather-provider.php:719
+#: includes/class-weather-provider.php:725
 msgid "Snowflake-Cold"
 msgstr ""
 
-#: includes/class-weather-provider.php:720
+#: includes/class-weather-provider.php:726
 msgid "Solar Eclipse"
 msgstr ""
 
-#: includes/class-weather-provider.php:721
+#: includes/class-weather-provider.php:727
 msgid "Sprinkles"
 msgstr ""
 
-#: includes/class-weather-provider.php:722
+#: includes/class-weather-provider.php:728
 msgid "Stars"
 msgstr ""
 
-#: includes/class-weather-provider.php:723
+#: includes/class-weather-provider.php:729
 msgid "Storm Showers"
 msgstr ""
 
-#: includes/class-weather-provider.php:724
+#: includes/class-weather-provider.php:730
 msgid "Storm Warning"
 msgstr ""
 
-#: includes/class-weather-provider.php:725
+#: includes/class-weather-provider.php:731
 msgid "Strong Winds"
 msgstr ""
 
-#: includes/class-weather-provider.php:727
+#: includes/class-weather-provider.php:733
 msgid "Windy"
 msgstr ""
 
-#: includes/class-weather-provider.php:728
+#: includes/class-weather-provider.php:734
 msgid "Gale Warning"
 msgstr ""
 
-#: includes/class-weather-provider.php:730
+#: includes/class-weather-provider.php:736
 msgid "Hurricane"
 msgstr ""
 
-#: includes/class-weather-provider.php:731
+#: includes/class-weather-provider.php:737
 msgid "Hurricane Warning"
 msgstr ""
 
-#: includes/class-weather-provider.php:732
+#: includes/class-weather-provider.php:738
 msgid "Dust"
 msgstr ""
 
-#: includes/class-weather-provider.php:733
+#: includes/class-weather-provider.php:739
 msgid "Earthquake"
 msgstr ""
 
-#: includes/class-weather-provider.php:734
+#: includes/class-weather-provider.php:740
 msgid "Fire"
 msgstr ""
 
-#: includes/class-weather-provider.php:735
+#: includes/class-weather-provider.php:741
 msgid "Flood"
 msgstr ""
 
-#: includes/class-weather-provider.php:736
+#: includes/class-weather-provider.php:742
 msgid "Cloudy with a Chance of Meatballs"
 msgstr ""
 
-#: includes/class-weather-provider.php:737
+#: includes/class-weather-provider.php:743
 msgid "Icy"
 msgstr ""
 
-#: includes/class-weather-provider.php:738
+#: includes/class-weather-provider.php:744
 msgid "Smog( Alt )"
 msgstr ""
 
-#: includes/class-weather-provider.php:742
+#: includes/class-weather-provider.php:748
 msgid "Sunny"
 msgstr ""
 
-#: includes/class-weather-provider.php:743
+#: includes/class-weather-provider.php:749
 msgid "Sunny and Overcast"
 msgstr ""
 
-#: includes/class-weather-provider.php:744
+#: includes/class-weather-provider.php:750
 msgid "Cloudy - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:745
+#: includes/class-weather-provider.php:751
 msgid "Cloudy with Gusts - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:746
+#: includes/class-weather-provider.php:752
 msgid "Cloudy High Winds - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:747
+#: includes/class-weather-provider.php:753
 msgid "Cloudy and Windy - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:748
+#: includes/class-weather-provider.php:754
 msgid "Fog - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:749
+#: includes/class-weather-provider.php:755
 msgid "Hail - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:750
+#: includes/class-weather-provider.php:756
 msgid "Haze - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:751
+#: includes/class-weather-provider.php:757
 msgid "Lightning - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:752
+#: includes/class-weather-provider.php:758
 msgid "Lighting and Wind - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:753
+#: includes/class-weather-provider.php:759
 msgid "Rainy Mix - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:754
+#: includes/class-weather-provider.php:760
 msgid "Rain - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:755
+#: includes/class-weather-provider.php:761
 msgid "Rain and Wind - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:756
+#: includes/class-weather-provider.php:762
 msgid "Showers - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:757
+#: includes/class-weather-provider.php:763
 msgid "Sleet Storm - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:758
+#: includes/class-weather-provider.php:764
 msgid "Sleet - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:759
+#: includes/class-weather-provider.php:765
 msgid "Snow - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:760
+#: includes/class-weather-provider.php:766
 msgid "Snow and Thunderstorms - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:761
+#: includes/class-weather-provider.php:767
 msgid "Snow and Wind - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:762
+#: includes/class-weather-provider.php:768
 msgid "Sprinkles - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:763
+#: includes/class-weather-provider.php:769
 msgid "Storm Showers - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:764
+#: includes/class-weather-provider.php:770
 msgid "Thunderstorm - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:765
+#: includes/class-weather-provider.php:771
 msgid "Windy - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:768
+#: includes/class-weather-provider.php:774
 msgid "Clear Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:769
+#: includes/class-weather-provider.php:775
 msgid "Cloudy - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:770
+#: includes/class-weather-provider.php:776
 msgid "Cloudy with Gusts - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:771
+#: includes/class-weather-provider.php:777
 msgid "Cloudy with High Winds - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:772
+#: includes/class-weather-provider.php:778
 msgid "Cloudy and Windy - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:773
+#: includes/class-weather-provider.php:779
 msgid "Fog - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:774
+#: includes/class-weather-provider.php:780
 msgid "Hail - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:775
+#: includes/class-weather-provider.php:781
 msgid "Lightning - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:776
+#: includes/class-weather-provider.php:782
 msgid "Partly Cloudy - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:777
+#: includes/class-weather-provider.php:783
 msgid "Rainy Mix - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:778
+#: includes/class-weather-provider.php:784
 msgid "Rain - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:779
+#: includes/class-weather-provider.php:785
 msgid "Rain and Wind - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:780
+#: includes/class-weather-provider.php:786
 msgid "Showers - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:781
+#: includes/class-weather-provider.php:787
 msgid "Sleet Storm - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:782
+#: includes/class-weather-provider.php:788
 msgid "Sleet - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:783
+#: includes/class-weather-provider.php:789
 msgid "Snow - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:784
+#: includes/class-weather-provider.php:790
 msgid "Snow and Thunderstorm - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:785
+#: includes/class-weather-provider.php:791
 msgid "Snow and Wind - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:786
+#: includes/class-weather-provider.php:792
 msgid "Sprinkles - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:787
+#: includes/class-weather-provider.php:793
 msgid "Storm Showers - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:788
+#: includes/class-weather-provider.php:794
 msgid "Thunderstorms - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:789
+#: includes/class-weather-provider.php:795
 msgid "Lunar Eclipse"
 msgstr ""
 
-#: includes/class-weather-provider.php:792
+#: includes/class-weather-provider.php:798
 msgid "Barometer"
 msgstr ""
 
-#: includes/class-weather-provider.php:793
+#: includes/class-weather-provider.php:799
 msgid "Barometer(Sea Level)"
 msgstr ""
 
-#: includes/class-weather-provider.php:794
+#: includes/class-weather-provider.php:800
 msgid "Thermometer"
 msgstr ""
 
-#: includes/class-weather-provider.php:795
+#: includes/class-weather-provider.php:801
 msgid "Thermometer - Exterior"
 msgstr ""
 
-#: includes/class-weather-provider.php:796
+#: includes/class-weather-provider.php:802
 msgid "Thermometer - Internal"
 msgstr ""
 
-#: includes/class-weather-provider.php:797
+#: includes/class-weather-provider.php:803
 msgid "Celsius"
 msgstr ""
 
-#: includes/class-weather-provider.php:798
+#: includes/class-weather-provider.php:804
 msgid "Fahrenheit"
 msgstr ""
 
-#: includes/class-weather-provider.php:800
+#: includes/class-weather-provider.php:806
 msgid "Degrees"
 msgstr ""
 
-#: includes/class-weather-provider.php:801
+#: includes/class-weather-provider.php:807
 msgid "Raindrops"
 msgstr ""
 
-#: includes/class-weather-provider.php:802
+#: includes/class-weather-provider.php:808
 msgid "Raindrop"
 msgstr ""
 
-#: includes/class-weather-provider.php:803
+#: includes/class-weather-provider.php:809
 msgid "Horizon"
 msgstr ""
 
-#: includes/class-weather-provider.php:804
+#: includes/class-weather-provider.php:810
 msgid "N/A"
 msgstr ""
 
-#: includes/class-weather-provider.php:807
+#: includes/class-weather-provider.php:813
 msgid "Umbrella"
 msgstr ""
 
-#: includes/class-weather-provider.php:808
+#: includes/class-weather-provider.php:814
 msgid "Meteor"
 msgstr ""
 
-#: includes/class-weather-provider.php:809
+#: includes/class-weather-provider.php:815
 msgid "Tornado"
 msgstr ""
 
-#: includes/class-weather-provider.php:810
+#: includes/class-weather-provider.php:816
 msgid "Tsunami"
 msgstr ""
 
-#: includes/class-weather-provider.php:811
+#: includes/class-weather-provider.php:817
 msgid "Volcano"
 msgstr ""
 
-#: includes/class-weather-provider.php:815
+#: includes/class-weather-provider.php:821
 msgid "First Quarter Moon"
 msgstr ""
 
-#: includes/class-weather-provider.php:817
+#: includes/class-weather-provider.php:823
 msgid "New Moon"
 msgstr ""
 
-#: includes/class-weather-provider.php:820
+#: includes/class-weather-provider.php:826
 msgid "Third Quarter Moon"
 msgstr ""
 
-#: includes/class-weather-provider.php:821
+#: includes/class-weather-provider.php:827
 msgid "Waning Crescent 1"
 msgstr ""
 
-#: includes/class-weather-provider.php:822
+#: includes/class-weather-provider.php:828
 msgid "Waning Crescent 2"
 msgstr ""
 
-#: includes/class-weather-provider.php:823
+#: includes/class-weather-provider.php:829
 msgid "Waning Crescent 3"
 msgstr ""
 
-#: includes/class-weather-provider.php:824
+#: includes/class-weather-provider.php:830
 msgid "Waning Crescent 4"
 msgstr ""
 
-#: includes/class-weather-provider.php:825
+#: includes/class-weather-provider.php:831
 msgid "Waning Crescent 5"
 msgstr ""
 
-#: includes/class-weather-provider.php:826
+#: includes/class-weather-provider.php:832
 msgid "Waning Crescent 6"
 msgstr ""
 
-#: includes/class-weather-provider.php:827
+#: includes/class-weather-provider.php:833
 msgid "Waning Gibbous 1"
 msgstr ""
 
-#: includes/class-weather-provider.php:828
+#: includes/class-weather-provider.php:834
 msgid "Waning Gibbous 2"
 msgstr ""
 
-#: includes/class-weather-provider.php:829
+#: includes/class-weather-provider.php:835
 msgid "Waning Gibbous 3"
 msgstr ""
 
-#: includes/class-weather-provider.php:830
+#: includes/class-weather-provider.php:836
 msgid "Waning Gibbous 4"
 msgstr ""
 
-#: includes/class-weather-provider.php:831
+#: includes/class-weather-provider.php:837
 msgid "Waning Gibbous 5"
 msgstr ""
 
-#: includes/class-weather-provider.php:832
+#: includes/class-weather-provider.php:838
 msgid "Waning Gibbous 6"
 msgstr ""
 
-#: includes/class-weather-provider.php:833
+#: includes/class-weather-provider.php:839
 msgid "Waxing Crescent 1"
 msgstr ""
 
-#: includes/class-weather-provider.php:834
+#: includes/class-weather-provider.php:840
 msgid "Waxing Crescent 2"
 msgstr ""
 
-#: includes/class-weather-provider.php:835
+#: includes/class-weather-provider.php:841
 msgid "Waxing Crescent 3"
 msgstr ""
 
-#: includes/class-weather-provider.php:836
+#: includes/class-weather-provider.php:842
 msgid "Waxing Crescent 4"
 msgstr ""
 
-#: includes/class-weather-provider.php:837
+#: includes/class-weather-provider.php:843
 msgid "Waxing Crescent 5"
 msgstr ""
 
-#: includes/class-weather-provider.php:838
+#: includes/class-weather-provider.php:844
 msgid "Waxing Crescent 6"
 msgstr ""
 
-#: includes/class-weather-provider.php:839
+#: includes/class-weather-provider.php:845
 msgid "Waxing Gibbous 1"
 msgstr ""
 
-#: includes/class-weather-provider.php:840
+#: includes/class-weather-provider.php:846
 msgid "Waxing Gibbous 2"
 msgstr ""
 
-#: includes/class-weather-provider.php:841
+#: includes/class-weather-provider.php:847
 msgid "Waxing Gibbous 3"
 msgstr ""
 
-#: includes/class-weather-provider.php:842
+#: includes/class-weather-provider.php:848
 msgid "Waxing Gibbous 4"
 msgstr ""
 
-#: includes/class-weather-provider.php:843
+#: includes/class-weather-provider.php:849
 msgid "Waxing Gibbous 5"
 msgstr ""
 
-#: includes/class-weather-provider.php:844
+#: includes/class-weather-provider.php:850
 msgid "Waxing Gibbous 6"
 msgstr ""
 
-#: simple-location.php:230
+#: simple-location.php:231
 msgid "Settings"
 msgstr ""
 
-#: simple-location.php:255
+#: simple-location.php:256
 msgid ""
 "Location and weather data is optionally stored for all posts, attachments, and comments. Location data is extracted from uploaded images along with other metadata. This\n"
 "\t\t\t\tdata can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it."

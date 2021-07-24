@@ -589,14 +589,20 @@ abstract class Weather_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Generates label for a measurement.
 	 *
+	 * @param string  $property Property Name.
+	 * @param boolean $imperial Whether to return metric or imperial units.
+	 * @return string Formatted string including the property and appropriate label.
 	 */
 	public static function get_form_label( $property, $imperial ) {
 		$props = self::get_names( $property, $imperial );
 		if ( ! $props ) {
 			return '';
-		} // unit label name icon
+		}
+		/* translators: 1. Property Name 2. Units */
 		$label = sprintf( __( '%1$s measured in %2$s', 'simple-location' ), $props['name'], $props['label'] );
+		/* translators: 1. Property Name 2. Aria Label 3. Unit of Measurement */
 		return sprintf( '%1$s(<span aria-label="%2$s">%3$s</span>):', $props['name'], $label, $props['unit'] );
 	}
 
@@ -615,7 +621,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$provider = $this->get_slug();
 
 		// Sanity Check.
-		if ( $fallback !== $provider && $fallback !== 'none' ) {
+		if ( $fallback !== $provider && 'none' !== $fallback ) {
 			$weather = Loc_Config::weather_provider( $fallback );
 			$weather->set( $this->latitude, $this->longitude );
 			$conditions = $weather->get_conditions( $time );

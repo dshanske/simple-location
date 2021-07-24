@@ -108,7 +108,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 			'unitGroup' => 'metric',
 		);
 
-		// For historic data
+		// For historic data.
 		if ( $timeline ) {
 			$url = sprintf( 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/%1$s,%2$s/%3$s', $this->latitude, $this->longitude, $datetime->getTimestamp() );
 

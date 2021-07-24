@@ -1,5 +1,13 @@
 <?php
+/**
+ * Station Weather Provider.
+ *
+ * @package Simple_Location
+ */
 
+/**
+ * Weather Provider using Custom Station JSON.
+ */
 class Weather_Provider_Station extends Weather_Provider {
 
 	/**
@@ -7,20 +15,21 @@ class Weather_Provider_Station extends Weather_Provider {
 	 *
 	 * The default version of this just sets the parameters
 	 *
-	 * @param array $args
+	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
 		$this->name   = __( 'Custom Station Provider', 'simple-location' );
 		$this->slug   = 'station';
 		$this->region = false;
 		$option       = get_option( 'sloc_weather_provider' );
-		// if ( 'station' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		// }
+		add_action( 'init', array( get_called_class(), 'init' ) );
+		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Init Function
+	 **/
 	public static function init() {
 		register_setting(
 			'sloc_stations', // option group.
@@ -34,6 +43,9 @@ class Weather_Provider_Station extends Weather_Provider {
 		);
 	}
 
+	/**
+	 * Admin Init Function
+	 **/
 	public static function admin_init() {
 		add_settings_section(
 			'sloc_stations',
@@ -129,13 +141,21 @@ class Weather_Provider_Station extends Weather_Provider {
 		echo '</li>';
 	}
 
+	/**
+	 * Set and Validate Coordinates.
+	 *
+	 * @param array|float $lat Latitude or array of all three properties.
+	 * @param float       $lng Longitude. Optional if first property is an array.
+	 * @param float       $alt Altitude. Optional.
+	 * @return boolean Return False if Validation Failed.
+	 */
 	public function set( $lat, $lng = null, $alt = null ) {
 		if ( ! $lng && is_array( $lat ) ) {
 			if ( isset( $lat['station_id'] ) ) {
 				$this->station_id = trim( $lat['station_id'] );
 			}
 		}
-			parent::set( $lat, $lng, $alt );
+		return parent::set( $lat, $lng, $alt );
 	}
 
 	/**
@@ -150,6 +170,7 @@ class Weather_Provider_Station extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @param int $time Timestamp.
 	 * @return array Current Conditions in Array
 	 */
 	public function get_conditions( $time = null ) {
@@ -199,18 +220,17 @@ class Weather_Provider_Station extends Weather_Provider {
 	}
 
 
-	/*
+	/**
 	 * Get Station Data.
 	 *
 	 * The JSON from the API return must match the current conditions return used by the plugin and specified in the parent class.
-	 *
-	 */
+	 **/
 	public function get_station_data() {
 		$return   = array();
 		$stations = get_option( 'sloc_stations' );
 		$endpoint = null;
 		foreach ( $stations as $key => $station ) {
-			if ( $this->station_id === trim( $station['id'] ) ) {
+			if ( trim( $station['id'] === $this->station_id ) ) {
 				$return = $this->fetch_json( $station['url'], array() );
 				if ( ! is_wp_error( $return ) ) {
 					if ( array_key_exists( 'latitude', $return ) && array_key_exists( 'longitude', $return ) && empty( $station['latitude'] ) && empty( $station['longitude'] ) ) {

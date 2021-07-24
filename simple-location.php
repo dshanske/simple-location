@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 4.4.7
+ * Version: 4.4.8
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * Text Domain: simple-location
@@ -38,7 +38,7 @@ class Simple_Location_Plugin {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	public static $version = '4.4.7';
+	public static $version = '4.4.8';
 
 
 	/**
@@ -67,10 +67,11 @@ class Simple_Location_Plugin {
 	}
 
 	/**
-	 * Upgrade Trigger
-	 *
+	 * Upgrade Trigger.
 	 * Triggered on Plugin Upgrade to Flush Rewrite Rules
 	 *
+	 * @param WP_Upgrader $upgrade_object WP_Upgrader object.
+	 * @param array       $options Array of bulk item update data.
 	 */
 	public static function upgrader_process_complete( $upgrade_object, $options ) {
 		$current_plugin_path_name = plugin_basename( __FILE__ );

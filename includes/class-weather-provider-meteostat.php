@@ -141,6 +141,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	/**
 	 * Return current conditions at the station.
 	 *
+	 * @param int $time Timestamp.
 	 * @return array Current Conditions.
 	 */
 	public function get_station_data( $time = null ) {
@@ -172,7 +173,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 
 		);
 
-		// For historic data
+		// For historic data.
 		$url  = 'https://api.meteostat.net/v2/stations/hourly.php';
 		$json = $this->fetch_json( $url, $args, array( 'x-api-key' => $this->api ) );
 		if ( array_key_exists( 'meta', $json ) ) {
@@ -228,7 +229,12 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		return array_filter( $return );
 	}
 
-
+	/**
+	 * Convert Status Code to Text.
+	 *
+	 * @param int $code Code.
+	 * @return string Textual Summary of Status Code.
+	 **/
 	public static function get_status( $code ) {
 		$conditions = array(
 			1  => __( 'Clear', 'simple-location' ),
