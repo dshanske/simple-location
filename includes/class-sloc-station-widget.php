@@ -59,8 +59,12 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		echo $args['before_widget']; // phpcs:ignore
-		if ( ! empty( $instance['title'] ) ) {
-			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title']; // phpcs:ignore
+		
+		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
+		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
+
+		if ( $title ) {
+			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore
 		}
 
 		if ( isset( $instance['cache_time'] ) ) {
