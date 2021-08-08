@@ -6,11 +6,11 @@
 .sloc-location-icon {
         vertical-align: middle;
 	display: inline-block;
-	svg {
-		vertical-align: middle;
-		width: 1rem;
-		fill: currentColor;
-	}
+	height: 1em;
+	width: 1em;
+	position: relative;
+	fill: currentColor;
+	top: -0.0625em;
 }
 
 .sloc-map {
