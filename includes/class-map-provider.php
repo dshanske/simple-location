@@ -21,6 +21,14 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $map_zoom;
 
 	 /**
+	  * Map Zoom Level Maximum.
+	  *
+	  * @since 1.0.0
+	  * @var int
+	  */
+	protected $max_map_zoom;
+
+	 /**
 	  * Map Height.
 	  *
 	  * @since 1.0.0
@@ -35,6 +43,22 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @var int
 	  */
 	protected $width;
+
+	 /**
+	  * Map Height Maximum Height.
+	  *
+	  * @since 1.0.0
+	  * @var int
+	  */
+	protected $max_height;
+
+	 /**
+	  * Map Maximum Width.
+	  *
+	  * @since 1.0.0
+	  * @var int
+	  */
+	protected $max_width;
 
 	 /**
 	  * Map Style.

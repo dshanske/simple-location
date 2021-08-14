@@ -13,8 +13,11 @@
 class Map_Provider_Mapbox extends Map_Provider {
 
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Mapbox', 'simple-location' );
-		$this->slug = 'mapbox';
+		$this->name         = __( 'Mapbox', 'simple-location' );
+		$this->slug         = 'mapbox';
+		$this->max_width    = 1280;
+		$this->max_height   = 1280;
+		$this->max_map_zoom = 22;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_mapbox_api' );
 		}
@@ -107,16 +110,14 @@ class Map_Provider_Mapbox extends Map_Provider {
 
 	public function default_styles() {
 		return array(
-			'streets-v11'                  => 'Streets',
-			'outdoors-v11'                 => 'Outdoor',
-			'light-v10'                    => 'Light',
-			'dark-v10'                     => 'Dark',
-			'satellite-v9'                 => 'Satellite',
-			'satellite-streets-v11'        => 'Satellite Streets',
-			'navigation-preview-day-v4'    => 'Navigation Preview Day',
-			'navigation-preview-night-v4'  => 'Navigation Preview Night',
-			'navigation-guidance-day-v4'   => 'Navigation Guidance Day',
-			'navigation-guidance-night-v4' => 'Navigation Guidance Night',
+			'streets-v11'           => 'Mapbox Streets',
+			'outdoors-v11'          => 'Mapbox Outdoor',
+			'light-v10'             => 'Mapbox Light',
+			'dark-v10'              => 'Mapbox Dark',
+			'satellite-v9'          => 'Mapbox Satellite',
+			'satellite-streets-v11' => 'Mapbox Satellite Streets',
+			'navigation-day-v1'     => 'Mapbox Navigation Day',
+			'navigation-night-v1'   => 'Mapbox Navigation Night',
 		);
 	}
 
@@ -128,7 +129,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 		if ( 'mapbox' === $this->user ) {
 			return $return;
 		}
-		$url          = 'https://api.mapbox.com/styles/v1/' . $this->user . '?access_token=' . $this->api;
+		$url          = 'https://api.mapbox.com/styles/v1/' . $this->user . '?access_token=' . $this->api . '&limit=50';
 				$args = array(
 					'headers'             => array(
 						'Accept' => 'application/json',
@@ -202,7 +203,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$user = 'mapbox';
 		}
 		$map = sprintf(
-			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s, %5$s,0,0/%6$sx%7$s?access_token=%8$s',
+			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s,%5$s,0,0/%6$sx%7$s?access_token=%8$s',
 			$user,
 			$this->style,
 			$this->longitude,
