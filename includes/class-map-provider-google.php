@@ -14,8 +14,12 @@ class Map_Provider_Google extends Map_Provider {
 
 
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Google Maps', 'simple-location' );
-		$this->slug = 'google';
+		$this->name       = __( 'Google Maps', 'simple-location' );
+		$this->slug       = 'google';
+		$this->max_width  = 640;
+		$this->max_height = 640;
+		$this->max_zoom   = 20;
+
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
 		}
@@ -100,6 +104,8 @@ class Map_Provider_Google extends Map_Provider {
 				'maptype'  => $this->style,
 				'language' => get_bloginfo( 'language' ),
 				'key'      => $this->api,
+				'zoom'     => $this->map_zoom,
+				'scale'    => 2,
 			),
 			$url
 		);

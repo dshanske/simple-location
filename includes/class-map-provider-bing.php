@@ -14,8 +14,11 @@ class Map_Provider_Bing extends Map_Provider {
 
 
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Bing Maps', 'simple-location' );
-		$this->slug = 'bing';
+		$this->name         = __( 'Bing Maps', 'simple-location' );
+		$this->slug         = 'bing';
+		$this->max_height   = 1500;
+		$this->max_width    = 2000;
+		$this->max_map_zoom = 22;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_bing_api' );
 		}
@@ -84,11 +87,13 @@ class Map_Provider_Bing extends Map_Provider {
 			'Aerial'                   => __( 'Aerial Imagery', 'simple-location' ),
 			'AerialWithLabels'         => __( 'Aerial Imagery with a Road Overlay', 'simple-location' ),
 			'AerialWithLabelsOnDemand' => __( 'Aerial imagery with on-demand road overlay.', 'simple-location' ),
-			'CanvasLight'              => __( 'A lighter version of the road maps which also has some of the details such as hill shading disabled.', 'simple-location' ),
-			'CanvasDark'               => __( 'A dark version of the road maps.', 'simple-location' ),
-			'CanvasGray'               => __( 'A grayscale version of the road maps.', 'simple-location' ),
-			'Road'                     => __( 'Roads without additional imagery', 'simple-location' ),
 			'Streetside'               => __( 'Street-level imagery', 'simple-location' ),
+			'BirdsEye'                 => __( 'Birds Eye (oblique-angle) imagery', 'simple-location' ),
+			'BirdsEyeWithLabels'       => __( 'Birds Eye (oblique-angle) imagery with a road overlay', 'simple-location' ),
+			'Road'                     => __( 'Roads without additional imagery', 'simple-location' ),
+			'CanvasDark'               => __( 'A dark version of the road maps.', 'simple-location' ),
+			'CanvasLight'              => __( 'A lighter version of the road maps which also has some of the details such as hill shading disabled.', 'simple-location' ),
+			'CanvasGray'               => __( 'A grayscale version of the road maps.', 'simple-location' ),
 		);
 	}
 

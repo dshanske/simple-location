@@ -14,8 +14,10 @@ class Map_Provider_LocationIQ extends Map_Provider {
 
 
 	public function __construct( $args = array() ) {
-		$this->name = __( 'LocationIQ', 'simple-location' );
-		$this->slug = 'locationiq';
+		$this->name         = __( 'LocationIQ', 'simple-location' );
+		$this->slug         = 'locationiq';
+		$this->max_map_zoom = 18;
+
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_locationiq_api' );
 		}
@@ -68,11 +70,10 @@ class Map_Provider_LocationIQ extends Map_Provider {
 		$map = add_query_arg(
 			array(
 				'key'     => $this->api,
-				'format'  => 'png',
 				'size'    => sprintf( '%1$sx%2$s', $this->width, $this->height ),
 				'markers' => sprintf( 'size:small|color:red|%1$s,%2$s', $this->latitude, $this->longitude ),
 			),
-			'https://maps.locationiq.com/v2/staticmap'
+			'https://maps.locationiq.com/v3/staticmap'
 		);
 		return $map;
 	}

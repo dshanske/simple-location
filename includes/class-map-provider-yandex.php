@@ -14,8 +14,11 @@ class Map_Provider_Yandex extends Map_Provider {
 
 
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Yandex', 'simple-location' );
-		$this->slug = 'Yandex';
+		$this->name         = __( 'Yandex', 'simple-location' );
+		$this->slug         = 'Yandex';
+		$this->max_map_zoom = 17;
+		$this->max_width    = 650;
+		$this->max_height   = 450;
 
 		parent::__construct( $args );
 		if ( $this->width > 650 ) {
@@ -36,7 +39,7 @@ class Map_Provider_Yandex extends Map_Provider {
 	public function get_the_static_map() {
 		$map = add_query_arg(
 			array(
-				'lang' => get_bloginfo( 'language' ),
+				'lang' => get_locale(),
 				'l'    => 'map',
 				'll'   => sprintf( '%1$s,%2$s', $this->longitude, $this->latitude ),
 				'size' => sprintf( '%1$s,%2$s', $this->width, $this->height ),

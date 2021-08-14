@@ -15,8 +15,12 @@ class Map_Provider_Here extends Map_Provider {
 	protected $appid;
 	protected $type;
 	public function __construct( $args = array() ) {
-		$this->name = __( 'HERE Maps', 'simple-location' );
-		$this->slug = 'here';
+		$this->name         = __( 'HERE Maps', 'simple-location' );
+		$this->slug         = 'here';
+		$this->max_width    = 2048;
+		$this->max_height   = 2048;
+		$this->max_map_zoom = 20;
+
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_here_api' );
 		}

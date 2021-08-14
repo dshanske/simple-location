@@ -14,8 +14,11 @@ class Map_Provider_Mapquest extends Map_Provider {
 
 
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Mapquest Maps', 'simple-location' );
-		$this->slug = 'mapquest';
+		$this->name          = __( 'Mapquest Maps', 'simple-location' );
+		$this->slug          = 'mapquest';
+		$this->max_map_zoom = 20;
+		$this->max_height    = 1920;
+		$this->max_width     = 1920;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_mapquest_api' );
 		}
@@ -94,7 +97,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$url = 'https://open.mapquestapi.com/staticmap/v5/map';
+		$url = 'https://www.mapquestapi.com/staticmap/v5/map';
 		$map = add_query_arg(
 			array(
 				'key'       => $this->api,
