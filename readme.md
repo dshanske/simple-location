@@ -1,7 +1,7 @@
 # Simple Location #
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
-**Stable tag:** 4.4.8  
+**Stable tag:** 4.4.9  
 **Requires at least:** 4.9  
 **Tested up to:** 5.8  
 **Requires PHP:** 5.6  
@@ -81,7 +81,7 @@ Timezone is also stored as a property and is derived from the location by defaul
 
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
-* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include Wikimedia, MapBox, Google, Mapquest's Open Static Map, HERE, LocationIQ, Geoapify, Yandex and Bing.
+* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, TomTom, Yandex and Bing.
 * Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ, OpenRoute and Geonames.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
 location of a three letter airport code, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
@@ -113,6 +113,7 @@ API Keys are required to use certain services.
 * [Visual Crossing](https://www.visualcrossing.com/)
 * [Meteostat](https://meteostat.net/) 
 * [Pirate Weather](https://pirateweather.net)
+* [TomTom](https://developer.tomtom.com/)
 
 At this time, all map services require an API key except Yandex, which permits limited non-commercial use.
 Nominatim does not require an API key, but it does ask for an email address, which will be the admin email of the site
@@ -249,6 +250,12 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.9 ( 2021-08-21 ) ###
+* Refresh of Map Providers based on latest API parameters
+* Introduction of Max Height, Width, and Zoom parameters to prevent going larger than provider supports
+* Introduction of TomTom maps
+* Adjustment of icon styling
 
 ### 4.4.8 ( 2021-07-23 ) ###
 * Refresh of dependencies and compatibility check with WP5.8

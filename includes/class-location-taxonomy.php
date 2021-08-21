@@ -389,6 +389,7 @@ final class Location_Taxonomy {
 						'selected'         => count( $selected ) >= 1 ? $selected[0] : '',
 						'orderby'          => 'name',
 						'hierarchical'     => $hierarchical,
+						/* translators: 1. Taxonomy Label */
 						'show_option_none' => sprintf( __( 'No %1$s', 'simple-location' ), $tax->label ),
 
 					)
