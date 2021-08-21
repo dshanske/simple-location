@@ -102,7 +102,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			'markup' => false,
 		);
 		foreach ( $weather as $key => $value ) {
-			$return[] = Loc_View::markup_value( $key, $value, $args );
+			$return[] = Weather_Provider::markup_value( $key, $value, $args );
 		}
 
 		if ( isset( $weather['_expires_at'] ) ) {

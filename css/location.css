@@ -30,14 +30,16 @@ ul.sloc-lastseen-data {
 .sloc-weather-icon {
   vertical-align: middle;
   display: inline-block;
-}
-.sloc-weather-icon svg {
-  vertical-align: middle;
-  width: 1.5rem;
+  margin-right: 0.3em;
+  position: relative;
   fill: currentColor;
 }
+.sloc-weather-icon svg {
+  height: 1.5em;
+  width: 1.5em;
+}
 
-ul.sloc-weather-display {
+.sloc-weather-display {
   list-style-position: inside;
   list-style: none;
 }

@@ -281,11 +281,64 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), $icon );
 		if ( file_exists( $svg ) ) {
-			return PHP_EOL . sprintf( '<span class="sloc-weather-icon sloc-icon-%1$s" style="display: inline-block; max-height: 1.5rem; margin-right: 0.1rem;" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), file_get_contents( $svg ) );
+			return PHP_EOL . sprintf( '<span class="sloc-weather-icon sloc-icon-%1$s" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), file_get_contents( $svg ) );
 		}
 		return '';
 	}
 
+	/**
+	 * Marks up a measurement.
+	 *
+	 * @param string  $property Property.
+	 * @param mixed   $value Value of the Property.
+	 * @param boolean $markup Add Microformats Markup.
+	 * @return string Marked up value.
+	 */
+	public static function markup_value( $property, $value, $args = array() ) {
+		$defaults      = array(
+			'markup'    => true, // Mark the value up with microformats.
+			'container' => 'li', // Wrap in this element.
+			'label'     => 'false', // Show the name of the property.
+			'units'     => get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ),
+			'round'     => false, // False to not round, true to round to integer, a numeric value to round to a specific precision.
+		);
+		$args          = wp_parse_args( $args, $defaults );
+		$args['units'] = ( $args['units'] === 'imperial' );
+		$params        = Weather_Provider::get_names( $property, $args['units'] );
+		if ( ! $params ) {
+			return '';
+		}
+
+		if ( is_numeric( $args['round'] ) ) {
+			$value = round( $value, $args['round'] );
+		} elseif ( true === $args['round'] ) {
+			$value = round( $value );
+		}
+
+		if ( $args['markup'] ) {
+			return sprintf(
+				'<%1$s class="sloc-%2$s p-%2$s h-measure">
+				<data class="p-type" value="%5$s"></data>
+				<data class="p-num" value="%3$s">%3$s</data>
+				<data class="p-unit" value="%4$s">%4$s</data></%1$s>',
+				$args['container'],
+				$property,
+				$value,
+				$params['unit'],
+				$params['label']
+			);
+		}
+
+		return sprintf(
+			'<%1$s class="sloc-%2$s">%6$s%5$s: %3$s%4$s</%1$s>',
+			$args['container'],
+			$property,
+			round( $value, 2 ),
+			$params['unit'],
+			$params['name'],
+			self::get_icon( $params['icon'] )
+		);
+	}
 
 	/**
 	 * Return array of current conditions. All fields optional.
