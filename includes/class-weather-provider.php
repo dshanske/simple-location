@@ -304,7 +304,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		);
 		$args          = wp_parse_args( $args, $defaults );
 		$args['units'] = ( $args['units'] === 'imperial' );
-		$params        = Weather_Provider::get_names( $property, $args['units'] );
+		$params        = self::get_names( $property, $args['units'] );
 		if ( ! $params ) {
 			return '';
 		}

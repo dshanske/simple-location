@@ -84,7 +84,7 @@ class Map_Provider_TomTom extends Map_Provider {
 
 	public function get_styles() {
 		return array(
-			'main' => __( 'Default', 'simple-location' ),
+			'main'  => __( 'Default', 'simple-location' ),
 			'night' => __( 'Night', 'simple-location' ),
 		);
 	}
@@ -94,16 +94,16 @@ class Map_Provider_TomTom extends Map_Provider {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$url = 	'https://api.tomtom.com/map/1/staticimage';
+		$url = 'https://api.tomtom.com/map/1/staticimage';
 		$map = add_query_arg(
 			array(
-				'key'     => $this->api,
-				'center' => sprintf( '%1$s,%2$s', $this->longitude, $this->latitude ),
-				'zoom' => $this->map_zoom,
-				'width' => $this->width,
-				'height' => $this->height,
+				'key'      => $this->api,
+				'center'   => sprintf( '%1$s,%2$s', $this->longitude, $this->latitude ),
+				'zoom'     => $this->map_zoom,
+				'width'    => $this->width,
+				'height'   => $this->height,
 				'language' => get_bloginfo( 'language' ),
-				'layer' => $this->style
+				'layer'    => $this->style,
 			),
 			$url
 		);
