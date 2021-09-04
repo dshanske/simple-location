@@ -15,6 +15,7 @@ class Loc_Timezone {
 		add_action( 'save_post', array( $cls, 'postbox_save_post_meta' ) );
 		add_action( 'after_micropub', array( $cls, 'after_micropub' ), 10, 2 );
 		add_filter( 'rest_prepare_post', array( $cls, 'rest_prepare_post' ), 10, 3 );
+		add_filter( 'rest_prepare_comment', array( $cls, 'rest_prepare_comment' ), 10, 3 );
 	}
 
 	/**
@@ -83,6 +84,15 @@ class Loc_Timezone {
 		$data['date_gmt']     = $date_gmt->format( DATE_W3C );
 		$modified_gmt         = new DateTime( $data['modified_gmt'], new DatetimeZone( 'GMT' ) );
 		$data['modified_gmt'] = $modified_gmt->format( DATE_W3C );
+		$response->set_data( $data );
+		return $response;
+	}
+
+	public static function rest_prepare_comment( $response, $comment, $request ) {
+		$data                 = $response->get_data();
+		$data['date']         = self::get_comment_date( $data['date_gmt'], DATE_W3C, $comment );
+		$date_gmt             = new DateTime( $data['date_gmt'], new DatetimeZone( 'GMT' ) );
+		$data['date_gmt']     = $date_gmt->format( DATE_W3C );
 		$response->set_data( $data );
 		return $response;
 	}
@@ -402,7 +412,7 @@ class Loc_Timezone {
 
 		$timezone = get_metadata( $type, $id, 'geo_timezone', true );
 		if ( ! $timezone ) {
-			return null;
+			return wp_timezone();
 		}
 		// Ensure timezone is a string
 		if ( ! is_string( $timezone ) ) {
@@ -457,6 +467,8 @@ class Loc_Timezone {
 		}
 		return wp_date( $d, get_post_timestamp( $post ), $timezone );
 	}
+
+
 
 	public static function get_the_modified_date( $the_date, $d = '', $post = null ) {
 		$post = get_post( $post );
