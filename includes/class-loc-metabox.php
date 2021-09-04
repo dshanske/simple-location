@@ -158,6 +158,14 @@ class Loc_Metabox {
 		if ( $post->post_date !== $post->post_modified ) {
 			return;
 		}
+
+		$timestamp = get_post_timestamp( $post );
+
+		// Do not update the last seen notation if the post is more than 10 minutes old.
+		if ( abs( time() - $timestamp ) > 600 ) {
+			return;
+		}
+
 		$geodata = WP_Geo_Data::get_geodata( $post );
 		if ( ! is_array( $geodata ) ) {
 			return;

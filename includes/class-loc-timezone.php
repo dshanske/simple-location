@@ -296,7 +296,11 @@ class Loc_Timezone {
 				delete_post_meta( $post->ID, '_timezone' );
 			}
 			if ( ! $timezone ) {
-				$timezone = wp_timezone_string();
+				$user     = wp_get_current_user();
+				$timezone = get_user_meta( $user->ID, 'geo_timezone', true );
+				if ( ! $timezone ) {
+					$timezone = wp_timezone_string();
+				}
 			}
 		}
 		?>
