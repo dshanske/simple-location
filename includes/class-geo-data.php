@@ -1562,7 +1562,7 @@ class WP_Geo_Data {
 			)
 		);
 		register_rest_field(
-			array( 'post', 'comment', 'term' ),
+			array( 'post', 'comment', 'user', 'term' ),
 			'longitude',
 			array(
 				'get_callback' => array( 'WP_Geo_Data', 'rest_get_longitude' ),
@@ -1573,7 +1573,7 @@ class WP_Geo_Data {
 			)
 		);
 		register_rest_field(
-			array( 'post', 'comment', 'term' ),
+			array( 'post', 'comment', 'term', 'user' ),
 			'geo_address',
 			array(
 				'get_callback' => array( 'WP_Geo_Data', 'rest_get_address' ),
@@ -1584,12 +1584,12 @@ class WP_Geo_Data {
 			)
 		);
 		register_rest_field(
-			array( 'post', 'comment', 'term' ),
-			'geo_public',
+			array( 'post', 'comment', 'term', 'user' ),
+			'timezone',
 			array(
-				'get_callback' => array( 'WP_Geo_Data', 'rest_get_visibility' ),
+				'get_callback' => array( 'WP_Geo_Data', 'rest_get_timezone' ),
 				'schema'       => array(
-					'geo_public' => __( 'Location Visibility', 'simple-location' ),
+					'geo_public' => __( 'Last Reported Timezone', 'simple-location' ),
 					'type'       => 'string',
 				),
 			)
@@ -1643,7 +1643,7 @@ class WP_Geo_Data {
 		if ( 'public' === $geodata['visibility'] ) {
 			return $geodata['longitude'];
 		}
-		return 'private';
+		return '';
 	}
 
 	/**
@@ -1666,7 +1666,7 @@ class WP_Geo_Data {
 		if ( 'public' === $geodata['visibility'] ) {
 			return $geodata['latitude'];
 		}
-		return 'private';
+		return '';
 	}
 
 
@@ -1690,12 +1690,12 @@ class WP_Geo_Data {
 		if ( in_array( $geodata['visibility'], array( 'public', 'protected' ), true ) ) {
 			return $geodata['address'];
 		}
-		return 'private';
+		return '';
 	}
 
 
 	/**
-	 * Adds visiility as a field to the REST API.
+	 * Adds timezone as a field to the REST API.
 	 *
 	 * @param mixed           $object Object type.
 	 * @param string          $attr Not used but required by filter.
@@ -1705,10 +1705,17 @@ class WP_Geo_Data {
 	 *
 	 * @since 1.0.0
 	 */
-	public static function rest_get_visibility( $object, $attr, $request, $object_type ) {
-		$object     = self::object( $object, $object_type );
-		$visibility = self::get_visibility( $object_type, $object );
-		return $visibility;
+	public static function rest_get_timezone( $object, $attr, $request, $object_type ) {
+		$object  = self::object( $object, $object_type );
+		$geodata = self::get_geodata( $object );
+		if ( empty( $geodata['timezone'] ) ) {
+			return wp_timezone_string();
+		}
+		if ( in_array( $geodata['visibility'], array( 'public', 'protected' ), true ) ) {
+			return $geodata['timezone'];
+		}
+
+		return wp_timezone_string();
 	}
 
 

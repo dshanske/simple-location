@@ -454,7 +454,7 @@ class Loc_Config {
 		);
 		add_settings_field(
 			'sloc_last_report', // id.
-			__( 'When Making a New Post, update the Author with Posts Location', 'simple-location' ), // setting title.
+			__( 'Update the Author with Posts Location when Saving a Post', 'simple-location' ), // setting title.
 			array( 'Loc_Config', 'checkbox_callback' ), // display callback.
 			'simloc', // settings page.
 			'sloc_general', // settings section.
