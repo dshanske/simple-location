@@ -78,6 +78,10 @@ class WP_Geo_Data {
 		add_post_type_support( 'page', 'geo-location' );
 		add_post_type_support( 'attachment', 'geo-location' );
 
+		add_filter( 'rest_prepare_post', array( $cls, 'rest_prepare_post' ), 10, 3 );
+		add_filter( 'rest_prepare_comment', array( $cls, 'rest_prepare_comment' ), 10, 3 );
+		add_filter( 'rest_prepare_user', array( $cls, 'rest_prepare_user' ), 10, 3 );
+
 	}
 
 
@@ -1734,6 +1738,39 @@ class WP_Geo_Data {
 			$data = null;
 		}
 		return $data;
+	}
+
+	public static function rest_prepare_post( $response, $post, $request ) {
+		$data = $response->get_data();
+		foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
+			if ( empty( $data[ $field ] ) ) {
+				unset( $data[ $field ] );
+			}
+		}
+		$response->set_data( $data );
+		return $response;
+	}
+
+	public static function rest_prepare_comment( $response, $comment, $request ) {
+		$data = $response->get_data();
+		foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
+			if ( empty( $data[ $field ] ) ) {
+				unset( $data[ $field ] );
+			}
+		}
+		$response->set_data( $data );
+		return $response;
+	}
+
+	public static function rest_prepare_user( $response, $user, $request ) {
+		$data = $response->get_data();
+		foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
+			if ( empty( $data[ $field ] ) ) {
+				unset( $data[ $field ] );
+			}
+		}
+		$response->set_data( $data );
+		return $response;
 	}
 
 }
