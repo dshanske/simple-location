@@ -10,7 +10,7 @@ $geodata = WP_Geo_Data::get_geodata( $profileuser );
 ?>
 <div id="locationbox-meta">
 <h3><?php esc_html_e( 'Last Reported Location', 'simple-location' ); ?></h3>
-<p><?php esc_html_e( 'This allows you to set the last reported location for this author. See Simple Location settings for options.', 'simple-location' ); ?></p>
+<p><?php esc_html_e( 'This allows you to set the last reported location for this author. This can be automatically updated when you post. See Simple Location settings for options.', 'simple-location' ); ?></p>
 
 <?php if ( 'dummy' !== get_option( 'sloc_geolocation_provider' ) ) { ?>
 <button	class="lookup-address-button button button-primary" aria-label="<?php esc_html_e( 'Location Lookup', 'simple-location' ); ?>" title="<?php esc_html_e( 'Location Lookup', 'simple-location' ); ?>">
