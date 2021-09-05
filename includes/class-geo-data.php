@@ -82,6 +82,8 @@ class WP_Geo_Data {
 		add_filter( 'rest_prepare_comment', array( $cls, 'rest_prepare_comment' ), 10, 3 );
 		add_filter( 'rest_prepare_user', array( $cls, 'rest_prepare_user' ), 10, 3 );
 
+		add_filter( 'map_meta_cap', array( $cls, 'map_meta_cap' ), 1, 4 );
+
 	}
 
 
@@ -1771,6 +1773,133 @@ class WP_Geo_Data {
 		}
 		$response->set_data( $data );
 		return $response;
+	}
+
+	 /*
+	  Sets Location custom capabilities.
+	 *
+	 * @param string[] $caps    Array of the users capabilities.
+	  * @param string   $cap     Capability name.
+	  * @param int      $user_id The user ID.
+	 * @param array    $args    Adds the context to the cap. Typically the object ID.
+	  */
+	public static function map_meta_cap( $caps, $cap, $user_id, $args ) {
+		$id = 0;
+		if ( isset( $args[0] ) ) {
+			$id = $args[0];
+		}
+		switch ( $cap ) {
+			case 'read_posts_location':
+				$post = get_post( $id );
+				// If it is your post you just need to be able to read it. Otherwise you need the private posts capability.
+				if ( $post && ( $user_id === $post->post_author ) ) {
+					$caps = array( 'read' );
+				} else {
+					$caps = array( 'read_private_posts' );
+				}
+				break;
+			case 'read_comments_location':
+				$comment = get_comment( $id );
+				// If it is your comment you just need to be able to read it. Otherwise you need the private posts capability.
+				if ( $comment && ( $user_id === $comment->user_id ) && ( 0 !== $comment->user_id ) ) {
+					$caps = array( 'read' );
+				} else {
+					$caps = array( 'read_private_posts' );
+				}
+				break;
+			case 'read_users_location':
+				// If it is your post you just need to be able to read it. Otherwise you need the private posts capability.
+				if ( $user_id === $id ) {
+					$caps = array( 'read' );
+				} else {
+					$caps = array( 'edit_users' );
+				}
+				break;
+			case 'edit_posts_location':
+				$post = get_post( $id );
+				// If it is your post you just need to be able to read it. Otherwise you need the private posts capability.
+				if ( $post && ( $user_id === $post->post_author ) ) {
+					$caps = array( 'edit_posts' );
+				} else {
+					$caps = array( 'edit_others_posts' );
+				}
+				break;
+			case 'edit_comments_location':
+				$comment = get_comment( $id );
+				// If it is your comment you just need to be able to read it. Otherwise you need the private posts capability.
+				if ( $comment && ( $user_id === $comment->user_id ) && ( 0 !== $comment->user_id ) ) {
+					$caps = array( 'edit_posts' );
+				} else {
+					$caps = array( 'moderate_comments' );
+				}
+				break;
+			case 'edit_users_location':
+				// If it is your post you just need to be able to read it. Otherwise you need the private posts capability.
+				if ( $user_id === $id ) {
+					$caps = array( 'read' );
+				} else {
+					$caps = array( 'edit_users' );
+				}
+				break;
+
+		}
+		return $caps;
+	}
+
+	/*
+	 Current User Can Read with Object for Private Location.
+	 *
+	 * @param mixed $object The object.
+	 * @return boolean True if current user can.
+	 */
+	public static function current_user_can_read( $object ) {
+		if ( ! $object ) {
+			$object = get_post();
+		}
+
+		if ( $object instanceof WP_Post ) {
+			return current_user_can( 'read_posts_location', $object->ID );
+		} elseif ( $object instanceof WP_Comment ) {
+			return current_user_can( 'read_comments_location', $object->comment_ID );
+		} elseif ( $object instanceof WP_Term ) {
+			return current_user_can( 'read_terms_location', $object->term_id );
+		} elseif ( $object instanceof WP_User ) {
+			return current_user_can( 'read_users_location', $object->ID );
+		} elseif ( is_numeric( $object ) ) {
+			$object = get_post( $object );
+			if ( $object instanceof WP_Post ) {
+				return current_user_can( 'read_posts_location', $object->ID );
+			}
+		}
+		return false;
+	}
+
+	/*
+	 Current User Can Read with Object for Private Location.
+	 *
+	 * @param mixed $object The object.
+	 * @return boolean True if current user can.
+	 */
+	public static function current_user_can_edit( $object ) {
+		if ( ! $object ) {
+			$object = get_post();
+		}
+
+		if ( $object instanceof WP_Post ) {
+			return current_user_can( 'edit_posts_location', $object->ID );
+		} elseif ( $object instanceof WP_Comment ) {
+			return current_user_can( 'edit_comments_location', $object->comment_ID );
+		} elseif ( $object instanceof WP_Term ) {
+			return current_user_can( 'edit_terms_location', $object->term_id );
+		} elseif ( $object instanceof WP_User ) {
+			return current_user_can( 'edit_users_location', $object->ID );
+		} elseif ( is_numeric( $object ) ) {
+			$object = get_post( $object );
+			if ( $object instanceof WP_Post ) {
+				return current_user_can( 'edit_posts_location', $object->ID );
+			}
+		}
+		return false;
 	}
 
 }

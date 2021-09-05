@@ -125,11 +125,15 @@ class Loc_Metabox {
 
 
 	public static function metabox( $object, $box ) {
-		load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-metabox.php' );
+		if ( WP_Geo_Data::current_user_can_edit( $object ) ) {
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-metabox.php' );
+		}
 	}
 
 	public static function user_profile( $user ) {
-		load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-user-metabox.php' );
+		if ( current_user_can( 'edit_users_location', $user->ID ) ) {
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-user-metabox.php' );
+		}
 	}
 
 

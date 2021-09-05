@@ -131,7 +131,7 @@ class Loc_View {
 		if ( ! isset( $loc ) ) {
 			return '';
 		}
-		if ( current_user_can( 'read_private_posts' ) && 'public' !== $loc['visibility'] ) {
+		if ( WP_Geo_Data::current_user_can_read( $object ) && 'public' !== $loc['visibility'] ) {
 			$loc['visibility'] = 'public';
 			if ( isset( $loc['address'] ) ) {
 				/* translators: Prefaces the address 1. with the private status */
