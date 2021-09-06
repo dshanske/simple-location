@@ -1,7 +1,7 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.4.9
+Stable tag: 4.4.10
 Requires at least: 4.9
 Tested up to: 5.8
 Requires PHP: 5.6
@@ -50,7 +50,7 @@ Locations are divided by administrative areas. The hierarchy for locations is:
 The reverse geocoding system attempts to consistently retrieve the country code, region code, and locality for the location and add them to the location taxonomy. This can be potentially problematic, as if the returns
 from the locations added aren't consistent, it will duplicate and explode the list of terms. This is the same issue that has held back venues.
 
-Locations are matched using the country code, region code, and locality field, and therefore, you can edit the displayed name or the region code without issue. Due to matching issues, you may have to make some manual changes.
+Locations are matched using the country code, region code, and locality field, and therefore, you can edit the displayed name or the region code without issue. Due to matching issues, you may have to make some manual changes and there may be some occasional dupplication.
 
 There is no top level Location page, /location included in the plugin. You can create a page at this location and use a custom template to allow it to show a list of your locations. 
 
@@ -75,6 +75,10 @@ It consists of four fields: latitude, longitude, public, and address. This match
 also provides for properties of altitude, accuracy, altitudeAccuracy, speed, and heading, which may be stored. Map Zoom is also stored as a geodata property.
 
 Timezone is also stored as a property and is derived from the location by default or set manually.
+
+In order to access private location information, the following custom capabilities are added to WordPress:
+* 'read_{$object_type}_location' - Whether or not a user is allowed to read information locations for object types: posts, comments, terms, users. A user is always allowed to read the location from their objects.
+* 'edit_{$object_type}_location' - Whether or not a user is allowed to edit information locations for object types: posts, comments, terms, users. A user is always allowed to read the location from their objects.
 
 
 == Providers ==
@@ -250,6 +254,14 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.4.10 ( 2021-09-xx ) =
+* Set Default Time for Posts based on the User Timezone field.
+* Ensure Last Seen Does Not Update if Off by More than Ten Minutes
+* Update Rest Field return to show all returns, but only if the information is public, otherwise it is blank.
+* Add timezone to REST comment endpoint
+* Remove empty returns from location data in post, comment, and user endpoints
+* Add custom capabilities
 
 = 4.4.9 ( 2021-08-21 ) =
 * Refresh of Map Providers based on latest API parameters
