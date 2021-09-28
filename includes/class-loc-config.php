@@ -892,9 +892,12 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function country_callback( array $args ) {
-		$name  = $args['label_for'];
-		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
+		$name = $args['label_for'];
+
+		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
 		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = $codes['3166-1'];
+		$codes = wp_list_pluck( $codes, 'name', 'alpha_2' );
 		$text  = get_option( $name );
 		self::select_callback( $name, $text, $codes );
 	}

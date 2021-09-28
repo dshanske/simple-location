@@ -89,10 +89,10 @@ class Loc_Timezone {
 	}
 
 	public static function rest_prepare_comment( $response, $comment, $request ) {
-		$data                 = $response->get_data();
-		$data['date']         = self::get_comment_date( $data['date_gmt'], DATE_W3C, $comment );
-		$date_gmt             = new DateTime( $data['date_gmt'], new DatetimeZone( 'GMT' ) );
-		$data['date_gmt']     = $date_gmt->format( DATE_W3C );
+		$data             = $response->get_data();
+		$data['date']     = self::get_comment_date( $data['date_gmt'], DATE_W3C, $comment );
+		$date_gmt         = new DateTime( $data['date_gmt'], new DatetimeZone( 'GMT' ) );
+		$data['date_gmt'] = $date_gmt->format( DATE_W3C );
 		$response->set_data( $data );
 		return $response;
 	}

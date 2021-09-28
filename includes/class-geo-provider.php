@@ -187,20 +187,53 @@ abstract class Geo_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns Country Data
+	 *
+	 * @param string $iso ISO2 or ISO3 Country Code.
+	 * @return array|boolean Country Data or false is failed.
+	 */
+	public static function country_data( $iso ) {
+		$iso = trim( $iso );
+		$iso = strtoupper( trim( $iso ) );
+
+		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
+		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = $codes['3166-1'];
+		$match = wp_filter_object_list( $codes, array( 'alpha_' . strlen( $iso ) => $iso ) );
+		if ( is_array( $match ) && 1 === count( $match ) ) {
+			return array_shift( $match );
+		}
+		return false;
+	}
+
+	/**
+	 * Returns Country Data from Name
+	 *
+	 * @param string $name Country Name
+	 * @return array|boolean Country Data or false is failed.
+	 */
+	public static function country_data_name( $name ) {
+		$name  = trim( $name );
+		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
+		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = $codes['3166-1'];
+		$match = wp_filter_object_list( $codes, array( 'name' => $name ) );
+		if ( is_array( $match ) && 1 === count( $match ) ) {
+			return array_shift( $match );
+		}
+		return false;
+	}
+
+	/**
 	 * Turn Country Code into Country Name.
 	 *
 	 * @param string $code Country Code.
 	 * @return string|boolean Country Name or false is failed.
 	 */
 	public static function country_name( $code ) {
-		$code = strtoupper( trim( $code ) );
-		if ( 2 !== strlen( $code ) ) {
-			return false;
-		}
-		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
-		$codes = json_decode( file_get_contents( $file ), true );
-		if ( array_key_exists( $code, $codes ) ) {
-			return $codes[ $code ];
+		$match = self::country_data( $code );
+		if ( is_array( $match ) ) {
+			return $match['name'];
 		}
 		return false;
 	}
@@ -212,13 +245,9 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @return string|boolean Country Code or false is failed.
 	 */
 	public static function country_code( $name ) {
-		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
-		$codes = json_decode( file_get_contents( $file ), true );
-		$name  = trim( $name );
-		foreach ( $codes as $key => $value ) {
-			if ( $name === $value ) {
-				return $key;
-			}
+		$match = self::country_data_name( $name );
+		if ( is_array( $match ) ) {
+			return $match['alpha_2'];
 		}
 		return false;
 	}
@@ -230,29 +259,49 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @return string|boolean ISO2 Country Code or false is failed.
 	 */
 	public static function country_code_iso3( $iso3 ) {
-		$iso3 = trim( $iso3 );
-		$iso3 = strtoupper( trim( $iso3 ) );
-		if ( 3 !== strlen( $iso3 ) ) {
+		$match = self::country_data( $iso3 );
+		if ( is_array( $match ) ) {
+			return $match['alpha_2'];
+		}
+
+		return false;
+	}
+
+	/**
+	 * Return Data on a Region by Code
+	 *
+	 * @param string $code Region Code.
+	 * @param string $country ISO2 Country Code.
+	 * @return array|boolean Region Data or false if failed.
+	 */
+	public static function region_data( $code, $country ) {
+		$code    = trim( $code );
+		$country = strtoupper( trim( $country ) );
+		$codes   = array();
+
+		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-2/' . $country . '.json';
+		if ( ! file_exists( $file ) ) {
 			return false;
 		}
-		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries-iso3.json';
+
 		$codes = json_decode( file_get_contents( $file ), true );
-		foreach ( $codes as $key => $value ) {
-			if ( $iso3 === $value ) {
-				return $key;
-			}
+
+		$match = wp_filter_object_list( $codes, array( 'code' => $country . '-' . $code ) );
+
+		if ( is_array( $match ) && 1 === count( $match ) ) {
+			return array_shift( $match );
 		}
 		return false;
 	}
 
 	/**
-	 * Turn a Region Name into a Region Code.
+	 * Return Data on a Region by Name
 	 *
 	 * @param string $name Region Name.
-	 * @param string $country Country Code.
-	 * @return string|boolean Region Code or false is failed.
+	 * @param string $country ISO2 Country Code.
+	 * @return array|boolean Region Data or false if failed.
 	 */
-	public static function region_code( $name, $country ) {
+	public static function region_data_name( $name, $country ) {
 		$name    = trim( $name );
 		$country = strtoupper( trim( $country ) );
 		$codes   = array();
@@ -263,22 +312,44 @@ abstract class Geo_Provider extends Sloc_Provider {
 		}
 
 		$codes = json_decode( file_get_contents( $file ), true );
-		foreach ( $codes as $code ) {
-			if ( $name === $code['name'] ) {
-				return str_replace( $country . '-', '', $code['code'] );
-			}
+
+		$match = wp_filter_object_list( $codes, array( 'name' => $name ) );
+
+		if ( is_array( $match ) && 1 === count( $match ) ) {
+			return array_shift( $match );
 		}
 
 		// If it cannot find a match, try to find an inexact match.
 		foreach ( $codes as $code ) {
 			if ( str_contains( $name, $code['name'] ) ) {
-				return str_replace( $country . '-', '', $code['code'] );
+				return $code;
 			}
 			// To cover non-latin characters do a string comparison.
 			if ( str_contains( $name, iconv( 'UTF-8', 'ASCII//TRANSLIT', $code['name'] ) ) ) {
-				return str_replace( $country . '-', '', $code['code'] );
+				return $code;
 			}
 		}
+
+		return false;
+	}
+
+	/**
+	 * Turn a Region Name into a Region Code.
+	 *
+	 * @param string $name Region Name.
+	 * @param string $country Country Code.
+	 * @return string|boolean Region Code or false if failed.
+	 */
+	public static function region_code( $name, $country ) {
+		$name    = trim( $name );
+		$country = strtoupper( trim( $country ) );
+
+		$match = self::region_data_name( $name, $country );
+
+		if ( is_array( $match ) ) {
+			return str_replace( $country . '-', '', $match['code'] );
+		}
+
 		return false;
 	}
 
@@ -291,21 +362,11 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 */
 	public static function region_name( $code, $country ) {
 		$code  = strtoupper( trim( $code ) );
-		$codes = array();
-
-		if ( 'US' === $country ) {
-			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/states-us.json';
-			$codes = json_decode( file_get_contents( $file ), true );
+		$match = self::region_data( $code, $country );
+		if ( is_array( $match ) ) {
+			return $match['name'];
 		}
 
-		if ( 'CA' === $country ) {
-			$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/provinces-ca.json';
-			$codes = json_decode( file_get_contents( $file ), true );
-		}
-
-		if ( array_key_exists( $code, $codes ) ) {
-			return $codes[ $code ];
-		}
 		return false;
 	}
 
