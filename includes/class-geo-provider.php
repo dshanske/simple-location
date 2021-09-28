@@ -114,7 +114,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @param array $reverse Array of MF2 Address Properties.
 	 * @return string|boolean Return Display Name or False if Failed.
 	 */
-	protected function display_name( $reverse ) {
+	public function display_name( $reverse ) {
 		if ( ! is_array( $reverse ) ) {
 			return false;
 		}
@@ -160,7 +160,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @param string $code Country Code.
 	 * @return boolean True if yes.
 	 */
-	protected function house_number( $code ) {
+	public function house_number( $code ) {
 		return ! in_array(
 			$code,
 			array(
@@ -192,7 +192,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @param string $code Country Code.
 	 * @return string|boolean Country Name or false is failed.
 	 */
-	protected function country_name( $code ) {
+	public function country_name( $code ) {
 		$code = strtoupper( trim( $code ) );
 		if ( 2 !== strlen( $code ) ) {
 			return false;
@@ -211,7 +211,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @param string $name Country Name.
 	 * @return string|boolean Country Code or false is failed.
 	 */
-	protected function country_code( $name ) {
+	public function country_code( $name ) {
 		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/countries.json';
 		$codes = json_decode( file_get_contents( $file ), true );
 		$name  = trim( $name );
@@ -229,7 +229,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @param string $iso3 ISO3 Country Code.
 	 * @return string|boolean ISO2 Country Code or false is failed.
 	 */
-	protected function country_code_iso3( $iso3 ) {
+	public function country_code_iso3( $iso3 ) {
 		$iso3 = trim( $iso3 );
 		if ( 3 !== strlen( $iso3 ) ) {
 			return false;
@@ -251,7 +251,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @param string $country Country Code.
 	 * @return string|boolean Region Code or false is failed.
 	 */
-	protected function region_code( $name, $country ) {
+	public function region_code( $name, $country ) {
 		$name    = trim( $name );
 		$country = strtoupper( trim( $country ) );
 		$codes   = array();
@@ -288,7 +288,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @param string $country Country Code.
 	 * @return string|boolean Region Name or false is failed.
 	 */
-	protected function region_name( $code, $country ) {
+	public function region_name( $code, $country ) {
 		$code  = strtoupper( trim( $code ) );
 		$codes = array();
 
@@ -313,7 +313,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 *
 	 * @return array|boolean Return Timezone Data or False if Failed
 	 */
-	protected function timezone() {
+	public function timezone() {
 		$timezone = Loc_Timezone::timezone_for_location( $this->latitude, $this->longitude );
 		if ( $timezone ) {
 			$return             = array();
