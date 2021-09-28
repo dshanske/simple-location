@@ -785,18 +785,25 @@ final class Location_Taxonomy {
 	}
 
 	public static function display_name( $term_id, $links = true ) {
-		$term     = get_term( $term_id );
-		$return   = array();
-		$return[] = $term->name;
+		$term   = get_term( $term_id );
+		$return = array();
+		if ( 0 === $term->parent ) {
+			$country  = get_term_meta( $term->term_id, 'country', true );
+			$flag     = Geo_Provider::country_flag( $country );
+			$return[] = $flag . ' ' . $term->name;
+		} else {
+			$return[] = $term->name;
+		}
 		while ( 0 !== $term->parent ) {
 			$term = get_term( $term->parent, 'location' );
 			if ( 0 === $term->parent ) {
 				$country = get_term_meta( $term->term_id, 'country', true );
 				if ( $country !== get_option( 'sloc_country' ) ) {
+					$flag = Geo_Provider::country_flag( $country );
 					if ( $links ) {
-						$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $term->name );
+						$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $flag . ' ' . $term->name );
 					} else {
-						$return[] = $term->name;
+						$return[] = $flag . ' ' . $term->name;
 					}
 				}
 			} else {
