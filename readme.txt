@@ -1,9 +1,9 @@
 === Simple Location ===
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
-Stable tag: 4.4.10
 Requires at least: 4.9
 Tested up to: 5.8
+Stable tag: 4.4.11
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -255,7 +255,14 @@ will now be required to show maps for services that require API keys.
 
 == Changelog ==
 
-= 4.4.10 ( 2021-09-xx ) =
+= 4.4.11 ( 2021-09-28 ) =
+* Fix issue with protected functions causing errors
+* Remove duplicative data for country and region conversion
+* Add unit tests
+* Add flags to country pulldowns
+* Add flags to Archive Views
+
+= 4.4.10 ( 2021-09-06 ) =
 * Set Default Time for Posts based on the User Timezone field.
 * Ensure Last Seen Does Not Update if Off by More than Ten Minutes
 * Update Rest Field return to show all returns, but only if the information is public, otherwise it is blank.
