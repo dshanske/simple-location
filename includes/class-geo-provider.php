@@ -239,6 +239,20 @@ abstract class Geo_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Turn Country Code into Country Flag.
+	 *
+	 * @param string $code Country Code.
+	 * @return string|boolean Country Name or false is failed.
+	 */
+	public static function country_flag( $code ) {
+		$match = self::country_data( $code );
+		if ( is_array( $match ) ) {
+			return $match['flag'];
+		}
+		return false;
+	}
+
+	/**
 	 * Turn Country Name into ISO2 Country Code.
 	 *
 	 * @param string $name Country Name.
