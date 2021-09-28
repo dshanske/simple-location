@@ -92,11 +92,10 @@ final class Location_Taxonomy {
 		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
 		$codes = json_decode( file_get_contents( $file ), true );
 		$codes = $codes['3166-1'];
-		$codes = wp_list_pluck( $codes, 'name', 'alpha_2' );
 
 		echo '<select name="country" id="country">';
-		foreach ( $codes as $code => $name ) {
-			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code ), selected( $country, $code, false ), esc_html( $name ) ); // phpcs:ignore
+		foreach ( $codes as $code ) {
+			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code['alpha_2'] ), selected( $country, $code['alpha_2'], false ), esc_html( $code['flag'] . ' ' . $code['name'] ) ); // phpcs:ignore
 		}
 		echo '</select>';
 	}

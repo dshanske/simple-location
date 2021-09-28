@@ -894,12 +894,17 @@ class Loc_Config {
 	public static function country_callback( array $args ) {
 		$name = $args['label_for'];
 
-		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
-		$codes = json_decode( file_get_contents( $file ), true );
-		$codes = $codes['3166-1'];
-		$codes = wp_list_pluck( $codes, 'name', 'alpha_2' );
-		$text  = get_option( $name );
-		self::select_callback( $name, $text, $codes );
+		$file    = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
+		$codes   = json_decode( file_get_contents( $file ), true );
+		$codes   = $codes['3166-1'];
+		$country = get_option( $name );
+		// self::select_callback( $name, $text, $codes );
+
+		printf( '<select name="%1$s" id="%1$s">', $name );
+		foreach ( $codes as $code ) {
+			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code['alpha_2'] ), selected( $country, $code['alpha_2'], false ), esc_html( $code['flag'] . ' ' . $code['name'] ) ); // phpcs:ignore
+		}
+		echo '</select>';
 	}
 
 	/**
