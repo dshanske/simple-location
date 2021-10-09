@@ -313,6 +313,9 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function add_location_admin_column( $columns ) {
+		if ( array_key_exists( 'post_type', $_GET ) && ! in_array( $_GET['post_type'], Loc_Metabox::screens() ) ) {
+			return $columns;
+		}
 		$columns['location'] = __( 'Location', 'simple-location' );
 		return $columns;
 	}
