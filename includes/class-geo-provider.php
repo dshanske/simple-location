@@ -389,7 +389,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 *
 	 * @return array|boolean Return Timezone Data or False if Failed
 	 */
-	public static function timezone() {
+	public function timezone() {
 		$timezone = Loc_Timezone::timezone_for_location( $this->latitude, $this->longitude );
 		if ( $timezone ) {
 			$return             = array();
