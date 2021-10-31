@@ -3,7 +3,7 @@ Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
 Requires at least: 4.9
 Tested up to: 5.8
-Stable tag: 4.4.11
+Stable tag: 4.4.12
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -254,6 +254,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.4.12 ( 2021-10-30 ) =
+* Fix minor bug
+* Update airport data
 
 = 4.4.11 ( 2021-09-28 ) =
 * Fix issue with protected functions causing errors

@@ -11,7 +11,7 @@
  * Domain Path:  /languages
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 4.4.11
+ * Version: 4.4.12
  *
  * @package Simple_Location
  */
@@ -42,7 +42,7 @@ class Simple_Location_Plugin {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	public static $version = '4.4.11';
+	public static $version = '4.4.12';
 
 
 	/**
