@@ -31,7 +31,7 @@ class Venue_Taxonomy {
 	}
 
 	public static function enqueue_term_scripts() {
-		if ( 'venue' === $_GET['taxonomy'] ) {
+		if ( 'venue' === sanitize_text_field( $_GET['taxonomy'] ) ) {
 			wp_enqueue_script(
 				'location',
 				plugins_url( 'simple-location/js/location.js' ),

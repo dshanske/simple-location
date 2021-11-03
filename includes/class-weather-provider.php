@@ -926,7 +926,15 @@ abstract class Weather_Provider extends Sloc_Provider {
 		if ( ! $echo ) {
 			return $return;
 		}
-		echo $return; // phpcs:ignore
+		echo wp_kses( 
+			$return,
+			array(
+				'option' => array(
+					'value' => array(),
+					'selected' => array(),
+				)
+			)
+		);
 	}
 
 	/**

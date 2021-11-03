@@ -30,7 +30,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		echo $args['before_widget']; // phpcs:ignore
 
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
-		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
+		$title = wp_kses( apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base ), Simple_Location_Plugin::kses_clean() );
 
 		if ( $title ) {
 			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore

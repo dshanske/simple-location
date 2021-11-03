@@ -270,6 +270,72 @@ class Simple_Location_Plugin {
 		}
 	}
 
+	/**
+	 * Generic Filter Set of HTML paramaters for KSES
+	 *
+	 * @return return array Array of HTML elements.
+	 */
+	public static function kses_clean() {
+		return array(
+			'a'          => array(
+				'class' => array(),
+				'href'  => array(),
+				'name'  => array(),
+			),
+			'abbr'       => array(),
+			'b'          => array(),
+			'br'         => array(),
+			'code'       => array(),
+			'ins'        => array(),
+			'del'        => array(),
+			'em'         => array(),
+			'i'          => array(),
+			'q'          => array(),
+			'strike'     => array(),
+			'strong'     => array(),
+			'time'       => array(
+				'datetime' => array(),
+			),
+			'blockquote' => array(),
+			'pre'        => array(),
+			'p'          => array(
+				'class' => array(),
+				'id' => array(),
+			),
+			'h1'         => array(),
+			'h2'         => array(),
+			'h3'         => array(),
+			'h4'         => array(),
+			'h5'         => array(),
+			'h6'         => array(),
+			'ul'         => array(),
+			'li'         => array(),
+			'ol'         => array(),
+			'span'       => array(),
+			'img'        => array(
+				'src'    => array(),
+				'class'  => array(),
+				'id'     => array(),
+				'alt'    => array(),
+				'title'  => array(),
+				'width'  => array(),
+				'height' => array(),
+				'srcset' => array(),
+			),
+			'figure'     => array(),
+			'figcaption' => array(),
+			'picture'    => array(
+				'srcset' => array(),
+				'type'   => array(),
+			),
+			'svg'        => array(
+				'version' => array(),
+				'viewbox' => array(),
+				'id' => array()
+			),
+		);
+	}
+
 }
 
 

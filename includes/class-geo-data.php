@@ -453,7 +453,8 @@ class WP_Geo_Data {
 	public static function kses_option() {
 		return array(
 			'option' => array(
-				'value' => array(),
+				'value'    => array(),
+				'selected' => array(),
 			),
 		);
 	}
@@ -584,7 +585,7 @@ class WP_Geo_Data {
 		printf( '\t\t<geo:lat>%1$s</geo:lat>\n', floatval( $geo['latitude'] ) );
 		printf( '\t\t<geo:long>%1$s</geo:long>', floatval( $geo['longitude'] ) );
 		if ( isset( $geo['address'] ) ) {
-			printf( '\t\t<geo:featureName>%1$s</geo:featureName>', sanitize_text_field( $geo['address'] ) );
+			printf( '\t\t<geo:featureName>%1$s</geo:featureName>', wp_kses_post( $geo['address'] ) );
 		}
 	}
 
@@ -686,7 +687,7 @@ class WP_Geo_Data {
 			);
 			echo '<div class="misc-pub-section curtime misc-pub-pubtime">';
 			/* translators: Attachment information. %s: Date based on the timestamp in the attachment file. */
-			printf(  __( 'Created on: %s', 'simple-location' ), '<b>' . $created_on . '</b>' ); // phpcs:ignore
+			echo wp_kses_post( sprintf(  __( 'Created on: %s', 'simple-location' ), '<b>' . $created_on . '</b>' ) );
 			echo '</div>';
 		}
 	}

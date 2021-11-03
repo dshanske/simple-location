@@ -41,13 +41,13 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
-		echo $args['before_widget']; // phpcs:ignore
+		echo wp_kses( $args['before_widget'], Simple_Location_Plugin::kses_clean() );
 
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
-		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
+		$title = wp_kses( apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base ), Simple_Location_Plugin::kses_clean() );
 
 		if ( $title ) {
-			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore
+			echo wp_kses( $args['before_title'] . $title . $args['after_title'], Simple_Location_Plugin::kses_clean() );
 		}
 
 		if ( isset( $instance['cache_time'] ) ) {
@@ -81,7 +81,7 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 			}
 		}
 		echo self::weather_list( $weather, 'fa-plane', $instance );
-		echo $args['after_widget']; // phpcs:ignore
+		echo wp_kses( $args['after_widget'], Simple_Location_Plugin::kses_clean() );
 
 	}
 

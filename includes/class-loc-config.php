@@ -350,7 +350,7 @@ class Loc_Config {
 		foreach ( $posts as $post_id ) {
 			delete_post_meta( $post_id, 'geo_public' );
 		}
-		$active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'general';
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'general';
 
 		?>
 		<div class="wrap">
@@ -700,8 +700,8 @@ class Loc_Config {
 	public static function checkbox_callback( array $args ) {
 		$name    = $args['label_for'];
 		$checked = get_option( $name );
-		printf( '<input name="%1s" type="hidden" value="0" />', $name ); // phpcs:ignore
-		printf( '<input name="%1s" type="checkbox" value="1" %2s />', $name, checked( 1, $checked, false ) ); // phpcs:ignore
+		printf( '<input name="%1s" type="hidden" value="0" />', esc_attr( $name ) );
+		printf( '<input name="%1s" type="checkbox" value="1" %2s />', esc_attr( $name ), checked( 1, $checked, false ) );
 	}
 
 
@@ -717,7 +717,7 @@ class Loc_Config {
 	 */
 	public static function number_callback( array $args ) {
 		$name = $args['label_for'];
-		printf( '<input name="%1s" type="number" min="0" step="1" size="4" class="small-text" value="%2s" />', $name, get_option( $name ) ); // phpcs:ignore
+		printf( '<input name="%1s" type="number" min="0" step="1" size="4" class="small-text" value="%2s" />', esc_attr( $name ), esc_attr( get_option( $name ) ) );
 	}
 
 
@@ -737,7 +737,7 @@ class Loc_Config {
 		if ( ! isset( $args['type'] ) ) {
 			$args['type'] = 'text';
 		}
-		printf( '<input name="%1s" size="50" autocomplete="off" class="regular-text" type="%2s" value="%3s" />', $name, esc_attr( $args['type'] ), get_option( $name ) ); // phpcs:ignore
+		printf( '<input name="%1s" size="50" autocomplete="off" class="regular-text" type="%2s" value="%3s" />', esc_attr( $name ), esc_attr( $args['type'] ), esc_attr( get_option( $name ) ) );
 	}
 
 
@@ -753,7 +753,7 @@ class Loc_Config {
 	 */
 	public static function textarea_callback( array $args ) {
 		$name = $args['label_for'];
-		printf( '<textarea name="%1s" class="regular-text">%2$s</textarea>', $name, get_option( $name ) ); // phpcs:ignore
+		printf( '<textarea name="%1s" class="regular-text">%2$s</textarea>', esc_attr( $name ), wp_kses_post( get_option( $name ) ) );
 	}
 
 
@@ -776,12 +776,12 @@ class Loc_Config {
 		$none        = array_key_exists( 'none', $args ) ? $args['none'] : 0;
 		$providers   = $args['providers'];
 		if ( $none ) {
-			$providers['none'] = __( 'None' );
+			$providers['none'] = __( 'None', 'default' );
 		}
 		if ( count( $providers ) > 1 ) {
 			printf( '<select name="%1$s">', esc_attr( $name ) );
 			foreach ( $providers as $key => $value ) {
-				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key ), $value ); // phpcs:ignore
+				echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key, false ), $value ), self::kses_option() );
 			}
 			echo '</select>';
 			echo '<p class="description">' . esc_html( $description ) . '</p>';
@@ -867,6 +867,20 @@ class Loc_Config {
 		return $return;
 	}
 
+	/**
+	 * KSES Option Filter
+	 *
+	 * @return array Option Filter for KSES
+	 */
+	public static function kses_option() {
+		return array(
+			'option' => array(
+				'value'    => array(),
+				'selected' => array(),
+			),
+		);
+	}
+
 
 	/**
 	 * Echo measurement unit choices.
@@ -877,8 +891,8 @@ class Loc_Config {
 	public static function measure_callback( array $args ) {
 		$text = get_option( 'sloc_measurements' );
 		echo '<select name="sloc_measurements">';
-		printf( '<option value="si" %1$s >%2$s</option>', selected( $text, 'si', false ), __( 'International(SI)', 'simple-location' ) ); // phpcs:ignore
-		printf( '<option value="imperial" %1$s >%2$s</option>', selected( $text, 'imperial', false ), __( 'Imperial', 'simple-location' ) ); // phpcs:ignore
+		echo wp_kses( sprintf( '<option value="si" %1$s >%2$s</option>', selected( $text, 'si', false ), __( 'International(SI)', 'simple-location' ) ), self::kses_option() );
+		echo wp_kses( sprintf( '<option value="imperial" %1$s >%2$s</option>', selected( $text, 'imperial', false ), __( 'Imperial', 'simple-location' ) ), self::kses_option() );
 		echo '</select><br /><br />';
 	}
 
@@ -898,11 +912,10 @@ class Loc_Config {
 		$codes   = json_decode( file_get_contents( $file ), true );
 		$codes   = $codes['3166-1'];
 		$country = get_option( $name );
-		// self::select_callback( $name, $text, $codes );
 
-		printf( '<select name="%1$s" id="%1$s">', $name );
+		printf( '<select name="%1$s" id="%1$s">', esc_attr( $name ) );
 		foreach ( $codes as $code ) {
-			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code['alpha_2'] ), selected( $country, $code['alpha_2'], false ), esc_html( $code['flag'] . ' ' . $code['name'] ) ); // phpcs:ignore
+			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code['alpha_2'] ), selected( $country, $code['alpha_2'], false ), esc_html( $code['flag'] . ' ' . $code['name'] ) ), self::kses_option() );
 		}
 		echo '</select>';
 	}
@@ -963,7 +976,7 @@ class Loc_Config {
 	public static function select_callback( $name, $text, $values ) {
 		echo '<select name="' . esc_attr( $name ) . '">';
 		foreach ( $values as $key => $value ) {
-			echo '<option value="' . $key . '" ' . selected( $text, $key ) . '>' . esc_html( $value ) . '</option>'; // phpcs:ignore
+			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key, false ), esc_html( $value ) ), self::kses_option() );
 		}
 		echo '</select><br /><br />';
 	}

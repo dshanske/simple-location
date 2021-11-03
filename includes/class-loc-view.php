@@ -81,7 +81,7 @@ class Loc_View {
 		if ( ! $echo ) {
 			return $return;
 		}
-		echo $return; // phpcs:ignore
+		echo wp_kses( $return, self::kses_option() );
 	}
 
 	/**
