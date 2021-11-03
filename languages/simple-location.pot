@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.4.12\n"
+"Project-Id-Version: Simple Location 4.4.13\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-10-31T02:52:05+00:00\n"
+"POT-Creation-Date: 2021-11-03T01:50:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: simple-location\n"
@@ -93,8 +93,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: includes/class-geo-data.php:319
-#: includes/class-geo-data.php:699
-#: includes/class-geo-data.php:1590
+#: includes/class-geo-data.php:697
+#: includes/class-geo-data.php:1588
 #: includes/class-loc-config.php:308
 #: includes/class-loc-metabox.php:86
 #: includes/class-loc-metabox.php:98
@@ -103,7 +103,7 @@ msgid "Location"
 msgstr ""
 
 #: includes/class-geo-data.php:339
-#: includes/class-location-taxonomy.php:736
+#: includes/class-location-taxonomy.php:737
 #: includes/class-sloc-weather-widget.php:193
 #: includes/class-weather-provider.php:921
 #: templates/loc-side-metabox.php:51
@@ -114,19 +114,19 @@ msgstr ""
 
 #: includes/class-geo-data.php:374
 #: includes/class-geo-data.php:495
-#: includes/class-geo-data.php:523
+#: includes/class-geo-data.php:522
 msgid "Private"
 msgstr ""
 
 #: includes/class-geo-data.php:375
 #: includes/class-geo-data.php:496
-#: includes/class-geo-data.php:524
+#: includes/class-geo-data.php:523
 msgid "Public"
 msgstr ""
 
 #: includes/class-geo-data.php:376
 #: includes/class-geo-data.php:497
-#: includes/class-geo-data.php:525
+#: includes/class-geo-data.php:524
 msgid "Protected"
 msgstr ""
 
@@ -135,49 +135,49 @@ msgid "All Posts"
 msgstr ""
 
 #: includes/class-geo-data.php:494
-#: includes/class-geo-data.php:522
+#: includes/class-geo-data.php:521
 msgid "With Location"
 msgstr ""
 
-#: includes/class-geo-data.php:521
+#: includes/class-geo-data.php:520
 msgid "All Comments"
 msgstr ""
 
 #. translators: Publish box date string. 1: Date, 2: Time. See https://secure.php.net/date
-#: includes/class-geo-data.php:670
+#: includes/class-geo-data.php:668
 msgid "%1$s at %2$s"
 msgstr ""
 
 #. translators: Publish box date format, see https://secure.php.net/date
-#: includes/class-geo-data.php:672
+#: includes/class-geo-data.php:670
 msgctxt "publish box date format"
 msgid "M j, Y"
 msgstr ""
 
 #. translators: Publish box time format, see https://secure.php.net/date
-#: includes/class-geo-data.php:674
+#: includes/class-geo-data.php:672
 msgctxt "publish box time format"
 msgid "H:i T"
 msgstr ""
 
 #. translators: Attachment information. %s: Date based on the timestamp in the attachment file.
-#: includes/class-geo-data.php:678
+#: includes/class-geo-data.php:676
 msgid "Created on: %s"
 msgstr ""
 
-#: includes/class-geo-data.php:707
+#: includes/class-geo-data.php:705
 msgid "Geo Coordinates"
 msgstr ""
 
-#: includes/class-geo-data.php:717
+#: includes/class-geo-data.php:715
 msgid "Creation Time"
 msgstr ""
 
-#: includes/class-geo-data.php:1295
+#: includes/class-geo-data.php:1293
 msgid "Invalid Input"
 msgstr ""
 
-#: includes/class-geo-data.php:1568
+#: includes/class-geo-data.php:1566
 #: includes/class-location-zones.php:158
 #: includes/class-weather-provider-station.php:138
 #: templates/geocode-form.php:12
@@ -187,7 +187,7 @@ msgstr ""
 msgid "Latitude"
 msgstr ""
 
-#: includes/class-geo-data.php:1579
+#: includes/class-geo-data.php:1577
 #: includes/class-location-zones.php:159
 #: includes/class-weather-provider-station.php:139
 #: templates/geocode-form.php:13
@@ -197,11 +197,11 @@ msgstr ""
 msgid "Longitude"
 msgstr ""
 
-#: includes/class-geo-data.php:1601
+#: includes/class-geo-data.php:1599
 msgid "Last Reported Timezone"
 msgstr ""
 
-#: includes/class-geo-data.php:1980
+#: includes/class-geo-data.php:1978
 #: includes/class-weather-provider.php:483
 msgid "m"
 msgstr ""
@@ -912,19 +912,19 @@ msgid "Locality Name"
 msgstr ""
 
 #. translators: 1. Taxonomy Label
-#: includes/class-location-taxonomy.php:395
+#: includes/class-location-taxonomy.php:396
 msgid "No %1$s"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:729
+#: includes/class-location-taxonomy.php:730
 msgid "Country"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:730
+#: includes/class-location-taxonomy.php:731
 msgid "Region"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:731
+#: includes/class-location-taxonomy.php:732
 msgid "Locality"
 msgstr ""
 
