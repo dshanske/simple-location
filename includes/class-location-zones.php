@@ -69,9 +69,9 @@ class Location_Zones {
 	 */
 	public static function save_zone( $meta_type, $object_id ) {
 		if ( isset( $_POST['latitude'] ) || isset( $_POST['longitude'] ) || isset( $_POST['address'] ) ) {
-			$zone = self::in_zone( $_POST['latitude'], $_POST['longitude'] );
+			$zone = self::in_zone( floatval( $_POST['latitude'] ), floatval( $_POST['longitude'] ) );
 			if ( empty( $zone ) ) {
-				WP_Geo_Data::set_visibility( $meta_type, $object_id, $_POST['geo_public'] );
+				WP_Geo_Data::set_visibility( $meta_type, $object_id, sanitize_text_field( $_POST['geo_public'] ) );
 			} else {
 				$_POST['address'] = $zone;
 				WP_Geo_Data::set_visibility( $meta_type, $object_id, 'protected' );

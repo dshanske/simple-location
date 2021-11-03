@@ -141,12 +141,12 @@ class Venue_Taxonomy {
 	public static function save_data( $term_id ) {
 		// phpcs:disable
 		if ( ! empty( $_POST['latitude'] ) ) {
-			update_term_meta( $term_id, 'geo_latitude', $_POST['latitude'] );
+			update_term_meta( $term_id, 'geo_latitude', floatval( $_POST['latitude'] ) );
 		} else {
 			delete_term_meta( $term_id, 'geo_latitude' );
 		}
 		if ( ! empty( $_POST['longitude'] ) ) {
-			update_post_meta( $post_id, 'geo_longitude', $_POST['longitude'] );
+			update_post_meta( $post_id, 'geo_longitude', floatval( $_POST['longitude'] ) );
 		} else {
 			delete_post_meta( $post_id, 'geo_longitude' );
 		}

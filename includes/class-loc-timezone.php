@@ -370,9 +370,9 @@ class Loc_Timezone {
 			}
 		}
 		if ( isset( $_POST['post_timezone'] ) ) {
-			if ( ! self::compare_timezones( new DateTimeZone( $_POST['post_timezone'] ), wp_timezone() ) ) {
-				// if ( wp_timezone_string() !== $_POST['post_timezone'] ) {
-				update_post_meta( $post_id, 'geo_timezone', $_POST['post_timezone'] );
+			$timezone = timezone_open( sanitize_text_field( $_POST['post_timezone'] ) );
+			if ( $timezone && ! self::compare_timezones( $timezone, wp_timezone() ) ) {
+				update_post_meta( $post_id, 'geo_timezone', $timezone->getName() );
 				return;
 			} else {
 				delete_post_meta( $post_id, 'geo_timezone' );

@@ -460,7 +460,7 @@ class WP_Geo_Data {
 		$choices = self::geo_public();
 		$return  = '';
 		foreach ( $choices as $value => $text ) {
-			$return .= sprintf( '<option value=%1s %2s>%3s</option>', esc_attr( $value ), selected( $public, $value, false ), $text );
+			$return .= sprintf( '<option value="%1s" %2s>%3s</option>', esc_attr( $value ), selected( $public, $value, false ), $text );
 		}
 		if ( ! $echo ) {
 			return $return;
@@ -487,7 +487,7 @@ class WP_Geo_Data {
 		}
 		$selected = 'none';
 		if ( isset( $_REQUEST['geo'] ) ) {
-			$selected = $_REQUEST['geo'];
+			$selected = sanitize_text_field( $_REQUEST['geo'] );
 		}
 		$list = array(
 			'none'      => esc_html__( 'All Posts', 'simple-location' ),
@@ -515,7 +515,7 @@ class WP_Geo_Data {
 	public static function geo_comments_dropdown() {
 		$selected = 'none';
 		if ( isset( $_REQUEST['geo'] ) ) {
-			$selected = $_REQUEST['geo'];
+			$selected = sanitize_text_field( $_REQUEST['geo'] );
 		}
 		$list = array(
 			'none'      => esc_html__( 'All Comments', 'simple-location' ),
@@ -1191,7 +1191,7 @@ class WP_Geo_Data {
 		if ( ! isset( $_REQUEST['geo'] ) ) {
 			return;
 		}
-		$geo  = $_REQUEST['geo'];
+		$geo  = sanitize_text_field( $_REQUEST['geo'] );
 		$args = self::filter_geo_query( $geo );
 		if ( ! empty( $args ) ) {
 			$query->query_vars['meta_query'] = array( $args );
