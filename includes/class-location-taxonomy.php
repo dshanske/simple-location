@@ -376,6 +376,7 @@ final class Location_Taxonomy {
 		$tax          = get_taxonomy( $taxonomy );
 		$selected     = wp_get_object_terms( $post->ID, $taxonomy, array( 'fields' => 'ids' ) );
 		$hierarchical = $tax->hierarchical;
+		$taxonomy = esc_attr( $taxonomy );
 		?>
 	<div id="taxonomy-<?php echo $taxonomy; ?>" class="selectdiv">
 		<?php if ( current_user_can( $tax->cap->edit_terms ) ) : ?>

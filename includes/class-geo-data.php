@@ -460,7 +460,7 @@ class WP_Geo_Data {
 		$choices = self::geo_public();
 		$return  = '';
 		foreach ( $choices as $value => $text ) {
-			$return .= sprintf( '<option value="%1s" %2s>%3s</option>', esc_attr( $value ), selected( $public, $value, false ), $text );
+			$return .= sprintf( '<option value="%1s" %2s>%3s</option>', esc_attr( $value ), selected( $public, $value, false ), esc_html( $text ) );
 		}
 		if ( ! $echo ) {
 			return $return;
@@ -498,8 +498,7 @@ class WP_Geo_Data {
 		);
 		echo '<select id="geo" name="geo">';
 		foreach ( $list as $key => $value ) {
-			$select = ( $key === $selected ) ? ' selected="selected"' : '';
-			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
+			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value );
 		}
 		echo '</select>';
 	}
@@ -526,8 +525,7 @@ class WP_Geo_Data {
 		);
 		echo '<select id="geo" name="geo">';
 		foreach ( $list as $key => $value ) {
-			$select = ( $key === $selected ) ? ' selected="selected"' : '';
-			echo '<option value="' . $key . '"' . selected( $selected, $key ) . '>' . $value . ' </option>'; // phpcs:ignore
+			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value );
 		}
 		echo '</select>';
 	}
