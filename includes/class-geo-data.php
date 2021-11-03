@@ -445,6 +445,19 @@ class WP_Geo_Data {
 		}
 	}
 
+	/**
+	 * KSES Option Filter
+	 *
+	 * @return array Option Filter for KSES
+	 */
+	public static function kses_option() {
+		return array(
+			'option' => array(
+				'value' => array(),
+			),
+		);
+	}
+
 
 	/**
 	 * Offers a formatted list of visibility options for a select form object.
@@ -465,7 +478,7 @@ class WP_Geo_Data {
 		if ( ! $echo ) {
 			return $return;
 		}
-		echo $return; // phpcs:ignore
+		echo wp_kses( $return, self::kses_option() );
 
 	}
 
@@ -498,7 +511,7 @@ class WP_Geo_Data {
 		);
 		echo '<select id="geo" name="geo">';
 		foreach ( $list as $key => $value ) {
-			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value );
+			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value ), self::kses_option() );
 		}
 		echo '</select>';
 	}
@@ -525,7 +538,7 @@ class WP_Geo_Data {
 		);
 		echo '<select id="geo" name="geo">';
 		foreach ( $list as $key => $value ) {
-			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value );
+			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value ), self::kses_option() );
 		}
 		echo '</select>';
 	}
@@ -567,11 +580,11 @@ class WP_Geo_Data {
 		$geo = array_map( 'esc_html', $geo );
 		$geo = array_map( 'ent2ncr', $geo );
 
-		echo "\t<georss:point>{$geo['latitude']} {$geo['longitude']}</georss:point>\n"; // phpcs:ignore
-		echo "\t\t<geo:lat>{$geo['latitude']}</geo:lat>\n"; // phpcs:ignore
-		echo "\t\t<geo:long>{$geo['longitude']}</geo:long>"; // phpcs:ignore
+		printf( '\t<georss:point>%1$s %2$s</georss:point>\n', floatval( $geo['latitude'] ), floatval( $geo['longitude' ) );
+		printf( '\t\t<geo:lat>%1$s</geo:lat>\n', floatval( $geo['latitude'] ) );
+		printf( '\t\t<geo:long>%1$s</geo:long>', floatval( $geo['longitude'] ) );
 		if ( isset( $geo['address'] ) ) {
-			echo "\t\t<geo:featureName>{$geo['address']}</geo:featureName>"; // phpcs:ignore
+			printf( '\t\t<geo:featureName>%1$s</geo:featureName>', sanitize_text_field( $geo['address'] ) );
 		}
 	}
 
@@ -600,10 +613,10 @@ class WP_Geo_Data {
 			'type'       => 'Feature',
 			'geometry'   => array(
 				'type'        => 'Point',
-				'coordinates' => array( $geo['longitude'], $geo['latitude'] ),
+				'coordinates' => array( floatval( $geo['longitude'] ), floatval( $geo['latitude'] ) ),
 			),
 			'properties' => array(
-				'name' => $geo['address'],
+				'name' => sanitize_text_field( $geo['address'] ),
 			),
 		);
 		$feed_item['geo'] = $json;
