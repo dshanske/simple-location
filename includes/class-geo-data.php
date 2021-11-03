@@ -580,7 +580,7 @@ class WP_Geo_Data {
 		$geo = array_map( 'esc_html', $geo );
 		$geo = array_map( 'ent2ncr', $geo );
 
-		printf( '\t<georss:point>%1$s %2$s</georss:point>\n', floatval( $geo['latitude'] ), floatval( $geo['longitude' ) );
+		printf( '\t<georss:point>%1$s %2$s</georss:point>\n', floatval( $geo['latitude'] ), floatval( $geo['longitude'] ) );
 		printf( '\t\t<geo:lat>%1$s</geo:lat>\n', floatval( $geo['latitude'] ) );
 		printf( '\t\t<geo:long>%1$s</geo:long>', floatval( $geo['longitude'] ) );
 		if ( isset( $geo['address'] ) ) {
