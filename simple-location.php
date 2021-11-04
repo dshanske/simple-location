@@ -302,16 +302,55 @@ class Simple_Location_Plugin {
 				'class' => array(),
 				'id' => array(),
 			),
-			'h1'         => array(),
-			'h2'         => array(),
-			'h3'         => array(),
-			'h4'         => array(),
-			'h5'         => array(),
-			'h6'         => array(),
-			'ul'         => array(),
-			'li'         => array(),
+			'h1'         => array(
+				'class' => array(),
+			),
+			'h2'         => array(
+				'class' => array(),
+			),
+			'h3'         => array(
+				'class' => array(),
+			),
+			'h4'         => array(
+				'class' => array(),
+			),
+			'h5'         => array(
+				'class' => array(),
+			),
+			'h6'         => array(
+				'class' => array(),
+			),
+			'ul'         => array(
+				'class' => array(),
+				'id' => array(),
+				'title' => array(),
+				'aria-label' => array(),
+				'aria-hidden' => array(),
+
+			),
+			'li'         => array(
+				'class' => array(),
+				'id' => array(),
+				'class' => array(),
+				'id' => array(),
+				'title' => array(),
+				'aria-label' => array(),
+				'aria-hidden' => array(),
+			),
 			'ol'         => array(),
-			'span'       => array(),
+			'span'       => array(
+				'class' => array(),
+				'id' => array(),
+				'title' => array(),
+				'aria-label' => array(),
+				'aria-hidden' => array(),
+				'data-prefix' => array(),
+				'data-icon' => array()
+			),
+			'section' => array(
+				'class' => array(),
+				'id' => array(),
+			),
 			'img'        => array(
 				'src'    => array(),
 				'class'  => array(),
@@ -331,8 +370,38 @@ class Simple_Location_Plugin {
 			'svg'        => array(
 				'version' => array(),
 				'viewbox' => array(),
-				'id' => array()
+				'id' => array(),
+				'x' => array(),
+				'y' => array(),
+				'xmlns' => array(),
+				'xmlns:xlink' => array(),
+				'xml:space' => array(),
+				'style' => array(),
+				'aria-hidden' => array(),
+				'focusable' => array(),
+				'class' => array(),
+				'role' => array(),
+				'height' => array(),
+				'width' => array(),
+				'fill' => array()
+				
+
 			),
+			'div' => array(
+				'class' => array(),
+				'id' => array(),
+			),
+			'g' => array(
+				'id' => array(),
+				'stroke' => array(),
+				'stroke-width' => array(),
+				'fill-rule' => array(),
+				'fill' => array(), 
+			),
+			'path' => array(
+				'd' => array(),
+				'fill' => array(),
+			)
 		);
 	}
 
