@@ -81,7 +81,15 @@ class Loc_View {
 		if ( ! $echo ) {
 			return $return;
 		}
-		echo wp_kses( $return, self::kses_option() );
+		echo wp_kses(
+			$return,
+			array(
+				'option' => array(
+					'selected' => array(),
+					'value'    => array(),
+				),
+			)
+		);
 	}
 
 	/**

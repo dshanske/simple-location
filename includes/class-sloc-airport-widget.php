@@ -63,13 +63,13 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 				$location = Airport_Location::get( $instance['airport'], 'ident' );
 			}
 			if ( is_wp_error( $location ) ) {
-				echo $location->get_error_message();
+				echo esc_html( $location->get_error_message() );
 				return;
 			}
 
 			$weather = Loc_View::get_weather_by_location( $location['latitude'], $location['longitude'], $cache_time ); // phpcs:ignore
 			if ( is_wp_error( $weather ) ) {
-				echo $weather->get_error_message();
+				echo esc_html( $weather->get_error_message() );
 				return;
 			}
 
@@ -80,7 +80,7 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 				$weather['name'] = $location['name'];
 			}
 		}
-		echo self::weather_list( $weather, 'fa-plane', $instance );
+		echo wp_kses( self::weather_list( $weather, 'fa-plane', $instance ), Simple_Location_Plugin::kses_clean() );
 		echo wp_kses( $args['after_widget'], Simple_Location_Plugin::kses_clean() );
 
 	}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Location Taxonomy Class
  *
@@ -7,8 +6,12 @@
  *
  * @package Post Kinds
  */
+
 add_action( 'init', array( 'Location_Taxonomy', 'init' ) );
 
+/**
+ * Class that handles the Location taxonomy functions.
+ */
 final class Location_Taxonomy {
 
 	public static function init() {
@@ -95,7 +98,7 @@ final class Location_Taxonomy {
 
 		echo '<select name="country" id="country">';
 		foreach ( $codes as $code ) {
-			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code['alpha_2'] ), selected( $country, $code['alpha_2'], false ), esc_html( $code['flag'] . ' ' . $code['name'] ) ); // phpcs:ignore
+			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code['alpha_2'] ), selected( $country, $code['alpha_2'], false ), esc_html( $code['flag'] . ' ' . $code['name'] ) );
 		}
 		echo '</select>';
 	}
@@ -113,20 +116,20 @@ final class Location_Taxonomy {
 		$codes = json_decode( file_get_contents( $file ), true );
 		$codes = wp_list_pluck( $codes, 'name', 'code' );
 		if ( ! array_key_exists( $country . '-' . $region, $codes ) && ! empty( $region ) ) {
-			printf( '<input class="widefat" type=text" name="region" value="%s" required />', $region );
+			printf( '<input class="widefat" type=text" name="region" value="%s" required />', esc_attr( $region ) );
 			return;
 		}
 		echo '<select name="region" id="region">';
 		foreach ( $codes as $code => $name ) {
 			$code = str_replace( $country . '-', '', $code );
-			printf( '<option value="%1$s" %2$s>%3$s(%1$s)</option>', esc_attr( $code ), selected( $region, $code, false ), esc_html( $name ) ); // phpcs:ignore
+			printf( '<option value="%1$s" %2$s>%3$s(%1$s)</option>', esc_attr( $code ), selected( $region, $code, false ), esc_html( $name ) );
 		}
 		echo '</select>';
 	}
 
 	public static function create_screen_fields( $taxonomy ) {
 		echo '<div class="form-field form-required">';
-				printf( '<label for="location-code">%1$s</label>', esc_html( 'Location Code:', 'simple-location' ) );
+				printf( '<label for="location-code">%1$s</label>', esc_html__( 'Location Code:', 'simple-location' ) );
 		printf( '<input class="widefat" type="text" name="location-code" required />' );
 		printf( '<p>%1$s</p>', esc_html__( 'Required. The code for this location. If no code, you can use the location.', 'simple-location' ) );
 		echo '</div>';
@@ -158,7 +161,7 @@ final class Location_Taxonomy {
 			case 'locality':
 				?>
 				<th><label for="locality"><?php esc_html_e( 'Locality:', 'simple-location' ); ?></label></th>
-				<td><input class="widefat" type=text" name="locality" value="<?php echo get_term_meta( $term->term_id, 'locality', true ); ?>" required />
+				<td><input class="widefat" type=text" name="locality" value="<?php echo esc_attr( get_term_meta( $term->term_id, 'locality', true ) ); ?>" required />
 					<p class="description"><?php esc_html_e( 'The city, village, or town for the location', 'simple-location' ); ?></p>
 				</td>
 				<?php
@@ -371,14 +374,14 @@ final class Location_Taxonomy {
 			$args = $box['args'];
 		}
 
-		extract( wp_parse_args( $args, $defaults ), EXTR_SKIP );
+		$args     = wp_parse_args( $args, $defaults );
+		$taxonomy = $args['taxonomy'];
 
 		$tax          = get_taxonomy( $taxonomy );
 		$selected     = wp_get_object_terms( $post->ID, $taxonomy, array( 'fields' => 'ids' ) );
 		$hierarchical = $tax->hierarchical;
-		$taxonomy = esc_attr( $taxonomy );
 		?>
-	<div id="taxonomy-<?php echo $taxonomy; ?>" class="selectdiv">
+	<div id="taxonomy-<?php echo esc_attr( $taxonomy ); ?>" class="selectdiv">
 		<?php if ( current_user_can( $tax->cap->edit_terms ) ) : ?>
 			<?php
 			if ( $hierarchical ) {
@@ -399,7 +402,7 @@ final class Location_Taxonomy {
 				);
 			} else {
 				?>
-				<select name="<?php echo "tax_input[$taxonomy][]"; ?>" class="widefat">
+				<select name="<?php echo esc_attr( "tax_input[$taxonomy][]" ); ?>" class="widefat">
 					<option value="0"></option>
 					<?php foreach ( get_terms( $taxonomy, array( 'hide_empty' => false ) ) as $term ) : ?>
 						<option value="<?php echo esc_attr( $term->slug ); ?>" <?php echo selected( $term->term_id, count( $selected ) >= 1 ? $selected[0] : '' ); ?>><?php echo esc_html( $term->name ); ?></option>
@@ -498,7 +501,7 @@ final class Location_Taxonomy {
 
 		foreach ( $terms as $term_id ) {
 			$data = self::get_location_data( $term_id );
-			// This should not happen
+			// This should not happen.
 			if ( empty( $data ) || ! array_key_exists( 'country', $data ) ) {
 				return false;
 			}

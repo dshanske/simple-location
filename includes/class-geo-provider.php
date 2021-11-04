@@ -209,7 +209,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	/**
 	 * Returns Country Data from Name
 	 *
-	 * @param string $name Country Name
+	 * @param string $name Country Name.
 	 * @return array|boolean Country Data or false is failed.
 	 */
 	public static function country_data_name( $name ) {

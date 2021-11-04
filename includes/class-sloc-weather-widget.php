@@ -51,7 +51,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		if ( is_wp_error( $weather ) ) {
 			echo $weather->get_error_message();
 		} elseif ( is_array( $weather ) ) {
-			echo self::weather_list( $weather, 'fa-map', $instance );
+			echo wp_kses( self::weather_list( $weather, 'fa-map', $instance ), Simple_Location_Plugin::kses_clean() );
 		} elseif ( is_string( $weather ) ) {
 			echo esc_html( $weather );
 		}
