@@ -47,7 +47,7 @@ module.exports = function(grunt) {
 	       overwriteEverytime: true
             },
 	    files: {
-              'data/airports.csv': 'https://ourairports.com/data/airports.csv',
+              'data/airports.csv': 'https://davidmegginson.github.io/ourairports-data/airports.csv',
 	      'data/airlines.csv': 'https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat',
             } 
        }

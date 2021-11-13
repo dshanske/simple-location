@@ -821,6 +821,33 @@ final class Location_Taxonomy {
 		return implode( ', ', $return );
 	}
 
+
+	public static function get_location_link( $term_id ) {
+		$term   = get_term( $term_id );
+		$link   = get_term_link( $term->term_id, 'location' );
+		$return = array();
+		if ( 0 === $term->parent ) {
+			$country  = get_term_meta( $term->term_id, 'country', true );
+			$flag     = Geo_Provider::country_flag( $country );
+			$return[] = $flag . ' ' . $term->name;
+		} else {
+			$return[] = $term->name;
+		}
+		while ( 0 !== $term->parent ) {
+			$term = get_term( $term->parent, 'location' );
+			if ( 0 === $term->parent ) {
+				$country = get_term_meta( $term->term_id, 'country', true );
+				if ( $country !== get_option( 'sloc_country' ) ) {
+					$flag     = Geo_Provider::country_flag( $country );
+					$return[] = $flag . ' ' . $term->name;
+				}
+			} else {
+				$return[] = $term->name;
+			}
+		}
+		return sprintf( '<a href="%1$s">%2$s</a>', $link, implode( ', ', $return ) );
+	}
+
 	/**
 	 * Wrapper around wp_list_categories for now that outputs a list of the locations.
 	 * May be customized further in future.
