@@ -2,21 +2,21 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.4.13\n"
+"Project-Id-Version: Simple Location 4.4.14\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-11-03T01:50:55+00:00\n"
+"POT-Creation-Date: 2021-11-13T04:46:14+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: simple-location\n"
 
 #. Plugin Name of the plugin
-#: includes/class-loc-config.php:307
-#: includes/class-loc-config.php:357
+#: includes/class-loc-config.php:319
+#: includes/class-loc-config.php:369
 msgid "Simple Location"
 msgstr ""
 
@@ -93,9 +93,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: includes/class-geo-data.php:319
-#: includes/class-geo-data.php:697
-#: includes/class-geo-data.php:1588
-#: includes/class-loc-config.php:308
+#: includes/class-geo-data.php:711
+#: includes/class-geo-data.php:1615
+#: includes/class-loc-config.php:320
 #: includes/class-loc-metabox.php:86
 #: includes/class-loc-metabox.php:98
 #: templates/loc-side-metabox.php:50
@@ -103,7 +103,7 @@ msgid "Location"
 msgstr ""
 
 #: includes/class-geo-data.php:339
-#: includes/class-location-taxonomy.php:737
+#: includes/class-location-taxonomy.php:740
 #: includes/class-sloc-weather-widget.php:193
 #: includes/class-weather-provider.php:921
 #: templates/loc-side-metabox.php:51
@@ -113,71 +113,71 @@ msgid "None"
 msgstr ""
 
 #: includes/class-geo-data.php:374
-#: includes/class-geo-data.php:495
-#: includes/class-geo-data.php:522
+#: includes/class-geo-data.php:509
+#: includes/class-geo-data.php:536
 msgid "Private"
 msgstr ""
 
 #: includes/class-geo-data.php:375
-#: includes/class-geo-data.php:496
-#: includes/class-geo-data.php:523
+#: includes/class-geo-data.php:510
+#: includes/class-geo-data.php:537
 msgid "Public"
 msgstr ""
 
 #: includes/class-geo-data.php:376
-#: includes/class-geo-data.php:497
-#: includes/class-geo-data.php:524
+#: includes/class-geo-data.php:511
+#: includes/class-geo-data.php:538
 msgid "Protected"
 msgstr ""
 
-#: includes/class-geo-data.php:493
+#: includes/class-geo-data.php:507
 msgid "All Posts"
 msgstr ""
 
-#: includes/class-geo-data.php:494
-#: includes/class-geo-data.php:521
+#: includes/class-geo-data.php:508
+#: includes/class-geo-data.php:535
 msgid "With Location"
 msgstr ""
 
-#: includes/class-geo-data.php:520
+#: includes/class-geo-data.php:534
 msgid "All Comments"
 msgstr ""
 
 #. translators: Publish box date string. 1: Date, 2: Time. See https://secure.php.net/date
-#: includes/class-geo-data.php:668
+#: includes/class-geo-data.php:682
 msgid "%1$s at %2$s"
 msgstr ""
 
 #. translators: Publish box date format, see https://secure.php.net/date
-#: includes/class-geo-data.php:670
+#: includes/class-geo-data.php:684
 msgctxt "publish box date format"
 msgid "M j, Y"
 msgstr ""
 
 #. translators: Publish box time format, see https://secure.php.net/date
-#: includes/class-geo-data.php:672
+#: includes/class-geo-data.php:686
 msgctxt "publish box time format"
 msgid "H:i T"
 msgstr ""
 
 #. translators: Attachment information. %s: Date based on the timestamp in the attachment file.
-#: includes/class-geo-data.php:676
+#: includes/class-geo-data.php:690
 msgid "Created on: %s"
 msgstr ""
 
-#: includes/class-geo-data.php:705
+#: includes/class-geo-data.php:719
 msgid "Geo Coordinates"
 msgstr ""
 
-#: includes/class-geo-data.php:715
+#: includes/class-geo-data.php:729
 msgid "Creation Time"
 msgstr ""
 
-#: includes/class-geo-data.php:1293
+#: includes/class-geo-data.php:1320
 msgid "Invalid Input"
 msgstr ""
 
-#: includes/class-geo-data.php:1566
+#: includes/class-geo-data.php:1593
 #: includes/class-location-zones.php:158
 #: includes/class-weather-provider-station.php:138
 #: templates/geocode-form.php:12
@@ -187,7 +187,7 @@ msgstr ""
 msgid "Latitude"
 msgstr ""
 
-#: includes/class-geo-data.php:1577
+#: includes/class-geo-data.php:1604
 #: includes/class-location-zones.php:159
 #: includes/class-weather-provider-station.php:139
 #: templates/geocode-form.php:13
@@ -197,11 +197,11 @@ msgstr ""
 msgid "Longitude"
 msgstr ""
 
-#: includes/class-geo-data.php:1599
+#: includes/class-geo-data.php:1626
 msgid "Last Reported Timezone"
 msgstr ""
 
-#: includes/class-geo-data.php:1978
+#: includes/class-geo-data.php:2021
 #: includes/class-weather-provider.php:483
 msgid "m"
 msgstr ""
@@ -342,215 +342,219 @@ msgstr ""
 msgid "You have not set an API key for this Pelias Instance"
 msgstr ""
 
-#: includes/class-loc-config.php:360
+#: includes/class-loc-config.php:372
 msgid "General"
 msgstr ""
 
-#: includes/class-loc-config.php:361
-#: includes/class-loc-config.php:632
+#: includes/class-loc-config.php:373
+#: includes/class-loc-config.php:655
 msgid "Providers"
 msgstr ""
 
-#: includes/class-loc-config.php:362
+#: includes/class-loc-config.php:374
 #: includes/class-location-zones.php:54
 msgid "Zones"
 msgstr ""
 
-#: includes/class-loc-config.php:363
+#: includes/class-loc-config.php:375
 #: includes/class-weather-provider-station.php:58
 msgid "Stations"
 msgstr ""
 
-#: includes/class-loc-config.php:366
+#: includes/class-loc-config.php:378
 msgid "Debug"
 msgstr ""
 
-#: includes/class-loc-config.php:375
+#: includes/class-loc-config.php:387
 msgid "Test the raw responses from the lookup features. This feature only appears if you have WP_DEBUG enabled."
 msgstr ""
 
-#: includes/class-loc-config.php:440
+#: includes/class-loc-config.php:452
 msgid "General Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:446
+#: includes/class-loc-config.php:458
 msgid "Default Visibility for Location"
 msgstr ""
 
-#: includes/class-loc-config.php:457
+#: includes/class-loc-config.php:469
 msgid "Update the Author with Posts Location when Saving a Post"
 msgstr ""
 
-#: includes/class-loc-config.php:468
+#: includes/class-loc-config.php:480
 msgid "Show Maps on Home and Archive Pages Not Just Single Posts"
 msgstr ""
 
-#: includes/class-loc-config.php:479
+#: includes/class-loc-config.php:491
 msgid "Automatically lookup location from supported geolocation provider for Micropub posts"
 msgstr ""
 
-#: includes/class-loc-config.php:490
+#: includes/class-loc-config.php:502
+msgid "Show location taxonomy instead of address field"
+msgstr ""
+
+#: includes/class-loc-config.php:513
 msgid "Home Country"
 msgstr ""
 
-#: includes/class-loc-config.php:500
+#: includes/class-loc-config.php:523
 msgid "Unit of Measure"
 msgstr ""
 
-#: includes/class-loc-config.php:510
+#: includes/class-loc-config.php:533
 msgid "Provider Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:517
+#: includes/class-loc-config.php:540
 msgid "Map Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:523
+#: includes/class-loc-config.php:546
 msgid "Provides maps to display on posts and pages"
 msgstr ""
 
-#: includes/class-loc-config.php:529
+#: includes/class-loc-config.php:552
 msgid "Geo Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:535
+#: includes/class-loc-config.php:558
 msgid "Services that Look up an address from coordinates or vice versa"
 msgstr ""
 
-#: includes/class-loc-config.php:541
+#: includes/class-loc-config.php:564
 msgid "Geolocation Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:547
+#: includes/class-loc-config.php:570
 msgid "Services that allow your site to figure out your location"
 msgstr ""
 
-#: includes/class-loc-config.php:553
+#: includes/class-loc-config.php:576
 #: templates/weather-form.php:17
 msgid "Weather Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:559
+#: includes/class-loc-config.php:582
 msgid "Retrieves Weather Data about a Location"
 msgstr ""
 
-#: includes/class-loc-config.php:565
+#: includes/class-loc-config.php:588
 msgid "Fallback Weather Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:571
+#: includes/class-loc-config.php:594
 msgid "Fallback Option if the Primary Provider Fails"
 msgstr ""
 
-#: includes/class-loc-config.php:579
+#: includes/class-loc-config.php:602
 msgid "Map Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:586
+#: includes/class-loc-config.php:609
 msgid "Default Map Width"
 msgstr ""
 
-#: includes/class-loc-config.php:597
+#: includes/class-loc-config.php:620
 msgid "Default Map Aspect Ratio"
 msgstr ""
 
-#: includes/class-loc-config.php:609
+#: includes/class-loc-config.php:632
 msgid "Default Map Zoom Level"
 msgstr ""
 
-#: includes/class-loc-config.php:621
+#: includes/class-loc-config.php:644
 msgid "Altitude will Display if Above This Height(in meters)"
 msgstr ""
 
-#: includes/class-loc-config.php:639
+#: includes/class-loc-config.php:662
 msgid "API Keys"
 msgstr ""
 
-#: includes/class-loc-config.php:655
+#: includes/class-loc-config.php:678
 msgid "Building"
 msgstr ""
 
-#: includes/class-loc-config.php:656
+#: includes/class-loc-config.php:679
 msgid "Block"
 msgstr ""
 
-#: includes/class-loc-config.php:657
+#: includes/class-loc-config.php:680
 msgid "Street"
 msgstr ""
 
-#: includes/class-loc-config.php:658
+#: includes/class-loc-config.php:681
 msgid "Village"
 msgstr ""
 
-#: includes/class-loc-config.php:659
+#: includes/class-loc-config.php:682
 msgid "Town"
 msgstr ""
 
-#: includes/class-loc-config.php:660
+#: includes/class-loc-config.php:683
 msgid "Metropolitan Area"
 msgstr ""
 
-#: includes/class-loc-config.php:661
+#: includes/class-loc-config.php:684
 msgid "State"
 msgstr ""
 
-#: includes/class-loc-config.php:662
+#: includes/class-loc-config.php:685
 msgid "Large European Country"
 msgstr ""
 
-#: includes/class-loc-config.php:663
+#: includes/class-loc-config.php:686
 msgid "Largest Country"
 msgstr ""
 
-#: includes/class-loc-config.php:664
+#: includes/class-loc-config.php:687
 msgid "Subcontinent"
 msgstr ""
 
-#: includes/class-loc-config.php:680
+#: includes/class-loc-config.php:703
 msgid "Widescreen"
 msgstr ""
 
-#: includes/class-loc-config.php:681
+#: includes/class-loc-config.php:704
 msgid "Square"
 msgstr ""
 
-#: includes/class-loc-config.php:682
+#: includes/class-loc-config.php:705
 msgid "Medium Format"
 msgstr ""
 
-#: includes/class-loc-config.php:683
+#: includes/class-loc-config.php:706
 msgid "Panorama"
 msgstr ""
 
-#: includes/class-loc-config.php:684
+#: includes/class-loc-config.php:707
 msgid "Circle-Vision 360"
 msgstr ""
 
-#: includes/class-loc-config.php:843
+#: includes/class-loc-config.php:866
 msgid "Ask your Web Browser for Your Location(requires HTTPS)"
 msgstr ""
 
-#: includes/class-loc-config.php:880
+#: includes/class-loc-config.php:917
 msgid "International(SI)"
 msgstr ""
 
-#: includes/class-loc-config.php:881
+#: includes/class-loc-config.php:918
 msgid "Imperial"
 msgstr ""
 
-#: includes/class-loc-config.php:988
+#: includes/class-loc-config.php:1024
 msgid "Simple Location Depends on Third Party Services"
 msgstr ""
 
-#: includes/class-loc-config.php:989
+#: includes/class-loc-config.php:1025
 msgid "Many of these services require you to sign up for an account and provide an API key below. Many have free and paid tiers. For this reason, the plugin offers multiple providers. At this moment, Nominatim, Wikimedia Maps, and the US National Weather Service can be used without API keys. Geonames requires an account, but is otherwise free to use. If you are uncertain of which to try, start with the defaults."
 msgstr ""
 
-#: includes/class-loc-config.php:1000
+#: includes/class-loc-config.php:1036
 msgid "These settings dictate the display of maps"
 msgstr ""
 
-#: includes/class-loc-config.php:1010
+#: includes/class-loc-config.php:1046
 msgid "In order for a specific service to work, you must add their API key below"
 msgstr ""
 
@@ -686,19 +690,19 @@ msgid "Walking"
 msgstr ""
 
 #. translators: Prefaces the address 1. with the private status
-#: includes/class-loc-view.php:138
+#: includes/class-loc-view.php:146
 msgid "Hidden: %1$s"
 msgstr ""
 
-#: includes/class-loc-view.php:154
+#: includes/class-loc-view.php:164
 msgid "Location: "
 msgstr ""
 
-#: includes/class-loc-view.php:163
+#: includes/class-loc-view.php:173
 msgid "Error: Invalid Map Provider"
 msgstr ""
 
-#: includes/class-loc-view.php:234
+#: includes/class-loc-view.php:259
 msgid "Weather: "
 msgstr ""
 
@@ -769,162 +773,166 @@ msgid "Bike"
 msgstr ""
 
 #. translators: 1. Location Type. 2: Location Name
-#: includes/class-location-taxonomy.php:49
+#: includes/class-location-taxonomy.php:52
 msgid "%1$1s: %2$2s"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:53
+#: includes/class-location-taxonomy.php:56
 msgid "Type"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:88
+#: includes/class-location-taxonomy.php:91
 msgid "Locations allow for 3 levels of hierarchy: Country, region, and locality. Countries have no parent. Regions have a country as a parent. Localities have regions are their parent."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:131
+#: includes/class-location-taxonomy.php:132
+msgid "Location Code:"
+msgstr ""
+
+#: includes/class-location-taxonomy.php:134
 msgid "Required. The code for this location. If no code, you can use the location."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:143
+#: includes/class-location-taxonomy.php:146
 msgid "Country:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:145
+#: includes/class-location-taxonomy.php:148
 msgid "Country."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:151
+#: includes/class-location-taxonomy.php:154
 msgid "Region:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:154
+#: includes/class-location-taxonomy.php:157
 msgid "The state, county, or province code for the location(attempts to use ISO3166-2 coding for regions). This can be different than than the name of the region, but is usually the same as the slug(accounting for multiple places with the same name"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:160
+#: includes/class-location-taxonomy.php:163
 msgid "Locality:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:162
+#: includes/class-location-taxonomy.php:165
 msgid "The city, village, or town for the location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:168
+#: includes/class-location-taxonomy.php:171
 msgid "Error: Cannot Identify Type. This likely means the parent of this term is a locality. Localities can have no child. Change Parent to Country, Region, or None."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:220
+#: includes/class-location-taxonomy.php:223
 msgctxt "taxonomy general name"
 msgid "Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:221
+#: includes/class-location-taxonomy.php:224
 msgctxt "taxonomy singular name"
 msgid "Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:222
+#: includes/class-location-taxonomy.php:225
 msgctxt "search locations"
 msgid "Search Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:223
+#: includes/class-location-taxonomy.php:226
 msgctxt "popular locations"
 msgid "Popular Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:224
+#: includes/class-location-taxonomy.php:227
 msgctxt "all taxonomy items"
 msgid "All Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:225
+#: includes/class-location-taxonomy.php:228
 msgctxt "taxonomy parent item"
 msgid "Parent Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:226
+#: includes/class-location-taxonomy.php:229
 msgctxt "taxonomy parent item with colon"
 msgid "Parent Location:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:227
+#: includes/class-location-taxonomy.php:230
 msgctxt "edit taxonomy item"
 msgid "Edit Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:228
+#: includes/class-location-taxonomy.php:231
 msgctxt "view taxonomy item"
 msgid "View Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:229
+#: includes/class-location-taxonomy.php:232
 msgctxt "update taxonomy item"
 msgid "Update Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:230
+#: includes/class-location-taxonomy.php:233
 msgctxt "add taxonomy item"
 msgid "Add New Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:231
+#: includes/class-location-taxonomy.php:234
 msgctxt "new taxonomy item"
 msgid "New Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:232
+#: includes/class-location-taxonomy.php:235
 msgctxt "separate kinds with commas"
 msgid "Separate locations with commas"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:233
+#: includes/class-location-taxonomy.php:236
 msgctxt "add or remove items"
 msgid "Add or remove location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:234
+#: includes/class-location-taxonomy.php:237
 msgctxt "choose most used"
 msgid "Choose from the most used location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:235
+#: includes/class-location-taxonomy.php:238
 msgctxt "no locations found"
 msgid "No locations found"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:236
+#: includes/class-location-taxonomy.php:239
 msgctxt "no locations"
 msgid "No locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:264
+#: includes/class-location-taxonomy.php:267
 #: includes/class-venue-taxonomy.php:127
 msgid "Country Code"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:276
+#: includes/class-location-taxonomy.php:279
 msgid "Region Code or name if code not available"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:289
+#: includes/class-location-taxonomy.php:292
 msgid "Locality Name"
 msgstr ""
 
 #. translators: 1. Taxonomy Label
-#: includes/class-location-taxonomy.php:396
+#: includes/class-location-taxonomy.php:399
 msgid "No %1$s"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:730
+#: includes/class-location-taxonomy.php:733
 msgid "Country"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:731
+#: includes/class-location-taxonomy.php:734
 msgid "Region"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:732
+#: includes/class-location-taxonomy.php:735
 msgid "Locality"
 msgstr ""
 
@@ -1388,8 +1396,8 @@ msgid "Adds current weather conditions at an airport"
 msgstr ""
 
 #: includes/class-sloc-airport-widget.php:97
-#: includes/class-sloc-lastseen-widget.php:154
-#: includes/class-sloc-station-widget.php:98
+#: includes/class-sloc-lastseen-widget.php:155
+#: includes/class-sloc-station-widget.php:97
 #: includes/class-sloc-weather-widget.php:182
 msgid "Title: "
 msgstr ""
@@ -1403,14 +1411,14 @@ msgid "Airport ID(3 or 4 letters): "
 msgstr ""
 
 #: includes/class-sloc-airport-widget.php:106
-#: includes/class-sloc-lastseen-widget.php:176
-#: includes/class-sloc-station-widget.php:108
+#: includes/class-sloc-lastseen-widget.php:177
+#: includes/class-sloc-station-widget.php:107
 #: includes/class-sloc-weather-widget.php:204
 msgid "Show Astronomical Info: "
 msgstr ""
 
 #: includes/class-sloc-airport-widget.php:110
-#: includes/class-sloc-station-widget.php:112
+#: includes/class-sloc-station-widget.php:111
 #: includes/class-sloc-weather-widget.php:208
 msgid "Cache Time: "
 msgstr ""
@@ -1474,24 +1482,24 @@ msgstr ""
 msgid "No User Set"
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:159
+#: includes/class-sloc-lastseen-widget.php:160
 msgid "Displays last reported user location. Reporting can be set manually in the user profile, updated based on the last post with a location, or updated using a webhook"
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:161
+#: includes/class-sloc-lastseen-widget.php:162
 #: includes/class-sloc-weather-widget.php:187
 msgid "User: "
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:172
+#: includes/class-sloc-lastseen-widget.php:173
 msgid "Show Local Time: "
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:180
+#: includes/class-sloc-lastseen-widget.php:181
 msgid "Show Text: "
 msgstr ""
 
-#: includes/class-sloc-lastseen-widget.php:184
+#: includes/class-sloc-lastseen-widget.php:185
 msgid "Show Map: "
 msgstr ""
 
@@ -1504,11 +1512,11 @@ msgstr ""
 msgid "Adds current weather conditions"
 msgstr ""
 
-#: includes/class-sloc-station-widget.php:102
+#: includes/class-sloc-station-widget.php:101
 msgid "Displays current weather at a weather station"
 msgstr ""
 
-#: includes/class-sloc-station-widget.php:105
+#: includes/class-sloc-station-widget.php:104
 msgid "Station ID: "
 msgstr ""
 

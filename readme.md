@@ -3,7 +3,7 @@
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
 **Tested up to:** 5.8  
-**Stable tag:** 4.4.13  
+**Stable tag:** 4.4.14  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -12,7 +12,7 @@ Adds geographic location and weather support to WordPress.
 
 ## Description ##
 
-Supports adding geo coordinates, a textual description, and a location taxonomy to a post, comment, user, or attachment. Supports adding weather data to a post or to a widget based on location.
+Supports adding geo coordinates, a location taxonomy, and a textual location description to a post, comment, user, or attachment. Supports adding weather data to a post or to a widget based on location.
 Offers choice of map displays. It supports retrieving location using the HTML5 geolocation API by default. Clicking the location icon or 'Lookup Location' will retrieve the location. 
 
 As it stores the GeoData in a WordPress standard format, Geodata can also be added from other plugins.
@@ -47,10 +47,12 @@ Locations are divided by administrative areas. The hierarchy for locations is:
 * Region - state, county, or province level. 
 * Locality - city, town, or village level
 
+You can choose to display the location over the textual address field. There is an option in settings to change this behavior.
+
 The reverse geocoding system attempts to consistently retrieve the country code, region code, and locality for the location and add them to the location taxonomy. This can be potentially problematic, as if the returns
 from the locations added aren't consistent, it will duplicate and explode the list of terms. This is the same issue that has held back venues.
 
-Locations are matched using the country code, region code, and locality field, and therefore, you can edit the displayed name or the region code without issue. Due to matching issues, you may have to make some manual changes and there may be some occasional dupplication.
+Locations are matched using the country code, region code, and locality field, and therefore, you can edit the displayed name or the region code without issue. Due to matching issues, you may have to make some manual changes and there may be some occasional duplication.
 
 There is no top level Location page, /location included in the plugin. You can create a page at this location and use a custom template to allow it to show a list of your locations. 
 
@@ -254,6 +256,12 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.4.14 ( 2021-11-12 ) ###
+* Fix for posts without location causing error
+* Added rewrite for map and location taxonomy together. /maps/location/us for example
+* Added option for showing taxonomy in the location display over the address field.
+
 
 ### 4.4.13 ( 2021-11-02 ) ###
 * Additional type fixing
