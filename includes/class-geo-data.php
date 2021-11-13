@@ -1105,8 +1105,21 @@ class WP_Geo_Data {
 	 */
 	public static function rewrite() {
 		global $wp_rewrite;
+		$pagination_regex = $wp_rewrite->pagination_base . '/?([0-9]{1,})/?$';
+
 		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES );
 		add_rewrite_endpoint( 'map', EP_ALL_ARCHIVES );
+
+		add_rewrite_rule(
+			'map/location/(.+?)/' . $pagination_regex,
+			'index.php?map=1&location=$matches[1]&paged=$matches[2]',
+			'top'
+		);
+		add_rewrite_rule(
+			'map/location/(.+?)/?$',
+			'index.php?location=$matches[1]&map=1',
+			'top'
+		);
 	}
 
 
