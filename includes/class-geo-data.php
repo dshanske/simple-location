@@ -1658,6 +1658,9 @@ class WP_Geo_Data {
 	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
+		if ( ! is_array( $geodata ) ) {
+			return '';
+		}
 		if ( empty( $geodata['latitude'] ) ) {
 			return '';
 		}
@@ -1681,6 +1684,10 @@ class WP_Geo_Data {
 	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
+
+		if ( ! is_array( $geodata ) ) {
+			return '';
+		}
 		if ( empty( $geodata['latitude'] ) ) {
 			return '';
 		}
@@ -1705,6 +1712,10 @@ class WP_Geo_Data {
 	public static function rest_get_address( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
+
+		if ( ! is_array( $geodata ) ) {
+			return '';
+		}
 		if ( empty( $geodata['address'] ) ) {
 			return '';
 		}
@@ -1729,6 +1740,11 @@ class WP_Geo_Data {
 	public static function rest_get_timezone( $object, $attr, $request, $object_type ) {
 		$object  = self::object( $object, $object_type );
 		$geodata = self::get_geodata( $object );
+
+		if ( ! is_array( $geodata ) ) {
+			return '';
+		}
+
 		if ( empty( $geodata['timezone'] ) ) {
 			return wp_timezone_string();
 		}

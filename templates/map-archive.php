@@ -27,8 +27,11 @@ get_header();
 			the_post();
 
 			$location = WP_Geo_Data::get_geodata( get_post(), false );
-			if ( 'public' === $location['visibility'] && array_key_exists( 'address', $location ) ) {
-				printf( '<li class="h-entry"><a class="u-url p-location" href="%1$s">%2$s</a></li>', esc_url( get_the_permalink() ), esc_html( $location['address'] ) );
+
+			if ( is_array( $location ) ) {
+				if ( 'public' === $location['visibility'] && array_key_exists( 'address', $location ) ) {
+					printf( '<li class="h-entry"><a class="u-url p-location" href="%1$s">%2$s</a></li>', esc_url( get_the_permalink() ), esc_html( $location['address'] ) );
+				}
 			}
 		}
 		?>

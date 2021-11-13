@@ -136,7 +136,7 @@ class Loc_View {
 
 	public static function get_location( $object = null, $args = array() ) {
 		$loc = WP_Geo_Data::get_geodata( $object );
-		if ( ! isset( $loc ) ) {
+		if ( ! is_array( $loc ) ) {
 			return '';
 		}
 		if ( WP_Geo_Data::current_user_can_read( $object ) && 'public' !== $loc['visibility'] ) {
@@ -222,7 +222,7 @@ class Loc_View {
 
 	public static function get_map( $object = null, $args = array() ) {
 		$loc = WP_Geo_Data::get_geodata( $object );
-		if ( isset( $loc ) && ( 'public' === $loc['visibility'] ) ) {
+		if ( is_array( $loc ) && ( 'public' === $loc['visibility'] ) ) {
 			$map = Loc_Config::map_provider();
 			if ( ! $map instanceof Map_Provider ) {
 				return '';
@@ -333,7 +333,7 @@ class Loc_View {
 			return '';
 		}
 		$loc = WP_Geo_Data::get_geodata( $user );
-		if ( ! isset( $loc['latitude'] ) ) {
+		if ( ! is_array( $loc ) || ! isset( $loc['latitude'] ) ) {
 			return '';
 		}
 		return self::get_weather_by_location( $loc['latitude'], $loc['longitude'], $cache_time );
