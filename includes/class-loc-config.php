@@ -107,6 +107,18 @@ class Loc_Config {
 
 		register_setting(
 			'simloc', // option group.
+			'sloc_taxonomy_display', // option name.
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Show Taxonomy instead of Address Field',
+				'show_in_rest' => true,
+				'default'      => false,
+				// If this is true then each time a post is made without location it will add it set automatically to private.
+			)
+		);
+
+		register_setting(
+			'simloc', // option group.
 			'sloc_country', // option name.
 			array(
 				'type'         => 'string',
@@ -482,6 +494,17 @@ class Loc_Config {
 			'sloc_general', // settings section.
 			array(
 				'label_for' => 'sloc_auto_micropub',
+			)
+		);
+
+		add_settings_field(
+			'sloc_taxonomy_display', // id.
+			__( 'Show location taxonomy instead of address field', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_general', // settings section.
+			array(
+				'label_for' => 'sloc_taxonomy_display',
 			)
 		);
 

@@ -156,6 +156,8 @@ class Loc_View {
 			'mapboxstyle'   => null,
 			'mapboxuser'    => null,
 			'weather'       => true,
+			'taxonomy'      => get_option( 'sloc_taxonomy_display' ), // Show taxonomy instead of address field.
+			'link'          => true, // Add Map Link
 			'icon'          => true, // Show Location Icon
 			'text'          => false, // Show Description
 			'markup'        => true, // Mark up with Microformats
@@ -182,6 +184,17 @@ class Loc_View {
 		if ( $args['text'] ) {
 			$c[] = $args['description'];
 		}
+
+		if ( $args['taxonomy'] ) {
+			if( is_numeric( $object ) || $object instanceof WP_Post || is_null( $object ) ) {
+				$tax = Location_Taxonomy::get_location_taxonomy( $object );
+				if ( $tax ) {
+					$loc['address'] = Location_Taxonomy::get_location_link( $tax );
+					$args['link'] = false;
+				} 
+			}
+		}
+
 		if ( 'public' === $args['visibility'] ) {
 			if ( $args['markup'] ) {
 				$c[] = self::get_the_geo( $loc );
@@ -205,7 +218,11 @@ class Loc_View {
 				$loc['address'] .= sprintf( '(%1$s)', $loc['altitude'] );
 			}
 			$adclass = $args['markup'] ? 'p-label' : '';
-			$c[]     = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $map->get_the_map_url(), $loc['address'] );
+			if ( $args['link'] ) {
+				$c[]     = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $map->get_the_map_url(), $loc['address'] );
+			} else {
+				$c[]     = sprintf( '<span class="%1$s">%2$s</span>', $adclass, $loc['address'] );
+			}
 		} elseif ( isset( $args['address'] ) ) {
 			$c[] = $args['address'];
 		}
