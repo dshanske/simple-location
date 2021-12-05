@@ -28,8 +28,6 @@ jobs:
           extensions: mysql
       - name: Install Composer dependencies for PHP
         uses: "ramsey/composer-install@v1"
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
       - name: Setup Test Environment
         run: composer setup-local-tests
       - name: Unit Testing
