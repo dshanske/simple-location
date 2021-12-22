@@ -237,6 +237,10 @@ final class Location_Taxonomy {
 			'choose_from_most_used'      => _x( 'Choose from the most used location', 'choose most used', 'simple-location' ),
 			'not found'                  => _x( 'No locations found', 'no locations found', 'simple-location' ),
 			'no_terms'                   => _x( 'No locations', 'no locations', 'simple-location' ),
+			'name_field_description'     => __( 'The name of the location', 'simple-location' ),
+			'parent_field_description'   => __( 'Localities should have a Region as a Parent, and Regions should have a Country as their Parent', 'simple-location' ),
+			'slug_field_description'     => __( 'The slug field contains the ISO 3166-1 code for country(such as US) or region(such as NY) or the locality name. In the event of duplication, may use something else', 'simple-location' ),
+			'desc_field_description'     => __( 'Will display on location archive pages if set', 'simple-location' ),
 		);
 
 		$args = array(
