@@ -30,35 +30,66 @@ class Loc_View {
 	 */
 	public static function get_iconlist() {
 		return array(
-			'fa-location-arrow'   => __( 'Location Arrow', 'simple-location' ),
-			'fa-compass'          => __( 'Compass', 'simple-location' ),
-			'fa-map'              => __( 'Map', 'simple-location' ),
-			'fa-map-marker'       => __( 'Map Marker', 'simple-location' ),
-			'fa-passport'         => __( 'Passport', 'simple-location' ),
-			'fa-home'             => __( 'Home', 'simple-location' ),
-			'fa-globe-asia'       => __( 'Globe - Asia', 'simple-location' ),
-			'fa-globe-americas'   => __( 'Globe - Americas', 'simple-location' ),
-			'fa-globe-europe'     => __( 'Globe - Europe', 'simple-location' ),
-			'fa-globe-africa'     => __( 'Globe - Africa', 'simple-location' ),
-			'fa-plane'            => __( 'Plane', 'simple-location' ),
-			'fa-train'            => __( 'Train', 'simple-location' ),
-			'fa-taxi'             => __( 'Taxi', 'simple-location' ),
-			'fa-tram'             => __( 'Tram', 'simple-location' ),
-			'fa-biking'           => __( 'Biking', 'simple-location' ),
-			'fa-bus'              => __( 'Bus', 'simple-location' ),
-			'fa-bus-alt'          => __( 'Bus (Alt)', 'simple-location' ),
-			'fa-car'              => __( 'Car', 'simple-location' ),
-			'fa-helicopter'       => __( 'Helicopter', 'simple-location' ),
-			'fa-horse'            => __( 'Horse', 'simple-location' ),
-			'fa-ship'             => __( 'Ship', 'simple-location' ),
-			'fa-running'          => __( 'Running', 'simple-location' ),
-			'fa-shuttlevan'       => __( 'Shuttle Van', 'simple-location' ),
-			'fa-subway'           => __( 'Subway', 'simple-location' ),
-			'fa-suitcase'         => __( 'Suitcase', 'simple-location' ),
-			'fa-suitcase-rolling' => __( 'Suitcase - Rolling', 'simple-location' ),
-			'fa-walking'          => __( 'Walking', 'simple-location' ),
-			'fa-running'          => __( 'Running', 'simple-location' ),
-
+			'fa-location-arrow'            => __( 'Location Arrow', 'simple-location' ),
+			'fa-compass'                   => __( 'Compass', 'simple-location' ),
+			'fa-map'                       => __( 'Map', 'simple-location' ),
+			'fa-map-marker'                => __( 'Map Marker', 'simple-location' ),
+			'fa-passport'                  => __( 'Passport', 'simple-location' ),
+			'fa-home'                      => __( 'Home', 'simple-location' ),
+			'fa-globe-asia'                => __( 'Globe - Asia', 'simple-location' ),
+			'fa-globe-americas'            => __( 'Globe - Americas', 'simple-location' ),
+			'fa-globe-europe'              => __( 'Globe - Europe', 'simple-location' ),
+			'fa-globe-africa'              => __( 'Globe - Africa', 'simple-location' ),
+			'fa-plane'                     => __( 'Plane', 'simple-location' ),
+			'fa-train'                     => __( 'Train', 'simple-location' ),
+			'fa-taxi'                      => __( 'Taxi', 'simple-location' ),
+			'fa-tram'                      => __( 'Tram', 'simple-location' ),
+			'fa-biking'                    => __( 'Biking', 'simple-location' ),
+			'fa-bus'                       => __( 'Bus', 'simple-location' ),
+			'fa-bus-alt'                   => __( 'Bus (Alt)', 'simple-location' ),
+			'fa-car'                       => __( 'Car', 'simple-location' ),
+			'fa-helicopter'                => __( 'Helicopter', 'simple-location' ),
+			'fa-horse'                     => __( 'Horse', 'simple-location' ),
+			'fa-ship'                      => __( 'Ship', 'simple-location' ),
+			'fa-running'                   => __( 'Running', 'simple-location' ),
+			'fa-shuttlevan'                => __( 'Shuttle Van', 'simple-location' ),
+			'fa-subway'                    => __( 'Subway', 'simple-location' ),
+			'fa-suitcase'                  => __( 'Suitcase', 'simple-location' ),
+			'fa-suitcase-rolling'          => __( 'Suitcase - Rolling', 'simple-location' ),
+			'fa-walking'                   => __( 'Walking', 'simple-location' ),
+			'fa-running'                   => __( 'Running', 'simple-location' ),
+			'americanairlines'             => __( 'American Airlines', 'simple-location' ),
+			's7airlines'                   => __( 'S7 Airlines', 'simple-location' ),
+			'unitedairlines'               => __( 'United Airlines', 'simple-location' ),
+			'pegasusairlines'              => __( 'Pegasus Airlines', 'simple-location' ),
+			'ethiopianairlines'            => __( 'Ethiopian Airlines', 'simple-location' ),
+			'southwestairlines'            => __( 'Southwest Airlines', 'simple-location' ),
+			'lotpolishairlines'            => __( 'Lot Polish Airlines', 'simple-location' ),
+			'chinaeasternairlines'         => __( 'China Eastern Airlines', 'simple-location' ),
+			'chinasouthernairlines'        => __( 'China Southern Airlines', 'simple-location' ),
+			'aerlingus'                    => __( 'Aer Lingus', 'simple-location' ),
+			'aeroflot'                     => __( 'Aeroflot', 'simple-location' ),
+			'aeromexico'                   => __( 'Aeromexico', 'simple-location' ),
+			'aircanada'                    => __( 'Air Canada', 'simple-location' ),
+			'airchina'                     => __( 'Air China', 'simple-location' ),
+			'airfrance'                    => __( 'Air France', 'simple-location' ),
+			'airasia'                      => __( 'Air Asia', 'simple-location' ),
+			'airbus'                       => __( 'Airbus', 'simple-location' ),
+			'boeing'                       => __( 'Boeing', 'simple-location' ),
+			'emirates'                     => __( 'Emirates', 'simple-location' ),
+			'etihadairways'                => __( 'Etihad Airways', 'simple-location' ),
+			'qatarairways'                 => __( 'Qatar Airways', 'simple-location' ),
+			'ryanair'                      => __( 'Ryanair', 'simple-location' ),
+			'sanfranciscomunicipalrailway' => __( 'San Francisco Municipal Railway', 'simple-location' ),
+			'shanghaimetro'                => __( 'Shanghai Metro', 'simple-location' ),
+			'turkishairlines'              => __( 'Turkish Airlines', 'simple-location' ),
+			'wizzair'                      => __( 'Wizz Air', 'simple-location' ),
+			'alitalia'                     => __( 'Alitalia', 'simple-location' ),
+			'ana'                          => __( 'ANA', 'simple-location' ),
+			'delta'                        => __( 'Delta', 'simple-location' ),
+			'easyjet'                      => __( 'easyJet', 'simple-location' ),
+			'lufthansa'                    => __( 'Lufthansa', 'simple-location' ),
+			'britishairways'               => __( 'British Airways', 'simple-location' ),
 		);
 	}
 
@@ -186,12 +217,12 @@ class Loc_View {
 		}
 
 		if ( $args['taxonomy'] ) {
-			if( is_numeric( $object ) || $object instanceof WP_Post || is_null( $object ) ) {
+			if ( is_numeric( $object ) || $object instanceof WP_Post || is_null( $object ) ) {
 				$tax = Location_Taxonomy::get_location_taxonomy( $object );
 				if ( $tax ) {
 					$loc['address'] = Location_Taxonomy::get_location_link( $tax );
-					$args['link'] = false;
-				} 
+					$args['link']   = false;
+				}
 			}
 		}
 
@@ -219,9 +250,9 @@ class Loc_View {
 			}
 			$adclass = $args['markup'] ? 'p-label' : '';
 			if ( $args['link'] ) {
-				$c[]     = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $map->get_the_map_url(), $loc['address'] );
+				$c[] = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $map->get_the_map_url(), $loc['address'] );
 			} else {
-				$c[]     = sprintf( '<span class="%1$s">%2$s</span>', $adclass, $loc['address'] );
+				$c[] = sprintf( '<span class="%1$s">%2$s</span>', $adclass, $loc['address'] );
 			}
 		} elseif ( isset( $args['address'] ) ) {
 			$c[] = $args['address'];
