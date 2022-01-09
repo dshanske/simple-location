@@ -21,7 +21,13 @@ module.exports = function(grunt) {
                 }
             }
         },
-
+	copy                 : {
+		main: {
+			files: [
+				{expand: true, cwd: 'node_modules/simple-icons/icons/', src: ['{americanairlines,s7airlines,unitedairlines,pegasusairlines,ethiopianairlines,southwestairlines,lotpolishairlines,chinaeasternairlines,chinasouthernairlines,aerlingus,aeroflot,aeromexico,aircanada,airchina,airfrance,airasia,airbus,emirates,etihadairways,qatarairways,ryanair,sanfranciscomunicipalrailway,shanghaimetro,turkishairlines,wizzair,alitalia,ana,}.svg'], dest: 'svgs/'},
+			],
+		},
+	},
         sass: {
             dev: {
                 options: {
@@ -56,6 +62,7 @@ module.exports = function(grunt) {
     // Load plugins.
     grunt.loadNpmTasks('grunt-wp-readme-to-markdown');
     grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-eslint');
     grunt.loadNpmTasks('grunt-downloadfile');
 

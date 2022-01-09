@@ -11,12 +11,13 @@
   "devDependencies": {
     "@wordpress/eslint-plugin": "^9.3.0",
     "grunt": "^1.4.1",
+    "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-sass": "~1.0.0",
     "grunt-downloadfile": "^2.1.1",
     "grunt-eslint": "^24.0.0",
     "grunt-wp-i18n": "^1.0.3",
     "grunt-wp-readme-to-markdown": ">=2.0.1",
-    "luxon": "^1.28.0"
-  },
-  "dependencies": {}
+    "luxon": "^1.28.0",
+    "simple-icons": "^6.5.0"
+  }
 }
