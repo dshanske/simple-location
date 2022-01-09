@@ -30,9 +30,9 @@
       "php-parallel-lint/php-parallel-lint": "^1.2",
       "wp-cli/i18n-command": "^2.2",
       "sebastian/phpcpd": "^3.0 || ^4.0 || ^6.0",
-      "sokil/php-isocodes": "^2.2 || ^3.3",
       "yoast/phpunit-polyfills": "^1.0",
-      "phpunit/phpunit": "^5.7.21 || ^6.5 || ^7.5"
+      "phpunit/phpunit": "^5.7.21 || ^6.5 || ^7.5",
+      "sokil/php-isocodes-db-i18n": "^4.0"
     },
     "prefer-stable" : true,
     "scripts": {
@@ -48,8 +48,8 @@
 		"Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin::run"
 	],
 	"copy-files": [
-	                 "cp -u -r vendor/sokil/php-isocodes/databases/iso_3166-2/*.json data/iso_3166-2/",
-	                 "cp -u -r vendor/sokil/php-isocodes/databases/iso_3166-1.json data/"
+	                 "cp -u -r vendor/sokil/php-isocodes-db-i18n/databases/iso_3166-2/*.json data/iso_3166-2/",
+	                 "cp -u -r vendor/sokil/php-isocodes-db-i18n/databases/iso_3166-1.json data/"
 	]
    },
   "post-update-cmd": [
