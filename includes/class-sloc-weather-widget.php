@@ -48,6 +48,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			echo 'no';
 			return;
 		}
+
 		if ( is_wp_error( $weather ) ) {
 			echo $weather->get_error_message();
 		} elseif ( is_array( $weather ) ) {
@@ -59,6 +60,9 @@ class Sloc_Weather_Widget extends WP_Widget {
 	}
 
 	protected static function weather_list( $weather, $icon = 'fa-map', $instance = null ) {
+		if ( ! is_array( $weather ) ) {
+			return '';
+		}
 
 		$measurements = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		$return       = array( PHP_EOL );
