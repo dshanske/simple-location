@@ -5,13 +5,13 @@
  * Description: Adds Location to WordPress
  * Author: David Shanske
  * Author URI: https://david.shanske.com
- * Requires at least: 4.9.9
+ * Requires at least: 4.9
  * Requires PHP: 5.6
  * Text Domain: simple-location
  * Domain Path:  /languages
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 4.4.14
+ * Version: 4.4.15
  *
  * @package Simple_Location
  */
@@ -42,7 +42,7 @@ class Simple_Location_Plugin {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	public static $version = '4.4.14';
+	public static $version = '4.4.15';
 
 
 	/**

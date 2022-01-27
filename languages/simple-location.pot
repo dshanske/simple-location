@@ -1,17 +1,17 @@
-# Copyright (C) 2021 David Shanske
+# Copyright (C) 2022 David Shanske
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.4.14\n"
+"Project-Id-Version: Simple Location 4.4.15\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-11-13T04:46:14+00:00\n"
+"POT-Creation-Date: 2022-01-27T00:00:44+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.5.0\n"
+"X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: simple-location\n"
 
 #. Plugin Name of the plugin
@@ -103,8 +103,8 @@ msgid "Location"
 msgstr ""
 
 #: includes/class-geo-data.php:339
-#: includes/class-location-taxonomy.php:740
-#: includes/class-sloc-weather-widget.php:193
+#: includes/class-location-taxonomy.php:744
+#: includes/class-sloc-weather-widget.php:197
 #: includes/class-weather-provider.php:921
 #: templates/loc-side-metabox.php:51
 #: templates/loc-side-metabox.php:119
@@ -689,20 +689,148 @@ msgstr ""
 msgid "Walking"
 msgstr ""
 
+#: includes/class-loc-view.php:61
+msgid "American Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:62
+msgid "S7 Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:63
+msgid "United Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:64
+msgid "Pegasus Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:65
+msgid "Ethiopian Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:66
+msgid "Southwest Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:67
+msgid "Lot Polish Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:68
+msgid "China Eastern Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:69
+msgid "China Southern Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:70
+msgid "Aer Lingus"
+msgstr ""
+
+#: includes/class-loc-view.php:71
+msgid "Aeroflot"
+msgstr ""
+
+#: includes/class-loc-view.php:72
+msgid "Aeromexico"
+msgstr ""
+
+#: includes/class-loc-view.php:73
+msgid "Air Canada"
+msgstr ""
+
+#: includes/class-loc-view.php:74
+msgid "Air China"
+msgstr ""
+
+#: includes/class-loc-view.php:75
+msgid "Air France"
+msgstr ""
+
+#: includes/class-loc-view.php:76
+msgid "Air Asia"
+msgstr ""
+
+#: includes/class-loc-view.php:77
+msgid "Airbus"
+msgstr ""
+
+#: includes/class-loc-view.php:78
+msgid "Boeing"
+msgstr ""
+
+#: includes/class-loc-view.php:79
+msgid "Emirates"
+msgstr ""
+
+#: includes/class-loc-view.php:80
+msgid "Etihad Airways"
+msgstr ""
+
+#: includes/class-loc-view.php:81
+msgid "Qatar Airways"
+msgstr ""
+
+#: includes/class-loc-view.php:82
+msgid "Ryanair"
+msgstr ""
+
+#: includes/class-loc-view.php:83
+msgid "San Francisco Municipal Railway"
+msgstr ""
+
+#: includes/class-loc-view.php:84
+msgid "Shanghai Metro"
+msgstr ""
+
+#: includes/class-loc-view.php:85
+msgid "Turkish Airlines"
+msgstr ""
+
+#: includes/class-loc-view.php:86
+msgid "Wizz Air"
+msgstr ""
+
+#: includes/class-loc-view.php:87
+msgid "Alitalia"
+msgstr ""
+
+#: includes/class-loc-view.php:88
+msgid "ANA"
+msgstr ""
+
+#: includes/class-loc-view.php:89
+msgid "Delta"
+msgstr ""
+
+#: includes/class-loc-view.php:90
+msgid "easyJet"
+msgstr ""
+
+#: includes/class-loc-view.php:91
+msgid "Lufthansa"
+msgstr ""
+
+#: includes/class-loc-view.php:92
+msgid "British Airways"
+msgstr ""
+
 #. translators: Prefaces the address 1. with the private status
-#: includes/class-loc-view.php:146
+#: includes/class-loc-view.php:177
 msgid "Hidden: %1$s"
 msgstr ""
 
-#: includes/class-loc-view.php:164
+#: includes/class-loc-view.php:195
 msgid "Location: "
 msgstr ""
 
-#: includes/class-loc-view.php:173
+#: includes/class-loc-view.php:204
 msgid "Error: Invalid Map Provider"
 msgstr ""
 
-#: includes/class-loc-view.php:259
+#: includes/class-loc-view.php:290
 msgid "Weather: "
 msgstr ""
 
@@ -906,33 +1034,49 @@ msgctxt "no locations"
 msgid "No locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:267
+#: includes/class-location-taxonomy.php:240
+msgid "The name of the location"
+msgstr ""
+
+#: includes/class-location-taxonomy.php:241
+msgid "Localities should have a Region as a Parent, and Regions should have a Country as their Parent"
+msgstr ""
+
+#: includes/class-location-taxonomy.php:242
+msgid "The slug field contains the ISO 3166-1 code for country(such as US) or region(such as NY) or the locality name. In the event of duplication, may use something else"
+msgstr ""
+
+#: includes/class-location-taxonomy.php:243
+msgid "Will display on location archive pages if set"
+msgstr ""
+
+#: includes/class-location-taxonomy.php:271
 #: includes/class-venue-taxonomy.php:127
 msgid "Country Code"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:279
+#: includes/class-location-taxonomy.php:283
 msgid "Region Code or name if code not available"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:292
+#: includes/class-location-taxonomy.php:296
 msgid "Locality Name"
 msgstr ""
 
 #. translators: 1. Taxonomy Label
-#: includes/class-location-taxonomy.php:399
+#: includes/class-location-taxonomy.php:403
 msgid "No %1$s"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:733
+#: includes/class-location-taxonomy.php:737
 msgid "Country"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:734
+#: includes/class-location-taxonomy.php:738
 msgid "Region"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:735
+#: includes/class-location-taxonomy.php:739
 msgid "Locality"
 msgstr ""
 
@@ -1397,8 +1541,8 @@ msgstr ""
 
 #: includes/class-sloc-airport-widget.php:97
 #: includes/class-sloc-lastseen-widget.php:155
-#: includes/class-sloc-station-widget.php:97
-#: includes/class-sloc-weather-widget.php:182
+#: includes/class-sloc-station-widget.php:102
+#: includes/class-sloc-weather-widget.php:186
 msgid "Title: "
 msgstr ""
 
@@ -1412,14 +1556,14 @@ msgstr ""
 
 #: includes/class-sloc-airport-widget.php:106
 #: includes/class-sloc-lastseen-widget.php:177
-#: includes/class-sloc-station-widget.php:107
-#: includes/class-sloc-weather-widget.php:204
+#: includes/class-sloc-station-widget.php:112
+#: includes/class-sloc-weather-widget.php:208
 msgid "Show Astronomical Info: "
 msgstr ""
 
 #: includes/class-sloc-airport-widget.php:110
-#: includes/class-sloc-station-widget.php:111
-#: includes/class-sloc-weather-widget.php:208
+#: includes/class-sloc-station-widget.php:116
+#: includes/class-sloc-weather-widget.php:212
 msgid "Cache Time: "
 msgstr ""
 
@@ -1437,40 +1581,40 @@ msgstr ""
 
 #: includes/class-sloc-lastseen-widget.php:63
 #: includes/class-sloc-lastseen-widget.php:64
-#: includes/class-sloc-weather-widget.php:116
-#: includes/class-sloc-weather-widget.php:117
+#: includes/class-sloc-weather-widget.php:120
+#: includes/class-sloc-weather-widget.php:121
 #: includes/class-weather-provider.php:864
 msgid "Sunrise"
 msgstr ""
 
 #: includes/class-sloc-lastseen-widget.php:70
 #: includes/class-sloc-lastseen-widget.php:71
-#: includes/class-sloc-weather-widget.php:123
-#: includes/class-sloc-weather-widget.php:124
+#: includes/class-sloc-weather-widget.php:127
+#: includes/class-sloc-weather-widget.php:128
 #: includes/class-weather-provider.php:865
 msgid "Sunset"
 msgstr ""
 
 #: includes/class-sloc-lastseen-widget.php:77
 #: includes/class-sloc-lastseen-widget.php:78
-#: includes/class-sloc-weather-widget.php:130
-#: includes/class-sloc-weather-widget.php:131
+#: includes/class-sloc-weather-widget.php:134
+#: includes/class-sloc-weather-widget.php:135
 #: includes/class-weather-provider.php:877
 msgid "Moonrise"
 msgstr ""
 
 #: includes/class-sloc-lastseen-widget.php:84
 #: includes/class-sloc-lastseen-widget.php:85
-#: includes/class-sloc-weather-widget.php:137
-#: includes/class-sloc-weather-widget.php:138
+#: includes/class-sloc-weather-widget.php:141
+#: includes/class-sloc-weather-widget.php:142
 #: includes/class-weather-provider.php:878
 msgid "Moonset"
 msgstr ""
 
 #: includes/class-sloc-lastseen-widget.php:92
 #: includes/class-sloc-lastseen-widget.php:93
-#: includes/class-sloc-weather-widget.php:145
-#: includes/class-sloc-weather-widget.php:146
+#: includes/class-sloc-weather-widget.php:149
+#: includes/class-sloc-weather-widget.php:150
 msgid "Moon Phase"
 msgstr ""
 
@@ -1487,7 +1631,7 @@ msgid "Displays last reported user location. Reporting can be set manually in th
 msgstr ""
 
 #: includes/class-sloc-lastseen-widget.php:162
-#: includes/class-sloc-weather-widget.php:187
+#: includes/class-sloc-weather-widget.php:191
 msgid "User: "
 msgstr ""
 
@@ -1512,11 +1656,15 @@ msgstr ""
 msgid "Adds current weather conditions"
 msgstr ""
 
-#: includes/class-sloc-station-widget.php:101
+#: includes/class-sloc-station-widget.php:80
+msgid "Unable to Connect to Station"
+msgstr ""
+
+#: includes/class-sloc-station-widget.php:106
 msgid "Displays current weather at a weather station"
 msgstr ""
 
-#: includes/class-sloc-station-widget.php:104
+#: includes/class-sloc-station-widget.php:109
 msgid "Station ID: "
 msgstr ""
 
@@ -1525,19 +1673,19 @@ msgstr ""
 msgid "Weather"
 msgstr ""
 
-#: includes/class-sloc-weather-widget.php:109
+#: includes/class-sloc-weather-widget.php:113
 msgid "Current Conditions Cache Expires At"
 msgstr ""
 
-#: includes/class-sloc-weather-widget.php:185
+#: includes/class-sloc-weather-widget.php:189
 msgid "Displays current weather based on user location set in user profile. If set for none will use latitude and longitude set"
 msgstr ""
 
-#: includes/class-sloc-weather-widget.php:199
+#: includes/class-sloc-weather-widget.php:203
 msgid "Latitude: "
 msgstr ""
 
-#: includes/class-sloc-weather-widget.php:201
+#: includes/class-sloc-weather-widget.php:205
 msgid "Longitude: "
 msgstr ""
 

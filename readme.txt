@@ -2,8 +2,8 @@
 Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
 Requires at least: 4.9
-Tested up to: 5.8
-Stable tag: 4.4.14
+Tested up to: 5.9
+Stable tag: 4.4.15
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -221,6 +221,12 @@ The plugin offers providers for:
 * Weather - Retrieves weather based on location or station ID
 * Map - Provides maps for display
 
+= What icons are used here? =
+
+* [Weather Icons](https://erikflowers.github.io/weather-icons/) are used for most of the weather options.
+* [Font Awesome](https://fontawesome.com/) is used for the transportation icons.
+* [Simple Icons](https://simpleicons.org/) supplies the transportation brand icons.
+
 == Upgrade Notice ==
 
 = 4.4.0 =
@@ -256,6 +262,11 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 4.4.15 ( 2022-01-26 ) =
+* Add airline brand icons 
+* Add labels now customizable for location taxonomy
+* Update dependencies
 
 = 4.4.14 ( 2021-11-12 ) =
 * Fix for posts without location causing error

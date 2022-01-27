@@ -185,6 +185,9 @@ class Weather_Provider_Station extends Weather_Provider {
 
 		if ( ! empty( $this->station_id ) ) {
 			$return = self::get_station_data();
+			if ( is_wp_error( $return ) ) {
+				return $return;
+			}
 		} elseif ( $this->latitude && $this->longitude ) {
 			$conditions = $this->get_cache();
 			if ( $conditions ) {

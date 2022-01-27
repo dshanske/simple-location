@@ -24,7 +24,7 @@ module.exports = function(grunt) {
 	copy                 : {
 		main: {
 			files: [
-				{expand: true, cwd: 'node_modules/simple-icons/icons/', src: ['{americanairlines,s7airlines,unitedairlines,pegasusairlines,ethiopianairlines,southwestairlines,lotpolishairlines,chinaeasternairlines,chinasouthernairlines,aerlingus,aeroflot,aeromexico,aircanada,airchina,airfrance,airasia,airbus,emirates,etihadairways,qatarairways,ryanair,sanfranciscomunicipalrailway,shanghaimetro,turkishairlines,wizzair,alitalia,ana,}.svg'], dest: 'svgs/'},
+				{expand: true, cwd: 'node_modules/simple-icons/icons/', src: ['{boeing,lufthansa,britishairways,easyjet,americanairlines,s7airlines,unitedairlines,pegasusairlines,ethiopianairlines,southwestairlines,lotpolishairlines,chinaeasternairlines,chinasouthernairlines,aerlingus,aeroflot,aeromexico,aircanada,airchina,airfrance,airasia,airbus,emirates,etihadairways,qatarairways,ryanair,sanfranciscomunicipalrailway,shanghaimetro,turkishairlines,wizzair,alitalia,ana,delta}.svg'], dest: 'svgs/'},
 			],
 		},
 	},
