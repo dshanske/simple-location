@@ -42,7 +42,7 @@ class Simple_Location_Plugin {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	public static $version = '4.4.15';
+	public static $version;
 
 
 	/**
@@ -122,6 +122,7 @@ class Simple_Location_Plugin {
 	 * @since 1.0.0
 	 */
 	public static function init() {
+		self::$version = get_file_data( __FILE__, array( 'Version' => 'Version' ) )['Version'];
 
 		load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
