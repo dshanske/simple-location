@@ -54,6 +54,6 @@ $geodata = WP_Geo_Data::get_geodata( $profileuser );
 <span class="description"><?php esc_attr_e( 'Address', 'simple-location' ); ?></span>
 </td>
 </tr>
-<?php Loc_Metabox::geo_public_user( $geodata['visibility'] ); // phpcs:ignore ?>
+<?php Loc_Metabox::geo_public_user( ifset( $geodata['visibility'] ) ); // phpcs:ignore ?>
 </table>
 </div>

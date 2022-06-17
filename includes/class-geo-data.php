@@ -1408,6 +1408,7 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function get_geodata( $object = null, $full = true ) {
+		$geodata = false;
 		if ( ! $object ) {
 			$object = get_post();
 		}
