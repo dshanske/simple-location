@@ -962,28 +962,28 @@ abstract class Weather_Provider extends Sloc_Provider {
 			return $conditions;
 		}
 		foreach ( array( 'temperature', 'heatindex', 'windchill', 'dewpoint' ) as $temp ) {
-			if ( array_key_exists( $temp, $conditions ) ) {
+			if ( array_key_exists( $temp, $conditions ) && is_numeric( $conditions[ $temp ] ) ) {
 				$conditions[ $temp ] = self::celsius_to_fahrenheit( $conditions[ $temp ] );
 			}
 		}
 
-		if ( array_key_exists( 'pressure', $conditions ) ) {
+		if ( array_key_exists( 'pressure', $conditions ) && is_numeric( $conditions['pressure'] ) ) {
 			$conditions['pressure'] = self::hpa_to_inhg( $conditions['pressure'] );
 		}
-		if ( array_key_exists( 'visibility', $conditions ) ) {
+		if ( array_key_exists( 'visibility', $conditions ) && is_numeric( $conditions['visibility'] ) ) {
 			$conditions['visibility'] = self::meters_to_miles( $conditions['visibility'] );
 		}
 
 		if ( array_key_exists( 'wind', $conditions ) ) {
-			foreach ( array( 'speed', 'guest' ) as $speed ) {
-				if ( array_key_exists( $speed, $conditions['wind'] ) ) {
+			foreach ( array( 'speed', 'gust' ) as $speed ) {
+				if ( array_key_exists( $speed, $conditions['wind'] ) && is_numeric( $conditions['wind'][ $speed ] ) ) {
 					$conditions['wind'][ $speed ] = self::mps_to_miph( $conditions['wind'][ $speed ] );
 				}
 			}
 		}
 
 		foreach ( array( 'rain', 'snow' ) as $fall ) {
-			if ( array_key_exists( $fall, $conditions ) ) {
+			if ( array_key_exists( $fall, $conditions ) &&  is_numeric( $conditions[ $fall ] ) ) {
 				$conditions[ $fall ] = self::mm_to_inches( $conditions[ $fall ] );
 			}
 		}
