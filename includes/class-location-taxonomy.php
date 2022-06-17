@@ -72,7 +72,7 @@ final class Location_Taxonomy {
 	 * @since 1.0.0
 	 */
 	public static function filter_location_posts( $query ) {
-		if ( is_admin() || current_user_can( 'read_posts_location' ) ) {
+		if ( is_admin() || ! current_user_can( 'read_posts_location' ) || ! $query->is_main_query() ) {
 			return $query;
 		}
 		if ( is_tax( 'location' ) ) {

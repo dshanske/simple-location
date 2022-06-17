@@ -97,7 +97,7 @@ class WP_Geo_Data {
 	 * @since 4.0.0
 	 */
 	public static function remove_maps_pagination( $query ) {
-		if ( ! array_key_exists( 'map', $query->query_vars ) ) {
+		if ( ! array_key_exists( 'map', $query->query_vars ) || ! $query->is_main_query() ) {
 			return;
 		}
 		$query->set( 'meta_query', array( self::filter_geo_query( 'map' ) ) );
@@ -1193,7 +1193,7 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function filter_location_posts( $query ) {
-		if ( ! array_key_exists( 'geo', $query->query_vars ) ) {
+		if ( ! array_key_exists( 'geo', $query->query_vars ) || ! $query->is_main_query() ) {
 			return;
 		}
 
