@@ -11,6 +11,7 @@ class Loc_Timezone {
 		add_filter( 'get_the_modified_time', array( $cls, 'get_the_modified_time' ), 9, 3 );
 		add_filter( 'get_comment_date', array( $cls, 'get_comment_date' ), 9, 3 );
 		add_filter( 'get_comment_time', array( $cls, 'get_comment_time' ), 9, 5 );
+		add_filter( 'post_date_column_time', array( $cls, 'post_date_column_time' ), 9, 4 );
 		add_action( 'simple_location_sidebox', array( $cls, 'post_submitbox' ) );
 		add_action( 'save_post', array( $cls, 'postbox_save_post_meta' ) );
 		add_action( 'after_micropub', array( $cls, 'after_micropub' ), 10, 2 );
@@ -502,6 +503,22 @@ class Loc_Timezone {
 		return wp_date( $d, get_post_timestamp( $post, 'modified' ), $timezone );
 	}
 
+
+
+	public static function post_date_column_time( $t_time, $post, $date, $mode ) {
+		$timezone = self::get_timezone( $post );
+		if ( self::compare_timezones( $timezone, wp_timezone() ) ) {
+			return $t_time;
+		}
+		return sprintf(
+				/* translators: 1: Post date, 2: Post time. */
+			__( '%1$s at %2$s', 'default' ),
+			/* translators: Post date format. See https://www.php.net/manual/datetime.format.php */
+				get_the_time( __( 'Y/m/d', 'default' ), $post ),
+			/* translators: Post time format. See https://www.php.net/manual/datetime.format.php */
+				get_the_time( __( 'g:i a T', 'simple-location' ), $post )
+		);
+	}
 
 	public static function get_comment_date( $date, $d, $comment ) {
 		if ( '' === $d ) {
