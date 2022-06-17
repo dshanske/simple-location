@@ -5,12 +5,12 @@ add_action( 'init', array( 'Loc_Timezone', 'init' ) );
 class Loc_Timezone {
 	public static function init() {
 		$cls = get_called_class();
-		add_filter( 'get_the_date', array( $cls, 'get_the_date' ), 12, 3 );
-		add_filter( 'get_the_time', array( $cls, 'get_the_time' ), 12, 3 );
-		add_filter( 'get_the_modified_date', array( $cls, 'get_the_modified_date' ), 12, 3 );
-		add_filter( 'get_the_modified_time', array( $cls, 'get_the_modified_time' ), 12, 3 );
-		add_filter( 'get_comment_date', array( $cls, 'get_comment_date' ), 12, 3 );
-		add_filter( 'get_comment_time', array( $cls, 'get_comment_time' ), 12, 5 );
+		add_filter( 'get_the_date', array( $cls, 'get_the_date' ), 9, 3 );
+		add_filter( 'get_the_time', array( $cls, 'get_the_time' ), 9, 3 );
+		add_filter( 'get_the_modified_date', array( $cls, 'get_the_modified_date' ), 9, 3 );
+		add_filter( 'get_the_modified_time', array( $cls, 'get_the_modified_time' ), 9, 3 );
+		add_filter( 'get_comment_date', array( $cls, 'get_comment_date' ), 9, 3 );
+		add_filter( 'get_comment_time', array( $cls, 'get_comment_time' ), 9, 5 );
 		add_action( 'simple_location_sidebox', array( $cls, 'post_submitbox' ) );
 		add_action( 'save_post', array( $cls, 'postbox_save_post_meta' ) );
 		add_action( 'after_micropub', array( $cls, 'after_micropub' ), 10, 2 );
