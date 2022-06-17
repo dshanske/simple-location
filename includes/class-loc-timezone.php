@@ -500,6 +500,7 @@ class Loc_Timezone {
 		if ( '' === $d ) {
 			$d = get_option( 'time_format' );
 		}
+
 		return wp_date( $d, get_post_timestamp( $post, 'modified' ), $timezone );
 	}
 
@@ -524,6 +525,7 @@ class Loc_Timezone {
 		if ( '' === $d ) {
 			$d = get_option( 'date_format' );
 		}
+
 		$timezone = self::get_timezone( $comment );
 		if ( is_null( $timezone ) ) {
 			return $date;
@@ -538,6 +540,9 @@ class Loc_Timezone {
 		$timezone = self::get_timezone( $comment );
 		if ( is_null( $timezone ) ) {
 			return $date;
+		}
+		if ( ( 'g:i a' === $d ) && ! self::compare_timezones( $timezone, wp_timezone() ) ) {
+			$d = 'g:i a T';
 		}
 		return wp_date( $d, get_comment_timestamp( $comment ), $timezone );
 	}
