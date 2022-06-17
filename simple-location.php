@@ -11,7 +11,7 @@
  * Domain Path:  /languages
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 4.4.15
+ * Version: 4.5.0
  *
  * @package Simple_Location
  */

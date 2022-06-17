@@ -2,8 +2,8 @@
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske/)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
-**Tested up to:** 5.9  
-**Stable tag:** 4.4.15  
+**Tested up to:** 6.0  
+**Stable tag:** 4.5.0  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -262,6 +262,11 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 4.5.0 ( 2022-06-17 ) ###
+* Adjust queries
+* Update dependencies
+* Show timezone on the post edit page when does not match site timezone
 
 ### 4.4.15 ( 2022-01-26 ) ###
 * Add airline brand icons 

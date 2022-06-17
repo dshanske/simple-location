@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 4.4.15\n"
+"Project-Id-Version: Simple Location 4.5.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-01-27T00:00:44+00:00\n"
+"POT-Creation-Date: 2022-06-17T05:14:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.6.0\n"
 "X-Domain: simple-location\n"
@@ -94,7 +94,7 @@ msgstr[1] ""
 
 #: includes/class-geo-data.php:319
 #: includes/class-geo-data.php:711
-#: includes/class-geo-data.php:1615
+#: includes/class-geo-data.php:1616
 #: includes/class-loc-config.php:320
 #: includes/class-loc-metabox.php:86
 #: includes/class-loc-metabox.php:98
@@ -177,7 +177,7 @@ msgstr ""
 msgid "Invalid Input"
 msgstr ""
 
-#: includes/class-geo-data.php:1593
+#: includes/class-geo-data.php:1594
 #: includes/class-location-zones.php:158
 #: includes/class-weather-provider-station.php:138
 #: templates/geocode-form.php:12
@@ -187,7 +187,7 @@ msgstr ""
 msgid "Latitude"
 msgstr ""
 
-#: includes/class-geo-data.php:1604
+#: includes/class-geo-data.php:1605
 #: includes/class-location-zones.php:159
 #: includes/class-weather-provider-station.php:139
 #: templates/geocode-form.php:13
@@ -197,11 +197,11 @@ msgstr ""
 msgid "Longitude"
 msgstr ""
 
-#: includes/class-geo-data.php:1626
+#: includes/class-geo-data.php:1627
 msgid "Last Reported Timezone"
 msgstr ""
 
-#: includes/class-geo-data.php:2021
+#: includes/class-geo-data.php:2022
 #: includes/class-weather-provider.php:483
 msgid "m"
 msgstr ""
@@ -562,12 +562,17 @@ msgstr ""
 msgid "Show:"
 msgstr ""
 
-#: includes/class-loc-timezone.php:318
+#: includes/class-loc-timezone.php:319
 msgid "Set Local Timezone"
 msgstr ""
 
-#: includes/class-loc-timezone.php:318
+#: includes/class-loc-timezone.php:319
 msgid "Timezone:"
+msgstr ""
+
+#. translators: Post time format. See https://www.php.net/manual/datetime.format.php
+#: includes/class-loc-timezone.php:520
+msgid "g:i a T"
 msgstr ""
 
 #: includes/class-loc-view.php:33
@@ -2805,11 +2810,11 @@ msgstr ""
 msgid "Waxing Gibbous 6"
 msgstr ""
 
-#: simple-location.php:236
+#: simple-location.php:237
 msgid "Settings"
 msgstr ""
 
-#: simple-location.php:261
+#: simple-location.php:262
 msgid ""
 "Location and weather data is optionally stored for all posts, attachments, and comments. Location data is extracted from uploaded images along with other metadata. This\n"
 "\t\t\t\tdata can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it."
