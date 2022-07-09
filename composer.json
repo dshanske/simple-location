@@ -13,6 +13,12 @@
 	       "email": "david@shanske.com"
        }
      ],
+    "config": {
+    	"allow-plugins": {
+        	"composer/installers": true,
+	        "dealerdirect/phpcodesniffer-composer-installer": true
+    	}
+    },
      "extra": {
 		"installer-name": "simple-location"
      },
