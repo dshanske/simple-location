@@ -926,13 +926,13 @@ abstract class Weather_Provider extends Sloc_Provider {
 		if ( ! $echo ) {
 			return $return;
 		}
-		echo wp_kses( 
+		echo wp_kses(
 			$return,
 			array(
 				'option' => array(
-					'value' => array(),
+					'value'    => array(),
 					'selected' => array(),
-				)
+				),
 			)
 		);
 	}
@@ -983,7 +983,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 
 		foreach ( array( 'rain', 'snow' ) as $fall ) {
-			if ( array_key_exists( $fall, $conditions ) &&  is_numeric( $conditions[ $fall ] ) ) {
+			if ( array_key_exists( $fall, $conditions ) && is_numeric( $conditions[ $fall ] ) ) {
 				$conditions[ $fall ] = self::mm_to_inches( $conditions[ $fall ] );
 			}
 		}

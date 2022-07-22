@@ -301,7 +301,7 @@ class Simple_Location_Plugin {
 			'pre'        => array(),
 			'p'          => array(
 				'class' => array(),
-				'id' => array(),
+				'id'    => array(),
 			),
 			'h1'         => array(
 				'class' => array(),
@@ -322,35 +322,35 @@ class Simple_Location_Plugin {
 				'class' => array(),
 			),
 			'ul'         => array(
-				'class' => array(),
-				'id' => array(),
-				'title' => array(),
-				'aria-label' => array(),
+				'class'       => array(),
+				'id'          => array(),
+				'title'       => array(),
+				'aria-label'  => array(),
 				'aria-hidden' => array(),
 
 			),
 			'li'         => array(
-				'class' => array(),
-				'id' => array(),
-				'class' => array(),
-				'id' => array(),
-				'title' => array(),
-				'aria-label' => array(),
+				'class'       => array(),
+				'id'          => array(),
+				'class'       => array(),
+				'id'          => array(),
+				'title'       => array(),
+				'aria-label'  => array(),
 				'aria-hidden' => array(),
 			),
 			'ol'         => array(),
 			'span'       => array(
-				'class' => array(),
-				'id' => array(),
-				'title' => array(),
-				'aria-label' => array(),
+				'class'       => array(),
+				'id'          => array(),
+				'title'       => array(),
+				'aria-label'  => array(),
 				'aria-hidden' => array(),
 				'data-prefix' => array(),
-				'data-icon' => array()
+				'data-icon'   => array(),
 			),
-			'section' => array(
+			'section'    => array(
 				'class' => array(),
-				'id' => array(),
+				'id'    => array(),
 			),
 			'img'        => array(
 				'src'    => array(),
@@ -369,40 +369,39 @@ class Simple_Location_Plugin {
 				'type'   => array(),
 			),
 			'svg'        => array(
-				'version' => array(),
-				'viewbox' => array(),
-				'id' => array(),
-				'x' => array(),
-				'y' => array(),
-				'xmlns' => array(),
+				'version'     => array(),
+				'viewbox'     => array(),
+				'id'          => array(),
+				'x'           => array(),
+				'y'           => array(),
+				'xmlns'       => array(),
 				'xmlns:xlink' => array(),
-				'xml:space' => array(),
-				'style' => array(),
+				'xml:space'   => array(),
+				'style'       => array(),
 				'aria-hidden' => array(),
-				'focusable' => array(),
-				'class' => array(),
-				'role' => array(),
-				'height' => array(),
-				'width' => array(),
-				'fill' => array()
-				
+				'focusable'   => array(),
+				'class'       => array(),
+				'role'        => array(),
+				'height'      => array(),
+				'width'       => array(),
+				'fill'        => array(),
 
 			),
-			'div' => array(
+			'div'        => array(
 				'class' => array(),
-				'id' => array(),
+				'id'    => array(),
 			),
-			'g' => array(
-				'id' => array(),
-				'stroke' => array(),
+			'g'          => array(
+				'id'           => array(),
+				'stroke'       => array(),
 				'stroke-width' => array(),
-				'fill-rule' => array(),
-				'fill' => array(), 
+				'fill-rule'    => array(),
+				'fill'         => array(),
 			),
-			'path' => array(
-				'd' => array(),
+			'path'       => array(
+				'd'    => array(),
 				'fill' => array(),
-			)
+			),
 		);
 	}
 

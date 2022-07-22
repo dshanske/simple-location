@@ -87,7 +87,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 			}
 		}
 		echo wp_kses( self::weather_list( $weather, 'fa-map', $instance ), Simple_Location_Plugin::kses_clean() );
-		//echo $args['after_widget']; // phpcs:ignore
+		// echo $args['after_widget']; // phpcs:ignore
 	}
 
 	/**

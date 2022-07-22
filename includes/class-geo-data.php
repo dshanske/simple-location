@@ -687,7 +687,7 @@ class WP_Geo_Data {
 			);
 			echo '<div class="misc-pub-section curtime misc-pub-pubtime">';
 			/* translators: Attachment information. %s: Date based on the timestamp in the attachment file. */
-			echo wp_kses_post( sprintf(  __( 'Created on: %s', 'simple-location' ), '<b>' . $created_on . '</b>' ) );
+			echo wp_kses_post( sprintf( __( 'Created on: %s', 'simple-location' ), '<b>' . $created_on . '</b>' ) );
 			echo '</div>';
 		}
 	}
