@@ -21,6 +21,8 @@ class Weather_Provider_HERE extends Weather_Provider {
 	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'HERE', 'simple-location' );
+		$this->url = 'https://developer.here.com/';
+		$this->description = __( 'HERE offers a free limited plan for up to 2500 weather transactions per month. Historical data not available.', 'simple-location' );
 		$this->slug = 'here';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_here_api' );

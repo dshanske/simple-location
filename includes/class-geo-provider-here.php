@@ -30,6 +30,8 @@ class Geo_Provider_Here extends Geo_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'HERE', 'simple-location' );
 		$this->slug = 'here';
+		$this->url = 'https://developer.here.com/';
+		$this->description = __( 'HERE offers a free limited plan for up to 30,000 geocoding transactions per month', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_here_api' );
 		}

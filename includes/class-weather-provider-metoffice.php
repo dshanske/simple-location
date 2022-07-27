@@ -22,6 +22,8 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Met Office(UK)', 'simple-location' );
 		$this->slug = 'metofficeuk';
+		$this->url = 'https://www.metoffice.gov.uk/services/data/datapoint';
+		$this->description = __( 'Limited to data for the UK only, and requires a free API key for unlimited access. Historical data is not available.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_metoffice_api' );
 		}

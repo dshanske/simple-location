@@ -16,6 +16,8 @@ class Map_Provider_TomTom extends Map_Provider {
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'TomTom Maps', 'simple-location' );
 		$this->slug         = 'tomtom';
+		$this->url = 'https://developer.tomtom.com/';
+		$this->description = __( 'Offers a freemium option or pay as you go. Sign up for an API Key', 'simple-location' );
 		$this->max_height   = 8192;
 		$this->max_width    = 8192;
 		$this->max_map_zoom = 22;

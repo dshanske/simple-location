@@ -14,6 +14,7 @@ class Location_Provider_Dummy extends Location_Provider {
 
 	public function __construct( $args = array() ) {
 		$this->name       = __( 'Set Location from Author Profile', 'simple-location' );
+		$this->description = __( 'This will always set the location of posts to the location set in the profile of the author', 'simple-location' );
 		$this->slug       = 'dummy';
 		$this->background = true;
 		parent::__construct( $args );

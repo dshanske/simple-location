@@ -32,6 +32,8 @@ class Geo_Provider_Bing extends Geo_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Bing', 'simple-location' );
 		$this->slug = 'bing';
+		$this->url = 'https://www.bingmapsportal.com/';
+		$this->description = __( 'Bing Geocoding API Requires a Bings Maps key...which is available for 125k transactions.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_bing_api' );
 		}

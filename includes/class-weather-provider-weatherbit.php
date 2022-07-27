@@ -22,6 +22,8 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Weatherbit', 'simple-location' );
 		$this->slug = 'weatherbit';
+		$this->url = 'https://www.weatherbit.io';
+		$this->description = __( 'Offers 500 calls per day free with an API key. Paid plan does include historical data.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_weatherbit_api' );
 		}

@@ -165,7 +165,7 @@ class Loc_Config {
 				'type'         => 'string',
 				'description'  => 'Map Provider',
 				'show_in_rest' => false,
-				'default'      => 'yandex',
+				'default'      => 'mapbox',
 			)
 		);
 		register_setting(

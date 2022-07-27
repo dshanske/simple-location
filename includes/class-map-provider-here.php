@@ -17,6 +17,8 @@ class Map_Provider_Here extends Map_Provider {
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'HERE Maps', 'simple-location' );
 		$this->slug         = 'here';
+		$this->url = 'https://developer.here.com/';
+		$this->description = __( 'HERE offers a free limited plan for up to 30,000 map transactions per month', 'simple-location' );
 		$this->max_width    = 2048;
 		$this->max_height   = 2048;
 		$this->max_map_zoom = 20;

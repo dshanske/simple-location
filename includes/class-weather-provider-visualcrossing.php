@@ -21,6 +21,8 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	 */
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Visual Crossing', 'simple-location' );
+		$this->url = 'https://www.visualcrossing.com/';
+		$this->description = __( 'Offers a free plan with 1000 requests per day, plus a metered rate after that of $0.0001 per request. Offer historical data. Requires API key.', 'simple-location' );
 		$this->slug = 'visualcrossing';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_visualcrossing_api' );

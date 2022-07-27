@@ -30,6 +30,8 @@ class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'OpenRoute', 'simple-location' );
 		$this->slug = 'openroute';
+		$this->url = 'https://openrouteservice.org/plans/';
+		$this->description = __( 'OpenRouteService is free for everyone, but you still need to sign up for an API key.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_openroute_api' );
 		}

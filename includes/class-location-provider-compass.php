@@ -16,6 +16,8 @@ class Location_Provider_Compass extends Location_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Compass', 'simple-location' );
 		$this->slug = 'compass';
+		$this->url = 'https://github.com/aaronpk/compass';
+		$this->description = __( 'If you have an instance of Compass, you can retrieve your current or historical location from it', 'simple-location' );
 		parent::__construct( $args );
 		$this->background = true;
 		add_filter( 'user_contactmethods', array( get_called_class(), 'user_contactmethods' ), 12 );

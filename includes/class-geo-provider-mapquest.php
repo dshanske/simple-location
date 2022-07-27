@@ -31,6 +31,8 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Mapquest', 'simple-location' );
 		$this->slug = 'mapquest';
+		$this->url = 'https://developer.mapquest.com/';
+		$this->description = __( 'Yes, MapQuest still exists. It offers Geocoding and a Static Map API. Offers a free tier with 15,000 transactions per month. Sign up for an API key', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_mapquest_api' );
 		}

@@ -16,6 +16,8 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'LocationIQ', 'simple-location' );
 		$this->slug         = 'locationiq';
+		$this->url = 'https://locationiq.com/';
+		$this->description = __( 'LocationIQ offers Geocoding and Static maps, with a free tier of 5000 requests/day. Sign up for an API key', 'simple-location' );
 		$this->max_map_zoom = 18;
 
 		if ( ! isset( $args['api'] ) ) {

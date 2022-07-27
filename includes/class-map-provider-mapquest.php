@@ -16,6 +16,8 @@ class Map_Provider_Mapquest extends Map_Provider {
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'Mapquest Maps', 'simple-location' );
 		$this->slug         = 'mapquest';
+		$this->url = 'https://developer.mapquest.com/';
+		$this->description = __( 'Yes, MapQuest still exists. It offers Geocoding and a Static Map API. Offers a free tier with 15,000 transactions per month. Sign up for an API key', 'simple-location' );
 		$this->max_map_zoom = 20;
 		$this->max_height   = 1920;
 		$this->max_width    = 1920;

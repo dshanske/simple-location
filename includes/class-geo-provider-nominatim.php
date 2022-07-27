@@ -30,6 +30,8 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'OpenStreetMap Nominatim', 'simple-location' );
 		$this->slug = 'nominatim';
+		$this->url = 'https://nominatim.org/';
+		$this->description = __( 'Nominatim uses OpenStreetMap Data for geocoding/reverse geocoding. OSM offers a free service for infrequent use.', 'simple-location' );
 		parent::__construct( $args );
 	}
 

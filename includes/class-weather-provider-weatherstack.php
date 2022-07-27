@@ -22,6 +22,8 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Weatherstack', 'simple-location' );
 		$this->slug = 'weatherstack';
+		$this->url = 'https://weatherstack.com';
+		$this->description = __( 'Offers a free account, but at only 250 calls/month and no historical data.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_weatherstack_api' );
 		}

@@ -16,6 +16,8 @@ class Map_Provider_Geoapify extends Map_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'GeoApify', 'simple-location' );
 		$this->slug = 'geoapify';
+		$this->url = 'https://www.geoapify.com/';
+		$this->description = __( 'GeoApify offers Maps and Geocoding APIs with a free tier of 3000 credits for requests per day. API Key required.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_geoapify_api' );
 		}

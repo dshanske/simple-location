@@ -30,6 +30,8 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'LocationIQ', 'simple-location' );
 		$this->slug = 'locationiq';
+		$this->url = 'https://locationiq.com/';
+		$this->description = __( 'LocationIQ offers Geocoding and Static maps, with a free tier of 5000 requests/day. Sign up for an API key', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_locationiq_api' );
 		}

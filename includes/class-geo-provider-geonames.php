@@ -30,6 +30,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Geonames', 'simple-location' );
 		$this->slug = 'geonames';
+		$this->url = 'The Geonames database is available under a creative commons license. A free user account is required.';
 		if ( ! isset( $args['user'] ) ) {
 			$args['user'] = get_option( 'sloc_geonames_user' );
 		}

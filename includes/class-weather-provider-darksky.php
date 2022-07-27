@@ -22,6 +22,8 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	public function __construct( $args = array() ) {
 		$this->name   = __( 'Dark Sky', 'simple-location' );
 		$this->slug   = 'darksky';
+		$this->url    = 'https://darksky.net';
+		$this->description = __( 'The Dark Sky API will continue to function until March 31st, 2023, but no new signups are permitted. Apple has announced the replacement for Dark Sky will be called Apple WeatherKit, but requires an Apple Developer program membership. Dark Sky will be removed when the API ceases to be available', 'simple-location' );
 		$this->region = false;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_darksky_api' );

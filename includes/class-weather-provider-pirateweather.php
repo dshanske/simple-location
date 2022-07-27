@@ -22,6 +22,8 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	public function __construct( $args = array() ) {
 		$this->name   = __( 'Pirate Weather', 'simple-location' );
 		$this->slug   = 'pirateweather';
+		$this->url =  'https://pirateweather.net';
+		$this->description = __( 'Pirate Weather is a service that reads public weather forecasts. It is offered for free by the developer, but donations are appreciated. Historic weather data is limited.', 'simple-location' );
 		$this->region = false;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_pirateweather_api' );

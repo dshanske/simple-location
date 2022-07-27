@@ -37,6 +37,13 @@ abstract class Sloc_Provider {
 	protected $description;
 
 	 /**
+	  * Provider URL.
+	  *
+	  * @var string
+	  */
+	protected $url;
+
+	 /**
 	  * Provider API Key.
 	  *
 	  * @since 1.0.0

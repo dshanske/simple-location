@@ -15,6 +15,8 @@ class Map_Provider_Mapbox extends Map_Provider {
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'Mapbox', 'simple-location' );
 		$this->slug         = 'mapbox';
+		$this->url = 'https://www.mapbox.com/';
+		$this->description = __( 'Mapbox offers 50,000 Static Map Requests per month with a free API key.', 'simple-location' );
 		$this->max_width    = 1280;
 		$this->max_height   = 1280;
 		$this->max_map_zoom = 22;

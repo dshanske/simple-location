@@ -16,6 +16,8 @@ class Map_Provider_Bing extends Map_Provider {
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'Bing Maps', 'simple-location' );
 		$this->slug         = 'bing';
+		$this->url = 'https://www.bingmapsportal.com/';
+		$this->description = __( 'Bing Static Map API Requires a Bings Maps key...which is available for 125k transactions.', 'simple-location' );
 		$this->max_height   = 1500;
 		$this->max_width    = 2000;
 		$this->max_map_zoom = 22;

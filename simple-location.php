@@ -196,7 +196,6 @@ class Simple_Location_Plugin {
 			'class-map-provider-here.php', // HERE.
 			'class-map-provider-locationiq.php', // LocationIQ.
 			'class-map-provider-geoapify.php', // Geoapify.
-			'class-map-provider-yandex.php', // Yandex.
 			'class-map-provider-tomtom.php', // Tom Tom.
 			'class-map-provider-staticmap.php', // Custom Provider.
 			'class-geo-provider-nominatim.php', // Nominatim.

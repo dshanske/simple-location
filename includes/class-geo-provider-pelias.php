@@ -30,6 +30,8 @@ class Geo_Provider_Pelias extends Geo_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Pelias', 'simple-location' );
 		$this->slug = 'pelias';
+		$this->url = 'https://pelias.io/';
+		$this->description = __( 'Pelias is an open source geocoder. To use this, a Pelias server is required', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_pelias_api' );
 		}

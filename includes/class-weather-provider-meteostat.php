@@ -29,6 +29,8 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Meteostat', 'simple-location' );
 		$this->slug = 'meteostat';
+		$this->url = 'https://meteostat.net';
+		$this->description = __( 'Meteostat is an open and free archive for weather data, and offers bulk historic weather data. It does not offer current weather consistently.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_meteostat_api' );
 		}
