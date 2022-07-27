@@ -11,18 +11,6 @@
  * @since 1.0.0
  */
 abstract class Weather_Provider extends Sloc_Provider {
-
-	 /**
-	  * Region.
-	  *
-	  * If null applies to all regions.
-	  * Can also be a string or array of strings representing two letter country codes.
-	  *
-	  * @since 4.0.7
-	  * @var string|array|null
-	  */
-	protected $region;
-
 	 /**
 	  * Station ID.
 	  *

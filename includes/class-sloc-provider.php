@@ -51,6 +51,16 @@ abstract class Sloc_Provider {
 	  */
 	protected $api;
 
+	 /**
+	  * Region.
+	  *
+	  * If null applies to all regions.
+	  * Can also be a string or array of strings representing two letter country codes.
+	  *
+	  * @since 4.0.7
+	  * @var string|array|null
+	  */
+	protected $region;
 
 	 /**
 	  * Latitude.
