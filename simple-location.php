@@ -100,6 +100,7 @@ class Simple_Location_Plugin {
 	 * @since 4.0.0
 	 */
 	public static function load( $files, $dir = 'includes/' ) {
+		$dir = trailingslashit( $dir );
 		if ( empty( $files ) ) {
 			return;
 		}
@@ -171,12 +172,18 @@ class Simple_Location_Plugin {
 		);
 		self::load( $libraries, 'lib/' );
 
-		// Load Providers.
+		// Load Location Providers.
 		$providers = array(
 			'class-location-provider-dummy.php', // Dummy Location Provider.
 			'class-location-provider-airport.php', // Airport Location Provider.
 			'class-location-provider-address.php', // Address Lookup Location Provider.
 			'class-location-provider-compass.php', // Compass https://github.com/aaronpk/Compass Location Provder.
+		);
+
+		self::load( $providers, 'includes/location/' );
+
+		// Load Weather Providers.
+		$providers = array(
 			'class-weather-provider-openweathermap.php', // Open Weather Map.
 			'class-weather-provider-darksky.php', // Dark Sky.
 			'class-weather-provider-nwsus.php', // National Weather Service (US).
@@ -189,6 +196,12 @@ class Simple_Location_Plugin {
 			'class-weather-provider-meteostat.php', // Meteostat.
 			'class-weather-provider-pirateweather.php', // Pirate Weather.
 			'class-weather-provider-station.php', // Custom Station Weather Provider.
+		);
+
+		self::load( $providers, 'includes/weather/' );
+
+		// Load Map Providers.
+		$providers = array(
 			'class-map-provider-mapbox.php', // MapBox.
 			'class-map-provider-google.php', // Google.
 			'class-map-provider-bing.php', // Bing.
@@ -198,6 +211,12 @@ class Simple_Location_Plugin {
 			'class-map-provider-geoapify.php', // Geoapify.
 			'class-map-provider-tomtom.php', // Tom Tom.
 			'class-map-provider-staticmap.php', // Custom Provider.
+		);
+
+		self::load( $providers, 'includes/map/' );
+
+		// Load Geo Providers.
+		$providers = array(
 			'class-geo-provider-nominatim.php', // Nominatim.
 			'class-geo-provider-mapquest.php', // MapQuest.
 			'class-geo-provider-openmapquest.php', // MapQuest Nominatim.
@@ -209,9 +228,8 @@ class Simple_Location_Plugin {
 			'class-geo-provider-pelias.php', // Pelias.
 			'class-geo-provider-openroute.php', // OpenRoute.
 		);
-		self::load( $providers );
+		self::load( $providers, 'includes/geo/' );
 	}
-
 
 	/**
 	 * Widgets Initializaton Function.
