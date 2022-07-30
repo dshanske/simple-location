@@ -146,10 +146,6 @@ class Simple_Location_Plugin {
 			'class-geo-provider.php', // Geo Provider Class.
 			'class-weather-provider.php', // Weather Provider Class.
 			'class-location-provider.php', // Location Provider Class.
-			'class-sloc-weather-widget.php', // Weather Widget.
-			'class-sloc-station-widget.php', // Weather Station Widget.
-			'class-sloc-airport-widget.php', // Airport Weather Widget.
-			'class-sloc-lastseen-widget.php', // Last Location Seen Widget.
 			'class-rest-geo.php', // REST endpoint for Geo.
 			'class-loc-config.php', // Configuration and Settings Page.
 			'class-loc-metabox.php', // Location Metabox.
@@ -165,6 +161,18 @@ class Simple_Location_Plugin {
 
 		// Load Core Files.
 		self::load( $core );
+
+		// Load Widgets.
+
+		$widgets = array(
+			'class-sloc-weather-widget.php', // Weather Widget.
+			'class-sloc-station-widget.php', // Weather Station Widget.
+			'class-sloc-airport-widget.php', // Airport Weather Widget.
+			'class-sloc-lastseen-widget.php', // Last Location Seen Widget.
+		);
+
+		self::load( $widgets, 'includes/widgets/' );
+
 		add_action( 'widgets_init', array( static::class, 'widgets_init' ) );
 
 		$libraries = array(
