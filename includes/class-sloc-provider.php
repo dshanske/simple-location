@@ -413,6 +413,7 @@ abstract class Sloc_Provider {
 		if ( is_numeric( $time ) ) {
 			$datetime = new DateTime();
 			$datetime->setTimestamp( $time );
+			$datetime->setTimezone( wp_timezone() );
 			return $datetime;
 		}
 		if ( is_string( $time ) ) {
