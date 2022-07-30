@@ -21,14 +21,6 @@ abstract class Geo_Provider extends Sloc_Provider {
 	protected $reverse_zoom;
 
 	 /**
-	  * Username if Applicable.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
-	protected $user;
-
-	 /**
 	  * Timezone.
 	  *
 	  * @since 1.0.0

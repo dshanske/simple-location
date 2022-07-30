@@ -6,7 +6,7 @@
  */
 
 /**
- * Reverse Geolocation using Bing API.
+ * Reverse Geolocation using GeoNames API.
  *
  * @since 1.0.0
  */

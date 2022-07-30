@@ -52,6 +52,14 @@ abstract class Sloc_Provider {
 	protected $api;
 
 	 /**
+	  * Username if Applicable.
+	  *
+	  * @since 1.0.0
+	  * @var int
+	  */
+	protected $user;
+
+	 /**
 	  * Region.
 	  *
 	  * If null applies to all regions.
