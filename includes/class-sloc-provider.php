@@ -217,6 +217,49 @@ abstract class Sloc_Provider {
 	}
 
 	/**
+	 * Adds a Setting Field for a Parameter of Type String
+	 */
+	public static function add_settings_parameter( $name, $property, $type = null ) {
+		if ( ! $type ) {
+			$type = __( 'API Key', 'simple-location' );
+		}
+
+		add_settings_field(
+			$property, // ID.
+			// translators: 1. Name of Service 2. Type of Property
+			sprintf( __( '%1$s %2$s', 'simple-location' ), $name, $type ), // Setting title.
+			array( 'Loc_Config', 'string_callback' ), // Display callback.
+			'sloc_api', // Settings page.
+			'sloc_api', // Settings section.
+			array(
+				'label_for' => $property,
+			)
+		);
+	}
+
+	/**
+	 * Adds a Setting Field for a Parameter of Type URL
+	 */
+	public static function add_settings_url_parameter( $name, $property, $type = null ) {
+		if ( ! $type ) {
+			$type = __( 'Service URL', 'simple-location' );
+		}
+
+		add_settings_field(
+			$property, // ID.
+			// translators: 1. Name of Service 2. Type of Property
+			sprintf( __( '%1$s %2$s', 'simple-location' ), $name, $type ), // Setting title.
+			array( 'Loc_Config', 'string_callback' ), // Display callback.
+			'sloc_api', // Settings page.
+			'sloc_api', // Settings section.
+			array(
+				'label_for' => $property,
+				'type'      => 'url',
+			)
+		);
+	}
+
+	/**
 	 * Set and Validate Coordinates.
 	 *
 	 * @param array|float $lat Latitude or array of all three properties.

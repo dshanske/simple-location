@@ -41,7 +41,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( 'google' === $option ) {
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 			add_action( 'init', array( get_called_class(), 'init' ) );
-		}
+		} 
 		parent::__construct( $args );
 	}
 
@@ -51,16 +51,7 @@ class Geo_Provider_Google extends Geo_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'googleapi', // ID.
-			__( 'Google Maps API Key', 'simple-location' ), // Setting title.
-			array( 'Loc_Config', 'string_callback' ), // Display callback.
-			'sloc_providers', // Settings page.
-			'sloc_api', // Settings section.
-			array(
-				'label_for' => 'sloc_google_api',
-			)
-		);
+		self::add_settings_parameter( __( 'Google', 'simple-location' ), 'sloc_google_api' );
 	}
 
 	/**

@@ -60,16 +60,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'visualcrossingapi', // ID.
-			__( 'Visual Crossing API', 'simple-location' ), // Setting title.
-			array( 'Loc_Config', 'string_callback' ), // Display callback.
-			'sloc_providers', // Settings page.
-			'sloc_api', // Settings section.
-			array(
-				'label_for' => 'sloc_visualcrossing_api',
-			)
-		);
+		self::add_settings_parameter( __( 'Visual Crossing', 'simple-location' ), 'sloc_visualcrossing_api' );
 	}
 
 	/**

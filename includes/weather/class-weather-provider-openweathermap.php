@@ -61,16 +61,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'openweatherapi', // id.
-			__( 'OpenWeatherMap API Key', 'simple-location' ), // setting title.
-			array( 'Loc_Config', 'string_callback' ), // display callback.
-			'sloc_providers', // settings page.
-			'sloc_api', // settings section.
-			array(
-				'label_for' => 'sloc_openweathermap_api',
-			)
-		);
+		self::add_settings_parameter( __( 'OpenWeatherMap', 'simple-location' ), 'sloc_openweathermap_api' );
 	}
 
 	/**

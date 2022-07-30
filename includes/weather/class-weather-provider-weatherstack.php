@@ -63,16 +63,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'weatherstackapi', // id.
-			__( 'Weatherstack API Key', 'simple-location' ), // setting title.
-			array( 'Loc_Config', 'string_callback' ), // display callback.
-			'sloc_providers', // settings page.
-			'sloc_api', // settings section.
-			array(
-				'label_for' => 'sloc_weatherstack_api',
-			)
-		);
+		self::add_settings_parameter( __( 'Weatherstack', 'simple-location' ), 'sloc_weatherstack_api' );
 	}
 
 	/**

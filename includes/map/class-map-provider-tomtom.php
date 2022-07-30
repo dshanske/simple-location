@@ -60,16 +60,7 @@ class Map_Provider_TomTom extends Map_Provider {
 	}
 
 	public static function admin_init() {
-		add_settings_field(
-			'tomtomapi', // id
-			__( 'TomTom API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_tomtom_api',
-			)
-		);
+		self::add_settings_parameter( __( 'TomTom', 'simple-location' ), 'sloc_tomtom_api' );
 
 		add_settings_field(
 			'tomtomstyle', // id

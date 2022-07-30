@@ -60,16 +60,7 @@ class Map_Provider_Bing extends Map_Provider {
 	}
 
 	public static function admin_init() {
-		add_settings_field(
-			'bingapi', // id
-			__( 'Bing API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_bing_api',
-			)
-		);
+		self::add_settings_parameter( __( 'Bing', 'simple-location' ), 'sloc_bing_api' );
 
 		add_settings_field(
 			'bingstyle', // id

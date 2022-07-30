@@ -58,16 +58,8 @@ class Map_Provider_Geoapify extends Map_Provider {
 	}
 
 	public static function admin_init() {
-		add_settings_field(
-			'geoapify_api', // id
-			__( 'GeoApify API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_geoapify_api',
-			)
-		);
+		self::add_settings_parameter( __( 'GeoApify', 'simple-location' ), 'sloc_geoapify_api' );
+
 		add_settings_field(
 			'geoapifystyle', // id
 			__( 'Geoapify Style', 'simple-location' ),

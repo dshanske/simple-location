@@ -78,26 +78,8 @@ class Geo_Provider_Pelias extends Geo_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'pelias_api', // ID.
-			__( 'Pelias API Key', 'simple-location' ), // Setting title.
-			array( 'Loc_Config', 'string_callback' ), // Display callback.
-			'sloc_providers', // Settings page.
-			'sloc_api', // Settings section.
-			array(
-				'label_for' => 'sloc_pelias_api',
-			)
-		);
-		add_settings_field(
-			'pelias_url', // ID.
-			__( 'Pelias Server URL', 'simple-location' ), // Setting title.
-			array( 'Loc_Config', 'string_callback' ), // Display callback.
-			'sloc_providers', // Settings page.
-			'sloc_api', // Settings section.
-			array(
-				'label_for' => 'sloc_pelias_url',
-			)
-		);
+		self::add_settings_parameter( __( 'Pelias', 'simple-location' ), 'sloc_pelias_api' );
+		self::add_settings_url_parameter( __( 'Pelias', 'simple-location' ), 'sloc_pelias_url' );
 	}
 
 	/**

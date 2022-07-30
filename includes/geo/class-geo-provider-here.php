@@ -68,16 +68,7 @@ class Geo_Provider_Here extends Geo_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'hereapi', // ID.
-			__( 'HERE API Key', 'simple-location' ), // Setting title.
-			array( 'Loc_Config', 'string_callback' ), // Display callback.
-			'sloc_providers', // Settings page.
-			'sloc_api', // Settings section.
-			array(
-				'label_for' => 'sloc_here_api',
-			)
-		);
+		self::add_settings_parameter( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
 	}
 
 	/**

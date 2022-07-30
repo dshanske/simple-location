@@ -76,16 +76,9 @@ class Map_Provider_Here extends Map_Provider {
 	}
 
 	public static function admin_init() {
-		add_settings_field(
-			'hereapi', // id
-			__( 'HERE API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_here_api',
-			)
-		);
+
+		self::add_settings_parameter( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
+		
 		add_settings_field(
 			'herestyle', // id
 			__( 'HERE Style', 'simple-location' ),

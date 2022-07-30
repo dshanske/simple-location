@@ -74,17 +74,9 @@ class Map_Provider_Mapbox extends Map_Provider {
 	}
 
 	public static function admin_init() {
-		add_settings_field(
-			'mapboxuser', // id
-			__( 'Mapbox User', 'simple-location' ),
-			array( 'Loc_Config', 'string_callback' ),
-			'sloc_providers',
-			'sloc_api',
-			array(
-				'label_for' => 'sloc_mapbox_user',
-
-			)
-		);
+		self::add_settings_parameter( __( 'Mapbox', 'simple-location' ), 'sloc_mapbox_user', __( 'User', 'simple-location' ) );
+		self::add_settings_parameter( __( 'Mapbox', 'simple-location' ), 'sloc_mapbox_api' );
+		
 		add_settings_field(
 			'mapboxstyle', // id
 			__( 'Mapbox Style', 'simple-location' ),
@@ -94,17 +86,6 @@ class Map_Provider_Mapbox extends Map_Provider {
 			array(
 				'label_for' => 'sloc_mapbox_style',
 				'provider'  => new Map_Provider_Mapbox(),
-
-			)
-		);
-		add_settings_field(
-			'mapboxapi', // id
-			__( 'Mapbox API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_mapbox_api',
 
 			)
 		);

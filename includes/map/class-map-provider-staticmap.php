@@ -58,16 +58,8 @@ class Map_Provider_StaticMap extends Map_Provider {
 	}
 
 	public static function admin_init() {
-		add_settings_field(
-			'staticmap_url', // id
-			__( 'Custom Static Map URL', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_staticmap_url',
-			)
-		);
+		self::add_settings_url_parameter( __( 'Custom Static Map', 'simple-location' ), 'sloc_staticmap_url' );
+
 		add_settings_field(
 			'staticmapstyle', // id
 			__( 'Static Map Style', 'simple-location' ),

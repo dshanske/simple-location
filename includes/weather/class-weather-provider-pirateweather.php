@@ -61,16 +61,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'sloc_pirateweather_api', // id.
-			__( 'Pirate Weather API Key', 'simple-location' ), // setting title.
-			array( 'Loc_Config', 'string_callback' ), // display callback.
-			'sloc_providers', // settings page.
-			'sloc_api', // settings section.
-			array(
-				'label_for' => 'sloc_pirateweather_api',
-			)
-		);
+		self::add_settings_parameter( __( 'Pirate Weather', 'simple-location' ), 'sloc_pirateweather_api' );
 	}
 
 	/**

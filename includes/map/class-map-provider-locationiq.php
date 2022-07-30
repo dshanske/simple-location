@@ -47,16 +47,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	}
 
 	public static function admin_init() {
-		add_settings_field(
-			'locationiq_api', // id
-			__( 'LocationIQ API Key', 'simple-location' ), // setting title
-			array( 'Loc_Config', 'string_callback' ), // display callback
-			'sloc_providers', // settings page
-			'sloc_api', // settings section
-			array(
-				'label_for' => 'sloc_locationiq_api',
-			)
-		);
+		self::add_settings_parameter( __( 'Location IQ', 'simple-location' ), 'sloc_locationiq_api' );
 	}
 
 

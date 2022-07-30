@@ -67,16 +67,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'geonamesuser', // ID.
-			__( 'Geonames User', 'simple-location' ),
-			array( 'Loc_Config', 'string_callback' ),
-			'sloc_providers',
-			'sloc_api',
-			array(
-				'label_for' => 'sloc_geonames_user',
-			)
-		);
+		self::add_settings_parameter( __( 'Geonames', 'simple-location' ), 'sloc_geonames_user', __( 'User', 'simple-location') );
 	}
 
 	/**

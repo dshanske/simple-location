@@ -61,16 +61,7 @@ class Weather_Provider_HERE extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'sloc_here_api', // id.
-			__( 'HERE API Key', 'simple-location' ), // setting title.
-			array( 'Loc_Config', 'string_callback' ), // display callback.
-			'sloc_providers', // settings page.
-			'sloc_api', // settings section.
-			array(
-				'label_for' => 'sloc_here_api',
-			)
-		);
+		self::add_settings_parameter( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
 	}
 
 	/**

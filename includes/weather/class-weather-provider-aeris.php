@@ -77,26 +77,10 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'aerisweatherid', // ID.
-			__( 'AerisWeather Client ID', 'simple-location' ), // Setting title.
-			array( 'Loc_Config', 'string_callback' ), // Display callback.
-			'sloc_providers', // Settings page.
-			'sloc_api', // Settings section.
-			array(
-				'label_for' => 'sloc_aeris_client_id',
-			)
-		);
-		add_settings_field(
-			'aerisweathersecret', // ID.
-			__( 'AerisWeather Client Secret', 'simple-location' ), // Setting title.
-			array( 'Loc_Config', 'string_callback' ), // Display callback.
-			'sloc_providers', // Settings page.
-			'sloc_api', // Settings section.
-			array(
-				'label_for' => 'sloc_aeris_client_secret',
-			)
-		);
+		self::add_settings_parameter( __( 'AerisWeather', 'simple-location' ), 'sloc_aeris_client_id', __( 'Client ID', 'simple-location' ) );
+
+		self::add_settings_parameter( __( 'AerisWeather', 'simple-location' ), 'sloc_aeris_client_secret', __( 'Client Secret', 'simple-location' ) );
+		
 		add_settings_field(
 			'aerisweatherpws', // ID.
 			__( 'Include Personal Weather Stations in AerisWeather Provider', 'simple-location' ), // Setting title.
