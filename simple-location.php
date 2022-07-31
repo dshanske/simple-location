@@ -283,14 +283,15 @@ class Simple_Location_Plugin {
 		// Load Geo Providers.
 		$providers = array(
 			'class-geo-provider-nominatim.php', // Nominatim.
+			'class-geo-provider-pelias.php', // Pelias.
 			'class-geo-provider-mapquest.php', // MapQuest.
 			'class-geo-provider-openmapquest.php', // MapQuest Nominatim.
 			'class-geo-provider-google.php', // Google.
+			'class-geo-provider-geoapify.php', // Geoapify.
 			'class-geo-provider-here.php', // HERE.
 			'class-geo-provider-bing.php', // Bing.
 			'class-geo-provider-locationiq.php', // LocationIQ.
 			'class-geo-provider-geonames.php', // Geonames.
-			'class-geo-provider-pelias.php', // Pelias.
 			'class-geo-provider-openroute.php', // OpenRoute.
 		);
 		self::register_providers( $providers, 'includes/geo/' );
