@@ -39,7 +39,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'WeatherStack', 'simple-location' ), 'sloc_weatherstack_api' ); 
+		self::register_settings_api( __( 'WeatherStack', 'simple-location' ), 'sloc_weatherstack_api' );
 	}
 
 	/**

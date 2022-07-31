@@ -35,7 +35,14 @@ class Loc_Metabox {
 		$screens   = self::screens();
 		$screens[] = 'comment';
 		$hooks     = array( 'profile.php' );
+
 		if ( in_array( get_current_screen()->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
+			wp_enqueue_style(
+				'sloc_admin',
+				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),
+				array(),
+				Simple_Location_Plugin::$version
+			);
 			wp_enqueue_script(
 				'sloc_location',
 				plugins_url( 'js/location.js', dirname( __FILE__ ) ),
@@ -49,12 +56,6 @@ class Loc_Metabox {
 				array(),
 				Simple_Location_Plugin::$version,
 				true
-			);
-			wp_enqueue_style(
-				'sloc_metabox',
-				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),
-				array(),
-				Simple_Location_Plugin::$version
 			);
 			wp_localize_script(
 				'sloc_location',

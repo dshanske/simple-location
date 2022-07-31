@@ -37,7 +37,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'Visual Crossing API Key', 'simple-location' ), 'sloc_visualcrossing_api' ); 
+		self::register_settings_api( __( 'Visual Crossing API Key', 'simple-location' ), 'sloc_visualcrossing_api' );
 	}
 
 	/**

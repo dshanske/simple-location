@@ -21,10 +21,10 @@ class Location_Provider_Address extends Location_Provider {
 	 *  Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name       = __( 'Set Location from Address Looked Up using Geo Provider', 'simple-location' );
-		$this->slug       = 'address';
+		$this->name        = __( 'Set Location from Address Looked Up using Geo Provider', 'simple-location' );
+		$this->slug        = 'address';
 		$this->description = __( 'If this provider is used, it will look up the address provided in the address box to find the coordinates', 'simple-location' );
-		$this->background = false;
+		$this->background  = false;
 		parent::__construct( $args );
 	}
 

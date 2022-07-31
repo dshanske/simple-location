@@ -151,13 +151,12 @@ abstract class Map_Provider extends Sloc_Provider {
 		}
 	}
 
-	/** 
+	/**
 	 * Is Provider Active
-	 *
 	 */
 	public function is_active() {
 		$option = get_option( 'sloc_map_provider' );
-		return ($this->slug === $option );
+		return ( $this->slug === $option );
 	}
 
 	/**

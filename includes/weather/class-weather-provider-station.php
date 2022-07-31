@@ -26,6 +26,14 @@ class Weather_Provider_Station extends Weather_Provider {
 		parent::__construct( $args );
 	}
 
+
+	/**
+	 * Is Provider Active
+	 */
+	public function is_active() {
+		return true;
+	}
+
 	/**
 	 * Init Function
 	 **/

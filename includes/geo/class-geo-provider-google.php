@@ -36,7 +36,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
 		}
-		
+
 		parent::__construct( $args );
 	}
 

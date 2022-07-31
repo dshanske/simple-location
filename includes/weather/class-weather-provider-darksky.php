@@ -38,7 +38,7 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'DarkSky API', 'simple-location' ), 'sloc_darksky_api' ); 
+		self::register_settings_api( __( 'DarkSky API', 'simple-location' ), 'sloc_darksky_api' );
 	}
 
 	/**

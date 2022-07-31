@@ -26,6 +26,6 @@ trait Sloc_API_OpenRoute {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'OpenRoute', 'simple-location' ), 'sloc_openroute_api' ); 
+		self::register_settings_api( __( 'OpenRoute', 'simple-location' ), 'sloc_openroute_api' );
 	}
 }

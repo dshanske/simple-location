@@ -34,8 +34,8 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'Aeris Client ID', 'simple-location' ), 'sloc_aeris_client_id' ); 
-		self::register_settings_api( __( 'Aeris Client Secret', 'simple-location' ), 'sloc_aeris_client_secret' ); 
+		self::register_settings_api( __( 'Aeris Client ID', 'simple-location' ), 'sloc_aeris_client_id' );
+		self::register_settings_api( __( 'Aeris Client Secret', 'simple-location' ), 'sloc_aeris_client_secret' );
 		register_setting(
 			'sloc_providers', // Option group.
 			'sloc_aeris_pws', // Option name.

@@ -45,7 +45,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'Meteostat API', 'simple-location' ), 'sloc_meteostat_api' ); 
+		self::register_settings_api( __( 'Meteostat API', 'simple-location' ), 'sloc_meteostat_api' );
 	}
 
 	/**

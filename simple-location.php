@@ -139,7 +139,7 @@ class Simple_Location_Plugin {
 					$class = ucwords( $class, '-' );
 					$class = str_replace( '-', '_', $class );
 					if ( class_exists( $class ) ) {
-						register_sloc_provider( new $class );
+						register_sloc_provider( new $class() );
 					} else {
 						error_log( 'Cannot register ' . $class );
 					}

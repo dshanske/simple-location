@@ -38,7 +38,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'PirateWeather API Key', 'simple-location' ), 'sloc_pirateweather_api' ); 
+		self::register_settings_api( __( 'PirateWeather API Key', 'simple-location' ), 'sloc_pirateweather_api' );
 	}
 
 	/**

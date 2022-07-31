@@ -30,7 +30,7 @@ trait Sloc_API_Bing {
 					'provider'  => new Map_Provider_Bing(),
 				)
 			);
-		} 
+		}
 	}
 
 	/**
@@ -39,7 +39,7 @@ trait Sloc_API_Bing {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'Bing', 'simple-location' ), 'sloc_bing_api' ); 
+		self::register_settings_api( __( 'Bing', 'simple-location' ), 'sloc_bing_api' );
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
 			register_setting(
 				'simloc',

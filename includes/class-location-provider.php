@@ -136,13 +136,12 @@ abstract class Location_Provider extends Sloc_Provider {
 		$this->api  = $r['api'];
 	}
 
-	/** 
+	/**
 	 * Is Provider Active
-	 *
 	 */
 	public function is_active() {
 		$option = get_option( 'sloc_location_provider' );
-		return ($this->slug === $option );
+		return ( $this->slug === $option );
 	}
 
 	/**

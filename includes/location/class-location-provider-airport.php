@@ -21,10 +21,10 @@ class Location_Provider_Airport extends Location_Provider {
 	 *  Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name       = __( 'Set Location from Airport Code', 'simple-location' );
+		$this->name        = __( 'Set Location from Airport Code', 'simple-location' );
 		$this->description = __( 'This location provider uses a local airport code database to set your location based on airport codes', 'simple-location' );
-		$this->slug       = 'airport';
-		$this->background = false;
+		$this->slug        = 'airport';
+		$this->background  = false;
 		parent::__construct( $args );
 	}
 

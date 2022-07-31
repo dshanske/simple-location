@@ -69,8 +69,28 @@ class Loc_Config {
 		self::register_general_settings();
 		self::register_provider_settings();
 		self::register_map_settings();
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue' ) );
 	}
 
+
+	public static function admin_enqueue( $hook_suffix ) {
+		$hooks = array( 'indieweb_page_simloc' );
+		if ( in_array( $hook_suffix, $hooks, true ) ) {
+			wp_enqueue_style(
+				'sloc_admin',
+				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),
+				array(),
+				Simple_Location_Plugin::$version
+			);
+			wp_enqueue_script(
+				'sloc_password',
+				plugins_url( 'js/password.js', dirname( __FILE__ ) ),
+				array(),
+				Simple_Location_Plugin::$version,
+				true
+			);
+		}
+	}
 
 	/**
 	 * Register General Settings.
@@ -159,7 +179,6 @@ class Loc_Config {
 		);
 	}
 
-
 	/**
 	 * Register Provider Settings.
 	 *
@@ -218,7 +237,6 @@ class Loc_Config {
 		);
 	}
 
-
 	/**
 	 * Register Map Settings.
 	 *
@@ -274,7 +292,6 @@ class Loc_Config {
 
 	}
 
-
 	/**
 	 * Register a Provider.
 	 *
@@ -301,7 +318,6 @@ class Loc_Config {
 		return true;
 	}
 
-
 	/**
 	 * Determine default for measurement.
 	 *
@@ -314,7 +330,6 @@ class Loc_Config {
 		}
 		return 'si';
 	}
-
 
 	/**
 	 * Setup administrative menu.
@@ -342,7 +357,6 @@ class Loc_Config {
 			);
 		}
 	}
-
 
 	/**
 	 * Generate Options Page.
@@ -434,7 +448,6 @@ class Loc_Config {
 		</div>
 		<?php
 	}
-
 
 	/**
 	 * Echoes link for tab on page
@@ -673,7 +686,6 @@ class Loc_Config {
 		);
 	}
 
-
 	/**
 	 * Tries to display easy to understand strings for zoom levels.
 	 *
@@ -696,7 +708,6 @@ class Loc_Config {
 		);
 	}
 
-
 	/**
 	 * Preset Aspect Ratios
 	 *
@@ -717,7 +728,6 @@ class Loc_Config {
 		);
 	}
 
-
 	/**
 	 * Echos a checkbox.
 	 *
@@ -731,10 +741,9 @@ class Loc_Config {
 	public static function checkbox_callback( array $args ) {
 		$name    = $args['label_for'];
 		$checked = get_option( $name );
-		printf( '<input name="%1s" type="hidden" value="0" />', esc_attr( $name ) );
-		printf( '<input name="%1s" type="checkbox" value="1" %2s />', esc_attr( $name ), checked( 1, $checked, false ) );
+		printf( '<input name="%1$s" type="hidden" value="0" />', esc_attr( $name ) );
+		printf( '<input name="%1$s" type="checkbox" value="1" %2$s />', esc_attr( $name ), checked( 1, $checked, false ) );
 	}
-
 
 	/**
 	 * Echos a number input.
@@ -748,9 +757,8 @@ class Loc_Config {
 	 */
 	public static function number_callback( array $args ) {
 		$name = $args['label_for'];
-		printf( '<input name="%1s" type="number" min="0" step="1" size="4" class="small-text" value="%2s" />', esc_attr( $name ), esc_attr( get_option( $name ) ) );
+		printf( '<input name="%1$s" type="number" min="0" step="1" size="4" class="small-text" value="%2$s" />', esc_attr( $name ), esc_attr( get_option( $name ) ) );
 	}
-
 
 	/**
 	 * Echos a text input.
@@ -768,9 +776,13 @@ class Loc_Config {
 		if ( ! isset( $args['type'] ) ) {
 			$args['type'] = 'text';
 		}
-		printf( '<input name="%1s" size="50" autocomplete="off" class="regular-text" type="%2s" value="%3s" />', esc_attr( $name ), esc_attr( $args['type'] ), esc_attr( get_option( $name ) ) );
+		$value = get_option( $name );
+		if ( 'password' === $args['type'] ) {
+			printf( '<input name="%1$s" id="%1$s" size="50" autocomplete="off" class="regular-text" type="password" autocomplete="off" data-lpignore="true" autofill="off" value="%2$s"/>', esc_attr( $name ), esc_attr( $value ) );
+		} else {
+			printf( '<input name="%1$s" id="%1$s" size="50" autocomplete="off" class="regular-text" type="%2$s" value="%3$s" />', esc_attr( $name ), esc_attr( $args['type'] ), esc_attr( $value ) );
+		}
 	}
-
 
 	/**
 	 * Echos a textarea.
@@ -784,9 +796,8 @@ class Loc_Config {
 	 */
 	public static function textarea_callback( array $args ) {
 		$name = $args['label_for'];
-		printf( '<textarea name="%1s" class="regular-text">%2$s</textarea>', esc_attr( $name ), wp_kses_post( get_option( $name ) ) );
+		printf( '<textarea name="%1$s" class="regular-text">%2$s</textarea>', esc_attr( $name ), wp_kses_post( get_option( $name ) ) );
 	}
-
 
 	/**
 	 * Echos a select box of providers.
@@ -822,7 +833,6 @@ class Loc_Config {
 		}
 	}
 
-
 	/**
 	 * See WP_Geo_Data::geo_public().
 	 *
@@ -831,7 +841,6 @@ class Loc_Config {
 	public static function geo_public() {
 		return WP_Geo_Data::geo_public();
 	}
-
 
 	/**
 	 * Return list of map providers.
@@ -847,7 +856,6 @@ class Loc_Config {
 		return $return;
 	}
 
-
 	/**
 	 * Return list of geo providers.
 	 *
@@ -861,7 +869,6 @@ class Loc_Config {
 		}
 		return $return;
 	}
-
 
 	/**
 	 * Return list of geolocation providers.
@@ -911,7 +918,6 @@ class Loc_Config {
 			),
 		);
 	}
-
 
 	/**
 	 * Echo measurement unit choices.
@@ -973,7 +979,6 @@ class Loc_Config {
 		self::select_callback( $name, $text, $styles );
 	}
 
-
 	/**
 	 * Echo list of values.
 	 *
@@ -995,7 +1000,6 @@ class Loc_Config {
 		self::select_callback( $name, $text, $list );
 	}
 
-
 	/**
 	 * Echo a select list.
 	 *
@@ -1012,7 +1016,6 @@ class Loc_Config {
 		echo '</select><br /><br />';
 	}
 
-
 	/**
 	 * General settings header.
 	 *
@@ -1020,7 +1023,6 @@ class Loc_Config {
 	 */
 	public static function sloc_general_settings() {
 	}
-
 
 	/**
 	 * Provider settings header.
@@ -1034,7 +1036,6 @@ class Loc_Config {
 		<?php
 	}
 
-
 	/**
 	 * Map settings header.
 	 *
@@ -1044,7 +1045,6 @@ class Loc_Config {
 		esc_html_e( 'These settings dictate the display of maps', 'simple-location' );
 	}
 
-
 	/**
 	 * API settings header.
 	 *
@@ -1053,7 +1053,6 @@ class Loc_Config {
 	public static function sloc_api_settings() {
 		esc_html_e( 'In order for a specific service to work, you must add their API key below', 'simple-location' );
 	}
-
 
 	/**
 	 * Returns the current map provider.
@@ -1071,7 +1070,6 @@ class Loc_Config {
 		}
 		return null;
 	}
-
 
 	/**
 	 * Returns the current reverse geo provider.
@@ -1092,7 +1090,6 @@ class Loc_Config {
 		}
 		return null;
 	}
-
 
 	/**
 	 * Returns the current Geolocation provider.
@@ -1116,7 +1113,6 @@ class Loc_Config {
 		}
 		return null;
 	}
-
 
 	/**
 	 * Returns the current weather provider.

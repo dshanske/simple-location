@@ -41,7 +41,7 @@ trait Sloc_API_GeoApify {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'GeoApify', 'simple-location' ), 'sloc_geoapify_api' ); 
+		self::register_settings_api( __( 'GeoApify', 'simple-location' ), 'sloc_geoapify_api' );
 
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
 			register_setting(

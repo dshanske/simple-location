@@ -205,9 +205,8 @@ abstract class Sloc_Provider {
 		return $this->description;
 	}
 
-	/** 
+	/**
 	 * Is Provider Active
-	 *
 	 */
 	abstract public function is_active();
 
@@ -220,6 +219,17 @@ abstract class Sloc_Provider {
 	 */
 	public function get_slug() {
 		return $this->slug;
+	}
+
+	/**
+	 * Sanitizes API Keys and Similar
+	 */
+	public static function sanitize_api_key( $string ) {
+		if ( ! is_string( $string ) ) {
+			return false;
+		}
+
+		return stripslashes( trim( $string ) );
 	}
 
 	/**
@@ -239,6 +249,7 @@ abstract class Sloc_Provider {
 			'sloc_api', // Settings section.
 			array(
 				'label_for' => $property,
+				'type'      => 'password',
 			)
 		);
 	}
@@ -275,16 +286,19 @@ abstract class Sloc_Provider {
 			$type = __( 'API Key', 'simple-location' );
 		}
 
+		$args = array(
+			'type'              => 'string',
+			// translators: 1. Name of Service 2. Type of Property
+			'description'       => sprintf( __( '%1$s %2$s', 'simple-location' ), $name, $type ),
+			'show_in_rest'      => false,
+			'default'           => '',
+			'sanitize_callback' => array( __CLASS__, 'sanitize_api_key' ),
+		);
+
 		register_setting(
 			'sloc_api', // Option group.
 			$property, // Option name.
-			array(
-				'type'         => 'string',
-				// translators: 1. Name of Service 2. Type of Property
-				'description' => sprintf( __( '%1$s %2$s', 'simple-location' ), $name, $type ),
-				'show_in_rest' => false,
-				'default'      => '',
-			)
+			$args
 		);
 	}
 

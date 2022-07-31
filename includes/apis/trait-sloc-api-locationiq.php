@@ -26,7 +26,7 @@ trait Sloc_API_LocationIQ {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'LocationIQ', 'simple-location' ), 'sloc_locationiq_api' ); 
+		self::register_settings_api( __( 'LocationIQ', 'simple-location' ), 'sloc_locationiq_api' );
 	}
 
 }

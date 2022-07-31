@@ -75,20 +75,18 @@ abstract class Geo_Provider extends Sloc_Provider {
 		$this->api          = $r['api'];
 		$this->set( $r['latitude'], $r['longitude'] );
 
-
 		if ( $this->is_active() && method_exists( $this, 'admin_init' ) ) {
 			add_action( 'admin_init', array( $this, 'admin_init' ) );
 			add_action( 'init', array( $this, 'init' ) );
 		}
 	}
 
-	/** 
+	/**
 	 * Is Provider Active
-	 *
 	 */
 	public function is_active() {
 		$option = get_option( 'sloc_geo_provider' );
-		return ($this->slug === $option );
+		return ( $this->slug === $option );
 	}
 
 	/**

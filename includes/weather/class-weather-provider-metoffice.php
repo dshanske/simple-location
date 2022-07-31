@@ -37,7 +37,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'Met Office API', 'simple-location' ), 'sloc_metoffice_api' ); 
+		self::register_settings_api( __( 'Met Office API', 'simple-location' ), 'sloc_metoffice_api' );
 	}
 
 	/**

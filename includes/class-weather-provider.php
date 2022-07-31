@@ -77,13 +77,13 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 	}
 
-	/** 
+	/**
 	 * Is Provider Active
-	 *
 	 */
 	public function is_active() {
-		$option = get_option( 'sloc_weather_provider' );
-		return ($this->slug === $option );
+		$option   = get_option( 'sloc_weather_provider' );
+		$fallback = get_option( 'sloc_fallback_weather_provider' );
+		return ( in_array( $this->slug, array( $option, $fallback ) ) );
 	}
 
 	/**

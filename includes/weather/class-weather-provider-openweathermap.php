@@ -38,7 +38,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'OpenWeatherMap API Key', 'simple-location' ), 'sloc_openweathermap_api' ); 
+		self::register_settings_api( __( 'OpenWeatherMap API Key', 'simple-location' ), 'sloc_openweathermap_api' );
 	}
 
 	/**
