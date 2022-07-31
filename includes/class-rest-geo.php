@@ -220,6 +220,31 @@ class REST_Geo {
 				),
 			)
 		);
+
+		register_rest_route(
+			'sloc_geo/1.0',
+			'/venue',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'venue' ),
+					'args'                => array(
+						'longitude' => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
+						'latitude'  => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
+						'provider'  => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+					'permission_callback' => function( $request ) {
+						return current_user_can( 'publish_posts' );
+					},
+				),
+			)
+		);
 		register_rest_route(
 			'sloc_geo/1.0',
 			'/weather',
@@ -409,6 +434,27 @@ class REST_Geo {
 		}
 	}
 
+	/**
+	 * Callback handler for Venue Retrieval.
+	 *
+	 * @param WP_Rest_Request $request REST Request.
+	 */
+	public static function venue( $request ) {
+		// We dont need to check the nonce like with admin-ajax.
+		$params      = $request->get_params();
+		$provider    = empty( $params['provider'] ) ? null : $params['provider'];
+		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+			$venue = Loc_Config::venue_provider( $provider );
+			if ( ! $venue ) {
+				return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
+			}
+			$venue->set( $params );
+			return $venue->reverse_lookup();
+		}
+		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
+	}
+
+
 
 	/**
 	 * Callback handler for Elevation Retrieval.
@@ -419,7 +465,6 @@ class REST_Geo {
 		// We dont need to check the nonce like with admin-ajax.
 		$params      = $request->get_params();
 		$provider    = empty( $params['provider'] ) ? null : $params['provider'];
-		$term_lookup = array_key_exists( 'term', $params );
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$elevation = Loc_Config::elevation_provider( $provider );
 			if ( ! $elevation ) {

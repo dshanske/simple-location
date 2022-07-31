@@ -181,8 +181,10 @@ class Simple_Location_Plugin {
 			'class-location-taxonomy.php', // Venue Taxonomy.
 			'class-sloc-provider.php', // Base Provider Class.
 			'class-map-provider.php', // Map Provider Class.
+			'trait-geolocation-trait.php', // Geolocation Trait.
 			'class-geo-provider.php', // Geo Provider Class.
 			'class-elevation-provider.php', // Elevation Provider Class.
+			'class-venue-provider.php', // Venue Provider Class.
 			'class-weather-provider.php', // Weather Provider Class.
 			'class-location-provider.php', // Location Provider Class.
 			'class-rest-geo.php', // REST endpoint for Geo.
@@ -304,6 +306,13 @@ class Simple_Location_Plugin {
 			'class-elevation-provider-openroute.php', // OpenRoute.
 		);
 		self::register_providers( $providers, 'includes/elevation/' );
+
+		// Load Venue Providers.
+		$providers = array(
+			'class-venue-provider-nominatim.php', // Nominatim.
+			'class-venue-provider-google.php', // Google.
+		);
+		self::register_providers( $providers, 'includes/venue/' );
 	}
 
 	/**

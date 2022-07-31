@@ -59,6 +59,13 @@ class Loc_Config {
 	private static $elevation = array();
 
 
+	 /**
+	  * Store Venue providers.
+	  *
+	  * @since 4.6.0
+	  * @var array
+	  */
+	private static $venue = array();
 
 	/**
 	 * Register Settings Configuration.
@@ -226,6 +233,19 @@ class Loc_Config {
 				'default'      => 'none',
 			)
 		);
+
+		register_setting(
+			'sloc_providers', // option group.
+			'sloc_venue_provider', // option name.
+			array(
+				'type'         => 'string',
+				'description'  => 'Venue Provider',
+				'show_in_rest' => false,
+				'default'      => 'nominatim',
+			)
+		);
+
+
 		register_setting(
 			'sloc_providers', // option group.
 			'sloc_weather_provider', // option name.
@@ -325,6 +345,8 @@ class Loc_Config {
 			static::$weather[ $object->get_slug() ] = $object;
 		} elseif ( $object instanceof Elevation_Provider ) {
 			static::$elevation[ $object->get_slug() ] = $object;
+		} elseif ( $object instanceof Venue_Provider ) {
+			static::$venue[ $object->get_slug() ] = $object;
 		}
 		return true;
 	}
@@ -425,6 +447,7 @@ class Loc_Config {
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/geocode-form.php' );
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/weather-form.php' );
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/elevation-form.php' );
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/venue-form.php' );
 			?>
 			</div>
 			<?php
@@ -609,6 +632,19 @@ class Loc_Config {
 				'label_for'   => 'sloc_geolocation_provider',
 				'description' => __( 'Services that allow your site to figure out your location', 'simple-location' ),
 				'providers'   => self::geolocation_providers(),
+			)
+		);
+
+		add_settings_field(
+			'sloc_venue_provider', // id.
+			__( 'Venue Provider', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
+			array(
+				'label_for'   => 'sloc_venue_provider',
+				'description' => __( 'Services that Look up One or More Venues from coordinates or description', 'simple-location' ),
+				'providers'   => self::venue_providers(),
 			)
 		);
 		add_settings_field(
@@ -937,6 +973,25 @@ class Loc_Config {
 	}
 
 	/**
+	 * Return list of venue providers.
+	 *
+	 * @return array Array of providers.
+	 * @since 1.0.0
+	 */
+	public static function venue_providers() {
+		$return = array();
+		foreach ( static::$venue as $g ) {
+			$return[ $g->get_slug() ] =
+				array(
+					'name'        => $g->get_name(),
+					'url'         => $g->get_url(),
+					'description' => $g->get_description(),
+				);
+		}
+		return $return;
+	}
+
+	/**
 	 * Return list of geolocation providers.
 	 *
 	 * @return array Array of providers.
@@ -1215,9 +1270,9 @@ class Loc_Config {
 	 * Returns the current elevation provider.
 	 *
 	 * @param string $provider Name of Provider to Be Returned. Optional.
-	 * @return Weather_Provider $return Weather Provider.
+	 * @return Elevation_Provider $return Elevation Provider.
 	 *
-	 * @since 1.0.0
+	 * @since 4.6.0
 	 */
 	public static function elevation_provider( $provider = null ) {
 		if ( ! $provider ) {
@@ -1227,6 +1282,26 @@ class Loc_Config {
 			return static::$elevation[ $provider ];
 		} else {
 			delete_option( 'sloc_elevation_provider' );
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the current venue provider.
+	 *
+	 * @param string $provider Name of Provider to Be Returned. Optional.
+	 * @return Venue_Provider $return Venue Provider.
+	 *
+	 * @since 4.6.0
+	 */
+	public static function venue_provider( $provider = null ) {
+		if ( ! $provider ) {
+			$provider = get_option( 'sloc_venue_provider' );
+		}
+		if ( isset( static::$venue[ $provider ] ) ) {
+			return static::$venue[ $provider ];
+		} else {
+			delete_option( 'sloc_venue_provider' );
 		}
 		return null;
 	}
