@@ -60,6 +60,12 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
+
+		if ( array_key_exists( 'status', $json ) && 'OK' !== $json['status'] ) {
+			return new WP_Error( $json['status'], isset( $json['errormessage'], __( 'Error Returning Results from Google', 'simple-location' ) );
+		}
+			
+
 		$addr              = $this->address_to_mf2( $json );
 		$addr['latitude']  = $this->latitude;
 		$addr['longitude'] = $this->longitude;

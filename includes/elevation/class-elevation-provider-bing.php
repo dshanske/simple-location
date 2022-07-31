@@ -37,11 +37,6 @@ class Elevation_Provider_Bing extends Elevation_Provider {
 			$args['api'] = get_option( 'sloc_bing_api' );
 		}
 
-		$option = get_option( 'sloc_geo_provider' );
-		if ( 'bing' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 
@@ -64,6 +59,9 @@ class Elevation_Provider_Bing extends Elevation_Provider {
 		$json = $this->fetch_json( $url, $args );
 		if ( is_wp_error( $json ) ) {
 			return $json;
+		}
+		if ( ! isset( $json['authenticationResultCode' )  || ( isset( $json['authenticationResultCode' ] ) && 'ValidCredentials' !== $json['authenticationResultCode'] ) ) {
+			return new WP_Error( 'invalid_api_key', __( 'Unable to Authenticate to Bing', 'simple-location' );
 		}
 		if ( isset( $json['error_message'] ) ) {
 				return new WP_Error( $json['status'], $json['error_message'] );

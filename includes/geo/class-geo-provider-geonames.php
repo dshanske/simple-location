@@ -133,7 +133,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	 */
 	public function geocode( $address ) {
 		if ( ! $this->user ) {
-			return null;
+			return new WP_Error( 'no_username_set', __( 'No GeoNames Username Set', 'simple-location' ) );
 		}
 		$args = array(
 			'username' => $this->user,
@@ -147,6 +147,11 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
+
+		if ( 1 === count( $json ) && array_key_exists( 'status', $json ) ) {
+			return new WP_Error( 'unknown_error', $json['status']['message'] );
+		}
+
 		$json                = $json['geonames'][0];
 		$return              = $this->address_to_mf2( $json );
 		$return['latitude']  = ifset( $json['lat'] );

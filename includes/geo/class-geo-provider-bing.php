@@ -59,12 +59,18 @@ class Geo_Provider_Bing extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
+		if ( ! isset( $json['authenticationResultCode' )  || ( isset( $json['authenticationResultCode' ] ) && 'ValidCredentials' !== $json['authenticationResultCode'] ) ) {
+			return new WP_Error( 'invalid_api_key', __( 'Unable to Authenticate to Bing', 'simple-location' );
+		}
 		if ( isset( $json['resourceSets'] ) ) {
 			$json = $json['resourceSets'][0];
 			if ( isset( $json['resources'] ) && is_array( $json['resources'] ) ) {
 				$json = $json['resources'][0];
 			}
+		} else {
+			return new WP_Error( 'unknown_error', __( 'Unknown Bing Error', 'simple-location' );
 		}
+			
 
 		$return              = $this->address_to_mf2( $json );
 		$return['latitude']  = $this->latitude;

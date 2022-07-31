@@ -37,11 +37,6 @@ class Elevation_Provider_OpenRoute extends Elevation_Provider {
 			$args['api'] = get_option( 'sloc_openroute_api' );
 		}
 
-		$option = get_option( 'sloc_geo_provider' );
-		if ( 'openroute' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

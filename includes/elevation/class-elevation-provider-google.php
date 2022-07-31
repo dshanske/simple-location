@@ -37,11 +37,6 @@ class Elevation_Provider_Google extends Elevation_Provider {
 			$args['api'] = get_option( 'sloc_google_api' );
 		}
 
-		$option = get_option( 'sloc_geo_provider' );
-		if ( 'google' === $option ) {
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-			add_action( 'init', array( get_called_class(), 'init' ) );
-		}
 		parent::__construct( $args );
 	}
 
@@ -65,9 +60,11 @@ class Elevation_Provider_Google extends Elevation_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		if ( isset( $json['error_message'] ) ) {
-			return new WP_Error( $json['status'], $json['error_message'] );
+
+		if ( array_key_exists( 'status', $json ) && 'OK' !== $json['status'] ) {
+			return new WP_Error( $json['status'], isset( $json['errormessage'], __( 'Error Returning Results from Google', 'simple-location' ) );
 		}
+
 		if ( ! isset( $json['results'] ) ) {
 			return null;
 		}

@@ -60,10 +60,14 @@ class Elevation_Provider_Geonames extends Elevation_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
+		if ( 1 === count( $json ) && array_key_exists( 'status', $json ) ) {
+			return new WP_Error( 'unknown_error', $json['status']['message'] );
+		}
+
 		if ( array_key_exists( 'srtm1', $json ) ) {
 			return round( $json['srtm1'], 2 );
 		}
-		return $null;
+		return new WP_Error( 'unknown_error', __( 'Unknown Geonames Error', 'simple-location' ) );
 	}
 }
 
