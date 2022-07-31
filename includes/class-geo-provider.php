@@ -76,9 +76,9 @@ abstract class Geo_Provider extends Sloc_Provider {
 		$this->set( $r['latitude'], $r['longitude'] );
 
 
-		if ( $this->is_active() && method_exists( 'admin_init', get_called_class() ) ) {
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-			add_action( 'init', array( get_called_class(), 'init' ) );
+		if ( $this->is_active() && method_exists( $this, 'admin_init' ) ) {
+			add_action( 'admin_init', array( $this, 'admin_init' ) );
+			add_action( 'init', array( $this, 'init' ) );
 		}
 	}
 
