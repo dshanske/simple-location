@@ -38,11 +38,6 @@ class Geo_Provider_Here extends Geo_Provider {
 			$args['api'] = get_option( 'sloc_here_api' );
 		}
 
-		$option = get_option( 'sloc_geo_provider' );
-		if ( 'here' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

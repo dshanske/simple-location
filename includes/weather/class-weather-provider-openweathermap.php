@@ -29,11 +29,6 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		}
 
 		$this->region = false;
-		$option       = get_option( 'sloc_weather_provider' );
-		if ( 'openweathermap' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

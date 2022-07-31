@@ -26,11 +26,6 @@ class Map_Provider_LocationIQ extends Map_Provider {
 		}
 		$this->style = 'roadmap';
 
-		$option = get_option( 'sloc_map_provider' );
-		if ( 'locationiq' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

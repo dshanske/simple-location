@@ -36,11 +36,6 @@ class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
 			$args['api'] = get_option( 'sloc_openroute_api' );
 		}
 
-		$option = get_option( 'sloc_geo_provider' );
-		if ( 'openroute' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		Geo_Provider::__construct( $args );
 	}
 

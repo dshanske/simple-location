@@ -205,6 +205,12 @@ abstract class Sloc_Provider {
 		return $this->description;
 	}
 
+	/** 
+	 * Is Provider Active
+	 *
+	 */
+	abstract public function is_active();
+
 	/**
 	 * Returns the slug property.
 	 *

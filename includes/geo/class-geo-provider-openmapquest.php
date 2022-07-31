@@ -35,11 +35,6 @@ class Geo_Provider_OpenMapquest extends Geo_Provider_Nominatim {
 			$args['api'] = get_option( 'sloc_mapquest_api' );
 		}
 
-		$option = get_option( 'sloc_geo_provider' );
-		if ( 'mapquest' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		Geo_Provider::__construct( $args );
 	}
 

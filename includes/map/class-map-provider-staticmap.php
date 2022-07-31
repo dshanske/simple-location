@@ -24,11 +24,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 			$args['style'] = get_option( 'sloc_staticmap_style' );
 		}
 
-		$option = get_option( 'sloc_map_provider' );
-		if ( 'staticmap' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

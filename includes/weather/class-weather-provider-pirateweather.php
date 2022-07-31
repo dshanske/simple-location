@@ -29,11 +29,6 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			$args['api'] = get_option( 'sloc_pirateweather_api' );
 		}
 
-		$option = get_option( 'sloc_weather_provider' );
-		if ( 'pirateweather' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

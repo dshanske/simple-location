@@ -37,11 +37,6 @@ class Geo_Provider_Bing extends Geo_Provider {
 			$args['api'] = get_option( 'sloc_bing_api' );
 		}
 
-		$option = get_option( 'sloc_geo_provider' );
-		if ( 'bing' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

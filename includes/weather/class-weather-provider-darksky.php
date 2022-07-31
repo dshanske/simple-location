@@ -29,11 +29,6 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 			$args['api'] = get_option( 'sloc_darksky_api' );
 		}
 
-		$option = get_option( 'sloc_weather_provider' );
-		if ( 'darksky' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

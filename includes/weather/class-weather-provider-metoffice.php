@@ -28,11 +28,6 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 			$args['api'] = get_option( 'sloc_metoffice_api' );
 		}
 		$this->region = 'GB';
-		$option       = get_option( 'sloc_weather_provider' );
-		if ( 'metofficeuk' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

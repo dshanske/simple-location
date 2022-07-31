@@ -22,9 +22,7 @@ class Weather_Provider_Station extends Weather_Provider {
 		$this->description = __( 'A custom station provider is one coded by any party who wants to provide it in the correct format. This allows you to retrieve information from stations when within range', 'simple-location' );
 		$this->slug        = 'station';
 		$this->region      = false;
-		$option            = get_option( 'sloc_weather_provider' );
-		add_action( 'init', array( get_called_class(), 'init' ) );
-		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+
 		parent::__construct( $args );
 	}
 

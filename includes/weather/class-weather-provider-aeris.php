@@ -25,11 +25,6 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$this->url         = 'https://www.aerisweather.com/';
 		$this->description = __( 'While Aeris Weather does not offer a free tier, if you share your personal weather station with PWSWeather, this gives you free access to their API, which includes historic data.', 'simple-location' );
 		$this->region      = false;
-		$option            = get_option( 'sloc_weather_provider' );
-		if ( $this->slug === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

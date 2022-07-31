@@ -30,11 +30,6 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 		$args['cache_key'] = '';
 
 		$this->region = false;
-		$option       = get_option( 'sloc_weather_provider' );
-		if ( 'weatherstack' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

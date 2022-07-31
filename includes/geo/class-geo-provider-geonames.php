@@ -35,11 +35,6 @@ class Geo_Provider_Geonames extends Geo_Provider {
 			$args['user'] = get_option( 'sloc_geonames_user' );
 		}
 
-		$option = get_option( 'sloc_geo_provider' );
-		if ( 'geonames' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

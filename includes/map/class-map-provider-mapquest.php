@@ -27,12 +27,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_mapquest_style' );
 		}
-
-		$option = get_option( 'sloc_map_provider' );
-		if ( 'mapquest' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'init', array( get_called_class(), 'style_init' ) );
-		}
+		
 		parent::__construct( $args );
 	}
 

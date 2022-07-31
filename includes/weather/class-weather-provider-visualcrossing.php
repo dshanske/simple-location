@@ -28,11 +28,6 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 			$args['api'] = get_option( 'sloc_visualcrossing_api' );
 		}
 		$this->region = false;
-		$option       = get_option( 'sloc_weather_provider' );
-		if ( $this->slug === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 

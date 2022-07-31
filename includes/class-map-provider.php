@@ -144,6 +144,20 @@ abstract class Map_Provider extends Sloc_Provider {
 		$this->style    = $r['style'];
 		$this->api      = $r['api'];
 		$this->set( $r['latitude'], $r['longitude'], $r['altitude'] );
+
+		if ( $this->is_active() && method_exists( 'admin_init', get_called_class() ) ) {
+			add_action( 'init', array( get_called_class(), 'init' ) );
+			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+		}
+	}
+
+	/** 
+	 * Is Provider Active
+	 *
+	 */
+	public function is_active() {
+		$option = get_option( 'sloc_map_provider' );
+		return ($this->slug === $option );
 	}
 
 	/**

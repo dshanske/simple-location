@@ -70,6 +70,20 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$this->units      = $r['units'];
 		$this->cache_time = intval( $r['cache_time'] );
 		$this->set( $r['latitude'], $r['longitude'] );
+
+		if ( $this->is_active() && method_exists( 'admin_init', get_called_class() ) ) {
+			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+			add_action( 'init', array( get_called_class(), 'init' ) );
+		}
+	}
+
+	/** 
+	 * Is Provider Active
+	 *
+	 */
+	public function is_active() {
+		$option = get_option( 'sloc_weather_provider' );
+		return ($this->slug === $option );
 	}
 
 	/**

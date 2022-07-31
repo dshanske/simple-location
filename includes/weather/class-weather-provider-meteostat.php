@@ -36,11 +36,6 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		}
 		$this->station = array();
 		$this->region  = false;
-		$option        = get_option( 'sloc_weather_provider' );
-		if ( $this->slug === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 
