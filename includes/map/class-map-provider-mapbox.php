@@ -37,38 +37,8 @@ class Map_Provider_Mapbox extends Map_Provider {
 		if ( 'mapbox' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-			add_action( 'init', array( get_called_class(), 'style_init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
-	}
-
-	public static function style_init() {
-		register_setting(
-			'simloc',
-			'sloc_mapbox_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'Mapbox Style',
-				'show_in_rest' => false,
-				'default'      => 'streets-v10',
-			)
-		);
-	}
-
-	public static function style_admin_init() {
-		add_settings_field(
-			'mapboxstyle', // id
-			__( 'Mapbox Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_mapbox_style',
-				'provider'  => new Map_Provider_Mapbox(),
-
-			)
-		);
 	}
 
 	public function default_styles() {

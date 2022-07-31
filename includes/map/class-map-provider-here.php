@@ -37,60 +37,8 @@ class Map_Provider_Here extends Map_Provider {
 		if ( 'here' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-			add_action( 'init', array( get_called_class(), 'style_init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
-	}
-
-	public static function style_init() {
-		register_setting(
-			'simloc',
-			'sloc_here_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'HERE Style',
-				'show_in_rest' => false,
-				'default'      => 'alps',
-			)
-		);
-
-		register_setting(
-			'simloc',
-			'sloc_here_type',
-			array(
-				'type'         => 'string',
-				'description'  => 'HERE Map Scheme Type',
-				'show_in_rest' => false,
-				'default'      => 0,
-			)
-		);
-	}
-
-	public static function style_admin_init() {
-		add_settings_field(
-			'herestyle', // id
-			__( 'HERE Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_here_style',
-				'provider'  => new Map_Provider_Here(),
-			)
-		);
-
-		add_settings_field(
-			'heretype', // id
-			__( 'HERE Map Scheme Type', 'simple-location' ),
-			array( get_called_class(), 'type_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_here_type',
-				'provider'  => new Map_Provider_Here(),
-			)
-		);
 	}
 
 	public static function type_callback( array $args ) {

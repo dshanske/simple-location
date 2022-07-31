@@ -32,37 +32,8 @@ class Map_Provider_Bing extends Map_Provider {
 		if ( 'bing' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-			add_action( 'init', array( get_called_class(), 'style_init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
-	}
-
-	public static function style_init() {
-		register_setting(
-			'simloc',
-			'sloc_bing_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'Bing Map Style',
-				'show_in_rest' => false,
-				'default'      => 'CanvasLight',
-			)
-		);
-	}
-
-	public static function style_admin_init() {
-		add_settings_field(
-			'bingstyle', // id
-			__( 'Bing Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_bing_style',
-				'provider'  => new Map_Provider_Bing(),
-			)
-		);
 	}
 
 	public function get_styles() {

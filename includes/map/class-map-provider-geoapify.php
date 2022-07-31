@@ -30,39 +30,9 @@ class Map_Provider_Geoapify extends Map_Provider {
 		if ( 'geoapify' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-			add_action( 'init', array( get_called_class(), 'style_init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
 	}
-
-	public static function style_init() {
-		register_setting(
-			'simloc',
-			'sloc_geoapify_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'Geoapify Map Style',
-				'show_in_rest' => false,
-				'default'      => 'osm-carto',
-			)
-		);
-	}
-
-	public static function style_admin_init() {
-		add_settings_field(
-			'geoapifystyle', // id
-			__( 'Geoapify Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_geoapify_style',
-				'provider'  => new Map_Provider_Geoapify(),
-			)
-		);
-	}
-
 
 	public function get_styles() {
 		return array(

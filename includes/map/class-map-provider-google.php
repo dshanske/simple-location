@@ -33,37 +33,8 @@ class Map_Provider_Google extends Map_Provider {
 		if ( 'google' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-			add_action( 'init', array( get_called_class(), 'style_init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
-	}
-
-	public static function style_init() {
-		register_setting(
-			'simloc',
-			'sloc_google_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'Google Map Style',
-				'show_in_rest' => false,
-				'default'      => 'roadmap',
-			)
-		);
-	}
-
-	public static function style_admin_init() {
-		add_settings_field(
-			'googlestyle', // id
-			__( 'Google Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_google_style',
-				'provider'  => new Map_Provider_Google(),
-			)
-		);
 	}
 
 	public function get_styles() {

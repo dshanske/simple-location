@@ -32,37 +32,8 @@ class Map_Provider_Mapquest extends Map_Provider {
 		if ( 'mapquest' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'init', array( get_called_class(), 'style_init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
-	}
-
-	public static function style_init() {
-		register_setting(
-			'simloc',
-			'sloc_mapquest_style',
-			array(
-				'type'         => 'string',
-				'description'  => 'Mapquest Map Style',
-				'show_in_rest' => false,
-				'default'      => 'map',
-			)
-		);
-	}
-
-	public static function style_admin_init() {
-		add_settings_field(
-			'mapqueststyle', // id
-			__( 'MapQuest Style', 'simple-location' ),
-			array( 'Loc_Config', 'style_callback' ),
-			'simloc',
-			'sloc_map',
-			array(
-				'label_for' => 'sloc_mapquest_style',
-				'provider'  => new Map_Provider_Mapquest(),
-			)
-		);
 	}
 
 	public function get_styles() {
