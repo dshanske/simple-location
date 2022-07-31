@@ -20,9 +20,9 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Weatherstack', 'simple-location' );
-		$this->slug = 'weatherstack';
-		$this->url = 'https://weatherstack.com';
+		$this->name        = __( 'Weatherstack', 'simple-location' );
+		$this->slug        = 'weatherstack';
+		$this->url         = 'https://weatherstack.com';
 		$this->description = __( 'Offers a free account, but at only 250 calls/month and no historical data.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_weatherstack_api' );
@@ -44,17 +44,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		register_setting(
-			'sloc_providers', // option group.
-			'sloc_weatherstack_api', // option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Weatherstack API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-
+		self::register_settings_api( __( 'WeatherStack', 'simple-location' ), 'sloc_weatherstack_api' ); 
 	}
 
 	/**
@@ -185,4 +175,3 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 
 }
 
-register_sloc_provider( new Weather_Provider_Weatherstack() );

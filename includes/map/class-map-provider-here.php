@@ -11,14 +11,14 @@
  * @since 1.0.0
  */
 class Map_Provider_Here extends Map_Provider {
+	use Sloc_API_Here;
 
-	protected $appid;
 	protected $type;
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'HERE Maps', 'simple-location' );
 		$this->slug         = 'here';
-		$this->url = 'https://developer.here.com/';
-		$this->description = __( 'HERE offers a free limited plan for up to 30,000 map transactions per month', 'simple-location' );
+		$this->url          = 'https://developer.here.com/';
+		$this->description  = __( 'HERE offers a free limited plan for up to 30,000 map transactions per month', 'simple-location' );
 		$this->max_width    = 2048;
 		$this->max_height   = 2048;
 		$this->max_map_zoom = 20;
@@ -37,21 +37,13 @@ class Map_Provider_Here extends Map_Provider {
 		if ( 'here' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+			add_action( 'init', array( get_called_class(), 'style_init' ) );
+			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
 	}
 
-	public static function init() {
-		register_setting(
-			'sloc_providers', // option group
-			'sloc_here_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'HERE Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+	public static function style_init() {
 		register_setting(
 			'simloc',
 			'sloc_here_style',
@@ -75,10 +67,7 @@ class Map_Provider_Here extends Map_Provider {
 		);
 	}
 
-	public static function admin_init() {
-
-		self::add_settings_parameter( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
-		
+	public static function style_admin_init() {
 		add_settings_field(
 			'herestyle', // id
 			__( 'HERE Style', 'simple-location' ),

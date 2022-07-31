@@ -20,11 +20,11 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name   = __( 'Pirate Weather', 'simple-location' );
-		$this->slug   = 'pirateweather';
-		$this->url =  'https://pirateweather.net';
+		$this->name        = __( 'Pirate Weather', 'simple-location' );
+		$this->slug        = 'pirateweather';
+		$this->url         = 'https://pirateweather.net';
 		$this->description = __( 'Pirate Weather is a service that reads public weather forecasts. It is offered for free by the developer, but donations are appreciated. Historic weather data is limited.', 'simple-location' );
-		$this->region = false;
+		$this->region      = false;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_pirateweather_api' );
 		}
@@ -43,16 +43,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		register_setting(
-			'sloc_providers', // option group.
-			'sloc_pirateweather_api', // option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Pirate Weather API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+		self::register_settings_api( __( 'PirateWeather API Key', 'simple-location' ), 'sloc_pirateweather_api' ); 
 	}
 
 	/**
@@ -188,5 +179,3 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	}
 
 }
-
-register_sloc_provider( new Weather_Provider_PirateWeather() );

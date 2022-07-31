@@ -18,11 +18,11 @@ class Weather_Provider_Station extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name   = __( 'Custom Station Provider', 'simple-location' );
+		$this->name        = __( 'Custom Station Provider', 'simple-location' );
 		$this->description = __( 'A custom station provider is one coded by any party who wants to provide it in the correct format. This allows you to retrieve information from stations when within range', 'simple-location' );
-		$this->slug   = 'station';
-		$this->region = false;
-		$option       = get_option( 'sloc_weather_provider' );
+		$this->slug        = 'station';
+		$this->region      = false;
+		$option            = get_option( 'sloc_weather_provider' );
 		add_action( 'init', array( get_called_class(), 'init' ) );
 		add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		parent::__construct( $args );
@@ -343,5 +343,3 @@ class Weather_Provider_Station extends Weather_Provider {
 	}
 
 }
-
-register_sloc_provider( new Weather_Provider_Station() );

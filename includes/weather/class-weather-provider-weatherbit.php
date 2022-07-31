@@ -20,9 +20,9 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Weatherbit', 'simple-location' );
-		$this->slug = 'weatherbit';
-		$this->url = 'https://www.weatherbit.io';
+		$this->name        = __( 'Weatherbit', 'simple-location' );
+		$this->slug        = 'weatherbit';
+		$this->url         = 'https://www.weatherbit.io';
 		$this->description = __( 'Offers 500 calls per day free with an API key. Paid plan does include historical data.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_weatherbit_api' );
@@ -44,17 +44,7 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		register_setting(
-			'sloc_providers', // option group.
-			'sloc_weatherbit_api', // option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Weatherbit API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-
+		self::register_settings_api( __( 'WeatherBit', 'simple-location' ), 'sloc_weatherbit_api' ); 
 	}
 
 	/**
@@ -235,4 +225,3 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 
 }
 
-register_sloc_provider( new Weather_Provider_Weatherbit() );

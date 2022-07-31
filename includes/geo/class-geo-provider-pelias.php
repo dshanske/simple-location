@@ -28,9 +28,9 @@ class Geo_Provider_Pelias extends Geo_Provider {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Pelias', 'simple-location' );
-		$this->slug = 'pelias';
-		$this->url = 'https://pelias.io/';
+		$this->name        = __( 'Pelias', 'simple-location' );
+		$this->slug        = 'pelias';
+		$this->url         = 'https://pelias.io/';
 		$this->description = __( 'Pelias is an open source geocoder. To use this, a Pelias server is required', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_pelias_api' );
@@ -50,6 +50,8 @@ class Geo_Provider_Pelias extends Geo_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
+		self::register_settings_api( __( 'Pelias Service API Key', 'simple-location' ), 'sloc_pelias_api' );
+		self::register_settings_api( __( 'Pelias Service URL', 'simple-location' ), 'sloc_pelias_url' );
 		register_setting(
 			'sloc_providers', // Option group.
 			'sloc_pelias_api', // Option name.
@@ -287,4 +289,3 @@ class Geo_Provider_Pelias extends Geo_Provider {
 	}
 }
 
-register_sloc_provider( new Geo_Provider_Pelias() );

@@ -58,5 +58,3 @@ class Location_Provider_Address extends Location_Provider {
 	}
 
 }
-
-register_sloc_provider( new Location_Provider_Address() );

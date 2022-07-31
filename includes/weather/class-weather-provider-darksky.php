@@ -20,11 +20,11 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name   = __( 'Dark Sky', 'simple-location' );
-		$this->slug   = 'darksky';
-		$this->url    = 'https://darksky.net';
+		$this->name        = __( 'Dark Sky', 'simple-location' );
+		$this->slug        = 'darksky';
+		$this->url         = 'https://darksky.net';
 		$this->description = __( 'The Dark Sky API will continue to function until March 31st, 2023, but no new signups are permitted. Apple has announced the replacement for Dark Sky will be called Apple WeatherKit, but requires an Apple Developer program membership. Dark Sky will be removed when the API ceases to be available', 'simple-location' );
-		$this->region = false;
+		$this->region      = false;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_darksky_api' );
 		}
@@ -43,16 +43,7 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		register_setting(
-			'sloc_providers', // option group.
-			'sloc_darksky_api', // option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'DarkSky API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+		self::register_settings_api( __( 'DarkSky API', 'simple-location' ), 'sloc_darksky_api' ); 
 	}
 
 	/**
@@ -185,5 +176,3 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 	}
 
 }
-
-register_sloc_provider( new Weather_Provider_DarkSky() );

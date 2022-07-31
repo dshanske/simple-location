@@ -30,7 +30,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	public function __construct( $args = array() ) {
 		$this->name = __( 'Geonames', 'simple-location' );
 		$this->slug = 'geonames';
-		$this->url = 'The Geonames database is available under a creative commons license. A free user account is required.';
+		$this->url  = 'The Geonames database is available under a creative commons license. A free user account is required.';
 		if ( ! isset( $args['user'] ) ) {
 			$args['user'] = get_option( 'sloc_geonames_user' );
 		}
@@ -49,6 +49,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
+		self::register_settings_api( __( 'GeoNames', 'simple-location' ), 'sloc_geonames_user', __( 'User', 'simple-location' ) );
 		register_setting(
 			'sloc_providers',
 			'sloc_geonames_user',
@@ -67,7 +68,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		self::add_settings_parameter( __( 'Geonames', 'simple-location' ), 'sloc_geonames_user', __( 'User', 'simple-location') );
+		self::add_settings_parameter( __( 'Geonames', 'simple-location' ), 'sloc_geonames_user', __( 'User', 'simple-location' ) );
 	}
 
 	/**
@@ -213,5 +214,3 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		return array_filter( $return );
 	}
 }
-
-register_sloc_provider( new Geo_Provider_Geonames() );

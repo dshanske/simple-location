@@ -20,9 +20,9 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'OpenWeatherMap', 'simple-location' );
-		$this->slug = 'openweathermap';
-		$this->url = 'https://openweathermap.org';
+		$this->name        = __( 'OpenWeatherMap', 'simple-location' );
+		$this->slug        = 'openweathermap';
+		$this->url         = 'https://openweathermap.org';
 		$this->description = __( 'Free account offers 1 millions calls per month, requires an API key', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_openweathermap_api' );
@@ -43,16 +43,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		register_setting(
-			'sloc_providers', // option group.
-			'sloc_openweathermap_api', // option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'OpenWeatherMap API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+		self::register_settings_api( __( 'OpenWeatherMap API Key', 'simple-location' ), 'sloc_openweathermap_api' ); 
 	}
 
 	/**
@@ -321,5 +312,3 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	}
 
 }
-
-register_sloc_provider( new Weather_Provider_OpenWeatherMap() );

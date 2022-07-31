@@ -11,7 +11,7 @@
  * @since 1.0.0
  */
 class Geo_Provider_Google extends Geo_Provider {
-
+	use Sloc_API_Google;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -29,10 +29,10 @@ class Geo_Provider_Google extends Geo_Provider {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Google', 'simple-location' );
-		$this->url = 'https://developers.google.com/maps/';
+		$this->name        = __( 'Google', 'simple-location' );
+		$this->url         = 'https://developers.google.com/maps/';
 		$this->description = __( 'Google Maps Platform API key is required, however Google offers a $200 per month credit, which is the equivalent of 28,000 queries. Click Get Started. Make sure to enable the Geocoding API. Follow the tutorial', 'simple-location' );
-		$this->slug = 'google';
+		$this->slug        = 'google';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
 		}
@@ -41,35 +41,8 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( 'google' === $option ) {
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 			add_action( 'init', array( get_called_class(), 'init' ) );
-		} 
+		}
 		parent::__construct( $args );
-	}
-
-	/**
-	 * Admin Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'Google', 'simple-location' ), 'sloc_google_api' );
-	}
-
-	/**
-	 * Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function init() {
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_google_api', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Google Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
 	}
 
 	/**
@@ -227,5 +200,3 @@ class Geo_Provider_Google extends Geo_Provider {
 		return $return;
 	}
 }
-
-register_sloc_provider( new Geo_Provider_Google() );

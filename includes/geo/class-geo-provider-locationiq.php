@@ -11,6 +11,7 @@
  * @since 1.0.0
  */
 class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
+	use Sloc_API_LocationIQ;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -28,9 +29,9 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'LocationIQ', 'simple-location' );
-		$this->slug = 'locationiq';
-		$this->url = 'https://locationiq.com/';
+		$this->name        = __( 'LocationIQ', 'simple-location' );
+		$this->slug        = 'locationiq';
+		$this->url         = 'https://locationiq.com/';
 		$this->description = __( 'LocationIQ offers Geocoding and Static maps, with a free tier of 5000 requests/day. Sign up for an API key', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_locationiq_api' );
@@ -42,33 +43,6 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
 		Geo_Provider::__construct( $args );
-	}
-
-	/**
-	 * Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function init() {
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_locationiq_api', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Location IQ API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-	}
-
-	/**
-	 * Admin Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'LocationIQ', 'simple-location' ), 'sloc_locationiq_api' );
 	}
 
 	/**
@@ -151,5 +125,3 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 		return array_filter( $return );
 	}
 }
-
-register_sloc_provider( new Geo_Provider_LocationIQ() );

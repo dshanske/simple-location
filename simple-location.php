@@ -114,6 +114,44 @@ class Simple_Location_Plugin {
 		}
 	}
 
+	/**
+	 * Load and register files.
+	 *
+	 * Checks for the existence of and loads files, then registers them as providers.
+
+	 * @param array  $files An array of filenames.
+	 * @param string $dir The directory the files can be found in, relative to the current directory.
+	 *
+	 * @since 4.0.0
+	 */
+	public static function register_providers( $files, $dir = 'includes/' ) {
+		$dir = trailingslashit( $dir );
+		if ( empty( $files ) ) {
+			return;
+		}
+		$path = plugin_dir_path( __FILE__ ) . $dir;
+		foreach ( $files as $file ) {
+			if ( file_exists( $path . $file ) ) {
+				require_once $path . $file;
+				if ( str_contains( $file, 'provider' ) ) {
+					$class = str_replace( 'class-', '', $file );
+					$class = str_replace( '.php', '', $class );
+					$class = ucwords( $class, '-' );
+					$class = str_replace( '-', '_', $class );
+					if ( class_exists( $class ) ) {
+						register_sloc_provider( new $class );
+					} else {
+						error_log( 'Cannot register ' . $class );
+					}
+				}
+			} else {
+				error_log( $path . $file );
+			}
+		}
+	}
+
+
+
 
 	/**
 	 * Plugin Initializaton Function.
@@ -180,6 +218,21 @@ class Simple_Location_Plugin {
 		);
 		self::load( $libraries, 'lib/' );
 
+		// Load API Traits. These are common code for the providers that offer different types of data.
+		$traits = array(
+			'trait-sloc-api-google.php', // Google Maps API Traits.
+			'trait-sloc-api-bing.php', // Bing Maps API Traits.
+			'trait-sloc-api-here.php', // HERE API Traits.
+			'trait-sloc-api-locationiq.php', // LocationIQ API Traits.
+			'trait-sloc-api-mapquest.php', // MapQuest API Traits.
+			'trait-sloc-api-openroute.php', // OpenRoute API Traits.
+			'trait-sloc-api-geoapify.php', // GeoApify API Traits.
+			'trait-sloc-api-mapbox.php', // MapBox API Traits.
+			'trait-sloc-api-tomtom.php', // TomTom API Traits.
+		);
+
+		self::load( $traits, 'includes/apis/' );
+
 		// Load Location Providers.
 		$providers = array(
 			'class-location-provider-dummy.php', // Dummy Location Provider.
@@ -188,7 +241,7 @@ class Simple_Location_Plugin {
 			'class-location-provider-compass.php', // Compass https://github.com/aaronpk/Compass Location Provder.
 		);
 
-		self::load( $providers, 'includes/location/' );
+		self::register_providers( $providers, 'includes/location/' );
 
 		// Load Weather Providers.
 		$providers = array(
@@ -206,7 +259,7 @@ class Simple_Location_Plugin {
 			'class-weather-provider-station.php', // Custom Station Weather Provider.
 		);
 
-		self::load( $providers, 'includes/weather/' );
+		self::register_providers( $providers, 'includes/weather/' );
 
 		// Load Map Providers.
 		$providers = array(
@@ -221,7 +274,7 @@ class Simple_Location_Plugin {
 			'class-map-provider-staticmap.php', // Custom Provider.
 		);
 
-		self::load( $providers, 'includes/map/' );
+		self::register_providers( $providers, 'includes/map/' );
 
 		// Load Geo Providers.
 		$providers = array(
@@ -236,7 +289,7 @@ class Simple_Location_Plugin {
 			'class-geo-provider-pelias.php', // Pelias.
 			'class-geo-provider-openroute.php', // OpenRoute.
 		);
-		self::load( $providers, 'includes/geo/' );
+		self::register_providers( $providers, 'includes/geo/' );
 	}
 
 	/**

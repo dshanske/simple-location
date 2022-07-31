@@ -20,12 +20,12 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name   = __( 'Aeris Weather', 'simple-location' );
-		$this->slug   = 'aeris';
-		$this->url = 'https://www.aerisweather.com/';
+		$this->name        = __( 'Aeris Weather', 'simple-location' );
+		$this->slug        = 'aeris';
+		$this->url         = 'https://www.aerisweather.com/';
 		$this->description = __( 'While Aeris Weather does not offer a free tier, if you share your personal weather station with PWSWeather, this gives you free access to their API, which includes historic data.', 'simple-location' );
-		$this->region = false;
-		$option       = get_option( 'sloc_weather_provider' );
+		$this->region      = false;
+		$option            = get_option( 'sloc_weather_provider' );
 		if ( $this->slug === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
@@ -39,26 +39,8 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_aeris_client_id', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'AerisWeather Client ID',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_aeris_client_secret', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'AerisWeather Client Secret',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+		self::register_settings_api( __( 'Aeris Client ID', 'simple-location' ), 'sloc_aeris_client_id' ); 
+		self::register_settings_api( __( 'Aeris Client Secret', 'simple-location' ), 'sloc_aeris_client_secret' ); 
 		register_setting(
 			'sloc_providers', // Option group.
 			'sloc_aeris_pws', // Option name.
@@ -80,7 +62,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		self::add_settings_parameter( __( 'AerisWeather', 'simple-location' ), 'sloc_aeris_client_id', __( 'Client ID', 'simple-location' ) );
 
 		self::add_settings_parameter( __( 'AerisWeather', 'simple-location' ), 'sloc_aeris_client_secret', __( 'Client Secret', 'simple-location' ) );
-		
+
 		add_settings_field(
 			'aerisweatherpws', // ID.
 			__( 'Include Personal Weather Stations in AerisWeather Provider', 'simple-location' ), // Setting title.
@@ -334,5 +316,3 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	}
 
 }
-
-register_sloc_provider( new Weather_Provider_Aeris() );

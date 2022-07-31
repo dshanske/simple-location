@@ -20,9 +20,9 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Met Office(UK)', 'simple-location' );
-		$this->slug = 'metofficeuk';
-		$this->url = 'https://www.metoffice.gov.uk/services/data/datapoint';
+		$this->name        = __( 'Met Office(UK)', 'simple-location' );
+		$this->slug        = 'metofficeuk';
+		$this->url         = 'https://www.metoffice.gov.uk/services/data/datapoint';
 		$this->description = __( 'Limited to data for the UK only, and requires a free API key for unlimited access. Historical data is not available.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_metoffice_api' );
@@ -42,16 +42,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		register_setting(
-			'sloc_providers', // option group.
-			'sloc_metoffice_api', // option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Met Office API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+		self::register_settings_api( __( 'Met Office API', 'simple-location' ), 'sloc_metoffice_api' ); 
 	}
 
 	/**
@@ -60,16 +51,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		add_settings_field(
-			'sloc_metoffice_api', // id.
-			__( 'Met Office API Key', 'simple-location' ), // setting title.
-			array( 'Loc_Config', 'string_callback' ), // display callback.
-			'sloc_providers', // settings page.
-			'sloc_api', // settings section.
-			array(
-				'label_for' => 'sloc_metoffice_api',
-			)
-		);
+		self::add_settings_parameter( __( 'Met Office', 'simple-location' ), 'sloc_metoffice_api' );
 	}
 
 	/**
@@ -314,4 +296,3 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 
 }
 
-register_sloc_provider( new Weather_Provider_MetOffice() );

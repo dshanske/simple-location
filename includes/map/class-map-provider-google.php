@@ -11,16 +11,16 @@
  * @since 1.0.0
  */
 class Map_Provider_Google extends Map_Provider {
-
+	use Sloc_API_Google;
 
 	public function __construct( $args = array() ) {
-		$this->name       = __( 'Google Maps', 'simple-location' );
-		$this->url = 'https://developers.google.com/maps/';
+		$this->name        = __( 'Google Maps', 'simple-location' );
+		$this->url         = 'https://developers.google.com/maps/';
 		$this->description = __( 'Google Maps Platform API key is required, however Google offers a $200 per month credit, which is the equivalent of 28,000 queries. Click Get Started. Make sure to enable the Static Map API. Follow the tutorial', 'simple-location' );
-		$this->slug       = 'google';
-		$this->max_width  = 640;
-		$this->max_height = 640;
-		$this->max_zoom   = 20;
+		$this->slug        = 'google';
+		$this->max_width   = 640;
+		$this->max_height  = 640;
+		$this->max_zoom    = 20;
 
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
@@ -33,21 +33,13 @@ class Map_Provider_Google extends Map_Provider {
 		if ( 'google' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+			add_action( 'init', array( get_called_class(), 'style_init' ) );
+			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
 	}
 
-	public static function init() {
-		register_setting(
-			'sloc_providers', // option group
-			'sloc_google_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Google Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+	public static function style_init() {
 		register_setting(
 			'simloc',
 			'sloc_google_style',
@@ -60,9 +52,7 @@ class Map_Provider_Google extends Map_Provider {
 		);
 	}
 
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'Google', 'simple-location' ), 'sloc_google_api' );
-
+	public static function style_admin_init() {
 		add_settings_field(
 			'googlestyle', // id
 			__( 'Google Style', 'simple-location' ),
@@ -144,5 +134,4 @@ class Map_Provider_Google extends Map_Provider {
 
 }
 
-register_sloc_provider( new Map_Provider_Google() );
 

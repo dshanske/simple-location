@@ -20,10 +20,10 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Visual Crossing', 'simple-location' );
-		$this->url = 'https://www.visualcrossing.com/';
+		$this->name        = __( 'Visual Crossing', 'simple-location' );
+		$this->url         = 'https://www.visualcrossing.com/';
 		$this->description = __( 'Offers a free plan with 1000 requests per day, plus a metered rate after that of $0.0001 per request. Offer historical data. Requires API key.', 'simple-location' );
-		$this->slug = 'visualcrossing';
+		$this->slug        = 'visualcrossing';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_visualcrossing_api' );
 		}
@@ -42,16 +42,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_visualcrossing_api', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Visual Crossing API',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+		self::register_settings_api( __( 'Visual Crossing API Key', 'simple-location' ), 'sloc_visualcrossing_api' ); 
 	}
 
 	/**
@@ -196,5 +187,3 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	}
 
 }
-
-register_sloc_provider( new Weather_Provider_VisualCrossing() );

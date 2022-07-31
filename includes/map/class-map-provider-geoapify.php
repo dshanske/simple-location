@@ -11,12 +11,12 @@
  * @since 1.0.0
  */
 class Map_Provider_Geoapify extends Map_Provider {
-
+	use Sloc_API_Geoapify;
 
 	public function __construct( $args = array() ) {
-		$this->name = __( 'GeoApify', 'simple-location' );
-		$this->slug = 'geoapify';
-		$this->url = 'https://www.geoapify.com/';
+		$this->name        = __( 'GeoApify', 'simple-location' );
+		$this->slug        = 'geoapify';
+		$this->url         = 'https://www.geoapify.com/';
 		$this->description = __( 'GeoApify offers Maps and Geocoding APIs with a free tier of 3000 credits for requests per day. API Key required.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_geoapify_api' );
@@ -30,21 +30,13 @@ class Map_Provider_Geoapify extends Map_Provider {
 		if ( 'geoapify' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+			add_action( 'init', array( get_called_class(), 'style_init' ) );
+			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
 	}
 
-	public static function init() {
-		register_setting(
-			'sloc_providers', // option group
-			'sloc_geoapify_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'GeoApify API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+	public static function style_init() {
 		register_setting(
 			'simloc',
 			'sloc_geoapify_style',
@@ -57,9 +49,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 		);
 	}
 
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'GeoApify', 'simple-location' ), 'sloc_geoapify_api' );
-
+	public static function style_admin_init() {
 		add_settings_field(
 			'geoapifystyle', // id
 			__( 'Geoapify Style', 'simple-location' ),
@@ -154,6 +144,3 @@ class Map_Provider_Geoapify extends Map_Provider {
 	}
 
 }
-
-register_sloc_provider( new Map_Provider_Geoapify() );
-

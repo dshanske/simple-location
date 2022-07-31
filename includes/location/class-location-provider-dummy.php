@@ -33,5 +33,3 @@ class Location_Provider_Dummy extends Location_Provider {
 
 
 }
-
-register_sloc_provider( new Location_Provider_Dummy() );

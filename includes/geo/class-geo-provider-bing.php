@@ -11,8 +11,7 @@
  * @since 1.0.0
  */
 class Geo_Provider_Bing extends Geo_Provider {
-
-
+	use Sloc_API_Bing;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -30,9 +29,9 @@ class Geo_Provider_Bing extends Geo_Provider {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Bing', 'simple-location' );
-		$this->slug = 'bing';
-		$this->url = 'https://www.bingmapsportal.com/';
+		$this->name        = __( 'Bing', 'simple-location' );
+		$this->slug        = 'bing';
+		$this->url         = 'https://www.bingmapsportal.com/';
 		$this->description = __( 'Bing Geocoding API Requires a Bings Maps key...which is available for 125k transactions.', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_bing_api' );
@@ -44,34 +43,6 @@ class Geo_Provider_Bing extends Geo_Provider {
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
 		parent::__construct( $args );
-	}
-
-	/**
-	 * Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function init() {
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_bing_api', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Bing Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-	}
-
-
-	/**
-	 * Admin Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'Bing', 'simple-location' ), 'sloc_bing_api' );
 	}
 
 	/**
@@ -234,5 +205,3 @@ class Geo_Provider_Bing extends Geo_Provider {
 	}
 
 }
-
-register_sloc_provider( new Geo_Provider_Bing() );

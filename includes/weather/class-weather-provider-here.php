@@ -11,6 +11,7 @@
  * @since 1.0.0
  */
 class Weather_Provider_HERE extends Weather_Provider {
+	use Sloc_API_Here;
 
 	/**
 	 * Constructor
@@ -20,10 +21,10 @@ class Weather_Provider_HERE extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'HERE', 'simple-location' );
-		$this->url = 'https://developer.here.com/';
+		$this->name        = __( 'HERE', 'simple-location' );
+		$this->url         = 'https://developer.here.com/';
 		$this->description = __( 'HERE offers a free limited plan for up to 2500 weather transactions per month. Historical data not available.', 'simple-location' );
-		$this->slug = 'here';
+		$this->slug        = 'here';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_here_api' );
 		}
@@ -35,33 +36,6 @@ class Weather_Provider_HERE extends Weather_Provider {
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
 		parent::__construct( $args );
-	}
-
-	/**
-	 * Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function init() {
-		register_setting(
-			'sloc_providers', // option group.
-			'sloc_here_api', // option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'HERE API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-	}
-
-	/**
-	 * Init Function To Add Settings Fields.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
 	}
 
 	/**
@@ -323,5 +297,3 @@ class Weather_Provider_HERE extends Weather_Provider {
 	}
 
 }
-
-register_sloc_provider( new Weather_Provider_HERE() );

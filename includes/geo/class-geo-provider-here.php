@@ -12,6 +12,8 @@
  */
 class Geo_Provider_Here extends Geo_Provider {
 
+	use Sloc_API_Here;
+
 	/**
 	 * Constructor for the Abstract Class.
 	 *
@@ -28,9 +30,9 @@ class Geo_Provider_Here extends Geo_Provider {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'HERE', 'simple-location' );
-		$this->slug = 'here';
-		$this->url = 'https://developer.here.com/';
+		$this->name        = __( 'HERE', 'simple-location' );
+		$this->slug        = 'here';
+		$this->url         = 'https://developer.here.com/';
 		$this->description = __( 'HERE offers a free limited plan for up to 30,000 geocoding transactions per month', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_here_api' );
@@ -42,33 +44,6 @@ class Geo_Provider_Here extends Geo_Provider {
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
 		parent::__construct( $args );
-	}
-
-	/**
-	 * Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function init() {
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_here_api', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'HERE Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-	}
-
-	/**
-	 * Admin Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
 	}
 
 	/**
@@ -222,5 +197,3 @@ class Geo_Provider_Here extends Geo_Provider {
 	}
 
 }
-
-register_sloc_provider( new Geo_Provider_Here() );

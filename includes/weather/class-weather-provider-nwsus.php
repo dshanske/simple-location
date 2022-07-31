@@ -20,11 +20,11 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name   = __( 'National Weather Service(US)', 'simple-location' );
-		$this->url    = 'https://www.weather.gov/documentation/services-web-api';
+		$this->name        = __( 'National Weather Service(US)', 'simple-location' );
+		$this->url         = 'https://www.weather.gov/documentation/services-web-api';
 		$this->description = __( 'Provided by the US National Weather service, and therefore limited to the United States. No API key or limit, other than rate limiting.', 'simple-location' );
-		$this->slug   = 'nwsus';
-		$this->region = 'US';
+		$this->slug        = 'nwsus';
+		$this->region      = 'US';
 		parent::__construct( $args );
 	}
 
@@ -281,4 +281,3 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 
 }
 
-register_sloc_provider( new Weather_Provider_NWSUS() );

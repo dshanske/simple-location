@@ -50,6 +50,14 @@ class Loc_Config {
 	  */
 	private static $weather = array();
 
+	 /**
+	  * Store Elevation Providers.
+	  *
+	  * @since 4.6.0
+	  * @var array
+	  */
+	private static $elevation = array();
+
 
 
 	/**
@@ -287,6 +295,8 @@ class Loc_Config {
 			static::$location[ $object->get_slug() ] = $object;
 		} elseif ( $object instanceof Weather_Provider ) {
 			static::$weather[ $object->get_slug() ] = $object;
+		} elseif ( $object instanceof Elevation_Provider ) {
+			static::$elevation[ $object->get_slug() ] = $object;
 		}
 		return true;
 	}
@@ -373,6 +383,7 @@ class Loc_Config {
 		<?php self::tab_link( 'providers', __( 'Providers', 'simple-location' ), $active_tab ); ?>
 		<?php self::tab_link( 'zones', __( 'Zones', 'simple-location' ), $active_tab ); ?>
 		<?php self::tab_link( 'stations', __( 'Stations', 'simple-location' ), $active_tab ); ?>
+		<?php self::tab_link( 'api', __( 'API Keys', 'simple-location' ), $active_tab ); ?>
 		<?php
 		if ( WP_DEBUG ) {
 			self::tab_link( 'debug', __( 'Debug', 'simple-location' ), $active_tab );
@@ -408,6 +419,10 @@ class Loc_Config {
 				case 'stations':
 					settings_fields( 'sloc_stations' );
 					do_settings_sections( 'sloc_stations' );
+					break;
+				case 'api':
+					settings_fields( 'sloc_api' );
+					do_settings_sections( 'sloc_api' );
 					break;
 				default:
 					settings_fields( 'simloc' );
@@ -651,17 +666,10 @@ class Loc_Config {
 		);
 
 		add_settings_section(
-			'sloc_providers',
-			__( 'Providers', 'simple-location' ),
-			array( 'Loc_Config', 'sloc_provider_settings' ),
-			'sloc_providers'
-		);
-
-		add_settings_section(
 			'sloc_api',
 			__( 'API Keys', 'simple-location' ),
 			array( 'Loc_Config', 'sloc_api_settings' ),
-			'sloc_providers'
+			'sloc_api'
 		);
 	}
 

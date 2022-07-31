@@ -11,13 +11,14 @@
  * @since 1.0.0
  */
 class Map_Provider_LocationIQ extends Map_Provider {
+	use Sloc_API_LocationIQ;
 
 
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'LocationIQ', 'simple-location' );
 		$this->slug         = 'locationiq';
-		$this->url = 'https://locationiq.com/';
-		$this->description = __( 'LocationIQ offers Geocoding and Static maps, with a free tier of 5000 requests/day. Sign up for an API key', 'simple-location' );
+		$this->url          = 'https://locationiq.com/';
+		$this->description  = __( 'LocationIQ offers Geocoding and Static maps, with a free tier of 5000 requests/day. Sign up for an API key', 'simple-location' );
 		$this->max_map_zoom = 18;
 
 		if ( ! isset( $args['api'] ) ) {
@@ -32,24 +33,6 @@ class Map_Provider_LocationIQ extends Map_Provider {
 		}
 		parent::__construct( $args );
 	}
-
-	public static function init() {
-		register_setting(
-			'sloc_providers', // option group
-			'sloc_locationiq_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Location IQ API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-	}
-
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'Location IQ', 'simple-location' ), 'sloc_locationiq_api' );
-	}
-
 
 	public function get_styles() {
 		return array();
@@ -105,6 +88,3 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	}
 
 }
-
-register_sloc_provider( new Map_Provider_LocationIQ() );
-

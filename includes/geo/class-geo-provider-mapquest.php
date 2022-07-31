@@ -11,7 +11,7 @@
  * @since 1.0.0
  */
 class Geo_Provider_Mapquest extends Geo_Provider {
-
+	use Sloc_API_Mapquest;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -29,9 +29,9 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Mapquest', 'simple-location' );
-		$this->slug = 'mapquest';
-		$this->url = 'https://developer.mapquest.com/';
+		$this->name        = __( 'Mapquest', 'simple-location' );
+		$this->slug        = 'mapquest';
+		$this->url         = 'https://developer.mapquest.com/';
 		$this->description = __( 'Yes, MapQuest still exists. It offers Geocoding and a Static Map API. Offers a free tier with 15,000 transactions per month. Sign up for an API key', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_mapquest_api' );
@@ -43,33 +43,6 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
 		Geo_Provider::__construct( $args );
-	}
-
-	/**
-	 * Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function init() {
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_mapquest_api', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Mapquest API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-	}
-
-	/**
-	 * Admin Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'MapQuest', 'simple-location' ), 'sloc_mapquest_api' );
 	}
 
 	/**
@@ -228,5 +201,3 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 
 
 }
-
-register_sloc_provider( new Geo_Provider_Mapquest() );

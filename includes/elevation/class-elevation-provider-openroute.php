@@ -1,17 +1,18 @@
 <?php
 /**
- * Reverse Geolocation Provider.
+ * Elevation Provider.
  *
  * @package Simple_Location
  */
 
 /**
- * Reverse Geolocation using OpenRoute Service API.
+ * Elevation using OpenRoute Service API.
  *
- * @since 1.0.0
+ * @since 4.5.0
  */
-class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
+class Elevation_Provider_OpenRoute {
 	use Sloc_API_OpenRoute;
+
 	/**
 	 * Constructor for the Abstract Class.
 	 *
@@ -41,7 +42,7 @@ class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
-		Geo_Provider::__construct( $args );
+		parent::__construct( $args );
 	}
 
 	/**
@@ -70,57 +71,5 @@ class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
 		}
 		return $json['geometry'][2];
 	}
-
-	/**
-	 * Return an address.
-	 *
-	 * @return array $reverse microformats2 address elements in an array.
-	 */
-	public function reverse_lookup() {
-		if ( empty( $this->api ) ) {
-			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for OpenRoute', 'simple-location' ) );
-		}
-		$args = array(
-			'api_key'   => $this->api,
-			'point.lat' => $this->latitude,
-			'point.lon' => $this->longitude,
-		// 'size'      => 1,
-		);
-
-		$json = $this->fetch_json( 'https://api.openrouteservice.org/geocode/reverse', $args );
-		if ( is_wp_error( $json ) ) {
-			return $json;
-		}
-		return $this->address_to_mf( $json );
-	}
-
-	/**
-	 * Geocode address.
-	 *
-	 * @param  string $address String representation of location.
-	 * @return array $reverse microformats2 address elements in an array.
-	 */
-	public function geocode( $address ) {
-		if ( empty( $this->api ) ) {
-			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for OpenRoute', 'simple-location' ) );
-		}
-		$args = array(
-			'api_key' => $this->api,
-			'text'    => $address,
-		);
-
-		$json = $this->fetch_json( 'https://api.openrouteservice.org/geocode/search', $args );
-		if ( is_wp_error( $json ) ) {
-			return $json;
-		}
-
-		if ( wp_is_numeric_array( $json ) ) {
-			$json = $json[0];
-		}
-		$address             = $json['features'][0];
-		$return              = $this->address_to_mf( $json );
-		$return['latitude']  = $address['geometry']['coordinates'][1];
-		$return['longitude'] = $address['geometry']['coordinates'][0];
-		return array_filter( $return );
-	}
 }
+

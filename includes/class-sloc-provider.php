@@ -259,6 +259,29 @@ abstract class Sloc_Provider {
 		);
 	}
 
+
+
+	/**
+	 * Registers a Setting Field for Credential Based Information
+	 */
+	public static function register_settings_api( $name, $property, $type = null ) {
+		if ( ! $type ) {
+			$type = __( 'API Key', 'simple-location' );
+		}
+
+		register_setting(
+			'sloc_api', // Option group.
+			$property, // Option name.
+			array(
+				'type'         => 'string',
+				// translators: 1. Name of Service 2. Type of Property
+				'description' => sprintf( __( '%1$s %2$s', 'simple-location' ), $name, $type ),
+				'show_in_rest' => false,
+				'default'      => '',
+			)
+		);
+	}
+
 	/**
 	 * Set and Validate Coordinates.
 	 *

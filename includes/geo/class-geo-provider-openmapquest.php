@@ -11,7 +11,7 @@
  * @since 1.0.0
  */
 class Geo_Provider_OpenMapquest extends Geo_Provider_Nominatim {
-
+	use Sloc_API_Mapquest;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -41,42 +41,6 @@ class Geo_Provider_OpenMapquest extends Geo_Provider_Nominatim {
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
 		Geo_Provider::__construct( $args );
-	}
-
-	/**
-	 * Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function init() {
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_mapquest_api', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Mapquest API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-	}
-
-	/**
-	 * Admin Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function admin_init() {
-		add_settings_field(
-			'mapquestapi', // ID.
-			__( 'MapQuest API Key', 'simple-location' ), // Setting title.
-			array( 'Loc_Config', 'string_callback' ), // Display callback.
-			'sloc_providers', // Settings page.
-			'sloc_api', // Settings section.
-			array(
-				'label_for' => 'sloc_mapquest_api',
-			)
-		);
 	}
 
 	/**
@@ -180,5 +144,3 @@ class Geo_Provider_OpenMapquest extends Geo_Provider_Nominatim {
 
 
 }
-
-register_sloc_provider( new Geo_Provider_OpenMapquest() );

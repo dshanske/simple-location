@@ -11,13 +11,13 @@
  * @since 1.0.0
  */
 class Map_Provider_Bing extends Map_Provider {
-
+	use Sloc_API_Bing;
 
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'Bing Maps', 'simple-location' );
 		$this->slug         = 'bing';
-		$this->url = 'https://www.bingmapsportal.com/';
-		$this->description = __( 'Bing Static Map API Requires a Bings Maps key...which is available for 125k transactions.', 'simple-location' );
+		$this->url          = 'https://www.bingmapsportal.com/';
+		$this->description  = __( 'Bing Static Map API Requires a Bings Maps key...which is available for 125k transactions.', 'simple-location' );
 		$this->max_height   = 1500;
 		$this->max_width    = 2000;
 		$this->max_map_zoom = 22;
@@ -32,21 +32,13 @@ class Map_Provider_Bing extends Map_Provider {
 		if ( 'bing' === $option ) {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
+			add_action( 'init', array( get_called_class(), 'style_init' ) );
+			add_action( 'admin_init', array( get_called_class(), 'style_admin_init' ) );
 		}
 		parent::__construct( $args );
 	}
 
-	public static function init() {
-		register_setting(
-			'sloc_providers', // option group
-			'sloc_bing_api', // option name
-			array(
-				'type'         => 'string',
-				'description'  => 'Bing Maps API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
+	public static function style_init() {
 		register_setting(
 			'simloc',
 			'sloc_bing_style',
@@ -59,9 +51,7 @@ class Map_Provider_Bing extends Map_Provider {
 		);
 	}
 
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'Bing', 'simple-location' ), 'sloc_bing_api' );
-
+	public static function style_admin_init() {
 		add_settings_field(
 			'bingstyle', // id
 			__( 'Bing Style', 'simple-location' ),
@@ -145,5 +135,3 @@ class Map_Provider_Bing extends Map_Provider {
 		return $this->get_the_static_map_html();
 	}
 }
-
-register_sloc_provider( new Map_Provider_Bing() );
