@@ -61,7 +61,6 @@ class Geo_Provider_Here extends Geo_Provider {
 			return $json;
 		}
 
-
 		if ( ! isset( $json['items'] ) || empty( $json['items'] ) ) {
 			return new WP_Error( 'invalid_response', __( 'No results', 'simple-location' ) );
 		}

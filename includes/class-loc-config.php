@@ -245,7 +245,6 @@ class Loc_Config {
 			)
 		);
 
-
 		register_setting(
 			'sloc_providers', // option group.
 			'sloc_weather_provider', // option name.
@@ -877,9 +876,9 @@ class Loc_Config {
 		$text        = get_option( $name );
 		$providers   = $args['providers'];
 		ksort( $providers );
-		$providers = array_reverse( $providers );
+		$providers         = array_reverse( $providers );
 		$providers['none'] = __( 'None', 'default' );
-		$providers = array_reverse( $providers );
+		$providers         = array_reverse( $providers );
 
 		if ( count( $providers ) > 1 ) {
 			printf( '<select name="%1$s">', esc_attr( $name ) );

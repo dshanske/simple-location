@@ -296,7 +296,6 @@ class Simple_Location_Plugin {
 		);
 		self::register_providers( $providers, 'includes/geo/' );
 
-
 		// Load Elevation Providers.
 		$providers = array(
 			'class-elevation-provider-bing.php', // Bing.

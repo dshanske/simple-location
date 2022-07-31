@@ -441,8 +441,8 @@ class REST_Geo {
 	 */
 	public static function venue( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
-		$params      = $request->get_params();
-		$provider    = empty( $params['provider'] ) ? null : $params['provider'];
+		$params   = $request->get_params();
+		$provider = empty( $params['provider'] ) ? null : $params['provider'];
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$venue = Loc_Config::venue_provider( $provider );
 			if ( ! $venue ) {
@@ -463,8 +463,8 @@ class REST_Geo {
 	 */
 	public static function elevation( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
-		$params      = $request->get_params();
-		$provider    = empty( $params['provider'] ) ? null : $params['provider'];
+		$params   = $request->get_params();
+		$provider = empty( $params['provider'] ) ? null : $params['provider'];
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$elevation = Loc_Config::elevation_provider( $provider );
 			if ( ! $elevation ) {
@@ -546,9 +546,9 @@ class REST_Geo {
 				}
 			}
 
-			 if ( ! isset( $reverse_adr['altitude'] ) ) {
+			if ( ! isset( $reverse_adr['altitude'] ) ) {
 				$reverse_adr['altitude'] = $reverse->elevation();
-			 }
+			}
 			return array_filter( $reverse_adr );
 		} elseif ( isset( $params['address'] ) ) {
 			$geocode = Loc_Config::geo_provider( $provider );

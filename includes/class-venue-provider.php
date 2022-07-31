@@ -53,17 +53,17 @@ abstract class Venue_Provider extends Sloc_Provider {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$defaults           = array(
-			'api'          => null,
-			'latitude'     => null,
-			'longitude'    => null,
-			'altitude'     => null,
-			'user'         => '',
+		$defaults   = array(
+			'api'       => null,
+			'latitude'  => null,
+			'longitude' => null,
+			'altitude'  => null,
+			'user'      => '',
 		);
-		$defaults           = apply_filters( 'sloc_venue_provider_defaults', $defaults );
-		$r                  = wp_parse_args( $args, $defaults );
-		$this->user         = $r['user'];
-		$this->api          = $r['api'];
+		$defaults   = apply_filters( 'sloc_venue_provider_defaults', $defaults );
+		$r          = wp_parse_args( $args, $defaults );
+		$this->user = $r['user'];
+		$this->api  = $r['api'];
 		$this->set( $r['latitude'], $r['longitude'] );
 
 		if ( $this->is_active() && method_exists( $this, 'admin_init' ) ) {
@@ -91,9 +91,9 @@ abstract class Venue_Provider extends Sloc_Provider {
 		$provider = Loc_Config::elevation_provider();
 		if ( ! $provider ) {
 			return 0;
-		} 
+		}
 
-		$provider->set ( $this->latitude, $this->longitude );
+		$provider->set( $this->latitude, $this->longitude );
 		return $provider->elevation();
 	}
 

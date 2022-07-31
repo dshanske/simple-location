@@ -101,9 +101,9 @@ abstract class Geo_Provider extends Sloc_Provider {
 		$provider = Loc_Config::elevation_provider();
 		if ( ! $provider ) {
 			return 0;
-		} 
+		}
 
-		$provider->set ( $this->latitude, $this->longitude );
+		$provider->set( $this->latitude, $this->longitude );
 		return $provider->elevation();
 	}
 

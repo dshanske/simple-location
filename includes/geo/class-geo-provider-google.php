@@ -64,7 +64,6 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( array_key_exists( 'status', $json ) && 'OK' !== $json['status'] ) {
 			return new WP_Error( $json['status'], ifset( $json['errormessage'], __( 'Error Returning Results from Google', 'simple-location' ) ) );
 		}
-			
 
 		$addr              = $this->address_to_mf2( $json );
 		$addr['latitude']  = $this->latitude;

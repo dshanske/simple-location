@@ -75,11 +75,11 @@ class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 		}
 
 		$args = array(
-			'text'      => $address,
-			'apiKey'    => $this->api,
+			'text'   => $address,
+			'apiKey' => $this->api,
 		);
 
-		$url  = 'https://api.geoapify.com/v1/geocode/search';
+		$url = 'https://api.geoapify.com/v1/geocode/search';
 
 		$json = $this->fetch_json( $url, $args );
 
