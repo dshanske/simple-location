@@ -193,6 +193,17 @@ abstract class Sloc_Provider {
 		return $this->name;
 	}
 
+	/**
+	 * Returns the url property.
+	 *
+	 * @return string $name Returns name.
+	 *
+	 * @since 4.6.0
+	 */
+	public function get_url() {
+		return $this->url;
+	}
+
 
 	/**
 	 * Returns the desciption property.

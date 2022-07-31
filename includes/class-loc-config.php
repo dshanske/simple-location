@@ -823,13 +823,25 @@ class Loc_Config {
 		if ( count( $providers ) > 1 ) {
 			printf( '<select name="%1$s">', esc_attr( $name ) );
 			foreach ( $providers as $key => $value ) {
-				echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key, false ), $value ), self::kses_option() );
+				if ( is_array( $value ) ) {
+					$name = $value['name'];
+				} else {
+					$name = $value;
+				}
+				echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $text, $key, false ), $name ), self::kses_option() );
 			}
 			echo '</select>';
 			echo '<p class="description">' . esc_html( $description ) . '</p>';
 			echo '<br /><br />';
 		} else {
 			printf( '<input name="%1$s" type="radio" id="%1$s" value="%2$s" checked /><span>%3$s</span>', esc_attr( $name ), esc_attr( key( $providers ) ), esc_html( reset( $providers ) ) );
+		}
+		if ( is_array( $providers[ $text ] ) ) {
+			if ( array_key_exists( 'url', $providers[ $text ] ) ) {
+				printf( '<p><a href="%1$s">%2$s</a> - %3$s</p>', esc_url( $providers[ $text ]['url'] ), esc_html( $providers[ $text ]['name'] ), $providers[ $text ]['description'] );
+			} else {
+				printf( '<p>%1$s - %2$s</p>', esc_html( $providers[ $text ]['name'] ), esc_html( $providers[ $text ]['description'] ) );
+			}
 		}
 	}
 
@@ -851,7 +863,12 @@ class Loc_Config {
 	public static function map_providers() {
 		$return = array();
 		foreach ( static::$maps as $map ) {
-			$return[ $map->get_slug() ] = esc_html( $map->get_name() );
+			$return[ $map->get_slug() ] =
+				array(
+					'name'        => $map->get_name(),
+					'url'         => $map->get_url(),
+					'description' => $map->get_description(),
+				);
 		}
 		return $return;
 	}
@@ -865,7 +882,31 @@ class Loc_Config {
 	public static function geo_providers() {
 		$return = array();
 		foreach ( static::$geo as $g ) {
-			$return[ $g->get_slug() ] = esc_html( $g->get_name() );
+			$return[ $g->get_slug() ] =
+				array(
+					'name'        => $g->get_name(),
+					'url'         => $g->get_url(),
+					'description' => $g->get_description(),
+				);
+		}
+		return $return;
+	}
+
+	/**
+	 * Return list of elevation providers.
+	 *
+	 * @return array Array of providers.
+	 * @since 1.0.0
+	 */
+	public static function elevation_providers() {
+		$return = array();
+		foreach ( static::$elevation as $g ) {
+			$return[ $g->get_slug() ] =
+				array(
+					'name'        => $g->get_name(),
+					'url'         => $g->get_url(),
+					'description' => $g->get_description(),
+				);
 		}
 		return $return;
 	}
@@ -881,7 +922,7 @@ class Loc_Config {
 			'HTML5' => __( 'Ask your Web Browser for Your Location(requires HTTPS)', 'simple-location' ),
 		);
 		foreach ( static::$location as $location ) {
-			$return[ $location->get_slug() ] = esc_html( $location->get_name() );
+			$return[ $location->get_slug() ] = $location->get_name();
 		}
 		return $return;
 	}
@@ -897,9 +938,17 @@ class Loc_Config {
 		$return = array();
 		foreach ( static::$weather as $weather ) {
 			if ( ! $station ) {
-				$return[ $weather->get_slug() ] = esc_html( $weather->get_name() );
+				$return[ $weather->get_slug() ] = array(
+					'name'        => $weather->get_name(),
+					'url'         => $weather->get_url(),
+					'description' => $weather->get_description(),
+				);
 			} elseif ( $weather->is_station() ) {
-				$return[ $weather->get_slug() ] = esc_html( $weather->get_name() );
+				$return[ $weather->get_slug() ] = array(
+					'name'        => $weather->get_name(),
+					'url'         => $weather->get_url(),
+					'description' => $weather->get_description(),
+				);
 			}
 		}
 		return $return;
@@ -1033,6 +1082,7 @@ class Loc_Config {
 		?>
 		<h4><?php esc_html_e( 'Simple Location Depends on Third Party Services', 'simple-location' ); ?></h4>
 		<p><?php esc_html_e( 'Many of these services require you to sign up for an account and provide an API key below. Many have free and paid tiers. For this reason, the plugin offers multiple providers. At this moment, Nominatim, Wikimedia Maps, and the US National Weather Service can be used without API keys. Geonames requires an account, but is otherwise free to use. If you are uncertain of which to try, start with the defaults.', 'simple-location' ); ?></p>
+		
 		<?php
 	}
 
@@ -1130,6 +1180,26 @@ class Loc_Config {
 			return static::$weather[ $provider ];
 		} else {
 			delete_option( 'sloc_weather_provider' );
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the current elevation provider.
+	 *
+	 * @param string $provider Name of Provider to Be Returned. Optional.
+	 * @return Weather_Provider $return Weather Provider.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function elevation_provider( $provider = null ) {
+		if ( ! $provider ) {
+			$provider = get_option( 'sloc_elevation_provider' );
+		}
+		if ( isset( static::$elevation[ $provider ] ) ) {
+			return static::$elevation[ $provider ];
+		} else {
+			delete_option( 'sloc_elevation_provider' );
 		}
 		return null;
 	}
