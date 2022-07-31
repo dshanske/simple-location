@@ -36,17 +36,6 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	}
 
 	/**
-	 * Returns elevation but there is no Nominatim Elevation API.
-	 *
-	 * @return float $elevation Elevation.
-	 *
-	 * @since 1.0.0
-	 */
-	public function elevation() {
-		return 0;
-	}
-
-	/**
 	 * Return an address.
 	 *
 	 * @return array $reverse microformats2 address elements in an array.
@@ -219,6 +208,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 
 			'latitude'         => $this->latitude,
 			'longitude'        => $this->longitude,
+			'altitude'         => $this->altitude,
 			'raw'              => $json,
 		);
 		if ( is_null( $addr['country-name'] ) ) {

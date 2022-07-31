@@ -10,7 +10,7 @@
  *
  * @since 4.5.0
  */
-class Elevation_Provider_OpenMapquest {
+class Elevation_Provider_OpenMapquest extends Elevation_Provider {
 	use Sloc_API_Mapquest;
 
 	/**

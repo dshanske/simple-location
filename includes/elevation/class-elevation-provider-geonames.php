@@ -36,11 +36,6 @@ class Elevation_Provider_Geonames extends Elevation_Provider {
 			$args['user'] = get_option( 'sloc_geonames_user' );
 		}
 
-		$option = get_option( 'sloc_geo_provider' );
-		if ( 'geonames' === $option ) {
-			add_action( 'init', array( get_called_class(), 'init' ) );
-			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
-		}
 		parent::__construct( $args );
 	}
 
@@ -53,14 +48,14 @@ class Elevation_Provider_Geonames extends Elevation_Provider {
 	 */
 	public function elevation() {
 		if ( ! $this->user ) {
-			return null;
+			return new WP_Error( 'missing_username', __( 'Missing GeoNames User', 'simple-location' ) );
 		}
 		$args = array(
 			'username' => $this->user,
 			'lat'      => $this->latitude,
 			'lng'      => $this->longitude,
 		);
-		$url  = 'http://api.geonames.org/srtm1';
+		$url  = 'https://secure.geonames.org/srtm1';
 		$json = $this->fetch_json( $url, $args );
 		if ( is_wp_error( $json ) ) {
 			return $json;
@@ -68,7 +63,7 @@ class Elevation_Provider_Geonames extends Elevation_Provider {
 		if ( array_key_exists( 'srtm1', $json ) ) {
 			return round( $json['srtm1'], 2 );
 		}
-		return null;
+		return $null;
 	}
 }
 

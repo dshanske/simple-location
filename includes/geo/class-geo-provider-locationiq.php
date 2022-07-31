@@ -41,17 +41,6 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 	}
 
 	/**
-	 * Returns elevation. But LocationIQ has no elevation API
-	 *
-	 * @return float $elevation Elevation.
-	 *
-	 * @since 1.0.0
-	 */
-	public function elevation() {
-		return 0;
-	}
-
-	/**
 	 * Return an address.
 	 *
 	 * @return array $reverse microformats2 address elements in an array.

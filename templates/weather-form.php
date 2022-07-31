@@ -17,7 +17,7 @@
 	<p><label for="provider"><?php esc_html_e( 'Weather Provider', 'simple-location' ); ?></label><select name="provider">
 		<?php
 		foreach ( $providers as $key => $value ) {
-			printf( '<option value="%1$s">%2$s</option>', $key, $value ); // phpcs:ignore
+			printf( '<option value="%1$s">%2$s</option>', $key, $value['name'] ); // phpcs:ignore
 		}
 		?>
 	  </select>

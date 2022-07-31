@@ -54,7 +54,7 @@ class Elevation_Provider_Bing extends Elevation_Provider {
 	 */
 	public function elevation() {
 		if ( empty( $this->api ) ) {
-			return null;
+			return new WP_Error( 'no_key', __( 'Missing API Key', 'simple-location' ) );
 		}
 		$args = array(
 			'points' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
@@ -69,7 +69,7 @@ class Elevation_Provider_Bing extends Elevation_Provider {
 				return new WP_Error( $json['status'], $json['error_message'] );
 		}
 		if ( ! isset( $json['resourceSets'] ) ) {
-			return null;
+			return new WP_Error( 'no_resource_sets', __( 'Missing Resource Sets', 'simple-location' ), $json );
 		}
 			$json = $json['resourceSets'][0]['resources'][0];
 		if ( ! isset( $json['elevations'] ) ) {

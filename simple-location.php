@@ -182,6 +182,7 @@ class Simple_Location_Plugin {
 			'class-sloc-provider.php', // Base Provider Class.
 			'class-map-provider.php', // Map Provider Class.
 			'class-geo-provider.php', // Geo Provider Class.
+			'class-elevation-provider.php', // Elevation Provider Class.
 			'class-weather-provider.php', // Weather Provider Class.
 			'class-location-provider.php', // Location Provider Class.
 			'class-rest-geo.php', // REST endpoint for Geo.
@@ -227,6 +228,7 @@ class Simple_Location_Plugin {
 			'trait-sloc-api-mapquest.php', // MapQuest API Traits.
 			'trait-sloc-api-openroute.php', // OpenRoute API Traits.
 			'trait-sloc-api-geoapify.php', // GeoApify API Traits.
+			'trait-sloc-api-geonames.php', // GeoNames API Traits.
 			'trait-sloc-api-mapbox.php', // MapBox API Traits.
 			'trait-sloc-api-tomtom.php', // TomTom API Traits.
 		);
@@ -290,6 +292,18 @@ class Simple_Location_Plugin {
 			'class-geo-provider-openroute.php', // OpenRoute.
 		);
 		self::register_providers( $providers, 'includes/geo/' );
+
+
+		// Load Elevation Providers.
+		$providers = array(
+			'class-elevation-provider-bing.php', // Bing.
+			'class-elevation-provider-geonames.php', // Geonames.
+			'class-elevation-provider-google.php', // Google.
+			'class-elevation-provider-mapquest.php', // MapQuest.
+			'class-elevation-provider-openmapquest.php', // MapQuest Nominatim.
+			'class-elevation-provider-openroute.php', // OpenRoute.
+		);
+		self::register_providers( $providers, 'includes/elevation/' );
 	}
 
 	/**

@@ -11,6 +11,7 @@
  * @since 1.0.0
  */
 class Geo_Provider_Geonames extends Geo_Provider {
+	use Sloc_API_Geonames;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -36,61 +37,6 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		}
 
 		parent::__construct( $args );
-	}
-
-	/**
-	 * Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function init() {
-		self::register_settings_api( __( 'GeoNames', 'simple-location' ), 'sloc_geonames_user', __( 'User', 'simple-location' ) );
-		register_setting(
-			'sloc_providers',
-			'sloc_geonames_user',
-			array(
-				'type'         => 'string',
-				'description'  => 'Geonames User',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-	}
-
-	/**
-	 * Admin Init Function To Register Settings.
-	 *
-	 * @since 4.0.0
-	 */
-	public static function admin_init() {
-		self::add_settings_parameter( __( 'Geonames', 'simple-location' ), 'sloc_geonames_user', __( 'User', 'simple-location' ) );
-	}
-
-	/**
-	 * Returns elevation.
-	 *
-	 * @return float $elevation Elevation.
-	 *
-	 * @since 1.0.0
-	 */
-	public function elevation() {
-		if ( ! $this->user ) {
-			return null;
-		}
-		$args = array(
-			'username' => $this->user,
-			'lat'      => $this->latitude,
-			'lng'      => $this->longitude,
-		);
-		$url  = 'http://api.geonames.org/srtm1';
-		$json = $this->fetch_json( $url, $args );
-		if ( is_wp_error( $json ) ) {
-			return $json;
-		}
-		if ( array_key_exists( 'srtm1', $json ) ) {
-			return round( $json['srtm1'], 2 );
-		}
-		return null;
 	}
 
 	/**

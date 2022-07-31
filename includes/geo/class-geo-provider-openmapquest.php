@@ -39,37 +39,6 @@ class Geo_Provider_OpenMapquest extends Geo_Provider_Nominatim {
 	}
 
 	/**
-	 * Returns elevation.
-	 *
-	 * @return float $elevation Elevation.
-	 *
-	 * @since 1.0.0
-	 */
-	public function elevation() {
-		if ( empty( $this->api ) ) {
-			return null;
-		}
-		$args = array(
-			'latLngCollection' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-			'key'              => $this->api,
-		);
-		$url  = 'https://open.mapquestapi.com/elevation/v1/profile';
-
-		$json = $this->fetch_json( $url, $args );
-
-		if ( is_wp_error( $json ) ) {
-			return $json;
-		}
-		if ( isset( $json['error_message'] ) ) {
-				return new WP_Error( $json['status'], $json['error_message'] );
-		}
-		if ( ! isset( $json['elevationProfile'] ) ) {
-			return null;
-		}
-		return round( $json['elevationProfile'][0]['height'], 2 );
-	}
-
-	/**
 	 * Return an address.
 	 *
 	 * @return array $reverse microformats2 address elements in an array.

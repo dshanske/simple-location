@@ -40,33 +40,6 @@ class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
 	}
 
 	/**
-	 * Returns elevation.
-	 *
-	 * @return float $elevation Elevation.
-	 *
-	 * @since 1.0.0
-	 */
-	public function elevation() {
-		if ( empty( $this->api ) ) {
-			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for OpenRoute', 'simple-location' ) );
-		}
-		$args = array(
-			'api_key'    => $this->api,
-			'format_out' => 'point',
-			'geometry'   => $this->longitude . ',' . $this->latitude,
-		);
-
-		$json = $this->fetch_json( 'https://api.openrouteservice.org/elevation/point', $args );
-		if ( is_wp_error( $json ) ) {
-			return $json;
-		}
-		if ( array_key_exists( 'geometry', $json ) ) {
-			return 0;
-		}
-		return $json['geometry'][2];
-	}
-
-	/**
 	 * Return an address.
 	 *
 	 * @return array $reverse microformats2 address elements in an array.

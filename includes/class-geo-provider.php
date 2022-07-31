@@ -90,13 +90,21 @@ abstract class Geo_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Returns elevation.
+	 * Returns elevation from provider.
 	 *
 	 * @return float $elevation Elevation.
 	 *
 	 * @since 1.0.0
 	 */
-	abstract public function elevation();
+	public function elevation() {
+		$provider = Loc_Config::elevation_provider();
+		if ( ! $provider ) {
+			return 0;
+		} 
+
+		$provider->set ( $this->latitude, $this->longitude );
+		return $provider->elevation();
+	}
 
 	/**
 	 * Return an address.

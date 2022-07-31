@@ -41,35 +41,6 @@ class Geo_Provider_Google extends Geo_Provider {
 	}
 
 	/**
-	 * Returns elevation.
-	 *
-	 * @return float $elevation Elevation.
-	 *
-	 * @since 1.0.0
-	 */
-	public function elevation() {
-		if ( empty( $this->api ) ) {
-			return null;
-		}
-		$args = array(
-			'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-			'key'       => $this->api,
-		);
-		$url  = 'https://maps.googleapis.com/maps/api/elevation/json';
-		$json = $this->fetch_json( $url, $args );
-		if ( is_wp_error( $json ) ) {
-			return $json;
-		}
-		if ( isset( $json['error_message'] ) ) {
-			return new WP_Error( $json['status'], $json['error_message'] );
-		}
-		if ( ! isset( $json['results'] ) ) {
-			return null;
-		}
-		return round( $json['results'][0]['elevation'], 2 );
-	}
-
-	/**
 	 * Return an address.
 	 *
 	 * @return array $reverse microformats2 address elements in an array.

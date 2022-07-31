@@ -192,7 +192,7 @@ class Loc_Config {
 				'type'         => 'string',
 				'description'  => 'Map Provider',
 				'show_in_rest' => false,
-				'default'      => 'mapbox',
+				'default'      => 'none',
 			)
 		);
 		register_setting(
@@ -215,6 +215,17 @@ class Loc_Config {
 				'default'      => 'HTML5',
 			)
 		);
+
+		register_setting(
+			'sloc_providers', // option group.
+			'sloc_elevation_provider', // option name.
+			array(
+				'type'         => 'string',
+				'description'  => 'Elevation Provider',
+				'show_in_rest' => false,
+				'default'      => 'none',
+			)
+		);
 		register_setting(
 			'sloc_providers', // option group.
 			'sloc_weather_provider', // option name.
@@ -222,7 +233,7 @@ class Loc_Config {
 				'type'         => 'string',
 				'description'  => 'Weather Provider',
 				'show_in_rest' => false,
-				'default'      => 'nws',
+				'default'      => 'none',
 			)
 		);
 		register_setting(
@@ -413,6 +424,7 @@ class Loc_Config {
 			<?php
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/geocode-form.php' );
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/weather-form.php' );
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/elevation-form.php' );
 			?>
 			</div>
 			<?php
@@ -597,6 +609,18 @@ class Loc_Config {
 				'label_for'   => 'sloc_geolocation_provider',
 				'description' => __( 'Services that allow your site to figure out your location', 'simple-location' ),
 				'providers'   => self::geolocation_providers(),
+			)
+		);
+		add_settings_field(
+			'sloc_elevation_provider', // id.
+			__( 'Elevation Provider', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
+			array(
+				'label_for'   => 'sloc_elevation_provider',
+				'description' => __( 'Services that allow your site to determine elevation for a set of coordinates', 'simple-location' ),
+				'providers'   => self::elevation_providers(),
 			)
 		);
 		add_settings_field(
@@ -815,11 +839,12 @@ class Loc_Config {
 		$name        = $args['label_for'];
 		$description = ifset( $args['description'], '' );
 		$text        = get_option( $name );
-		$none        = array_key_exists( 'none', $args ) ? $args['none'] : 0;
 		$providers   = $args['providers'];
-		if ( $none ) {
-			$providers['none'] = __( 'None', 'default' );
-		}
+		ksort( $providers );
+		$providers = array_reverse( $providers );
+		$providers['none'] = __( 'None', 'default' );
+		$providers = array_reverse( $providers );
+
 		if ( count( $providers ) > 1 ) {
 			printf( '<select name="%1$s">', esc_attr( $name ) );
 			foreach ( $providers as $key => $value ) {
@@ -924,6 +949,7 @@ class Loc_Config {
 		foreach ( static::$location as $location ) {
 			$return[ $location->get_slug() ] = $location->get_name();
 		}
+
 		return $return;
 	}
 
@@ -951,6 +977,7 @@ class Loc_Config {
 				);
 			}
 		}
+
 		return $return;
 	}
 

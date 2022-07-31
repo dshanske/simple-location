@@ -10,7 +10,7 @@
  *
  * @since 4.5.0
  */
-class Elevation_Provider_OpenRoute {
+class Elevation_Provider_OpenRoute extends Elevation_Provider {
 	use Sloc_API_OpenRoute;
 
 	/**
@@ -66,7 +66,7 @@ class Elevation_Provider_OpenRoute {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		if ( array_key_exists( 'geometry', $json ) ) {
+		if ( ! array_key_exists( 'geometry', $json ) ) {
 			return 0;
 		}
 		return $json['geometry'][2];

@@ -42,7 +42,7 @@ class Elevation_Provider_Mapquest extends Elevation_Provider {
 			add_action( 'init', array( get_called_class(), 'init' ) );
 			add_action( 'admin_init', array( get_called_class(), 'admin_init' ) );
 		}
-		Geo_Provider::__construct( $args );
+		parent::__construct( $args );
 	}
 
 	/**

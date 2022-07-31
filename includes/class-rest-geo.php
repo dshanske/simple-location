@@ -195,6 +195,33 @@ class REST_Geo {
 		);
 		register_rest_route(
 			'sloc_geo/1.0',
+			'/elevation',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'elevation' ),
+					'args'                => array(
+						'longitude' => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
+						'latitude'  => array(
+							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
+						'units'     => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'provider'  => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+					'permission_callback' => function( $request ) {
+						return current_user_can( 'publish_posts' );
+					},
+				),
+			)
+		);
+		register_rest_route(
+			'sloc_geo/1.0',
 			'/weather',
 			array(
 				array(
@@ -382,6 +409,28 @@ class REST_Geo {
 		}
 	}
 
+
+	/**
+	 * Callback handler for Elevation Retrieval.
+	 *
+	 * @param WP_Rest_Request $request REST Request.
+	 */
+	public static function elevation( $request ) {
+		// We dont need to check the nonce like with admin-ajax.
+		$params      = $request->get_params();
+		$provider    = empty( $params['provider'] ) ? null : $params['provider'];
+		$term_lookup = array_key_exists( 'term', $params );
+		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+			$elevation = Loc_Config::elevation_provider( $provider );
+			if ( ! $elevation ) {
+				return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
+			}
+			$elevation->set( $params );
+			return $elevation->elevation();
+		}
+		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
+	}
+
 	/**
 	 * Callback handler for Geolocation Retrieval.
 	 *
@@ -452,9 +501,9 @@ class REST_Geo {
 				}
 			}
 
-			if ( isset( $params['altitude'] ) && 0 !== $params['altitude'] ) {
+			 if ( ! isset( $reverse_adr['altitude'] ) ) {
 				$reverse_adr['altitude'] = $reverse->elevation();
-			}
+			 }
 			return array_filter( $reverse_adr );
 		} elseif ( isset( $params['address'] ) ) {
 			$geocode = Loc_Config::geo_provider( $provider );

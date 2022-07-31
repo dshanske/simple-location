@@ -42,17 +42,6 @@ class Geo_Provider_Here extends Geo_Provider {
 	}
 
 	/**
-	 * Returns elevation, but HERE has no elevation API.
-	 *
-	 * @return float $elevation Elevation.
-	 *
-	 * @since 1.0.0
-	 */
-	public function elevation() {
-		return 0;
-	}
-
-	/**
 	 * Return an address.
 	 *
 	 * @return array $reverse microformats2 address elements in an array.

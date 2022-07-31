@@ -41,39 +41,6 @@ class Geo_Provider_Bing extends Geo_Provider {
 	}
 
 	/**
-	 * Returns elevation.
-	 *
-	 * @return float $elevation Elevation.
-	 *
-	 * @since 1.0.0
-	 */
-	public function elevation() {
-		if ( empty( $this->api ) ) {
-			return null;
-		}
-		$args = array(
-			'points' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-			'key'    => $this->api,
-		);
-		$url  = 'http://dev.virtualearth.net/REST/v1/Elevation/List';
-		$json = $this->fetch_json( $url, $args );
-		if ( is_wp_error( $json ) ) {
-			return $json;
-		}
-		if ( isset( $json['error_message'] ) ) {
-				return new WP_Error( $json['status'], $json['error_message'] );
-		}
-		if ( ! isset( $json['resourceSets'] ) ) {
-			return null;
-		}
-			$json = $json['resourceSets'][0]['resources'][0];
-		if ( ! isset( $json['elevations'] ) ) {
-			return null;
-		}
-			return round( $json['elevations'][0], 2 );
-	}
-
-	/**
 	 * Return an address.
 	 *
 	 * @return array $reverse microformats2 address elements in an array.
