@@ -176,7 +176,9 @@ class Simple_Location_Plugin {
 
 		// Core Load Files.
 		$core = array(
+			'functions.php', // Global Functions.
 			'class-geo-data.php', // Register Metadata Functions.
+			'class-sloc-media-metadata.php', // Media Metadata Functions.
 			'class-venue-taxonomy.php', // Venue Taxonomy.
 			'class-location-taxonomy.php', // Venue Taxonomy.
 			'class-sloc-provider.php', // Base Provider Class.
@@ -507,59 +509,3 @@ class Simple_Location_Plugin {
 	}
 
 }
-
-
-if ( ! function_exists( 'ifset' ) ) {
-
-	/**
-	 * Compat for the null coaslescing operator.
-	 *
-	 * Returns $var if set otherwise $default.
-	 *
-	 * @param mixed $var A variable.
-	 * @param mixed $default Return if $var is not set. Defaults to false.
-	 * @return mixed $return The returned value.
-	 */
-	function ifset( &$var, $default = false ) {
-		return isset( $var ) ? $var : $default;
-	}
-}
-
-if ( ! function_exists( 'array_key_return' ) ) {
-
-	/**
-	 * Returns $key in $array if set otherwise $default.
-	 *
-	 * @param string|number $key Key.
-	 * @param array         $array An array.
-	 * @param mixed         $default Return if $var is not set. Defaults to false.
-	 * @return mixed $return The returned value.
-	 */
-	function array_key_return( $key, &$array, $default = false ) {
-		if ( ! is_array( $array ) ) {
-			return $default;
-		}
-		return array_key_exists( $key, $array ) ? $array[ $key ] : $default;
-	}
-}
-
-if ( ! function_exists( 'ifset_round' ) ) {
-	/**
-	 * Returns if set and round.
-	 *
-	 * Returns $var, rounding it if it is a float if set otherwise $default.
-	 *
-	 * @param mixed $var A variable.
-	 * @param mixed $precision Rounds floats to a precision. Defaults to 0.
-	 * @param mixed $default Returned if var is not set. Defaults to false.
-	 * @return mixed $return The returned value.
-	 */
-	function ifset_round( &$var, $precision = 0, $default = false ) {
-		$return = ifset( $var, $default );
-		if ( is_float( $return ) ) {
-			return round( $return, $precision );
-		}
-		return $return;
-	}
-}
-

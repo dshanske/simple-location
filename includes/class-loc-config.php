@@ -1305,16 +1305,3 @@ class Loc_Config {
 		return null;
 	}
 }
-
-
-/**
- * Re\gister a provider.
- *
- * @param Sloc_Provider $object Sloc Provider.
- * @return boolean If successful return true.
- *
- * @since 1.0.0
- */
-function register_sloc_provider( $object ) {
-	return Loc_Config::register_provider( $object );
-}

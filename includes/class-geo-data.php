@@ -8,9 +8,9 @@
  */
 
 add_action( 'init', array( 'WP_Geo_Data', 'init' ), 1 );
+
 // Jetpack added Location support in 2017 remove it due conflict https://github.com/Automattic/jetpack/pull/9573 which created conflict.
 add_filter( 'jetpack_tools_to_include', array( 'WP_Geo_Data', 'jetpack_remove' ), 11 );
-
 
 /**
  * Handles Geo Functionality for WordPress objects.
@@ -37,13 +37,6 @@ class WP_Geo_Data {
 		add_action( 'pre_get_posts', array( $cls, 'filter_location_posts' ) );
 		add_action( 'pre_get_comments', array( $cls, 'pre_get_comments' ) );
 
-		// Grab geo data from EXIF, if it's available.
-		$wp_version = get_bloginfo( 'version' );
-		if ( version_compare( $wp_version, '5.0', '>=' ) ) {
-			add_action( 'wp_read_image_metadata', array( $cls, 'exif_data' ), 10, 5 );
-		} else {
-			add_action( 'wp_read_image_metadata', array( $cls, 'exif_data' ), 10, 3 );
-		}
 		add_action( 'wp_generate_attachment_metadata', array( $cls, 'attachment' ), 20, 2 );
 		add_filter( 'attachment_fields_to_edit', array( $cls, 'attachment_fields_to_edit' ), 10, 2 );
 		add_action( 'attachment_submitbox_misc_actions', array( $cls, 'attachment_submitbox_metadata' ), 12 );
@@ -1005,98 +998,6 @@ class WP_Geo_Data {
 	}
 
 	/**
-	 * Enhance EXIF data.
-	 *
-	 * The EXIF data extracted by WordPress By Default Does Not Include location data and the date information is incorrect.
-	 *
-	 * @param array  $meta Image Metadata.
-	 * @param string $file Path to Image File.
-	 * @param int    $image_type Type of Image.
-	 * @param array  $iptc IPTC Data.
-	 * @param array  $exif EXIF Data.
-	 * @return array $meta Updated metadata.
-	 *
-	 * @since 1.0.0
-	 */
-	public static function exif_data( $meta, $file, $image_type, $iptc = null, $exif = null ) {
-		if ( ! is_array( $exif ) && is_callable( 'exif_read_data' ) && in_array( $image_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ), true ) ) {
-			$exif = @exif_read_data( $file );
-		}
-		// If there is no Exif Version set return.
-		if ( ! $exif['ExifVersion'] ) {
-			return $meta;
-		}
-		$version = (int) $exif['ExifVersion'];
-		// The changes between EXIF Versions mean different approaches are required.
-		$meta['ExifVersion'] = sanitize_text_field( $exif['ExifVersion'] );
-		if ( $version < 232 ) {
-			// Prior to Version 232, GPS coordinates were stored in several fields.
-			if ( ! empty( $exif['GPSLongitude'] ) && count( $exif['GPSLongitude'] ) === 3 && ! empty( $exif['GPSLongitudeRef'] ) ) {
-				$meta['location']['longitude'] = round( ( 'W' === $exif['GPSLongitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLongitude'] ), 7 );
-			}
-			if ( ! empty( $exif['GPSLatitude'] ) && count( $exif['GPSLatitude'] ) === 3 && ! empty( $exif['GPSLatitudeRef'] ) ) {
-				$meta['location']['latitude'] = round( ( 'S' === $exif['GPSLatitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLatitude'] ), 7 );
-			}
-			$datetime = null;
-			if ( 231 === $version ) {
-				// In Version 231 the timezone offset was stored in a separate field.
-				foreach (
-					array(
-						'DateTimeOriginal'  => 'UndefinedTag:0x9011',
-						'DateTimeDigitized' => 'UndefinedTag:0x9012',
-					)
-					as $time => $offset
-				) {
-					if ( ! empty( $exif[ $time ] ) && ! empty( $exif[ $offset ] ) ) {
-						$datetime = wp_exif_datetime( $exif[ $time ], $exif[ $offset ] );
-						break;
-					}
-				}
-			} else {
-				// Otherwise the timezone will be derived from the location.
-				if ( ! empty( $meta['location'] ) ) {
-					// Try to get the right timezone from the location.
-					$timezone = Loc_Timezone::timezone_for_location( $meta['location']['latitude'], $meta['location']['longitude'] );
-					if ( $timezone instanceof Timezone_Result ) {
-						$timezone = $timezone->timezone;
-					}
-				} else {
-					$timezone = wp_timezone();
-				}
-				if ( ! empty( $exif['DateTimeOriginal'] ) ) {
-					$datetime = wp_exif_datetime( $exif['DateTimeOriginal'], $timezone );
-				} elseif ( ! empty( $exif['DateTimeDigitized'] ) ) {
-					$datetime = wp_exif_datetime( $exif['DateTimeDigitized'], $timezone );
-				}
-			}
-			if ( $datetime ) {
-				// By default WordPress sets a timestamp that is wrong because it does not factor in timezone. This issues a correct timestamp.
-				$meta['created_timestamp'] = $datetime->getTimestamp();
-				// Also stores an ISO8601 formatted string.
-				$meta['created'] = $datetime->format( DATE_W3C );
-			}
-		} elseif ( 232 === $version ) {
-			// As of Version 232, the timezone is stored along with the datetime.
-			if ( ! empty( $exif['DateTimeOriginal'] ) ) {
-				$datetime = new DateTime( $exif['DateTimeOriginal'] );
-			} elseif ( ! empty( $exif['DateTimeDigitized'] ) ) {
-				$datetime = new DateTime( $exif['DateTimeDigitized'] );
-			}
-			if ( $datetime ) {
-				// By default WordPress sets a timestamp that is wrong because it does not factor in timezone. This issues a correct timestamp.
-				$meta['created'] = $datetime->getTimestamp();
-				// Also stores an ISO8601 formatted string.
-				$meta['created_timestamp'] = $datetime->format( DATE_W3C );
-			}
-		}
-		if ( ! empty( $exif['GPSAltitude'] ) ) {
-			// Photos may also store an altitude.
-			$meta['location']['altitude'] = wp_exif_frac2dec( $exif['GPSAltitude'] ) * ( 1 === $exif['GPSAltitudeRef'] ? -1 : 1 );
-		}
-		return $meta;
-	}
-
-	/**
 	 * Adds rewrite endpoints.
 	 *
 	 * This adds rewrite endpoints for the plugin.
@@ -1461,9 +1362,9 @@ class WP_Geo_Data {
 	 */
 	public static function register_meta() {
 		$args = array(
-			'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
+			'sanitize_callback' => array( __CLASS__, 'clean_coordinate' ),
 			'type'              => 'number',
-			'description'       => 'Latitude',
+			'description'       => __( 'Latitude', 'simple-location' ),
 			'single'            => true,
 			'show_in_rest'      => false,
 		);
@@ -1473,9 +1374,9 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_latitude', $args );
 
 		$args = array(
-			'sanitize_callback' => array( 'WP_Geo_Data', 'clean_coordinate' ),
+			'sanitize_callback' => array( __CLASS__, 'clean_coordinate' ),
 			'type'              => 'number',
-			'description'       => 'Longitude',
+			'description'       => __( 'Longitude', 'simple-location' ),
 			'single'            => true,
 			'show_in_rest'      => false,
 		);
@@ -1485,41 +1386,8 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_longitude', $args );
 
 		$args = array(
-			'type'         => 'number',
-			'description'  => 'Altitude',
-			'single'       => true,
-			'show_in_rest' => false,
-		);
-		register_meta( 'post', 'geo_altitude', $args );
-		register_meta( 'comment', 'geo_altitude', $args );
-		register_meta( 'user', 'geo_altitude', $args );
-		register_meta( 'term', 'geo_altitude', $args );
-
-		$args = array(
-			'type'         => 'array',
-			'description'  => 'Trip',
-			'single'       => true,
-			'show_in_rest' => false,
-		);
-		register_meta( 'post', 'geo_trip', $args );
-		register_meta( 'comment', 'geo_trip', $args );
-		register_meta( 'user', 'geo_trip', $args );
-		register_meta( 'term', 'geo_trip', $args );
-
-		$args = array(
-			'type'         => 'array',
-			'description'  => 'Weather Data',
-			'single'       => true,
-			'show_in_rest' => false,
-		);
-		register_meta( 'post', 'geo_weather', $args );
-		register_meta( 'comment', 'geo_weather', $args );
-		register_meta( 'user', 'geo_weather', $args );
-		register_meta( 'term', 'geo_weather', $args );
-
-		$args = array(
 			'type'         => 'string',
-			'description'  => 'Timezone of Location',
+			'description'  => __( 'Timezone of Location', 'simple-location' ),
 			'single'       => true,
 			'show_in_rest' => false,
 		);
@@ -1529,33 +1397,9 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_timezone', $args );
 
 		$args = array(
-			'type'         => 'number',
-			'description'  => 'Geodata Zoom for Map Display',
-			'single'       => true,
-			'show_in_rest' => false,
-		);
-		register_meta( 'post', 'geo_zoom', $args );
-		register_meta( 'comment', 'geo_zoom', $args );
-		register_meta( 'user', 'geo_zoom', $args );
-		register_meta( 'term', 'geo_zoom', $args );
-
-		$args = array(
-			'type'         => 'number',
-			'description'  => 'Geodata Public',
-			'single'       => true,
-			'show_in_rest' => false,
-		);
-		// Officially 0 is private 1 is public and absence or non-zero is assumed public.
-		// Therefore any non-zero number could be used to specify different display options.
-		register_meta( 'post', 'geo_public', $args );
-		register_meta( 'comment', 'geo_public', $args );
-		register_meta( 'user', 'geo_public', $args );
-		register_meta( 'term', 'geo_public', $args );
-
-		$args = array(
-			'sanitize_callback' => array( 'WP_Geo_Data', 'sanitize_address' ),
+			'sanitize_callback' => array( __CLASS__, 'sanitize_address' ),
 			'type'              => 'string',
-			'description'       => 'Geodata Address',
+			'description'       => __( 'Geodata Address', 'simple-location' ),
 			'single'            => true,
 			'show_in_rest'      => false,
 		);
@@ -1565,9 +1409,9 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_address', $args );
 
 		$args = array(
-			'sanitize_callback' => array( 'WP_Geo_Data', 'esc_attr' ),
+			'sanitize_callback' => array( __CLASS__, 'esc_attr' ),
 			'type'              => 'string',
-			'description'       => 'Geodata Icon',
+			'description'       => __( 'Geodata Icon', 'simple-location' ),
 			'single'            => true,
 			'show_in_rest'      => false,
 		);
@@ -1576,6 +1420,107 @@ class WP_Geo_Data {
 		register_meta( 'user', 'geo_icon', $args );
 		register_meta( 'term', 'geo_icon', $args );
 
+
+		// Numeric Geo Properties
+		$numerics = array(
+			'altitude'    => __( 'Altitude', 'simple-location' ),
+			'zoom'        => __( 'Geodata Zoom for Map Display', 'simple-location' ),
+			/*
+			 * Officially 0 is private 1 is public and absence or non-zero is assumed public.
+			 * Therefore any non-zero number could be used to specify different display options.
+			 */
+			'public'      => __( 'Geodata Public', 'simple-location' ),
+		);
+		foreach ( $numerics as $prop => $description ) {
+			$args = array(
+				'type'         => 'number',
+				'description'  => 'Altitude',
+				'single'       => true,
+				'show_in_rest' => false,
+			);
+			foreach ( array( 'post', 'comment', 'user', 'term' ) as $type ) {
+				register_meta( $type, 'geo_' . $prop, $args );
+			}
+		}
+
+		// Legacy Weather Storage
+		$args = array(
+			'type'         => 'array',
+			'description'  => 'Weather Data (Deprecated)',
+			'single'       => true,
+			'show_in_rest' => false,
+		);
+		register_meta( 'post', 'geo_weather', $args );
+		register_meta( 'comment', 'geo_weather', $args );
+		register_meta( 'user', 'geo_weather', $args );
+		register_meta( 'term', 'geo_weather', $args );
+
+
+		$numerics = array(
+			// Weather Properties.
+			'temperature' => __( 'Temperature', 'simple-location' ),
+			'humidity'    => __( 'Humidity', 'simple-location' ),
+			'heatindex'   => __( 'Heat Index', 'simple-location' ),
+			'windchill'   => __( 'Wind Chill', 'simple-location' ),
+			'dewpoint'    => __( 'Dewpoint', 'simple-location' ),
+			'pressure'    => __( 'Atmospheric Pressure', 'simple-location' ),
+			'cloudiness'  => __( 'Cloudiness', 'simple-location' ),
+			'rain'        => __( 'Rainfall', 'simple-location' ),
+			'snow'        => __( 'Snowfall', 'simple-location' ),
+			'visibility'  => __( 'Visibility', 'simple-location' ),
+			'radiation'   => __( 'Radiation', 'simple-location' ),
+			'illuminance' => __( 'Illuminance', 'simple-location' ),
+			'uv'          => __( 'UV Index', 'simple-location' ),
+			'aqi'         => __( 'Air Quality Index', 'simple-location' ),
+			'pm1_0'       => __( 'Particulate Matter 1.0', 'simple-location' ),
+			'pm2_5'       => __( 'Particulate Matter 2.5', 'simple-location' ),
+			'pm10_0'      => __( 'Particulate Matter 10.0', 'simple-location' ),
+			'co'          => __( 'Carbon Monoxide', 'simple-location' ),
+			'co2'         => __( 'Carbon Dioxide', 'simple-location' ),
+			'nh3'         => __( 'Ammonia', 'simple-location' ),
+			'o3'          => __( 'Ozone', 'simple-location' ),
+			'pb'          => __( 'Lead', 'simple-location' ),
+			'so2'         => __( 'Sulfur Dioxide', 'simple-location' ),
+			'windspeed'   => __( 'Wind Speed', 'simple-location' ),
+			'winddegree'  => __( 'Wind Degree', 'simple-location' ),
+			'windgust'    => __( 'Wind Gust', 'simple-location' ),
+		);
+
+		foreach ( $numerics as $prop => $description ) {
+			$args = array(
+				'type'         => 'number',
+				'description'  => 'Altitude',
+				'single'       => true,
+				'show_in_rest' => false,
+			);
+			foreach ( array( 'post', 'comment', 'user', 'term' ) as $type ) {
+				register_meta( $type, 'weather_' . $prop, $args );
+			}
+		}
+
+		$args = array(
+			'sanitize_callback' => array( __CLASS__, 'sanitize_text_field' ),
+			'type'              => 'string',
+			'description'       => __( 'Weather Summary', 'simple-location' ),
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		register_meta( 'post', 'weather_summary', $args );
+		register_meta( 'comment', 'weather_summary', $args );
+		register_meta( 'user', 'weather_summary', $args );
+		register_meta( 'term', 'weather_summary', $args );
+
+		$args = array(
+			'sanitize_callback' => array( __CLASS__, 'esc_attr' ),
+			'type'              => 'string',
+			'description'       => __( 'Weather Icon', 'simple-location' ),
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		register_meta( 'post', 'weather_icon', $args );
+		register_meta( 'comment', 'weather_icon', $args );
+		register_meta( 'user', 'weather_icon', $args );
+		register_meta( 'term', 'weather_icon', $args );
 	}
 
 
@@ -1946,93 +1891,4 @@ class WP_Geo_Data {
 		}
 		return false;
 	}
-
-}
-
-if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
-	/**
-	 * Convert the EXIF geographical longitude and latitude from degrees, minutes
-	 * and seconds to degrees format.
-	 * This is based on a Trac Ticket - https://core.trac.wordpress.org/ticket/9257
-	 * closed due privacy concerns. Updated to match location storage for this just in case
-	 * and to use their function over my original one.
-	 *
-	 * @param array|string $coordinate The coordinate to convert to degrees format.
-	 * @return float|false Coordinate in degrees format or false if failure
-	 */
-	function wp_exif_gps_convert( $coordinate ) {
-		if ( is_array( $coordinate ) ) {
-			@list( $degree, $minute, $second ) = $coordinate;
-			$float                             = wp_exif_frac2dec( $degree ) + ( wp_exif_frac2dec( $minute ) / 60 ) + ( wp_exif_frac2dec( $second ) / 3600 );
-
-			return ( ( is_float( $float ) || ( is_int( $float ) && $degree === $float ) ) && ( abs( $float ) <= 180 ) ) ? $float : 999;
-		}
-		return false;
-	}
-}
-
-
-if ( ! function_exists( 'wp_exif_datetime' ) ) {
-	/**
-	 * Convert the exif date format to a datetime object
-	 *
-	 * @param string              $str EXIF string.
-	 * @param string|DateTimeZone $timezone A timezone or offset string. Default is the WordPress timezone.
-	 * @return DateTime
-	 */
-	function wp_exif_datetime( $str, $timezone = null ) {
-		if ( is_string( $timezone ) ) {
-			$timezone = timezone_open( $timezone );
-		}
-
-		if ( ! $timezone instanceof DateTimeZone ) {
-			$timezone = wp_timezone();
-		}
-		$datetime = new DateTime( $str, $timezone );
-		return $datetime;
-	}
-}
-
-/**
- * Convert decimal location to a textual representation
- *
- * @param float        $latitude Latitude.
- * @param float        $longitude Longitude.
- * @param float|string $altitude Altitude. Optional.
-
- * @return string Textual Representation of Location.
- */
-function dec_to_dms( $latitude, $longitude, $altitude = '' ) {
-	$latitudedirection  = $latitude < 0 ? 'S' : 'N';
-	$longitudedirection = $longitude < 0 ? 'W' : 'E';
-
-	$latitudenotation  = $latitude < 0 ? '-' : '';
-	$longitudenotation = $longitude < 0 ? '-' : '';
-
-	$latitudeindegrees  = floor( abs( $latitude ) );
-	$longitudeindegrees = floor( abs( $longitude ) );
-
-	$latitudedecimal  = abs( $latitude ) - $latitudeindegrees;
-	$longitudedecimal = abs( $longitude ) - $longitudeindegrees;
-
-	$_precision       = 3;
-	$latitudeminutes  = round( $latitudedecimal * 60, $_precision );
-	$longitudeminutes = round( $longitudedecimal * 60, $_precision );
-	if ( ! empty( $altitude ) && is_numeric( $altitude ) ) {
-		$altitudedisplay = sprintf( '%1$s%2$s', $altitude, __( 'm', 'simple-location' ) );
-	} else {
-		$altitudedisplay = '';
-	}
-	return sprintf(
-		'%s%s° %s %s %s%s° %s %s%s',
-		$latitudenotation,
-		$latitudeindegrees,
-		$latitudeminutes,
-		$latitudedirection,
-		$longitudenotation,
-		$longitudeindegrees,
-		$longitudeminutes,
-		$longitudedirection,
-		$altitudedisplay
-	);
 }
