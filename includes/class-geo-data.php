@@ -1032,37 +1032,6 @@ class WP_Geo_Data {
 	}
 
 	/**
-	 * Sanitize Floats.
-	 *
-	 * @param float $input Float input.
-	 * @return $input Sanitized Float Input.
-	 *
-	 * @since 1.0.0
-	 */
-	public static function sanitize_float( $input ) {
-		return filter_var( $input, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION );
-	}
-
-
-
-	/**
-	 * Sanitize and round coordinates.
-	 *
-	 * @param string $coordinate Coordinate.
-	 * @return float $coordinate Sanitized, rounded and converted coordinate.
-	 *
-	 * @since 1.0.0
-	 */
-	public static function clean_coordinate( $coordinate ) {
-		$coordinate = trim( $coordinate );
-		$pattern    = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
-		preg_match( $pattern, $coordinate, $matches );
-		return round( (float) $matches[0], 7 );
-	}
-
-
-
-	/**
 	 * Set GeoData on an Object.
 	 *
 	 * @param mixed $object Can be WP_Comment, WP_User, WP_Post, WP_Term, or int which will be considered a post id.
@@ -1268,7 +1237,7 @@ class WP_Geo_Data {
 	 */
 	public static function register_meta() {
 		$args = array(
-			'sanitize_callback' => array( __CLASS__, 'clean_coordinate' ),
+			'sanitize_callback' => 'clean_coordinate',
 			'type'              => 'number',
 			'description'       => __( 'Latitude', 'simple-location' ),
 			'single'            => true,
@@ -1280,7 +1249,7 @@ class WP_Geo_Data {
 		register_meta( 'term', 'geo_latitude', $args );
 
 		$args = array(
-			'sanitize_callback' => array( __CLASS__, 'clean_coordinate' ),
+			'sanitize_callback' => 'clean_coordinate',
 			'type'              => 'number',
 			'description'       => __( 'Longitude', 'simple-location' ),
 			'single'            => true,
