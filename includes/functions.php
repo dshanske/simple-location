@@ -295,4 +295,19 @@ function area_of_triangle( $a, $b, $c ) {
 	return abs( $area / 2 );
 }
 
-
+if( ! function_exists( 'clean_coordinate' ) ) {
+	/**
+	 * Sanitize and round coordinates.
+	 *
+	 * @param string $coordinate Coordinate.
+	 * @return float $coordinate Sanitized, rounded and converted coordinate.
+	 *
+	 * @since 1.0.0
+	 */
+	function clean_coordinate( $coordinate ) {
+		$coordinate = trim( $coordinate );
+		$pattern    = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
+		preg_match( $pattern, $coordinate, $matches );
+		return round( (float) $matches[0], 7 );
+	}
+}

@@ -30,7 +30,7 @@ class REST_Geo {
 	 * @return int|bool|WP_Error
 	 */
 	public static function sanitize_coordinates( $value, $request, $param ) {
-		return WP_Geo_Data::clean_coordinate( $value );
+		return clean_coordinate( $value );
 	}
 
 	/**

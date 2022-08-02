@@ -76,9 +76,9 @@ class Airport_Location {
 					} elseif ( 'iata_code' === $key ) {
 						$airport['code'] = $line[ $value ];
 					} elseif ( 'latitude_deg' === $key ) {
-						$airport['latitude'] = WP_Geo_Data::clean_coordinate( $line[ $value ] );
+						$airport['latitude'] = clean_coordinate( $line[ $value ] );
 					} elseif ( 'longitude_deg' === $key ) {
-						$airport['longitude'] = WP_Geo_Data::clean_coordinate( $line[ $value ] );
+						$airport['longitude'] = clean_coordinate( $line[ $value ] );
 					} elseif ( 'elevation_ft' === $key ) {
 						$airport['elevation']    = round( (int) $line[ $value ] * 3.28 );
 						$airport['elevation_ft'] = (int) $line[ $value ];
