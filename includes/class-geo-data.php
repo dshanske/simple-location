@@ -781,59 +781,6 @@ class WP_Geo_Data {
 	}
 
 	/**
-	 * Calculates the bounding box of a set of coordinates.
-	 *
-	 * @param array   $locations An array of lat,lng.
-	 * @param boolean $flip Whether to put lng first.
-	 * @return array An array of coordinates, min and max.
-	 *
-	 * @since 1.0.0
-	 */
-	public static function bounding_box( $locations, $flip = false ) {
-		$lats = array();
-		$lngs = array();
-		foreach ( $locations as $location ) {
-			$lats[] = $location[0];
-			$lngs[] = $location[1];
-		}
-		if ( ! $flip ) {
-			return array(
-				min( $lats ),
-				min( $lngs ),
-				max( $lats ),
-				max( $lngs ),
-			);
-		} else {
-			return array(
-				min( $lngs ),
-				min( $lats ),
-				max( $lngs ),
-				max( $lats ),
-			);
-		}
-	}
-
-
-	/**
-	 * Calculate the area of a triangle.
-	 *
-	 * @param array $a First point.
-	 * @param array $b Middle point.
-	 * @param array $c Last point.
-	 *
-	 * @return float
-	 */
-	protected static function area_of_triangle( $a, $b, $c ) {
-		list( $ax, $ay ) = $a;
-		list( $bx, $by ) = $b;
-		list( $cx, $cy ) = $c;
-		$area            = $ax * ( $by - $cy );
-		$area           += $bx * ( $cy - $ay );
-		$area           += $cx * ( $ay - $by );
-		return abs( $area / 2 );
-	}
-
-	/**
 	 * Reduce points with Visvalingam-Whyatt algorithm.
 	 *
 	 * @param array $points Points.
@@ -849,7 +796,7 @@ class WP_Geo_Data {
 		$kill = count( $points ) - $target;
 		while ( $kill-- > 0 ) {
 			$idx      = 1;
-			$min_area = self::area_of_triangle( $points[0], $points[1], $points[2] );
+			$min_area = area_of_triangle( $points[0], $points[1], $points[2] );
 			foreach ( range( 2, array_key_last_index( $points, -2 ) ) as $segment ) {
 				$area = self::area_of_triangle(
 					$points[ $segment - 1 ],
@@ -866,47 +813,6 @@ class WP_Geo_Data {
 
 		return $points;
 	}
-
-
-	/**
-	 * Calculates the distance in meters between two coordinates.
-	 *
-	 * Returns the distance between lat/lng1 and lat/lng2.
-	 *
-	 * @param float $lat1 Latitude 1.
-	 * @param float $lng1 Longitude 1.
-	 * @param float $lat2 Latitude 2.
-	 * @param float $lng2 Longitude 2.
-	 * @return float $meters Distance in meters between the two points.
-	 *
-	 * @since 1.0.0
-	 */
-	public static function gc_distance( $lat1, $lng1, $lat2, $lng2 ) {
-		$lat1 = floatval( $lat1 );
-		$lng1 = floatval( $lng1 );
-		$lat2 = floatval( $lat2 );
-		$lng2 = floatval( $lng2 );
-		return ( 6378100 * acos( cos( deg2rad( $lat1 ) ) * cos( deg2rad( $lat2 ) ) * cos( deg2rad( $lng2 ) - deg2rad( $lng1 ) ) + sin( deg2rad( $lat1 ) ) * sin( deg2rad( $lat2 ) ) ) );
-	}
-
-	/**
-	 * Advises if the two points are within a radius.
-	 *
-	 * Returns if the distance is less than meters specified.
-	 *
-	 * @param float $lat1 Latitude 1.
-	 * @param float $lng1 Longitude 1.
-	 * @param float $lat2 Latitude 2.
-	 * @param float $lng2 Longitude 2.
-	 * @param int   $meters Meters.
-	 * @return boolean $radius Are the two points within $meters of center.
-	 *
-	 * @since 1.0.0
-	 */
-	public static function in_radius( $lat1, $lng1, $lat2, $lng2, $meters = 50 ) {
-		return ( self::gc_distance( $lat1, $lng1, $lat2, $lng2 ) <= $meters );
-	}
-
 
 	/**
 	 * Reduce points with Ramer–Douglas–Peucker algorithm.
@@ -1578,32 +1484,6 @@ class WP_Geo_Data {
 	}
 
 	/**
-	 * Registers Geo Metadata.
-	 *
-	 * @param object $object Object.
-	 * @param string $object_type Post, comment, user, or term.
-	 *
-	 * @since 1.0.0
-	 */
-	public static function object( $object, $object_type ) {
-		if ( ! is_object( $object ) ) {
-			return null;
-		}
-		switch ( $object_type ) {
-			case 'post':
-				return get_post( $object->ID );
-			case 'comment':
-				return get_comment( $object->comment_ID );
-			case 'user':
-				return get_user_by( 'id', $object->ID );
-			case 'term':
-				return get_term( $object->term_id );
-			default:
-				return null;
-		}
-	}
-
-	/**
 	 * Adds longitude as a field to the REST API.
 	 *
 	 * @param mixed           $object The object being acted on.
@@ -1615,7 +1495,7 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
-		$object  = self::object( $object, $object_type );
+		$object  = sloc_get_object_from_id( $object, $object_type );
 		$geodata = self::get_geodata( $object );
 		if ( ! is_array( $geodata ) ) {
 			return '';
@@ -1641,7 +1521,7 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
-		$object  = self::object( $object, $object_type );
+		$object  = sloc_get_object_from_id( $object, $object_type );
 		$geodata = self::get_geodata( $object );
 
 		if ( ! is_array( $geodata ) ) {
@@ -1669,7 +1549,7 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function rest_get_address( $object, $attr, $request, $object_type ) {
-		$object  = self::object( $object, $object_type );
+		$object  = sloc_get_object_from_id( $object, $object_type );
 		$geodata = self::get_geodata( $object );
 
 		if ( ! is_array( $geodata ) ) {
@@ -1697,7 +1577,7 @@ class WP_Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function rest_get_timezone( $object, $attr, $request, $object_type ) {
-		$object  = self::object( $object, $object_type );
+		$object  = sloc_get_object_from_id( $object, $object_type );
 		$geodata = self::get_geodata( $object );
 
 		if ( ! is_array( $geodata ) ) {

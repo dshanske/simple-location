@@ -187,7 +187,7 @@ class Location_Zones {
 	public static function in_zone( $lat, $lng ) {
 		$zones = get_option( 'sloc_zones', array() );
 		foreach ( $zones as $zone ) {
-			if ( WP_Geo_Data::in_radius( $zone['latitude'], $zone['longitude'], $lat, $lng, $zone['radius'] ) ) {
+			if ( geo_in_radius( $zone['latitude'], $zone['longitude'], $lat, $lng, $zone['radius'] ) ) {
 				return $zone['name'];
 			}
 		}
