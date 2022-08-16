@@ -6,7 +6,7 @@
  */
 
 global $profileuser;
-$geodata = WP_Geo_Data::get_geodata( $profileuser );
+$geodata = get_user_geodata( $profileuser );
 ?>
 <div id="locationbox-meta">
 <h3><?php esc_html_e( 'Last Reported Location', 'simple-location' ); ?></h3>

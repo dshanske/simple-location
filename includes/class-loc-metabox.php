@@ -63,7 +63,7 @@ class Loc_Metabox {
 				array(
 					'lookup'             => get_option( 'sloc_geolocation_provider' ),
 					'units'              => get_option( 'sloc_measurements' ),
-					'visibility_options' => WP_Geo_Data::geo_public(),
+					'visibility_options' => Geo_Base::geo_public(),
 					'api_nonce'          => wp_create_nonce( 'wp_rest' ),
 					'api_url'            => rest_url( '/sloc_geo/1.0/' ),
 				)
@@ -109,7 +109,7 @@ class Loc_Metabox {
 		<tr>
 		<th><label for="geo_public"><?php esc_html_e( 'Show:', 'simple-location' ); ?></label></th>
 		<td><select id="location-visibility" name="geo_public">
-		<?php WP_Geo_Data::geo_public_select( $public, true ); ?>
+		<?php Geo_Base::geo_public_select( $public, true ); ?>
 		</select></td>
 		</tr>
 		<?php
@@ -126,7 +126,7 @@ class Loc_Metabox {
 
 
 	public static function metabox( $object, $box ) {
-		if ( WP_Geo_Data::current_user_can_edit( $object ) ) {
+		if ( Geo_Base::current_user_can_edit( $object ) ) {
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-metabox.php' );
 		}
 	}
@@ -171,13 +171,13 @@ class Loc_Metabox {
 			return;
 		}
 
-		$geodata = WP_Geo_Data::get_geodata( $post );
+		$geodata = get_post_geodata( $post->ID );
 		if ( ! is_array( $geodata ) ) {
 			return;
 		}
 		$author = new WP_User( $post->post_author );
 		if ( 'private' !== $geodata['visibility'] ) {
-			WP_Geo_Data::set_geodata( $author, $geodata );
+			set_post_geodata( $author, $geodata );
 		}
 	}
 
@@ -263,7 +263,7 @@ class Loc_Metabox {
 			delete_metadata( $meta_type, $object_id, 'geo_weather' );
 		}
 		if ( ! empty( $_POST['latitude'] ) || ! empty( $_POST['longitude'] ) || ! empty( $_POST['address'] ) ) {
-			WP_Geo_Data::set_visibility( $meta_type, $object_id, sanitize_text_field( $_POST['geo_public'] ) );
+			set_geo_visibility( $meta_type, $object_id, sanitize_text_field( $_POST['geo_public'] ) );
 		} else {
 			delete_metadata( $meta_type, $object_id, 'geo_public' );
 		}

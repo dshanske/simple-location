@@ -7,9 +7,9 @@
 
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
-	$geodata = WP_Geo_Data::get_geodata( get_comment( $comment ) );
+	$geodata = get_comment_geodata( $comment );
 } else {
-	$geodata = WP_Geo_Data::get_geodata();
+	$geodata = get_post_geodata();
 }
 $weather      = ifset( $geodata['weather'], array() );
 $location     = wp_get_object_terms( get_the_ID(), 'location', array( 'fields' => 'ids' ) );
@@ -25,7 +25,7 @@ $wind = ifset( $weather['wind'], array() );
 $trip = ifset( $geodata['trip'], array() );
 
 $public     = array_key_exists( 'visibility', $geodata ) ? $geodata['visibility'] : get_option( 'geo_public' );
-$choices    = WP_Geo_Data::geo_public();
+$choices    = Geo_Base::geo_public();
 $map_return = '';
 $zone       = '';
 if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
@@ -138,7 +138,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 
 	<div id="location-visibility-select" class="hide-if-js">
 		<input type="hidden" name="hidden_location_visibility" id="hidden_location_visibility" value="<?php echo esc_attr( $public ); ?>" />
-		<select name="geo_public" id="location-visibility" width="90%"><?php echo WP_Geo_Data::geo_public_select( $public ); // phpcs:ignore ?></select>
+		<select name="geo_public" id="location-visibility" width="90%"><?php echo Geo_Base::geo_public_select( $public ); // phpcs:ignore ?></select>
 		<a href="#location-visibility" class="save-location-visibility hide-if-no-js button">OK</a>
 		<a href="#location-visibility" class="cancel-location-visibility hide-if-no-js button-cancel">Cancel</a>
 	</div><!-- #location-visibility-select -->

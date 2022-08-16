@@ -18,7 +18,7 @@ get_header();
 				?>
 			</header><!-- .page-header -->
 			<?php $map_provider = Loc_Config::map_provider(); ?>
-		<img class="archive-map sloc-map" src="<?php echo wp_kses_post( $map_provider->get_archive_map( WP_Geo_Data::get_archive_public_location_list() ) ); ?>" />
+		<img class="archive-map sloc-map" src="<?php echo wp_kses_post( $map_provider->get_archive_map( get_geo_archive_location_list() ) ); ?>" />
 		<ul>
 			<?php
 		}
@@ -26,7 +26,7 @@ get_header();
 		while ( have_posts() ) {
 			the_post();
 
-			$location = WP_Geo_Data::get_geodata( get_post(), false );
+			$location = get_post_geodata( get_post() );
 
 			if ( is_array( $location ) ) {
 				if ( 'public' === $location['visibility'] && array_key_exists( 'address', $location ) ) {

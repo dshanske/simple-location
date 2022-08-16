@@ -203,7 +203,7 @@ class Weather_Provider_Station extends Weather_Provider {
 
 			$sitelist = get_option( 'sloc_stations' );
 			foreach ( $sitelist as $key => $value ) {
-				$sitelist[ $key ]['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $value['latitude'], $value['longitude'] ) );
+				$sitelist[ $key ]['distance'] = round( geo_distance( $this->latitude, $this->longitude, $value['latitude'], $value['longitude'] ) );
 			}
 			usort(
 				$sitelist,

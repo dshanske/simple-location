@@ -37,7 +37,8 @@
       "wp-cli/i18n-command": "^2.3",
       "sebastian/phpcpd": "^3.0 || ^4.0 || ^6.0",
       "yoast/phpunit-polyfills": "^1.0",
-      "sokil/php-isocodes": "^2.0 || ^4.1.0"
+      "sokil/php-isocodes": "^2.0 || ^4.1.0",
+      "dms/phpunit-arraysubset-asserts": "^0.4.0"
     },
     "prefer-stable" : true,
     "scripts": {

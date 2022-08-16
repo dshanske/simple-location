@@ -67,7 +67,7 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 				return;
 			}
 
-			$weather = Loc_View::get_weather_by_location( $location['latitude'], $location['longitude'], $cache_time ); // phpcs:ignore
+			$weather = Sloc_Weather_Data::get_weather_by_location( $location['latitude'], $location['longitude'], $cache_time ); // phpcs:ignore
 			if ( is_wp_error( $weather ) ) {
 				echo esc_html( $weather->get_error_message() );
 				return;

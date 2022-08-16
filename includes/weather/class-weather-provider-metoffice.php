@@ -121,7 +121,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 
 			$sitelist = $this->get_sitelist();
 			foreach ( $sitelist as $key => $value ) {
-				$sitelist[ $key ]['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $value['latitude'], $value['longitude'] ) );
+				$sitelist[ $key ]['distance'] = round( geo_distance( $this->latitude, $this->longitude, $value['latitude'], $value['longitude'] ) );
 			}
 			usort(
 				$sitelist,
@@ -218,7 +218,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 			'station_data' => $this->station(),
 		);
 
-		$return['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
+		$return['distance'] = round( geo_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
 
 		$url  = sprintf( 'http://datapoint.metoffice.gov.uk/public/data/val/wxobs/all/json/%1$s?res=hourly&key=%2$s', $this->station_id, $this->api );
 		$args = array(

@@ -200,6 +200,30 @@ function sloc_get_object_from_id( $object, $object_type ) {
 	}
 }
 
+/**
+ * Returns an object id from an $object
+ *
+ * @param object $object Object.
+ *
+ * @since 4.6.0
+ */
+function sloc_get_id_from_object( $object ) {
+	if ( ! is_object( $object ) ) {
+		return null;
+	}
+
+	if ( $object instanceof WP_Post ) {
+		return $object->ID;
+	} elseif ( $object instanceof WP_Comment ) {
+		return $object->comment_ID;
+	} elseif ( $object instanceof WP_User ) {
+		return $object->ID;
+	} elseif ( $object instanceof WP_Term ) {
+		return $object->term_id;
+	}
+	return null;
+}
+
 
 /**
  * Calculates the distance in meters between two coordinates.
@@ -295,7 +319,135 @@ function area_of_triangle( $a, $b, $c ) {
 	return abs( $area / 2 );
 }
 
-if( ! function_exists( 'clean_coordinate' ) ) {
+
+/**
+ * Reduce points with Visvalingam-Whyatt algorithm.
+ *
+ * @param array $points Points.
+ * @param int   $target Desired count of points.
+ *
+ * @return array Reduced set of points.
+ */
+function sloc_simplify_vw( $points, $target ) {
+	// Refuse to reduce if points are less than target.
+	if ( count( $points ) <= $target ) {
+		return $points;
+	}
+	$kill = count( $points ) - $target;
+	while ( $kill-- > 0 ) {
+		$idx      = 1;
+		$min_area = area_of_triangle( $points[0], $points[1], $points[2] );
+		foreach ( range( 2, array_key_last_index( $points, -2 ) ) as $segment ) {
+			$area = area_of_triangle(
+				$points[ $segment - 1 ],
+				$points[ $segment ],
+				$points[ $segment + 1 ]
+			);
+			if ( $area < $min_area ) {
+				$min_area = $area;
+				$idx      = $segment;
+			}
+		}
+		array_splice( $points, $idx, 1 );
+	}
+
+	return $points;
+}
+
+/**
+ * Reduce points with Ramer–Douglas–Peucker algorithm.
+ *
+ * @param array $points Points.
+ * @param int   $tolerance Tolerance.
+ *
+ * @return array Reduced set of points.
+ */
+function sloc_simplify_rdp( $points, $tolerance ) {
+	// if this is a multilinestring, then we call ourselves one each segment individually, collect the list, and return that list of simplified lists.
+	if ( is_array( $points[0][0] ) ) {
+		$multi = array();
+		foreach ( $points as $subvertices ) {
+			$multi[] = sloc_simplify_rdp( $subvertices, $tolerance );
+		}
+		return $multi;
+	}
+	$tolerance2 = $tolerance * $tolerance;
+
+	// okay, so this is a single linestring and we simplify it individually.
+	return sloc_segment_rdp( $points, $tolerance2 );
+}
+
+
+
+/**
+ * Reduce single linestring with Ramer–Douglas–Peucker algorithm.
+ *
+ * @param array $segment Single line segment.
+ * @param int   $tolerance_squared Tolerance Squared.
+ *
+ * @return array Reduced set of points.
+ */
+function sloc_segment_rdp( $segment, $tolerance_squared ) {
+	if ( count( $segment ) <= 2 ) {
+		return $segment; // segment is too small to simplify, hand it back as-is.
+	}
+
+	/*
+	 * Find the maximum distance (squared) between this line $segment and each vertex.
+	 * distance is solved as described at UCSD page linked above.
+	 * cheat: vertical lines (directly north-south) have no slope so we fudge it with a very tiny nudge to one vertex; can't imagine any units where this will matter.
+	 */
+	$startx = (float) $segment[0][0];
+	$starty = (float) $segment[0][1];
+	$endx   = (float) $segment[ count( $segment ) - 1 ][0];
+	$endy   = (float) $segment[ count( $segment ) - 1 ][1];
+
+	if ( $endx === $startx ) {
+		$startx += 0.00001;
+	}
+
+	$m = ( $endy - $starty ) / ( $endx - $startx ); // slope, as in y = mx + b.
+	$b = $starty - ( $m * $startx );              // y-intercept, as in y = mx + b.
+
+	$max_distance_squared = 0;
+	$max_distance_index   = null;
+	for ( $i = 1, $l = count( $segment ); $i <= $l - 2; $i++ ) {
+		$x1 = $segment[ $i ][0];
+		$y1 = $segment[ $i ][1];
+
+		$closestx = ( ( $m * $y1 ) + ( $x1 ) - ( $m * $b ) ) / ( ( $m * $m ) + 1 );
+		$closesty = ( $m * $closestx ) + $b;
+		$distsqr  = ( $closestx - $x1 ) * ( $closestx - $x1 ) + ( $closesty - $y1 ) * ( $closesty - $y1 );
+
+		if ( $distsqr > $max_distance_squared ) {
+			$max_distance_squared = $distsqr;
+			$max_distance_index   = $i;
+		}
+	}
+
+	/*
+	 * Cleanup and disposition.
+	 * if the max distance is below tolerance, we can bail, giving a straight line between the start vertex and end vertex.
+	 * (all points are so close to the straight line).
+	 */
+
+	if ( $max_distance_squared <= $tolerance_squared ) {
+		return array( $segment[0], $segment[ count( $segment ) - 1 ] );
+	}
+
+	/*
+	 * But if we got here then a vertex falls outside the tolerance.
+	 * split the line segment into two smaller segments at that "maximum error vertex" and simplify those.
+	 */
+	$slice1 = array_slice( $segment, 0, $max_distance_index );
+	$slice2 = array_slice( $segment, $max_distance_index );
+	$segs1  = sloc_segment_rdp( $slice1, $tolerance_squared );
+	$segs2  = sloc_segment_rdp( $slice2, $tolerance_squared );
+	return array_merge( $segs1, $segs2 );
+}
+
+
+if ( ! function_exists( 'clean_coordinate' ) ) {
 	/**
 	 * Sanitize and round coordinates.
 	 *
@@ -310,4 +462,20 @@ if( ! function_exists( 'clean_coordinate' ) ) {
 		preg_match( $pattern, $coordinate, $matches );
 		return round( (float) $matches[0], 7 );
 	}
+}
+
+
+/**
+ * Get a list of post IDs in the current query.
+ *
+ * This gets a list of all the IDs in the current query.
+ *
+ * @return $post_ids array of post ids.
+ *
+ * @since 1.0.0
+ */
+function sloc_query_id_list() {
+	global $wp_query;
+	$post_ids = wp_list_pluck( $wp_query->posts, 'ID' );
+	return $post_ids;
 }

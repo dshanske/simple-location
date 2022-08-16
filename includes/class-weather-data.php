@@ -1,0 +1,363 @@
+<?php
+/**
+ * Weather Metadata
+ *
+ * Registers weather metadata and supplies functions to assist in manipulating it.
+ *
+ * @package Simple Location
+ */
+
+add_action( 'init', array( 'Sloc_Weather_Data', 'init' ) );
+
+/**
+ * Handles Weather Functionality for WordPress objects.
+ *
+ * @since 1.0.0
+ */
+class Sloc_Weather_Data {
+
+	public static $properties = array(
+		'temperature',
+		'humidity',
+		'heatindex',
+		'windchill',
+		'dewpoint',
+		'pressure',
+		'cloudiness',
+		'rain',
+		'snow',
+		'visibility',
+		'radiation',
+		'illuminance',
+		'uv',
+		'aqi',
+		'pm1_0',
+		'pm2_5',
+		'pm10_0',
+		'co',
+		'co2',
+		'nh3',
+		'o3',
+		'pb',
+		'so2',
+		'windspeed',
+		'winddegree',
+		'windgust',
+		'summary',
+		'icon',
+	);
+
+	/**
+	 * Weather Data Initialization Function.
+	 *
+	 * Meant to be attached to init hook enhancements.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function init() {
+		self::register_meta();
+	}
+
+	/**
+	 * Registers Geo Metadata.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function register_meta() {
+		// Legacy Weather Storage
+		$args = array(
+			'type'         => 'array',
+			'description'  => 'Weather Data (Deprecated)',
+			'single'       => true,
+			'show_in_rest' => false,
+		);
+		register_meta( 'post', 'geo_weather', $args );
+		register_meta( 'comment', 'geo_weather', $args );
+		register_meta( 'user', 'geo_weather', $args );
+		register_meta( 'term', 'geo_weather', $args );
+
+		$numerics = array(
+			// Weather Properties.
+			'temperature' => __( 'Temperature', 'simple-location' ),
+			'humidity'    => __( 'Humidity', 'simple-location' ),
+			'heatindex'   => __( 'Heat Index', 'simple-location' ),
+			'windchill'   => __( 'Wind Chill', 'simple-location' ),
+			'dewpoint'    => __( 'Dewpoint', 'simple-location' ),
+			'pressure'    => __( 'Atmospheric Pressure', 'simple-location' ),
+			'cloudiness'  => __( 'Cloudiness', 'simple-location' ),
+			'rain'        => __( 'Rainfall', 'simple-location' ),
+			'snow'        => __( 'Snowfall', 'simple-location' ),
+			'visibility'  => __( 'Visibility', 'simple-location' ),
+			'radiation'   => __( 'Radiation', 'simple-location' ),
+			'illuminance' => __( 'Illuminance', 'simple-location' ),
+			'uv'          => __( 'UV Index', 'simple-location' ),
+			'aqi'         => __( 'Air Quality Index', 'simple-location' ),
+			'pm1_0'       => __( 'Particulate Matter 1.0', 'simple-location' ),
+			'pm2_5'       => __( 'Particulate Matter 2.5', 'simple-location' ),
+			'pm10_0'      => __( 'Particulate Matter 10.0', 'simple-location' ),
+			'co'          => __( 'Carbon Monoxide', 'simple-location' ),
+			'co2'         => __( 'Carbon Dioxide', 'simple-location' ),
+			'nh3'         => __( 'Ammonia', 'simple-location' ),
+			'o3'          => __( 'Ozone', 'simple-location' ),
+			'pb'          => __( 'Lead', 'simple-location' ),
+			'so2'         => __( 'Sulfur Dioxide', 'simple-location' ),
+			'windspeed'   => __( 'Wind Speed', 'simple-location' ),
+			'winddegree'  => __( 'Wind Degree', 'simple-location' ),
+			'windgust'    => __( 'Wind Gust', 'simple-location' ),
+		);
+
+		foreach ( $numerics as $prop => $description ) {
+			$args = array(
+				'type'         => 'number',
+				'description'  => 'Altitude',
+				'single'       => true,
+				'show_in_rest' => false,
+			);
+			foreach ( array( 'post', 'comment', 'user', 'term' ) as $type ) {
+				register_meta( $type, 'weather_' . $prop, $args );
+			}
+		}
+
+		$args = array(
+			'sanitize_callback' => array( __CLASS__, 'sanitize_text_field' ),
+			'type'              => 'string',
+			'description'       => __( 'Weather Summary', 'simple-location' ),
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		register_meta( 'post', 'weather_summary', $args );
+		register_meta( 'comment', 'weather_summary', $args );
+		register_meta( 'user', 'weather_summary', $args );
+		register_meta( 'term', 'weather_summary', $args );
+
+		$args = array(
+			'sanitize_callback' => array( __CLASS__, 'esc_attr' ),
+			'type'              => 'string',
+			'description'       => __( 'Weather Icon', 'simple-location' ),
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		register_meta( 'post', 'weather_icon', $args );
+		register_meta( 'comment', 'weather_icon', $args );
+		register_meta( 'user', 'weather_icon', $args );
+		register_meta( 'term', 'weather_icon', $args );
+	}
+
+
+	/**
+	 * Set weather on an Object.
+	 *
+	 * @param string $type
+	 * @param int    $id
+	 * @param array  $weather  An array of details about the weather at a location...see registered properties.
+	 * @return WP_Error|boolean Return success or WP_Error.
+	 *
+	 * @since 4.6.0
+	 */
+	public static function set_object_weather_data( $type, $id, $weather ) {
+		if ( ! is_array( $weather ) ) {
+			return false;
+		}
+
+		$weather = wp_array_slice_assoc( $weather, static::$properties );
+
+		foreach ( $weather as $key => $value ) {
+			update_metadata( $type, $id, 'weather_' . $key, $value );
+		}
+		return true;
+	}
+
+
+	/**
+	 * Get Geo Meta Data on an Object.
+	 *
+	 * @param string $type Object type.
+	 * @param int    $id Object ID.
+	 * @return array $weather
+	 *
+	 * @since 4.6.0
+	 */
+	public static function get_object_weather_data( $type, $id ) {
+		$weather = self::migrate_weather( $type, $id );
+
+		if ( $weather ) {
+			return $weather;
+		}
+
+		$weather = array();
+
+		foreach ( static::$properties as $prop ) {
+			$weather[ $prop ] = get_metadata( $type, $id, 'weather_' . $prop, true );
+		}
+
+		return array_filter( $weather );
+	}
+
+	/**
+	 * Migrate Meta Data from Array to Individual Keys
+	 *
+	 * @param string $type Object type.
+	 * @param int    $id Object ID.
+	 * @return array $weather
+	 *
+	 * @since 4.6.0
+	 */
+	public static function migrate_weather( $type, $id ) {
+		$weather = get_metadata( $type, $id, 'geo_weather', true );
+		if ( ! $weather ) {
+			return $weather;
+		}
+
+		if ( array_key_exists( 'wind', $weather ) ) {
+			$w = array(
+				'windgust'   => ifset( $weather['wind']['gust'] ),
+				'winddegree' => ifset( $weather['wind']['degree'] ),
+				'windspeed'  => ifset( $weather['wind']['speed'] ),
+			);
+			$w = array_filter( $w );
+			unset( $weather['wind'] );
+			$weather = array_merge( $w, $weather );
+		}
+
+		self::set_weather_data( $type, $id, $weather );
+
+		return $weather;
+	}
+
+	/**
+	 * Does this object have weather data.
+	 *
+	 * @param mixed $object Object type.
+	 * @return WP_Error|boolean Return success or WP_Error.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function has_weather( $type, $id ) {
+		$data = get_metadata( $type, $id, '', true );
+		foreach ( array_keys( $data ) as $key ) {
+			if ( str_contains( 'weather', $key ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static function get_the_weather( $weather, $args = null ) {
+		$defaults = array(
+			'style'         => 'simple', // Options are simple, complete, graphic (only)
+			'description'   => __( 'Weather: ', 'simple-location' ),
+			'wrapper-class' => array( 'sloc-weather' ), // Class or classes to wrap the weather in
+			'wrapper-type'  => 'p', // HTML type to wrap the weather in
+		);
+		$args     = wp_parse_args( $args, $defaults );
+		if ( ! is_array( $weather ) || empty( $weather ) ) {
+			return '';
+		}
+		if ( ! isset( $weather['icon'] ) ) {
+			$weather['icon'] = 'wi-thermometer';
+		}
+
+		$class    = implode( ' ', $args['wrapper-class'] );
+		$return   = array( PHP_EOL );
+		$return[] = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
+		if ( 'graphic' !== $args['style'] ) {
+			$return[] = self::get_the_temperature( $weather ) . PHP_EOL;
+			if ( ! empty( $weather['summary'] ) ) {
+				$return[] = sprintf( '<span class="p-weather">%1$s</span>', $weather['summary'] );
+			}
+		}
+		if ( 'complete' === $args['style'] ) {
+			$return[] = self::get_weather_extras( $weather );
+		}
+		if ( isset( $weather['station_id'] ) ) {
+			if ( isset( $weather['name'] ) ) {
+				$return[] = sprintf( '<p>%1$s</p>', $weather['name'] );
+			}
+		}
+		return sprintf( '<%1$s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], esc_attr( $class ), implode( PHP_EOL, array_filter( $return ) ) );
+	}
+
+	private static function get_the_temperature( $weather ) {
+		if ( ! isset( $weather['temperature'] ) ) {
+			return null;
+		}
+		$units = ifset( $weather['units'] );
+		if ( ! $units ) {
+			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
+		}
+		if ( 'imperial' === $units ) {
+			$weather = Weather_Provider::metric_to_imperial( $weather );
+		}
+
+		return Weather_Provider::markup_value(
+			'temperature',
+			$weather['temperature'],
+			array(
+				'container' => 'span',
+				'round'     => true,
+				'units'     => $units,
+			)
+		);
+	}
+
+	private static function get_weather_extras( $weather ) {
+		$units = ifset( $weather['units'] );
+		if ( ! $units ) {
+			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
+		}
+		if ( 'imperial' === $units ) {
+			$weather = Weather_Provider::metric_to_imperial( $weather );
+		}
+
+		$return = array();
+		foreach ( array( 'humidity', 'cloudiness', 'visibility' ) as $param ) {
+			$return[] = Weather_Provider::markup_value(
+				$param,
+				$weather[ $param ],
+				array(
+					'units' => $units,
+				)
+			);
+		}
+		return '<ul>' . implode( '', $return ) . '</ul>';
+	}
+
+	public static function get_weather_data( $lat, $lng, $cache_time = null ) {
+		$weather = Loc_Config::weather_provider();
+		$weather->set( $lat, $lng );
+		if ( is_numeric( $cache_time ) ) {
+			$weather->set_cache_time( $cache_time );
+		}
+		return $weather->get_conditions();
+	}
+
+	public static function get_weather_by_user( $user, $cache_time = null ) {
+		if ( is_numeric( $user ) && 0 !== $user ) {
+			$user = new WP_User( $user );
+		}
+		if ( ! $user instanceof WP_User ) {
+			return '';
+		}
+		$loc = get_geodata( $user );
+		if ( ! is_array( $loc ) || ! isset( $loc['latitude'] ) ) {
+			return '';
+		}
+		return self::get_weather_by_location( $loc['latitude'], $loc['longitude'], $cache_time );
+	}
+
+	public static function get_weather_by_location( $lat, $lng, $cache_time = null ) {
+		return self::get_weather_data( $lat, $lng, $cache_time );
+	}
+
+	public static function get_weather_by_station( $station, $provider = null, $cache_time = null ) {
+		$provider = Loc_Config::weather_provider( $provider );
+		$provider->set( array( 'station_id' => $station ) );
+
+		if ( is_numeric( $cache_time ) ) {
+			$provider->set_cache_time( $cache_time );
+		}
+
+		return $provider->get_conditions();
+	}
+
+}

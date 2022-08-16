@@ -92,7 +92,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		$data     = file_get_contents( $file );
 		$sitelist = json_decode( $data, true );
 		foreach ( $sitelist as $key => $value ) {
-				$sitelist[ $key ]['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $value['location']['latitude'], $value['location']['longitude'] ) );
+				$sitelist[ $key ]['distance'] = round( geo_distance( $this->latitude, $this->longitude, $value['location']['latitude'], $value['location']['longitude'] ) );
 		}
 		usort(
 			$sitelist,
@@ -138,7 +138,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			'station_data' => $this->station,
 		);
 		if ( ! empty( $this->station ) & array_key_exists( 'latitude', $this->station ) ) {
-			$return['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
+			$return['distance'] = round( geo_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
 		}
 
 		$time     = $this->datetime( $time );

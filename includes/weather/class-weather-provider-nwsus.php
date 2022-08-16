@@ -94,7 +94,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			}
 			$sitelist = $response['features'];
 			foreach ( $sitelist as $key => $value ) {
-				$sitelist[ $key ]['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $value['geometry']['coordinates'][1], $value['geometry']['coordinates'][0] ) );
+				$sitelist[ $key ]['distance'] = round( geo_distance( $this->latitude, $this->longitude, $value['geometry']['coordinates'][1], $value['geometry']['coordinates'][0] ) );
 			}
 			usort(
 				$sitelist,
@@ -160,7 +160,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			$return['latitude']  = $response['geometry']['coordinates'][1];
 			$return['longitude'] = $response['geometry']['coordinates'][0];
 			if ( ! empty( $this->latitude ) ) {
-				$return['distance'] = round( WP_Geo_Data::gc_distance( $this->latitude, $this->longitude, $return['latitude'], $return['longitude'] ) );
+				$return['distance'] = round( geo_distance( $this->latitude, $this->longitude, $return['latitude'], $return['longitude'] ) );
 			}
 		}
 		if ( empty( $properties ) ) {

@@ -1,6 +1,6 @@
 <?php
 
-class LocationTest extends WP_UnitTestCase {
+class LocationTaxonomyTest extends WP_UnitTestCase {
 	public function test_set_and_get_location_data() {
 		$addr = array(
 				'country-name' => 'United States of America',

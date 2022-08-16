@@ -906,12 +906,12 @@ class Loc_Config {
 	}
 
 	/**
-	 * See WP_Geo_Data::geo_public().
+	 * See Geo_Base::geo_public().
 	 *
 	 * @since 1.0.0
 	 */
 	public static function geo_public() {
-		return WP_Geo_Data::geo_public();
+		return Geo_Base::geo_public();
 	}
 
 	/**

@@ -79,10 +79,10 @@ class Location_Plugins {
 				if ( ! empty( $zone ) ) {
 					$meta['geo_address'] = $zone;
 					update_post_meta( $args['ID'], 'geo_address', $zone );
-					WP_Geo_Data::set_visibility( 'post', $args['ID'], 'protected' );
+					set_post_geo_visibility( $args['ID'], 'protected' );
 					update_post_meta( $args['ID'], 'geo_zone', $zone );
 				} else {
-					WP_Geo_Data::set_visibility( 'post', $args['ID'], 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
+					set_post_geo_visibility( 'post', $args['ID'], 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
 				}
 			}
 			// If altitude is above 1000m always show the higher zoom level.

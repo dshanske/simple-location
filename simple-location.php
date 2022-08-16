@@ -114,6 +114,25 @@ class Simple_Location_Plugin {
 		}
 	}
 
+
+	/**
+	 * Filename to Classname Function.
+	 *
+	 * @param string $filename.
+	 *
+	 * @since 4.6.0
+	 */
+	public static function filename_to_classname( $filename ) {
+		$class = str_replace( 'class-', '', $filename );
+		$class = str_replace( '.php', '', $class );
+		$class = ucwords( $class, '-' );
+		$class = str_replace( '-', '_', $class );
+		if ( class_exists( $class ) ) {
+			return $class;
+		}
+		return false;
+	}
+
 	/**
 	 * Load and register files.
 	 *
@@ -122,7 +141,7 @@ class Simple_Location_Plugin {
 	 * @param array  $files An array of filenames.
 	 * @param string $dir The directory the files can be found in, relative to the current directory.
 	 *
-	 * @since 4.0.0
+	 * @since 4.6.0
 	 */
 	public static function register_providers( $files, $dir = 'includes/' ) {
 		$dir = trailingslashit( $dir );
@@ -134,11 +153,8 @@ class Simple_Location_Plugin {
 			if ( file_exists( $path . $file ) ) {
 				require_once $path . $file;
 				if ( str_contains( $file, 'provider' ) ) {
-					$class = str_replace( 'class-', '', $file );
-					$class = str_replace( '.php', '', $class );
-					$class = ucwords( $class, '-' );
-					$class = str_replace( '-', '_', $class );
-					if ( class_exists( $class ) ) {
+					$class = self::filename_to_classname( $file );
+					if ( $class ) {
 						register_sloc_provider( new $class() );
 					} else {
 						error_log( 'Cannot register ' . $class );
@@ -177,7 +193,10 @@ class Simple_Location_Plugin {
 		// Core Load Files.
 		$core = array(
 			'functions.php', // Global Functions.
-			'class-geo-data.php', // Register Metadata Functions.
+			'class-geo-base.php', // Register Geo Base Functions that Modify Core Functionality
+			'class-geo-data.php', // Register Geo Metadata Functions.
+			'class-weather-data.php', // Register Weather Metadata Functions.
+			'data-functions.php', // Global Data Functions to retrieve and store data.
 			'class-sloc-media-metadata.php', // Media Metadata Functions.
 			'class-venue-taxonomy.php', // Venue Taxonomy.
 			'class-location-taxonomy.php', // Venue Taxonomy.
@@ -192,7 +211,6 @@ class Simple_Location_Plugin {
 			'class-rest-geo.php', // REST endpoint for Geo.
 			'class-loc-config.php', // Configuration and Settings Page.
 			'class-loc-metabox.php', // Location Metabox.
-			'class-loc-view.php', // Location View functionality.
 			'class-timezone-result.php',
 			'class-astronomical-calculator.php', // Calculates sunrise sunset etc.
 			'class-location-plugins.php',

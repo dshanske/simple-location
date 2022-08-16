@@ -74,7 +74,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 		}
 
 		if ( isset( $instance['station'] ) ) {
-			$weather = Loc_View::get_weather_by_station( $instance['station'], $instance['provider'], $cache_time ); // phpcs:ignore
+			$weather = Sloc_Weather_Data::get_weather_by_station( $instance['station'], $instance['provider'], $cache_time ); // phpcs:ignore
 			if ( is_wp_error( $weather ) ) {
 				if ( 'http_request_failed' === $weather->get_error_code() ) {
 					echo esc_html__( 'Unable to Connect to Station', 'simple-location' );

@@ -40,7 +40,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			$w->set_cache_time( $instance['cache_time'] );
 		}
 		if ( isset( $instance['user'] ) && '-1' !== $instance['user'] ) {
-			$weather = Loc_View::get_weather_by_user( $instance['user'] ); // phpcs:ignore
+			$weather = Sloc_Weather_Data::get_weather_by_user( $instance['user'] ); // phpcs:ignore
 		} elseif ( ! empty( $instance['latitude'] ) && ! empty( $instance['longitude'] ) ) {
 			$w->set( $instance['latitude'], $instance['longitude'] );
 			$weather = $w->get_conditions();
