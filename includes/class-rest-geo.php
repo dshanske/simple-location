@@ -426,7 +426,7 @@ class REST_Geo {
 			}
 		}
 
-		$return = WP_Geo_Data::set_geodata( wp_get_current_user(), $location );
+		$return = set_user_geodata( wp_get_current_user()->ID, $location );
 		if ( is_wp_error( $return ) ) {
 			return $return;
 		} else {

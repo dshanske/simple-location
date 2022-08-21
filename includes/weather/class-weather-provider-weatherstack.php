@@ -124,10 +124,8 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			}
 			$return['pressure'] = ifset( $response['pressure'] );
 
-			$return['wind']           = array();
-			$return['wind']['speed']  = self::kmh_to_ms( ifset_round( $response['wind_speed'] ) );
-			$return['wind']['degree'] = ifset_round( $response['wind_degree'] );
-			$return['wind']           = array_filter( $return['wind'] );
+			$return['windspeed']  = self::kmh_to_ms( ifset_round( $response['wind_speed'] ) );
+			$return['winddegree'] = ifset_round( $response['wind_degree'] );
 			$return['rain']           = ifset_round( $response['precip'], 2 );
 			$return['cloudiness']     = ifset( $response['cloudcover'] );
 			$return['visibility']     = self::km_to_meters( ifset_round( $response['visibility'], 2 ) );

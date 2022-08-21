@@ -363,11 +363,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type float $humidity Humidity as a percentage between 0 and 100.
 	 *  @type float $pressure Atomospheric Pressure at mean sea level in hPa/mbar
 	 *  @type int $cloudiness Cloudiness as a percentage between 0 and 100.
-	 *  @type array $wind {
-	 *      @type int $speed Speed in meters per second.
-	 *      @type float $degree Degree between 0 and 360.
-	 *      @type int $gust Wind Gust in meters per second.
-	 *  }
+	 *  @type int $windspeed Speed in meters per second.
+	 *  @type float $winddegree Degree between 0 and 360.
+	 *  @type int $windgust Wind Gust in meters per second.
 	 *  @type float $rain Rainfall in millimeters for the last hour.
 	 *  @type float $snow Snowfall in millimeters for the last hour.
 	 *  @type float $visibility Visibility in meters.
@@ -451,19 +449,19 @@ abstract class Weather_Provider extends Sloc_Provider {
 				'icon'  => 'wi-cloudy',
 
 			),
-			'wind-speed'  => array(
+			'windspeed'  => array(
 				'unit'  => __( 'mps', 'simple-location' ),
 				'label' => __( 'meters per second', 'simple-location' ),
 				'name'  => __( 'Wind Speed', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'wind-gust'   => array(
+			'windgust'   => array(
 				'unit'  => __( 'mps', 'simple-location' ),
 				'label' => __( 'meters per second', 'simple-location' ),
 				'name'  => __( 'Wind Gust', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'wind_degree' => array(
+			'winddegree' => array(
 				'unit'  => __( '&deg;', 'simple-location' ),
 				'label' => __( 'degrees', 'simple-location' ),
 				'name'  => __( 'Wind Direction', 'simple-location' ),
@@ -592,19 +590,19 @@ abstract class Weather_Provider extends Sloc_Provider {
 				'name'  => __( 'Pressure', 'simple-location' ),
 				'icon'  => 'wi-barometer',
 			),
-			'wind-speed'  => array(
+			'windspeed'  => array(
 				'unit'  => __( 'MPH', 'simple-location' ),
 				'label' => __( 'miles per hour', 'simple-location' ),
 				'name'  => __( 'Wind Speed', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'wind-gust'   => array(
+			'windgust'   => array(
 				'unit'  => __( 'MPH', 'simple-location' ),
 				'label' => __( 'miles per hour', 'simple-location' ),
 				'name'  => __( 'Wind Gust', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'wind-degree' => array(
+			'winddegree' => array(
 				'unit'  => __( '&deg;', 'simple-location' ),
 				'label' => __( 'degree', 'simple-location' ),
 				'name'  => __( 'Wind Direction', 'simple-location' ),

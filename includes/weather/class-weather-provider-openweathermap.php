@@ -137,13 +137,9 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				$return['snow'] = round( $current['snow']['1h'], 2 );
 			}
 
-			$return['wind'] = array_filter(
-				array(
-					'speed'  => round( $current['wind_speed'] ),
-					'degree' => round( $current['wind_deg'], 1 ),
-					'gust'   => ifset_round( $current['wind_gust'], 1 ),
-				)
-			);
+			$return['windspeed'] = round( $current['wind_speed'] );
+			$return['winddegree'] = round( $current['wind_deg'], 1 );
+			$return['windgust'] = ifset_round( $current['wind_gust'], 1 );
 
 			if ( isset( $current['weather'] ) ) {
 				if ( wp_is_numeric_array( $current['weather'] ) ) {

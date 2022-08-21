@@ -108,10 +108,8 @@ class Weather_Provider_HERE extends Weather_Provider {
 
 			$return['pressure']       = ifset_round( $current['barometerPressure'], 1 );
 			$return['uv']             = ifset_round( $current['uvIndex'], 1 );
-			$return['wind']           = array();
-			$return['wind']['speed']  = self::kmh_to_ms( ifset_round( $current['windSpeed'] ) );
-			$return['wind']['degree'] = ifset_round( $current['windDirection'], 1 );
-			$return['wind']           = array_filter( $return['wind'] );
+			$return['windspeed']  = self::kmh_to_ms( ifset_round( $current['windSpeed'] ) );
+			$return['winddegree'] = ifset_round( $current['windDirection'], 1 );
 			$return['rain']           = self::cm_to_mm( ifset_round( $current['precipitation1H'], 2 ) );
 			$return['snow']           = ifset_round( $current['snowFall'], 2 );
 			$return['summary']        = ifset( $current['description'] );

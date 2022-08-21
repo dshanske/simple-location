@@ -71,10 +71,10 @@ class Location_Zones {
 		if ( isset( $_POST['latitude'] ) || isset( $_POST['longitude'] ) || isset( $_POST['address'] ) ) {
 			$zone = self::in_zone( floatval( $_POST['latitude'] ), floatval( $_POST['longitude'] ) );
 			if ( empty( $zone ) ) {
-				Geo_Data::set_visibility( $meta_type, $object_id, sanitize_text_field( $_POST['geo_public'] ) );
+				Geo_Data::set_geodata( $meta_type, $object_id, 'visibility', sanitize_text_field( $_POST['geo_public'] ) );
 			} else {
 				$_POST['address'] = $zone;
-				Geo_Data::set_visibility( $meta_type, $object_id, 'protected' );
+				Geo_Data::set_geodata( $meta_type, $object_id, 'visibility', 'protected' );
 				update_metadata( $meta_type, $object_id, 'geo_zone', $zone );
 			}
 		} else {

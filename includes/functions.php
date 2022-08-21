@@ -182,19 +182,16 @@ function register_sloc_provider( $object ) {
  *
  * @since 4.5.0
  */
-function sloc_get_object_from_id( $object, $object_type ) {
-	if ( ! is_object( $object ) ) {
-		return null;
-	}
+function sloc_get_object_from_id( $object_type, $id ) {
 	switch ( $object_type ) {
 		case 'post':
-			return get_post( $object->ID );
+			return get_post( $id );
 		case 'comment':
-			return get_comment( $object->comment_ID );
+			return get_comment( $id );
 		case 'user':
-			return get_user_by( 'id', $object->ID );
+			return get_user_by( 'id', $id );
 		case 'term':
-			return get_term( $object->term_id );
+			return get_term( $id );
 		default:
 			return null;
 	}
@@ -220,6 +217,30 @@ function sloc_get_id_from_object( $object ) {
 		return $object->ID;
 	} elseif ( $object instanceof WP_Term ) {
 		return $object->term_id;
+	}
+	return null;
+}
+
+/**
+ * Returns an object type from an $object
+ *
+ * @param object $object Object.
+ *
+ * @since 4.6.0
+ */
+function sloc_get_type_from_object( $object ) {
+	if ( ! is_object( $object ) ) {
+		return null;
+	}
+
+	if ( $object instanceof WP_Post ) {
+		return 'post';
+	} elseif ( $object instanceof WP_Comment ) {
+		return 'comment';
+	} elseif ( $object instanceof WP_User ) {
+		return 'user';
+	} elseif ( $object instanceof WP_Term ) {
+		return 'term';
 	}
 	return null;
 }

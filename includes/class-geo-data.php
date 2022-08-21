@@ -17,7 +17,18 @@ add_action( 'init', array( 'Geo_Data', 'init' ), 1 );
 class Geo_Data {
 
 
-	public static $properties = array( 'latitude', 'longitude', 'address', 'trip', 'map_zoom', 'altitude', 'speed', 'heading', 'visibility', 'timezone', 'icon' );
+	public static $properties = array(
+		'latitude',  // Decimal Latitude
+		'longitude', // Decimal Longitude
+		'altitude',  // Altitude in meters.
+		'address',  // Textual Display of Location
+		'zoom', // Zoom for Map Display
+		'speed',  // Speed in meters.
+		'heading', // If set, between 0 and 360 degrees.
+		'visibility', // Can either be public, private, or protected.
+		'timezone', // Timezone String
+		'icon', // Icon representing location
+	);
 
 	/**
 	 * Geo Data Initialization Function.
@@ -60,56 +71,12 @@ class Geo_Data {
 	}
 
 	/**
-	 * Sets visibility property on any metadata capable object.
+	 * Retrieves default visibility option
 	 *
-	 * Allows visibility to be set on posts, comments, terms, etc.
 	 *
-	 * @param string $type Object Type.
-	 * @param int    $id Post ID, Comment ID, User ID, etc.
-	 * @param string $status Visibility to be set.
-	 * @since 1.0.0
 	 */
-	public static function set_visibility( $type, $id, $status ) {
-		switch ( $status ) {
-			case '0':
-			case 'private':
-				$status = '0';
-				break;
-			case '1':
-			case 'public':
-				$status = '1';
-				break;
-			case '2':
-			case 'protected':
-				$status = '2';
-				break;
-			default:
-				delete_metadata( $type, $id, 'geo_public' );
-				return false;
-		}
-		update_metadata( $type, $id, 'geo_public', $status );
-	}
-
-	/**
-	 * Retrieves visibility property on any metadata capable object.
-	 *
-	 * Gets visibility from posts, comments, terms, etc.
-	 *
-	 * @param string $type Object Type.
-	 * @param int    $id Post ID, Comment ID, User ID, etc.
-	 * @return false|string $status Visibility.
-	 * @since 1.0.0
-	 */
-	public static function get_visibility( $type = null, $id = null ) {
-		if ( is_null( $type ) && is_null( $id ) ) {
-			$status = false;
-		} else {
-			$status = get_metadata( $type, $id, 'geo_public', true );
-		}
-
-		if ( false === $status ) {
-			$status = (int) get_option( 'geo_public' );
-		}
+	public static function get_default_visibility() {
+		$status = (int) get_option( 'geo_public' );
 		switch ( (int) $status ) {
 			case 0:
 				return 'private';
@@ -206,6 +173,59 @@ class Geo_Data {
 		}
 	}
 
+
+	/**
+	 * Delete a Single Piece of GeoData.
+	 *
+	 * @param string $type
+	 * @param int    $id
+	 * @param array  $geodata {
+	 *   An array of details about a location.
+	 *
+	 * }
+	 * @return WP_Error|boolean Return success or WP_Error.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function delete_geodata( $type, $id, $key ) {
+		if ( ! $type || ! is_numeric( $id ) ) {
+			return false;
+		}
+
+		$id = absint( $id );
+		if ( ! $id ) {
+			return false;
+		}
+		if ( ! empty( $key ) && ! in_array( $key, static::$properties, true ) ) {
+			return false;
+		}
+
+		/**
+		 * Short-circuits the deleting of a field
+		 *
+		 * The dynamic portion of the hook name, `$type`, refers to the object type
+		 * (post, comment, term, user, or any other type with associated geo data).
+		 * Returning a non-null value will effectively short-circuit the function.
+		 *
+		 * Possible filter names include:
+		 *
+		 *  - `delete_post_geodata`
+		 *  - `delete_comment_geodata`
+		 *  - `delete_term_geodata`
+		 *  - `delete_user_geodata`
+		 *
+		 * @param mixed  $value     The value to return, either a single value or an array
+		 *                          of values depending on the value of `$single`. Default null.
+		 * @param string $type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
+		 *                          or any other object type with an associated meta table.
+		 * @param int    $id ID of the object geodata data is for.
+		 * @param string $key  Geo data key.
+		 */
+		$check = apply_filters( "delete_{$type}_geodata", null, $type, $id, $key );
+
+		return delete_metadata( $type, $id, $key );
+	}
+
 	/**
 	 * Set GeoData.
 	 *
@@ -214,77 +234,119 @@ class Geo_Data {
 	 * @param array  $geodata {
 	 *   An array of details about a location.
 	 *
-	 *  @type float $latitude Decimal Latitude.
-	 *  @type float $longitude Decimal Longitude.
-	 *  @type float $altitude Altitude in Meters.
-	 *  @type string $icon Icon.
-	 *  @type string $address Textual Description of location.
-	 *  @type int $map_zoom Zoom for Map Display.
-	 *  @type float $speed Speed in Meters.
-	 *  @type float $heading If set, between 0 and 360 degrees.
-	 *  @type string $wikipedia_link URL of the Airport Homepage
-	 *  @type string $visibility Can be either public, private, or protected.
-	 *  @type string $timezone Timezone string.
-	 *  @type array $weather Array of Weather Properties.
 	 * }
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
 	 * @since 1.0.0
 	 */
-	public static function set_geodata( $type, $id, $geodata ) {
-		if ( ! is_array( $geodata ) ) {
+	public static function set_geodata( $type, $id, $key = '', $geodata ) {
+		if ( ! $type || ! is_numeric( $id ) ) {
 			return false;
 		}
-		$geodata = wp_array_slice_assoc( $geodata, static::$properties );
-		if ( isset( $geodata['map_zoom'] ) ) {
-			$geodata['zoom'] = $geodata['map_zoom'];
-			unset( $geodata['map_zoom'] );
+
+		$id = absint( $id );
+		if ( ! $id ) {
+			return false;
+		}
+		if ( ! empty( $key ) && ! in_array( $key, static::$properties, true ) ) {
+			return false;
+		}
+
+		/**
+		 * Short-circuits the setting of a geodata field.
+		 *
+		 * The dynamic portion of the hook name, `$type`, refers to the object type
+		 * (post, comment, term, user, or any other type with associated geo data).
+		 * Returning a non-null value will effectively short-circuit the function.
+		 *
+		 * Possible filter names include:
+		 *
+		 *  - `set_post_geodata`
+		 *  - `set_comment_geodata`
+		 *  - `set_term_geodata`
+		 *  - `set_user_geodata`
+		 *
+		 * @param mixed  $value     The value to return, either a single value or an array
+		 *                          of values depending on the value of `$single`. Default null.
+		 * @param int    $id ID of the object weather data is for.
+		 * @param string $type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
+		 *                          or any other object type with an associated meta table.
+		 * @param string $key  Geo data key.
+		 * @param string $geodata Value.
+		 */
+		$check = apply_filters( "set_{$type}_geodata", null, $id, $key, $type, $geodata );
+
+		if ( null !== $check ) {
+			return $check;
+		}
+
+		if ( 'visibility' === $key ) {
+			switch ( $geodata ) {
+				case '0':
+				case 'private':
+					$geodata = '0';
+					break;
+				case '1':
+				case 'public':
+					$geodata = '1';
+					break;
+				case '2':
+				case 'protected':
+					$geodata = '2';
+					break;
+				default:
+					delete_metadata( $type, $id, 'geo_public' );
+					return false;
+			}
+			return update_metadata( $type, $id, 'geo_public', $geodata );
+		}
+
+		if ( $key ) {
+			return update_metadata( $type, $id, 'geo_' . $key, $geodata, true );
+		}
+
+		if ( empty( $key ) && ( is_array( $geodata ) ) ) {
+			$geodata = wp_array_slice_assoc( $geodata, static::$properties );
 		}
 
 		if ( isset( $geodata['visibility'] ) ) {
-			self::set_visibility( $type, $id, $geodata['visibility'] );
+			self::set_geodata( $type, $id, 'visibility', $geodata['visibility'] );
 			unset( $geodata['visibility'] );
 		}
 		foreach ( $geodata as $key => $value ) {
-			update_metadata( $type, $id, 'geo_' . $key, $value );
+			if ( ! empty( $value ) ) {
+				update_metadata( $type, $id, 'geo_' . $key, $value );
+			} else {
+				delete_metadata( $type, $id, 'geo_' . $key );
+			}
 		}
+
 		return true;
 	}
 
-
 	/**
-	 * Get Geo Meta Data on an Object.
+	 * Get Latitude and Longitude on an Object.
 	 *
-	 * @param string  $type Object type.
-	 * @param int     $id Object ID.
-	 * @param boolean $full Return just location and visibility or everything.
-	 * @return array $geodata See get_geodata and set_geodata for full list.
+	 * @param string $type Object Type
+	 * @param int    $id Object ID
+	 * @return array The first index is the latitude, the second the longitude, the third the altitude(optional).
 	 *
-	 * @since 1.0.0
+	 * @since 4.6.0
 	 */
-	private static function get_geometadata( $type, $id, $full = true ) {
-		$geodata              = array();
-		$geodata['longitude'] = get_metadata( $type, $id, 'geo_longitude', true );
-		$geodata['latitude']  = get_metadata( $type, $id, 'geo_latitude', true );
-		$geodata['altitude']  = get_metadata( $type, $id, 'geo_altitude', true );
-		$geodata['trip']      = get_metadata( $type, $id, 'geo_trip', true );
-		$geodata['address']   = get_metadata( $type, $id, 'geo_address', true );
-		$geodata['icon']      = get_metadata( $type, $id, 'geo_icon', true );
-		if ( empty( $geodata['icon'] ) ) {
-			$geodata['icon'] = self::get_default_icon();
-		}
-		$geodata['visibility'] = self::get_visibility( $type, $id );
+	public static function get_geopoint( $type, $id ) {
+		$latitude  = self::get_geodata( $type, $id, 'latitude' );
+		$longitude = self::get_geodata( $type, $id, 'longitude' );
+		$altitude = self::get_geodata( $type, $id, 'altitude' );
 
-		if ( $full ) {
-			$geodata['timezone'] = get_metadata( $type, $id, 'geo_timezone', true );
-			$geodata['map_zoom'] = get_metadata( $type, $id, 'geo_zoom', true );
-			$geodata['weather']  = get_metadata( $type, $id, 'geo_weather', true );
+		if ( ! $latitude || ! $longitude ) {
+			return false;
 		}
-		$geodata = array_filter( $geodata );
-		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) && empty( $geodata['trip'] ) ) {
-			return null;
+
+		if ( $altitude ) {
+			return array( $latitude, $longitude, $altitude );
 		}
-		return array_filter( $geodata );
+
+		return array( $latitude, $longitude );
 	}
 
 	/**
@@ -295,17 +357,71 @@ class Geo_Data {
 	 *
 	 * @since 1.0.0
 	 */
-	public static function has_location( $object = null ) {
-		$data = self::get_geodata( $object );
-		return ! is_null( $data );
+	public static function has_location( $type, $id ) {
+		return is_array( self::get_geopoint( $type, $id ) );
+	}
+
+	/**
+	 * Get a GeoURI for an Object.
+	 *
+	 * @param string $type Object Type
+	 * @param int    $id Object ID
+	 * @return string|boolean Geo URI or false if no location.
+	 *
+	 * @since 4.6.0
+	 */
+	public static function get_geouri( $type, $id ) {
+		$point = self::get_geopoint( $type, $id );
+		return 'geo:' . implode( ',', $point );
 	}
 
 
 	/**
+	 * Parse a GEO URI into properties
+	 */
+	public static function parse_geo_uri( $uri ) {
+		if ( ! is_string( $uri ) ) {
+			return $uri;
+		}
+		// Ensure this is a geo uri
+		if ( 'geo:' !== substr( $uri, 0, 4 ) ) {
+			return $uri;
+		}
+		$properties = array();
+		// Geo URI format:
+		// http://en.wikipedia.org/wiki/Geo_URI#Example
+		// https://indieweb.org/Micropub#h-entry
+		//
+		// e.g. geo:37.786971,-122.399677;u=35
+		$geo                     = str_replace( 'geo:', '', urldecode( $uri ) );
+		$geo                     = explode( ';', $geo );
+		$coords                  = explode( ',', $geo[0] );
+		$properties['latitude']  = trim( $coords[0] );
+		$properties['longitude'] = trim( $coords[1] );
+		// Geo URI optionally allows for altitude to be stored as a third csv
+		if ( isset( $coords[2] ) ) {
+			$properties['altitude'] = trim( $coords[2] );
+		}
+		// Store additional parameters
+		array_shift( $geo ); // Remove coordinates to check for other parameters
+		foreach ( $geo as $g ) {
+			$g = explode( '=', $g );
+			if ( 'u' === $g[0] ) {
+				$g[0] = 'accuracy';
+			}
+			if ( 'name' === $g[0] ) {
+				$g[0] = 'address';
+			}
+			$properties[ $g[0] ] = $g[1];
+		}
+		return $properties;
+	}
+
+	/**
 	 * Get GeoData on an Object.
 	 *
-	 * @param mixed   $object Can be WP_Comment, WP_User, WP_Post, WP_Term, or int which will be considered a post id.
-	 * @param boolean $full Return all or just some of the data.
+	 * @param mixed  $object Can be WP_Comment, WP_User, WP_Post, WP_Term, or int which will be considered a post id.
+	 * @param string $key Key. Optional. If empty returns all GeoData.
 	 * @return array $geodata {
 	 *  An array of details about a location.
 	 *
@@ -324,14 +440,91 @@ class Geo_Data {
 	 *
 	 * @since 1.0.0
 	 */
-	public static function get_geodata( $type, $id, $full = true ) {
-		$geodata = self::get_geometadata( $type, $id, $full );
-		if ( ! $geodata ) {
+	public static function get_geodata( $type, $id, $key = '' ) {
+		if ( ! $type || ! is_numeric( $id ) ) {
+			return false;
+		}
+
+		$id = absint( $id );
+		if ( ! $id ) {
+			return false;
+		}
+		if ( ! empty( $key ) && ! in_array( $key, static::$properties, true ) ) {
+			return false;
+		}
+
+		/**
+		 * Short-circuits the return value of a geodata field.
+		 *
+		 * The dynamic portion of the hook name, `$type`, refers to the object type
+		 * (post, comment, term, user, or any other type with associated geo data).
+		 * Returning a non-null value will effectively short-circuit the function.
+		 *
+		 * Possible filter names include:
+		 *
+		 *  - `get_post_geodata`
+		 *  - `get_comment_geodata`
+		 *  - `get_term_geodata`
+		 *  - `get_user_geodata`
+		 *
+		 * @param mixed  $value     The value to return, either a single value or an array
+		 *                          of values.
+		 * @param int    $id ID of the object geo data is for.
+		 * @param string $key  Geo data key.
+		 * @param string $type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
+		 *                          or any other object type with an associated meta table.
+		 */
+		$check = apply_filters( "get_{$type}_geodata", null, $id, $key, $type );
+
+		if ( null !== $check ) {
+			return $check;
+		}
+
+
+		if ( 'visibility' === $key ) {
+			$visibility = get_metadata( $type, $id, 'geo_public', true );
+			if ( empty( $visibility ) ) {
+				return self::get_default_visibility();
+			}
+			switch ( (int) $visibility ) {
+				case 0:
+					return 'private';
+				case 1:
+					return 'public';
+				case 2:
+					return 'protected';
+				default:
+					return self::get_default_visibility();
+			}
+		}
+
+		if ( ! empty( $key ) ) {
+			return get_metadata( $type, $id, 'geo_' . $key, true );
+		}
+
+		$geodata = array();
+
+		$properties = static::$properties;
+		unset( $properties['visibility'] );
+		unset( $properties['map_zoom'] );
+
+		foreach ( static::$properties as $prop ) {
+			$geodata[ $prop ] = get_metadata( $type, $id, 'geo_' . $prop, true );
+		}
+
+		$geodata['visibility'] = self::get_geodata( $type, $id, 'visibility' );
+		$geodata['map_zoom']   = get_metadata( $type, $id, 'geo_zoom', true );
+
+		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
 			return null;
 		}
-		return $geodata;
-	}
 
+		if ( empty( $geodata['icon'] ) ) {
+			$geodata['icon'] = self::get_default_icon();
+		}
+
+		return array_filter( $geodata );
+	}
 
 	/**
 	 * Registers Geo Metadata.
@@ -385,6 +578,19 @@ class Geo_Data {
 		register_meta( 'comment', 'geo_address', $args );
 		register_meta( 'user', 'geo_address', $args );
 		register_meta( 'term', 'geo_address', $args );
+
+		$args = array(
+			'sanitize_callback' => array( __CLASS__, 'sanitize_address' ),
+			'type'              => 'number',
+			'description'       => __( 'Geodata Public', 'simple-location' ),
+			'default'           => get_option( 'geo_public' ),
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		register_meta( 'post', 'geo_public', $args );
+		register_meta( 'comment', 'geo_public', $args );
+		register_meta( 'user', 'geo_public', $args );
+		register_meta( 'term', 'geo_public', $args );
 
 		$args = array(
 			'sanitize_callback' => array( __CLASS__, 'esc_attr' ),
@@ -643,7 +849,7 @@ class Geo_Data {
 		if ( ! is_array( $loc ) ) {
 			return '';
 		}
-		if ( Geo_Base::current_user_can_read( $object ) && 'public' !== $loc['visibility'] ) {
+		if ( Geo_Base::current_user_can_read( sloc_get_object_from_id( $type, $id ) ) && 'public' !== $loc['visibility'] ) {
 			$loc['visibility'] = 'public';
 			if ( isset( $loc['address'] ) ) {
 				/* translators: Prefaces the address 1. with the private status */

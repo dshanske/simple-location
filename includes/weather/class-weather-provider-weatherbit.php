@@ -125,10 +125,8 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 			$return['pressure']    = ifset_round( $response['pres'], 2 );
 			$return['cloudiness']  = ifset_round( $response['clouds'] );
 
-			$return['wind']           = array();
-			$return['wind']['speed']  = ifset_round( $response['wind_spd'], 2 );
-			$return['wind']['degree'] = ifset_round( $response['wind_dir'], 1 );
-			$return['wind']           = array_filter( $return['wind'] );
+			$return['windspeed']  = ifset_round( $response['wind_spd'], 2 );
+			$return['winddegree'] = ifset_round( $response['wind_dir'], 1 );
 			$return['rain']           = ifset_round( $response['precip'], 2 );
 			$return['visibility']     = self::km_to_meters( ifset_round( $response['vis'], 2 ) );
 			$return['aqi']            = ifset_round( $response['aqi'], 2 );

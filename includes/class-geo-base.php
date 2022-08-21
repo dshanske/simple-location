@@ -1,4 +1,4 @@
-w<?php
+<?php
 /**
  * Geographical Metadata
  *

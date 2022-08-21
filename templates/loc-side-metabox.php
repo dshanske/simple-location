@@ -8,10 +8,12 @@
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
 	$geodata = get_comment_geodata( $comment );
+	$weather = get_comment_weather_data( $comment );
 } else {
 	$geodata = get_post_geodata();
+	$weather = get_post_weather_data();
 }
-$weather      = ifset( $geodata['weather'], array() );
+
 $location     = wp_get_object_terms( get_the_ID(), 'location', array( 'fields' => 'ids' ) );
 $location     = count( $location ) >= 1 ? $location[0] : '';
 $display_name = ifset( $geodata['address'] );
@@ -21,7 +23,6 @@ $imperial = ( 'imperial' === $units );
 if ( $imperial ) {
 	$weather = Weather_Provider::metric_to_imperial( $weather );
 }
-$wind = ifset( $weather['wind'], array() );
 $trip = ifset( $geodata['trip'], array() );
 
 $public     = array_key_exists( 'visibility', $geodata ) ? $geodata['visibility'] : get_option( 'geo_public' );
@@ -181,17 +182,17 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 		</p>
 
 		<p class="field-row">
-			<label for="wind_degree">
-				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'wind-degree', $imperial ) ); ?>
+			<label for="winddegree">
+				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'winddegree', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" max="360" name="wind_degree" id="wind_degree" value="<?php echo esc_attr( ifset( $wind['degree'], '' ) ); ?>" />
+			<input class="widefat" type="number" min="0" max="360" name="winddegree" id="winddegree" value="<?php echo esc_attr( ifset( $weather['winddegree'], '' ) ); ?>" />
 		</p>
 
 		<p class="field-row">
-			<label for="wind_speed">
-				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'wind-speed', $imperial ) ); ?>
+			<label for="windspeed">
+				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'windspeed', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" name="wind_speed" id="wind_speed" step="0.01" value="<?php echo esc_attr( ifset_round( $wind['speed'], 2, '' ) ); ?>" />
+			<input class="widefat" type="number" min="0" name="windspeed" id="windspeed" step="0.01" value="<?php echo esc_attr( ifset_round( $weather['windspeed'], 2, '' ) ); ?>" />
 		</p>
 
 		<p class="field-row">

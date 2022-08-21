@@ -149,20 +149,61 @@ class Sloc_Weather_Data {
 	 *
 	 * @param string $type
 	 * @param int    $id
+	 * @param string $key
 	 * @param array  $weather  An array of details about the weather at a location...see registered properties.
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
 	 * @since 4.6.0
 	 */
-	public static function set_object_weather_data( $type, $id, $weather ) {
-		if ( ! is_array( $weather ) ) {
+	public static function set_object_weatherdata( $type, $id, $key, $weather ) {
+		if ( ! $type || ! is_numeric( $id ) ) {
 			return false;
+		}
+
+		$id = absint( $id );
+		if ( ! $id ) {
+			return false;
+		}
+		if ( ! empty( $key ) && ! in_array( $key, static::$properties, true ) ) {
+			return false;
+		}
+
+		/**
+		 * Short-circuits the return value of a weatherdata field.
+		 *
+		 * The dynamic portion of the hook name, `$type`, refers to the object type
+		 * (post, comment, term, user, or any other type with associated weather data).
+		 * Returning a non-null value will effectively short-circuit the function.
+		 *
+		 * Possible filter names include:
+		 *
+		 *  - `get_post_weatherdata`
+		 *  - `get_comment_weatherdata`
+		 *  - `get_term_weatherdata`
+		 *  - `get_user_weatherdata`
+		 *
+		 * @param mixed  $value     The value to return, either a single value or an array
+		 *                          of values depending on the value of `$single`. Default null.
+		 * @param int    $id ID of the object weather data is for.
+		 * @param string $type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
+		 *                          or any other object type.
+		 * @param string $key  Weather data key.
+		 * @param mixed $value Weather data value.
+		 */
+		$check = apply_filters( "set_{$type}_weatherdata", null, $id, $type, $key, $weather );
+
+		if ( $key ) {
+			return update_metadata( $type, $id, 'weather_' . $key, $weather );
 		}
 
 		$weather = wp_array_slice_assoc( $weather, static::$properties );
 
-		foreach ( $weather as $key => $value ) {
-			update_metadata( $type, $id, 'weather_' . $key, $value );
+		foreach ( $weather as $prop => $value ) {
+			if ( ! empty( $value ) ) {
+				update_metadata( $type, $id, 'weather_' . $prop, $value );
+			} else {
+				delete_metadata( $type, $id, 'weather_' . $prop );
+			}
 		}
 		return true;
 	}
@@ -173,15 +214,54 @@ class Sloc_Weather_Data {
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id Object ID.
+	 * @param string $key Optional.
 	 * @return array $weather
 	 *
 	 * @since 4.6.0
 	 */
-	public static function get_object_weather_data( $type, $id ) {
-		$weather = self::migrate_weather( $type, $id );
+	public static function get_object_weatherdata( $type, $id, $key = '' ) {
+		if ( ! $type || ! is_numeric( $id ) ) {
+			return false;
+		}
 
-		if ( $weather ) {
-			return $weather;
+		$id = absint( $id );
+		if ( ! $id ) {
+			return false;
+		}
+		if ( ! empty( $key ) && ! in_array( $key, static::$properties, true ) ) {
+			return false;
+		}
+		/**
+		 * Short-circuits the return value of a weatherdata field.
+		 *
+		 * The dynamic portion of the hook name, `$type`, refers to the object type
+		 * (post, comment, term, user, or any other type with associated weather data).
+		 * Returning a non-null value will effectively short-circuit the function.
+		 *
+		 * Possible filter names include:
+		 *
+		 *  - `get_post_weatherdata`
+		 *  - `get_comment_weatherdata`
+		 *  - `get_term_weatherdata`
+		 *  - `get_user_weatherdata`
+		 *
+		 * @param mixed  $value     The value to return, either a single value or an array
+		 *                          of values depending on the value of `$single`. Default null.
+		 * @param int    $object_id ID of the object weather data is for.
+		 * @param string $key  Weather data key.
+		 * @param string $object_type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
+		 *                          or any other object type with an associated meta table.
+		 */
+		$check = apply_filters( "get_{$type}_weatherdata", null, $id, $key, $type );
+
+		if ( null !== $check ) {
+			return $check;
+		}
+
+		self::migrate_weather( $type, $id );
+
+		if ( $key ) {
+			return get_metadata( $type, $id, 'weather_' . $key, true );
 		}
 
 		$weather = array();
@@ -205,7 +285,7 @@ class Sloc_Weather_Data {
 	public static function migrate_weather( $type, $id ) {
 		$weather = get_metadata( $type, $id, 'geo_weather', true );
 		if ( ! $weather ) {
-			return $weather;
+			return;
 		}
 
 		if ( array_key_exists( 'wind', $weather ) ) {
@@ -219,9 +299,7 @@ class Sloc_Weather_Data {
 			$weather = array_merge( $w, $weather );
 		}
 
-		self::set_weather_data( $type, $id, $weather );
-
-		return $weather;
+		self::set_object_weatherdata( $type, $id, '', $weather );
 	}
 
 	/**
@@ -233,13 +311,7 @@ class Sloc_Weather_Data {
 	 * @since 1.0.0
 	 */
 	public static function has_weather( $type, $id ) {
-		$data = get_metadata( $type, $id, '', true );
-		foreach ( array_keys( $data ) as $key ) {
-			if ( str_contains( 'weather', $key ) ) {
-				return true;
-			}
-		}
-		return false;
+		return is_array( self::get_object_weatherdata( $type, $id ) );
 	}
 
 	public static function get_the_weather( $weather, $args = null ) {

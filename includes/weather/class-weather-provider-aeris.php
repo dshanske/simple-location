@@ -166,11 +166,9 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$return['summary']     = ifset( $observation['weather'] );
 		$return['cloudiness']  = ifset( $observation['sky'] );
 
-		$return['wind']           = array();
-		$return['wind']['speed']  = self::kmh_to_ms( ifset_round( $observation['windSpeedKPH'] ) );
-		$return['wind']['gust']   = self::kmh_to_ms( ifset_round( $observation['windGustKPH'] ) );
-		$return['wind']['degree'] = ifset_round( $observation['windDirDEG'], 1 );
-		$return['wind']           = array_filter( $return['wind'] );
+		$return['windspeed']  = self::kmh_to_ms( ifset_round( $observation['windSpeedKPH'] ) );
+		$return['windgust']   = self::kmh_to_ms( ifset_round( $observation['windGustKPH'] ) );
+		$return['winddegree'] = ifset_round( $observation['windDirDEG'], 1 );
 		$return['rain']           = ifset_round( $observation['precipMM'], 2 );
 		$return['snow']           = self::cm_to_mm( ifset_round( $observation['snowDepthCM'], 2 ) );
 		$return['radiation']      = ifset_round( $observation['solradWM2'], 2 );

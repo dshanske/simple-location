@@ -195,11 +195,9 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		$return['pressure']    = ifset_round( $json['pres'], 1 );
 		$return['summary']     = ifset( $json['conditions'] );
 
-		$return['wind']           = array();
-		$return['wind']['speed']  = round( self::kmh_to_ms( ifset( $json['wspd'] ) ), 1 );
-		$return['wind']['gust']   = round( self::kmh_to_ms( ifset( $json['wpgt'] ) ), 1 );
-		$return['wind']['degree'] = ifset_round( $json['wdir'], 1 );
-		$return['wind']           = array_filter( $return['wind'] );
+		$return['windspeed']  = round( self::kmh_to_ms( ifset( $json['wspd'] ) ), 1 );
+		$return['windgust']   = round( self::kmh_to_ms( ifset( $json['wpgt'] ) ), 1 );
+		$return['winddegree'] = ifset_round( $json['wdir'], 1 );
 		$return['rain']           = ifset_round( $json['prcp'], 2 );
 		$return['snow']           = self::cm_to_mm( ifset_round( $json['snow'], 2 ) );
 		$return['summary']        = ifset( $json['coco'] );

@@ -53,8 +53,8 @@ class Simple_Location_Plugin {
 	 * @since 1.0.0
 	 */
 	public static function activate() {
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-data.php';
-		WP_Geo_Data::rewrite();
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-base.php';
+		Geo_Base::rewrite();
 		flush_rewrite_rules();
 	}
 

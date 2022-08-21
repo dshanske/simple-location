@@ -206,7 +206,7 @@ class Loc_Metabox {
 		}
 
 		if ( isset( $_POST['location_icon'] ) & ! empty( $_POST['location_icon'] ) ) {
-			if ( Loc_View::get_default_icon() === $_POST[ 'location_icon' ] ) {
+			if ( Geo_Data::get_default_icon() === $_POST[ 'location_icon' ] ) {
 				delete_metadata( $meta_type, $object_id, 'geo_icon' );
 			} else {
 				update_metadata( $meta_type, $object_id, 'geo_icon', sanitize_text_field( $_POST[ 'location_icon' ] ) );
@@ -227,7 +227,7 @@ class Loc_Metabox {
 		$weather    = array();
 
 		// Numeric Properties
-		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'cloudiness', 'rain', 'snow', 'weather_visibility' );
+		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'cloudiness', 'rain', 'snow', 'weather_visibility', 'windspeed', 'winddegree', 'windgust' );
 		foreach ( $wtr_params as $param ) {
 			if ( ! empty( $_POST[ $param ] ) && 'none' !== $_POST[ $param ] && is_numeric( $_POST[ $param ] ) ) {
 				$weather[ str_replace( 'weather_', '', $param ) ] = floatval( $_POST[ $param ] );
@@ -242,25 +242,13 @@ class Loc_Metabox {
 			}
 		}
 
-		$wind = array();
-		if ( ! empty( $_POST['wind_speed'] ) ) {
-			$wind['speed'] = floatval( $_POST['wind_speed'] );
-		}
-		if ( ! empty( $_POST['wind_degree'] ) ) {
-			$wind['degree'] = floatval( $_POST['wind_degree'] );
-		}
-		$wind = array_filter( $wind );
-		if ( ! empty( $wind ) ) {
-			$weather['wind'] = $wind;
-		}
-		$weather = array_filter( $weather );
+
+
 		if ( 'imperial' === $units ) {
 			$weather = Weather_Provider::imperial_to_metric( $weather );
 		}
 		if ( ! empty( $weather ) ) {
-			update_metadata( $meta_type, $object_id, 'geo_weather', $weather );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_weather' );
+			Sloc_Weather_Data::set_object_weather_data( $meta_type, $object_id, $weather, true );
 		}
 		if ( ! empty( $_POST['latitude'] ) || ! empty( $_POST['longitude'] ) || ! empty( $_POST['address'] ) ) {
 			set_geo_visibility( $meta_type, $object_id, sanitize_text_field( $_POST['geo_public'] ) );

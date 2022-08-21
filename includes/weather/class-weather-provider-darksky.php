@@ -110,12 +110,10 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 			if ( isset( $current['cloudCover'] ) ) {
 				$return['cloudiness'] = round( $current['cloudCover'] * 100, 1 );
 			}
-			$return['wind']           = array();
-			$return['wind']['speed']  = ifset_round( $current['windSpeed'] );
-			$return['wind']['degree'] = ifset_round( $current['windBearing'], 1 );
-			$return['wind']['gust']   = ifset_round( $current['windGuest'], 1 );
+			$return['windspeed']  = ifset_round( $current['windSpeed'] );
+			$return['winddegree'] = ifset_round( $current['windBearing'], 1 );
+			$return['windgust']   = ifset_round( $current['windGuest'], 1 );
 			$return['uvi']            = ifset( $current['uvIndex'] );
-			$return['wind']           = array_filter( $return['wind'] );
 			$return['rain']           = ifset_round( $current['precipIntensity'], 2 );
 			$return['snow']           = ifset_round( $current['precipAccumulation'], 2 );
 			$return['summary']        = ifset( $current['summary'] );

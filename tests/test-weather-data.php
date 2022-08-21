@@ -19,16 +19,23 @@ class WeatherDataTest extends WP_UnitTestCase {
 		)
 	);
 
+	public function test_set_and_get_post_temperature() {
+		$post_id = $this->factory()->post->create();
+		set_post_weatherdata( $post_id, 'temperature', 45.2 );
+		$return = get_post_weatherdata( $post_id, 'temperature' );
+		$this->assertEquals( 45.2, $return, wp_json_encode( $return ) );
+	}
+
 	public function test_set_and_get_post_weatherdata() {
 		$post_id = $this->factory()->post->create();
-		set_post_weather_data( $post_id, static::$weather );
-		$this->assertEquals( static::$weather, get_post_weather_data( $post_id ), );
+		set_post_weatherdata( $post_id, '', static::$weather );
+		$this->assertEquals( static::$weather, get_post_weatherdata( $post_id ), );
 	}
 
 	public function test_set_and_get_old_post_weatherdata() {
 		$post_id = $this->factory()->post->create();
 		add_post_meta( $post_id, 'geo_weather', static::$oldweather );
-		$this->assertEquals( static::$weather, get_post_weather_data( $post_id ) );
+		$this->assertEquals( static::$weather, get_post_weatherdata( $post_id ) );
 	}
 
 }
