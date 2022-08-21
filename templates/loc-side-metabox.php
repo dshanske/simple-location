@@ -7,11 +7,11 @@
 
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
-	$geodata = get_comment_geodata( $comment );
-	$weather = get_comment_weather_data( $comment );
-} else {
+	$geodata = get_comment_geodata( $comment->comment_ID );
+	$weather = get_comment_weatherdata( $comment->comment_ID );
+} else { 
 	$geodata = get_post_geodata();
-	$weather = get_post_weather_data();
+	$weather = get_post_weatherdata();
 }
 
 $location     = wp_get_object_terms( get_the_ID(), 'location', array( 'fields' => 'ids' ) );
@@ -23,7 +23,6 @@ $imperial = ( 'imperial' === $units );
 if ( $imperial ) {
 	$weather = Weather_Provider::metric_to_imperial( $weather );
 }
-$trip = ifset( $geodata['trip'], array() );
 
 $public     = array_key_exists( 'visibility', $geodata ) ? $geodata['visibility'] : get_option( 'geo_public' );
 $choices    = Geo_Base::geo_public();
@@ -93,7 +92,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 				<?php esc_html_e( 'Icon:', 'simple-location' ); ?>
 			</label>
 			<select name="location_icon" id="location_icon">
-				<?php Loc_View::icon_select( ifset( $geodata['icon'] ), true ); ?>" />
+				<?php Geo_Data::icon_select( ifset( $geodata['icon'] ), true ); ?>" />
 			</select>
 		</p>
 
@@ -113,24 +112,6 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 		</p>
 	</div><!-- #location-fields -->
 </div><!-- .location-section -->
-
-<!-- Remove Trip Visibility for Now
-<div class="location-section location-section-trip">
-	<span class="dashicons-before dashicons-car" id="location-visibility-title" title="<?php esc_html_e( 'Trip', 'simple-location' ); ?>"> <?php esc_html_e( 'Trip:', 'simple-location' ); ?></span>
-	<span id="trip-label"><?php echo isset( $geodata['trip'] ) ? esc_html__( 'Set', 'simple-location' ) : esc_html__( 'None', 'simple-location' ); ?></span>
-	<a href="#location-trip" class="edit-location-trip hide-if-no-js" role="button"><span aria-hidden="true">Edit</a><span class="screen-reader-text">Trip</span>
-	<div id="trip-data" class="field-row hide-if-js">
-			<p class="field-row">	
-		 <label for="trip_path">
-			   <?php esc_html_e( 'Path: ', 'simple-location' ); ?>
-		 </label>
-		<input type="text" name="trip_path" id="trip_path" value="<?php echo esc_attr( ifset( $trip['path'] ) ); ?>" />
-			</p>
-			<a href="#location-trip" class="save-location-trip hide-if-no-js button">OK</a>
-			<a href="#location-trip" class="cancel-location-trip hide-if-no-js button-cancel">Cancel</a>
-	</div>
-</div>
--->
 
 <div class="location-section location-section-visibility">
 	<span class="dashicons-before dashicons-hidden" id="location-visibility-title" title="<?php esc_html_e( 'Visibility', 'simple-location' ); ?>"> <?php esc_html_e( 'Visibility:', 'simple-location' ); ?></span>
