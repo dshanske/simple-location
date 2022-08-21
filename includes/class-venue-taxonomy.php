@@ -62,6 +62,8 @@ class Venue_Taxonomy {
 			'add_or_remove_items'        => __( 'Add or remove venues', 'simple-location' ),
 			'choose_from_most_used'      => __( 'Choose from the most used venues', 'simple-location' ),
 			'menu_name'                  => __( 'Venues', 'simple-location' ),
+			'name_field_description'     => __( 'The name of the venue or place', 'simple-location' ),
+			'desc_field_description'     => __( 'Will display on venue archive pages if set', 'simple-location' ),
 		);
 
 		$args = array(
@@ -139,22 +141,6 @@ class Venue_Taxonomy {
 	}
 
 	public static function save_data( $term_id ) {
-		// phpcs:disable
-		if ( ! empty( $_POST['latitude'] ) ) {
-			update_term_meta( $term_id, 'geo_latitude', floatval( $_POST['latitude'] ) );
-		} else {
-			delete_term_meta( $term_id, 'geo_latitude' );
-		}
-		if ( ! empty( $_POST['longitude'] ) ) {
-			update_post_meta( $post_id, 'geo_longitude', floatval( $_POST['longitude'] ) );
-		} else {
-			delete_post_meta( $post_id, 'geo_longitude' );
-		}
-		if ( ! empty( $_POST['address'] ) ) {
-			update_post_meta( $post_id, 'geo_address', sanitize_text_field( $_POST['address'] ) );
-		} else {
-			delete_post_meta( $post_id, 'geo_address' );
-		}
-		// phpcs:enable
+		Loc_Metabox::save_meta( 'term', $term_id );
 	}
 }
