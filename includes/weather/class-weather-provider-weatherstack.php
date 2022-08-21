@@ -126,14 +126,14 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 
 			$return['windspeed']  = self::kmh_to_ms( ifset_round( $response['wind_speed'] ) );
 			$return['winddegree'] = ifset_round( $response['wind_degree'] );
-			$return['rain']           = ifset_round( $response['precip'], 2 );
-			$return['cloudiness']     = ifset( $response['cloudcover'] );
-			$return['visibility']     = self::km_to_meters( ifset_round( $response['visibility'], 2 ) );
-			$summary                  = ifset( $response['weather_descriptions'] );
-			$summary                  = is_array( $summary ) ? implode( ' ', $summary ) : '';
-			$return['summary']        = $summary;
-			$return['uv']             = ifset( $response['uv_index'] );
-			$return['icon']           = $this->icon_map( $response['weather_code'], ifset( $response['is_day'] ) );
+			$return['rain']       = ifset_round( $response['precip'], 2 );
+			$return['cloudiness'] = ifset( $response['cloudcover'] );
+			$return['visibility'] = self::km_to_meters( ifset_round( $response['visibility'], 2 ) );
+			$summary              = ifset( $response['weather_descriptions'] );
+			$summary              = is_array( $summary ) ? implode( ' ', $summary ) : '';
+			$return['summary']    = $summary;
+			$return['uv']         = ifset( $response['uv_index'] );
+			$return['icon']       = $this->icon_map( $response['weather_code'], ifset( $response['is_day'] ) );
 
 			$return = array_filter( $this->extra_data( $return ) );
 			$this->set_cache( $return );

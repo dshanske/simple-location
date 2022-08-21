@@ -127,14 +127,14 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 
 			$return['windspeed']  = ifset_round( $response['wind_spd'], 2 );
 			$return['winddegree'] = ifset_round( $response['wind_dir'], 1 );
-			$return['rain']           = ifset_round( $response['precip'], 2 );
-			$return['visibility']     = self::km_to_meters( ifset_round( $response['vis'], 2 ) );
-			$return['aqi']            = ifset_round( $response['aqi'], 2 );
-			$return['uv']             = ifset_round( $response['uv'] );
-			$return['radiation']      = ifset_round( $response['solar_rad'], 2 );
-			$return['snow']           = ifset_round( $response['snow'], 2 );
-			$return['summary']        = ifset( $response['weather']['description'] );
-			$return['icon']           = $this->icon_map( $response['weather']['code'], ifset( $response['pod'] ) === 'd' );
+			$return['rain']       = ifset_round( $response['precip'], 2 );
+			$return['visibility'] = self::km_to_meters( ifset_round( $response['vis'], 2 ) );
+			$return['aqi']        = ifset_round( $response['aqi'], 2 );
+			$return['uv']         = ifset_round( $response['uv'] );
+			$return['radiation']  = ifset_round( $response['solar_rad'], 2 );
+			$return['snow']       = ifset_round( $response['snow'], 2 );
+			$return['summary']    = ifset( $response['weather']['description'] );
+			$return['icon']       = $this->icon_map( $response['weather']['code'], ifset( $response['pod'] ) === 'd' );
 
 			$return = array_filter( $this->extra_data( $return ) );
 

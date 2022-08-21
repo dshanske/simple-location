@@ -169,11 +169,11 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$return['windspeed']  = self::kmh_to_ms( ifset_round( $observation['windSpeedKPH'] ) );
 		$return['windgust']   = self::kmh_to_ms( ifset_round( $observation['windGustKPH'] ) );
 		$return['winddegree'] = ifset_round( $observation['windDirDEG'], 1 );
-		$return['rain']           = ifset_round( $observation['precipMM'], 2 );
-		$return['snow']           = self::cm_to_mm( ifset_round( $observation['snowDepthCM'], 2 ) );
-		$return['radiation']      = ifset_round( $observation['solradWM2'], 2 );
-		$return['uv']             = ifset_round( $observation['uvi'], 2 );
-		$return['visibility']     = self::km_to_meters( ifset_round( $observation['visibilityKM'] ) );
+		$return['rain']       = ifset_round( $observation['precipMM'], 2 );
+		$return['snow']       = self::cm_to_mm( ifset_round( $observation['snowDepthCM'], 2 ) );
+		$return['radiation']  = ifset_round( $observation['solradWM2'], 2 );
+		$return['uv']         = ifset_round( $observation['uvi'], 2 );
+		$return['visibility'] = self::km_to_meters( ifset_round( $observation['visibilityKM'] ) );
 
 		$return['icon'] = $this->icon_map( $observation['weatherCoded'] );
 

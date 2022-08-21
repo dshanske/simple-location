@@ -138,10 +138,10 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 		$return['windspeed']  = round( self::kmh_to_ms( ifset( $json['windspeed'] ) ), 1 );
 		$return['windgust']   = round( self::kmh_to_ms( ifset( $json['windgust'] ) ), 1 );
 		$return['winddegree'] = ifset_round( $json['winddir'], 1 );
-		$return['rain']           = ifset_round( $json['precip'], 2 );
-		$return['snow']           = self::cm_to_mm( ifset_round( $json['snow'], 2 ) );
-		$return['radiation']      = ifset_round( $json['solarradiation'], 2 );
-		$return['visibility']     = self::km_to_meters( ifset_round( $json['visibility'] ) );
+		$return['rain']       = ifset_round( $json['precip'], 2 );
+		$return['snow']       = self::cm_to_mm( ifset_round( $json['snow'], 2 ) );
+		$return['radiation']  = ifset_round( $json['solarradiation'], 2 );
+		$return['visibility'] = self::km_to_meters( ifset_round( $json['visibility'] ) );
 
 		$return['icon'] = $this->icon_map( $json['icon'] );
 

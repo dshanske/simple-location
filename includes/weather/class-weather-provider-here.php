@@ -106,16 +106,16 @@ class Weather_Provider_HERE extends Weather_Provider {
 
 			$return['humidity'] = ifset_round( $current['humidity'], 1 );
 
-			$return['pressure']       = ifset_round( $current['barometerPressure'], 1 );
-			$return['uv']             = ifset_round( $current['uvIndex'], 1 );
+			$return['pressure']   = ifset_round( $current['barometerPressure'], 1 );
+			$return['uv']         = ifset_round( $current['uvIndex'], 1 );
 			$return['windspeed']  = self::kmh_to_ms( ifset_round( $current['windSpeed'] ) );
 			$return['winddegree'] = ifset_round( $current['windDirection'], 1 );
-			$return['rain']           = self::cm_to_mm( ifset_round( $current['precipitation1H'], 2 ) );
-			$return['snow']           = ifset_round( $current['snowFall'], 2 );
-			$return['summary']        = ifset( $current['description'] );
-			$return['icon']           = $this->icon_map( $current['icon'] );
-			$return['visibility']     = self::km_to_meters( ifset_round( $current['visibility'], 1 ) );
-			$return                   = array_filter( $this->extra_data( $return ) );
+			$return['rain']       = self::cm_to_mm( ifset_round( $current['precipitation1H'], 2 ) );
+			$return['snow']       = ifset_round( $current['snowFall'], 2 );
+			$return['summary']    = ifset( $current['description'] );
+			$return['icon']       = $this->icon_map( $current['icon'] );
+			$return['visibility'] = self::km_to_meters( ifset_round( $current['visibility'], 1 ) );
+			$return               = array_filter( $this->extra_data( $return ) );
 
 			$this->set_cache( $return );
 

@@ -174,11 +174,11 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$return['humidity']    = self::get_value( $properties, 'relativeHumidity' );
 		$return['rain']        = self::m_to_mm( self::get_value( $properties, 'precipitationLastHour' ) );
 		$return['visibility']  = self::get_value( $properties, 'visibility' );
-		$return['winddegree']        = self::get_value( $properties, 'windDirection' );
-		$return['windspeed']         = self::kmh_to_ms( self::get_value( $properties, 'windSpeed' ) );
-		$return['windgust']          = self::get_value( $properties, 'windGust' );
-		$return['pressure'] = round( self::get_value( $properties, 'barometricPressure' ) / 100, 2 );
-		$return['summary']  = ifset( $properties['textDescription'] );
+		$return['winddegree']  = self::get_value( $properties, 'windDirection' );
+		$return['windspeed']   = self::kmh_to_ms( self::get_value( $properties, 'windSpeed' ) );
+		$return['windgust']    = self::get_value( $properties, 'windGust' );
+		$return['pressure']    = round( self::get_value( $properties, 'barometricPressure' ) / 100, 2 );
+		$return['summary']     = ifset( $properties['textDescription'] );
 		if ( isset( $return['summary'] ) ) {
 			$return['icon'] = self::icon_map( $return['summary'] );
 		}

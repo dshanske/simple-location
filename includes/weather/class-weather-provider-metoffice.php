@@ -263,11 +263,11 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		$return['humidity']    = ifset( $properties['H'] );
 		$return['visibility']  = ifset( $properties['V'] );
 		$return['pressure']    = ifset( $properties['P'] );
-		$return['windspeed']         = self::mph_to_mps( ifset( $properties['S'] ) );
-		$return['windgust']          = self::mph_to_mps( ifset( $properties['G'] ) );
-		$return['summary'] = $this->weather_type( ifset( $properties['W'] ) );
-		$return['icon']    = self::icon_map( ifset( $properties['W'] ) );
-		$return            = array_filter( $this->extra_data( $return ) );
+		$return['windspeed']   = self::mph_to_mps( ifset( $properties['S'] ) );
+		$return['windgust']    = self::mph_to_mps( ifset( $properties['G'] ) );
+		$return['summary']     = $this->weather_type( ifset( $properties['W'] ) );
+		$return['icon']        = self::icon_map( ifset( $properties['W'] ) );
+		$return                = array_filter( $this->extra_data( $return ) );
 
 		$this->set_cache( $return );
 

@@ -116,11 +116,11 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			$return['windspeed']  = ifset_round( $current['windSpeed'] );
 			$return['winddegree'] = ifset_round( $current['windBearing'], 1 );
 			$return['windgust']   = ifset_round( $current['windGuest'], 1 );
-			$return['uvi']            = ifset( $current['uvIndex'] );
-			$return['rain']           = ifset_round( $current['precipIntensity'], 2 );
-			$return['snow']           = ifset_round( $current['precipAccumulation'], 2 );
-			$return['summary']        = ifset( $current['summary'] );
-			$return['icon']           = $this->icon_map( ifset( $current['icon'] ) );
+			$return['uvi']        = ifset( $current['uvIndex'] );
+			$return['rain']       = ifset_round( $current['precipIntensity'], 2 );
+			$return['snow']       = ifset_round( $current['precipAccumulation'], 2 );
+			$return['summary']    = ifset( $current['summary'] );
+			$return['icon']       = $this->icon_map( ifset( $current['icon'] ) );
 			if ( isset( $current['visibility'] ) ) {
 				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
