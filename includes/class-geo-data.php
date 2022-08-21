@@ -237,7 +237,7 @@ class Geo_Data {
 	 *
 	 * @since 1.0.0
 	 */
-	public static function set_geodata( $type, $id, $key = '', $geodata ) {
+	public static function set_geodata( $type, $id, $key, $geodata ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
 			return false;
 		}
@@ -588,7 +588,6 @@ class Geo_Data {
 			'sanitize_callback' => array( __CLASS__, 'sanitize_address' ),
 			'type'              => 'number',
 			'description'       => __( 'Geodata Public', 'simple-location' ),
-			'default'           => get_option( 'geo_public' ),
 			'single'            => true,
 			'show_in_rest'      => false,
 		);
