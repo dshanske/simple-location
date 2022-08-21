@@ -210,7 +210,57 @@ class Sloc_Weather_Data {
 
 
 	/**
-	 * Get Geo Meta Data on an Object.
+	 * Delete a Single Piece of Weather Data.
+	 *
+	 * @param string $type
+	 * @param int    $id
+	 * @param string  $key 
+	 *
+	 * @return WP_Error|boolean Return success or WP_Error.
+	 *
+	 * @since 4.6.0
+	 */
+	public static function delete_object_weatherdata( $type, $id, $key ) {
+		if ( ! $type || ! is_numeric( $id ) ) {
+			return false;
+		}
+
+		$id = absint( $id );
+		if ( ! $id ) {
+			return false;
+		}
+		if ( ! empty( $key ) && ! in_array( $key, static::$properties, true ) ) {
+			return false;
+		}
+
+		/**
+		 * Short-circuits the deleting of a field
+		 *
+		 * The dynamic portion of the hook name, `$type`, refers to the object type
+		 * (post, comment, term, user, or any other type with associated weather data).
+		 * Returning a non-null value will effectively short-circuit the function.
+		 *
+		 * Possible filter names include:
+		 *
+		 *  - `delete_post_weatherdata`
+		 *  - `delete_comment_weatherdata`
+		 *  - `delete_term_weatherdata`
+		 *  - `delete_user_weatherdata`
+		 *
+		 * @param mixed  $value     The value to return, either a single value or an array
+		 *                          of values depending on the value of `$single`. Default null.
+		 * @param string $type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
+		 *                          or any other object type with an associated meta table.
+		 * @param int    $id ID of the object weatherdata data is for.
+		 * @param string $key  Geo data key.
+		 */
+		$check = apply_filters( "delete_{$type}_weatherdata", null, $type, $id, $key );
+
+		return delete_metadata( $type, $id, 'weather_' . $key );
+
+
+	/**
+	 * Get Weather Meta Data on an Object.
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id Object ID.

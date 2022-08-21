@@ -221,7 +221,7 @@ class Geo_Data {
 		 */
 		$check = apply_filters( "delete_{$type}_geodata", null, $type, $id, $key );
 
-		return delete_metadata( $type, $id, $key );
+		return delete_metadata( $type, $id, 'geo_' . $key );
 	}
 
 	/**
