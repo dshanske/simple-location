@@ -72,8 +72,6 @@ class Geo_Data {
 
 	/**
 	 * Retrieves default visibility option
-	 *
-	 *
 	 */
 	public static function get_default_visibility() {
 		$status = (int) get_option( 'geo_public' );
@@ -248,6 +246,11 @@ class Geo_Data {
 		if ( ! $id ) {
 			return false;
 		}
+
+		if ( 'map_zoom' === $key ) {
+			$key = 'zoom';
+		}
+
 		if ( ! empty( $key ) && ! in_array( $key, static::$properties, true ) ) {
 			return false;
 		}
@@ -306,6 +309,9 @@ class Geo_Data {
 		}
 
 		if ( empty( $key ) && ( is_array( $geodata ) ) ) {
+			if ( array_key_exists( 'map_zoom', $geodata ) ) {
+				$geodata['zoom'] = $geodata['map_zoom'];
+			}
 			$geodata = wp_array_slice_assoc( $geodata, static::$properties );
 		}
 
@@ -336,7 +342,7 @@ class Geo_Data {
 	public static function get_geopoint( $type, $id ) {
 		$latitude  = self::get_geodata( $type, $id, 'latitude' );
 		$longitude = self::get_geodata( $type, $id, 'longitude' );
-		$altitude = self::get_geodata( $type, $id, 'altitude' );
+		$altitude  = self::get_geodata( $type, $id, 'altitude' );
 
 		if ( ! $latitude || ! $longitude ) {
 			return false;
@@ -479,7 +485,6 @@ class Geo_Data {
 		if ( null !== $check ) {
 			return $check;
 		}
-
 
 		if ( 'visibility' === $key ) {
 			$visibility = get_metadata( $type, $id, 'geo_public', true );

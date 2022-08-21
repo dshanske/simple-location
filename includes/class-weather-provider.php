@@ -449,19 +449,19 @@ abstract class Weather_Provider extends Sloc_Provider {
 				'icon'  => 'wi-cloudy',
 
 			),
-			'windspeed'  => array(
+			'windspeed'   => array(
 				'unit'  => __( 'mps', 'simple-location' ),
 				'label' => __( 'meters per second', 'simple-location' ),
 				'name'  => __( 'Wind Speed', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'windgust'   => array(
+			'windgust'    => array(
 				'unit'  => __( 'mps', 'simple-location' ),
 				'label' => __( 'meters per second', 'simple-location' ),
 				'name'  => __( 'Wind Gust', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'winddegree' => array(
+			'winddegree'  => array(
 				'unit'  => __( '&deg;', 'simple-location' ),
 				'label' => __( 'degrees', 'simple-location' ),
 				'name'  => __( 'Wind Direction', 'simple-location' ),
@@ -590,19 +590,19 @@ abstract class Weather_Provider extends Sloc_Provider {
 				'name'  => __( 'Pressure', 'simple-location' ),
 				'icon'  => 'wi-barometer',
 			),
-			'windspeed'  => array(
+			'windspeed'   => array(
 				'unit'  => __( 'MPH', 'simple-location' ),
 				'label' => __( 'miles per hour', 'simple-location' ),
 				'name'  => __( 'Wind Speed', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'windgust'   => array(
+			'windgust'    => array(
 				'unit'  => __( 'MPH', 'simple-location' ),
 				'label' => __( 'miles per hour', 'simple-location' ),
 				'name'  => __( 'Wind Gust', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'winddegree' => array(
+			'winddegree'  => array(
 				'unit'  => __( '&deg;', 'simple-location' ),
 				'label' => __( 'degree', 'simple-location' ),
 				'name'  => __( 'Wind Direction', 'simple-location' ),
@@ -948,10 +948,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type float $windchill Wind Chill in Fahrenheit.
 	 *  @type float $dewpoint Dewpoint in Fahrenheit.
 	 *  @type float $pressure Atomospheric Pressure at mean sea level in inHg.
-	 *  @type array $wind {
-	 *      @type int $speed Speed in miles per hour
-	 *      @type int $gust Wind Gust in miles per hour.
-	 *  }
+	 *  @type array $windspeed Speed in miles per hour
+	 *  @type int $windgust Wind Gust in miles per hour.
 	 *  @type float $rain Rainfall in inches for the last hour.
 	 *  @type float $snow Snowfall in inches for the last hour.
 	 *  @type float $visibility Visibility in miles.
@@ -974,11 +972,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 			$conditions['visibility'] = self::meters_to_miles( $conditions['visibility'] );
 		}
 
-		if ( array_key_exists( 'wind', $conditions ) ) {
-			foreach ( array( 'speed', 'gust' ) as $speed ) {
-				if ( array_key_exists( $speed, $conditions['wind'] ) && is_numeric( $conditions['wind'][ $speed ] ) ) {
-					$conditions['wind'][ $speed ] = self::mps_to_miph( $conditions['wind'][ $speed ] );
-				}
+		foreach ( array( 'windspeed', 'windgust' ) as $speed ) {
+			if ( array_key_exists( $speed, $conditions ) && is_numeric( $conditions[ $speed ] ) ) {
+				$conditions[ $speed ] = self::mps_to_miph( $conditions[ $speed ] );
 			}
 		}
 
@@ -1014,11 +1010,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 			$conditions['visibility'] = self::miles_to_meters( $conditions['visibility'] );
 		}
 
-		if ( array_key_exists( 'wind', $conditions ) ) {
-			foreach ( array( 'speed', 'gust' ) as $speed ) {
-				if ( array_key_exists( $speed, $conditions['wind'] ) ) {
-					$conditions[ $speed ] = self::miph_to_mps( $conditions[ $speed ] );
-				}
+		foreach ( array( 'windspeed', 'windgust' ) as $speed ) {
+			if ( array_key_exists( $speed, $conditions ) ) {
+				$conditions[ $speed ] = self::miph_to_mps( $conditions[ $speed ] );
 			}
 		}
 

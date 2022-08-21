@@ -181,79 +181,80 @@ class Loc_Metabox {
 		}
 	}
 
-	public static function save_meta( $meta_type, $object_id ) {
+	public static function save_meta( $meta_type, $object_id, $convert = true ) {
 		// phpcs:disable
 		$units              = get_option( 'sloc_measurements' );
-		$lon_params = array( 'latitude', 'longitude', 'map_zoom', 'altitude', 'speed', 'heading' );
-		foreach ( $lon_params as $param ) {
-			if ( 'map_zoom' === $param ) {
-				$maparam = 'zoom';
-			} else {
-				$maparam = $param;
-			}
-			
-			if ( isset( $_POST[ $param ] ) && is_numeric( $_POST[ $param ] ) ) {
-				update_metadata( $meta_type, $object_id, 'geo_' . $maparam, floatval( $_POST[ $param ] ) );
-			} else {
-				delete_metadata( $meta_type, $object_id, 'geo_' . $maparam );
-			}
+		$params = array( 'latitude', 'longitude', 'map_zoom', 'altitude', 'speed', 'heading', 'address','location_icon', 'timezone', 'geo_public' );
+		$data = wp_array_slice_assoc( $_POST, $params );
+		$data = array_map( 'sanitize_text_field', $data );
+
+		if ( array_key_exists( 'map_zoom', $data ) ) {
+			$data['zoom'] = $data['map_zoom'];
+			unset( $data['map_zoom'] );
 		}
 
-		if ( isset( $_POST['address'] ) & ! empty( $_POST['address'] ) ) {
-			update_metadata( $meta_type, $object_id, 'geo_address', sanitize_text_field( $_POST[ 'address' ] ) );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_address' );
+		if ( array_key_exists( 'location_icon', $data ) && ! empty( $data['location_icon'] ) ) {
+			$data['icon'] = $data['location_icon'];
+			unset( $data['location_icon'] );
 		}
 
-		if ( isset( $_POST['location_icon'] ) & ! empty( $_POST['location_icon'] ) ) {
-			if ( Geo_Data::get_default_icon() === $_POST[ 'location_icon' ] ) {
-				delete_metadata( $meta_type, $object_id, 'geo_icon' );
-			} else {
-				update_metadata( $meta_type, $object_id, 'geo_icon', sanitize_text_field( $_POST[ 'location_icon' ] ) );
-			}
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_icon' );
-		}
-
-		if ( isset( $_POST['timezone'] ) ) {
-			$timezone = timezone_open( sanitize_text_field( $_POST['timezone'] ) );
+		if ( array_key_exists( 'timezone', $data ) ) {
+			$timezone = timezone_open( $data['timezone'] );
 			if ( $timezone && ( ! Loc_Timezone::compare_timezones( wp_timezone(), $timezone  ) ) ) {
-				update_metadata( $meta_type, $object_id, 'geo_timezone', $timezone->getName() );
+				$data['timezone'] = $timezone->getName();
 			} else {
-				delete_metadata( $meta_type, $object_id, 'geo_timezone' );
+				$data['timezone'] = '';
 			}
 		}
 
-		$weather    = array();
+		if ( ! empty( $weather['latitude'] ) || ! empty( $weather['longitude'] ) || ! empty( $weather['address'] ) ) {
+			$data['visibility'] = $data['geo_public'];
+		} else {
+			Geo_Data::delete_geodata( $meta_type, $object_id, 'visibility' );
+		}
+
+		unset( $data['geo_public'] );
+
+		foreach ( $data as $key => $value ) {
+			if ( ! empty( $value ) ) {
+				if ( is_numeric( $value ) ) {
+					$value = floatval( $value );
+				}
+				Geo_Data::set_geodata( $meta_type, $object_id, $key, $value );
+			} else {
+				Geo_Data::delete_geodata( $meta_type, $object_id, $key );
+			}
+		}
 
 		// Numeric Properties
-		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'cloudiness', 'rain', 'snow', 'weather_visibility', 'windspeed', 'winddegree', 'windgust' );
-		foreach ( $wtr_params as $param ) {
-			if ( ! empty( $_POST[ $param ] ) && 'none' !== $_POST[ $param ] && is_numeric( $_POST[ $param ] ) ) {
-				$weather[ str_replace( 'weather_', '', $param ) ] = floatval( $_POST[ $param ] );
-			}
+		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'cloudiness', 'rain', 'snow', 'windspeed', 'winddegree', 'windgust' );
+		$weather = wp_array_slice_assoc( $_POST, $wtr_params );
+
+		if ( array_key_exists( 'weather_visibility', $_POST ) ) {
+			$weather['visibility'] = $_POST['weather_visibility'];
 		}
 
-		// Textual Properties
-		$wtr_params = array( 'weather_summary', 'weather_icon' );
-		foreach ( $wtr_params as $param ) {
-			if ( ! empty( $_POST[ $param ] ) && 'none' !== $_POST[ $param ] ) {
-				$weather[ str_replace( 'weather_', '', $param ) ] = sanitize_text_field( $_POST[ $param ] );
+		foreach( $weather as $key => $value ) {
+			if ( ! is_numeric( $value ) ) {
+				unset( $weather[ $key ] );
 			}
 		}
+		$weather = array_map( 'floatval', $weather );
 
+		if ( array_key_exists( 'weather_summary', $_POST ) ) {
+			$weather['summary'] = sanitize_text_field( $_POST['weather_summary'] );
+		}
 
+		if ( array_key_exists( 'weather_icon', $_POST ) ) {
+			$weather['icon'] = sanitize_text_field( $_POST['weather_icon'] );
+		}
 
-		if ( 'imperial' === $units ) {
+		if ( 'imperial' === $units && $convert ) {
 			$weather = Weather_Provider::imperial_to_metric( $weather );
 		}
+
 		if ( ! empty( $weather ) ) {
-			Sloc_Weather_Data::set_object_weather_data( $meta_type, $object_id, $weather, true );
-		}
-		if ( ! empty( $_POST['latitude'] ) || ! empty( $_POST['longitude'] ) || ! empty( $_POST['address'] ) ) {
-			set_geo_visibility( $meta_type, $object_id, sanitize_text_field( $_POST['geo_public'] ) );
-		} else {
-			delete_metadata( $meta_type, $object_id, 'geo_public' );
+			Sloc_Weather_Data::set_object_weatherdata( $meta_type, $object_id, '', $weather );
 		}
 		// phpcs:enable
 	}
