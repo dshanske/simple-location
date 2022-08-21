@@ -257,6 +257,7 @@ class Sloc_Weather_Data {
 		$check = apply_filters( "delete_{$type}_weatherdata", null, $type, $id, $key );
 
 		return delete_metadata( $type, $id, 'weather_' . $key );
+	}
 
 
 	/**
