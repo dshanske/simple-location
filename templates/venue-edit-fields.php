@@ -21,7 +21,7 @@ $geodata = get_term_geodata( intval( $_REQUEST['tag_ID'] ) );
 	</tr>
 
 	<tr>
-		<th><label for="street-address"><?php esc_html_e( 'Address', 'simple-location' ); ?></label></th>
+		<th><label for="street-address"><?php esc_html_e( 'Street Address', 'simple-location' ); ?></label></th>
 		<td><input type="text" name="street-address" id="street-address" value="" size="50" /></td>
 	</tr>
 
@@ -36,8 +36,8 @@ $geodata = get_term_geodata( intval( $_REQUEST['tag_ID'] ) );
 	</tr>
 
 	<tr>
-		<th><label for="country-code"><?php esc_html_e( 'Country Code', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="country-code" id="country-code" value="" size="2" /></td>
+		<th><label for="country"><?php esc_html_e( 'Country', 'simple-location' ); ?></label></th>
+		<td><?php Venue_Taxonomy::country_select( 'US' ); ?></td>
 	</tr>                                             
 
 	<tr>

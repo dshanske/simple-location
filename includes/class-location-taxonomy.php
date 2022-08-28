@@ -13,6 +13,7 @@ add_action( 'init', array( 'Location_Taxonomy', 'init' ) );
  * Class that handles the Location taxonomy functions.
  */
 final class Location_Taxonomy {
+	use Geolocation_Trait;
 
 	public static function init() {
 		self::register();
@@ -89,42 +90,6 @@ final class Location_Taxonomy {
 
 	public static function pre_add_form() {
 		printf( '<p>%1$s</p>', esc_html__( 'Locations allow for 3 levels of hierarchy: Country, region, and locality. Countries have no parent. Regions have a country as a parent. Localities have regions are their parent.', 'simple-location' ) );
-	}
-
-	public static function country_select( $country ) {
-		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
-		$codes = json_decode( file_get_contents( $file ), true );
-		$codes = $codes['3166-1'];
-
-		echo '<select name="country" id="country">';
-		foreach ( $codes as $code ) {
-			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $code['alpha_2'] ), selected( $country, $code['alpha_2'], false ), esc_html( $code['flag'] . ' ' . $code['name'] ) );
-		}
-		echo '</select>';
-	}
-
-	public static function region_select( $region, $country ) {
-		$country = strtoupper( trim( $country ) );
-		if ( 2 !== strlen( $country ) ) {
-			return false;
-		}
-		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-2/' . $country . '.json';
-		if ( ! file_exists( $file ) ) {
-			return false;
-		}
-
-		$codes = json_decode( file_get_contents( $file ), true );
-		$codes = wp_list_pluck( $codes, 'name', 'code' );
-		if ( ! array_key_exists( $country . '-' . $region, $codes ) && ! empty( $region ) ) {
-			printf( '<input class="widefat" type=text" name="region" value="%s" required />', esc_attr( $region ) );
-			return;
-		}
-		echo '<select name="region" id="region">';
-		foreach ( $codes as $code => $name ) {
-			$code = str_replace( $country . '-', '', $code );
-			printf( '<option value="%1$s" %2$s>%3$s(%1$s)</option>', esc_attr( $code ), selected( $region, $code, false ), esc_html( $name ) );
-		}
-		echo '</select>';
 	}
 
 	public static function create_screen_fields( $taxonomy ) {

@@ -196,13 +196,13 @@ class Simple_Location_Plugin {
 			'class-geo-base.php', // Register Geo Base Functions that Modify Core Functionality
 			'class-geo-data.php', // Register Geo Metadata Functions.
 			'class-weather-data.php', // Register Weather Metadata Functions.
+			'trait-geolocation-trait.php', // Geolocation Trait.
 			'data-functions.php', // Global Data Functions to retrieve and store data.
 			'class-sloc-media-metadata.php', // Media Metadata Functions.
 			'class-venue-taxonomy.php', // Venue Taxonomy.
 			'class-location-taxonomy.php', // Venue Taxonomy.
 			'class-sloc-provider.php', // Base Provider Class.
 			'class-map-provider.php', // Map Provider Class.
-			'trait-geolocation-trait.php', // Geolocation Trait.
 			'class-geo-provider.php', // Geo Provider Class.
 			'class-elevation-provider.php', // Elevation Provider Class.
 			'class-venue-provider.php', // Venue Provider Class.

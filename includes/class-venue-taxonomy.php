@@ -12,6 +12,7 @@ add_action( 'init', array( 'Venue_Taxonomy', 'init' ) );
 add_action( 'init', array( 'Venue_Taxonomy', 'register' ), 1 );
 
 class Venue_Taxonomy {
+	use Geolocation_Trait;
 	public static function init() {
 		// Add the Correct Archive Title to Venue Archives.
 		add_filter( 'get_the_archive_title', array( 'Venue_Taxonomy', 'archive_title' ), 10, 3 );
