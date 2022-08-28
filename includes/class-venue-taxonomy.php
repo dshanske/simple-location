@@ -92,6 +92,7 @@ class Venue_Taxonomy {
 	}
 
 	public static function create_screen_fields( $taxonomy ) {
+		wp_nonce_field( 'create', 'venue_taxonomy_meta' );
 		?>
 	<div class="form-field">
 		<label for="latitude"><?php esc_html_e( 'Latitude:', 'simple-location' ); ?></label>
@@ -105,42 +106,30 @@ class Venue_Taxonomy {
 	}
 
 	public static function edit_screen_fields( $term, $taxonomy ) {
-		?>
-	<tr class="form-field">
-		<tr>
-		<th><label for="latitude"><?php esc_html_e( 'Latitude:', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="latitude" id="latitude" value="" size="10" /></td></tr>   
-		<tr>									
-		<th><label for="longitude"><?php esc_html_e( 'Longitude:', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="longitude" id="longitude" value="" size="10" />  </td>
-		</tr>
-
-		<tr><td><button type="button" class="button lookup-address-button"><?php esc_html_e( 'Get Location', 'simple-location' ); ?></button></td></tr>
-
-		<tr><th><label for="street-address"><?php esc_html_e( 'Address', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="street-address" id="street-address" value="" size="50" /></td></tr>
-
-		<tr><th><label for="locality"><?php esc_html_e( 'City/Town/Village', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="locality" id="locality" value="<?php echo esc_attr( ifset( $address['locality'], '' ) ); ?>" size="30" /></td></tr>    
-
-		<tr><th><label for="region"><?php esc_html_e( 'State/County/Province', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="region" id="region" value="" size="30" /> </td></tr>
-
-		<tr><th><label for="country-code"><?php esc_html_e( 'Country Code', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="country-code" id="country-code" value="" size="2" /></td></tr>                                             
-
-		<tr><th><label for="extended-address"><?php esc_html_e( 'Neighborhood/Suburb', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="extended-address" id="extended-address" value="" size="30" /></td></tr>                                                                                              
-		<tr><th><label for="postal-code"><?php esc_html_e( 'Postal Code', 'simple-location' ); ?></label></th>                                   
-		<td><input type="text" name="postal-code" id="postal-code" value="" size="10" /></td></tr>                                              
-
-		<tr><th><label for="country-name"><?php esc_html_e( 'Country Name', 'simple-location' ); ?></label></th>
-		<td><input type="text" name="country-name" id="country-name" value="" size="30" /></td></tr>
-	</tr>
-		<?php
+		wp_nonce_field( 'edit', 'venue_taxonomy_meta' );
+		load_template( plugin_dir_path( __DIR__ ) . 'templates/venue-edit-fields.php' );
 	}
 
 	public static function save_data( $term_id ) {
-		Loc_Metabox::save_meta( 'term', $term_id );
+		// This option only exists when using one of the two forms.
+		if ( ! array_key_exists( 'venue_taxonomy_meta', $_POST ) ) {
+			return;
+		}
+		$nonce = sanitize_text_field( $_POST['venue_taxonomy_meta'] );
+		if ( ! wp_verify_nonce( $nonce, 'edit' ) && ! wp_verify_nonce( $nonce, 'create' ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'edit_term', $term_id ) ) {
+			return;
+		}
+
+		// phpcs:disable
+		$term = get_term( $term_id );
+
+		if ( 'venue' !== $term->taxonomy ) {
+			return;
+		}
+		Loc_Metabox::save_meta( 'term', $term->term_id );
 	}
 }

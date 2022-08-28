@@ -305,7 +305,7 @@ class Geo_Data {
 		}
 
 		if ( $key ) {
-			return update_metadata( $type, $id, 'geo_' . $key, $geodata, true );
+			return update_metadata( $type, $id, 'geo_' . $key, $geodata );
 		}
 
 		if ( empty( $key ) && ( is_array( $geodata ) ) ) {
@@ -531,12 +531,26 @@ class Geo_Data {
 		return array_filter( $geodata );
 	}
 
+	private static function register_terms_meta( $taxonomies, $meta_key, $args ) {
+		if ( empty( $taxonomies ) ) {
+			register_term_meta( '', $meta_key, $args );
+		}
+
+		if ( is_string( $taxonomies ) ) {
+			$taxonomy = array( $taxonomies );
+		}
+		foreach( $taxonomies as $taxonomy ) {
+			register_term_meta( $taxonomy, $meta_key, $args );
+		}
+	}
+
 	/**
 	 * Registers Geo Metadata.
 	 *
 	 * @since 1.0.0
 	 */
 	public static function register_meta() {
+		$taxonomies = apply_filters( 'sloc_geo_taxonomies', array( 'venue' ) );
 		$args = array(
 			'sanitize_callback' => 'clean_coordinate',
 			'type'              => 'number',
@@ -547,7 +561,7 @@ class Geo_Data {
 		register_meta( 'post', 'geo_latitude', $args );
 		register_meta( 'comment', 'geo_latitude', $args );
 		register_meta( 'user', 'geo_latitude', $args );
-		register_meta( 'term', 'geo_latitude', $args );
+		self::register_terms_meta( $taxonomies, 'geo_latitude', $args );
 
 		$args = array(
 			'sanitize_callback' => 'clean_coordinate',
@@ -559,7 +573,7 @@ class Geo_Data {
 		register_meta( 'post', 'geo_longitude', $args );
 		register_meta( 'comment', 'geo_longitude', $args );
 		register_meta( 'user', 'geo_longitude', $args );
-		register_meta( 'term', 'geo_longitude', $args );
+		self::register_terms_meta( $taxonomies, 'geo_longitude', $args );
 
 		$args = array(
 			'type'         => 'string',
@@ -570,7 +584,7 @@ class Geo_Data {
 		register_meta( 'post', 'geo_timezone', $args );
 		register_meta( 'comment', 'geo_timezone', $args );
 		register_meta( 'user', 'geo_timezone', $args );
-		register_meta( 'term', 'geo_timezone', $args );
+		self::register_terms_meta( $taxonomies, 'geo_timezone', $args );
 
 		$args = array(
 			'sanitize_callback' => array( __CLASS__, 'sanitize_address' ),
@@ -582,7 +596,7 @@ class Geo_Data {
 		register_meta( 'post', 'geo_address', $args );
 		register_meta( 'comment', 'geo_address', $args );
 		register_meta( 'user', 'geo_address', $args );
-		register_meta( 'term', 'geo_address', $args );
+		self::register_terms_meta( $taxonomies, 'geo_address', $args );
 
 		$args = array(
 			'sanitize_callback' => array( __CLASS__, 'sanitize_address' ),
@@ -594,7 +608,7 @@ class Geo_Data {
 		register_meta( 'post', 'geo_public', $args );
 		register_meta( 'comment', 'geo_public', $args );
 		register_meta( 'user', 'geo_public', $args );
-		register_meta( 'term', 'geo_public', $args );
+		self::register_terms_meta( $taxonomies, 'geo_public', $args );
 
 		$args = array(
 			'sanitize_callback' => array( __CLASS__, 'esc_attr' ),
@@ -606,7 +620,7 @@ class Geo_Data {
 		register_meta( 'post', 'geo_icon', $args );
 		register_meta( 'comment', 'geo_icon', $args );
 		register_meta( 'user', 'geo_icon', $args );
-		register_meta( 'term', 'geo_icon', $args );
+		self::register_terms_meta( $taxonomies, 'geo_icon', $args );
 
 		// Numeric Geo Properties
 		$numerics = array(
@@ -625,9 +639,10 @@ class Geo_Data {
 				'single'       => true,
 				'show_in_rest' => false,
 			);
-			foreach ( array( 'post', 'comment', 'user', 'term' ) as $type ) {
+			foreach ( array( 'post', 'comment', 'user', ) as $type ) {
 				register_meta( $type, 'geo_' . $prop, $args );
 			}
+			self::register_terms_meta( $taxonomies, 'geo_' . $prop, $args );
 		}
 	}
 
