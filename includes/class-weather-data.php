@@ -56,6 +56,20 @@ class Sloc_Weather_Data {
 	 */
 	public static function init() {
 		self::register_meta();
+		add_action( 'simple_location_sidebox', array( __CLASS__, 'post_submitbox' ), 12 );
+	}
+
+	public static function post_submitbox( $screen ) {
+		// Check to see whether or not there is a configured provider. If there is not, hide the option.
+		$weather = Loc_Config::weather_provider();
+		if ( ! $weather ) {
+			return;
+		}
+		
+		if ( in_array( $screen, array( 'comment', 'nav-menu' ), true ) ) {
+			return;
+		}
+		load_template( plugin_dir_path( __DIR__ ) . 'templates/weather-side-metabox.php' );
 	}
 
 	/**
