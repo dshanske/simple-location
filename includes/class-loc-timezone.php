@@ -4,19 +4,18 @@ add_action( 'init', array( 'Loc_Timezone', 'init' ) );
 
 class Loc_Timezone {
 	public static function init() {
-		$cls = get_called_class();
-		add_filter( 'get_the_date', array( $cls, 'get_the_date' ), 9, 3 );
-		add_filter( 'get_the_time', array( $cls, 'get_the_time' ), 9, 3 );
-		add_filter( 'get_the_modified_date', array( $cls, 'get_the_modified_date' ), 9, 3 );
-		add_filter( 'get_the_modified_time', array( $cls, 'get_the_modified_time' ), 9, 3 );
-		add_filter( 'get_comment_date', array( $cls, 'get_comment_date' ), 9, 3 );
-		add_filter( 'get_comment_time', array( $cls, 'get_comment_time' ), 9, 5 );
-		add_filter( 'post_date_column_time', array( $cls, 'post_date_column_time' ), 9, 4 );
-		add_action( 'simple_location_sidebox', array( $cls, 'post_submitbox' ) );
-		add_action( 'save_post', array( $cls, 'postbox_save_post_meta' ) );
-		add_action( 'after_micropub', array( $cls, 'after_micropub' ), 10, 2 );
-		add_filter( 'rest_prepare_post', array( $cls, 'rest_prepare_post' ), 10, 3 );
-		add_filter( 'rest_prepare_comment', array( $cls, 'rest_prepare_comment' ), 10, 3 );
+		add_filter( 'get_the_date', array( __CLASS__, 'get_the_date' ), 9, 3 );
+		add_filter( 'get_the_time', array( __CLASS__, 'get_the_time' ), 9, 3 );
+		add_filter( 'get_the_modified_date', array( __CLASS__, 'get_the_modified_date' ), 9, 3 );
+		add_filter( 'get_the_modified_time', array( __CLASS__, 'get_the_modified_time' ), 9, 3 );
+		add_filter( 'get_comment_date', array( __CLASS__, 'get_comment_date' ), 9, 3 );
+		add_filter( 'get_comment_time', array( __CLASS__, 'get_comment_time' ), 9, 5 );
+		add_filter( 'post_date_column_time', array( __CLASS__, 'post_date_column_time' ), 9, 4 );
+		add_action( 'simple_location_sidebox', array( __CLASS__, 'submitbox' ), 10, 3 );
+		add_action( 'save_post', array( __CLASS__, 'postbox_save_post_meta' ) );
+		add_action( 'after_micropub', array( __CLASS__, 'after_micropub' ), 10, 2 );
+		add_filter( 'rest_prepare_post', array( __CLASS__, 'rest_prepare_post' ), 10, 3 );
+		add_filter( 'rest_prepare_comment', array( __CLASS__, 'rest_prepare_comment' ), 10, 3 );
 	}
 
 	/**
@@ -293,54 +292,8 @@ class Loc_Timezone {
 	}
 
 
-	public static function post_submitbox( $screen ) {
-		if ( in_array( $screen, array( 'comment', 'nav-menu' ), true ) ) {
-			return;
-		}
-		global $post;
-		wp_nonce_field( 'timezone_override_metabox', 'timezone_override_nonce' );
-		$timezone = get_post_meta( $post->ID, 'geo_timezone', true );
-		if ( ! $timezone ) {
-			$timezone = get_post_meta( $post->ID, '_timezone', true );
-			if ( $timezone ) {
-				update_post_meta( $post->ID, 'geo_timezone', true );
-				delete_post_meta( $post->ID, '_timezone' );
-			}
-			if ( ! $timezone ) {
-				$user     = wp_get_current_user();
-				$timezone = get_user_meta( $user->ID, 'geo_timezone', true );
-				if ( ! $timezone ) {
-					$timezone = wp_timezone_string();
-				}
-			}
-		}
-		?>
-		<div class="location-section location-section-timezone">
-			<span class="dashicons-before dashicons-clock" id="timezone-browser" title="<?php esc_html_e( 'Set Local Timezone', 'simple-location' ); ?>"> <?php esc_html_e( 'Timezone:', 'simple-location' ); ?></span>
-				<span id="post-timezone-label">
-				<?php
-				if ( $timezone ) {
-					echo esc_html( $timezone ); }
-				?>
-			</span>
-			<a href="#post_timezone" class="edit-post-timezone hide-if-no-js" role="button"><span aria-hidden="true">Edit</span> <span class="screen-reader-text">Override Timezone</span></a>
-
-			<div id="post-timezone-select" class="hide-if-js">
-				<input type="hidden" name="hidden_post_timezone" id="hidden_post_timezone" value="<?php echo esc_html( $timezone ); ?>" />
-				<input type="hidden" name="timezone_default" id="timezone_default" value="<?php echo esc_attr( wp_timezone_string() ); ?>" />
-				<select name="post_timezone" id="post-timezone" width="90%">
-				<?php
-					echo self::wp_timezone_choice( $timezone ); // phpcs:ignore
-					echo '</select>';
-				?>
-
-				<p>
-					<a href="#post_timezone" class="save-post-timezone hide-if-no-js button">OK</a>
-					<a href="#post_timezone" class="cancel-post-timezone hide-if-no-js button-cancel">Cancel</a>
-				</p>
-			</div><!-- #post-timezone-select -->
-		</div><!-- .location-section -->
-		<?php
+	public static function submitbox( $screen, $object, $args ) {
+		load_template( plugin_dir_path( __DIR__ ) . 'templates/timezone-metabox.php' );
 	}
 
 	/* Save the post timezone metadata. */

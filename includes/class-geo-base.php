@@ -1,13 +1,12 @@
 <?php
 /**
- * Geographical Metadata
+ * Location Data
  *
- * Sets up basic support for geo and weather.
- *
- * @package Simple Location
+ * Sets up basic support for location.
  */
 
 add_action( 'init', array( 'Geo_Base', 'init' ), 1 );
+add_action( 'admin_init', array( 'Geo_Base', 'admin_init' ) );
 
 // Jetpack added Location support in 2017 remove it due conflict https://github.com/Automattic/jetpack/pull/9573 which created conflict.
 add_filter( 'jetpack_tools_to_include', array( 'Geo_Base', 'jetpack_remove' ), 11 );
@@ -67,6 +66,155 @@ class Geo_Base {
 
 		add_filter( 'map_meta_cap', array( __CLASS__, 'map_meta_cap' ), 1, 4 );
 
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue' ) );
+		add_action( 'save_post', array( __CLASS__, 'save_post_meta' ) );
+		add_action( 'save_post', array( __CLASS__, 'last_seen' ), 20, 2 );
+		add_action( 'edit_attachment', array( __CLASS__, 'save_post_meta' ) );
+		add_action( 'edit_comment', array( __CLASS__, 'save_comment_meta' ) );
+		add_action( 'show_user_profile', array( __CLASS__, 'user_profile' ), 12 );
+		add_action( 'edit_user_profile', array( __CLASS__, 'user_profile' ), 12 );
+		add_action( 'personal_options_update', array( __CLASS__, 'save_user_meta' ), 12 );
+		add_action( 'edit_user_profile_update', array( __CLASS__, 'save_user_meta' ), 12 );
+
+	}
+
+	public static function admin_init() {
+		/* Add meta boxes on the 'add_meta_boxes' hook. */
+		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
+	}
+
+	public static function screens() {
+		$screens = array( 'post', 'attachment', 'venue' );
+		return apply_filters( 'sloc_post_types', $screens );
+	}
+
+	/* Create location meta boxes to be displayed on the post editor screen. */
+	public static function add_meta_boxes() {
+		add_meta_box(
+			'locationsidebox',
+			esc_html__( 'Location', 'simple-location' ),
+			array( __CLASS__, 'metabox' ),
+			self::screens(), // post types
+			'side',
+			'default',
+			array(
+				'__block_editor_compatible_meta_box' => true,
+				'__back_compat_meta_box'             => false,
+			)
+		);
+		add_meta_box(
+			'locationsidebox',
+			esc_html__( 'Location', 'simple-location' ),
+			array( __CLASS__, 'metabox' ),
+			'comment',
+			'normal',
+			'default'
+		);
+	}
+
+	public static function metabox( $object, $args ) {
+		if ( self::current_user_can_edit( $object ) ) {
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-metabox.php' );
+			do_action( 'simple_location_sidebox', get_current_screen(), $object, $args );
+		}
+	}
+
+	public static function user_profile( $user ) {
+		if ( current_user_can( 'edit_users_location', $user->ID ) ) {
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-user-metabox.php' );
+		}
+	}
+
+	public static function profile_text_field( $user, $key, $title, $description ) {
+		?>
+	<tr>
+		<th><label for="<?php echo esc_html( $key ); ?>"><?php echo esc_html( $title ); ?></label></th>
+		<td>
+			<input type="text" name="<?php echo esc_html( $key ); ?>" id="<?php echo esc_html( $key ); ?>" value="<?php echo esc_attr( get_the_author_meta( 'geo_' . $key, $user->ID ) ); ?>" class="regular-text" /><br />
+			<span class="description"><?php echo esc_html( $description ); ?></span>
+		</td>
+	</tr>
+		<?php
+	}
+
+
+	public static function last_seen( $post_id, $post ) {
+		if ( 0 === (int) get_option( 'sloc_last_report' ) ) {
+			return;
+		}
+		if ( 'publish' !== $post->post_status ) {
+			return;
+		}
+		if ( $post->post_date !== $post->post_modified ) {
+			return;
+		}
+
+		$timestamp = get_post_timestamp( $post );
+
+		// Do not update the last seen notation if the post is more than 10 minutes old.
+		if ( abs( time() - $timestamp ) > 600 ) {
+			return;
+		}
+
+		$geodata = get_post_geodata( $post->ID );
+		if ( ! is_array( $geodata ) ) {
+			return;
+		}
+		$author = new WP_User( $post->post_author );
+		if ( 'private' !== $geodata['visibility'] ) {
+			set_post_geodata( $author, $geodata );
+		}
+	}
+
+	public static function geo_public_user( $public ) {
+		?>
+		<tr>
+		<th><label for="geo_public"><?php esc_html_e( 'Show:', 'simple-location' ); ?></label></th>
+		<td><select id="location-visibility" name="geo_public">
+		<?php self::geo_public_select( $public, true ); ?>
+		</select></td>
+		</tr>
+		<?php
+	}
+
+	public static function enqueue( $hook_suffix ) {
+		$screens   = self::screens();
+		$screens[] = 'comment';
+		$hooks     = array( 'profile.php' );
+
+		if ( in_array( get_current_screen()->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
+			wp_enqueue_style(
+				'sloc_admin',
+				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),
+				array(),
+				Simple_Location_Plugin::$version
+			);
+			wp_enqueue_script(
+				'sloc_location',
+				plugins_url( 'js/location.js', dirname( __FILE__ ) ),
+				array( 'jquery' ),
+				Simple_Location_Plugin::$version,
+				true
+			);
+			wp_enqueue_script(
+				'moment-timezone',
+				plugins_url( 'js/luxon.min.js', dirname( __FILE__ ) ),
+				array(),
+				Simple_Location_Plugin::$version,
+				true
+			);
+			wp_localize_script(
+				'sloc_location',
+				'slocOptions',
+				array(
+					'lookup'             => get_option( 'sloc_geolocation_provider' ),
+					'units'              => get_option( 'sloc_measurements' ),
+					'visibility_options' => self::geo_public(),
+					'api_nonce'          => wp_create_nonce( 'wp_rest' ),
+					'api_url'            => rest_url( '/sloc_geo/1.0/' ),
+				)
+			);
+		}
 	}
 
 	/**
@@ -175,7 +323,7 @@ class Geo_Base {
 	 * @since 1.0.0
 	 */
 	public static function add_location_admin_column( $columns ) {
-		if ( array_key_exists( 'post_type', $_GET ) && ! in_array( $_GET['post_type'], Loc_Metabox::screens() ) ) {
+		if ( array_key_exists( 'post_type', $_GET ) && ! in_array( $_GET['post_type'], self::screens() ) ) {
 			return $columns;
 		}
 		$columns['location'] = __( 'Location', 'simple-location' );
@@ -567,7 +715,7 @@ class Geo_Base {
 	 */
 	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
 		$id      = sloc_get_id_from_object( $object );
-		$geodata = get_geodata( $id, $object_type );
+		$geodata = Geo_Data::get_geodata( $object_type, $id );
 		if ( ! is_array( $geodata ) ) {
 			return '';
 		}
@@ -593,7 +741,7 @@ class Geo_Base {
 	 */
 	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
 		$id      = sloc_get_id_from_object( $object );
-		$geodata = get_geodata( $id, $object_type );
+		$geodata = Geo_Data::get_geodata( $object_type, $id );
 
 		if ( ! is_array( $geodata ) ) {
 			return '';
@@ -620,8 +768,8 @@ class Geo_Base {
 	 * @since 1.0.0
 	 */
 	public static function rest_get_address( $object, $attr, $request, $object_type ) {
-		$object  = sloc_get_object_from_id( $object, $object_type );
-		$geodata = get_geodata( $object );
+		$id      = sloc_get_id_from_object( $object, $object_type );
+		$geodata = Geo_Data::get_geodata( $object_type, $id );
 
 		if ( ! is_array( $geodata ) ) {
 			return '';
@@ -648,8 +796,8 @@ class Geo_Base {
 	 * @since 1.0.0
 	 */
 	public static function rest_get_timezone( $object, $attr, $request, $object_type ) {
-		$object  = sloc_get_object_from_id( $object, $object_type );
-		$geodata = get_geodata( $object );
+		$id      = sloc_get_id_from_object( $object, $object_type );
+		$geodata = Geo_Data::get_geodata( $object_type, $id );
 
 		if ( ! is_array( $geodata ) ) {
 			return '';
@@ -842,4 +990,152 @@ class Geo_Base {
 		}
 		return false;
 	}
+
+	public static function save_meta( $meta_type, $object_id, $convert = true ) {
+		// phpcs:disable
+		$units              = get_option( 'sloc_measurements' );
+		$params = array( 'latitude', 'longitude', 'map_zoom', 'altitude', 'speed', 'heading', 'address','location_icon', 'timezone', 'geo_public' );
+		$data = wp_array_slice_assoc( $_POST, $params );
+		$data = array_map( 'sanitize_text_field', $data );
+
+		if ( array_key_exists( 'map_zoom', $data ) ) {
+			$data['zoom'] = $data['map_zoom'];
+			unset( $data['map_zoom'] );
+		}
+
+		if ( array_key_exists( 'location_icon', $data ) && ! empty( $data['location_icon'] ) ) {
+			$data['icon'] = $data['location_icon'];
+			unset( $data['location_icon'] );
+		}
+
+		if ( array_key_exists( 'timezone', $data ) ) {
+			$timezone = timezone_open( $data['timezone'] );
+			if ( $timezone && ( ! Loc_Timezone::compare_timezones( wp_timezone(), $timezone  ) ) ) {
+				$data['timezone'] = $timezone->getName();
+			} else {
+				$data['timezone'] = '';
+			}
+		}
+
+		if ( ! empty( $weather['latitude'] ) || ! empty( $weather['longitude'] ) || ! empty( $weather['address'] ) ) {
+			$data['visibility'] = $data['geo_public'];
+		} else {
+			Geo_Data::delete_geodata( $meta_type, $object_id, 'visibility' );
+		}
+
+		unset( $data['geo_public'] );
+
+		foreach ( $data as $key => $value ) {
+			if ( ! empty( $value ) ) {
+				if ( is_numeric( $value ) ) {
+					$value = floatval( $value );
+				}
+				Geo_Data::set_geodata( $meta_type, $object_id, $key, $value );
+			} else {
+				Geo_Data::delete_geodata( $meta_type, $object_id, $key );
+			}
+		}
+
+		// Numeric Properties
+		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'cloudiness', 'rain', 'snow', 'windspeed', 'winddegree', 'windgust' );
+		$weather = wp_array_slice_assoc( $_POST, $wtr_params );
+
+		if ( array_key_exists( 'weather_visibility', $_POST ) ) {
+			$weather['visibility'] = $_POST['weather_visibility'];
+		}
+
+		foreach( $weather as $key => $value ) {
+			if ( ! is_numeric( $value ) ) {
+				unset( $weather[ $key ] );
+			}
+		}
+		$weather = array_map( 'floatval', $weather );
+
+		if ( array_key_exists( 'weather_summary', $_POST ) ) {
+			$weather['summary'] = sanitize_text_field( $_POST['weather_summary'] );
+		}
+
+		if ( array_key_exists( 'weather_icon', $_POST ) ) {
+			$weather['icon'] = sanitize_text_field( $_POST['weather_icon'] );
+		}
+
+		if ( 'imperial' === $units && $convert ) {
+			$weather = Weather_Provider::imperial_to_metric( $weather );
+		}
+
+		if ( ! empty( $weather ) ) {
+			Sloc_Weather_Data::set_object_weatherdata( $meta_type, $object_id, '', $weather );
+		}
+		// phpcs:enable
+	}
+
+	/* Save the meta box's post metadata. */
+	public static function save_post_meta( $post_id ) {
+		/*
+		 * We need to verify this came from our screen and with proper authorization,
+		 * because the save_post action can be triggered at other times.
+		 */
+		if ( ! isset( $_POST['location_metabox_nonce'] ) ) {
+			return;
+		}
+
+		// Verify that the nonce is valid.
+		if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
+			return;
+		}
+		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+		// Check the user's permissions.
+		if ( isset( $_POST['post_type'] ) && 'page' === $_POST['post_type'] ) {
+			if ( ! current_user_can( 'edit_page', $post_id ) ) {
+				return;
+			}
+		} else {
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				return;
+			}
+		}
+		if ( has_term( '', 'venue' ) ) {
+			return;
+		}
+		self::save_meta( 'post', $post_id );
+	}
+
+
+	/* Save the meta box's comment metadata. */
+	public static function save_comment_meta( $comment_id ) {
+		/*
+		 * We need to verify this came from our screen and with proper authorization,
+		 * because the save_post action can be triggered at other times.
+		 */
+		if ( ! isset( $_POST['location_metabox_nonce'] ) ) {
+			return;
+		}
+		// Verify that the nonce is valid.
+		if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
+			return;
+		}
+		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+		// Check the user's permissions.
+		if ( ! current_user_can( 'edit_comment', $comment_id ) ) {
+			return;
+		}
+		self::save_meta( 'comment', $comment_id );
+	}
+
+
+	/* Save the user metadata. */
+	public static function save_user_meta( $user_id ) {
+		// Check the user's permissions.
+		if ( ! current_user_can( 'edit_user', $user_id ) ) {
+			return;
+		}
+		self::save_meta( 'user', $user_id );
+	}
+
 }
