@@ -41,7 +41,7 @@ class WeatherDataTest extends WP_UnitTestCase {
 	public function test_save_meta_from_POST() {
 		$_POST = static::$weather;
 		$post_id = $this->factory()->post->create();
-		Loc_Metabox::save_meta( 'post', $post_id, false );
+		Geo_Base::save_meta( 'post', $post_id, false );
 		Assert::assertArraySubset( static::$weather, get_post_weatherdata( $post_id ), );		
 	}
 

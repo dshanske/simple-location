@@ -1017,7 +1017,7 @@ class Geo_Base {
 		}
 
 		if ( ! empty( $data['latitude'] ) || ! empty( $data['longitude'] ) || ! empty( $data['address'] ) ) {
-			$data['visibility'] = $data['geo_public'];
+			$data['visibility'] = ifset( $data['geo_public'] );
 		} else {
 			Geo_Data::delete_geodata( $meta_type, $object_id, 'visibility' );
 		}

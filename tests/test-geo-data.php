@@ -60,7 +60,7 @@ class GeoDataTest extends WP_UnitTestCase {
 	public function test_save_meta_from_POST() {
 		$_POST = static::$geo;
 		$post_id = $this->factory()->post->create();
-		Loc_Metabox::save_meta( 'post', $post_id );
+		Geo_Base::save_meta( 'post', $post_id );
 		Assert::assertArraySubset( static::$geo, get_post_geodata( $post_id ), );		
 	}
 
