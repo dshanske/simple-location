@@ -33,6 +33,7 @@ final class Location_Taxonomy {
 
 	public static function admin_menu() {
 		remove_meta_box( 'locationdiv', 'post', 'side' );
+		remove_meta_box( 'locationdiv', 'venue', 'side' );
 	}
 
 	public static function taxonomy_parent_dropdown_args( $dropdown_args, $taxonomy, $context ) {
@@ -225,7 +226,7 @@ final class Location_Taxonomy {
 			),
 			'query_var'          => true,
 		);
-		register_taxonomy( 'location', array( 'post' ), $args );
+		register_taxonomy( 'location', get_post_types_by_support( 'geo-location' ), $args );
 
 		register_meta(
 			'term',

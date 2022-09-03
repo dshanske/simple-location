@@ -57,6 +57,10 @@ class Sloc_Weather_Data {
 	public static function init() {
 		self::register_meta();
 		add_action( 'simple_location_sidebox', array( __CLASS__, 'submitbox' ), 12, 3 );
+		
+		// Add Post Type Support for Weather
+		add_post_type_support( 'post', 'weather' );
+
 	}
 
 	public static function submitbox( $screen, $object, $args ) {
@@ -65,11 +69,10 @@ class Sloc_Weather_Data {
 		if ( ! $weather ) {
 			return;
 		}
-		
-		if ( in_array( $screen, array( 'comment', 'nav-menu' ), true ) ) {
-			return;
+
+		if ( ! empty( $screen->post_type ) && post_type_supports( $screen->post_type, 'weather' ) ) {
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/weather-metabox.php' );
 		}
-		load_template( plugin_dir_path( __DIR__ ) . 'templates/weather-metabox.php' );
 	}
 
 	/**
@@ -364,7 +367,9 @@ class Sloc_Weather_Data {
 			$weather = array_merge( $w, $weather );
 		}
 
-		self::set_object_weatherdata( $type, $id, '', $weather );
+		if ( self::set_object_weatherdata( $type, $id, '', $weather ) ) {
+			delete_metadata( $type, $id, 'geo_weather' );
+		}
 	}
 
 	/**

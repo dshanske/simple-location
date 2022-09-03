@@ -84,8 +84,7 @@ class Geo_Base {
 	}
 
 	public static function screens() {
-		$screens = array( 'post', 'attachment', 'venue' );
-		return apply_filters( 'sloc_post_types', $screens );
+		return apply_filters( 'sloc_post_types', get_post_types_by_support( 'geo-location' ) );
 	}
 
 	/* Create location meta boxes to be displayed on the post editor screen. */
