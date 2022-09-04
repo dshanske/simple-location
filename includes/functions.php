@@ -500,3 +500,29 @@ function sloc_query_id_list() {
 	$post_ids = wp_list_pluck( $wp_query->posts, 'ID' );
 	return $post_ids;
 }
+
+
+/* Wrapper around get_post_datetime that adjusts if timezone property is available 
+*/
+function sloc_get_post_datetime( $post = null, $field = 'date', $source = 'local' ) {
+	$datetime = get_post_datetime( $post, $field, $source );
+	$timezone = get_post_geodata( $post, 'timezone' );
+	if ( ! $timezone ) {
+		return $datetime;
+	}
+
+	return $datetime->setTimezone( new DateTimeZone( $timezone ) );
+}
+
+
+/* Wrapper around get_comment_datetime that adjusts if timezone property is available 
+*/
+function sloc_get_comment_datetime( $comment = null ) {
+	$datetime = get_comment_datetime( $comment );
+	$timezone = get_post_geodata( $comment, 'timezone' );
+	if ( ! $timezone ) {
+		return $datetime;
+	}
+
+	return $datetime->setTimezone( new DateTimeZone( $timezone ) );
+}

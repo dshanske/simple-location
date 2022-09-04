@@ -28,6 +28,7 @@ class Geo_Data {
 		'visibility', // Can either be public, private, or protected.
 		'timezone', // Timezone String
 		'icon', // Icon representing location
+		'day', // Boolean identifying if it is daytime or not
 	);
 
 	/**
@@ -539,7 +540,7 @@ class Geo_Data {
 		if ( is_string( $taxonomies ) ) {
 			$taxonomy = array( $taxonomies );
 		}
-		foreach( $taxonomies as $taxonomy ) {
+		foreach ( $taxonomies as $taxonomy ) {
 			register_term_meta( $taxonomy, $meta_key, $args );
 		}
 	}
@@ -551,7 +552,7 @@ class Geo_Data {
 	 */
 	public static function register_meta() {
 		$taxonomies = apply_filters( 'sloc_geo_taxonomies', array( 'venue' ) );
-		$args = array(
+		$args       = array(
 			'sanitize_callback' => 'clean_coordinate',
 			'type'              => 'number',
 			'description'       => __( 'Latitude', 'simple-location' ),
@@ -622,6 +623,16 @@ class Geo_Data {
 		register_meta( 'user', 'geo_icon', $args );
 		self::register_terms_meta( $taxonomies, 'geo_icon', $args );
 
+		// This parameter only applies to datestamped content like posts or comments.
+		$args = array(
+			'type'         => 'number',
+			'description'  => __( 'Is it Day Time', 'simple-location' ),
+			'single'       => true,
+			'show_in_rest' => false,
+		);
+		register_meta( 'post', 'geo_day', $args );
+		register_meta( 'comment', 'geo_day', $args );
+
 		// Numeric Geo Properties
 		$numerics = array(
 			'altitude' => __( 'Altitude', 'simple-location' ),
@@ -639,7 +650,7 @@ class Geo_Data {
 				'single'       => true,
 				'show_in_rest' => false,
 			);
-			foreach ( array( 'post', 'comment', 'user', ) as $type ) {
+			foreach ( array( 'post', 'comment', 'user' ) as $type ) {
 				register_meta( $type, 'geo_' . $prop, $args );
 			}
 			self::register_terms_meta( $taxonomies, 'geo_' . $prop, $args );

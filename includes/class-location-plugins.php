@@ -74,6 +74,7 @@ class Location_Plugins {
 		$properties = $input['properties'];
 		$meta       = $args['meta_input'];
 		if ( isset( $meta['geo_longitude'] ) && $meta['geo_latitude'] ) {
+			is_day_post( $args['ID'] ); // Set whether this is day or not.
 			if ( ! isset( $properties['location-visibility'] ) ) {
 				$zone = Location_Zones::in_zone( $meta['geo_latitude'], $meta['geo_longitude'] );
 				if ( ! empty( $zone ) ) {

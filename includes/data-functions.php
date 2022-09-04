@@ -7,12 +7,14 @@
  * @package Simple_Location
  */
 
-function set_post_geodata( $id, $key, $geodata ) {
-	return Geo_Data::set_geodata( 'post', $id, $key, $geodata );
+function set_post_geodata( $post, $key, $geodata ) {
+	$post = get_post( $post );
+	return Geo_Data::set_geodata( 'post', $post->ID, $key, $geodata );
 }
 
-function set_comment_geodata( $id, $key, $geodata ) {
-	return Geo_Data::set_geodata( 'comment', $id, $key, $geodata );
+function set_comment_geodata( $comment, $key, $geodata ) {
+	$comment = get_comment( $comment );
+	return Geo_Data::set_geodata( 'comment', $comment->comment_ID, $key, $geodata );
 }
 
 function set_user_geodata( $id, $key, $geodata ) {
@@ -27,19 +29,57 @@ function set_term_geodata( $id, $key, $geodata ) {
  * Wrapper around get_geodata for post IDs or objects
  *
  */
-function get_post_geodata( $post_id = null, $key = '' ) {
-	if ( ! $post_id ) {
-		$post_id = get_the_ID();
+function get_post_geodata( $post = null, $key = '' ) {
+	$post = get_post( $post );
+	return Geo_Data::get_geodata( 'post', $post->ID, $key );
+}
+
+/*
+ * Returns whether the post occurred in the daytime or not and stores value.
+ *
+ */
+function is_day_post( $post = null ) {
+	$post = get_post( $post );
+	$day = get_post_geodata( $post, 'day' );
+	if ( ! empty( $day ) ) {
+		return $day;
 	}
-	return Geo_Data::get_geodata( 'post', $post_id, $key );
+	$latitude = get_post_geodata( $post, 'latitude' );
+	$longitude = get_post_geodata( $post, 'longitude' );
+	$altitude = get_post_geodata( $post, 'altitude' );
+	$calc               = new Astronomical_Calculator( $latitude, $longitude, $altitude );
+	$day      = $calc->is_daytime( get_post_timestamp( $post ) );
+	set_post_geodata( $post, 'day', $day ? 1 : 0 );
+	return $day;
 }
 
 /*
  * Wrapper around get_geodata for comment IDs or objects
  *
  */
-function get_comment_geodata( $comment_id, $key = '' ) {
-	return Geo_Data::get_geodata( 'comment', $comment_id, $key );
+function get_comment_geodata( $comment = null, $key = '' ) {
+	$comment = get_comment( $comment );
+	return Geo_Data::get_geodata( 'comment', $comment->comment_ID, $key );
+}
+
+
+/*
+ * Returns whether the comment occurred in the daytime or not and stores value.
+ *
+ */
+function is_day_comment( $comment = null ) {
+	$comment = get_comment( $comment );
+	$day = get_comment_geodata( $comment, 'day' );
+	if ( ! empty( $day ) ) {
+		return $day;
+	}
+	$latitude = get_comment_geodata( $post, 'latitude' );
+	$longitude = get_comment_geodata( $post, 'longitude' );
+	$altitude = get_comment_geodata( $post, 'altitude' );
+	$calc               = new Astronomical_Calculator( $latitude, $longitude, $altitude );
+	$day      = $calc->is_daytime( get_comment_timestamp( $comment ) );
+	set_comment_geodata( $comment, 'day', $day );
+	return $day;
 }
 
 /*

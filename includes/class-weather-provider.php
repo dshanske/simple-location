@@ -110,7 +110,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$return['sunset']   = $calc->get_iso8601( $timestamp, 'sunset' );
 		$return['moonrise'] = $calc->get_iso8601( $timestamp, 'moonrise' );
 		$return['moonset']  = $calc->get_iso8601( $timestamp, 'moonset' );
-		$return['day']      = $calc->is_daytime();
+		$return['day']      = $calc->is_daytime( $timestamp );
 		$timezone           = Loc_Timezone::timezone_for_location( $latitude, $longitude );
 		if ( $timezone instanceof Timezone_Result ) {
 			$timezone = $timezone->timezone;

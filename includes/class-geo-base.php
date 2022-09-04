@@ -1106,6 +1106,9 @@ class Geo_Base {
 			return;
 		}
 		self::save_meta( 'post', $post_id );
+		if ( 'venue' !== get_post_type( $post_id ) ) {
+			is_day_post( $post_id );
+		}
 	}
 
 
@@ -1131,6 +1134,7 @@ class Geo_Base {
 			return;
 		}
 		self::save_meta( 'comment', $comment_id );
+		is_day_comment( $comment_id );
 	}
 
 

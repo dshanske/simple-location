@@ -64,13 +64,11 @@ class GeoDataTest extends WP_UnitTestCase {
 		Assert::assertArraySubset( static::$geo, get_post_geodata( $post_id ), );		
 	}
 
-	public function test_set_and_get_term_latitude() {
-		$term_id = $this->factory()->term->create( array( 'taxonomy' => 'venue' ) );
-		set_term_geodata( $term_id, 'latitude', 45.2 );
-		$return = get_term_geodata( $term_id, 'latitude' );
-		$this->assertEquals( 45.2, $return, wp_json_encode( $return ) );
+	public function test_set_and_get_post_day() {
+		$post_id = $this->factory()->post->create();
+		set_post_geodata( $post_id, 'day', '1' );
+		$return = get_post_geodata( $post_id, 'day' );
+		$this->assertEquals( '1', $return, wp_json_encode( $return ) );
 	}
-
-
 }
 
