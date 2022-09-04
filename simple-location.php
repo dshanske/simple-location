@@ -199,7 +199,7 @@ class Simple_Location_Plugin {
 			'trait-geolocation-trait.php', // Geolocation Trait.
 			'data-functions.php', // Global Data Functions to retrieve and store data.
 			'class-sloc-media-metadata.php', // Media Metadata Functions.
-			'class-venue-taxonomy.php', // Venue Taxonomy.
+			'class-post-venue.php', // Venue CPT.
 			'class-location-taxonomy.php', // Venue Taxonomy.
 			'class-sloc-provider.php', // Base Provider Class.
 			'class-map-provider.php', // Map Provider Class.
@@ -210,7 +210,6 @@ class Simple_Location_Plugin {
 			'class-location-provider.php', // Location Provider Class.
 			'class-rest-geo.php', // REST endpoint for Geo.
 			'class-loc-config.php', // Configuration and Settings Page.
-			'class-loc-metabox.php', // Location Metabox.
 			'class-timezone-result.php',
 			'class-astronomical-calculator.php', // Calculates sunrise sunset etc.
 			'class-location-plugins.php',
