@@ -138,6 +138,13 @@ class Geo_Base {
 
 
 	public static function last_seen( $post_id, $post ) {
+		if ( 'venue' === $post->post_type ) {
+			return;
+		}
+
+		if ( ! post_type_supports( $post->post_type, 'geo-location' ) ) {
+			return;
+		}
 		if ( 0 === (int) get_option( 'sloc_last_report' ) ) {
 			return;
 		}
@@ -159,9 +166,8 @@ class Geo_Base {
 		if ( ! is_array( $geodata ) ) {
 			return;
 		}
-		$author = new WP_User( $post->post_author );
 		if ( 'private' !== $geodata['visibility'] ) {
-			set_post_geodata( $author, $geodata );
+			set_user_geodata( $post->post_author, '', $geodata );
 		}
 	}
 
