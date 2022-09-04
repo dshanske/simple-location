@@ -78,21 +78,19 @@ class Location_Plugins {
 				$zone = Location_Zones::in_zone( $meta['geo_latitude'], $meta['geo_longitude'] );
 				if ( ! empty( $zone ) ) {
 					$meta['geo_address'] = $zone;
-					update_post_meta( $args['ID'], 'geo_address', $zone );
-					set_post_geo_visibility( $args['ID'], 'protected' );
+					set_post_geodata( $args['ID'], 'address', $zone );
+					set_post_geodata( $args['ID'], 'visibility', 'protected' );
 					update_post_meta( $args['ID'], 'geo_zone', $zone );
 				} else {
-					set_post_geo_visibility( 'post', $args['ID'], 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
+					set_post_geodata( $args['ID'], 'visibility', 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
 				}
 			}
 			// If altitude is above 1000m always show the higher zoom level.
 			if ( isset( $meta['geo_altitude'] ) && 1000 < $meta['geo_altitude'] ) {
-				update_post_meta( $args['ID'], 'geo_zoom', 9 );
+				set_post_geodata( $args['ID'], 'zoom', 9 );
 			} elseif ( isset( $meta['geo_accuracy'] ) ) {
-				update_post_meta( $args['ID'], 'geo_zoom', round( log( 591657550.5 / ( $meta['geo_accuracy'] * 45 ), 2 ) ) + 1 );
+				set_post_geodata( $args['ID'], 'zoom', round( log( 591657550.5 / ( $meta['geo_accuracy'] * 45 ), 2 ) ) + 1 );
 			}
-			$weather = Loc_Config::weather_provider();
-			$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
 
 			if ( isset( $properties['published'] ) ) {
 				$published = new DateTime( $properties['published'][0] );
@@ -100,11 +98,15 @@ class Location_Plugins {
 				$published = new DateTime();
 			}
 
-			$conditions = $weather->get_conditions( $published->getTimestamp() );
-			if ( ! empty( $conditions ) || ! is_wp_error( $conditions ) ) {
-				// if debug mode is on remove the raw data from storage.
-				unset( $conditions['raw'] );
-				update_post_meta( $args['ID'], 'geo_weather', $conditions );
+			$weather = Loc_Config::weather_provider();
+			if ( $weather ) {
+				$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
+				$conditions = $weather->get_conditions( $published->getTimestamp() );
+				if ( ! empty( $conditions ) || ! is_wp_error( $conditions ) ) {
+					// if debug mode is on remove the raw data from storage.
+					unset( $conditions['raw'] );
+					set_post_weatherdata( $args['ID'], '', $conditions );
+				}
 			}
 		}
 
