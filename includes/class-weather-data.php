@@ -15,6 +15,7 @@ add_action( 'init', array( 'Sloc_Weather_Data', 'init' ) );
  * @since 1.0.0
  */
 class Sloc_Weather_Data {
+	use Weather_Info_Trait;
 
 	public static $properties = array(
 		'temperature',
@@ -500,15 +501,6 @@ class Sloc_Weather_Data {
 		}
 
 		return $provider->get_conditions();
-	}
-
-	public static function temp_unit() {
-		switch ( get_option( 'sloc_measurements' ) ) {
-			case 'imperial':
-				return 'F';
-			default:
-				return 'C';
-		}
 	}
 
 }

@@ -195,6 +195,7 @@ class Simple_Location_Plugin {
 			'functions.php', // Global Functions.
 			'class-geo-base.php', // Register Geo Base Functions that Modify Core Functionality
 			'class-geo-data.php', // Register Geo Metadata Functions.
+			'trait-weather-info.php', // Weather Information Such as Icons.
 			'class-weather-data.php', // Register Weather Metadata Functions.
 			'trait-geolocation-trait.php', // Geolocation Trait.
 			'data-functions.php', // Global Data Functions to retrieve and store data.
