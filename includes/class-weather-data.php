@@ -46,6 +46,7 @@ class Sloc_Weather_Data {
 		'windgust',
 		'summary',
 		'icon',
+		'code'
 	);
 
 	/**
@@ -122,6 +123,7 @@ class Sloc_Weather_Data {
 			'windspeed'   => __( 'Wind Speed', 'simple-location' ),
 			'winddegree'  => __( 'Wind Degree', 'simple-location' ),
 			'windgust'    => __( 'Wind Gust', 'simple-location' ),
+			'code'        => __( 'Weather Condition Code', 'simple-location' )
 		);
 
 		foreach ( $numerics as $prop => $description ) {

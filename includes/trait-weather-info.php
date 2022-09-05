@@ -329,4 +329,78 @@ trait Weather_Info_Trait {
 			return false;
 	}
 
+	/*
+	 * An adaptation of the OpenWeatherMap weather condition codes, replacing the use of icon mapping.
+	 */
+	public static function weather_condition_codes( $code ) {
+		$map = array(
+			/* Thunderstorms */
+			'200' => __( 'thunderstorm with light rain', 'simple-location' ),
+			'201' => __( 'thunderstorm with rain', 'simple-location' ),
+			'202' => __( 'thunderstorm with heavy rain', 'simple-location' ),
+			'210' => __( 'light thunderstorm', 'simple-location' ),
+			'211' => __( 'thunderstorm', 'simple-location' ),
+			'212' => __( 'heavy thunderstorm', 'simple-location' ),
+			'221' => __( 'ragged thunderstorm', 'simple-location' ),
+			'230' => __( 'thunderstorm with light drizzle', 'simple-location' ),
+			'231' => __( 'thunderstorm with drizzle', 'simple-location' ),
+			'232' => __( 'thunderstorm with heavy drizzle', 'simple-location' ),
+			'233' => __( 'thunderstorm with hail', 'simple-location' ),
+			/* Drizzle */
+			'300' => __( 'light intensity drizzle', 'simple-location' ),
+			'301' => __( 'drizzle', 'simple-location' ),
+			'302' => __( 'heavy intensity drizzle', 'simple-location' ),
+			'310' => __( 'light intensity drizzle rain', 'simple-location' ),
+			'311' => __( 'drizzle rain', 'simple-location' ),
+			'312' => __( 'heavy intensity drizzle rain', 'simple-location' ),
+			'313' => __( 'shower rain and drizzle', 'simple-location' ),
+			'314' => __( 'heavy shower rain and drizzle', 'simple-location' ),
+			'321' => __( 'shower drizzle', 'simple-location' ),
+			/* Rain */
+			'500' => __( 'light rain', 'simple-location' ),
+			'503' => __( 'moderate rain', 'simple-location' ),
+			'504' => __( 'extreme rain', 'simple-location' ),
+			'511' => __( 'freezing rain', 'simple-location' ),
+			'520' => __( 'light intensity shower rain', 'simple-location' ),
+			'521' => __( 'shower rain', 'simple-location' ),
+			'522' => __( 'heavy intensity shower rain', 'simple-location' ),
+			'531' => __( 'ragged shower rain', 'simple-location' ),
+			/* Snow */
+			'600' => __( 'light snow', 'simple-location' ),
+			'601' => __( 'Snow', 'simple-location' ),
+			'602' => __( 'Heavy snow', 'simple-location' ),
+			'610' => __( 'Mix of Snow/Rain', 'simple-location' ),
+			'611' => __( 'Sleet', 'simple-location' ),
+			'612' => __( 'Light shower sleet', 'simple-location' ),
+			'613' => __( 'Shower sleet', 'simple-location' ),
+			'615' => __( 'Light rain and snow', 'simple-location' ),
+			'616' => __( 'Rain and snow', 'simple-location' ),
+			'620' => __( 'Light shower snow', 'simple-location' ),
+			'621' => __( 'Shower snow', 'simple-location' ),
+			'622' => __( 'Heavy shower snow', 'simple-location' ),
+			'623' => __( 'Flurries', 'simple-location' ),
+			/* Atmosphere */
+			'701' => __( 'mist', 'simple-location' ),
+			'711' => __( 'Smoke', 'simple-location' ),
+			'721' => __( 'Haze', 'simple-location' ),
+			'731' => __( 'sand/dust', 'simple-location' ),
+			'741' => __( 'fog', 'simple-location' ),
+			'751' => __( 'sand', 'simple-location' ),
+			'761' => __( 'dust', 'simple-location' ),
+			'762' => __( 'volcanic ash', 'simple-location' ),
+			'771' => __( 'squalls', 'simple-location' ),
+			'781' => __( 'tornado', 'simple-location' ),
+			/* Cloudiness */
+			'800' => __( 'clear sky', 'simple-location' ),
+			'801' => __( 'few clouds: 11-25%', 'simple-location' ),
+			'802' => __( 'scattered clouds: 25-50%', 'simple-location' ),
+			'803' => __( 'broken clouds: 51-84%', 'simple-location' ),
+			'804' => __( 'overcast clouds: 85-100%', 'simple-location' ),
+			'900' => __( 'unknown precipitation', 'simple-location' ),
+		);
+		if ( array_key_exists( $code, $map ) ) {
+			return $map[ $code ];
+		}
+		return '';
+	}
 }
