@@ -571,7 +571,7 @@ class REST_Geo {
 		);
 		$time   = null;
 		if ( array_key_exists( 'time', $params ) ) {
-			$time = $params['time'];
+			$time = (int) $params['time'];
 		}
 		$return   = array();
 		$provider = empty( $params['provider'] ) ? null : $params['provider'];

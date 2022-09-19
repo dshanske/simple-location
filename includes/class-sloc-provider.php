@@ -515,7 +515,7 @@ abstract class Sloc_Provider {
 	 * @return DateTime Date Time object.
 	 */
 	public static function datetime( $time ) {
-		if ( is_numeric( $time ) ) {
+		if ( is_numeric( $time ) && 0 !== $time ) {
 			$datetime = new DateTime();
 			$datetime->setTimestamp( $time );
 			$datetime->setTimezone( wp_timezone() );

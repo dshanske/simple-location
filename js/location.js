@@ -188,11 +188,8 @@ jQuery( document ).ready( function( $ ) {
 						if ( ( 'humidity' in weather ) && ( '' === $( '#humidity' ).val() ) ) {
 							$( '#humidity' ).val( weather.humidity );
 						}
-						if ( ( 'icon' in weather ) && ( 'none' === $( '#weather_icon' ).val() ) ) {
-							$( '#weather_icon' ).val( weather.icon ).change();
-						}
-						if ( ( 'summary' in weather ) && ( '' === $( '#weather_summary' ).val() ) ) {
-							$( '#weather_summary' ).val( weather.summary );
+						if ( ( 'code' in weather ) && ( 'none' === $( '#weather_code' ).val() ) ) {
+							$( '#weather_code' ).val( weather.code ).change();
 							$( '#weather-label' ).text( weather.summary );
 						}
 						if ( ( 'pressure' in weather ) && ( '' === $( '#pressure' ).val() ) ) {
@@ -210,13 +207,11 @@ jQuery( document ).ready( function( $ ) {
 						if ( ( 'visibility' in weather ) && ( '' === $( '#weather_visibility' ).val() ) ) {
 							$( '#weather_visibility' ).val( weather.visibility );
 						}
-						if ( 'wind' in weather ) {
-							if ( 'speed' in weather.wind ) {
-								$( '#wind_speed' ).val( weather.wind.speed );
-							}
-							if ( 'degree' in weather.wind ) {
-								$( '#wind_degree' ).val( weather.wind.degree );
-							}
+						if ( 'windspeed' in weather && ( '' === $( '#windspeed' ).val() ) ) {
+							$( '#windspeed' ).val( weather.windspeed );
+						}
+						if ( 'winddegree' in weather && ( '' === $( '#winddegree' ).val() ) ) {
+							$( '#winddegree' ).val( weather.winddegree );
 						}
 						if ( 'units' in weather ) {
 							$( '#units' ).val( weather.units );

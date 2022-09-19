@@ -133,7 +133,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			$summary              = is_array( $summary ) ? implode( ' ', $summary ) : '';
 			$return['summary']    = $summary;
 			$return['uv']         = ifset( $response['uv_index'] );
-			$return['icon']       = $this->icon_map( $response['weather_code'], ifset( $response['is_day'] ) );
+			$return['code']       = $this->code_map( $response['weather_code'] );
 
 			$return = array_filter( $this->extra_data( $return ) );
 			$this->set_cache( $return );
@@ -150,21 +150,47 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	 * @param boolean $is_day Is It Daytime.
 	 * @return string Icon ID.
 	 */
-	private function icon_map( $id, $is_day ) {
-		$id = (int) $id;
+	private function code_map( $id ) {
 		switch ( $id ) {
 			case 113:
-				return $is_day ? 'wi-day-sunny' : 'wi-night-clear';
+				return 800;
 			case 116:
-				return $is_day ? 'wi-day-cloudy' : 'wi-night-partly-cloudy';
+				return 801;
 			case 119:
-				return $is_day ? 'wi-cloudy' : 'wi-night-cloudy';
+				return 803;
 			case 122:
-				return $is_day ? 'wi-day-sunny-overcast' : 'wi-night-alt-cloudy';
+				return 804;
+			case 143:
+				return 701;
+			case 227:
+				return 625;
+			case 230:
+				return 602;
+			case 248:
+			case 260:
+				return 741;
+			case 263:
+				return 300;
+			case 266:
+				return 310;
+			case 281:
+				return 309;
+			case 284:
+				return 309;
+			case 293:
+			case 296:
+				return 500;
+			case 299:
+			case 302:
+				return 503;
+			case 305:
+			case 308:
+				return 504;
+			case 311:
+				return 511;
 			default:
 				return '';
 		}
 	}
-
 }
 

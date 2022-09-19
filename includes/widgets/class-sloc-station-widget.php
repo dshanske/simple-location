@@ -40,7 +40,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 		if ( count( $providers ) > 1 ) {
 				printf( '<select name="%1$s">', esc_attr( $name ) );
 			foreach ( $providers as $key => $value ) {
-				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $option, $key ), $value ); // phpcs:ignore
+				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $option, $key ), $value['name'] ); // phpcs:ignore
 			}
 				echo '</select>';
 				echo '<br /><br />';

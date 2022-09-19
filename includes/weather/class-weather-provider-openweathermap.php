@@ -145,8 +145,9 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				if ( wp_is_numeric_array( $current['weather'] ) ) {
 					$current['weather'] = $current['weather'][0];
 				}
+				$return['code']    = (int) $current['weather']['id'];
 				$return['summary'] = $current['weather']['description'];
-				$return['icon']    = $this->icon_map( (int) $current['weather']['id'] );
+				$return['icon']    = $this->icon_map( $return['code'] );
 			}
 
 			$return = array_filter( $this->extra_data( $return ) );
@@ -215,91 +216,4 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		}
 		return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
 	}
-
-	/**
-	 * Return array of station data.
-	 *
-	 * @param string $id Weather type ID.
-	 * @return string Icon ID.
-	 */
-	private function icon_map( $id ) {
-		if ( in_array( $id, array( 200, 201, 202, 230, 231, 232 ), true ) ) {
-			return 'wi-thunderstorm';
-		}
-		if ( in_array( $id, array( 210, 211, 212, 221 ), true ) ) {
-			return 'wi-lightning';
-		}
-		if ( in_array( $id, array( 300, 301, 321, 500 ), true ) ) {
-			return 'wi-sprinkle';
-		}
-		if ( in_array( $id, array( 302, 311, 312, 314, 501, 502, 503, 504 ), true ) ) {
-			return 'wi-rain';
-		}
-		if ( in_array( $id, array( 310, 511, 611, 612, 615, 616, 620 ), true ) ) {
-			return 'wi-rain-mix';
-		}
-		if ( in_array( $id, array( 313, 520, 521, 522, 701 ), true ) ) {
-			return 'wi-showers';
-		}
-		if ( in_array( $id, array( 531, 901 ), true ) ) {
-			return 'wi-storm-showers';
-		}
-		if ( in_array( $id, array( 600, 601, 621, 622 ), true ) ) {
-			return 'wi-snow';
-		}
-		if ( in_array( $id, array( 602 ), true ) ) {
-			return 'wi-sleet';
-		}
-
-		if ( in_array( $id, array( 711 ), true ) ) {
-			return 'wi-smoke';
-		}
-		if ( in_array( $id, array( 721 ), true ) ) {
-			return 'wi-day-haze';
-		}
-		if ( in_array( $id, array( 731, 761 ), true ) ) {
-			return 'wi-dust';
-		}
-		if ( in_array( $id, array( 741 ), true ) ) {
-			return 'wi-fog';
-		}
-		if ( in_array( $id, array( 771, 801, 802, 803 ), true ) ) {
-			return 'wi-cloudy-gusts';
-		}
-		if ( in_array( $id, array( 781, 900 ), true ) ) {
-			return 'wi-tornado';
-		}
-		if ( in_array( $id, array( 800 ), true ) ) {
-			return 'wi-day-sunny';
-		}
-		if ( in_array( $id, array( 804 ), true ) ) {
-			return 'wi-cloudy';
-		}
-		if ( in_array( $id, array( 902, 962 ), true ) ) {
-			return 'wi-hurricane';
-		}
-		if ( in_array( $id, array( 903 ), true ) ) {
-			return 'wi-snowflake-cold';
-		}
-		if ( in_array( $id, array( 904 ), true ) ) {
-			return 'wi-hot';
-		}
-		if ( in_array( $id, array( 905 ), true ) ) {
-			return 'wi-windy';
-		}
-		if ( in_array( $id, array( 906 ), true ) ) {
-			return 'wi-day-hail';
-		}
-		if ( in_array( $id, array( 957 ), true ) ) {
-			return 'wi-strong-wind';
-		}
-		if ( in_array( $id, array( 762 ), true ) ) {
-			return 'wi-volcano';
-		}
-		if ( in_array( $id, array( 751 ), true ) ) {
-			return 'wi-sandstorm';
-		}
-		return '';
-	}
-
 }

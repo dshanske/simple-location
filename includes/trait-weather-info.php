@@ -332,8 +332,9 @@ trait Weather_Info_Trait {
 	/*
 	 * An adaptation of the OpenWeatherMap weather condition codes, replacing the use of icon mapping.
 	 */
-	public static function weather_condition_codes( $code ) {
+	public static function weather_condition_codes( $code = null ) {
 		$map = array(
+			'none' => __( 'None', 'simple-location' ),
 			/* Thunderstorms */
 			'200' => __( 'thunderstorm with light rain', 'simple-location' ),
 			'201' => __( 'thunderstorm with rain', 'simple-location' ),
@@ -350,21 +351,28 @@ trait Weather_Info_Trait {
 			'300' => __( 'light intensity drizzle', 'simple-location' ),
 			'301' => __( 'drizzle', 'simple-location' ),
 			'302' => __( 'heavy intensity drizzle', 'simple-location' ),
+			'309' => __( 'freezing drizzle', 'simple-location' ),
 			'310' => __( 'light intensity drizzle rain', 'simple-location' ),
 			'311' => __( 'drizzle rain', 'simple-location' ),
 			'312' => __( 'heavy intensity drizzle rain', 'simple-location' ),
 			'313' => __( 'shower rain and drizzle', 'simple-location' ),
 			'314' => __( 'heavy shower rain and drizzle', 'simple-location' ),
 			'321' => __( 'shower drizzle', 'simple-location' ),
+			/* Wind */
+			'400' => __( 'Windy', 'simple-location' ),
 			/* Rain */
 			'500' => __( 'light rain', 'simple-location' ),
 			'503' => __( 'moderate rain', 'simple-location' ),
 			'504' => __( 'extreme rain', 'simple-location' ),
 			'511' => __( 'freezing rain', 'simple-location' ),
+			'512' => __( 'rain and wind', 'simple-location' ),
+			'513' => __( 'ice', 'simple-location' ),
 			'520' => __( 'light intensity shower rain', 'simple-location' ),
 			'521' => __( 'shower rain', 'simple-location' ),
 			'522' => __( 'heavy intensity shower rain', 'simple-location' ),
 			'531' => __( 'ragged shower rain', 'simple-location' ),
+			'540' => __( 'flood', 'simple-location' ),
+			'541' => __( 'flash flooding', 'simple-location' ),
 			/* Snow */
 			'600' => __( 'light snow', 'simple-location' ),
 			'601' => __( 'Snow', 'simple-location' ),
@@ -379,8 +387,13 @@ trait Weather_Info_Trait {
 			'621' => __( 'Shower snow', 'simple-location' ),
 			'622' => __( 'Heavy shower snow', 'simple-location' ),
 			'623' => __( 'Flurries', 'simple-location' ),
+			'624' => __( 'Hail', 'simple-location' ),
+			'625' => __( 'Snow and Wind', 'simple-location' ),
+			'626' => __( 'Diamond dust', 'simple-location' ),
 			/* Atmosphere */
 			'701' => __( 'mist', 'simple-location' ),
+			'702' => __( 'Frost', 'simple-locaiton' ),
+			'703' => __( 'Icy', 'simple-location' ),
 			'711' => __( 'Smoke', 'simple-location' ),
 			'721' => __( 'Haze', 'simple-location' ),
 			'731' => __( 'sand/dust', 'simple-location' ),
@@ -389,17 +402,139 @@ trait Weather_Info_Trait {
 			'761' => __( 'dust', 'simple-location' ),
 			'762' => __( 'volcanic ash', 'simple-location' ),
 			'771' => __( 'squalls', 'simple-location' ),
+			'772' => __( 'waterspouts', 'simple-location' ),
 			'781' => __( 'tornado', 'simple-location' ),
+			'782' => __( 'hurricane', 'simple-location' ),
+			'790' => __( 'lightning', 'simple-location' ),
+
 			/* Cloudiness */
-			'800' => __( 'clear sky', 'simple-location' ),
-			'801' => __( 'few clouds: 11-25%', 'simple-location' ),
-			'802' => __( 'scattered clouds: 25-50%', 'simple-location' ),
-			'803' => __( 'broken clouds: 51-84%', 'simple-location' ),
-			'804' => __( 'overcast clouds: 85-100%', 'simple-location' ),
-			'900' => __( 'unknown precipitation', 'simple-location' ),
+			'800' => __( 'Clear Sky', 'simple-location' ),
+			'801' => __( 'Few Clouds', 'simple-location' ),
+			'802' => __( 'Scattered Clouds', 'simple-location' ),
+			'803' => __( 'Broken Clouds', 'simple-location' ),
+			'804' => __( 'Overcast Clouds', 'simple-location' ),
+			'900' => __( 'Unknown Precipitation', 'simple-location' ),
 		);
 		if ( array_key_exists( $code, $map ) ) {
 			return $map[ $code ];
+		}
+		if ( is_null( $code ) ) {
+			return $map;
+		}
+		return '';
+	}
+
+
+	/*
+	 * Map Codes to Icons
+	 */
+	public static function weather_condition_icons( $code, $is_day = true ) {
+		switch( $code ) {
+			case '200':
+			case '201':
+			case '202':
+			case '210':
+			case '211':
+			case '212':
+			case '221':
+			case '230':
+			case '231':
+			case '232':
+			case '233':
+				return $is_day ? 'wi-day-thunderstorm' : 'wi-night-thunderstorm';
+			case '300':
+			case '301':
+			case '302':
+			case '309':
+			case '310':
+			case '311':
+			case '312':
+			case '313':
+			case '314':
+			case '321':
+				return $is_day ? 'wi-day-sprinkle' : 'wi-night-sprinkle';
+			case '400':
+				return $is_day ? 'wi-day-windy' : 'wi-windy';
+			case '500':
+			case '503': 
+			case '504':
+			case '511':
+				return $is_day ? 'wi-day-rain' : 'wi-night-rain';
+			case '512': 
+				return $is_day ? 'wi-day-rain-wind' : 'wi-night-rain-wind';
+			case '513': 
+				return 'wi-snowflake-cold';
+			case '520':
+			case '521':
+			case '522':
+			case '531':
+				return $is_day ? 'wi-day-showers' : 'wi-night-showers';
+			case '540':
+			case '541':
+				return 'wi-flood';
+			case '600':
+			case '601':
+			case '602':
+				return $is_day ? 'wi-day-snow' : 'wi-night-snow';
+			case '610':
+				return $is_day ? 'wi-day-rain-mix' : 'wi-night-rain-mix';
+			case '611':
+			case '612':
+			case '613':
+				return $is_day ? 'wi-day-sleet' : 'wi-night-sleet';
+			case '615':
+			case '616':
+				return $is_day ? 'wi-day-rain-mix' : 'wi-night-rain-mix';
+			case '620':
+			case '621':
+			case '622':
+			case '623': 
+				return $is_day ? 'wi-day-snow-wind' : 'wi-night-snow-wind';
+				
+			case '624':
+				return $is_day ? 'wi-day-hail' : 'wi-night-hail';
+			case '625':
+				return $is_day ? 'wi-day-snow-wind' : 'wi-night-snow-wind';
+			case '626':
+				return $is_day ? 'wi-day-sleet' : 'wi-night-sleet';
+			case '701':
+
+			case '702':
+			case '703':
+			case '711':
+				return 'wi-smoke';
+			case '721':
+				return 'wi-day-haze';
+			case '731':
+				return 'wi-dust';
+			case '741':
+				return $is_day ? 'wi-day-fog' : 'wi-night-fog';
+			case '751':
+				return 'wi-sandstorm';
+			case '761':
+				return 'wi-dust';
+			case '762':
+				return 'wi-volcano';
+			case '771':
+			case '772':
+				return 'wi-gale-warning';
+			case '781':
+				return 'wi-tornado';
+			case '782':
+				return 'wi-hurricane';
+			case '790':
+				return $is_day ? 'wi-day-lightning' : 'wi-night-lightning';
+			case '800':
+				return $is_day ? 'wi-day-sunny' : 'wi-night-clear';
+			case '801': 
+				return $is_day ? 'wi-day-cloudy' : 'wi-night-cloudy';
+			case '802': 
+			case '803':
+				return $is_day ? 'wi-day-cloudy' : 'wi-night-partly-cloudy';
+			case '804':
+				return $is_day ? 'wi-day-cloudy' : 'wi-night-cloudy';
+			case '900':
+				return 'wi-raindrops';
 		}
 		return '';
 	}

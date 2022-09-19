@@ -387,7 +387,8 @@ class Sloc_Weather_Data {
 		return is_array( self::get_object_weatherdata( $type, $id ) );
 	}
 
-	public static function get_the_weather( $weather, $args = null ) {
+	public static function get_the_weather( $type, $id, $args = null ) {
+		$weather = self::get_object_weatherdata( $type, $id );
 		$defaults = array(
 			'style'         => 'simple', // Options are simple, complete, graphic (only)
 			'description'   => __( 'Weather: ', 'simple-location' ),
@@ -398,7 +399,13 @@ class Sloc_Weather_Data {
 		if ( ! is_array( $weather ) || empty( $weather ) ) {
 			return '';
 		}
-		if ( ! isset( $weather['icon'] ) ) {
+
+		if ( isset( $weather['code'] ) ) {
+			$weather['icon'] = self::weather_condition_icons( $weather['code'] );
+			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
+		} 	
+
+		if ( empty( $weather['icon'] ) ) {
 			$weather['icon'] = 'wi-thermometer';
 		}
 
@@ -468,12 +475,20 @@ class Sloc_Weather_Data {
 	}
 
 	public static function get_weather_data( $lat, $lng, $cache_time = null ) {
-		$weather = Loc_Config::weather_provider();
-		$weather->set( $lat, $lng );
+		$provider = Loc_Config::weather_provider();
+		$provider->set( $lat, $lng );
 		if ( is_numeric( $cache_time ) ) {
-			$weather->set_cache_time( $cache_time );
+			$provider->set_cache_time( $cache_time );
 		}
-		return $weather->get_conditions();
+
+
+		$weather = $provider->get_conditions();
+
+		if ( isset( $weather['code'] ) ) {
+			$weather['icon'] = self::weather_condition_icons( $weather['code'] );
+			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
+		} 	
+		return $weather;
 	}
 
 	public static function get_weather_by_user( $user, $cache_time = null ) {
@@ -502,7 +517,42 @@ class Sloc_Weather_Data {
 			$provider->set_cache_time( $cache_time );
 		}
 
-		return $provider->get_conditions();
+		$weather = $provider->get_conditions();
+
+		if ( isset( $weather['code'] ) ) {
+			$weather['icon'] = self::weather_condition_icons( $weather['code'] );
+			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
+		} 	
+		return $weather;
+
 	}
+
+	/**
+	 * Generates Pulldown list of Weather Statuses.
+	 *
+	 * @param string  $icon Icon to be Selected.
+	 * @param boolean $echo Echo or Return.
+	 * @return string Select Option. Optional.
+	 */
+	public static function code_select( $code, $echo = false ) {
+		$choices = self::weather_condition_codes( null );
+		$return = '';
+		foreach ( $choices as $value => $text ) {
+			$return .= sprintf( '<option value="%1s" %2s>%3s</option>', esc_attr( $value ), selected( $code, $value, false ), esc_html( $text ) );
+		}
+		if ( ! $echo ) {
+			return $return;
+		}
+		echo wp_kses(
+			$return,
+			array(
+				'option' => array(
+					'selected' => array(),
+					'value'    => array(),
+				),
+			)
+		);
+	}
+
 
 }

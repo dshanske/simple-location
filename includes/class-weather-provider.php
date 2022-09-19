@@ -103,6 +103,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * }
 	 */
 	public function extra_data( $return, $timestamp = null ) {
+		if ( $timestamp = null ) {
+			$timestamp = time();
+		}
 		$latitude           = array_key_return( 'latitude', $return, $this->latitude );
 		$longitude          = array_key_return( 'longitude', $return, $this->longitude );
 		$altitude           = array_key_return( 'altitude', $return, $this->altitude );

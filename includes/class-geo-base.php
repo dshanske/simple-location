@@ -1049,6 +1049,11 @@ class Geo_Base {
 			$weather['visibility'] = $_POST['weather_visibility'];
 		}
 
+
+		if ( array_key_exists( 'weather_code', $_POST ) ) {
+			$weather['code'] = $_POST['weather_code'];
+		}
+
 		foreach( $weather as $key => $value ) {
 			if ( ! is_numeric( $value ) ) {
 				unset( $weather[ $key ] );

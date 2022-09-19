@@ -959,8 +959,8 @@ class Geo_Data {
 		if ( $args['icon'] ) {
 			array_unshift( $c, self::get_icon( $loc['icon'] ) );
 		}
-		if ( isset( $loc['weather'] ) && $args['weather'] ) {
-			$c[] = Sloc_Weather_Data::get_the_weather( $loc['weather'] );
+		if ( $args['weather'] ) {
+			$c[] = Sloc_Weather_Data::get_the_weather( $type, $id );
 		}
 
 		$return = implode( PHP_EOL, $c );

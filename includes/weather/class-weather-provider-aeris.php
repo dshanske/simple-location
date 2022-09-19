@@ -90,18 +90,11 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$client_secret = get_option( 'sloc_aeris_client_secret' );
 		if ( empty( $client_id ) || empty( $client_secret ) ) {
 			return array();
-		}
-		$datetime = $this->datetime( $time );
 
-		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
-			return array(
-				'time'     => $time,
-				'datetime' => $datetime,
-			);
 		}
 
 		if ( ! empty( $this->station_id ) && empty( $this->latitude ) ) {
-			return $this->get_station_data();
+			return $this->get_station_data( $time );
 		}
 		if ( $this->latitude && $this->longitude ) {
 			$conditions = $this->get_cache();
@@ -114,6 +107,10 @@ class Weather_Provider_Aeris extends Weather_Provider {
 				'client_secret' => $client_secret,
 				'p'             => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
 			);
+			if ( is_numeric( $time ) && 0 !== $time ) {
+				$args['from'] = $time;
+			}
+
 			if ( 1 === (int) get_option( 'sloc_aeris_pws' ) ) {
 				$args['filter'] = 'allstations';
 			}
@@ -175,7 +172,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$return['uv']         = ifset_round( $observation['uvi'], 2 );
 		$return['visibility'] = self::km_to_meters( ifset_round( $observation['visibilityKM'] ) );
 
-		$return['icon'] = $this->icon_map( $observation['weatherCoded'] );
+		$return['code'] = $this->code_map( $observation['weatherCoded'] );
 
 		return array_filter( $return );
 	}
@@ -185,7 +182,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 *
 	 * @return array Current Conditions in Array
 	 */
-	public function get_station_data() {
+	public function get_station_data( $time = null ) {
 		$client_id     = get_option( 'sloc_aeris_client_id' );
 		$client_secret = get_option( 'sloc_aeris_client_secret' );
 		$return        = array();
@@ -208,6 +205,10 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			'client_secret' => $client_secret,
 			'p'             => $this->station_id,
 		);
+
+		if ( is_numeric( $time ) && 0 !== $time ) {
+			$args['from'] = $time;
+		}
 
 		$url = 'https://api.aerisapi.com/observations/closest';
 
@@ -235,7 +236,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * @param string $id Weather type ID.
 	 * @return string Icon ID.
 	 */
-	private function icon_map( $id ) {
+	private function code_map( $id ) {
 		$id = explode( ':', $id );
 		if ( 3 !== count( $id ) ) {
 			return '';
@@ -245,67 +246,72 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$weather   = $id[2];
 		switch ( $weather ) {
 			case 'A': // Hail.
-				return 'wi-hail';
+				return 624;
 			case 'BD':  // Blowing dust.
-				return 'wi-dust';
+				return 761;
 			case 'BN': // Blowing sand.
-				return 'wi-sandstorm';
+				return 751;
 			case 'BR': // Mist.
-				return 'wi-umbrella';
+				return 701;
 			case 'BS': // Blowing snow.
-				return 'wi-snow-wind';
+				return 625;
 			case 'BY': // Blowing spray.
-				return 'wi-rain-wind';
+				return '512';
 			case 'F': // Fog.
-				return 'wi-fog';
+				return 741;
 			case 'FR':  // Frost.
-				return 'wi-snowflake-cold';
+				return 702;
 			case 'H': // Haze.
-				return 'wi-day-haze';
+				return 721;
 			case 'IF': // Ice fog.
 			case 'IC': // Ice crystals.
-				return 'icy';
+				return 703;
 			case 'IP': // Ice pellets / Sleet.
-				return 'wi-sleet';
+				return 611;
 			case 'K': // Smoke.
-				return 'wi-smoke';
+				return 711;
 			case 'L': // Drizzle.
+				return 301;
 			case 'R': // Rain.
+				500;
 			case 'RW': // Rain showers.
-				return 'wi-rain';
+				return 521;
 			case 'RS': // Rain/snow mix.
+				return 610;
 			case 'WM': // Wintry mix (snow, sleet, rain).
-				return 'wi-rain-mix';
+				return 615;
 			case 'SI': // Snow/sleet mix.
+				return 613;
 			case 'S': // Snow.
+				return 601;
 			case 'SW': // Snow showers.
-				return 'wi-snow';
+				return 621;
 			case 'T': // Thunderstorms.
-				return 'wi-thunderstorm';
+				return 211;
 			case 'UP': // Unknown precipitation. May occur in an automated observation station, which cannot determine the precipitation type falling.
-				return 'wi-sprinkle';
+				return 900;
 			case 'VA': // Volcanic ash.
-				return 'wi-volcano';
+				return 762;
 			case 'WP': // Waterspouts.
-				return 'wi-water';
+				return 772;
 			case 'ZF': // Freezing fog.
-				return 'wi-fog';
+				return 731;
 			case 'ZL': // Freezing drizzle.
 			case 'ZR': // Freezing rain.
+				return 511;
 			case 'ZY': // Freezing spray.
-				return 'wi-raindrop';
+				return 511;
 			case 'FW': // Fair/Mostly sunny. Cloud coverage is 7-32% of the sky.
-				return 'wi-day-sunny';
+				return 801;
 			case 'SC': // Partly cloudy. Cloud coverage is 32-70% of the sky.
-				return 'wi-day-cloudy';
+				return 802;
 			case 'BK': // Mostly Cloudy. Cloud coverage is 70-95% of the sky.
-				return 'wi-cloudy';
+				return 803;
 			case 'OV': // Cloudy/Overcast. Cloud coverage is 95-100% of the sky.
-				return 'wi-cloud';
+				return 804;
 			case 'CL': // Clear. Cloud coverage is 0-7% of the sky.
-				return 'wi-day-sunny';
+				return 800;
 		}
 		return '';
 	}
-
 }

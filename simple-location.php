@@ -44,6 +44,14 @@ class Simple_Location_Plugin {
 	  */
 	public static $version;
 
+	 /**
+	  * Plugin Path
+	  *
+	  * @since 1.0.0
+	  * @var string
+	  */
+	public static $path;
+
 
 	/**
 	 * Plugin Activation Function.
@@ -178,6 +186,7 @@ class Simple_Location_Plugin {
 	 */
 	public static function init() {
 		self::$version = get_file_data( __FILE__, array( 'Version' => 'Version' ) )['Version'];
+		self::$path = plugin_dir_path( __FILE__ );
 
 		load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 

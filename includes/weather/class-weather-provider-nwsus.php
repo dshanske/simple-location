@@ -178,10 +178,16 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$return['windspeed']   = self::kmh_to_ms( self::get_value( $properties, 'windSpeed' ) );
 		$return['windgust']    = self::get_value( $properties, 'windGust' );
 		$return['pressure']    = round( self::get_value( $properties, 'barometricPressure' ) / 100, 2 );
-		$return['summary']     = ifset( $properties['textDescription'] );
-		if ( isset( $return['summary'] ) ) {
-			$return['icon'] = self::icon_map( $return['summary'] );
+
+		$return['summary'] = ifset( $properties['textDescription'] );
+
+		if ( ! empty( $properties['presentWeather'] ) ) {
+			$return['code'] = self::phenomenon_code_map( $properties['presentWeather'] );
 		}
+		if ( ! isset( $return['code'] ) ) {
+			$return['code'] = self::cloud_code_map( $properties['cloudLayers'] );
+		}
+
 		$url      = sprintf( 'https://api.weather.gov/stations/%1$s', $this->station_id );
 		$response = wp_remote_get( $url, $args );
 		if ( is_wp_error( $response ) ) {
@@ -197,82 +203,148 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$this->set_cache( $return );
 
 		if ( WP_DEBUG ) {
-			$return['raw'] = $response;
+			$return['raw'] = $properties;
 		}
 		return $return;
 	}
 
+
 	/**
-	 * Return array of station data.
+	 * Return the condition code based on cloudlayer.
+	 *
+	 * @param array $layers Cloud
+	 * @return string Weather Code.
+	 */
+	private function cloud_code_map( $layers ) {
+		$code = end( $layers )['amount'];
+		/* cloudLayers use MetarSkyCoverage codes: OVC, BKN, SCT, FEW, SKC, CLR, VV */
+		switch ( $code ) {
+			case 'OVC':
+				return 804;
+			case 'BKN':
+				return 803;
+			case 'SCT':
+				return 802;
+			case 'FEW':
+				return 801;
+			case 'SKC':
+			case 'CLR':
+				return 800;
+			case 'VV':
+				return 804;
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * Return the condition code based on presentWeather.
 	 *
 	 * @param string $id Weather type ID.
 	 * @return string Icon ID.
 	 */
-	private function icon_map( $id ) {
-		switch ( $id ) {
-			case 'Cloudy':
-				return 'wi-cloudy';
-			case 'A few clouds':
-			case 'Few clouds':
-				return 'wi-cloud';
-			case 'Partly Cloudy':
-				return 'wi-day-cloudy';
-			case 'Mostly Cloudy':
-				return 'wi-cloudy';
-			case 'Overcast':
-				return 'wi-cloudy';
-			case 'Fair/clear and windy':
-				return 'wi-windy';
-			case 'A few clouds and windy':
-				return 'wi-cloudy-windy';
-			case 'Partly cloudy and windy':
-				return 'wi-cloudy-windy';
-			case 'Mostly cloudy and windy':
-				return 'wi-cloudy-windy';
-			case 'Overcast and windy':
-				return 'wi-cloudy-windy';
-			case 'Snow':
-				return 'wi-snow';
-			case 'Rain/snow':
-				return 'wi-snow';
-			case 'Rain/sleet':
-			case 'Rain/sleet':
-			case 'Freezing rain':
-			case 'Rain/freezing rain':
-			case 'Freezing rain/snow':
-			case 'Sleet':
-				return 'wi-sleet';
-			case 'Rain':
-			case 'Rain showers (high cloud cover)':
-			case 'Rain showers (low cloud cover)':
-				return 'wi-rain';
-			case 'Thunderstorm (high cloud cover)':
-			case 'Thunderstorm (medium cloud cover)':
-			case 'Thunderstorm (low cloud cover)':
-				return 'wi-thunderstorm';
-			case 'Tornado':
-				return 'wi-tornado';
-			case 'Hurricane conditions':
-				return 'wi-hurricane';
-			case 'Tropical storm conditions':
-				return 'wi-storm-showers';
-			case 'Dust':
-				return 'wi-dust';
-			case 'Smoke':
-				return 'wi-smoke';
-			case 'Haze':
-				return 'wi-day-haze';
-			case 'Hot':
-				return 'wi-hot';
-			case 'Cold':
-			case 'Blizzard':
-				return 'wi-snow';
-			case 'Fog/mist':
-				return 'wi-fog';
+	private function phenomenon_code_map( $weather ) {
+		if ( ! is_array( $weather ) ) {
+			return null;
+		}
+
+		/*
+		 MetarPhenomenon{
+		description:
+
+		An object representing a decoded METAR phenomenon string.
+		intensity*	string
+		nullable: trueEnum:
+		[ light, heavy ]
+		modifier*	string
+		nullable: trueEnum:
+		[ patches, blowing, low_drifting, freezing, shallow, partial, showers ]
+		weather*	stringEnum:
+		[ fog_mist, dust_storm, dust, drizzle, funnel_cloud, fog, smoke, hail, snow_pellets, haze, ice_crystals, ice_pellets, dust_whirls, spray, rain, sand, snow_grains, snow, squalls, sand_storm, thunderstorms, unknown, volcanic_ash ]
+		rawString*	string
+		inVicinity	boolean */
+
+		if ( 1 === count( $weather ) ) {
+			$weather = end( $weather );
+		} else {
+			$codes = wp_list_pluck( $weather, 'weather' );
+			if ( empty( array_diff( $codes, array( 'thunderstorms', 'rain' ) ) ) ) {
+				return 201;
+			}
+		}
+
+		switch ( $weather['weather'] ) {
+			case 'thunderstorms':
+				if ( ! isset( $weather['intensity'] ) ) {
+					return 211;
+				}
+				if ( 'light' === $weather['intensity'] ) {
+					return 210;
+				}
+				if ( 'heavy' === $weather['intensity'] ) {
+					return 212;
+				}
+			case 'fog':
+			case 'fog_mist':
+				return 741;
+			case 'dust':
+			case 'dust_storm':
+			case 'dust_whirls':
+				return 761;
+			case 'drizzle':
+				if ( ! isset( $weather['intensity'] ) ) {
+					return 301;
+				}
+				if ( 'light' === $weather['intensity'] ) {
+					return 300;
+				}
+				if ( 'heavy' === $weather['intensity'] ) {
+					return 302;
+				}
+			case 'smoke':
+				return 711;
+			case 'hail':
+				return 624;
+			case 'snow_pellets':
+				return 611;
+			case 'haze':
+				return 721;
+			case 'ice_crystals':
+			case 'ice_pellets':
+			case 'spray':
+			case 'rain':
+				if ( ! isset( $weather['intensity'] ) ) {
+					return 521;
+				}
+				if ( 'light' === $weather['intensity'] ) {
+					return 520;
+				}
+				if ( 'heavy' === $weather['intensity'] ) {
+					return 522;
+				}
+			case 'sand':
+			case 'sand_storm':
+				return 751;
+			case 'snow_grains':
+			case 'snow':
+				if ( ! isset( $weather['intensity'] ) ) {
+					return 601;
+				}
+				if ( 'light' === $weather['intensity'] ) {
+					return 600;
+				}
+				if ( 'heavy' === $weather['intensity'] ) {
+					return 602;
+				}
+			case 'squalls':
+				return 771;
+			case 'volcanic_ash':
+				return 762;
+			case 'funnel_cloud':
+			case 'unknown':
 			default:
-				return '';
+				return null;
 		}
 	}
-
 }
 

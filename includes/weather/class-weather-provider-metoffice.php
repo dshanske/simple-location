@@ -143,50 +143,101 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	}
 
 	/**
-	 * Converts code into weather description.
+	 * converts code into weather description.
 	 *
-	 * @param int $type Code.
-	 * @return string Description.
+	 * @param int $type code.
+	 * @return string description.
 	 */
 	public function weather_type( $type ) {
 		$types = array(
-			0  => 'Clear night',
-			1  => 'Sunny day',
-			2  => 'Partly cloudy (night)',
-			3  => 'Partly cloudy (day)',
-			4  => 'Not used',
-			5  => 'Mist',
-			6  => 'Fog',
-			7  => 'Cloudy',
-			8  => 'Overcast',
-			9  => 'Light rain shower (night)',
-			10 => 'Light rain shower (day)',
-			11 => 'Drizzle',
-			12 => 'Light rain',
-			13 => 'Heavy rain shower (night)',
-			14 => 'Heavy rain shower (day)',
-			15 => 'Heavy rain',
-			16 => 'Sleet shower (night)',
-			17 => 'Sleet shower (day)',
-			18 => 'Sleet',
-			19 => 'Hail shower (night)',
-			20 => 'Hail shower (day)',
-			21 => 'Hail',
-			22 => 'Light snow shower (night)',
-			23 => 'Light snow shower (day)',
-			24 => 'Light snow',
-			25 => 'Heavy snow shower (night)',
-			26 => 'Heavy snow shower (day)',
-			27 => 'Heavy snow',
-			28 => 'Thunder shower (night)',
-			29 => 'Thunder shower (day)',
-			30 => 'Thunder',
+			0  => 'clear night',
+			1  => 'sunny day',
+			2  => 'partly cloudy (night)',
+			3  => 'partly cloudy (day)',
+			4  => 'not used',
+			5  => 'mist',
+			6  => 'fog',
+			7  => 'cloudy',
+			8  => 'overcast',
+			9  => 'light rain shower (night)',
+			10 => 'light rain shower (day)',
+			11 => 'drizzle',
+			12 => 'light rain',
+			13 => 'heavy rain shower (night)',
+			14 => 'heavy rain shower (day)',
+			15 => 'heavy rain',
+			16 => 'sleet shower (night)',
+			17 => 'sleet shower (day)',
+			18 => 'sleet',
+			19 => 'hail shower (night)',
+			20 => 'hail shower (day)',
+			21 => 'hail',
+			22 => 'light snow shower (night)',
+			23 => 'light snow shower (day)',
+			24 => 'light snow',
+			25 => 'heavy snow shower (night)',
+			26 => 'heavy snow shower (day)',
+			27 => 'heavy snow',
+			28 => 'thunder shower (night)',
+			29 => 'thunder shower (day)',
+			30 => 'thunder',
 		);
 		if ( array_key_exists( intval( $type ), $types ) ) {
 			return $types[ intval( $types ) ];
 		}
-		return __( 'Not Available', 'simple-location' );
+		return __( 'not available', 'simple-location' );
 	}
+
+	/**
+	 * Convert Status Code to Text.
+	 *
+	 * @param int $code Code.
+	 * @return string Textual Summary of Status Code.
+	 **/
+	public static function code_map( $type ) {
+		$conditions = array();
+		if ( array_key_exists( $code, $conditions ) ) {
+			return $conditions[ $code ];
+		}
+		$types = array(
+			0  => 800,
+			1  => 800,
+			2  => 802,
+			3  => 802,
+			4  => '',
+			5  => 701,
+			6  => 741,
+			7  => 803,
+			8  => 804,
+			9  => 520,
+			10 => 520,
+			11 => 301,
+			12 => 500,
+			13 => 522,
+			14 => 522,
+			15 => 504,
+			16 => 613,
+			17 => 613,
+			18 => 611,
+			19 => 624,
+			20 => 624,
+			21 => 624,
+			22 => 620,
+			23 => 620,
+			24 => 600,
+			25 => 622,
+			26 => 622,
+			27 => 602,
+			28 => 201,
+			29 => 201,
+			30 => 211,
+		);
+		if ( array_key_exists( intval( $type ), $types ) ) {
+			return $types[ intval( $types ) ];
+		}
+		return '';
+	}
+
 
 	/**
 	 * Return info on the current station.
@@ -266,23 +317,12 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		$return['windspeed']   = self::mph_to_mps( ifset( $properties['S'] ) );
 		$return['windgust']    = self::mph_to_mps( ifset( $properties['G'] ) );
 		$return['summary']     = $this->weather_type( ifset( $properties['W'] ) );
-		$return['icon']        = self::icon_map( ifset( $properties['W'] ) );
+		$return['code']        = $this->code_map( ifset( $properties['W'] ) );
 		$return                = array_filter( $this->extra_data( $return ) );
 
 		$this->set_cache( $return );
 
 		return $return;
 	}
-
-	/**
-	 * Return array of station data.
-	 *
-	 * @param string $id Weather type ID.
-	 * @return string Icon ID.
-	 */
-	private function icon_map( $id ) {
-		return null;
-	}
-
 }
 

@@ -79,7 +79,11 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 
 			$datetime = $this->datetime( $time );
 
-			$url = sprintf( 'https://timemachine.pirateweather.net/forecast/%1$s/%2$s,%3$s,%4$s', $this->api, $this->latitude, $this->longitude, $datetime->getTimestamp() );
+			if ( $time ) {
+				$url = sprintf( 'https://api.pirateweather.net/forecast/%1$s/%2$s,%3$s,%4$s', $this->api, $this->latitude, $this->longitude, $datetime->getTimestamp() );
+			} else {
+				$url = sprintf( 'https://api.pirateweather.net/forecast/%1$s/%2$s,%3$s', $this->api, $this->latitude, $this->longitude );
+			}
 			$url = add_query_arg( $data, $url );
 
 			$args = array(
@@ -120,7 +124,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			$return['rain']       = ifset_round( $current['precipIntensity'], 2 );
 			$return['snow']       = ifset_round( $current['precipAccumulation'], 2 );
 			$return['summary']    = ifset( $current['summary'] );
-			$return['icon']       = $this->icon_map( ifset( $current['icon'] ) );
+			$return['code']       = $this->code_map( ifset( $current['icon'] ) );
 			if ( isset( $current['visibility'] ) ) {
 				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
@@ -135,37 +139,35 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	/**
 	 * Return array of station data.
 	 *
-	 * @param string $id Weather type ID.
-	 * @return string Icon ID.
+	 * @param string $id Weather type icon.
+	 * @return string code id.
 	 */
-	private function icon_map( $id ) {
+	private function code_map( $id ) {
 		switch ( $id ) {
 			case 'clear-day':
-				return 'wi-day-sunny';
 			case 'clear-night':
-				return 'wi-night-clear';
+				return 800;
 			case 'rain':
-				return 'wi-rain';
+				return 500;
 			case 'snow':
-				return 'wi-snow';
+				return 601;
 			case 'sleet':
-				return 'wi-sleet';
+				return 611;
 			case 'wind':
-				return 'wi-windy';
+				return '';
 			case 'fog':
-				return 'wi-fog';
+				return 741;
 			case 'cloudy':
-				return 'wi-cloudy';
+				return 804;
 			case 'partly-cloudy-day':
-				return 'wi-day-cloudy';
 			case 'partly-cloudy-night':
-				return 'wi-night-cloudy';
+				return 803;
 			case 'hail':
-				return 'wi-hail';
+				return;
 			case 'thunderstorm':
-				return 'wi-thunderstorm';
+				return 211;
 			case 'tornado':
-				return 'wi-tornado';
+				return 781;
 			default:
 				return '';
 		}

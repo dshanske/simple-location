@@ -256,13 +256,16 @@ class Weather_Provider_Station extends Weather_Provider {
 						if ( is_string( $prop ) && 'N/A' === trim( $prop ) ) {
 							unset( $return[ $k ] );
 						}
-						if ( in_array( $k, array( 'rain', 'snow', 'pm1_0', 'pm10_0', 'pm2_5' ) ) && 0 === (int) $prop ) {
-							unset( $return[ $k ] );
+						if ( 'wind' === $k && is_array( $prop ) ) {
+							foreach ( array( 'speed', 'degree', 'gust' ) as $l ) {
+								$return[ 'wind' . $l ] = $prop[ $l ];
+							}
+							unset( $return['wind'] );
 						}
 					}
 
 					if ( isset( $return['summary'] ) ) {
-						$return['icon'] = self::icon_map( $return['summary'] );
+						$return['code'] = self::code_map( $return['summary'] );
 					}
 					$return = array_filter( $this->extra_data( $return, null ) );
 					break;
@@ -279,73 +282,77 @@ class Weather_Provider_Station extends Weather_Provider {
 	 * @param string $id Weather type ID.
 	 * @return string Icon ID.
 	 */
-	private function icon_map( $id ) {
+	private function code_map( $id ) {
 		switch ( $id ) {
 			case 'Sunny':
+			case 'Clear':
+				return 800;
 			case 'Mostly Sunny':
-				return 'wi-day-sunny';
+				return 801;
 			case 'Cloudy':
-				return 'wi-cloudy';
+				return 802;
 			case 'A few clouds':
 			case 'Few clouds':
-				return 'wi-cloud';
+				return 801;
 			case 'Partly Cloudy':
-				return 'wi-day-cloudy';
+				return 802;
 			case 'Mostly Cloudy':
-				return 'wi-cloudy';
+				return 803;
 			case 'Overcast':
-				return 'wi-cloudy';
+				return 804;
 			case 'Fair/clear and windy':
-				return 'wi-windy';
+				return 400;
 			case 'A few clouds and windy':
-				return 'wi-cloudy-windy';
+				return 801;
 			case 'Partly cloudy and windy':
-				return 'wi-cloudy-windy';
+				return 802;
 			case 'Mostly cloudy and windy':
-				return 'wi-cloudy-windy';
+				return 803;
 			case 'Overcast and windy':
-				return 'wi-cloudy-windy';
+				return 804;
 			case 'Snow':
-				return 'wi-snow';
+				return 601;
 			case 'Rain/snow':
-				return 'wi-snow';
+				return 616;
 			case 'Rain/sleet':
 			case 'Rain/sleet':
+				return 620;
 			case 'Freezing rain':
 			case 'Rain/freezing rain':
 			case 'Freezing rain/snow':
+				return 511;
 			case 'Sleet':
-				return 'wi-sleet';
+				return 611;
 			case 'Rain':
 			case 'Rain showers (high cloud cover)':
 			case 'Rain showers (low cloud cover)':
-				return 'wi-rain';
+				return 521;
 			case 'Thunderstorm (high cloud cover)':
 			case 'Thunderstorm (medium cloud cover)':
 			case 'Thunderstorm (low cloud cover)':
-				return 'wi-thunderstorm';
+				return 211;
 			case 'Tornado':
-				return 'wi-tornado';
+				return 781;
 			case 'Hurricane conditions':
-				return 'wi-hurricane';
+				return 782;
 			case 'Tropical storm conditions':
-				return 'wi-storm-showers';
+				return 522;
 			case 'Dust':
-				return 'wi-dust';
+				return 761;
 			case 'Smoke':
-				return 'wi-smoke';
+				return 711;
 			case 'Haze':
-				return 'wi-day-haze';
+				return 721;
 			case 'Hot':
-				return 'wi-hot';
+				return '';
 			case 'Cold':
+				return '';
 			case 'Blizzard':
-				return 'wi-snow';
+				return 622;
 			case 'Fog/mist':
-				return 'wi-fog';
+				return 741;
 			default:
 				return '';
 		}
 	}
-
 }

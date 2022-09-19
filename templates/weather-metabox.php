@@ -13,6 +13,10 @@ if ( 'comment' === $screen->id ) {
 
 $units    = get_option( 'sloc_measurements' );
 $imperial = ( 'imperial' === $units );
+$summary = Sloc_Weather_Data::weather_condition_codes( ifset( $weather['code'] ) );
+if ( ! $summary ) {
+	$summary = ifset( $weather['summary'], __( 'None', 'simple-location' ) );
+}
 if ( $imperial ) {
 	$weather = Weather_Provider::metric_to_imperial( $weather );
 }
@@ -21,7 +25,7 @@ if ( $imperial ) {
 
 <div class="location-section location-section-weather">
 	<span class="dashicons-before dashicons-palmtree" id="weather-title" title="<?php esc_html_e( 'Weather', 'simple-location' ); ?>"> <?php esc_html_e( 'Weather:', 'simple-location' ); ?></span>
-	<span id="weather-label"><?php echo esc_html( ifset( $weather['summary'], __( 'None', 'simple-location' ) ) ); ?></span>
+	<span id="weather-label"><?php echo esc_html( $summary ); ?></span>
 	<a href="#weather" class="edit-weather hide-if-no-js" role="button"><span aria-hidden="true">Edit</a><span class="screen-reader-text">weather</span>
 
 	<div id="weather-fields" class="field-row hide-if-js">
@@ -40,18 +44,11 @@ if ( $imperial ) {
 		</p>
 
 		<p class="field-row">
-			<label for="weather_summary" class="half">
-				<?php esc_html_e( 'Weather Description: ', 'simple-location' ); ?>
+			<label for="weather_code">
+				<?php esc_html_e( 'Condition', 'simple-location' ); ?>
 			</label>
-			<input class="widefat" type="text" name="weather_summary" id="weather_summary" value="<?php echo esc_html( ifset( $weather['summary'], '' ) ); ?>" />
-		</p>
-
-		<p class="field-row">
-			<label for="weather_icon">
-				<?php esc_html_e( 'Icon', 'simple-location' ); ?>
-			</label>
-			<select name="weather_icon" id="weather_icon">
-				<?php Weather_Provider::icon_select( ifset( $weather['icon'] ), true ); // phpcs:ignore ?>" />
+			<select name="weather_code" id="weather_code">
+				<?php Sloc_Weather_Data::code_select( ifset( $weather['code'] ), true ); // phpcs:ignore ?>
 			</select>
 		</p>
 

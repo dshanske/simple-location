@@ -79,15 +79,12 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		$datetime = $this->datetime( $time );
 
 		if ( $this->station_id && ! $this->latitude ) {
-			return $this->get_station_data();
+			return $this->get_station_data( $time );
 		}
 
-		// Use timeline or current endpoint.
-		$timeline = ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) );
-
-		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/meteostat.json';
+		$file = trailingslashit( Simple_Location_Plugin::$path ) . 'data/meteostat.json';
 		if ( ! file_exists( $file ) ) {
-			return new WP_Error( 'filesystem_error', "File doesn't exist" );
+			return new WP_Error( 'filesystem_error', "File doesn't exist", wp_json_encode( $file ) );
 		}
 		$data     = file_get_contents( $file );
 		$sitelist = json_decode( $data, true );
@@ -101,14 +98,14 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			}
 		);
 		if ( 100000 > $sitelist[0]['distance'] ) {
-			$this->station_id = $sitelist[0]['identifiers']['wmo'];
+			$this->station_id = $sitelist[0]['id'];
 			$this->station    = array_filter( $sitelist[0] );
 			$return           = self::get_station_data( $time );
 			unset( $this->station_id );
 			$this->set_cache( $return );
 			return $return;
 		}
-		return self::get_fallback_conditions( $datetime );
+		return self::get_fallback_conditions( $time );
 
 		$conditions = $this->get_cache();
 		if ( $conditions ) {
@@ -141,13 +138,13 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			$return['distance'] = round( geo_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
 		}
 
-		$time     = $this->datetime( $time );
-		$time     = $time->setTimezone( new DateTimeZone( 'GMT' ) );
-		$tomorrow = clone $time;
+		$datetime = $this->datetime( $time );
+		$datetime = $datetime->setTimezone( new DateTimeZone( 'GMT' ) );
+		$tomorrow = clone $datetime;
 		$tomorrow->add( new DateInterval( 'P1D' ) );
 		$args = array(
 			'station' => $this->station_id,
-			'start'   => $time->format( 'Y-m-d' ),
+			'start'   => $datetime->format( 'Y-m-d' ),
 			'end'     => $tomorrow->format( 'Y-m-d' ),
 
 		);
@@ -169,8 +166,8 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 
 		$json = $json['data'];
 
-		if ( array_key_exists( $time->format( 'G' ), $json ) ) {
-			$json = $json[ $time->format( 'G' ) ];
+		if ( array_key_exists( $datetime->format( 'G' ), $json ) ) {
+			$json = $json[ $datetime->format( 'G' ) ];
 		}
 
 		$return = array_merge( $return, $this->convert_data( $json ) );
@@ -201,7 +198,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		$return['rain']       = ifset_round( $json['prcp'], 2 );
 		$return['snow']       = self::cm_to_mm( ifset_round( $json['snow'], 2 ) );
 		$return['summary']    = ifset( $json['coco'] );
-		$return['icon']       = $this->icon_map( $json['coco'] );
+		$return['code']       = $this->code_map( $json['coco'] );
 
 		return array_filter( $return );
 	}
@@ -215,6 +212,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	public static function get_status( $code ) {
 		$conditions = array(
 			1  => __( 'Clear', 'simple-location' ),
+			2  => __( 'Fair', 'simple-location' ),
 			3  => __( 'Cloudy', 'simple-location' ),
 			4  => __( 'Overcast', 'simple-location' ),
 			5  => __( 'Fog', 'simple-location' ),
@@ -248,39 +246,40 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	}
 
 	/**
-	 * Return array of station data.
+	 * Convert Code
 	 *
-	 * @param string $code Weather type ID.
-	 * @return string Icon ID.
-	 */
-	private function icon_map( $code ) {
+	 * @param int $code Code.
+	 * @return string Textual Summary of Status Code.
+	 **/
+	public static function code_map( $code ) {
 		$conditions = array(
-			1  => 'wi-night-clear',
-			3  => 'wi-cloudy',
-			4  => 'wi-cloud',
-			5  => 'wi-fog',
-			6  => 'wi-fog',
-			7  => 'wi-sprinkles',
-			8  => 'wi-rain',
-			9  => 'wi-storm-showers',
-			10 => 'wi-showers',
-			11 => 'wi-storm-showers',
-			12 => 'wi-sleet',
-			13 => 'wi-sleet',
-			14 => 'wi-snow',
-			15 => 'wi-snow',
-			16 => 'wi-snow',
-			17 => 'wi-showers',
-			18 => 'wi-showers',
-			19 => 'wi-sleet',
-			20 => 'wi-sleet',
-			21 => 'wi-snow',
-			22 => 'wi-snow',
-			23 => 'wi-lightning',
-			24 => 'wi-hail',
-			25 => 'wi-thunderstorm',
-			26 => 'wi-thunderstorm',
-			27 => 'wi-rain-wind',
+			1  => 800,
+			2  => 800,
+			3  => 802,
+			4  => 804,
+			5  => 741,
+			6  => 741,
+			7  => 500,
+			8  => 503,
+			9  => 504,
+			10 => 511,
+			11 => 511,
+			12 => 611,
+			13 => 611,
+			14 => 600,
+			15 => 601,
+			16 => 602,
+			17 => 521,
+			18 => 522,
+			19 => 613,
+			20 => 613,
+			21 => 621,
+			22 => 622,
+			23 => 790,
+			24 => 624,
+			25 => 211,
+			26 => 212,
+			27 => 202,
 		);
 		if ( array_key_exists( $code, $conditions ) ) {
 			return $conditions[ $code ];
