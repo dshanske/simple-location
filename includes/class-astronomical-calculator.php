@@ -240,9 +240,9 @@ class Astronomical_Calculator {
 		$sunrise = $this->get_timestamp( $timestamp, 'sunrise' );
 		$sunset  = $this->get_timestamp( $timestamp, 'sunset' );
 		if ( self::between( $timestamp, $sunrise, $sunset ) ) {
-			return 'true';
+			return true;
 		}
-		return 'false';
+		return false;
 	}
 
 	/**
