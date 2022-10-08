@@ -338,7 +338,7 @@ class Geo_Data {
 	 * @param int    $id Object ID
 	 * @return array The first index is the latitude, the second the longitude, the third the altitude(optional).
 	 *
-	 * @since 4.6.0
+	 * @since 5.0.0
 	 */
 	public static function get_geopoint( $type, $id ) {
 		$latitude  = self::get_geodata( $type, $id, 'latitude' );
@@ -375,7 +375,7 @@ class Geo_Data {
 	 * @param int    $id Object ID
 	 * @return string|boolean Geo URI or false if no location.
 	 *
-	 * @since 4.6.0
+	 * @since 5.0.0
 	 */
 	public static function get_geouri( $type, $id ) {
 		$point = self::get_geopoint( $type, $id );

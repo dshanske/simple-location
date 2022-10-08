@@ -202,7 +202,7 @@ function sloc_get_object_from_id( $object_type, $id ) {
  *
  * @param object $object Object.
  *
- * @since 4.6.0
+ * @since 5.0.0
  */
 function sloc_get_id_from_object( $object ) {
 	if ( ! is_object( $object ) ) {
@@ -226,7 +226,7 @@ function sloc_get_id_from_object( $object ) {
  *
  * @param object $object Object.
  *
- * @since 4.6.0
+ * @since 5.0.0
  */
 function sloc_get_type_from_object( $object ) {
 	if ( ! is_object( $object ) ) {

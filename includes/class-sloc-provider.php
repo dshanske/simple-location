@@ -198,7 +198,7 @@ abstract class Sloc_Provider {
 	 *
 	 * @return string $name Returns name.
 	 *
-	 * @since 4.6.0
+	 * @since 5.0.0
 	 */
 	public function get_url() {
 		return $this->url;

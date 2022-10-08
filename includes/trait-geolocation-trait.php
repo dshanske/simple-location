@@ -8,7 +8,7 @@
 /**
  *
  *
- * @since 4.6.0
+ * @since 5.0.0
  */
 trait GeoLocation_Trait {
 	/**

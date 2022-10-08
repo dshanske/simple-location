@@ -53,7 +53,7 @@ class Loc_Config {
 	 /**
 	  * Store Elevation Providers.
 	  *
-	  * @since 4.6.0
+	  * @since 5.0.0
 	  * @var array
 	  */
 	private static $elevation = array();
@@ -62,7 +62,7 @@ class Loc_Config {
 	 /**
 	  * Store Venue providers.
 	  *
-	  * @since 4.6.0
+	  * @since 5.0.0
 	  * @var array
 	  */
 	private static $venue = array();
@@ -1271,7 +1271,7 @@ class Loc_Config {
 	 * @param string $provider Name of Provider to Be Returned. Optional.
 	 * @return Elevation_Provider $return Elevation Provider.
 	 *
-	 * @since 4.6.0
+	 * @since 5.0.0
 	 */
 	public static function elevation_provider( $provider = null ) {
 		if ( ! $provider ) {
@@ -1291,7 +1291,7 @@ class Loc_Config {
 	 * @param string $provider Name of Provider to Be Returned. Optional.
 	 * @return Venue_Provider $return Venue Provider.
 	 *
-	 * @since 4.6.0
+	 * @since 5.0.0
 	 */
 	public static function venue_provider( $provider = null ) {
 		if ( ! $provider ) {

@@ -173,7 +173,7 @@ class Sloc_Weather_Data {
 	 * @param array  $weather  An array of details about the weather at a location...see registered properties.
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
-	 * @since 4.6.0
+	 * @since 5.0.0
 	 */
 	public static function set_object_weatherdata( $type, $id, $key, $weather ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
@@ -238,7 +238,7 @@ class Sloc_Weather_Data {
 	 *
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
-	 * @since 4.6.0
+	 * @since 5.0.0
 	 */
 	public static function delete_object_weatherdata( $type, $id, $key ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
@@ -288,7 +288,7 @@ class Sloc_Weather_Data {
 	 * @param string $key Optional.
 	 * @return array $weather
 	 *
-	 * @since 4.6.0
+	 * @since 5.0.0
 	 */
 	public static function get_object_weatherdata( $type, $id, $key = '' ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
@@ -351,7 +351,7 @@ class Sloc_Weather_Data {
 	 * @param int    $id Object ID.
 	 * @return array $weather
 	 *
-	 * @since 4.6.0
+	 * @since 5.0.0
 	 */
 	public static function migrate_weather( $type, $id ) {
 		$weather = get_metadata( $type, $id, 'geo_weather', true );
@@ -372,6 +372,38 @@ class Sloc_Weather_Data {
 
 		if ( self::set_object_weatherdata( $type, $id, '', $weather ) ) {
 			delete_metadata( $type, $id, 'geo_weather' );
+		}
+	}
+
+
+	/**
+	 * Migrate Meta Data from Array to Individual Keys
+	 *
+	 * @return array $weather
+	 *
+	 * @since 5.0.0
+	 */
+	public static function bulk_migrate_weather() {
+		$posts = get_posts(
+			array(
+				'fields' => 'ids',
+				'meta_key' => 'geo_weather',
+				'meta_compare' => 'EXISTS'
+			)
+		);
+		foreach( $posts as $post ) {
+			self::migrate_weather( 'post', $post );
+		}
+
+		$comments = get_comments(
+			array(
+				'fields' => 'ids',
+				'meta_key' => 'geo_weather',
+				'meta_compare' => 'EXISTS'
+			)
+		);
+		foreach( $comments as $comment ) {
+			self::migrate_weather( 'comment', $comment );
 		}
 	}
 

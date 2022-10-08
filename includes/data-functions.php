@@ -34,6 +34,17 @@ function get_post_geodata( $post = null, $key = '' ) {
 	return Geo_Data::get_geodata( 'post', $post->ID, $key );
 }
 
+function get_array_post_geodata( $posts ) {
+	if ( ! wp_is_numeric_array( $posts ) ) {
+		return false;
+	}
+	$return = array();
+	foreach( $posts as $post_id ) {
+		$return[ $post_id ] = get_post_geodata( $post_id );
+	}
+	return $return;
+}
+
 /*
  * Returns whether the post occurred in the daytime or not and stores value.
  *
