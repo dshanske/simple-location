@@ -154,6 +154,51 @@ class Post_Venue {
 	}
 
 	/**
+	 * Return Nearby Venues
+	 *
+	 * @param float $lat Latitude.
+	 * @param float $lng Longitude.
+	 * @return array Return the IDs of all nearby venues
+	 */
+	public static function nearby( $lat, $lng ) {
+		/**
+		 * Short-circuits the checking for a venue if it is not stored as normal.
+		 *
+		 * @param mixed  $value     The boolean value as to whether someone is at a venue.
+		 *                          Default null.
+		 * @param float $lat Latitude.
+		 * @param float $lnt Longitude.
+		 */
+		$check = apply_filters( 'pre_nearby_venue', null, $lat, $lng );
+
+		if ( ! is_null( $check ) ) {
+			return $check;
+		}
+
+		$box = geo_radius_box( $lat, $lng );
+		return get_posts(
+			array(
+				'post_type'  => 'venue',
+				'fields'     => 'ids',
+				'meta_query' => array(
+					array(
+						'key'     => 'geo_latitude',
+						'compare' => 'BETWEEN',
+						'type'    => 'DECIMAL( 10, 7 )',
+						'value'   => array( $box[0], $box[2] ),
+					),
+					array(
+						'key'     => 'geo_longitude',
+						'compare' => 'BETWEEN',
+						'type'    => 'DECIMAL(10,7)',
+						'value'   => array( $box[1], $box[3] ),
+					),
+				),
+			)
+		);
+	}
+
+	/**
 	 * Checks if a Location is at a venue.
 	 *
 	 * @param float $lat Latitude.

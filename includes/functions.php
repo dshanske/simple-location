@@ -267,6 +267,29 @@ function geo_distance( $lat1, $lng1, $lat2, $lng2 ) {
 		return ( 6378100 * acos( cos( deg2rad( $lat1 ) ) * cos( deg2rad( $lat2 ) ) * cos( deg2rad( $lng2 ) - deg2rad( $lng1 ) ) + sin( deg2rad( $lat1 ) ) * sin( deg2rad( $lat2 ) ) ) );
 }
 
+/**
+ * Returns a bounding box around a location
+ *
+ * @param float $lat1 Latitude 1.
+ * @param float $lng1 Longitude 1.
+ * @param float $lat2 Latitude 2.
+ * @param float $lng2 Longitude 2.
+ * @return float $meters Distance in meters between the two points.
+ *
+ * @since 1.0.0
+ */
+function geo_radius_box( $lat, $lng, $radius = 50 ) {
+	$lat = floatval( $lat );
+	$lng = floatval( $lng );
+	$r = $radius / 6378100;
+	return array( 
+		$lat - rad2deg( $r / cos( deg2rad( $lat ) ) ),
+		$lng - rad2deg( $r / cos( deg2rad( $lng ) ) ),
+		$lat + rad2deg( $r ),
+		$lng + rad2deg( $r )
+	);
+}
+
 
 /**
  * Advises if the two points are within a radius.
@@ -283,9 +306,9 @@ function geo_distance( $lat1, $lng1, $lat2, $lng2 ) {
  * @since 1.0.0
  */
 function geo_in_radius( $lat1, $lng1, $lat2, $lng2, $meters = 50 ) {
-/*	if ( ! is_numeric( $meters ) ) {
+	if ( ! is_numeric( $meters ) ) {
 		$meters = 50;
-	} */
+	}
 	return ( geo_distance( $lat1, $lng1, $lat2, $lng2 ) <= $meters );
 }
 

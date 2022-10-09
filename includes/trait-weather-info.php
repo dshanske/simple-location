@@ -416,7 +416,7 @@ trait Weather_Info_Trait {
 			'900' => __( 'Unknown Precipitation', 'simple-location' ),
 		);
 
-		if ( is_null( $code ) ) {
+		if ( ! is_numeric( $code ) ) {
 			return $map;
 		}
 

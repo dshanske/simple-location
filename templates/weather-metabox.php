@@ -13,10 +13,14 @@ if ( 'comment' === $screen->id ) {
 
 $units    = get_option( 'sloc_measurements' );
 $imperial = ( 'imperial' === $units );
-$summary = Sloc_Weather_Data::weather_condition_codes( ifset( $weather['code'] ) );
-if ( ! $summary ) {
-	$summary = ifset( $weather['summary'], __( 'None', 'simple-location' ) );
+if( array_key_exists( 'code', $weather ) ) {
+	$summary = Sloc_Weather_Data::weather_condition_codes( ifset( $weather['code'] ) );
 }
+
+if ( empty( $summary ) ) {
+	$summary = __( 'None', 'simple-location' );
+}
+
 if ( $imperial ) {
 	$weather = Weather_Provider::metric_to_imperial( $weather );
 }
