@@ -76,14 +76,23 @@ class Location_Plugins {
 		if ( isset( $meta['geo_longitude'] ) && $meta['geo_latitude'] ) {
 			is_day_post( $args['ID'] ); // Set whether this is day or not.
 			if ( ! isset( $properties['location-visibility'] ) ) {
-				$zone = Location_Zones::in_zone( $meta['geo_latitude'], $meta['geo_longitude'] );
-				if ( ! empty( $zone ) ) {
-					$meta['geo_address'] = $zone;
-					set_post_geodata( $args['ID'], 'address', $zone );
+				$venue = Post_Venue::at_venue( $meta['geo_latitude'], $meta['geo_longitude'] );
+				if ( false !== $venue ) {
+					update_post_meta( $args['ID'], 'venue_id', $venue );
 					set_post_geodata( $args['ID'], 'visibility', 'protected' );
-					update_post_meta( $args['ID'], 'geo_zone', $zone );
+					$meta['geo_address'] = get_the_title( $venue );
+					set_post_geodata( $args['ID'], 'address', $meta['geo_address'] );
 				} else {
-					set_post_geodata( $args['ID'], 'visibility', 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
+					$zones = get_option( 'sloc_zones', array() );
+					$zone = Location_Zones::in_zone( $meta['geo_latitude'], $meta['geo_longitude'] );
+					if ( ! empty( $zone ) ) {
+						$meta['geo_address'] = $zone;
+						set_post_geodata( $args['ID'], 'address', $zone );
+						set_post_geodata( $args['ID'], 'visibility', 'protected' );
+						update_post_meta( $args['ID'], 'geo_zone', $zone );
+					} else {
+						set_post_geodata( $args['ID'], 'visibility', 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
+					}
 				}
 			}
 			// If altitude is above 1000m always show the higher zoom level.

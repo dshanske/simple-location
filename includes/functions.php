@@ -283,6 +283,9 @@ function geo_distance( $lat1, $lng1, $lat2, $lng2 ) {
  * @since 1.0.0
  */
 function geo_in_radius( $lat1, $lng1, $lat2, $lng2, $meters = 50 ) {
+/*	if ( ! is_numeric( $meters ) ) {
+		$meters = 50;
+	} */
 	return ( geo_distance( $lat1, $lng1, $lat2, $lng2 ) <= $meters );
 }
 

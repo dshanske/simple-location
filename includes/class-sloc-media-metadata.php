@@ -236,20 +236,29 @@ class Sloc_Media_Metadata {
 			if ( ! array_key_exists( 'geo_altitude', $update ) ) {
 				$update['geo_altitude'] = $reverse->elevation();
 			}
-			$zone = Location_Zones::in_zone( $data['location']['latitude'], $data['location']['longitude'] );
-			if ( ! empty( $zone ) ) {
-				$update['geo_address'] = $zone;
-				set_geo_visibility( 'post', $post_id, 'protected' );
-				$update['geo_zone'] = $zone;
+
+			$venue = Post_Venue::at_venue( $meta['geo_latitude'], $meta['geo_longitude'] );
+			if ( false !== $venue ) {
+				update_post_meta( $args['ID'], 'venue_id', $venue );
+				set_post_geodata( $args['ID'], 'visibility', 'protected' );
+				$meta['geo_address'] = get_the_title( $venue );
+				set_post_geodata( $args['ID'], 'address', $meta['geo_address'] );
 			} else {
-				set_geo_visibility( 'post', $post_id, 'public' );
+				$zone = Location_Zones::in_zone( $data['location']['latitude'], $data['location']['longitude'] );
+				if ( ! empty( $zone ) ) {
+					$update['geo_address'] = $zone;
+					set_geo_visibility( 'post', $post_id, 'protected' );
+					$update['geo_zone'] = $zone;
+				} else {
+					set_geo_visibility( 'post', $post_id, 'public' );
+				}
 			}
+			$update = array_filter( $update );
+			foreach ( $update as $key => $value ) {
+				update_post_meta( $post_id, $key, $value );
+			}
+			return $meta;
 		}
-		$update = array_filter( $update );
-		foreach ( $update as $key => $value ) {
-			update_post_meta( $post_id, $key, $value );
-		}
-		return $meta;
 	}
 
 }

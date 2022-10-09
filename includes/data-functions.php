@@ -31,6 +31,9 @@ function set_term_geodata( $id, $key, $geodata ) {
  */
 function get_post_geodata( $post = null, $key = '' ) {
 	$post = get_post( $post );
+	if ( ! $post ) {
+		return array();
+	} 
 	return Geo_Data::get_geodata( 'post', $post->ID, $key );
 }
 

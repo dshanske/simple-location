@@ -415,11 +415,13 @@ trait Weather_Info_Trait {
 			'804' => __( 'Overcast Clouds', 'simple-location' ),
 			'900' => __( 'Unknown Precipitation', 'simple-location' ),
 		);
-		if ( array_key_exists( $code, $map ) ) {
-			return $map[ $code ];
-		}
+
 		if ( is_null( $code ) ) {
 			return $map;
+		}
+
+		if ( array_key_exists( $code, $map ) ) {
+			return $map[ $code ];
 		}
 		return '';
 	}
