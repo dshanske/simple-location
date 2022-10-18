@@ -500,6 +500,7 @@ class REST_Geo {
 				$reverse_adr = array(
 					'venue_id' => $venue,
 					'display-name' => get_the_title( $venue ),
+					'nearby' => Post_Venue::nearby( $params['latitude'], $params['longitude'] )
 				);
 				$visibility = get_post_geodata( $venue, 'visibility' );
 				// A private venue becomes protected as you do not want to show the coordinates but you would want to show the label
