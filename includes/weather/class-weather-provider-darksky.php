@@ -98,6 +98,9 @@ class Weather_Provider_DarkSky extends Weather_Provider {
 			);
 
 			$response = $this->fetch_json( $url, $args );
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
 
 			if ( WP_DEBUG ) {
 				$return['raw'] = $response;

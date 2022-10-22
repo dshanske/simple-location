@@ -147,7 +147,6 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				}
 				$return['code']    = (int) $current['weather']['id'];
 				$return['summary'] = $current['weather']['description'];
-				$return['icon']    = $this->icon_map( $return['code'] );
 			}
 
 			$return = array_filter( $this->extra_data( $return ) );
