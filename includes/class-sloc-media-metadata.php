@@ -244,14 +244,7 @@ class Sloc_Media_Metadata {
 				$meta['geo_address'] = get_the_title( $venue );
 				set_post_geodata( $args['ID'], 'address', $meta['geo_address'] );
 			} else {
-				$zone = Location_Zones::in_zone( $data['location']['latitude'], $data['location']['longitude'] );
-				if ( ! empty( $zone ) ) {
-					$update['geo_address'] = $zone;
-					set_geo_visibility( 'post', $post_id, 'protected' );
-					$update['geo_zone'] = $zone;
-				} else {
-					set_geo_visibility( 'post', $post_id, 'public' );
-				}
+				set_geo_visibility( 'post', $post_id, 'public' );
 			}
 			$update = array_filter( $update );
 			foreach ( $update as $key => $value ) {

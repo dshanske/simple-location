@@ -509,45 +509,36 @@ class REST_Geo {
 				}
 				$reverse_adr['visibility'] = $visibility;
 			} else {
-				$zone    = Location_Zones::in_zone( $params['latitude'], $params['longitude'] );
-				if ( ! empty( $zone ) ) {
-					$reverse_adr = array(
-						'display-name' => $zone,
-						'visibility'   => 'protected',
+				$reverse = Loc_Config::geo_provider( $provider );
+				if ( ! $reverse ) {
+					return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
+				}
+				$reverse->set( $params );
+				$reverse_adr = $reverse->reverse_lookup();
+				if ( is_wp_error( $reverse_adr ) ) {
+					return $reverse_adr;
+				}
+				$reverse_adr['map_url']    = $map->get_the_static_map();
+				$reverse_adr['map_link']   = $map->get_the_map_url();
+				$reverse_adr['map_return'] = $map->get_the_map();
+				$term                      = Location_Taxonomy::get_location( $reverse_adr, $term_lookup );
+				if ( $term ) {
+					$reverse_adr['term_id']      = $term;
+					$reverse_adr['term_details'] = Location_Taxonomy::get_location_data( $term );
+					$reverse_adr['terms']        = wp_dropdown_categories(
+						array(
+							'echo'             => 0,
+							'taxonomy'         => 'location',
+							'class'            => 'widefat',
+							'hide_empty'       => 0,
+							'name'             => 'tax_input[location][]',
+							'id'               => 'location_dropdown',
+							'orderby'          => 'name',
+							'hierarchical'     => true,
+							'selected'         => $term,
+							'show_option_none' => __( 'No Location', 'simple-location' ),
+						)
 					);
-				} else {
-					$reverse = Loc_Config::geo_provider( $provider );
-					if ( ! $reverse ) {
-						return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
-					}
-					$reverse->set( $params );
-					$reverse_adr = $reverse->reverse_lookup();
-					if ( is_wp_error( $reverse_adr ) ) {
-						return $reverse_adr;
-					}
-					$reverse_adr['map_url']    = $map->get_the_static_map();
-					$reverse_adr['map_link']   = $map->get_the_map_url();
-					$reverse_adr['map_return'] = $map->get_the_map();
-					$term                      = Location_Taxonomy::get_location( $reverse_adr, $term_lookup );
-					if ( $term ) {
-						$reverse_adr['term_id']      = $term;
-						$reverse_adr['term_details'] = Location_Taxonomy::get_location_data( $term );
-						$reverse_adr['terms']        = wp_dropdown_categories(
-							array(
-								'echo'             => 0,
-								'taxonomy'         => 'location',
-								'class'            => 'widefat',
-								'hide_empty'       => 0,
-								'name'             => 'tax_input[location][]',
-								'id'               => 'location_dropdown',
-								'orderby'          => 'name',
-								'hierarchical'     => true,
-								'selected'         => $term,
-								'show_option_none' => __( 'No Location', 'simple-location' ),
-							)
-						);
-
-					}
 				}
 			}
 			if ( isset( $params['weather'] ) && ( 'no' !== $params['weather'] ) ) {

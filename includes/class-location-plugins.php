@@ -82,17 +82,9 @@ class Location_Plugins {
 					set_post_geodata( $args['ID'], 'visibility', 'protected' );
 					$meta['geo_address'] = get_the_title( $venue );
 					set_post_geodata( $args['ID'], 'address', $meta['geo_address'] );
-				} else {
-					$zones = get_option( 'sloc_zones', array() );
-					$zone = Location_Zones::in_zone( $meta['geo_latitude'], $meta['geo_longitude'] );
-					if ( ! empty( $zone ) ) {
-						$meta['geo_address'] = $zone;
-						set_post_geodata( $args['ID'], 'address', $zone );
-						set_post_geodata( $args['ID'], 'visibility', 'protected' );
-						update_post_meta( $args['ID'], 'geo_zone', $zone );
-					} else {
-						set_post_geodata( $args['ID'], 'visibility', 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
-					}
+				} 
+				else {
+					set_post_geodata( $args['ID'], 'visibility', 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
 				}
 			}
 			// If altitude is above 1000m always show the higher zoom level.
@@ -214,16 +206,21 @@ class Location_Plugins {
 		if ( ! isset( $input['lat'] ) && ! isset( $input['lon'] ) ) {
 			return $input;
 		}
+
+		$venues = array();
+		$reverse_adr = array();
 		$reverse = Loc_Config::geo_provider();
-		$reverse->set( $input['lat'], $input['lon'] );
-		$zone = Location_Zones::in_zone( $input['lat'], $input['lon'] );
-		if ( empty( $zone ) ) {
+		if ( $reverse ) {
+			$reverse->set( $input['lat'], $input['lon'] );
 			$reverse_adr = $reverse->reverse_lookup();
-		} else {
-			$reverse_adr = array( 'display-name' => $zone );
+		}
+		$venue = Loc_Config::venue_provider( $provider );
+		if ( $venue ) {
+			$venue->set( $params );
+			$venues = $venue->reverse_lookup();
 		}
 		return array(
-			'venues' => array(),
+			'venues' => $venues,
 			'geo'    => array(
 				'label'      => ifset( $reverse_adr['display-name'] ),
 				'latitude'   => $input['lat'],

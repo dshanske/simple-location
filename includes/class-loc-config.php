@@ -427,7 +427,6 @@ class Loc_Config {
 
 		<?php self::tab_link( 'general', __( 'General', 'simple-location' ), $active_tab ); ?>
 		<?php self::tab_link( 'providers', __( 'Providers', 'simple-location' ), $active_tab ); ?>
-		<?php self::tab_link( 'zones', __( 'Zones', 'simple-location' ), $active_tab ); ?>
 		<?php self::tab_link( 'stations', __( 'Stations', 'simple-location' ), $active_tab ); ?>
 		<?php self::tab_link( 'api', __( 'API Keys', 'simple-location' ), $active_tab ); ?>
 		<?php
@@ -459,10 +458,6 @@ class Loc_Config {
 				case 'providers':
 					settings_fields( 'sloc_providers' );
 					do_settings_sections( 'sloc_providers' );
-					break;
-				case 'zones':
-					settings_fields( 'sloc_zones' );
-					do_settings_sections( 'sloc_zones' );
 					break;
 				case 'stations':
 					settings_fields( 'sloc_stations' );

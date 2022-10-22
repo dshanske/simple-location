@@ -3,15 +3,16 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Author: David Shanske
- * Author URI: https://david.shanske.com
+ * Version: 5.0.0
  * Requires at least: 4.9
  * Requires PHP: 5.6
- * Text Domain: simple-location
- * Domain Path:  /languages
+ * Requires CP: 1.4.3
+ * Author: David Shanske
+ * Author URI: https://david.shanske.com
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 4.5.0
+ * Text Domain: simple-location
+ * Domain Path:  /languages
  *
  * @package Simple_Location
  */
@@ -223,7 +224,6 @@ class Simple_Location_Plugin {
 			'class-timezone-result.php',
 			'class-astronomical-calculator.php', // Calculates sunrise sunset etc.
 			'class-location-plugins.php',
-			'class-location-zones.php',
 			'class-loc-timezone.php',
 			'class-airport-location.php',
 			'compat-functions.php',
