@@ -61,9 +61,22 @@ class Post_Venue {
 
 		register_meta(
 			'post',
+			'venue_id',
+			array(
+				'object_subtype'    => 'attachment',
+				'type'              => 'number',
+				'description'       => __( 'Venue Post ID', 'simple-location' ),
+				'sanitize_callback' => 'intval',
+				'single'            => true,
+				'show_in_rest'      => true,
+			)
+		);
+
+		register_meta(
+			'post',
 			'venue_radius',
 			array(
-				'object_subtype'    => 'post',
+				'object_subtype'    => 'venue',
 				'type'              => 'number',
 				'description'       => __( 'Radius around the Venue in meters', 'simple-location' ),
 				'sanitize_callback' => 'intval',
