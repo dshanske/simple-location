@@ -8,9 +8,17 @@
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
 	$geodata = get_comment_geodata( $comment->comment_ID );
+	$type = '';
 } else { 
+	$type = get_post_type();
 	$geodata = get_post_geodata();
+	if ( 'venue' === $type ) {
+		$geodata['venue_radius'] = get_post_meta( get_the_ID(), 'venue_radius', true );
+	} else {
+		$geodata['venue_id'] = get_post_meta( get_the_ID(), 'venue_id', true );
+	}
 }
+
 
 $location     = wp_get_object_terms( get_the_ID(), 'location', array( 'fields' => 'ids' ) );
 $location     = count( $location ) >= 1 ? $location[0] : '';
@@ -19,9 +27,7 @@ $display_name = ifset( $geodata['address'] );
 $public     = array_key_exists( 'visibility', $geodata ) ? $geodata['visibility'] : get_option( 'geo_public' );
 $choices    = Geo_Base::geo_public();
 $map_return = '';
-$zone       = '';
 if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
-	$zone         = Location_Zones::in_zone( $geodata['latitude'], $geodata['longitude'] );
 	$map_provider = Loc_Config::map_provider();
 	$map_args     = array(
 		'latitude'  => ifset( $geodata['latitude'] ),
@@ -64,6 +70,19 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 	);
 	?>
 
+	<?php if ( 'venue' === $type ) { ?>
+		<label for="venue_radius" class="quarter">
+			<?php esc_html_e( 'Radius Around Venue:', 'simple-location' ); ?>
+			<input class="widefat" type="number" name="venue_radius" id="venue_radius" step="1" min="1" value="<?php echo esc_attr( ifset( $geodata['venue_radius'], '' ) ); ?>" />
+		</label>
+	<?php } else { ?>
+		<label for="venue_id" class="quarter">
+			<?php esc_html_e( 'Venue:', 'simple-location' ); ?>
+			<input class="widefat" type="number" name="venue_id" id="venue_id" step="1" value="<?php echo esc_attr( ifset( $geodata['venue_id'], '' ) ); ?>" />
+		</label>
+	<?php } ?>
+
+
 		<label for="latitude" class="quarter">
 			<?php esc_html_e( 'Latitude:', 'simple-location' ); ?>
 			<input type="text" name="latitude" id="latitude" class="widefat" value="<?php echo esc_html( ifset( $geodata['latitude'], '' ) ); ?>" />
@@ -79,6 +98,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			<?php esc_html_e( 'Altitude:', 'simple-location' ); ?>
 			<input class="widefat" type="number" name="altitude" id="altitude" step="0.01" value="<?php echo esc_attr( ifset( $geodata['altitude'], '' ) ); ?>" />
 		</label>
+
 		<p class="field-row">
 			<label for="location_icon">
 				<?php esc_html_e( 'Icon:', 'simple-location' ); ?>

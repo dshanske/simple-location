@@ -167,6 +167,10 @@ jQuery( document ).ready( function( $ ) {
 						$( '#altitude' ).val( response.altitude );
 					}
 
+					if ( 'venue_id' in response && ( '' === $( '#venue_id' ).val() ) ) {
+						$( '#venue_id' ).val( response.venue_id );
+					}
+
 					if ( 'terms' in response ) {
 						$( '#location_dropdown' ).replaceWith( response.terms );
 					}

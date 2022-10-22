@@ -497,12 +497,29 @@ class REST_Geo {
 			$map->set( array_filter( $map_args ) );
 			$venue = Post_Venue::at_venue( $params['latitude'], $params['longitude'] );
 			if ( false !== $venue ) {
+				$term        = Location_Taxonomy::get_location_taxonomy( $venue );
 				$reverse_adr = array(
-					'venue_id' => $venue,
+					'venue_id'     => $venue,
 					'display-name' => get_the_title( $venue ),
-					'nearby' => Post_Venue::nearby( $params['latitude'], $params['longitude'] )
+					'term_id'      => $term->term_id,
+					'term_details' => Location_Taxonomy::get_location_data( $term->term_id ),
+					'terms'        => wp_dropdown_categories(
+						array(
+							'echo'             => 0,
+							'taxonomy'         => 'location',
+							'class'            => 'widefat',
+							'hide_empty'       => 0,
+							'name'             => 'tax_input[location][]',
+							'id'               => 'location_dropdown',
+							'orderby'          => 'name',
+							'hierarchical'     => true,
+							'selected'         => $term->term_id,
+							'show_option_none' => __( 'No Location', 'simple-location' ),
+						)
+					),
+					'nearby'       => Post_Venue::nearby( $params['latitude'], $params['longitude'] ),
 				);
-				$visibility = get_post_geodata( $venue, 'visibility' );
+				$visibility  = get_post_geodata( $venue, 'visibility' );
 				// A private venue becomes protected as you do not want to show the coordinates but you would want to show the label
 				if ( 'private' === $visibility ) {
 					$visibility = 'protected';
