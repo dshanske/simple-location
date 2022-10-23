@@ -48,7 +48,7 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 			'namedetails'     => '1',
 			'lat'             => $this->latitude,
 			'lon'             => $this->longitude,
-			'zoom'            => $this->reverse_zoom,
+			'zoom'            => 18,
 			'accept-language' => get_bloginfo( 'language' ),
 		);
 		$url  = 'https://nominatim.openstreetmap.org/reverse';
@@ -58,11 +58,18 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		return array(
-			'items' => array(
-				$this->address_to_hcard( $json ),
-			),
-		);
+
+		$return = array();
+		if ( wp_is_numeric_array( $json ) ) {
+			foreach( $json as $item ) {
+				$return[] = $this->address_to_hcard( $item );
+			}
+			return array( 'items' => $return );
+		} else {
+			return array(
+				'items' => array( $this->address_to_hcard( $json ) )
+			);
+		}
 	}
 
 	/**
