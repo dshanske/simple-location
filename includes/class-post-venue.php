@@ -212,6 +212,30 @@ class Post_Venue {
 	}
 
 	/**
+	 * Return Nearby Venues in a Select List
+	 *
+	 * @param float $lat Latitude.
+	 * @param float $lng Longitude.
+	 * @param int $current Current venue.
+	 * @return array Return select
+	 */
+	public static function nearby_select( $lat, $lng, $current = 0, $echo = true ) {
+		$current = intval( $current );
+		$venues = self::nearby( $lat, $lng );
+		$return = '<select name="venue_id" id="venue_id">';
+		$return .= sprintf( '<option value="0" %1$s>%2$s</option>', selected( $current, 0, false ), esc_html__( 'None', 'simple-location' ) );
+		foreach ( $venues as $venue ) {
+			$venue = intval( $venue );
+			$return .= sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $venue ), selected( $current, $venue, false ), esc_html( get_the_title( $venue ) ) );
+		}
+		$return .= '</select>';
+		if ( $echo ) {
+			echo $return;
+		} 
+		return $return;
+	}
+
+	/**
 	 * Checks if a Location is at a venue.
 	 *
 	 * @param float $lat Latitude.

@@ -517,7 +517,7 @@ class REST_Geo {
 							'show_option_none' => __( 'No Location', 'simple-location' ),
 						)
 					),
-					'nearby'       => Post_Venue::nearby( $params['latitude'], $params['longitude'] ),
+					'nearby_select' => Post_Venue::nearby_select( $params['latitude'], $params['longitude'], $venue, false )
 				);
 				$visibility  = get_post_geodata( $venue, 'visibility' );
 				// A private venue becomes protected as you do not want to show the coordinates but you would want to show the label
@@ -575,6 +575,11 @@ class REST_Geo {
 					$reverse_adr['altitude'] = $provider->elevation();
 				}
 			}
+
+			if ( ! isset( $reverse_adr['nearby_select'] ) ) {
+				$reverse_adr['nearby_select'] = Post_Venue::nearby_select( $params['latitude'], $params['longitude'], 0, false );
+			}
+
 			return array_filter( $reverse_adr );
 		} elseif ( isset( $params['address'] ) ) {
 			$geocode = Loc_Config::geo_provider( $provider );

@@ -340,6 +340,7 @@ class Simple_Location_Plugin {
 		$providers = array(
 			'class-venue-provider-nominatim.php', // Nominatim.
 			'class-venue-provider-google.php', // Google.
+			'class-venue-provider-locationiq.php',
 		);
 		self::register_providers( $providers, 'includes/venue/' );
 	}
