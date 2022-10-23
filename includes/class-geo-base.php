@@ -1110,21 +1110,21 @@ class Geo_Base {
 		if ( has_term( '', 'venue' ) ) {
 			return;
 		}
-		self::save_meta( 'post', $post_id );
 		if ( 'venue' !== get_post_type( $post_id ) ) {
 			is_day_post( $post_id );
+			if ( isset( $_POST['venue_id'] ) && is_numeric( $_POST['venue_id'] ) && 0 !== intval( $_POST['venue_id'] ) ) {
+				update_post_meta( $post_id, 'venue_id', intval( $_POST['venue_id'] ) );
+			} else {
+				delete_post_meta( $post_id, 'venue_id' );
+			}
+		} else {
 			if ( isset( $_POST['venue_radius'] ) && is_numeric( $_POST['venue_radius'] ) ) {
 				update_post_meta( $post_id, 'venue_radius', intval( $_POST['venue_radius'] ) );
 			} else {
 				delete_post_meta( $post_id, 'venue_radius' );
 			}
-		} else {
-			if ( isset( $_POST['venue_id'] ) && is_numeric( $_POST['venue_id'] ) ) {
-				update_post_meta( $post_id, 'venue_id', intval( $_POST['venue_id'] ) );
-			} else {
-				delete_post_meta( $post_id, 'venue_id' );
-			}
 		}
+		self::save_meta( 'post', $post_id );
 	}
 
 

@@ -174,6 +174,9 @@ jQuery( document ).ready( function( $ ) {
 					if ( 'terms' in response ) {
 						$( '#location_dropdown' ).replaceWith( response.terms );
 					}
+					if ( 'nearby_select' in response ) {
+						$( '#venue_id' ).replaceWith( response.nearby_select );
+					}
 
 					if ( 'visibility' in response ) {
 						$( '#location-visibility' ).val( response[ 'visibility' ] ); // eslint-disable-line dot-notation

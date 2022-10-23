@@ -53,7 +53,6 @@ class Post_Venue {
 				'object_subtype'    => 'post',
 				'type'              => 'number',
 				'description'       => __( 'Venue Post ID', 'simple-location' ),
-				'sanitize_callback' => 'intval',
 				'single'            => true,
 				'show_in_rest'      => true,
 			)
@@ -66,7 +65,6 @@ class Post_Venue {
 				'object_subtype'    => 'attachment',
 				'type'              => 'number',
 				'description'       => __( 'Venue Post ID', 'simple-location' ),
-				'sanitize_callback' => 'intval',
 				'single'            => true,
 				'show_in_rest'      => true,
 			)
@@ -79,7 +77,6 @@ class Post_Venue {
 				'object_subtype'    => 'venue',
 				'type'              => 'number',
 				'description'       => __( 'Radius around the Venue in meters', 'simple-location' ),
-				'sanitize_callback' => 'intval',
 				'single'            => true,
 				'show_in_rest'      => true,
 				'default'           => 50,
