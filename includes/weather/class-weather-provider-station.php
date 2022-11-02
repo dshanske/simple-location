@@ -117,6 +117,9 @@ class Weather_Provider_Station extends Weather_Provider {
 	 * @return mixed The value or empty string.
 	 */
 	public static function key( $array, $key ) {
+		if ( ! is_array( $array ) ) {
+			return '';
+		}
 		if ( array_key_exists( $key, $array ) ) {
 			return $array[ $key ];
 		}
@@ -132,10 +135,10 @@ class Weather_Provider_Station extends Weather_Provider {
 	 *  @type string $name Zone Name.
 	 *  @type float $latitude Latitude.
 	 *  @type float $longitude Longitude.
-	 *  @type foat $radius Radius.
+	 *  @type float $radius Radius.
 	 * }
 	 */
-	private static function station_inputs( $int, $value = '' ) {
+	private static function station_inputs( $int, $value = array() ) {
 		$output = '<input type="text" name="%1$s[%2$s][%3$s]" id="%4$s" value="%5$s" placeholder="%6$s" />';
 		$name   = 'sloc_stations';
 		echo '<li>';
