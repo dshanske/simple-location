@@ -396,6 +396,7 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function simloc_options() {
+		Sloc_Weather_Data::bulk_migrate_weather();
 		$posts = get_posts(
 			array(
 				'meta_query' => array(
