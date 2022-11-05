@@ -8,9 +8,9 @@
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
 	$geodata = get_comment_geodata( $comment->comment_ID );
-	$type = '';
-} else { 
-	$type = get_post_type();
+	$type    = '';
+} else {
+	$type    = get_post_type();
 	$geodata = get_post_geodata();
 	if ( 'venue' === $type ) {
 		$geodata['venue_radius'] = get_post_meta( get_the_ID(), 'venue_radius', true );
@@ -137,4 +137,4 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 		<a href="#location-visibility" class="cancel-location-visibility hide-if-no-js button-cancel">Cancel</a>
 	</div><!-- #location-visibility-select -->
 </div><!-- .location-section -->
-<?php 
+<?php

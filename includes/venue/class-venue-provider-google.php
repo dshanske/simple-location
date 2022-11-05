@@ -52,7 +52,7 @@ class Venue_Provider_Google extends Venue_Provider {
 		$args = array(
 			'location' => $this->latitude . ',' . $this->longitude,
 			'radius'   => 200,
-			'type' => 'establishment',
+			'type'     => 'establishment',
 			'language' => get_bloginfo( 'language' ),
 			'key'      => $this->api,
 		);

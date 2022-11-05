@@ -33,7 +33,7 @@ function get_post_geodata( $post = null, $key = '' ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
 		return array();
-	} 
+	}
 	return Geo_Data::get_geodata( 'post', $post->ID, $key );
 }
 
@@ -42,7 +42,7 @@ function get_array_post_geodata( $posts ) {
 		return false;
 	}
 	$return = array();
-	foreach( $posts as $post_id ) {
+	foreach ( $posts as $post_id ) {
 		$return[ $post_id ] = get_post_geodata( $post_id );
 	}
 	return $return;
@@ -54,15 +54,15 @@ function get_array_post_geodata( $posts ) {
  */
 function is_day_post( $post = null ) {
 	$post = get_post( $post );
-	$day = get_post_geodata( $post, 'day' );
+	$day  = get_post_geodata( $post, 'day' );
 	if ( ! empty( $day ) ) {
 		return $day;
 	}
-	$latitude = get_post_geodata( $post, 'latitude' );
+	$latitude  = get_post_geodata( $post, 'latitude' );
 	$longitude = get_post_geodata( $post, 'longitude' );
-	$altitude = get_post_geodata( $post, 'altitude' );
-	$calc               = new Astronomical_Calculator( $latitude, $longitude, $altitude );
-	$day      = $calc->is_daytime( get_post_timestamp( $post ) );
+	$altitude  = get_post_geodata( $post, 'altitude' );
+	$calc      = new Astronomical_Calculator( $latitude, $longitude, $altitude );
+	$day       = $calc->is_daytime( get_post_timestamp( $post ) );
 	set_post_geodata( $post, 'day', $day ? 1 : 0 );
 	return $day;
 }
@@ -83,15 +83,15 @@ function get_comment_geodata( $comment = null, $key = '' ) {
  */
 function is_day_comment( $comment = null ) {
 	$comment = get_comment( $comment );
-	$day = get_comment_geodata( $comment, 'day' );
+	$day     = get_comment_geodata( $comment, 'day' );
 	if ( ! empty( $day ) ) {
 		return $day;
 	}
-	$latitude = get_comment_geodata( $post, 'latitude' );
+	$latitude  = get_comment_geodata( $post, 'latitude' );
 	$longitude = get_comment_geodata( $post, 'longitude' );
-	$altitude = get_comment_geodata( $post, 'altitude' );
-	$calc               = new Astronomical_Calculator( $latitude, $longitude, $altitude );
-	$day      = $calc->is_daytime( get_comment_timestamp( $comment ) );
+	$altitude  = get_comment_geodata( $post, 'altitude' );
+	$calc      = new Astronomical_Calculator( $latitude, $longitude, $altitude );
+	$day       = $calc->is_daytime( get_comment_timestamp( $comment ) );
 	set_comment_geodata( $comment, 'day', $day );
 	return $day;
 }

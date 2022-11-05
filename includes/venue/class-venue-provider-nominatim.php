@@ -61,13 +61,13 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 
 		$return = array();
 		if ( wp_is_numeric_array( $json ) ) {
-			foreach( $json as $item ) {
+			foreach ( $json as $item ) {
 				$return[] = $this->address_to_hcard( $item );
 			}
 			return array( 'items' => $return );
 		} else {
 			return array(
-				'items' => array( $this->address_to_hcard( $json ) )
+				'items' => array( $this->address_to_hcard( $json ) ),
 			);
 		}
 	}

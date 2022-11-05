@@ -46,9 +46,9 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 	 */
 	public function reverse_lookup() {
 		$args = array(
-			'key'             => $this->api,
-			'lat'             => $this->latitude,
-			'lon'             => $this->longitude,
+			'key' => $this->api,
+			'lat' => $this->latitude,
+			'lon' => $this->longitude,
 		);
 		$url  = 'https://us1.locationiq.com/v1/nearby';
 
@@ -60,7 +60,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 
 		$return = array();
 
-		foreach( $json as $item ) {
+		foreach ( $json as $item ) {
 			$return[] = $this->address_to_hcard( $item );
 		}
 

@@ -132,7 +132,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 		$return['localtime'] = $datetime->format( DATE_W3C );
 
-		/* if ( array_key_exists( 'radiation', $return ) && ! array_key_exists( 'cloudiness', $return ) ) {
+		/*
+		 if ( array_key_exists( 'radiation', $return ) && ! array_key_exists( 'cloudiness', $return ) ) {
 			$return['cloudiness'] = $calc->cloudiness( $return['radiation'], $return['humidity'] );
 		} */
 		return array_filter( $return );

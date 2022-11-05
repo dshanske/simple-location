@@ -499,11 +499,11 @@ class REST_Geo {
 			if ( false !== $venue ) {
 				$term        = Location_Taxonomy::get_location_taxonomy( $venue );
 				$reverse_adr = array(
-					'venue_id'     => $venue,
-					'display-name' => get_the_title( $venue ),
-					'term_id'      => $term->term_id,
-					'term_details' => Location_Taxonomy::get_location_data( $term->term_id ),
-					'terms'        => wp_dropdown_categories(
+					'venue_id'      => $venue,
+					'display-name'  => get_the_title( $venue ),
+					'term_id'       => $term->term_id,
+					'term_details'  => Location_Taxonomy::get_location_data( $term->term_id ),
+					'terms'         => wp_dropdown_categories(
 						array(
 							'echo'             => 0,
 							'taxonomy'         => 'location',
@@ -517,7 +517,7 @@ class REST_Geo {
 							'show_option_none' => __( 'No Location', 'simple-location' ),
 						)
 					),
-					'nearby_select' => Post_Venue::nearby_select( $params['latitude'], $params['longitude'], $venue, false )
+					'nearby_select' => Post_Venue::nearby_select( $params['latitude'], $params['longitude'], $venue, false ),
 				);
 				$visibility  = get_post_geodata( $venue, 'visibility' );
 				// A private venue becomes protected as you do not want to show the coordinates but you would want to show the label

@@ -1,19 +1,18 @@
 <?php
 /**
  * Weather Sidebar Metabox.
- *
  */
 
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
 	$weather = get_comment_weatherdata( $comment->comment_ID );
-} else { 
+} else {
 	$weather = get_post_weatherdata();
 }
 
 $units    = get_option( 'sloc_measurements' );
 $imperial = ( 'imperial' === $units );
-if( array_key_exists( 'code', $weather ) ) {
+if ( array_key_exists( 'code', $weather ) ) {
 	$summary = Sloc_Weather_Data::weather_condition_codes( ifset( $weather['code'] ) );
 }
 
@@ -111,4 +110,4 @@ if ( $imperial ) {
 		</p>
 	</div>
 </div>
-<?php 
+<?php

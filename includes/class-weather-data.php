@@ -46,7 +46,7 @@ class Sloc_Weather_Data {
 		'windgust',
 		'summary',
 		'icon',
-		'code'
+		'code',
 	);
 
 	/**
@@ -59,7 +59,7 @@ class Sloc_Weather_Data {
 	public static function init() {
 		self::register_meta();
 		add_action( 'simple_location_sidebox', array( __CLASS__, 'submitbox' ), 12, 3 );
-		
+
 		// Add Post Type Support for Weather
 		add_post_type_support( 'post', 'weather' );
 
@@ -123,7 +123,7 @@ class Sloc_Weather_Data {
 			'windspeed'   => __( 'Wind Speed', 'simple-location' ),
 			'winddegree'  => __( 'Wind Degree', 'simple-location' ),
 			'windgust'    => __( 'Wind Gust', 'simple-location' ),
-			'code'        => __( 'Weather Condition Code', 'simple-location' )
+			'code'        => __( 'Weather Condition Code', 'simple-location' ),
 		);
 
 		foreach ( $numerics as $prop => $description ) {
@@ -234,7 +234,7 @@ class Sloc_Weather_Data {
 	 *
 	 * @param string $type
 	 * @param int    $id
-	 * @param string  $key 
+	 * @param string $key
 	 *
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
@@ -386,23 +386,23 @@ class Sloc_Weather_Data {
 	public static function bulk_migrate_weather() {
 		$posts = get_posts(
 			array(
-				'fields' => 'ids',
-				'meta_key' => 'geo_weather',
-				'meta_compare' => 'EXISTS'
+				'fields'       => 'ids',
+				'meta_key'     => 'geo_weather',
+				'meta_compare' => 'EXISTS',
 			)
 		);
-		foreach( $posts as $post ) {
+		foreach ( $posts as $post ) {
 			self::migrate_weather( 'post', $post );
 		}
 
 		$comments = get_comments(
 			array(
-				'fields' => 'ids',
-				'meta_key' => 'geo_weather',
-				'meta_compare' => 'EXISTS'
+				'fields'       => 'ids',
+				'meta_key'     => 'geo_weather',
+				'meta_compare' => 'EXISTS',
 			)
 		);
-		foreach( $comments as $comment ) {
+		foreach ( $comments as $comment ) {
 			self::migrate_weather( 'comment', $comment );
 		}
 	}
@@ -420,7 +420,7 @@ class Sloc_Weather_Data {
 	}
 
 	public static function get_the_weather( $type, $id, $args = null ) {
-		$weather = self::get_object_weatherdata( $type, $id );
+		$weather  = self::get_object_weatherdata( $type, $id );
 		$defaults = array(
 			'style'         => 'simple', // Options are simple, complete, graphic (only)
 			'description'   => __( 'Weather: ', 'simple-location' ),
@@ -433,9 +433,9 @@ class Sloc_Weather_Data {
 		}
 
 		if ( isset( $weather['code'] ) ) {
-			$weather['icon'] = self::weather_condition_icons( $weather['code'] );
+			$weather['icon']    = self::weather_condition_icons( $weather['code'] );
 			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
-		} 	
+		}
 
 		if ( empty( $weather['icon'] ) ) {
 			$weather['icon'] = 'wi-thermometer';
@@ -513,13 +513,12 @@ class Sloc_Weather_Data {
 			$provider->set_cache_time( $cache_time );
 		}
 
-
 		$weather = $provider->get_conditions();
 
 		if ( isset( $weather['code'] ) ) {
-			$weather['icon'] = self::weather_condition_icons( $weather['code'] );
+			$weather['icon']    = self::weather_condition_icons( $weather['code'] );
 			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
-		} 	
+		}
 		return $weather;
 	}
 
@@ -552,9 +551,9 @@ class Sloc_Weather_Data {
 		$weather = $provider->get_conditions();
 
 		if ( isset( $weather['code'] ) ) {
-			$weather['icon'] = self::weather_condition_icons( $weather['code'] );
+			$weather['icon']    = self::weather_condition_icons( $weather['code'] );
 			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
-		} 	
+		}
 		return $weather;
 
 	}
@@ -568,7 +567,7 @@ class Sloc_Weather_Data {
 	 */
 	public static function code_select( $code, $echo = false ) {
 		$choices = self::weather_condition_codes( null );
-		$return = '';
+		$return  = '';
 		foreach ( $choices as $value => $text ) {
 			$return .= sprintf( '<option value="%1s" %2s>%3s</option>', esc_attr( $value ), selected( $code, $value, false ), esc_html( $text ) );
 		}

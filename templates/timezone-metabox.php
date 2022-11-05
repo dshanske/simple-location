@@ -1,7 +1,6 @@
 <?php
 /**
  * Timezone Sidebar Metabox.
- *
  */
 
 
@@ -52,4 +51,4 @@ wp_nonce_field( 'timezone_override_metabox', 'timezone_override_nonce' );
 		</p>
 	</div><!-- #post-timezone-select -->
 </div><!-- .location-section -->
-<?php 
+<?php

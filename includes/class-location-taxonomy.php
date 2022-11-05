@@ -280,6 +280,9 @@ final class Location_Taxonomy {
 		if ( ! array_key_exists( 'country-name', $address ) && array_key_exists( 'country-code', $address ) ) {
 			$address['country-code'] = Geo_Provider::country_name( $address['country-code'] );
 		}
+		if ( array_key_exists( 'region', $address ) && ! array_key_exists( 'region-code', $address ) ) {
+			$address['region-code'] = $address['region'];
+		}
 		if ( ! array_key_exists( 'region-code', $address ) && array_key_exists( 'region-name', $address ) ) {
 			$address['region-code'] = Geo_Provider::country_code( $address['region-name'] );
 		}
@@ -793,7 +796,10 @@ final class Location_Taxonomy {
 
 
 	public static function get_location_link( $term_id ) {
-		$term   = get_term( $term_id );
+		$term = get_term( $term_id );
+		if ( is_wp_error( $term ) ) {
+			return $term;
+		}
 		$link   = get_term_link( $term->term_id, 'location' );
 		$return = array();
 		if ( 0 === $term->parent ) {
@@ -816,6 +822,26 @@ final class Location_Taxonomy {
 			}
 		}
 		return sprintf( '<a href="%1$s">%2$s</a>', $link, implode( ', ', $return ) );
+	}
+
+	public static function get_post_location( $post_id = null ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return '';
+		}
+		$terms = wp_get_object_terms( $post->ID, 'location', array( 'fields' => 'ids' ) );
+		if ( empty( $terms ) ) {
+			return false;
+		}
+		return $terms[0];
+	}
+
+	public static function get_post_location_link( $post_id = null ) {
+		$term = self::get_post_location( $post_id );
+		if ( ! $term ) {
+			return '';
+		}
+		return self::get_location_link( $terms[0] );
 	}
 
 	/**
