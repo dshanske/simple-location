@@ -11,19 +11,19 @@ class GeoDataTest extends WP_UnitTestCase {
 	public function test_set_and_get_post_geodata() {
 		$post_id = $this->factory()->post->create();
 		set_post_geodata( $post_id, '', static::$geo );
-		Assert::assertArraySubset( static::$geo, get_post_geodata( $post_id ), );
+		Assert::assertArraySubset( static::$geo, get_post_geodata( $post_id ) );
 	}
 
 	public function test_set_geodata_and_get_post_geopoint() {
 		$post_id = $this->factory()->post->create();
 		set_post_geodata( $post_id, '', static::$geo );
-		$this->assertEquals( array( 45.01, -75.44 ), Geo_Data::get_geopoint( 'post', $post_id ), );
+		$this->assertEquals( array( 45.01, -75.44 ), Geo_Data::get_geopoint( 'post', $post_id ) );
 	}
 
 	public function test_set_geodata_and_get_post_geouri() {
 		$post_id = $this->factory()->post->create();
 		set_post_geodata( $post_id, '', static::$geo );
-		$this->assertEquals( 'geo:45.01,-75.44', Geo_Data::get_geouri( 'post', $post_id ), );
+		$this->assertEquals( 'geo:45.01,-75.44', Geo_Data::get_geouri( 'post', $post_id ) );
 	}
 
 
@@ -32,7 +32,7 @@ class GeoDataTest extends WP_UnitTestCase {
 		$geo = static::$geo;
 		$geo['altitude'] = 1000;
 		set_post_geodata( $post_id, '', $geo );
-		$this->assertEquals( array( 45.01, -75.44, 1000 ), Geo_Data::get_geopoint( 'post', $post_id ), );
+		$this->assertEquals( array( 45.01, -75.44, 1000 ), Geo_Data::get_geopoint( 'post', $post_id ) );
 	}
 
 	public function test_set_and_get_post_latitude() {
