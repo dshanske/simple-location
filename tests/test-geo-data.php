@@ -61,7 +61,7 @@ class GeoDataTest extends WP_UnitTestCase {
 		$_POST = static::$geo;
 		$post_id = $this->factory()->post->create();
 		Geo_Base::save_meta( 'post', $post_id );
-		Assert::assertArraySubset( static::$geo, get_post_geodata( $post_id ), );		
+		Assert::assertArraySubset( static::$geo, get_post_geodata( $post_id ) );		
 	}
 
 	public function test_set_and_get_post_day() {
