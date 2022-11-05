@@ -161,6 +161,7 @@ class Location_Plugins {
 			$venue = Post_Venue::add_new_venue( $location );
 			if ( ! is_wp_error( $venue ) ) {
 				Post_Venue::set_post_venue( $args['ID'], $venue );
+				set_post_geodata( $args['ID'], 'visibility', get_post_geodata( $venue, 'visibility' );
 				update_post_meta(
 					$args['ID'],
 					'mf2_checkin',

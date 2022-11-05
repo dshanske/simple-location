@@ -310,6 +310,10 @@ class Post_Venue {
 		$meta = array();
 
 		if ( array_key_exists( 'url', $venue ) ) {
+			// Temporary fix just in case multiple arrays exists
+			if ( is_array( $venue['url'] ) ) {
+				$venue['url'] = $venue['url'][0];
+			}
 			$meta['venue_url'] = $venue['url'];
 			// If the URL in the check-in property is local, then return the existing URL.
 			$id = url_to_postid( $venue['url'] );
@@ -370,6 +374,7 @@ class Post_Venue {
 				Location_Taxonomy::set_location( $id, $location );
 			}
 			set_post_geodata( $id, null, $venue );
+			set_post_geodata( $id, 'visibility', 'public' );
 		}
 
 		return $id;
