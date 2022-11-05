@@ -2,8 +2,8 @@
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske/)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
-**Tested up to:** 6.0  
-**Stable tag:** 4.5.0  
+**Tested up to:** 6.1  
+**Stable tag:** 5.0.0  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -15,7 +15,7 @@ Adds geographic location and weather support to WordPress.
 Supports adding geo coordinates, a location taxonomy, and a textual location description to a post, comment, user, or attachment. Supports adding weather data to a post or to a widget based on location.
 Offers choice of map displays. It supports retrieving location using the HTML5 geolocation API by default. Clicking the location icon or 'Lookup Location' will retrieve the location. 
 
-As it stores the GeoData in a WordPress standard format, Geodata can also be added from other plugins.
+As it stores the GeoData in the classic WordPress format, Geodata can also be added from other plugins.
 
 Automatically saves location data from image metadata when uploaded as well.
 
@@ -30,17 +30,10 @@ unless removed. For all other data, it is provided by the user, who decides its 
 HTML5 browser geolocation, for which the user must give consent to share). Other information is secured through use of third-party APIs to identify a 
 location, calculate elevation, display maps, and weather conditions.
 
-## Zones ##
-
-Zones allow for geofencing. You can set coordinates and a radius around them. If you set location to a place within a zone, the default behavior is to replace the location
-with a preset Name and hide the coordinates. This allows you to protect private locations such as your home, or your place of business. For Micropub, it will set the location
-as protected if the location is in the zone and the location-visibility property is not set. For the post editor in WordPress, looking up the location of an item inside the 
-zone will result in the visibility being set to protected and the name being set to the zone name. This can be overridden.
-
 ## Locations and Venues ##
 
-Locations and venues both use WordPress taxonomies to allow you to generate an archive page of all posts from that location/venue and giving it a permalink on your site. Locations are meant to reflect a more general
-location...for example, "Here are posts I made in California." Venues are meant to reflect a specific location, such as a business or point of interest. "Here are all my posts made at the Dairy Queen."
+Locations uses WordPress taxonomies to allow you to generate an archive page of all posts from that location and giving it a permalink on your site. Locations are meant to reflect a more general
+location...for example, "Here are posts I made in California." 
 
 Locations are divided by administrative areas. The hierarchy for locations is:
 * Country
@@ -56,7 +49,18 @@ Locations are matched using the country code, region code, and locality field, a
 
 There is no top level Location page, /location included in the plugin. You can create a page at this location and use a custom template to allow it to show a list of your locations. 
 
-The taxonomy for venue functionality has been in the plugin for several versions, but has remained unimplemented due to the difficulty in automating the selection process.
+Venues are meant to reflect a specific location, such as a business or point of interest. Venues were originally set up as a taxonomy, and were in the plugin unimplemented for several versions. However,
+due to various changes since that was set up, they were switched to a custom post type. Under this setup, each venue is represented by a URL on the site that posts can be linked to. The URL contains
+information about the venue.
+
+## Zones ##
+
+Zones allow for geofencing. You can set coordinates and a radius around them. If you set location to a place within a zone, the default behavior is to replace the location
+with a preset Name and hide the coordinates. This allows you to protect private locations such as your home, or your place of business. For Micropub, it will set the location
+as protected if the location is in the zone and the location-visibility property is not set. For the post editor in WordPress, looking up the location of an item inside the 
+zone will result in the visibility being set to protected and the name being set to the zone name. This can be overridden.
+
+Zones are replaced as of 5.0.0 with Private Venues
 
 ## Weather ##
 
@@ -87,8 +91,10 @@ In order to access private location information, the following custom capabiliti
 
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
-* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, TomTom, Yandex and Bing.
-* Geocoding Providers take geo coordinates and look up the actual location/address for textual display, as well as derive the elevation is possible. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ, OpenRoute and Geonames.
+* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, TomTom, and Bing.
+* Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses
+* Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues.
+* Elevation Providers optionally derive the elevation from an API when not available. Elevation is used to estimate altitude and adjust estimated sunrise/sunset levels accordingly.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
 location of a three letter airport code, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
 * Weather Providers retrieve weather data about your location and include OpenWeatherMap, Pirate Weather, Dark Sky, Weatherstack, WeatherBit, HERE and the US National Weather Service. HERE, Pirate Weather, Dark Sky, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs that must return the properties as they are stored in WordPress.
@@ -120,8 +126,9 @@ API Keys are required to use certain services.
 * [Meteostat](https://meteostat.net/) 
 * [Pirate Weather](https://pirateweather.net)
 * [TomTom](https://developer.tomtom.com/)
+* [AerisWeather](https://aerisweather.com/) - Individuals who share their personal weather station data with PWSWeather.com are offered a free contributor account.
 
-At this time, all map services require an API key except Yandex, which permits limited non-commercial use.
+At this time, all map services require an API key, but most permit limited non-commercial use.
 Nominatim does not require an API key, but it does ask for an email address, which will be the admin email of the site
 If not provided there will be no map displayed regardless of setting, reverse geo lookup will not work 
 Without a weather provider this service will not work. 
@@ -130,6 +137,13 @@ API Keys may have free limits, or may incur fees if overused. This plugin only u
 with the provider's terms of use.
 
 The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin if installed.
+
+### How do I add support for location to a custom post type? ###
+
+`add_post_type_support( 'geo-location');` 
+`add_post_type_support( 'weather' );`
+
+The software uses two custom features to declare that the post type supports these features, otherwise the location and weather features do not show in the editor.
 
 ### Why are my maps served from the provider instead of saved as images to my site? ###
 
@@ -161,6 +175,8 @@ This may be replaced with better logic in future.
 Simple Location uses WordPress Geodata to store location, as does the WordPress app. So setting location with the app should allow it to be displayed by Simple Location. The only major difference
 is that whether or not a location is public is set with either 0 for private or 1 for public. The spec implemented states a non-zero number is considered public. This plugin adds the option of 2,
 also known as protected, which shows a textual description of the location but does not display a map or geographic coordinates.
+
+However, now that the WordPress apps no longer support location, this may be moot. 
 
 ### The Location Icon does not retrieve my location. ###
 
@@ -229,6 +245,16 @@ The plugin offers providers for:
 
 ## Upgrade Notice ##
 
+### 5.0.0 ###
+
+Due to extensive refactoring in this version, there may be unanticipated behavior. Old functions have been removed and users calling them directly may need to 
+New global functions have been introduced to reduce the calls to specific classes. Weather and location data has been separated into separate storage locations and functions, with a new
+signature based on the Metadata API. This means that rolling back once the data is migrated could be problematic and the recommendation is to backup before upgrading.
+
+Venues are introduced officially. They replace the Zone feature and will be expanded to additional functionality in future. They should be considered a beta feature at this point. 
+
+The ability to set location taxonomy to display over address is currently global. Will be looking for better control in future.
+
 ### 4.4.0 ###
 
 This update includes support for Locations. Which will be generated when a new location is looked up.
@@ -262,6 +288,23 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 5.0.0 ( 2022-11-xx ) ###
+* Remove Yandex as a supported provider.
+* Add URL and documentation strings to all providers
+* Refactor reused code in providers into traits.
+* Separate Elevation into a separate provider category. The Elevation provider is called by the Geo Provider when needed.
+* Add additional error checks
+* Introduce GeoApify for Geolocation
+* Split off EXIF data enhancement into a separate file
+* Move several geo faunctions to global scope.
+* Add a series of global functions to get/set geo and weather data which are also pluggable to different storage locations
+* Separate weather and geo into two separate sets of functions
+* Set the weather condition to a code instead of storing icons and summary. Retain summary and icon for backcompat
+* Introduce Venue as a Custom Post Type
+* Replace Zones with Private Venues
+* Automatically create venues when checking in using Micrpub.
+* Make default for displaying location on posts the venue name and link, then location taxonomy, then address field.
 
 ### 4.5.0 ( 2022-06-17 ) ###
 * Adjust queries
