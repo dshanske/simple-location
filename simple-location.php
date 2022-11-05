@@ -187,7 +187,7 @@ class Simple_Location_Plugin {
 	 */
 	public static function init() {
 		self::$version = get_file_data( __FILE__, array( 'Version' => 'Version' ) )['Version'];
-		self::$path = plugin_dir_path( __FILE__ );
+		self::$path    = plugin_dir_path( __FILE__ );
 
 		load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 

@@ -73,20 +73,14 @@ class Location_Plugins {
 		}
 		$properties = $input['properties'];
 		$meta       = $args['meta_input'];
+
 		if ( isset( $meta['geo_longitude'] ) && $meta['geo_latitude'] ) {
-			is_day_post( $args['ID'] ); // Set whether this is day or not.
-			if ( ! isset( $properties['location-visibility'] ) ) {
-				$venue = Post_Venue::at_venue( $meta['geo_latitude'], $meta['geo_longitude'] );
-				if ( false !== $venue ) {
-					update_post_meta( $args['ID'], 'venue_id', $venue );
-					set_post_geodata( $args['ID'], 'visibility', 'protected' );
-					$meta['geo_address'] = get_the_title( $venue );
-					set_post_geodata( $args['ID'], 'address', $meta['geo_address'] );
-				} 
-				else {
-					set_post_geodata( $args['ID'], 'visibility', 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
-				}
+			if ( isset( $properties['published'] ) ) {
+				$published = new DateTime( $properties['published'][0] );
+			} else {
+				$published = new DateTime();
 			}
+
 			// If altitude is above 1000m always show the higher zoom level.
 			if ( isset( $meta['geo_altitude'] ) && 1000 < $meta['geo_altitude'] ) {
 				set_post_geodata( $args['ID'], 'zoom', 9 );
@@ -94,12 +88,7 @@ class Location_Plugins {
 				set_post_geodata( $args['ID'], 'zoom', round( log( 591657550.5 / ( $meta['geo_accuracy'] * 45 ), 2 ) ) + 1 );
 			}
 
-			if ( isset( $properties['published'] ) ) {
-				$published = new DateTime( $properties['published'][0] );
-			} else {
-				$published = new DateTime();
-			}
-
+			is_day_post( $args['ID'] ); // Set whether this is day or not.
 			$weather = Loc_Config::weather_provider();
 			if ( $weather ) {
 				$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
@@ -109,6 +98,20 @@ class Location_Plugins {
 					unset( $conditions['raw'] );
 					set_post_weatherdata( $args['ID'], '', $conditions );
 				}
+			}
+
+			$venue = Post_Venue::at_venue( $meta['geo_latitude'], $meta['geo_longitude'] );
+			if ( false !== $venue ) {
+				update_post_meta( $args['ID'], 'venue_id', $venue );
+			} else {
+			}
+
+			if ( ! isset( $properties['location-visibility'] ) && false !== $venue ) {
+				set_post_geodata( $args['ID'], 'visibility', 'protected' );
+				// Set the Address to Null
+				set_post_geodata( $args['ID'], 'address', '' );
+			} else {
+				set_post_geodata( $args['ID'], 'visibility', 'public' ); // This is on the basis that if you are sending coordinates from Micropub you want to display them unless otherwise said.
 			}
 		}
 
@@ -141,7 +144,7 @@ class Location_Plugins {
 		}
 
 		// Strip out anything that might not be relevant to an address.
-		$location = wp_array_slice_assoc( $location, array( 'street-address', 'extended-address', 'post-office-box', 'locality', 'region', 'postal-code', 'country-name', 'country-code', 'region-code', 'latitude', 'longitude', 'altitude', 'name', 'label' ) );
+		$location = wp_array_slice_assoc( $location, array( 'street-address', 'extended-address', 'post-office-box', 'locality', 'region', 'postal-code', 'country-name', 'country-code', 'region-code', 'region', 'latitude', 'longitude', 'altitude', 'name', 'label', 'url' ) );
 		foreach ( $location as $key => $value ) {
 			if ( is_array( $value ) && 1 === count( $value ) ) {
 				$location[ $key ] = array_shift( $value );
@@ -152,6 +155,25 @@ class Location_Plugins {
 		$term        = Location_Taxonomy::get_location_taxonomy( $args['ID'] );
 		$reverse     = Loc_Config::geo_provider();
 		$reverse_adr = null;
+
+		// If this is a checkin.
+		if ( isset( $properties['checkin'] ) ) {
+			$venue = Post_Venue::add_new_venue( $location );
+			if ( ! is_wp_error( $venue ) ) {
+				Post_Venue::set_post_venue( $args['ID'], $venue );
+				update_post_meta(
+					$args['ID'],
+					'mf2_checkin',
+					array(
+						'type'       => array( 'h-card' ),
+						'properties' => array(
+							'url'  => array( get_permalink( $venue ) ),
+							'name' => array( get_the_title( $venue ) ),
+						),
+					)
+				);
+			}
+		}
 
 		if ( ! empty( array_intersect( array_keys( $location ), array( 'region', 'country-name' ) ) ) ) {
 			if ( ! $term ) {
@@ -207,9 +229,9 @@ class Location_Plugins {
 			return $input;
 		}
 
-		$venues = array();
+		$venues      = array();
 		$reverse_adr = array();
-		$reverse = Loc_Config::geo_provider();
+		$reverse     = Loc_Config::geo_provider();
 		if ( $reverse ) {
 			$reverse->set( $input['lat'], $input['lon'] );
 			$reverse_adr = $reverse->reverse_lookup();

@@ -48,13 +48,14 @@ class Post_Venue {
 
 		register_meta(
 			'post',
-			'venue_id',
+			'venue_street_address',
 			array(
-				'object_subtype'    => 'post',
-				'type'              => 'number',
-				'description'       => __( 'Venue Post ID', 'simple-location' ),
+				'object_subtype'    => 'venue',
+				'type'              => 'string',
+				'description'       => __( 'Street Address of Venue', 'simple-location' ),
 				'single'            => true,
-				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_text_field',
+				'show_in_rest'      => false,
 			)
 		);
 
@@ -62,11 +63,23 @@ class Post_Venue {
 			'post',
 			'venue_id',
 			array(
-				'object_subtype'    => 'attachment',
-				'type'              => 'number',
-				'description'       => __( 'Venue Post ID', 'simple-location' ),
-				'single'            => true,
-				'show_in_rest'      => true,
+				'object_subtype' => 'post',
+				'type'           => 'number',
+				'description'    => __( 'Venue Post ID', 'simple-location' ),
+				'single'         => true,
+				'show_in_rest'   => true,
+			)
+		);
+
+		register_meta(
+			'post',
+			'venue_id',
+			array(
+				'object_subtype' => 'attachment',
+				'type'           => 'number',
+				'description'    => __( 'Venue Post ID', 'simple-location' ),
+				'single'         => true,
+				'show_in_rest'   => true,
 			)
 		);
 
@@ -74,12 +87,12 @@ class Post_Venue {
 			'post',
 			'venue_radius',
 			array(
-				'object_subtype'    => 'venue',
-				'type'              => 'number',
-				'description'       => __( 'Radius around the Venue in meters', 'simple-location' ),
-				'single'            => true,
-				'show_in_rest'      => true,
-				'default'           => 50,
+				'object_subtype' => 'venue',
+				'type'           => 'number',
+				'description'    => __( 'Radius around the Venue in meters', 'simple-location' ),
+				'single'         => true,
+				'show_in_rest'   => true,
+				'default'        => 50,
 			)
 		);
 	}
@@ -213,22 +226,22 @@ class Post_Venue {
 	 *
 	 * @param float $lat Latitude.
 	 * @param float $lng Longitude.
-	 * @param int $current Current venue.
+	 * @param int   $current Current venue.
 	 * @return array Return select
 	 */
 	public static function nearby_select( $lat, $lng, $current = 0, $echo = true ) {
 		$current = intval( $current );
-		$venues = self::nearby( $lat, $lng );
-		$return = '<select name="venue_id" id="venue_id">';
+		$venues  = self::nearby( $lat, $lng );
+		$return  = '<select name="venue_id" id="venue_id">';
 		$return .= sprintf( '<option value="0" %1$s>%2$s</option>', selected( $current, 0, false ), esc_html__( 'None', 'simple-location' ) );
 		foreach ( $venues as $venue ) {
-			$venue = intval( $venue );
+			$venue   = intval( $venue );
 			$return .= sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $venue ), selected( $current, $venue, false ), esc_html( get_the_title( $venue ) ) );
 		}
 		$return .= '</select>';
 		if ( $echo ) {
 			echo $return;
-		} 
+		}
 		return $return;
 	}
 
@@ -272,6 +285,96 @@ class Post_Venue {
 		}
 		return false;
 	}
+
+	public static function get_post_venue( $post_id ) {
+		return get_post_meta( $post_id, 'venue_id', true );
+	}
+
+	public static function set_post_venue( $post_id, $venue_id ) {
+		if ( ! is_numeric( $venue_id ) ) {
+			return false;
+		}
+		return update_post_meta( $post_id, 'venue_id', $venue_id );
+	}
+
+	public static function add_new_venue( $venue ) {
+		$venue = Location_Taxonomy::normalize_address( $venue );
+		if ( array_key_exists( 'name', $venue ) ) {
+			$title = $venue['name'];
+		} elseif ( array_key_exists( 'label', $venue ) ) {
+			$title = $venue['label'];
+		} else {
+			$title = '';
+		}
+
+		$meta = array();
+
+		if ( array_key_exists( 'url', $venue ) ) {
+			$meta['venue_url'] = $venue['url'];
+			// If the URL in the check-in property is local, then return the existing URL.
+			$id = url_to_postid( $venue['url'] );
+			if ( $id ) {
+				return $id;
+			}
+
+			$match = get_posts(
+				array(
+					'post_type'  => 'venue',
+					'fields'     => 'ids',
+					'meta_query' => array(
+						array(
+							'key'   => 'venue_url',
+							'value' => $venue['url'],
+						),
+					),
+				)
+			);
+			if ( ! empty( $match ) ) {
+				return $match[0];
+			}
+
+			$match = get_posts(
+				array(
+					'post_type'  => 'venue',
+					'fields'     => 'ids',
+					'meta_query' => array(
+						array(
+							'compare' => 'LIKE',
+							'key'     => 'venue_alternative',
+							'value'   => $venue['url'],
+						),
+					),
+				)
+			);
+			if ( ! empty( $match ) ) {
+				return $match[0];
+			}
+		}
+
+		if ( array_key_exists( 'street-address', $venue ) ) {
+			$meta['venue_street_address'] = $venue['street-address'];
+		}
+
+		$location = Location_Taxonomy::get_location( $venue, true );
+
+		$wp = array(
+			'post_title'  => $title,
+			'post_status' => 'publish',
+			'post_type'   => 'venue',
+			'meta_input'  => $meta,
+		);
+
+		$id = wp_insert_post( $wp, true );
+		if ( ! is_wp_error( $id ) ) {
+			if ( $location ) {
+				Location_Taxonomy::set_location( $id, $location );
+			}
+			set_post_geodata( $id, null, $venue );
+		}
+
+		return $id;
+	}
+
 
 
 }

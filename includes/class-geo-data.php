@@ -897,11 +897,11 @@ class Geo_Data {
 			'mapboxuser'    => null,
 			'weather'       => true,
 			'taxonomy'      => get_option( 'sloc_taxonomy_display' ), // Show taxonomy instead of address field.
-			'link'          => true, // Add Map Link
+			'link'          => true, // Link to venue if displaying venue, link to taxonomy archive if showing taxonomy, link to map if showing address field, affected by visibility.
 			'icon'          => true, // Show Location Icon
 			'text'          => false, // Show Description
 			'markup'        => true, // Mark up with Microformats
-			'description'   => __( 'Location: ', 'simple-location' ),
+			'description'   => __( 'Location: ', 'simple-location' ), // This text prefaces the location
 			'wrapper-class' => array( 'sloc-display' ), // Class or classes to wrap the entire location in
 			'wrapper-type'  => 'div', // HTML type to wrap the entire location in
 		);
@@ -910,11 +910,15 @@ class Geo_Data {
 		$args     = array_merge( $loc, $args );
 		$map      = Loc_Config::map_provider();
 		if ( is_null( $map ) ) {
-			return __( 'Error: Invalid Map Provider', 'simple-location' );
+			$url = '';
+		} else {
+			$map->set( $loc );
+			$url = $map->get_the_map_url();
 		}
-		$map->set( $loc );
+
 		$wrap  = '<%1$s class="%2$s">%3$s</%1$s>';
 		$class = is_array( $args['wrapper-class'] ) ? $args['wrapper-class'] : explode( ' ', $args['wrapper-class'] );
+
 		if ( $args['markup'] ) {
 			$class[] = 'p-location';
 			$class[] = 'h-adr';
@@ -923,6 +927,14 @@ class Geo_Data {
 
 		if ( $args['text'] ) {
 			$c[] = $args['description'];
+		}
+
+		if ( ( 'post' === $type ) && ( in_array( get_post_type( $id ), get_post_types_by_support( 'geo-location' ) ) ) ) {
+			$term  = Location_Taxonomy::get_post_location( $id );
+			$venue = Post_Venue::get_post_venue( $id );
+		} else {
+			$term  = false;
+			$venue = false;
 		}
 
 		if ( 'public' === $args['visibility'] ) {
@@ -936,7 +948,14 @@ class Geo_Data {
 					unset( $loc['altitude'] );
 				}
 			}
-			if ( ! array_key_exists( 'address', $loc ) ) {
+
+			if ( $venue ) {
+				$loc['address'] = get_the_title( $venue );
+				$url            = get_permalink( $venue );
+			} elseif ( $args['taxonomy'] && $term ) {
+				$loc['address'] = Location_Taxonomy::display_name( $term, false );
+				$url            = get_term_link( $term );
+			} elseif ( empty( $loc['address'] ) ) {
 				if ( ! array_key_exists( 'latitude', $loc ) ) {
 					$loc['address'] = '';
 				} else {
@@ -948,14 +967,25 @@ class Geo_Data {
 				$loc['address'] .= sprintf( '(%1$s)', $loc['altitude'] );
 			}
 			$adclass = $args['markup'] ? 'p-label' : '';
-			if ( $args['link'] ) {
-				$c[] = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $map->get_the_map_url(), $loc['address'] );
+			if ( $args['link'] && $url ) {
+				$c[] = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $url, $loc['address'] );
 			} else {
 				$c[] = sprintf( '<span class="%1$s">%2$s</span>', $adclass, $loc['address'] );
 			}
-		} elseif ( isset( $args['address'] ) ) {
-			$c[] = $args['address'];
+			// Else this is protected.
+		} else {
+			$url = false;
+			if ( $venue ) {
+				$loc['address'] = get_the_title( $venue );
+			}
+			if ( $args['taxonomy'] && $term ) {
+				$loc['address'] = Location_Taxonomy::display_name( $term, false );
+				$url            = get_term_link( $term );
+			} elseif ( isset( $loc['address'] ) ) {
+				$c[] = $loc['address'];
+			}
 		}
+
 		if ( $args['icon'] ) {
 			array_unshift( $c, self::get_icon( $loc['icon'] ) );
 		}
