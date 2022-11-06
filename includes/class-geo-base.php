@@ -675,7 +675,7 @@ class Geo_Base {
 			array( 'post', 'comment', 'user', 'term' ),
 			'longitude',
 			array(
-				'get_callback' => array( '__CLASS__', 'rest_get_longitude' ),
+				'get_callback' => array( __CLASS__, 'rest_get_longitude' ),
 				'schema'       => array(
 					'longitude' => __( 'Longitude', 'simple-location' ),
 					'type'      => 'float',
@@ -686,18 +686,18 @@ class Geo_Base {
 			array( 'post', 'comment', 'term', 'user' ),
 			'geo_address',
 			array(
-				'get_callback' => array( '__CLASS__', 'rest_get_address' ),
+				'get_callback' => array( __CLASS__, 'rest_get_address' ),
 				'schema'       => array(
 					'geo_address' => __( 'Location', 'simple-location' ),
 					'type'        => 'string',
 				),
 			)
-		);
+		); 
 		register_rest_field(
 			array( 'post', 'comment', 'term', 'user' ),
 			'timezone',
 			array(
-				'get_callback' => array( '__CLASS__', 'rest_get_timezone' ),
+				'get_callback' => array( __CLASS__, 'rest_get_timezone' ),
 				'schema'       => array(
 					'geo_public' => __( 'Last Reported Timezone', 'simple-location' ),
 					'type'       => 'string',
