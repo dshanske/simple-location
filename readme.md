@@ -3,7 +3,7 @@
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
 **Tested up to:** 6.1  
-**Stable tag:** 5.0.0  
+**Stable tag:** 5.0.1  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -289,7 +289,11 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
-### 5.0.0 ( 2022-11-xx ) ###
+### 5.0.1 ( 2022-11-06 ) ###
+* Fix issue raising warning during block editor
+* Fix strict typing on zenith
+
+### 5.0.0 ( 2022-11-05 ) ###
 * Remove Yandex as a supported provider.
 * Add URL and documentation strings to all providers
 * Refactor reused code in providers into traits.

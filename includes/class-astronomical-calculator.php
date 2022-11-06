@@ -71,10 +71,10 @@ class Astronomical_Calculator {
 	 *
 	 * @since 4.0.0
 	 */
-	public function __construct( $latitude, $longitude, $elevation = null ) {
+	public function __construct( $latitude, $longitude, $elevation = 0 ) {
 		$this->latitude  = $latitude;
 		$this->longitude = $longitude;
-		$this->elevation = intval( $elevation );
+		$this->elevation = floatval( $elevation );
 		$this->zenith    = $this->get_zenith();
 		$this->timezone  = Loc_Timezone::timezone_for_location( $latitude, $longitude );
 		if ( $this->timezone instanceof Timezone_Result ) {
@@ -201,7 +201,7 @@ class Astronomical_Calculator {
 	 */
 	private function get_zenith() {
 		$zenith = 90.583333; // default zenith.
-		if ( 0 < $this->elevation ) {
+		if ( is_numeric( $this->elevation ) && 0 < $this->elevation ) {
 			$adjustment = 0.0347 * sqrt( $this->elevation );
 			$zenith     = $zenith + $adjustment;
 		}
