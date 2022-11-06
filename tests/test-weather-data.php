@@ -29,7 +29,7 @@ class WeatherDataTest extends WP_UnitTestCase {
 	public function test_set_and_get_post_weatherdata() {
 		$post_id = $this->factory()->post->create();
 		set_post_weatherdata( $post_id, '', static::$weather );
-		$this->assertEquals( static::$weather, get_post_weatherdata( $post_id ), );
+		$this->assertEquals( static::$weather, get_post_weatherdata( $post_id ) );
 	}
 
 	public function test_set_and_get_old_post_weatherdata() {
@@ -42,7 +42,7 @@ class WeatherDataTest extends WP_UnitTestCase {
 		$_POST = static::$weather;
 		$post_id = $this->factory()->post->create();
 		Geo_Base::save_meta( 'post', $post_id, false );
-		Assert::assertArraySubset( static::$weather, get_post_weatherdata( $post_id ), );		
+		Assert::assertArraySubset( static::$weather, get_post_weatherdata( $post_id ) );		
 	}
 
 }
