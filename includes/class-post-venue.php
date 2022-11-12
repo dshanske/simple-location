@@ -357,6 +357,7 @@ class Post_Venue {
 
 		if ( array_key_exists( 'street-address', $venue ) ) {
 			$meta['venue_street_address'] = $venue['street-address'];
+			$meta['_venue_data']          = $venue;
 		}
 
 		$location = Location_Taxonomy::get_location( $venue, true );
@@ -378,6 +379,38 @@ class Post_Venue {
 		}
 
 		return $id;
+	}
+
+	public static function get_venue_type( $venue_id = null ) {
+		$venue = get_post( $venue_id );
+		if ( ! $venue || 'venue' !== get_post_type( $venue ) ) {
+			return '';
+		}
+		$terms = wp_get_object_terms( $venue->ID, 'venue_type', array( 'fields' => 'ids' ) );
+		if ( empty( $terms ) ) {
+			return false;
+		}
+		return $terms;
+	}
+
+	public static function get_venue_posts( $venue_id = null ) {
+			$venue = get_post( $venue_id );
+		if ( 'venue' !== get_post_type( $venue ) ) {
+			return false;
+		}
+
+			return get_posts(
+				array(
+					'post_type'  => 'post',
+					'fields'     => 'ids',
+					'meta_query' => array(
+						array(
+							'key'   => 'venue_id',
+							'value' => $venue->ID,
+						),
+					),
+				)
+			);
 	}
 
 
