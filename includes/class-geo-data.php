@@ -545,11 +545,89 @@ class Geo_Data {
 		}
 	}
 
-	/**
-	 * Registers Geo Metadata.
-	 *
-	 * @since 1.0.0
-	 */
+	public static function bulk_edit_lookup_location( $post_id ) {
+		$update  = false;
+		$post    = get_post( $post_id );
+		$geodata = get_post_geodata( $post_id );
+		if ( ! $geodata ) {
+			$update      = true;
+			$geolocation = Loc_Config::geolocation_provider();
+			if ( is_object( $geolocation ) && $geolocation->background() && $post->post_author ) {
+				$geolocation->set_user( $post->post_author );
+				$geolocation->retrieve( get_post_datetime( $post ) );
+				$geodata = $geolocation->get();
+				if ( is_wp_error( $geodata ) ) {
+					return $geodata;
+				}
+				if ( ! empty( $geodata ) ) {
+					$geodata['visibility'] = get_post_geodata( $post, 'visibility' );
+					// Determine if we need to look up the location again.
+					$term = Location_Taxonomy::get_location_taxonomy( $post );
+					if ( empty( $term ) || ! array_key_exists( 'address', $geodata ) ) {
+						$reverse = Loc_Config::geo_provider();
+						$reverse->set( $geodata['latitude'], $geodata['longitude'] );
+						$reverse_adr = $reverse->reverse_lookup();
+						if ( ! is_wp_error( $reverse_adr ) ) {
+							$update = true;
+							$term   = Location_Taxonomy::get_location( $reverse_adr );
+							Location_Taxonomy::set_location( $post_id, $term );
+							$venue = Post_Venue::at_venue( $geodata['latitude'], $geodata['longitude'] );
+							if ( $venue ) {
+								update_post_meta( $post_id, 'venue_id', $venue );
+							} elseif ( ! array_key_exists( 'address', $geodata ) && array_key_exists( 'display-name', $reverse_adr ) ) {
+								$geodata['address'] = $reverse_adr['display-name'];
+							}
+						}
+					}
+					if ( true === $update ) {
+						set_post_geodata( $post, '', $geodata );
+					}
+				}
+			}
+		}
+		// If this is a checkin.
+		$checkin = get_post_meta( $post_id, 'mf2_checkin', true );
+		if ( $checkin && is_array( $checkin ) ) {
+			$checkin = Location_Taxonomy::normalize_address( $checkin );
+			$venue   = Post_Venue::add_new_venue( $checkin );
+			if ( is_numeric( $venue ) ) {
+				$update = true;
+				Post_Venue::set_post_venue( $post_id, $venue );
+				set_post_geodata( $post_id, 'visibility', get_post_geodata( $venue, 'visibility' ) );
+				update_post_meta(
+					$post_id,
+					'mf2_checkin',
+					array(
+						'type'       => array( 'h-card' ),
+						'properties' => array(
+							'url'  => array( get_permalink( $venue ) ),
+							'name' => array( get_the_title( $venue ) ),
+						),
+					)
+				);
+			}
+		}
+
+		$weather = get_post_weatherdata( $post_id );
+		if ( empty( $weather ) ) {
+			$weather = Loc_Config::weather_provider();
+			if ( $weather ) {
+				$weather->set( $geodata['latitude'], $geodata['longitude'] );
+				$conditions = $weather->get_conditions( get_post_timestamp( $post ) );
+				if ( ! empty( $conditions ) && ! is_wp_error( $conditions ) ) {
+					$update = true;
+					set_post_weatherdata( $post_id, null, $conditions );
+				}
+			}
+		}
+		return ( true === $update ) ? $post_id : false;
+	}
+
+		/**
+		 * Registers Geo Metadata.
+		 *
+		 * @since 1.0.0
+		 */
 	public static function register_meta() {
 		$taxonomies = apply_filters( 'sloc_geo_taxonomies', array( 'venue' ) );
 		$args       = array(
@@ -670,7 +748,7 @@ class Geo_Data {
 		return $altitude . $aunits;
 	}
 
-	// Return marked up coordinates
+		// Return marked up coordinates
 	public static function get_the_geo( $loc, $display = false ) {
 		$string = $display ? '<span class="p-%1$s">%2$f</span>' : '<data class="p-%1$s" value="%2$f"></data>';
 		$return = '';
@@ -736,20 +814,20 @@ class Geo_Data {
 		return $comment_text;
 	}
 
-	/**
-	 * Returns the default icon.
-	 *
-	 * @return string Default Icon.
-	 */
+		/**
+		 * Returns the default icon.
+		 *
+		 * @return string Default Icon.
+		 */
 	public static function get_default_icon() {
 		return 'fa-location-arrow';
 	}
 
-	/**
-	 * Returns list of available icons.
-	 *
-	 * @return array List of Icon Options.
-	 */
+		/**
+		 * Returns list of available icons.
+		 *
+		 * @return array List of Icon Options.
+		 */
 	public static function get_iconlist() {
 		return array(
 			'fa-location-arrow'            => __( 'Location Arrow', 'simple-location' ),
@@ -815,14 +893,13 @@ class Geo_Data {
 		);
 	}
 
-
-	/**
-	 * Generates Pulldown list of Icons.
-	 *
-	 * @param string  $icon Icon to be Selected.
-	 * @param boolean $echo Echo or Return.
-	 * @return string Select Option. Optional.
-	 */
+		/**
+		 * Generates Pulldown list of Icons.
+		 *
+		 * @param string  $icon Icon to be Selected.
+		 * @param boolean $echo Echo or Return.
+		 * @return string Select Option. Optional.
+		 */
 	public static function icon_select( $icon, $echo = false ) {
 		$choices = self::get_iconlist();
 		if ( ! $icon ) {
@@ -846,13 +923,13 @@ class Geo_Data {
 		);
 	}
 
-	/**
-	 * Return the marked up icon standardized to the fonts.
-	 *
-	 * @param string $icon Name of Icon.
-	 * @param string $summary Description of Icon. Optional.
-	 * @return string marked up icon
-	 */
+		/**
+		 * Return the marked up icon standardized to the fonts.
+		 *
+		 * @param string $icon Name of Icon.
+		 * @param string $summary Description of Icon. Optional.
+		 * @return string marked up icon
+		 */
 	public static function get_icon( $icon = null, $summary = null ) {
 		if ( is_null( $icon ) ) {
 			$icon = self::get_default_icon();

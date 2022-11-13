@@ -274,6 +274,17 @@ final class Location_Taxonomy {
 	 * @return array Normalized Address Data.
 	 */
 	public static function normalize_address( $address ) {
+		if ( array_key_exists( 'type', $address ) && array_key_exists( 'properties', $address ) ) {
+			$address = $address['properties'];
+			$address = array_map(
+				function( $v ) {
+					if ( is_array( $v ) ) {
+						return $v[0];
+					}
+				},
+				$address
+			);
+		}
 		if ( ! array_key_exists( 'country-code', $address ) && array_key_exists( 'country-name', $address ) ) {
 			$address['country-code'] = Geo_Provider::country_code( $address['country-name'] );
 		}

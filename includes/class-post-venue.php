@@ -304,7 +304,7 @@ class Post_Venue {
 		} elseif ( array_key_exists( 'label', $venue ) ) {
 			$title = $venue['label'];
 		} else {
-			$title = '';
+			return false;
 		}
 
 		$meta = array();

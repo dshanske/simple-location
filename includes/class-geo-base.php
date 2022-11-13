@@ -310,6 +310,7 @@ class Geo_Base {
 			foreach ( $post_ids as $post_id ) {
 				$return[] = Geo_Data::bulk_edit_lookup_location( $post_id );
 			}
+			$return      = array_filter( $return );
 			$redirect_to = add_query_arg( 'bulk_lookup_location_count', count( $return ), $redirect_to );
 		}
 		return $redirect_to;
@@ -692,7 +693,7 @@ class Geo_Base {
 					'type'        => 'string',
 				),
 			)
-		); 
+		);
 		register_rest_field(
 			array( 'post', 'comment', 'term', 'user' ),
 			'timezone',
