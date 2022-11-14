@@ -26,12 +26,19 @@ get_header();
 		while ( have_posts() ) {
 			the_post();
 
-			$location = get_post_geodata( get_post() );
-
-			if ( is_array( $location ) ) {
-				if ( 'public' === $location['visibility'] && array_key_exists( 'address', $location ) ) {
-					printf( '<li class="h-entry"><a class="u-url p-location" href="%1$s">%2$s</a></li>', esc_url( get_the_permalink() ), esc_html( $location['address'] ) );
-				}
+			if ( 'public' === get_post_geodata( get_the_ID(), 'visibility' ) ) {
+					echo get_post_location( 
+						get_the_ID(),
+						array(
+							'weather' => false,
+							'wrapper-type' => 'li',
+							'wrapper-class' => 'h-entry',
+							'markup' => false,
+							'icon' => false,
+							'object_link' => true,
+							'altitude' => false
+						)
+					);
 			}
 		}
 		?>

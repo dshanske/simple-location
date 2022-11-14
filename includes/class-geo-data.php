@@ -973,8 +973,10 @@ class Geo_Data {
 			'mapboxstyle'   => null,
 			'mapboxuser'    => null,
 			'weather'       => true,
+			'altitude'      => true, // Adds altitude when above certain level
 			'taxonomy'      => get_option( 'sloc_taxonomy_display' ), // Show taxonomy instead of address field.
 			'link'          => true, // Link to venue if displaying venue, link to taxonomy archive if showing taxonomy, link to map if showing address field, affected by visibility.
+			'object_link'   => false, // If this is set to true, then the link will be to the object link, overriding the link attribute
 			'icon'          => true, // Show Location Icon
 			'text'          => false, // Show Description
 			'markup'        => true, // Mark up with Microformats
@@ -1040,7 +1042,11 @@ class Geo_Data {
 				}
 			}
 
-			if ( isset( $loc['altitude'] ) ) {
+			if ( $args['object_link'] ) {
+				$url = get_object_permalink( $type, $id );
+			}
+
+			if ( isset( $loc['altitude'] ) && $args['altitude'] ) {
 				$loc['address'] .= sprintf( '(%1$s)', $loc['altitude'] );
 			}
 			$adclass = $args['markup'] ? 'p-label' : '';
@@ -1060,6 +1066,10 @@ class Geo_Data {
 				$url            = get_term_link( $term );
 			} elseif ( isset( $loc['address'] ) ) {
 				$c[] = $loc['address'];
+			}
+
+			if ( $args['object_link'] ) {
+				$url = get_object_permalink( $type, $id );
 			}
 		}
 

@@ -554,3 +554,18 @@ function sloc_get_comment_datetime( $comment = null ) {
 
 	return $datetime->setTimezone( new DateTimeZone( $timezone ) );
 }
+
+function get_object_permalink( $type, $id ) {
+	switch ( $type ) {
+		case 'post':
+			return get_permalink( $id );
+		case 'comment':
+			return get_comment_link( $id );
+		case 'user':
+			return get_author_posts_url( $id );
+		case 'term':
+			return get_term_link( $id );
+		default:
+			return false;
+	}
+}

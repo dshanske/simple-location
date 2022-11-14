@@ -9,11 +9,17 @@
 
 function set_post_geodata( $post, $key, $geodata ) {
 	$post = get_post( $post );
+	if ( ! $post ) {
+		return false;
+	}
 	return Geo_Data::set_geodata( 'post', $post->ID, $key, $geodata );
 }
 
 function set_comment_geodata( $comment, $key, $geodata ) {
 	$comment = get_comment( $comment );
+	if ( ! $comment ) {
+		return false;
+	}
 	return Geo_Data::set_geodata( 'comment', $comment->comment_ID, $key, $geodata );
 }
 

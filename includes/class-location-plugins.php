@@ -80,9 +80,11 @@ class Location_Plugins {
 			} else {
 				$published = new DateTime();
 			}
-
+			// Always assume a checkin is to a building level option
+			if ( isset( $properties['checkin'] ) ) {
+				set_post_geodata( $args['ID'], 'zoom', 18 );
 			// If altitude is above 1000m always show the higher zoom level.
-			if ( isset( $meta['geo_altitude'] ) && 1000 < $meta['geo_altitude'] ) {
+			} elseif ( isset( $meta['geo_altitude'] ) && 1000 < $meta['geo_altitude'] ) {
 				set_post_geodata( $args['ID'], 'zoom', 9 );
 			} elseif ( isset( $meta['geo_accuracy'] ) ) {
 				set_post_geodata( $args['ID'], 'zoom', round( log( 591657550.5 / ( $meta['geo_accuracy'] * 45 ), 2 ) ) + 1 );
