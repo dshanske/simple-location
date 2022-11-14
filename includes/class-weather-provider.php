@@ -358,6 +358,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 			$weather = Loc_Config::weather_provider( $fallback );
 			$weather->set( $this->latitude, $this->longitude );
 			$conditions = $weather->get_conditions( $time );
+			if ( is_wp_error( $conditions ) ) {
+				return $conditions;
+			}
 			if ( ! empty( $conditions ) ) {
 				// if debug mode is on remove the raw data from storage.
 				unset( $conditions['raw'] );
