@@ -3,7 +3,7 @@
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
 **Tested up to:** 6.1  
-**Stable tag:** 5.0.2  
+**Stable tag:** 5.0.3  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -288,6 +288,12 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 5.0.3 ( 2022-11-13 ) ###
+* Add support to lookup location to update older posts with venue creation
+* Update map archive to call get_location over custom code. Add arguments to get_location to allow better customization for the map. 
+* Set map zoom level to building level if Micropub post is a checkin
+* Allow for passing thorugh a zoom when creating a venue, otherwise building level default
 
 ### 5.0.2 ( 2022-11-12 ) ###
 * Add function to get posts for a specific venue

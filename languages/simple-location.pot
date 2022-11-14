@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 5.0.1\n"
+"Project-Id-Version: Simple Location 5.0.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-11-06T18:23:49+00:00\n"
+"POT-Creation-Date: 2022-11-14T03:24:28+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: simple-location\n"
@@ -191,8 +191,8 @@ msgstr ""
 
 #: includes/class-geo-base.php:94
 #: includes/class-geo-base.php:106
-#: includes/class-geo-base.php:334
-#: includes/class-geo-base.php:691
+#: includes/class-geo-base.php:335
+#: includes/class-geo-base.php:692
 #: includes/class-loc-config.php:377
 #: includes/class-sloc-media-metadata.php:175
 #: templates/loc-metabox.php:48
@@ -226,8 +226,8 @@ msgid_plural "Updated %s posts."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-geo-base.php:354
-#: includes/class-location-taxonomy.php:713
+#: includes/class-geo-base.php:355
+#: includes/class-location-taxonomy.php:724
 #: includes/class-post-venue.php:236
 #: includes/class-weather-provider.php:601
 #: includes/trait-weather-info.php:337
@@ -237,39 +237,39 @@ msgstr[1] ""
 msgid "None"
 msgstr ""
 
-#: includes/class-geo-base.php:389
-#: includes/class-geo-base.php:456
-#: includes/class-geo-base.php:483
-msgid "Private"
-msgstr ""
-
 #: includes/class-geo-base.php:390
 #: includes/class-geo-base.php:457
 #: includes/class-geo-base.php:484
-msgid "Public"
+msgid "Private"
 msgstr ""
 
 #: includes/class-geo-base.php:391
 #: includes/class-geo-base.php:458
 #: includes/class-geo-base.php:485
+msgid "Public"
+msgstr ""
+
+#: includes/class-geo-base.php:392
+#: includes/class-geo-base.php:459
+#: includes/class-geo-base.php:486
 msgid "Protected"
 msgstr ""
 
-#: includes/class-geo-base.php:454
+#: includes/class-geo-base.php:455
 msgid "All Posts"
 msgstr ""
 
-#: includes/class-geo-base.php:455
-#: includes/class-geo-base.php:482
+#: includes/class-geo-base.php:456
+#: includes/class-geo-base.php:483
 msgid "With Location"
 msgstr ""
 
-#: includes/class-geo-base.php:481
+#: includes/class-geo-base.php:482
 msgid "All Comments"
 msgstr ""
 
-#: includes/class-geo-base.php:669
-#: includes/class-geo-data.php:558
+#: includes/class-geo-base.php:670
+#: includes/class-geo-data.php:636
 #: includes/weather/class-weather-provider-station.php:148
 #: templates/elevation-form.php:12
 #: templates/geocode-form.php:12
@@ -280,8 +280,8 @@ msgstr ""
 msgid "Latitude"
 msgstr ""
 
-#: includes/class-geo-base.php:680
-#: includes/class-geo-data.php:570
+#: includes/class-geo-base.php:681
+#: includes/class-geo-data.php:648
 #: includes/weather/class-weather-provider-station.php:149
 #: templates/elevation-form.php:13
 #: templates/geocode-form.php:13
@@ -292,294 +292,294 @@ msgstr ""
 msgid "Longitude"
 msgstr ""
 
-#: includes/class-geo-base.php:702
+#: includes/class-geo-base.php:703
 msgid "Last Reported Timezone"
 msgstr ""
 
-#: includes/class-geo-data.php:581
+#: includes/class-geo-data.php:659
 msgid "Timezone of Location"
 msgstr ""
 
-#: includes/class-geo-data.php:593
+#: includes/class-geo-data.php:671
 msgid "Geodata Address"
 msgstr ""
 
-#: includes/class-geo-data.php:605
-#: includes/class-geo-data.php:644
+#: includes/class-geo-data.php:683
+#: includes/class-geo-data.php:722
 msgid "Geodata Public"
 msgstr ""
 
-#: includes/class-geo-data.php:617
+#: includes/class-geo-data.php:695
 msgid "Geodata Icon"
 msgstr ""
 
-#: includes/class-geo-data.php:629
+#: includes/class-geo-data.php:707
 msgid "Is it Day Time"
 msgstr ""
 
-#: includes/class-geo-data.php:638
+#: includes/class-geo-data.php:716
 #: templates/loc-user-metabox.php:43
 #: templates/loc-user-metabox.php:47
 msgid "Altitude"
 msgstr ""
 
-#: includes/class-geo-data.php:639
+#: includes/class-geo-data.php:717
 msgid "Geodata Zoom for Map Display"
 msgstr ""
 
-#: includes/class-geo-data.php:755
+#: includes/class-geo-data.php:833
 msgid "Location Arrow"
 msgstr ""
 
-#: includes/class-geo-data.php:756
+#: includes/class-geo-data.php:834
 #: includes/location/class-location-provider-compass.php:17
 msgid "Compass"
 msgstr ""
 
-#: includes/class-geo-data.php:757
+#: includes/class-geo-data.php:835
 msgid "Map"
 msgstr ""
 
-#: includes/class-geo-data.php:758
+#: includes/class-geo-data.php:836
 msgid "Map Marker"
 msgstr ""
 
-#: includes/class-geo-data.php:759
+#: includes/class-geo-data.php:837
 msgid "Passport"
 msgstr ""
 
-#: includes/class-geo-data.php:760
+#: includes/class-geo-data.php:838
 msgid "Home"
 msgstr ""
 
-#: includes/class-geo-data.php:761
+#: includes/class-geo-data.php:839
 msgid "Globe - Asia"
 msgstr ""
 
-#: includes/class-geo-data.php:762
+#: includes/class-geo-data.php:840
 msgid "Globe - Americas"
 msgstr ""
 
-#: includes/class-geo-data.php:763
+#: includes/class-geo-data.php:841
 msgid "Globe - Europe"
 msgstr ""
 
-#: includes/class-geo-data.php:764
+#: includes/class-geo-data.php:842
 msgid "Globe - Africa"
 msgstr ""
 
-#: includes/class-geo-data.php:765
+#: includes/class-geo-data.php:843
 #: includes/class-location-provider.php:336
 msgid "Plane"
 msgstr ""
 
-#: includes/class-geo-data.php:766
+#: includes/class-geo-data.php:844
 #: includes/class-location-provider.php:333
 msgid "Train"
 msgstr ""
 
-#: includes/class-geo-data.php:767
+#: includes/class-geo-data.php:845
 #: includes/class-location-provider.php:339
 msgid "Taxi"
 msgstr ""
 
-#: includes/class-geo-data.php:768
+#: includes/class-geo-data.php:846
 msgid "Tram"
 msgstr ""
 
-#: includes/class-geo-data.php:769
+#: includes/class-geo-data.php:847
 msgid "Biking"
 msgstr ""
 
-#: includes/class-geo-data.php:770
+#: includes/class-geo-data.php:848
 #: includes/class-location-provider.php:332
 msgid "Bus"
 msgstr ""
 
-#: includes/class-geo-data.php:771
+#: includes/class-geo-data.php:849
 msgid "Bus (Alt)"
 msgstr ""
 
-#: includes/class-geo-data.php:772
+#: includes/class-geo-data.php:850
 #: includes/class-location-provider.php:331
 msgid "Car"
 msgstr ""
 
-#: includes/class-geo-data.php:773
+#: includes/class-geo-data.php:851
 msgid "Helicopter"
 msgstr ""
 
-#: includes/class-geo-data.php:774
+#: includes/class-geo-data.php:852
 #: includes/class-location-provider.php:340
 msgid "Horse"
 msgstr ""
 
-#: includes/class-geo-data.php:775
+#: includes/class-geo-data.php:853
 msgid "Ship"
 msgstr ""
 
-#: includes/class-geo-data.php:776
-#: includes/class-geo-data.php:782
+#: includes/class-geo-data.php:854
+#: includes/class-geo-data.php:860
 #: includes/class-location-provider.php:338
 msgid "Running"
 msgstr ""
 
-#: includes/class-geo-data.php:777
+#: includes/class-geo-data.php:855
 msgid "Shuttle Van"
 msgstr ""
 
-#: includes/class-geo-data.php:778
+#: includes/class-geo-data.php:856
 #: includes/class-location-provider.php:334
 msgid "Subway"
 msgstr ""
 
-#: includes/class-geo-data.php:779
+#: includes/class-geo-data.php:857
 msgid "Suitcase"
 msgstr ""
 
-#: includes/class-geo-data.php:780
+#: includes/class-geo-data.php:858
 msgid "Suitcase - Rolling"
 msgstr ""
 
-#: includes/class-geo-data.php:781
+#: includes/class-geo-data.php:859
 #: includes/class-location-provider.php:337
 msgid "Walking"
 msgstr ""
 
-#: includes/class-geo-data.php:783
+#: includes/class-geo-data.php:861
 msgid "American Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:784
+#: includes/class-geo-data.php:862
 msgid "S7 Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:785
+#: includes/class-geo-data.php:863
 msgid "United Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:786
+#: includes/class-geo-data.php:864
 msgid "Pegasus Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:787
+#: includes/class-geo-data.php:865
 msgid "Ethiopian Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:788
+#: includes/class-geo-data.php:866
 msgid "Southwest Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:789
+#: includes/class-geo-data.php:867
 msgid "Lot Polish Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:790
+#: includes/class-geo-data.php:868
 msgid "China Eastern Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:791
+#: includes/class-geo-data.php:869
 msgid "China Southern Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:792
+#: includes/class-geo-data.php:870
 msgid "Aer Lingus"
 msgstr ""
 
-#: includes/class-geo-data.php:793
+#: includes/class-geo-data.php:871
 msgid "Aeroflot"
 msgstr ""
 
-#: includes/class-geo-data.php:794
+#: includes/class-geo-data.php:872
 msgid "Aeromexico"
 msgstr ""
 
-#: includes/class-geo-data.php:795
+#: includes/class-geo-data.php:873
 msgid "Air Canada"
 msgstr ""
 
-#: includes/class-geo-data.php:796
+#: includes/class-geo-data.php:874
 msgid "Air China"
 msgstr ""
 
-#: includes/class-geo-data.php:797
+#: includes/class-geo-data.php:875
 msgid "Air France"
 msgstr ""
 
-#: includes/class-geo-data.php:798
+#: includes/class-geo-data.php:876
 msgid "Air Asia"
 msgstr ""
 
-#: includes/class-geo-data.php:799
+#: includes/class-geo-data.php:877
 msgid "Airbus"
 msgstr ""
 
-#: includes/class-geo-data.php:800
+#: includes/class-geo-data.php:878
 msgid "Boeing"
 msgstr ""
 
-#: includes/class-geo-data.php:801
+#: includes/class-geo-data.php:879
 msgid "Emirates"
 msgstr ""
 
-#: includes/class-geo-data.php:802
+#: includes/class-geo-data.php:880
 msgid "Etihad Airways"
 msgstr ""
 
-#: includes/class-geo-data.php:803
+#: includes/class-geo-data.php:881
 msgid "Qatar Airways"
 msgstr ""
 
-#: includes/class-geo-data.php:804
+#: includes/class-geo-data.php:882
 msgid "Ryanair"
 msgstr ""
 
-#: includes/class-geo-data.php:805
+#: includes/class-geo-data.php:883
 msgid "San Francisco Municipal Railway"
 msgstr ""
 
-#: includes/class-geo-data.php:806
+#: includes/class-geo-data.php:884
 msgid "Shanghai Metro"
 msgstr ""
 
-#: includes/class-geo-data.php:807
+#: includes/class-geo-data.php:885
 msgid "Turkish Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:808
+#: includes/class-geo-data.php:886
 msgid "Wizz Air"
 msgstr ""
 
-#: includes/class-geo-data.php:809
+#: includes/class-geo-data.php:887
 msgid "Alitalia"
 msgstr ""
 
-#: includes/class-geo-data.php:810
+#: includes/class-geo-data.php:888
 msgid "ANA"
 msgstr ""
 
-#: includes/class-geo-data.php:811
+#: includes/class-geo-data.php:889
 msgid "Delta"
 msgstr ""
 
-#: includes/class-geo-data.php:812
+#: includes/class-geo-data.php:890
 msgid "easyJet"
 msgstr ""
 
-#: includes/class-geo-data.php:813
+#: includes/class-geo-data.php:891
 msgid "Lufthansa"
 msgstr ""
 
-#: includes/class-geo-data.php:814
+#: includes/class-geo-data.php:892
 msgid "British Airways"
 msgstr ""
 
 #. translators: Prefaces the address 1. with the private status
-#: includes/class-geo-data.php:886
+#: includes/class-geo-data.php:963
 msgid "Hidden: %1$s"
 msgstr ""
 
-#: includes/class-geo-data.php:904
+#: includes/class-geo-data.php:983
 msgid "Location: "
 msgstr ""
 
@@ -801,7 +801,7 @@ msgid "Simple Location Depends on Third Party Services"
 msgstr ""
 
 #: includes/class-loc-config.php:1161
-msgid "Many of these services require you to sign up for an account and provide an API key below. Many have free and paid tiers. For this reason, the plugin offers multiple providers. At this moment, Nominatim, Wikimedia Maps, and the US National Weather Service can be used without API keys. Geonames requires an account, but is otherwise free to use. If you are uncertain of which to try, start with the defaults."
+msgid "Many of these services require you to sign up for an account and provide an API key below. Many have free and paid tiers. For this reason, the plugin offers multiple providers. At this moment, Nominatim, and the US National Weather Service can be used without API keys and there is no map service that does not require an API key. Geonames requires an account, but is otherwise free to use. If you are uncertain of which to try, start with the defaults."
 msgstr ""
 
 #: includes/class-loc-config.php:1172
@@ -997,19 +997,19 @@ msgid "Locality Name"
 msgstr ""
 
 #. translators: 1. Taxonomy Label
-#: includes/class-location-taxonomy.php:372
+#: includes/class-location-taxonomy.php:383
 msgid "No %1$s"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:706
+#: includes/class-location-taxonomy.php:717
 msgid "Country"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:707
+#: includes/class-location-taxonomy.php:718
 msgid "Region"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:708
+#: includes/class-location-taxonomy.php:719
 msgid "Locality"
 msgstr ""
 
