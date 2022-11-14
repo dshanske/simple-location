@@ -376,6 +376,11 @@ class Post_Venue {
 			}
 			set_post_geodata( $id, null, $venue );
 			set_post_geodata( $id, 'visibility', 'public' );
+			if ( array_key_exists( 'zoom', $venue ) ) {
+				set_post_geodata( $id, 'zoom', $venue['zoom'] );
+			} else {
+				set_post_geodata( $id, 'zoom', 18 );
+			}
 		}
 
 		return $id;
