@@ -186,8 +186,8 @@ class Geo_Base {
 		$screens   = self::screens();
 		$screens[] = 'comment';
 		$hooks     = array( 'profile.php' );
-
-		if ( in_array( get_current_screen()->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
+		$screen = get_current_screen();
+		if ( in_array( $screen->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
 			wp_enqueue_style(
 				'sloc_admin',
 				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),
@@ -208,16 +208,28 @@ class Geo_Base {
 				Simple_Location_Plugin::$version,
 				true
 			);
-			wp_localize_script(
-				'sloc_location',
-				'slocOptions',
-				array(
+
+			if ( 'post' === $screen->post_type ) {
+				$weather = 'yes';
+			} elseif ( 'comment' === $screen->id ) {
+				$weather = 'yes';
+			} else {
+				$weather = 'no';
+			}
+
+			$options = array(
 					'lookup'             => get_option( 'sloc_geolocation_provider' ),
 					'units'              => get_option( 'sloc_measurements' ),
 					'visibility_options' => self::geo_public(),
 					'api_nonce'          => wp_create_nonce( 'wp_rest' ),
 					'api_url'            => rest_url( '/sloc_geo/1.0/' ),
-				)
+					'weather'            => $weather
+				);
+
+			wp_localize_script(
+				'sloc_location',
+				'slocOptions',
+				$options
 			);
 		}
 	}

@@ -137,7 +137,7 @@ jQuery( document ).ready( function( $ ) {
 				longitude: $( '#longitude' ).val(),
 				altitude: $( '#altitude' ).val(),
 				term: true,
-				weather,
+				weather: slocOptions.weather,
 				map_zoom: $( '#map_zoom' ).val(), // eslint-disable-line camelcase
 				height: 200,
 				width: 200,

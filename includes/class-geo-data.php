@@ -611,7 +611,7 @@ class Geo_Data {
 		}
 
 		$weather = get_post_weatherdata( $post_id );
-		if ( empty( $weather ) ) {
+		if ( empty( $weather ) && ( 'post' === get_post_type( $post_id ) ) ) {
 			$weather = Loc_Config::weather_provider();
 			if ( $weather ) {
 				$weather->set( $geodata['latitude'], $geodata['longitude'] );
