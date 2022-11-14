@@ -589,6 +589,7 @@ class Geo_Data {
 		$checkin = get_post_meta( $post_id, 'mf2_checkin', true );
 		if ( $checkin && is_array( $checkin ) ) {
 			$checkin = Location_Taxonomy::normalize_address( $checkin );
+			$checkin = array_merge( $geodata, $checkin );
 			$venue   = Post_Venue::add_new_venue( $checkin );
 			if ( is_numeric( $venue ) ) {
 				$update = true;
@@ -602,6 +603,7 @@ class Geo_Data {
 						'properties' => array(
 							'url'  => array( get_permalink( $venue ) ),
 							'name' => array( get_the_title( $venue ) ),
+							'uid'  => array( $venue ),
 						),
 					)
 				);
