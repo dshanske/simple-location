@@ -366,6 +366,7 @@ class Post_Venue {
 			'post_title'  => $title,
 			'post_status' => 'publish',
 			'post_type'   => 'venue',
+			'post_name' => sanitize_title( $title . ' ' . Location_Taxonomy::display_name( $location, false ) ),
 			'meta_input'  => $meta,
 		);
 
