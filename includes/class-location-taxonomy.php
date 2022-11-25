@@ -85,6 +85,10 @@ final class Location_Taxonomy {
 				'value'   => 1,
 			);
 			$query->set( 'meta_query', array( $public ) );
+			$post_types = get_post_types_by_support( 'geo-location' );
+			$search     = array_search( 'venue', $post_types, true );
+			unset( $post_types[ $search ] );
+			$query->set( 'post_type', $post_types );
 		}
 		return $query;
 	}
@@ -773,7 +777,7 @@ final class Location_Taxonomy {
 	}
 
 	public static function display_name( $term_id, $links = true ) {
-		$term   = get_term( $term_id );
+		$term = get_term( $term_id );
 		if ( is_wp_error( $term ) ) {
 			return '';
 		}
