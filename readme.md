@@ -3,7 +3,7 @@
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
 **Tested up to:** 6.1  
-**Stable tag:** 5.0.3  
+**Stable tag:** 5.0.4  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -288,6 +288,11 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 5.0.4 ( 2022-11-25 ) ###
+* Add uid when updating the checkin property of a post
+* Add location to post slug for venues to assist in disambiguation
+* Add location to venue when displayed to assist in disambiguation
 
 ### 5.0.3 ( 2022-11-13 ) ###
 * Add support to lookup location to update older posts with venue creation
