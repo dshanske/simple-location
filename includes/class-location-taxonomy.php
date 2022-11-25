@@ -774,6 +774,9 @@ final class Location_Taxonomy {
 
 	public static function display_name( $term_id, $links = true ) {
 		$term   = get_term( $term_id );
+		if ( is_wp_error( $term ) ) {
+			return '';
+		}
 		$return = array();
 		if ( 0 === $term->parent ) {
 			$country  = get_term_meta( $term->term_id, 'country', true );
