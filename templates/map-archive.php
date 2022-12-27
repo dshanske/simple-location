@@ -27,16 +27,16 @@ get_header();
 			the_post();
 
 			if ( 'public' === get_post_geodata( get_the_ID(), 'visibility' ) ) {
-					echo get_post_location( 
+					echo get_post_location(
 						get_the_ID(),
 						array(
-							'weather' => false,
-							'wrapper-type' => 'li',
+							'weather'       => false,
+							'wrapper-type'  => 'li',
 							'wrapper-class' => 'h-entry',
-							'markup' => false,
-							'icon' => false,
-							'object_link' => true,
-							'altitude' => false
+							'markup'        => false,
+							'icon'          => false,
+							'object_link'   => true,
+							'altitude'      => false,
 						)
 					);
 			}
