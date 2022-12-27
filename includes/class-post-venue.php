@@ -177,12 +177,143 @@ class Post_Venue {
 
 		add_filter( 'manage_venue_posts_columns', array( __CLASS__, 'remove_date_admin_column' ) );
 		add_filter( 'manage_venue_posts_columns', array( 'Geo_Base', 'add_location_admin_column' ) );
+		add_filter( 'manage_venue_posts_columns', array( __CLASS__, 'add_checkins_admin_column' ) );
 		add_action( 'manage_venue_posts_custom_column', array( 'Geo_Base', 'manage_location_admin_column' ), 10, 2 );
+		add_action( 'manage_venue_posts_custom_column', array( __CLASS__, 'manage_checkins_admin_column' ), 10, 2 );
 
 		// Add Dropdown.
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'venue_types_dropdown' ), 12, 2 );
+
+		add_filter( 'bulk_actions-edit-venue', array( __CLASS__, 'register_bulk_edit' ), 10 );
+		add_filter( 'handle_bulk_actions-edit-venue', array( __CLASS__, 'handle_bulk_edit' ), 10, 3 );
+		add_action( 'admin_notices', array( __CLASS__, 'bulk_action_admin_notices' ) );
+		add_action( 'pre_get_posts', array( __CLASS__, 'post__in' ) );
 	}
 
+	/**
+	 * Adds posts__in support to edit post screen.
+	 *
+	 * @param WP_Query $query Query Object.
+	 */
+	public static function post__in( $query ) {
+		if ( ! is_admin() ) {
+			return $query;
+		}
+
+		if ( ! array_key_exists( 'post__in', $_GET ) ) {
+			return $query;
+		}
+
+		$ids = $_GET['post__in'];
+		$ids = array_map( 'intval', $ids );
+
+		$query->set( 'post__in', $ids );
+	}
+
+	/**
+	 * This registers an admin column in the venue edit screen.
+	 *
+	 * @param array $columns Columns passed through from filter.
+	 * @return array $columns Column with extra property added.
+	 * @since 1.0.0
+	 */
+	public static function add_checkins_admin_column( $columns ) {
+		$columns['checkins'] = __( 'Checkins', 'simple-location' );
+		return $columns;
+	}
+
+	/**
+	 * Returns number of checkins for the venue edit screen column.
+	 *
+	 * @param string $column Which column is being rendered.
+	 * @param int    $post_id The post id for the row.
+	 */
+	public static function manage_checkins_admin_column( $column, $post_id ) {
+		if ( 'checkins' === $column ) {
+			$ids = self::get_venue_posts( $post_id );
+			if ( is_countable( $ids ) ) {
+				$count = count( $ids );
+				$url   = add_query_arg(
+					array(
+						'post__in' => $ids,
+					),
+					'edit.php'
+				);
+				printf( '<a href="%s">%s</a>', esc_url( $url ), $count );
+			} else {
+				__e( 'None', 'simple-location' );
+			}
+		}
+	}
+
+
+	/**
+	 * Register Bulk Edit of Location.
+	 *
+	 * Adds options to bulk edit location.
+	 *
+	 * @param array $actions List of Registered Bulk Edit Actions.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function register_bulk_edit( $actions ) {
+		$actions['venue_children'] = __( 'Update Venue from Its Checkins', 'simple-location' );
+		return $actions;
+	}
+
+	/**
+	 * Bulk Edit Handler.
+	 *
+	 * Allows for Bulk Updating venues.
+	 *
+	 * @param string $redirect_to Where to redirect once complete.
+	 * @param string $doaction The Action Being Requested.
+	 * @param array  $post_ids The list of Post IDs to act on.
+	 * @return string $redirect_to Return the Redirect_To Parameter
+	 */
+	public static function handle_bulk_edit( $redirect_to, $doaction, $post_ids ) {
+		switch ( $doaction ) {
+			case 'venue_children':
+				$count = 0;
+				foreach ( $post_ids as $post_id ) {
+					$data = get_post_geodata( $post_id );
+					if ( ! array_key_exists( 'longitude', $data ) && ! array_key_exists( 'latitude', $data ) ) {
+						$ids = self::get_venue_posts( $post_id );
+						if ( ! empty( $ids ) ) {
+							$data = get_post_geodata( $ids[0] );
+							if ( array_key_exists( 'longitude', $data ) ) {
+								set_post_geodata( $post_id, '', $data );
+								$location = Location_Taxonomy::get_location_taxonomy( $ids[0] );
+								if ( $location ) {
+									Location_Taxonomy::set_location( $post_id, $location->term_id );
+								}
+							}
+							$count++;
+						}
+					}
+				}
+				$redirect_to = add_query_arg( 'bulk_venue_children', $count, $redirect_to );
+				break;
+
+		}
+		return $redirect_to;
+	}
+
+	/**
+	 * Add Notice when Bulk Action is run with results.
+	 */
+	public static function bulk_action_admin_notices() {
+		if ( isset( $_REQUEST['bulk_venue_children'] ) ) {
+			$count = intval( $_REQUEST['bulk_venue_children'] );
+			if ( 0 === $count ) {
+				$string = __( 'None of the Venues Were Updated.', 'simple-location' );
+			} else {
+				/* translators: Count of posts updated. */
+				$string = sprintf( _n( 'Updated %s venue.', 'Updated %s venues.', $count, 'simple-location' ), $count );
+			}
+			printf( '<div id="message" class="updated fade">%1$s</div>', esc_html( $string ) );
+		}
+	}
 
 	/**
 	 * This removes the data column from displaying on the venue edit screen
@@ -194,8 +325,6 @@ class Post_Venue {
 		unset( $columns['date'] );
 		return $columns;
 	}
-
-
 
 	/**
 	 * Generates a dropdown
@@ -451,25 +580,23 @@ class Post_Venue {
 	}
 
 	public static function get_venue_posts( $venue_id = null ) {
-			$venue = get_post( $venue_id );
+		$venue = get_post( $venue_id );
 		if ( 'venue' !== get_post_type( $venue ) ) {
 			return false;
 		}
 
-			return get_posts(
-				array(
-					'post_type'  => 'post',
-					'fields'     => 'ids',
-					'meta_query' => array(
-						array(
-							'key'   => 'venue_id',
-							'value' => $venue->ID,
-						),
+		return get_posts(
+			array(
+				'post_type'  => 'post',
+				'fields'     => 'ids',
+				'meta_query' => array(
+					array(
+						'key'   => 'venue_id',
+						'value' => $venue->ID,
 					),
-				)
-			);
+				),
+			)
+		);
 	}
-
-
 
 }
