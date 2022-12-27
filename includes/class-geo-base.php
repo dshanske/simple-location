@@ -48,17 +48,16 @@ class Geo_Base {
 		// Add Dropdown.
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'geo_posts_dropdown' ), 12, 2 );
 		add_action( 'restrict_manage_comments', array( __CLASS__, 'geo_comments_dropdown' ), 12 );
-		add_filter( 'manage_posts_columns', array( __CLASS__, 'add_location_admin_column' ) );
-		add_action( 'manage_posts_custom_column', array( __CLASS__, 'manage_location_admin_column' ), 10, 2 );
-
-		add_filter( 'bulk_actions-edit-post', array( __CLASS__, 'register_bulk_edit_location' ), 10 );
-		add_filter( 'handle_bulk_actions-edit-post', array( __CLASS__, 'handle_bulk_edit_location' ), 10, 3 );
-		add_action( 'admin_notices', array( __CLASS__, 'bulk_action_admin_notices' ) );
 
 		// Add the Same Post Type Support JetPack uses.
 		add_post_type_support( 'post', 'geo-location' );
 		add_post_type_support( 'page', 'geo-location' );
 		add_post_type_support( 'attachment', 'geo-location' );
+
+		add_filter( 'bulk_actions-edit-post', array( __CLASS__, 'register_bulk_edit_location' ), 10 );
+		add_filter( 'handle_bulk_actions-edit-post', array( __CLASS__, 'handle_bulk_edit_location' ), 10, 3 );
+		add_action( 'admin_notices', array( __CLASS__, 'bulk_action_admin_notices' ) );
+
 
 		add_filter( 'rest_prepare_post', array( __CLASS__, 'rest_prepare_post' ), 10, 3 );
 		add_filter( 'rest_prepare_comment', array( __CLASS__, 'rest_prepare_comment' ), 10, 3 );
@@ -75,6 +74,11 @@ class Geo_Base {
 		add_action( 'edit_user_profile', array( __CLASS__, 'user_profile' ), 12 );
 		add_action( 'personal_options_update', array( __CLASS__, 'save_user_meta' ), 12 );
 		add_action( 'edit_user_profile_update', array( __CLASS__, 'save_user_meta' ), 12 );
+
+		foreach( get_post_types_by_support( 'geo-location' ) as $post_type ) {
+			add_filter( sprintf( 'manage_%1$s_posts_columns', $post_type ), array( __CLASS__, 'add_location_admin_column' ) );
+			add_action( sprintf( 'manage_%1$s_posts_custom_column', $post_type ), array( __CLASS__, 'manage_location_admin_column' ), 10, 2 );
+		}
 
 	}
 
@@ -341,9 +345,6 @@ class Geo_Base {
 	 * @since 1.0.0
 	 */
 	public static function add_location_admin_column( $columns ) {
-		if ( array_key_exists( 'post_type', $_GET ) && ! in_array( $_GET['post_type'], self::screens() ) ) {
-			return $columns;
-		}
 		$columns['location'] = __( 'Location', 'simple-location' );
 		return $columns;
 	}
@@ -359,12 +360,12 @@ class Geo_Base {
 	 */
 	public static function manage_location_admin_column( $column, $post_id ) {
 		if ( 'location' === $column ) {
-			$geo_public = self::geo_public();
-			$location   = get_post_geodata( $post_id );
-			if ( $location ) {
-				echo esc_html( $geo_public[ $location['visibility'] ] );
+			if ( ! has_post_location( $post_id ) ) {
+				echo esc_html_e( 'None', 'simple-location' );
 			} else {
-				esc_html_e( 'None', 'simple-location' );
+				$geo_public = self::geo_public();
+				$visibility   = get_post_geodata( $post_id, 'visibility' );
+				echo esc_html( $geo_public[ $visibility ] );
 			}
 		}
 	}

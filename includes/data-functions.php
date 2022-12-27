@@ -31,6 +31,19 @@ function set_term_geodata( $id, $key, $geodata ) {
 	return Geo_Data::set_geodata( 'term', $id, $key, $geodata );
 }
 
+
+/*
+ * Wrapper around has_geodata for post IDs or objects
+ *
+ */
+function has_post_location( $post = null ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return array();
+	}
+	return Geo_Data::has_location( 'post', $post->ID );
+}
+
 /*
  * Wrapper around get_geodata for post IDs or objects
  *

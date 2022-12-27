@@ -128,9 +128,10 @@ class Post_Venue {
 				'labels'           => $labels,
 				'description'      => __( 'Represents a place', 'simple-location' ),
 				'public'           => true,
+				'hierarchical'     => true,
 				'show_in_rest'     => true,
 				'menu_icon'        => 'dashicons-location',
-				'supports'         => array( 'title', 'thumbnail', 'geo-location', 'editor', 'custom-fields' ),
+				'supports'         => array( 'title', 'thumbnail', 'geo-location', 'editor', 'custom-fields', 'page-attributes' ),
 				'taxonomies'       => array( 'location' ),
 				'has_archive'      => false,
 				'delete_with_user' => false,
@@ -174,6 +175,8 @@ class Post_Venue {
 		);
 		register_taxonomy( 'venue_type', 'venue', $args );
 
+		add_filter( 'manage_venue_posts_columns', array( 'Geo_Base', 'add_location_admin_column' ) );
+		add_action( 'manage_venue_posts_custom_column', array( 'Geo_Base', 'manage_location_admin_column' ), 10, 2 );
 	}
 
 	/**
