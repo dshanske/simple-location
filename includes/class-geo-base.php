@@ -58,7 +58,6 @@ class Geo_Base {
 		add_filter( 'handle_bulk_actions-edit-post', array( __CLASS__, 'handle_bulk_edit_location' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'bulk_action_admin_notices' ) );
 
-
 		add_filter( 'rest_prepare_post', array( __CLASS__, 'rest_prepare_post' ), 10, 3 );
 		add_filter( 'rest_prepare_comment', array( __CLASS__, 'rest_prepare_comment' ), 10, 3 );
 		add_filter( 'rest_prepare_user', array( __CLASS__, 'rest_prepare_user' ), 10, 3 );
@@ -75,7 +74,7 @@ class Geo_Base {
 		add_action( 'personal_options_update', array( __CLASS__, 'save_user_meta' ), 12 );
 		add_action( 'edit_user_profile_update', array( __CLASS__, 'save_user_meta' ), 12 );
 
-		foreach( get_post_types_by_support( 'geo-location' ) as $post_type ) {
+		foreach ( get_post_types_by_support( 'geo-location' ) as $post_type ) {
 			add_filter( sprintf( 'manage_%1$s_posts_columns', $post_type ), array( __CLASS__, 'add_location_admin_column' ) );
 			add_action( sprintf( 'manage_%1$s_posts_custom_column', $post_type ), array( __CLASS__, 'manage_location_admin_column' ), 10, 2 );
 		}
@@ -190,7 +189,7 @@ class Geo_Base {
 		$screens   = self::screens();
 		$screens[] = 'comment';
 		$hooks     = array( 'profile.php' );
-		$screen = get_current_screen();
+		$screen    = get_current_screen();
 		if ( in_array( $screen->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
 			wp_enqueue_style(
 				'sloc_admin',
@@ -222,13 +221,13 @@ class Geo_Base {
 			}
 
 			$options = array(
-					'lookup'             => get_option( 'sloc_geolocation_provider' ),
-					'units'              => get_option( 'sloc_measurements' ),
-					'visibility_options' => self::geo_public(),
-					'api_nonce'          => wp_create_nonce( 'wp_rest' ),
-					'api_url'            => rest_url( '/sloc_geo/1.0/' ),
-					'weather'            => $weather
-				);
+				'lookup'             => get_option( 'sloc_geolocation_provider' ),
+				'units'              => get_option( 'sloc_measurements' ),
+				'visibility_options' => self::geo_public(),
+				'api_nonce'          => wp_create_nonce( 'wp_rest' ),
+				'api_url'            => rest_url( '/sloc_geo/1.0/' ),
+				'weather'            => $weather,
+			);
 
 			wp_localize_script(
 				'sloc_location',
@@ -364,7 +363,7 @@ class Geo_Base {
 				echo esc_html_e( 'None', 'simple-location' );
 			} else {
 				$geo_public = self::geo_public();
-				$visibility   = get_post_geodata( $post_id, 'visibility' );
+				$visibility = get_post_geodata( $post_id, 'visibility' );
 				echo esc_html( $geo_public[ $visibility ] );
 			}
 		}

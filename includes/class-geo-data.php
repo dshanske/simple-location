@@ -1033,10 +1033,10 @@ class Geo_Data {
 			if ( $venue ) {
 				$loc['address'] = get_the_title( $venue );
 				if ( $term ) {
-					$loc['address'] .= ' - '; 
+					$loc['address'] .= ' - ';
 					$loc['address'] .= Location_Taxonomy::display_name( $term, false );
 				}
-				$url            = get_permalink( $venue );
+				$url = get_permalink( $venue );
 			} elseif ( $args['taxonomy'] && $term ) {
 				$loc['address'] = Location_Taxonomy::display_name( $term, false );
 				$url            = get_term_link( $term );

@@ -175,8 +175,56 @@ class Post_Venue {
 		);
 		register_taxonomy( 'venue_type', 'venue', $args );
 
+		add_filter( 'manage_venue_posts_columns', array( __CLASS__, 'remove_date_admin_column' ) );
 		add_filter( 'manage_venue_posts_columns', array( 'Geo_Base', 'add_location_admin_column' ) );
 		add_action( 'manage_venue_posts_custom_column', array( 'Geo_Base', 'manage_location_admin_column' ), 10, 2 );
+
+		// Add Dropdown.
+		add_action( 'restrict_manage_posts', array( __CLASS__, 'venue_types_dropdown' ), 12, 2 );
+	}
+
+
+	/**
+	 * This removes the data column from displaying on the venue edit screen
+	 *
+	 * @param array $columns Columns passed through from filter.
+	 * @return array $columns Column with date removed.
+	 */
+	public static function remove_date_admin_column( $columns ) {
+		unset( $columns['date'] );
+		return $columns;
+	}
+
+
+
+	/**
+	 * Generates a dropdown
+	 *
+	 * Allows visibility to be filtered on post edit screen.
+	 *
+	 * @param string $post_type The post type slug.
+	 * @param string $which     The location of the extra table nav markup:
+	 *                          'top' or 'bottom' for WP_Posts_List_Table,
+	 *                          'bar' for WP_Media_List_Table.
+	 * @since 1.0.0
+	 */
+	public static function venue_types_dropdown( $post_type, $which ) {
+		if ( 'venue' !== $post_type ) {
+			return;
+		}
+		$selected = 'all';
+		if ( isset( $_REQUEST['venue_type'] ) ) {
+			$selected = sanitize_text_field( $_REQUEST['venue_type'] );
+		}
+		$list = array( '' => __( 'All', 'simple-location' ) );
+		foreach ( get_terms( 'venue_type', array( 'hide_empty' => false ) ) as $type ) {
+			$list[ $type->slug ] = $type->name;
+		}
+		echo '<select id="venue_type" name="venue_type">';
+		foreach ( $list as $key => $value ) {
+			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value ), Geo_Base::kses_option() );
+		}
+		echo '</select>';
 	}
 
 	/**
@@ -369,7 +417,7 @@ class Post_Venue {
 			'post_title'  => $title,
 			'post_status' => 'publish',
 			'post_type'   => 'venue',
-			'post_name' => sanitize_title( $title . ' ' . Location_Taxonomy::display_name( $location, false ) ),
+			'post_name'   => sanitize_title( $title . ' ' . Location_Taxonomy::display_name( $location, false ) ),
 			'meta_input'  => $meta,
 		);
 

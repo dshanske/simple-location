@@ -83,7 +83,7 @@ class Location_Plugins {
 			// Always assume a checkin is to a building level option
 			if ( isset( $properties['checkin'] ) ) {
 				set_post_geodata( $args['ID'], 'zoom', 18 );
-			// If altitude is above 1000m always show the higher zoom level.
+				// If altitude is above 1000m always show the higher zoom level.
 			} elseif ( isset( $meta['geo_altitude'] ) && 1000 < $meta['geo_altitude'] ) {
 				set_post_geodata( $args['ID'], 'zoom', 9 );
 			} elseif ( isset( $meta['geo_accuracy'] ) ) {
