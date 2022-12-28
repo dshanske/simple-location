@@ -412,6 +412,9 @@ class REST_Geo {
 		$location = array_filter( $location );
 		if ( isset( $location['latitude'] ) && isset( $location['longitude'] ) ) {
 			$reverse = Loc_Config::geo_provider();
+			if ( ! $reverse ) {
+				return __( 'Provider Not Available', 'simple-location' );
+			}
 			$reverse->set( $location['latitude'], $location['longitude'] );
 			$reverse_adr = $reverse->reverse_lookup();
 
@@ -488,13 +491,15 @@ class REST_Geo {
 		$term_lookup = array_key_exists( 'term', $params );
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$map      = Loc_Config::map_provider();
-			$map_args = array(
-				'latitude'  => $params['latitude'],
-				'longitude' => $params['longitude'],
-				'height'    => ifset( $params['height'] ),
-				'width'     => ifset( $params['width'] ),
-			);
-			$map->set( array_filter( $map_args ) );
+			if ( $map ) {
+				$map_args = array(
+					'latitude'  => $params['latitude'],
+					'longitude' => $params['longitude'],
+					'height'    => ifset( $params['height'] ),
+					'width'     => ifset( $params['width'] ),
+				);
+				$map->set( array_filter( $map_args ) );
+			}
 			$venue = Post_Venue::at_venue( $params['latitude'], $params['longitude'] );
 			if ( false !== $venue ) {
 				$term        = Location_Taxonomy::get_location_taxonomy( $venue );
@@ -535,9 +540,11 @@ class REST_Geo {
 				if ( is_wp_error( $reverse_adr ) ) {
 					return $reverse_adr;
 				}
-				$reverse_adr['map_url']    = $map->get_the_static_map();
-				$reverse_adr['map_link']   = $map->get_the_map_url();
-				$reverse_adr['map_return'] = $map->get_the_map();
+				if ( $map ) {
+					$reverse_adr['map_url']    = $map->get_the_static_map();
+					$reverse_adr['map_link']   = $map->get_the_map_url();
+					$reverse_adr['map_return'] = $map->get_the_map();
+				}
 				$term                      = Location_Taxonomy::get_location( $reverse_adr, $term_lookup );
 				if ( $term ) {
 					$reverse_adr['term_id']      = $term;
@@ -560,11 +567,13 @@ class REST_Geo {
 			}
 			if ( isset( $params['weather'] ) && ( 'no' !== $params['weather'] ) ) {
 				$weather = Loc_Config::weather_provider();
-				$weather->set( $params );
-				$time                   = ifset( $params['time'], null );
-				$reverse_adr['weather'] = $weather->get_conditions( $time );
-				if ( array_key_exists( 'units', $params ) && 'imperial' === $params['units'] ) {
-					$reverse_adr['weather'] = $weather->metric_to_imperial( $reverse_adr['weather'] );
+				if ( $weather ) {
+					$weather->set( $params );
+					$time                   = ifset( $params['time'], null );
+					$reverse_adr['weather'] = $weather->get_conditions( $time );
+					if ( array_key_exists( 'units', $params ) && 'imperial' === $params['units'] ) {
+						$reverse_adr['weather'] = $weather->metric_to_imperial( $reverse_adr['weather'] );
+					}
 				}
 			}
 
@@ -583,6 +592,9 @@ class REST_Geo {
 			return array_filter( $reverse_adr );
 		} elseif ( isset( $params['address'] ) ) {
 			$geocode = Loc_Config::geo_provider( $provider );
+			if ( ! $geocode ) {
+				return new WP_Error( 'no_provider', __( 'Reverse Geolocation Provider Not Set', 'simple-location' ) );
+			}
 			return $geocode->geocode( $params['address'] );
 		}
 		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
@@ -607,6 +619,9 @@ class REST_Geo {
 		$return   = array();
 		$provider = empty( $params['provider'] ) ? null : $params['provider'];
 		$weather  = Loc_Config::weather_provider( $provider );
+		if ( ! $weather ) {
+			return new WP_Error( 'no_provider', __( 'No Weather Provider Set', 'simple-location' ) );
+		}
 		if ( ! empty( $params['station'] ) ) {
 			$weather->set( array( 'station_id' => $params['station'] ) );
 		} elseif ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
