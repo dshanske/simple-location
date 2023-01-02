@@ -579,6 +579,48 @@ class Post_Venue {
 		return $terms;
 	}
 
+	public static function has_parent_venue( $venue_id = null ) {
+		return has_post_parent( $venue_id );
+	}
+
+	public static function get_parent_venue( $venue_id = null ) {
+		return wp_get_post_parent_id( $venue_id );
+	}
+
+	public static function get_venue_ancestors( $venue_id = null ) {
+		$venue = get_post( $venue_id );
+		if ( ! $venue ) {
+			return false;
+		}
+		return get_ancestors( $venue->ID, 'venue', 'post_type' );
+	}
+
+	/* Gets attached photos from posts from a venue */
+
+	public static function get_attached_photos( $venue_id ) {
+		$post_ids = self::get_venue_posts( $venue_id );
+		if ( empty( $post_ids ) ) {
+			return array();
+		}
+		$media_ids = array();
+		foreach ( $post_ids as $post_id ) {
+			$attached  = get_attached_media( 'image', $post_id );
+			$media_ids = array_merge( $media_ids, array_keys( $attached ) );
+		}
+		return $media_ids;
+	}
+
+	public static function get_venue_gallery( $venue_id = null ) {
+		$media_ids = self::get_attached_photos( $venue_id );
+		return gallery_shortcode(
+			array(
+				'ids'     => $media_ids,
+				'columns' => 3,
+				'link'    => 'none',
+			)
+		);
+	}
+
 	public static function get_venue_posts( $venue_id = null ) {
 		$venue = get_post( $venue_id );
 		if ( 'venue' !== get_post_type( $venue ) ) {
@@ -589,6 +631,7 @@ class Post_Venue {
 			array(
 				'post_type'  => 'post',
 				'fields'     => 'ids',
+				'nopaging'   => true,
 				'meta_query' => array(
 					array(
 						'key'   => 'venue_id',
