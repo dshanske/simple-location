@@ -72,8 +72,8 @@ class Astronomical_Calculator {
 	 * @since 4.0.0
 	 */
 	public function __construct( $latitude, $longitude, $elevation = 0 ) {
-		$this->latitude  = $latitude;
-		$this->longitude = $longitude;
+		$this->latitude  = floatval( $latitude );
+		$this->longitude = floatval( $longitude );
 		$this->elevation = floatval( $elevation );
 		$this->zenith    = $this->get_zenith();
 		$this->timezone  = Loc_Timezone::timezone_for_location( $latitude, $longitude );
@@ -108,6 +108,8 @@ class Astronomical_Calculator {
 		if ( $timestamp instanceof DateTime ) {
 			$timestamp = $timestamp->getTimestamp();
 		}
+
+
 
 		switch ( $type ) {
 			case 'sunset':

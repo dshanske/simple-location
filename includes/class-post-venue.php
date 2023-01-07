@@ -616,7 +616,7 @@ class Post_Venue {
 			array(
 				'ids'     => $media_ids,
 				'columns' => 3,
-				'link'    => 'none',
+				'link'    => 'file',
 			)
 		);
 	}
