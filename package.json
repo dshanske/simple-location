@@ -17,7 +17,7 @@
     "grunt-eslint": "^24.0.0",
     "grunt-wp-i18n": "^1.0.3",
     "grunt-wp-readme-to-markdown": ">=2.0.1",
-    "luxon": "^2.4.0",
+    "luxon": "^2.5.2",
     "simple-icons": "^7.1.0"
   }
 }
