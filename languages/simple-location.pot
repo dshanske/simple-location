@@ -1,15 +1,15 @@
-# Copyright (C) 2022 David Shanske
+# Copyright (C) 2023 David Shanske
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 5.0.5\n"
+"Project-Id-Version: Simple Location 5.0.7\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2022-12-27T15:30:16+00:00\n"
+"POT-Creation-Date: 2023-01-10T05:09:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: simple-location\n"
@@ -1221,38 +1221,50 @@ msgstr ""
 msgid "No Geolocation Provider Available"
 msgstr ""
 
-#: includes/class-rest-geo.php:433
+#: includes/class-rest-geo.php:416
+msgid "Provider Not Available"
+msgstr ""
+
+#: includes/class-rest-geo.php:436
 msgid "Updated"
 msgstr ""
 
-#: includes/class-rest-geo.php:449
-#: includes/class-rest-geo.php:471
-#: includes/class-rest-geo.php:531
+#: includes/class-rest-geo.php:452
+#: includes/class-rest-geo.php:474
+#: includes/class-rest-geo.php:536
 msgid "Provider Not Found"
 msgstr ""
 
-#: includes/class-rest-geo.php:454
-#: includes/class-rest-geo.php:476
-#: includes/class-rest-geo.php:588
+#: includes/class-rest-geo.php:457
+#: includes/class-rest-geo.php:479
+#: includes/class-rest-geo.php:600
 msgid "Missing Arguments"
 msgstr ""
 
-#: includes/class-rest-geo.php:517
-#: includes/class-rest-geo.php:556
+#: includes/class-rest-geo.php:522
+#: includes/class-rest-geo.php:563
 #: templates/loc-metabox.php:67
 msgid "No Location"
 msgstr ""
 
-#: includes/class-rest-geo.php:619
+#: includes/class-rest-geo.php:596
+msgid "Reverse Geolocation Provider Not Set"
+msgstr ""
+
+#: includes/class-rest-geo.php:623
+msgid "No Weather Provider Set"
+msgstr ""
+
+#: includes/class-rest-geo.php:634
 msgid "Missing Coordinates or Station for Weather Lookup"
 msgstr ""
 
-#: includes/class-rest-geo.php:657
-#: includes/class-rest-geo.php:676
+#: includes/class-rest-geo.php:672
+#: includes/class-rest-geo.php:691
 msgid "This Airport Code was Not Found"
 msgstr ""
 
-#: includes/class-rest-geo.php:683
+#: includes/class-rest-geo.php:698
 msgid "Could Not Determine Timezone"
 msgstr ""
 

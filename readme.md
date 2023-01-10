@@ -3,7 +3,7 @@
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
 **Tested up to:** 6.1  
-**Stable tag:** 5.0.6  
+**Stable tag:** 5.0.7  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -289,8 +289,13 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
+### 5.0.7 ( 2023-01-10 ) ###
+
+* Minor bug fixes
+* Add function to return child venues.
+
 ### 5.0.6 ( 2023-01-02 ) ###
-* Add functions for parent venues and to extract media from child venues
+* Add functions for parent venues and to extract media from posts made at venue
 * Check error on return
 
 ### 5.0.5 ( 2022-12-27 ) ###
