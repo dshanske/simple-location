@@ -109,8 +109,6 @@ class Astronomical_Calculator {
 			$timestamp = $timestamp->getTimestamp();
 		}
 
-
-
 		switch ( $type ) {
 			case 'sunset':
 				$function = 'date_sunset';

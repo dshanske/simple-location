@@ -490,7 +490,7 @@ class REST_Geo {
 		$provider    = empty( $params['provider'] ) ? null : $params['provider'];
 		$term_lookup = array_key_exists( 'term', $params );
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
-			$map      = Loc_Config::map_provider();
+			$map = Loc_Config::map_provider();
 			if ( $map ) {
 				$map_args = array(
 					'latitude'  => $params['latitude'],
@@ -545,7 +545,7 @@ class REST_Geo {
 					$reverse_adr['map_link']   = $map->get_the_map_url();
 					$reverse_adr['map_return'] = $map->get_the_map();
 				}
-				$term                      = Location_Taxonomy::get_location( $reverse_adr, $term_lookup );
+				$term = Location_Taxonomy::get_location( $reverse_adr, $term_lookup );
 				if ( $term ) {
 					$reverse_adr['term_id']      = $term;
 					$reverse_adr['term_details'] = Location_Taxonomy::get_location_data( $term );

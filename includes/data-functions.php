@@ -83,8 +83,8 @@ function is_day_post( $post = null ) {
 	if ( ! $latitude || ! $longitude ) {
 		return null;
 	}
-	$calc      = new Astronomical_Calculator( $latitude, $longitude, $altitude );
-	$day       = $calc->is_daytime( get_post_timestamp( $post ) );
+	$calc = new Astronomical_Calculator( $latitude, $longitude, $altitude );
+	$day  = $calc->is_daytime( get_post_timestamp( $post ) );
 	set_post_geodata( $post, 'day', $day ? 1 : 0 );
 	return $day;
 }

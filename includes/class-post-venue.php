@@ -587,6 +587,20 @@ class Post_Venue {
 		return wp_get_post_parent_id( $venue_id );
 	}
 
+	public static function get_venue_children( $venue_id = null ) {
+		$venue = get_post( $venue_id );
+		if ( ! $venue ) {
+			return false;
+		}
+
+		return get_posts(
+			array(
+				'post_parent' => $venue->ID,
+				'fields'      => 'ids',
+			)
+		);
+	}
+
 	public static function get_venue_ancestors( $venue_id = null ) {
 		$venue = get_post( $venue_id );
 		if ( ! $venue ) {
