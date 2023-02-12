@@ -549,6 +549,9 @@ class Sloc_Weather_Data {
 		}
 
 		$weather = $provider->get_conditions();
+		if ( is_wp_error( $weather ) ) {
+			return $weather;
+		}
 
 		if ( isset( $weather['code'] ) ) {
 			$weather['icon']    = self::weather_condition_icons( $weather['code'] );
