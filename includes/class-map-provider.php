@@ -18,7 +18,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected int $map_zoom;
+	protected $map_zoom;
 
 	 /**
 	  * Map Zoom Level Maximum.
@@ -26,7 +26,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected int $max_map_zoom;
+	protected $max_map_zoom;
 
 	 /**
 	  * Map Height.
@@ -34,7 +34,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected int $height;
+	protected $height;
 
 	 /**
 	  * Map Width.
@@ -42,7 +42,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected int $width;
+	protected $width;
 
 	 /**
 	  * Map Height Maximum Height.
@@ -50,7 +50,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected int $max_height;
+	protected $max_height;
 
 	 /**
 	  * Map Maximum Width.
@@ -58,7 +58,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected int $max_width;
+	protected $max_width;
 
 	 /**
 	  * Map Style.
@@ -66,7 +66,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	protected string $style;
+	protected $style;
 
 	 /**
 	  * Username if appropriate.
@@ -82,7 +82,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	protected string $static;
+	protected $static;
 
 	 /**
 	  * Location Information.
@@ -90,7 +90,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	protected string $location;
+	protected $location;
 
 	/**
 	 * Constructor for the Abstract Class.
