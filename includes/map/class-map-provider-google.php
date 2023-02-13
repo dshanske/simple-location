@@ -20,7 +20,7 @@ class Map_Provider_Google extends Map_Provider {
 		$this->slug        = 'google';
 		$this->max_width   = 640;
 		$this->max_height  = 640;
-		$this->max_zoom    = 20;
+		$this->max_map_zoom    = 20;
 
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );

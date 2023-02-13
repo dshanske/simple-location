@@ -18,7 +18,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected $map_zoom;
+	protected int $map_zoom;
 
 	 /**
 	  * Map Zoom Level Maximum.
@@ -26,7 +26,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected $max_map_zoom;
+	protected int $max_map_zoom;
 
 	 /**
 	  * Map Height.
@@ -34,7 +34,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected $height;
+	protected int $height;
 
 	 /**
 	  * Map Width.
@@ -42,7 +42,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected $width;
+	protected int $width;
 
 	 /**
 	  * Map Height Maximum Height.
@@ -50,7 +50,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected $max_height;
+	protected int $max_height;
 
 	 /**
 	  * Map Maximum Width.
@@ -58,7 +58,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var int
 	  */
-	protected $max_width;
+	protected int $max_width;
 
 	 /**
 	  * Map Style.
@@ -66,13 +66,13 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	protected $style;
+	protected string $style;
 
 	 /**
 	  * Username if appropriate.
 	  *
 	  * @since 1.0.0
-	  * @var int
+	  * @var string
 	  */
 	protected $user;
 
@@ -82,7 +82,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	protected $static;
+	protected string $static;
 
 	 /**
 	  * Location Information.
@@ -90,7 +90,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	  * @since 1.0.0
 	  * @var string
 	  */
-	protected $location;
+	protected string $location;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -125,11 +125,11 @@ abstract class Map_Provider extends Sloc_Provider {
 			'width'     => $width,
 			'height'    => round( $width / get_option( 'sloc_aspect', ( 16 / 9 ) ) ),
 			'map_zoom'  => get_option( 'sloc_zoom' ),
-			'api'       => null,
+			'api'       => '',
 			'latitude'  => null,
 			'longitude' => null,
 			'altitude'  => null,
-			'location'  => null,
+			'location'  => '',
 			'user'      => '',
 			'style'     => '',
 		);
