@@ -569,3 +569,60 @@ function get_object_permalink( $type, $id ) {
 			return false;
 	}
 }
+
+/**
+ * Retrieve post published or modified time as a `DateTimeImmutable` object instance.
+ *
+ * @param int|WP_Post $attachment  WP_Post object or ID. Default is global `$post` object.
+ * @param string      $field Optional. Accepts 'created', 'date' or 'modified'. Created is based on media metadata whereas the rest are based on post fields.
+ * @return DateTimeImmutable|false Time object on success, false on failure.
+ */
+function sloc_get_attachment_datetime( $attachment, $field = 'created' ) {
+		$attachment = get_post( $attachment );
+	if ( ! $attachment ) {
+		return false;
+	}
+	if ( 'attachment' !== $attachment->post_type ) {
+		return false;
+	}
+
+	if ( ! in_array( $field, array( 'created', 'date', 'modified' ) ) ) {
+		$field = 'created';
+	}
+
+	if ( 'created' === $field ) {
+		$data = get_post_meta( $attachment->ID, '_wp_attachment_metadata', true );
+		if ( ! $data ) {
+			return false;
+		}
+		$data    = $data['image_meta'];
+		$created = 0;
+
+		if ( array_key_exists( 'created', $data ) ) {
+			$created = $data['created'];
+		} elseif ( array_key_exists( 'created_timestamp', $data ) ) {
+			$created = $data['created_timestamp'];
+		}
+
+		if ( is_numeric( $created ) ) {
+			if ( 0 === $created ) {
+				return false;
+			} else {
+				$datetime = new DateTime();
+				$datetime->setTimestamp( intval( $created ) );
+				$datetime->setTimezone( wp_timezone() );
+				return DateTimeImmutable::createFromMutable( $datetime );
+			}
+		} elseif ( is_string( $created ) ) {
+			return new DateTimeImmutable( $created );
+		} else {
+			return false;
+		}
+	}
+
+		$time = ( 'modified' === $field ) ? $attachment->post_modified : $attachment->post_date;
+	if ( empty( $time ) || '0000-00-00 00:00:00' === $time ) {
+		return false;
+	}
+		return date_create_immutable_from_format( 'Y-m-d H:i:s', $time, wp_timezone() );
+}
