@@ -116,25 +116,24 @@ class Sloc_Media_Metadata {
 	}
 
 	/**
-	 * Echos the uploaded date to the attachment edit page.
+	 * Echos the created date to the attachment edit page.
 	 *
-	 * Adds the uploaded date, if present to the attachment submit metabox.
+	 * Adds the created date, if present to the attachment submit metabox.
 	 *
-	 * @param WP_Post $post The attachment.
+	 * @param WP_Post $attachment The attachment.
 	 *
 	 * @since 1.0.0
 	 */
-	public static function attachment_submitbox_metadata( $post ) {
-		$published = get_post_meta( $post->ID, 'mf2_published', true );
-		$date      = new DateTime( $published );
-		if ( $published ) {
+	public static function attachment_submitbox_metadata( $attachment ) {
+		$created = sloc_get_attachment_datetime( $attachment, 'created' );
+		if ( $created ) {
 			$created_on = sprintf(
 			/* translators: Publish box date string. 1: Date, 2: Time. See https://secure.php.net/date */
 				__( '%1$s at %2$s', 'simple-location' ),
 				/* translators: Publish box date format, see https://secure.php.net/date */
-				wp_date( _x( 'M j, Y', 'publish box date format', 'simple-location' ), $date->getTimestamp(), $date->getTimeZone() ),
+				wp_date( _x( 'M j, Y', 'publish box date format', 'simple-location' ), $created->getTimestamp(), $created->getTimeZone() ),
 				/* translators: Publish box time format, see https://secure.php.net/date */
-				wp_date( _x( 'H:i T', 'publish box time format', 'simple-location' ), $date->getTimestamp(), $date->getTimeZone() )
+				wp_date( _x( 'H:i T', 'publish box time format', 'simple-location' ), $created->getTimestamp(), $created->getTimeZone() )
 			);
 			echo '<div class="misc-pub-section curtime misc-pub-pubtime">';
 			/* translators: Attachment information. %s: Date based on the timestamp in the attachment file. */
@@ -172,6 +171,7 @@ class Sloc_Media_Metadata {
 				'html'         => sprintf( '<span>%1$s, %2$s</span>', $geodata['latitude'], $geodata['longitude'] ),
 			);
 		}
+
 		$time = get_post_meta( $post->ID, 'mf2_published', true );
 		if ( $time ) {
 			$form_fields['mf2_published'] = array(
