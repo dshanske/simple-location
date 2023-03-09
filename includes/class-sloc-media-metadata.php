@@ -62,66 +62,52 @@ class Sloc_Media_Metadata {
 		$version = (int) $exif['ExifVersion'];
 		// The changes between EXIF Versions mean different approaches are required.
 		$meta['ExifVersion'] = sanitize_text_field( $exif['ExifVersion'] );
-		if ( $version < 232 ) {
-			// Prior to Version 232, GPS coordinates were stored in several fields.
-			if ( ! empty( $exif['GPSLongitude'] ) && count( $exif['GPSLongitude'] ) === 3 && ! empty( $exif['GPSLongitudeRef'] ) ) {
-				$meta['location']['longitude'] = round( ( 'W' === $exif['GPSLongitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLongitude'] ), 7 );
+		if ( ! empty( $exif['GPSLongitude'] ) && count( $exif['GPSLongitude'] ) === 3 && ! empty( $exif['GPSLongitudeRef'] ) ) {
+			$meta['location']['longitude'] = round( ( 'W' === $exif['GPSLongitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLongitude'] ), 7 );
+		}
+		if ( ! empty( $exif['GPSLatitude'] ) && count( $exif['GPSLatitude'] ) === 3 && ! empty( $exif['GPSLatitudeRef'] ) ) {
+			$meta['location']['latitude'] = round( ( 'S' === $exif['GPSLatitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLatitude'] ), 7 );
+		}
+		$datetime = null;
+
+		if ( $version <= 232 ) {
+			// In Version 231 the timezone offset was stored in a separate field.
+			foreach (
+				array(
+					'DateTimeOriginal'  => 'UndefinedTag:0x9011',
+					'DateTimeDigitized' => 'UndefinedTag:0x9012',
+				)
+				as $time => $offset
+			) {
+				if ( ! empty( $exif[ $time ] ) && ! empty( $exif[ $offset ] ) ) {
+					$datetime = wp_exif_datetime( $exif[ $time ], $exif[ $offset ] );
+					break;
+				}
 			}
-			if ( ! empty( $exif['GPSLatitude'] ) && count( $exif['GPSLatitude'] ) === 3 && ! empty( $exif['GPSLatitudeRef'] ) ) {
-				$meta['location']['latitude'] = round( ( 'S' === $exif['GPSLatitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLatitude'] ), 7 );
-			}
-			$datetime = null;
-			if ( 231 === $version ) {
-				// In Version 231 the timezone offset was stored in a separate field.
-				foreach (
-					array(
-						'DateTimeOriginal'  => 'UndefinedTag:0x9011',
-						'DateTimeDigitized' => 'UndefinedTag:0x9012',
-					)
-					as $time => $offset
-				) {
-					if ( ! empty( $exif[ $time ] ) && ! empty( $exif[ $offset ] ) ) {
-						$datetime = wp_exif_datetime( $exif[ $time ], $exif[ $offset ] );
-						break;
-					}
+		} else {
+			// Otherwise the timezone will be derived from the location.
+			if ( ! empty( $meta['location'] ) ) {
+				// Try to get the right timezone from the location.
+				$timezone = Loc_Timezone::timezone_for_location( $meta['location']['latitude'], $meta['location']['longitude'] );
+				if ( $timezone instanceof Timezone_Result ) {
+					$timezone = $timezone->timezone;
 				}
 			} else {
-				// Otherwise the timezone will be derived from the location.
-				if ( ! empty( $meta['location'] ) ) {
-					// Try to get the right timezone from the location.
-					$timezone = Loc_Timezone::timezone_for_location( $meta['location']['latitude'], $meta['location']['longitude'] );
-					if ( $timezone instanceof Timezone_Result ) {
-						$timezone = $timezone->timezone;
-					}
-				} else {
-					$timezone = wp_timezone();
-				}
-				if ( ! empty( $exif['DateTimeOriginal'] ) ) {
-					$datetime = wp_exif_datetime( $exif['DateTimeOriginal'], $timezone );
-				} elseif ( ! empty( $exif['DateTimeDigitized'] ) ) {
-					$datetime = wp_exif_datetime( $exif['DateTimeDigitized'], $timezone );
-				}
+				$timezone = wp_timezone();
 			}
-			if ( $datetime ) {
-				// By default WordPress sets a timestamp that is wrong because it does not factor in timezone. This issues a correct timestamp.
-				$meta['created_timestamp'] = $datetime->getTimestamp();
-				// Also stores an ISO8601 formatted string.
-				$meta['created'] = $datetime->format( DATE_W3C );
-			}
-		} elseif ( 232 === $version ) {
-			// As of Version 232, the timezone is stored along with the datetime.
 			if ( ! empty( $exif['DateTimeOriginal'] ) ) {
-				$datetime = new DateTime( $exif['DateTimeOriginal'] );
+				$datetime = wp_exif_datetime( $exif['DateTimeOriginal'], $timezone );
 			} elseif ( ! empty( $exif['DateTimeDigitized'] ) ) {
-				$datetime = new DateTime( $exif['DateTimeDigitized'] );
-			}
-			if ( $datetime ) {
-				// By default WordPress sets a timestamp that is wrong because it does not factor in timezone. This issues a correct timestamp.
-				$meta['created_timestamp'] = $datetime->getTimestamp();
-				// Also stores an ISO8601 formatted string.
-				$meta['created'] = $datetime->format( DATE_W3C );
+				$datetime = wp_exif_datetime( $exif['DateTimeDigitized'], $timezone );
 			}
 		}
+		if ( $datetime ) {
+			// By default WordPress sets a timestamp that is wrong because it does not factor in timezone. This issues a correct timestamp.
+			$meta['created_timestamp'] = $datetime->getTimestamp();
+			// Also stores an ISO8601 formatted string.
+			$meta['created'] = $datetime->format( DATE_W3C );
+		}
+
 		if ( ! empty( $exif['GPSAltitude'] ) ) {
 			// Photos may also store an altitude.
 			$meta['location']['altitude'] = wp_exif_frac2dec( $exif['GPSAltitude'] ) * ( 1 === $exif['GPSAltitudeRef'] ? -1 : 1 );
