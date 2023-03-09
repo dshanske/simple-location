@@ -117,9 +117,9 @@ class Sloc_Media_Metadata {
 			}
 			if ( $datetime ) {
 				// By default WordPress sets a timestamp that is wrong because it does not factor in timezone. This issues a correct timestamp.
-				$meta['created'] = $datetime->getTimestamp();
+				$meta['created_timestamp'] = $datetime->getTimestamp();
 				// Also stores an ISO8601 formatted string.
-				$meta['created_timestamp'] = $datetime->format( DATE_W3C );
+				$meta['created'] = $datetime->format( DATE_W3C );
 			}
 		}
 		if ( ! empty( $exif['GPSAltitude'] ) ) {
