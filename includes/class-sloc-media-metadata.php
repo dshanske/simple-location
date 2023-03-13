@@ -230,7 +230,7 @@ class Sloc_Media_Metadata {
 				$meta['geo_address'] = get_the_title( $venue );
 				set_post_geodata( $args['ID'], 'address', $meta['geo_address'] );
 			} else {
-				set_geo_visibility( 'post', $post_id, 'public' );
+				set_post_geodata( $post_id, 'visibility', 'public' );
 			}
 			$update = array_filter( $update );
 			foreach ( $update as $key => $value ) {
