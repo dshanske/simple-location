@@ -74,17 +74,19 @@ final class Location_Taxonomy {
 	 * @since 1.0.0
 	 */
 	public static function filter_location_posts( $query ) {
-		if ( is_admin() || ! current_user_can( 'read_posts_location' ) || ! $query->is_main_query() ) {
+		if ( is_admin() || ! $query->is_main_query() ) {
 			return $query;
 		}
 		if ( is_tax( 'location' ) ) {
-			$public = array(
-				'key'     => 'geo_public',
-				'type'    => 'numeric',
-				'compare' => '=',
-				'value'   => 1,
-			);
-			$query->set( 'meta_query', array( $public ) );
+			if ( ! current_user_can( 'read_posts_location' ) ) {
+				$public = array(
+					'key'     => 'geo_public',
+					'type'    => 'numeric',
+					'compare' => '=',
+					'value'   => 1,
+				);
+				$query->set( 'meta_query', array( $public ) );
+			}
 			$post_types = get_post_types_by_support( 'geo-location' );
 			$search     = array_search( 'venue', $post_types, true );
 			unset( $post_types[ $search ] );
