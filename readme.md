@@ -3,7 +3,7 @@
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
 **Tested up to:** 6.1  
-**Stable tag:** 5.0.9  
+**Stable tag:** 5.0.10  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -288,6 +288,9 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 5.0.10 (2023-03-13 ) ###
+* Fix call to deprecated function
 
 ### 5.0.9 ( 2023-03-12 ) ###
 * Fix issue with filter of location archives
