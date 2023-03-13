@@ -289,6 +289,9 @@ will now be required to show maps for services that require API keys.
 
 ## Changelog ##
 
+### 5.0.9 ( 2023-03-12 ) ###
+* Fix issue with filter of location archives
+
 ### 5.0.8 ( 2023-03-08 ) ###
 * Fix EXIF data issue
 * Introduce attachement date function to get created time and use it to show this in the attachment editor.
