@@ -232,7 +232,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'container' => 'li', // Wrap in this element.
 			'label'     => 'false', // Show the name of the property.
 			'units'     => get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) ),
-			'round'     => false, // False to not round, true to round to integer, a numeric value to round to a specific precision.
+			'round'     => false, // False to round to 2 digits, true to round to integer, a numeric value to round to a specific precision.
 		);
 		$args          = wp_parse_args( $args, $defaults );
 		$args['units'] = ( $args['units'] === 'imperial' );
@@ -240,11 +240,14 @@ abstract class Weather_Provider extends Sloc_Provider {
 		if ( ! $params ) {
 			return '';
 		}
-
-		if ( is_numeric( $args['round'] ) ) {
-			$value = round( $value, $args['round'] );
-		} elseif ( true === $args['round'] ) {
-			$value = round( $value );
+		if ( is_numeric( $value ) ) {
+			if ( is_numeric( $args['round'] ) ) {
+				$value = round( $value, $args['round'] );
+			} elseif ( true === $args['round'] ) {
+				$value = round( $value );
+			} else {
+				$value = round( $value, 2 );
+			}
 		}
 
 		if ( $args['markup'] ) {
@@ -265,7 +268,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'<%1$s class="sloc-%2$s">%6$s%5$s: %3$s%4$s</%1$s>',
 			$args['container'],
 			$property,
-			round( $value, 2 ),
+			$value,
 			$params['unit'],
 			$params['name'],
 			self::get_icon( $params['icon'] )
