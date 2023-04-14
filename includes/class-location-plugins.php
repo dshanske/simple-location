@@ -21,6 +21,78 @@ class Location_Plugins {
 		add_filter( 'before_micropub', array( 'Location_Plugins', 'micropub_lookup_location' ), 10 );
 		add_action( 'after_micropub', array( 'Location_Plugins', 'micropub_set_location' ), 10, 2 );
 		add_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_geo' ), 10, 2 );
+		add_filter( 'webmention_handler_mf2_set_properties', array( 'Location_Plugins', 'webmention_handler_mf2_set_properties' ), 10, 2 );
+	}
+
+	public static function array_get( $array, $key, $default = array(), $index = true ) {
+		$return = $default;
+		if ( is_array( $array ) && isset( $array[ $key ] ) ) {
+			$return = $array[ $key ];
+		}
+		if ( $index && wp_is_numeric_array( $return ) && ! empty( $return ) ) {
+			$return = $return[0];
+		}
+		return $return;
+	}
+
+	/**
+	 *
+	 *
+	 */
+	public static function webmention_handler_mf2_set_properties( $meta, $handler ) {
+		$item = $handler->get_webmention_item();
+		if ( ! $item ) {
+			return $meta;
+		}
+		$mf_array = $item->get_raw();
+		if ( empty( $mf_array ) ) {
+			return $meta;
+		}
+		$location = $mf_array['properties']['location'];
+		if ( $location ) {
+			$location = $location[0];
+			$props    = $location['properties'];
+			if ( is_array( $location ) ) {
+				$props = $location['properties'];
+				if ( isset( $props['geo'] ) ) {
+					if ( array_key_exists( 'label', $props ) ) {
+						$meta['geo_address'] = static::get_first_array_item( $props['label'] );
+					}
+					$props = $handler->get_first_array_item( $props['geo'] );
+					$props = $props['properties'];
+				} else {
+					$parts = array(
+						static::array_get( $props, 'name', array(), true ),
+						static::array_get( $props, 'street-address', array(), true ),
+						static::array_get( $props, 'locality', array(), true ),
+						static::array_get( $props, 'region', array(), true ),
+						static::array_get( $props, 'postal-code', array(), true ),
+						static::array_get( $props, 'country-name', array(), true ),
+
+					);
+					$parts = array_filter( $parts );
+					if ( ! empty( $parts ) ) {
+						$meta['geo_address'] = implode(
+							', ',
+							array_filter(
+								$parts,
+								function( $v ) {
+									return $v;
+								}
+							)
+						);
+					}
+				}
+				foreach ( array( 'latitude', 'longitude', 'altitude', 'accuracy' ) as $property ) {
+					if ( array_key_exists( $property, $props ) ) {
+						$meta[ 'geo_' . $property ] = $props[ $property ][0];
+					}
+				}
+			} elseif ( 'http' !== substr( $location, 0, 4 ) ) {
+				$meta['geo_address'] = $location;
+			}
+		}
+		return $meta;
 	}
 
 	/**
@@ -105,7 +177,6 @@ class Location_Plugins {
 			$venue = Post_Venue::at_venue( $meta['geo_latitude'], $meta['geo_longitude'] );
 			if ( false !== $venue ) {
 				update_post_meta( $args['ID'], 'venue_id', $venue );
-			} else {
 			}
 
 			if ( ! isset( $properties['location-visibility'] ) && false !== $venue ) {
