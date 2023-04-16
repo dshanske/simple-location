@@ -48,7 +48,7 @@ class Location_Plugins {
 		if ( empty( $mf_array ) ) {
 			return $meta;
 		}
-		$location = $mf_array['properties']['location'];
+		$location = ifset( $mf_array['properties']['location'] ); 
 		if ( $location ) {
 			$location = $location[0];
 			$props    = $location['properties'];
