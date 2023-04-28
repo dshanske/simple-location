@@ -279,7 +279,6 @@ class Simple_Location_Plugin {
 		// Load Weather Providers.
 		$providers = array(
 			'class-weather-provider-openweathermap.php', // Open Weather Map.
-			'class-weather-provider-darksky.php', // Dark Sky.
 			'class-weather-provider-nwsus.php', // National Weather Service (US).
 			'class-weather-provider-weatherstack.php', // weatherstack.com.
 			'class-weather-provider-weatherbit.php', // weatherbit.com.
