@@ -97,6 +97,9 @@ class Astronomical_Calculator {
 	 * @since 4.0.0
 	 */
 	public function get_timestamp( $timestamp, $type = 'sunrise' ) {
+		if ( ! is_numeric( $this->latitude ) && ! is_numeric( $this->longitude ) ) {
+			return null;
+		}
 		if ( ! $timestamp ) {
 			$timestamp = time();
 		}
