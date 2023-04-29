@@ -273,7 +273,9 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			}
 		}
 
-		switch ( $weather['weather'] ) {
+		$condition = ifset( $weather['weather'] );
+
+		switch ( $condition ) {
 			case 'thunderstorms':
 				if ( ! isset( $weather['intensity'] ) ) {
 					return 211;
