@@ -48,8 +48,13 @@ class Location_Plugins {
 		if ( empty( $mf_array ) ) {
 			return $meta;
 		}
+
+		if ( ! array_key_exists( 'properties', $mf_array ) ) {
+			return $meta;
+		}
+
 		$location = ifset( $mf_array['properties']['location'] ); 
-		if ( $location ) {
+		if ( wp_is_numeric_array( $location ) ) {
 			$location = $location[0];
 			$props    = $location['properties'];
 			if ( is_array( $location ) ) {
