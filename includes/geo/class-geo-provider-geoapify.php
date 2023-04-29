@@ -56,7 +56,7 @@ class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 			'type'   => 'building',
 		);
 		$url  = 'https://api.geoapify.com/v1/geocode/reverse/';
-		$json = $this->fetch_json( 'https://api.openrouteservice.org/geocode/reverse', $args );
+		$json = $this->fetch_json( $url, $args );
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
