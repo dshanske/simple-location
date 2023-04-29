@@ -129,7 +129,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
 
-			$return = $this->extra_data( $return, $datetime );
+			$return = $this->extra_data( $return, $time );
 
 			return array_filter( $return );
 		}

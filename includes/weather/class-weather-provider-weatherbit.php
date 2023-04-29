@@ -136,7 +136,7 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 			$return['summary']    = ifset( $response['weather']['description'] );
 			$return['code']       = ifset( $response['weather']['code'] );
 
-			$return = array_filter( $this->extra_data( $return ) );
+			$return = array_filter( $this->extra_data( $return, $time ) );
 
 			$this->set_cache( $return );
 			return $return;

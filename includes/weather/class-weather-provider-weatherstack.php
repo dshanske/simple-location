@@ -135,7 +135,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			$return['uv']         = ifset( $response['uv_index'] );
 			$return['code']       = $this->code_map( $response['weather_code'] );
 
-			$return = array_filter( $this->extra_data( $return ) );
+			$return = array_filter( $this->extra_data( $return, $time ) );
 			$this->set_cache( $return );
 
 			return $return;

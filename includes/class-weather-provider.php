@@ -103,7 +103,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * }
 	 */
 	public function extra_data( $return, $timestamp = null ) {
-		if ( $timestamp = null ) {
+		if ( is_null( $timestamp ) ) {
 			$timestamp = time();
 		}
 		$latitude           = array_key_return( 'latitude', $return, $this->latitude );

@@ -115,7 +115,7 @@ class Weather_Provider_HERE extends Weather_Provider {
 			$return['summary']    = ifset( $current['description'] );
 			$return['code']       = $this->code_map( $current['iconName'] );
 			$return['visibility'] = self::km_to_meters( ifset_round( $current['visibility'], 1 ) );
-			$return               = array_filter( $this->extra_data( $return ) );
+			$return               = array_filter( $this->extra_data( $return, $time ) );
 
 			$this->set_cache( $return );
 

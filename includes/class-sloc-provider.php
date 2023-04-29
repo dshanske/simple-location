@@ -462,6 +462,9 @@ abstract class Sloc_Provider {
 	 * @return float millmeters.
 	 */
 	public static function cm_to_mm( $cm ) {
+		if ( ! is_numeric( $cm ) ) {
+			return( $cm );
+		}
 		return round( $cm * 10, 2 );
 	}
 

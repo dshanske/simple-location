@@ -122,7 +122,7 @@ class Astronomical_Calculator {
 			default:
 				$function = 'date_sunrise';
 		}
-		return call_user_func( $function, $timestamp, SUNFUNCS_RET_TIMESTAMP, $this->latitude, $this->longitude, self::get_zenith( $this->elevation ) );
+		 return call_user_func( $function, $timestamp, SUNFUNCS_RET_TIMESTAMP, $this->latitude, $this->longitude, self::get_zenith( $this->elevation ) );
 	}
 
 
