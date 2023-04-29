@@ -36,7 +36,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 		'width'     => 200,
 		'map_zoom'  => ifset( $geodata['map_zoom'] ),
 	);
-	if ( $map ) {
+	if ( $map_provider ) {
 		$map_provider->set( array_filter( $map_args ) );
 		$map_return = $map_provider->get_the_map();
 	}
