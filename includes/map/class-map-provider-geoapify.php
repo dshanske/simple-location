@@ -86,7 +86,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 		$map = add_query_arg(
 			array(
 				'apiKey' => $this->api,
-				'area'   => 'rect:' . implode( ',', Geo_Data::bounding_box( $locations, true ) ),
+				'area'   => 'rect:' . implode( ',', geo_bounding_box( $locations, true ) ),
 				'format' => 'jpeg',
 				'width'  => $this->width,
 				'height' => $this->height,
