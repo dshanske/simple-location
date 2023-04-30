@@ -122,7 +122,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		if ( $timestamp instanceof DateTime ) {
 			$datetime = $timestamp;
 		} elseif ( is_numeric( $timestamp ) ) {
-			$datetime = new DateTime( null, $timezone );
+			$datetime = new DateTime( "now", $timezone );
 			if ( ! is_null( $timestamp ) ) {
 				$datetime->setTimestamp( $timestamp );
 			}
