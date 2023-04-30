@@ -1034,11 +1034,11 @@ class Geo_Data {
 				$loc['address'] = get_the_title( $venue );
 				if ( $term ) {
 					$loc['address'] .= ' - ';
-					$loc['address'] .= Location_Taxonomy::display_name( $term, false );
+					$loc['address'] .= Location_Taxonomy::display_name( $term, array( 'links' => false ) );
 				}
 				$url = get_permalink( $venue );
 			} elseif ( $args['taxonomy'] && $term ) {
-				$loc['address'] = Location_Taxonomy::display_name( $term, false );
+				$loc['address'] = Location_Taxonomy::display_name( $term, array( 'links' => false ) );
 				$url            = get_term_link( $term );
 			} elseif ( empty( $loc['address'] ) ) {
 				if ( ! array_key_exists( 'latitude', $loc ) ) {
@@ -1068,7 +1068,7 @@ class Geo_Data {
 				$loc['address'] = get_the_title( $venue );
 			}
 			if ( $args['taxonomy'] && $term ) {
-				$loc['address'] = Location_Taxonomy::display_name( $term, false );
+				$loc['address'] = Location_Taxonomy::display_name( $term, array( 'links' => false ) );
 				$url            = get_term_link( $term );
 			} elseif ( isset( $loc['address'] ) ) {
 				$c[] = $loc['address'];

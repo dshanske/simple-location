@@ -778,16 +778,26 @@ final class Location_Taxonomy {
 		return get_term_meta( $term->term_id, 'country', true );
 	}
 
-	public static function display_name( $term_id, $links = true ) {
+	public static function display_name( $term_id, $args = array() ) {
+		$defaults = array(
+			'links' => true,
+			'flag'  => true,
+		);
+
+		$args = wp_parse_args( $args, $defaults );
 		$term = get_term( $term_id );
 		if ( is_wp_error( $term ) ) {
 			return '';
 		}
 		$return = array();
 		if ( 0 === $term->parent ) {
-			$country  = get_term_meta( $term->term_id, 'country', true );
-			$flag     = Geo_Provider::country_flag( $country );
-			$return[] = $flag . ' ' . $term->name;
+			$country = get_term_meta( $term->term_id, 'country', true );
+			if ( $args['flag'] ) {
+				$flag     = Geo_Provider::country_flag( $country );
+				$return[] = $flag . ' ' . $term->name;
+			} else {
+				$return[] = $term->name;
+			}
 		} else {
 			$return[] = $term->name;
 		}
@@ -804,7 +814,7 @@ final class Location_Taxonomy {
 					}
 				}
 			} else {
-				if ( $links ) {
+				if ( $args['links'] ) {
 					$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $term->name );
 				} else {
 					$return[] = $term->name;
