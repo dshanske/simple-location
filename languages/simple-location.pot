@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 5.0.11\n"
+"Project-Id-Version: Simple Location 5.0.12\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-04-14T05:29:28+00:00\n"
+"POT-Creation-Date: 2023-04-30T00:18:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.7.1\n"
 "X-Domain: simple-location\n"
@@ -160,32 +160,32 @@ msgstr ""
 msgid "Unable To Find Airport Code"
 msgstr ""
 
-#: includes/class-astronomical-calculator.php:402
+#: includes/class-astronomical-calculator.php:405
 msgid "New"
 msgstr ""
 
-#: includes/class-astronomical-calculator.php:408
+#: includes/class-astronomical-calculator.php:411
 msgid "Waxing Crescent"
 msgstr ""
 
-#: includes/class-astronomical-calculator.php:414
+#: includes/class-astronomical-calculator.php:417
 msgid "First Quarter"
 msgstr ""
 
-#: includes/class-astronomical-calculator.php:420
+#: includes/class-astronomical-calculator.php:423
 #: includes/class-weather-provider.php:561
 msgid "Full Moon"
 msgstr ""
 
-#: includes/class-astronomical-calculator.php:426
+#: includes/class-astronomical-calculator.php:429
 msgid "Waning Gibbous"
 msgstr ""
 
-#: includes/class-astronomical-calculator.php:432
+#: includes/class-astronomical-calculator.php:435
 msgid "Third Quarter"
 msgstr ""
 
-#: includes/class-astronomical-calculator.php:438
+#: includes/class-astronomical-calculator.php:441
 msgid "Waning Crescent"
 msgstr ""
 
@@ -3105,19 +3105,6 @@ msgstr ""
 msgid "Unable to Retrieve"
 msgstr ""
 
-#: includes/weather/class-weather-provider-darksky.php:23
-#: includes/weather/class-weather-provider-darksky.php:50
-msgid "Dark Sky"
-msgstr ""
-
-#: includes/weather/class-weather-provider-darksky.php:26
-msgid "The Dark Sky API will continue to function until March 31st, 2023, but no new signups are permitted. Apple has announced the replacement for Dark Sky will be called Apple WeatherKit, but requires an Apple Developer program membership. Dark Sky will be removed when the API ceases to be available"
-msgstr ""
-
-#: includes/weather/class-weather-provider-darksky.php:41
-msgid "DarkSky API"
-msgstr ""
-
 #: includes/weather/class-weather-provider-here.php:26
 msgid "HERE offers a free limited plan for up to 2500 weather transactions per month. Historical data not available."
 msgstr ""
@@ -3605,11 +3592,11 @@ msgstr ""
 msgid "Longitude: "
 msgstr ""
 
-#: simple-location.php:368
+#: simple-location.php:367
 msgid "Settings"
 msgstr ""
 
-#: simple-location.php:393
+#: simple-location.php:392
 msgid ""
 "Location and weather data is optionally stored for all posts, attachments, and comments. Location data is extracted from uploaded images along with other metadata. This\n"
 "\t\t\t\tdata can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it."

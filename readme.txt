@@ -3,7 +3,7 @@ Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
 Requires at least: 4.9
 Tested up to: 6.2
-Stable tag: 5.0.11
+Stable tag: 5.0.12
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -113,7 +113,6 @@ API Keys are required to use certain services.
 * [OpenWeatherMap](http://openweathermap.com/api)
 * [MapQuest](https://developer.mapquest.com/)
 * [HERE](https://developer.here.com/)
-* [Dark Sky](https://darksky.net/dev)
 * [Compass](https://github.com/aaronpk/Compass)
 * [Weatherstack](https://weatherstack.com)
 * [Weatherbit](https://www.weatherbit.io/api/weather-current)
@@ -163,7 +162,7 @@ takes a URL and an ID. So you could run a script that generates a static page an
 
 = Which providers support historic weather data? =
 
-Currently, only Visual Crossing and Dark Sky(soon to be discontinued), support historic weather data on their basic plan. Meteostat consists solely of historical data and has no current data.
+Currently, only Visual Crossing supports historic weather data on their basic plan. Meteostat consists solely of historical data and has no current data.
 
 = What is the fallback weather provider? =
 
@@ -288,6 +287,11 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 5.0.12 ( 2023-04-30 ) =
+* Remove Dark Sky as API is turned off
+* Fix several issues where errors occurred because a non-numeric value was passed to a function that required a numeric one
+* Check for existence of array properties before using them
 
 = 5.0.11 ( 2023-04-14 ) =
 * Add code to store webmention location in comments previously handled by Semantic Linkbacks
