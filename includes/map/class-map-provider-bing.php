@@ -84,7 +84,7 @@ class Map_Provider_Bing extends Map_Provider {
 		$map = add_query_arg(
 			array(
 				'dc'      => sprintf( 'l,,3;enc:%1$s', $polyline ),
-				'mapArea' => implode( ',', WP_Geo_Data::bounding_box( $locations ) ),
+				'mapArea' => implode( ',', Geo_Data::bounding_box( $locations ) ),
 				'key'     => $this->api,
 			),
 			sprintf( 'https://dev.virtualearth.net/REST/v1/Imagery/Map/%1$s/', $this->style )
