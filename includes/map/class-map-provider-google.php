@@ -49,7 +49,7 @@ class Map_Provider_Google extends Map_Provider {
 		$url = 'https://maps.googleapis.com/maps/api/staticmap';
 		$map = add_query_arg(
 			array(
-				'markers'  => sprintf( 'color:red%7Clabel:P%7C|%1$s,%2$s', $this->latitude, $this->longitude ),
+				'markers'  => sprintf( 'color:red|label:X|%1$s,%2$s', $this->latitude, $this->longitude ),
 				'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
 				'maptype'  => $this->style,
 				'language' => get_bloginfo( 'language' ),
