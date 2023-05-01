@@ -56,7 +56,7 @@ class Sloc_Media_Metadata {
 			$exif = @exif_read_data( $file );
 		}
 		// If there is no Exif Version set return.
-		if ( array_key_exists( 'ExifVersion', $exif ) ) {
+		if ( ! array_key_exists( 'ExifVersion', $exif ) ) {
 			return $meta;
 		}
 		$version = (int) $exif['ExifVersion'];
