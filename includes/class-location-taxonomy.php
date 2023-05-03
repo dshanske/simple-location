@@ -807,7 +807,7 @@ final class Location_Taxonomy {
 				$country = get_term_meta( $term->term_id, 'country', true );
 				if ( $country !== get_option( 'sloc_country' ) ) {
 					$flag = Geo_Provider::country_flag( $country );
-					if ( $links ) {
+					if ( $args['links'] ) {
 						$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $flag . ' ' . $term->name );
 					} else {
 						$return[] = $flag . ' ' . $term->name;
