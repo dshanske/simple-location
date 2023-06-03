@@ -133,7 +133,7 @@ final class Location_Taxonomy {
 			case 'locality':
 				?>
 				<th><label for="locality"><?php esc_html_e( 'Locality:', 'simple-location' ); ?></label></th>
-				<td><input class="widefat" type=text" name="locality" value="<?php echo esc_attr( get_term_meta( $term->term_id, 'locality', true ) ); ?>" required />
+				<td><input class="widefat" type="text" name="locality" value="<?php echo esc_attr( get_term_meta( $term->term_id, 'locality', true ) ); ?>" required />
 					<p class="description"><?php esc_html_e( 'The city, village, or town for the location', 'simple-location' ); ?></p>
 				</td>
 				<?php
