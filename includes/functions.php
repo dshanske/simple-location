@@ -499,7 +499,7 @@ if ( ! function_exists( 'clean_coordinate' ) ) {
 	 * Sanitize and round coordinates.
 	 *
 	 * @param string $coordinate Coordinate.
-	 * @return float $coordinate Sanitized, rounded and converted coordinate.
+	 * @return float|false $coordinate Sanitized, rounded and converted coordinate. False if not valid coordinate
 	 *
 	 * @since 1.0.0
 	 */
@@ -507,7 +507,10 @@ if ( ! function_exists( 'clean_coordinate' ) ) {
 		$coordinate = trim( $coordinate );
 		$pattern    = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
 		preg_match( $pattern, $coordinate, $matches );
-		return round( (float) $matches[0], 7 );
+		if ( wp_is_numeric_array( $matches ) ) {
+			return round( (float) $matches[0], 7 );
+		}
+		return false;
 	}
 }
 

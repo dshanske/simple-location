@@ -54,7 +54,7 @@ class Location_Provider_Address extends Location_Provider {
 		$this->latitude   = $address['latitude'];
 		$this->longitude  = $address['longitude'];
 		$this->altitude   = ifset( $address['altitude'] );
-		$this->annotation = $address['display_name'];
+		$this->annotation = ifset( $address['display_name'] );
 	}
 
 }

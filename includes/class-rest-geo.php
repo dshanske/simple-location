@@ -491,7 +491,7 @@ class REST_Geo {
 		$term_lookup = array_key_exists( 'term', $params );
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$map = Loc_Config::map_provider();
-			if ( $map ) {
+			if ( is_object( $map ) ) {
 				$map_args = array(
 					'latitude'  => $params['latitude'],
 					'longitude' => $params['longitude'],
