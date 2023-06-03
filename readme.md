@@ -3,7 +3,7 @@
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
 **Tested up to:** 6.2  
-**Stable tag:** 5.0.13  
+**Stable tag:** 5.0.14  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -287,6 +287,11 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 5.0.14 ( 2023-06-03 ) ###
+* Fix undeclared variable
+* Fix unclosed string
+
 
 ### 5.0.13 ( 2023-05-02 ) ###
 * Fix issue with geoapify and bing map providers due calling old bounding box function
