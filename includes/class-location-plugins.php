@@ -53,7 +53,7 @@ class Location_Plugins {
 			return $meta;
 		}
 
-		$location = ifset( $mf_array['properties']['location'] ); 
+		$location = ifset( $mf_array['properties']['location'] );
 		if ( wp_is_numeric_array( $location ) ) {
 			$location = $location[0];
 			$props    = $location['properties'];

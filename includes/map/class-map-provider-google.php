@@ -14,13 +14,13 @@ class Map_Provider_Google extends Map_Provider {
 	use Sloc_API_Google;
 
 	public function __construct( $args = array() ) {
-		$this->name        = __( 'Google Maps', 'simple-location' );
-		$this->url         = 'https://developers.google.com/maps/';
-		$this->description = __( 'Google Maps Platform API key is required, however Google offers a $200 per month credit, which is the equivalent of 28,000 queries. Click Get Started. Make sure to enable the Static Map API. Follow the tutorial', 'simple-location' );
-		$this->slug        = 'google';
-		$this->max_width   = 640;
-		$this->max_height  = 640;
-		$this->max_map_zoom    = 20;
+		$this->name         = __( 'Google Maps', 'simple-location' );
+		$this->url          = 'https://developers.google.com/maps/';
+		$this->description  = __( 'Google Maps Platform API key is required, however Google offers a $200 per month credit, which is the equivalent of 28,000 queries. Click Get Started. Make sure to enable the Static Map API. Follow the tutorial', 'simple-location' );
+		$this->slug         = 'google';
+		$this->max_width    = 640;
+		$this->max_height   = 640;
+		$this->max_map_zoom = 20;
 
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
