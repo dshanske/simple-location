@@ -459,7 +459,7 @@ class Loc_Timezone {
 
 
 
-	public static function post_date_column_time( $t_time, $post, $date, $mode ) {
+	public static function post_date_column_time( $t_time, $post, $date = null, $mode = null ) {
 		$timezone = self::get_timezone( $post );
 		if ( self::compare_timezones( $timezone, wp_timezone() ) ) {
 			return $t_time;
