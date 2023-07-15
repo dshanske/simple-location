@@ -2,16 +2,16 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 5.0.15\n"
+"Project-Id-Version: Simple Location 5.0.16\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-07-01T15:42:47+00:00\n"
+"POT-Creation-Date: 2023-07-15T04:34:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.8.0\n"
+"X-Generator: WP-CLI 2.8.1\n"
 "X-Domain: simple-location\n"
 
 #. Plugin Name of the plugin
@@ -230,7 +230,7 @@ msgstr[1] ""
 #: includes/class-location-taxonomy.php:730
 #: includes/class-post-venue.php:416
 #: includes/class-weather-provider.php:607
-#: includes/trait-weather-info.php:337
+#: includes/trait-weather-info.php:344
 #: includes/widgets/class-sloc-weather-widget.php:197
 #: templates/loc-metabox.php:50
 #: templates/weather-metabox.php:20
@@ -1315,32 +1315,32 @@ msgid "Service URL"
 msgstr ""
 
 #: includes/class-weather-data.php:100
-#: includes/trait-weather-info.php:102
-#: includes/trait-weather-info.php:255
+#: includes/trait-weather-info.php:108
+#: includes/trait-weather-info.php:262
 msgid "Temperature"
 msgstr ""
 
 #: includes/class-weather-data.php:101
 #: includes/class-weather-provider.php:544
-#: includes/trait-weather-info.php:126
+#: includes/trait-weather-info.php:132
 msgid "Humidity"
 msgstr ""
 
 #: includes/class-weather-data.php:102
-#: includes/trait-weather-info.php:114
-#: includes/trait-weather-info.php:267
+#: includes/trait-weather-info.php:120
+#: includes/trait-weather-info.php:274
 msgid "Heat Index"
 msgstr ""
 
 #: includes/class-weather-data.php:103
-#: includes/trait-weather-info.php:108
-#: includes/trait-weather-info.php:261
+#: includes/trait-weather-info.php:114
+#: includes/trait-weather-info.php:268
 msgid "Wind Chill"
 msgstr ""
 
 #: includes/class-weather-data.php:104
-#: includes/trait-weather-info.php:120
-#: includes/trait-weather-info.php:273
+#: includes/trait-weather-info.php:126
+#: includes/trait-weather-info.php:280
 msgid "Dewpoint"
 msgstr ""
 
@@ -1349,26 +1349,26 @@ msgid "Atmospheric Pressure"
 msgstr ""
 
 #: includes/class-weather-data.php:106
-#: includes/trait-weather-info.php:138
+#: includes/trait-weather-info.php:144
 msgid "Cloudiness"
 msgstr ""
 
 #: includes/class-weather-data.php:107
-#: includes/trait-weather-info.php:162
-#: includes/trait-weather-info.php:304
+#: includes/trait-weather-info.php:168
+#: includes/trait-weather-info.php:311
 msgid "Rainfall"
 msgstr ""
 
 #: includes/class-weather-data.php:108
-#: includes/trait-weather-info.php:168
-#: includes/trait-weather-info.php:310
+#: includes/trait-weather-info.php:174
+#: includes/trait-weather-info.php:317
 #: includes/weather/class-weather-provider-meteostat.php:228
 msgid "Snowfall"
 msgstr ""
 
 #: includes/class-weather-data.php:109
-#: includes/trait-weather-info.php:174
-#: includes/trait-weather-info.php:316
+#: includes/trait-weather-info.php:180
+#: includes/trait-weather-info.php:323
 #: templates/loc-metabox.php:130
 msgid "Visibility"
 msgstr ""
@@ -1378,17 +1378,17 @@ msgid "Radiation"
 msgstr ""
 
 #: includes/class-weather-data.php:111
-#: includes/trait-weather-info.php:186
+#: includes/trait-weather-info.php:192
 msgid "Illuminance"
 msgstr ""
 
 #: includes/class-weather-data.php:112
-#: includes/trait-weather-info.php:192
+#: includes/trait-weather-info.php:198
 msgid "UV Index"
 msgstr ""
 
 #: includes/class-weather-data.php:113
-#: includes/trait-weather-info.php:198
+#: includes/trait-weather-info.php:204
 msgid "Air Quality Index"
 msgstr ""
 
@@ -1405,38 +1405,38 @@ msgid "Particulate Matter 10.0"
 msgstr ""
 
 #: includes/class-weather-data.php:117
-#: includes/trait-weather-info.php:222
+#: includes/trait-weather-info.php:229
 msgid "Carbon Monoxide"
 msgstr ""
 
 #: includes/class-weather-data.php:118
-#: includes/trait-weather-info.php:227
+#: includes/trait-weather-info.php:234
 msgid "Carbon Dioxide"
 msgstr ""
 
 #: includes/class-weather-data.php:119
-#: includes/trait-weather-info.php:232
+#: includes/trait-weather-info.php:239
 msgid "Ammonia"
 msgstr ""
 
 #: includes/class-weather-data.php:120
-#: includes/trait-weather-info.php:237
+#: includes/trait-weather-info.php:244
 msgid "Ozone"
 msgstr ""
 
 #: includes/class-weather-data.php:121
-#: includes/trait-weather-info.php:242
+#: includes/trait-weather-info.php:249
 msgid "Lead"
 msgstr ""
 
 #: includes/class-weather-data.php:122
-#: includes/trait-weather-info.php:247
+#: includes/trait-weather-info.php:254
 msgid "Sulfur Dioxide"
 msgstr ""
 
 #: includes/class-weather-data.php:123
-#: includes/trait-weather-info.php:144
-#: includes/trait-weather-info.php:285
+#: includes/trait-weather-info.php:150
+#: includes/trait-weather-info.php:292
 msgid "Wind Speed"
 msgstr ""
 
@@ -1445,8 +1445,8 @@ msgid "Wind Degree"
 msgstr ""
 
 #: includes/class-weather-data.php:125
-#: includes/trait-weather-info.php:150
-#: includes/trait-weather-info.php:291
+#: includes/trait-weather-info.php:156
+#: includes/trait-weather-info.php:298
 msgid "Wind Gust"
 msgstr ""
 
@@ -1512,13 +1512,13 @@ msgid "Rain and Windy"
 msgstr ""
 
 #: includes/class-weather-provider.php:455
-#: includes/trait-weather-info.php:378
+#: includes/trait-weather-info.php:385
 #: includes/weather/class-weather-provider-visualcrossing.php:194
 msgid "Snow"
 msgstr ""
 
 #: includes/class-weather-provider.php:456
-#: includes/trait-weather-info.php:391
+#: includes/trait-weather-info.php:398
 msgid "Snow and Wind"
 msgstr ""
 
@@ -1542,7 +1542,7 @@ msgid "Sandstorm"
 msgstr ""
 
 #: includes/class-weather-provider.php:461
-#: includes/trait-weather-info.php:381
+#: includes/trait-weather-info.php:388
 #: includes/weather/class-weather-provider-meteostat.php:225
 msgid "Sleet"
 msgstr ""
@@ -1552,7 +1552,7 @@ msgid "Smog"
 msgstr ""
 
 #: includes/class-weather-provider.php:463
-#: includes/trait-weather-info.php:397
+#: includes/trait-weather-info.php:404
 msgid "Smoke"
 msgstr ""
 
@@ -1591,7 +1591,7 @@ msgid "Thunderstorm"
 msgstr ""
 
 #: includes/class-weather-provider.php:472
-#: includes/trait-weather-info.php:362
+#: includes/trait-weather-info.php:369
 msgid "Windy"
 msgstr ""
 
@@ -1600,7 +1600,7 @@ msgid "Gale Warning"
 msgstr ""
 
 #: includes/class-weather-provider.php:474
-#: includes/trait-weather-info.php:390
+#: includes/trait-weather-info.php:397
 #: includes/weather/class-weather-provider-meteostat.php:237
 #: includes/weather/class-weather-provider-visualcrossing.php:203
 msgid "Hail"
@@ -1635,7 +1635,7 @@ msgid "Cloudy with a Chance of Meatballs"
 msgstr ""
 
 #: includes/class-weather-provider.php:482
-#: includes/trait-weather-info.php:396
+#: includes/trait-weather-info.php:403
 msgid "Icy"
 msgstr ""
 
@@ -2102,7 +2102,7 @@ msgid "You have not set an API key for OpenRoute"
 msgstr ""
 
 #: includes/functions.php:77
-#: includes/trait-weather-info.php:172
+#: includes/trait-weather-info.php:178
 msgid "m"
 msgstr ""
 
@@ -2615,451 +2615,451 @@ msgstr ""
 msgid "Night"
 msgstr ""
 
-#: includes/trait-weather-info.php:100
 #: includes/trait-weather-info.php:106
 #: includes/trait-weather-info.php:112
 #: includes/trait-weather-info.php:118
+#: includes/trait-weather-info.php:124
 msgid "&deg;C"
 msgstr ""
 
-#: includes/trait-weather-info.php:101
 #: includes/trait-weather-info.php:107
 #: includes/trait-weather-info.php:113
 #: includes/trait-weather-info.php:119
+#: includes/trait-weather-info.php:125
 msgid "degrees celsius"
 msgstr ""
 
-#: includes/trait-weather-info.php:124
-#: includes/trait-weather-info.php:136
+#: includes/trait-weather-info.php:130
+#: includes/trait-weather-info.php:142
 msgid "%"
 msgstr ""
 
-#: includes/trait-weather-info.php:125
-#: includes/trait-weather-info.php:137
+#: includes/trait-weather-info.php:131
+#: includes/trait-weather-info.php:143
 msgid "percent"
 msgstr ""
 
-#: includes/trait-weather-info.php:130
+#: includes/trait-weather-info.php:136
 msgid "hPa"
 msgstr ""
 
-#: includes/trait-weather-info.php:131
+#: includes/trait-weather-info.php:137
 msgid "hectopascals"
 msgstr ""
 
-#: includes/trait-weather-info.php:132
-#: includes/trait-weather-info.php:279
+#: includes/trait-weather-info.php:138
+#: includes/trait-weather-info.php:286
 msgid "Pressure"
 msgstr ""
 
-#: includes/trait-weather-info.php:142
 #: includes/trait-weather-info.php:148
+#: includes/trait-weather-info.php:154
 msgid "mps"
 msgstr ""
 
-#: includes/trait-weather-info.php:143
 #: includes/trait-weather-info.php:149
+#: includes/trait-weather-info.php:155
 msgid "meters per second"
 msgstr ""
 
-#: includes/trait-weather-info.php:154
-#: includes/trait-weather-info.php:295
+#: includes/trait-weather-info.php:160
+#: includes/trait-weather-info.php:302
 msgid "&deg;"
 msgstr ""
 
-#: includes/trait-weather-info.php:155
+#: includes/trait-weather-info.php:161
 msgid "degrees"
 msgstr ""
 
-#: includes/trait-weather-info.php:156
-#: includes/trait-weather-info.php:297
+#: includes/trait-weather-info.php:162
+#: includes/trait-weather-info.php:304
 msgid "Wind Direction"
 msgstr ""
 
-#: includes/trait-weather-info.php:160
 #: includes/trait-weather-info.php:166
+#: includes/trait-weather-info.php:172
 msgid "mm"
 msgstr ""
 
-#: includes/trait-weather-info.php:161
 #: includes/trait-weather-info.php:167
+#: includes/trait-weather-info.php:173
 msgid "millimeters in the last hour"
 msgstr ""
 
-#: includes/trait-weather-info.php:173
+#: includes/trait-weather-info.php:179
 msgid "meters"
 msgstr ""
 
-#: includes/trait-weather-info.php:178
+#: includes/trait-weather-info.php:184
 msgid "W/m^2"
 msgstr ""
 
-#: includes/trait-weather-info.php:179
+#: includes/trait-weather-info.php:185
 msgid "watts per square meter"
 msgstr ""
 
-#: includes/trait-weather-info.php:180
+#: includes/trait-weather-info.php:186
 msgid "Solar Radiation"
 msgstr ""
 
-#: includes/trait-weather-info.php:184
+#: includes/trait-weather-info.php:190
 msgid "lx"
 msgstr ""
 
-#: includes/trait-weather-info.php:185
+#: includes/trait-weather-info.php:191
 msgid "lux"
 msgstr ""
 
-#: includes/trait-weather-info.php:191
 #: includes/trait-weather-info.php:197
+#: includes/trait-weather-info.php:203
 msgid "index"
 msgstr ""
 
-#: includes/trait-weather-info.php:201
 #: includes/trait-weather-info.php:208
-#: includes/trait-weather-info.php:214
+#: includes/trait-weather-info.php:215
+#: includes/trait-weather-info.php:221
 msgid "µg/m3"
 msgstr ""
 
-#: includes/trait-weather-info.php:202
 #: includes/trait-weather-info.php:209
-#: includes/trait-weather-info.php:215
+#: includes/trait-weather-info.php:216
+#: includes/trait-weather-info.php:222
 msgid "micrograms per cubic meter of air"
 msgstr ""
 
-#: includes/trait-weather-info.php:203
+#: includes/trait-weather-info.php:210
 msgid "PM1.0"
 msgstr ""
 
-#: includes/trait-weather-info.php:210
+#: includes/trait-weather-info.php:217
 msgid "PM2.5"
 msgstr ""
 
-#: includes/trait-weather-info.php:216
+#: includes/trait-weather-info.php:223
 msgid "PM10"
 msgstr ""
 
-#: includes/trait-weather-info.php:220
-#: includes/trait-weather-info.php:225
-#: includes/trait-weather-info.php:230
-#: includes/trait-weather-info.php:235
-#: includes/trait-weather-info.php:240
-#: includes/trait-weather-info.php:245
+#: includes/trait-weather-info.php:227
+#: includes/trait-weather-info.php:232
+#: includes/trait-weather-info.php:237
+#: includes/trait-weather-info.php:242
+#: includes/trait-weather-info.php:247
+#: includes/trait-weather-info.php:252
 msgid "ppm"
 msgstr ""
 
-#: includes/trait-weather-info.php:221
-#: includes/trait-weather-info.php:226
-#: includes/trait-weather-info.php:231
-#: includes/trait-weather-info.php:236
-#: includes/trait-weather-info.php:241
-#: includes/trait-weather-info.php:246
+#: includes/trait-weather-info.php:228
+#: includes/trait-weather-info.php:233
+#: includes/trait-weather-info.php:238
+#: includes/trait-weather-info.php:243
+#: includes/trait-weather-info.php:248
+#: includes/trait-weather-info.php:253
 msgid "parts per million"
 msgstr ""
 
-#: includes/trait-weather-info.php:253
-#: includes/trait-weather-info.php:259
-#: includes/trait-weather-info.php:265
-#: includes/trait-weather-info.php:271
-msgid "&deg;F"
-msgstr ""
-
-#: includes/trait-weather-info.php:254
 #: includes/trait-weather-info.php:260
 #: includes/trait-weather-info.php:266
 #: includes/trait-weather-info.php:272
+#: includes/trait-weather-info.php:278
+msgid "&deg;F"
+msgstr ""
+
+#: includes/trait-weather-info.php:261
+#: includes/trait-weather-info.php:267
+#: includes/trait-weather-info.php:273
+#: includes/trait-weather-info.php:279
 msgid "degrees fahrenheit"
 msgstr ""
 
-#: includes/trait-weather-info.php:277
+#: includes/trait-weather-info.php:284
 msgid "inHg"
 msgstr ""
 
-#: includes/trait-weather-info.php:278
+#: includes/trait-weather-info.php:285
 msgid "inches of mercury"
 msgstr ""
 
-#: includes/trait-weather-info.php:283
-#: includes/trait-weather-info.php:289
+#: includes/trait-weather-info.php:290
+#: includes/trait-weather-info.php:296
 msgid "MPH"
 msgstr ""
 
-#: includes/trait-weather-info.php:284
-#: includes/trait-weather-info.php:290
+#: includes/trait-weather-info.php:291
+#: includes/trait-weather-info.php:297
 msgid "miles per hour"
 msgstr ""
 
-#: includes/trait-weather-info.php:296
+#: includes/trait-weather-info.php:303
 msgid "degree"
 msgstr ""
 
-#: includes/trait-weather-info.php:302
-#: includes/trait-weather-info.php:308
+#: includes/trait-weather-info.php:309
+#: includes/trait-weather-info.php:315
 msgid "in"
 msgstr ""
 
-#: includes/trait-weather-info.php:303
-#: includes/trait-weather-info.php:309
+#: includes/trait-weather-info.php:310
+#: includes/trait-weather-info.php:316
 msgid "inches in the last hour"
 msgstr ""
 
-#: includes/trait-weather-info.php:314
+#: includes/trait-weather-info.php:321
 msgid "mi"
 msgstr ""
 
-#: includes/trait-weather-info.php:315
+#: includes/trait-weather-info.php:322
 msgid "miles"
 msgstr ""
 
-#: includes/trait-weather-info.php:339
+#: includes/trait-weather-info.php:346
 msgid "thunderstorm with light rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:340
+#: includes/trait-weather-info.php:347
 msgid "thunderstorm with rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:341
+#: includes/trait-weather-info.php:348
 msgid "thunderstorm with heavy rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:342
+#: includes/trait-weather-info.php:349
 msgid "light thunderstorm"
 msgstr ""
 
-#: includes/trait-weather-info.php:343
+#: includes/trait-weather-info.php:350
 msgid "thunderstorm"
 msgstr ""
 
-#: includes/trait-weather-info.php:344
+#: includes/trait-weather-info.php:351
 msgid "heavy thunderstorm"
 msgstr ""
 
-#: includes/trait-weather-info.php:345
+#: includes/trait-weather-info.php:352
 msgid "ragged thunderstorm"
 msgstr ""
 
-#: includes/trait-weather-info.php:346
+#: includes/trait-weather-info.php:353
 msgid "thunderstorm with light drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:347
+#: includes/trait-weather-info.php:354
 msgid "thunderstorm with drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:348
+#: includes/trait-weather-info.php:355
 msgid "thunderstorm with heavy drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:349
+#: includes/trait-weather-info.php:356
 msgid "thunderstorm with hail"
 msgstr ""
 
-#: includes/trait-weather-info.php:351
+#: includes/trait-weather-info.php:358
 msgid "light intensity drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:352
+#: includes/trait-weather-info.php:359
 msgid "drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:353
+#: includes/trait-weather-info.php:360
 msgid "heavy intensity drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:354
+#: includes/trait-weather-info.php:361
 msgid "freezing drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:355
+#: includes/trait-weather-info.php:362
 msgid "light intensity drizzle rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:356
+#: includes/trait-weather-info.php:363
 msgid "drizzle rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:357
+#: includes/trait-weather-info.php:364
 msgid "heavy intensity drizzle rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:358
+#: includes/trait-weather-info.php:365
 msgid "shower rain and drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:359
+#: includes/trait-weather-info.php:366
 msgid "heavy shower rain and drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:360
+#: includes/trait-weather-info.php:367
 msgid "shower drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:364
+#: includes/trait-weather-info.php:371
 msgid "light rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:365
+#: includes/trait-weather-info.php:372
 msgid "moderate rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:366
+#: includes/trait-weather-info.php:373
 msgid "extreme rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:367
+#: includes/trait-weather-info.php:374
 msgid "freezing rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:368
+#: includes/trait-weather-info.php:375
 msgid "rain and wind"
 msgstr ""
 
-#: includes/trait-weather-info.php:369
+#: includes/trait-weather-info.php:376
 msgid "ice"
 msgstr ""
 
-#: includes/trait-weather-info.php:370
+#: includes/trait-weather-info.php:377
 msgid "light intensity shower rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:371
+#: includes/trait-weather-info.php:378
 msgid "shower rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:372
+#: includes/trait-weather-info.php:379
 msgid "heavy intensity shower rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:373
+#: includes/trait-weather-info.php:380
 msgid "ragged shower rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:374
+#: includes/trait-weather-info.php:381
 msgid "flood"
 msgstr ""
 
-#: includes/trait-weather-info.php:375
+#: includes/trait-weather-info.php:382
 msgid "flash flooding"
 msgstr ""
 
-#: includes/trait-weather-info.php:377
+#: includes/trait-weather-info.php:384
 msgid "light snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:379
+#: includes/trait-weather-info.php:386
 msgid "Heavy snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:380
+#: includes/trait-weather-info.php:387
 msgid "Mix of Snow/Rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:382
+#: includes/trait-weather-info.php:389
 msgid "Light shower sleet"
 msgstr ""
 
-#: includes/trait-weather-info.php:383
+#: includes/trait-weather-info.php:390
 msgid "Shower sleet"
 msgstr ""
 
-#: includes/trait-weather-info.php:384
+#: includes/trait-weather-info.php:391
 msgid "Light rain and snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:385
+#: includes/trait-weather-info.php:392
 msgid "Rain and snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:386
+#: includes/trait-weather-info.php:393
 msgid "Light shower snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:387
+#: includes/trait-weather-info.php:394
 msgid "Shower snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:388
+#: includes/trait-weather-info.php:395
 msgid "Heavy shower snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:389
+#: includes/trait-weather-info.php:396
 msgid "Flurries"
 msgstr ""
 
-#: includes/trait-weather-info.php:392
+#: includes/trait-weather-info.php:399
 msgid "Diamond dust"
 msgstr ""
 
-#: includes/trait-weather-info.php:394
+#: includes/trait-weather-info.php:401
 msgid "mist"
 msgstr ""
 
-#: includes/trait-weather-info.php:398
+#: includes/trait-weather-info.php:405
 msgid "Haze"
 msgstr ""
 
-#: includes/trait-weather-info.php:399
+#: includes/trait-weather-info.php:406
 msgid "sand/dust"
 msgstr ""
 
-#: includes/trait-weather-info.php:400
+#: includes/trait-weather-info.php:407
 msgid "fog"
 msgstr ""
 
-#: includes/trait-weather-info.php:401
+#: includes/trait-weather-info.php:408
 msgid "sand"
 msgstr ""
 
-#: includes/trait-weather-info.php:402
+#: includes/trait-weather-info.php:409
 msgid "dust"
 msgstr ""
 
-#: includes/trait-weather-info.php:403
+#: includes/trait-weather-info.php:410
 msgid "volcanic ash"
 msgstr ""
 
-#: includes/trait-weather-info.php:404
+#: includes/trait-weather-info.php:411
 msgid "squalls"
 msgstr ""
 
-#: includes/trait-weather-info.php:405
+#: includes/trait-weather-info.php:412
 msgid "waterspouts"
 msgstr ""
 
-#: includes/trait-weather-info.php:406
+#: includes/trait-weather-info.php:413
 msgid "tornado"
 msgstr ""
 
-#: includes/trait-weather-info.php:407
+#: includes/trait-weather-info.php:414
 msgid "hurricane"
 msgstr ""
 
-#: includes/trait-weather-info.php:408
+#: includes/trait-weather-info.php:415
 msgid "lightning"
 msgstr ""
 
-#: includes/trait-weather-info.php:411
+#: includes/trait-weather-info.php:418
 msgid "Clear Sky"
 msgstr ""
 
-#: includes/trait-weather-info.php:412
+#: includes/trait-weather-info.php:419
 msgid "Few Clouds"
 msgstr ""
 
-#: includes/trait-weather-info.php:413
+#: includes/trait-weather-info.php:420
 msgid "Scattered Clouds"
 msgstr ""
 
-#: includes/trait-weather-info.php:414
+#: includes/trait-weather-info.php:421
 msgid "Broken Clouds"
 msgstr ""
 
-#: includes/trait-weather-info.php:415
+#: includes/trait-weather-info.php:422
 msgid "Overcast Clouds"
 msgstr ""
 
-#: includes/trait-weather-info.php:416
+#: includes/trait-weather-info.php:423
 msgid "Unknown Precipitation"
 msgstr ""
 
