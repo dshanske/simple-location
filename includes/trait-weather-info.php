@@ -95,7 +95,13 @@ trait Weather_Info_Trait {
 	 * }
 	 */
 	public static function get_names( $property, $imperial = false ) {
-		$units = array(
+		$defaults = array(
+			'unit'  => '',
+			'label' => '',
+			'name'  => '',
+			'icon'  => '',
+		);
+		$units    = array(
 			'temperature' => array(
 				'unit'  => __( '&deg;C', 'simple-location' ),
 				'label' => __( 'degrees celsius', 'simple-location' ),
@@ -196,6 +202,7 @@ trait Weather_Info_Trait {
 				'unit'  => '',
 				'label' => __( 'index', 'simple-location' ),
 				'name'  => __( 'Air Quality Index', 'simple-location' ),
+				'icon'  => 'md-aqi',
 			),
 			'pm1_0'       => array(
 				'unit'  => __( 'µg/m3', 'simple-location' ),
@@ -324,7 +331,7 @@ trait Weather_Info_Trait {
 				return $return;
 			}
 			if ( array_key_exists( $property, $return ) ) {
-				return $return[ $property ];
+				return wp_parse_args( $return[ $property ], $defaults );
 			}
 			return false;
 	}
