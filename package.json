@@ -18,6 +18,6 @@
     "grunt-wp-i18n": "^1.0.3",
     "grunt-wp-readme-to-markdown": ">=2.0.1",
     "luxon": "^2.4.0",
-    "simple-icons": "^7.1.0"
+    "simple-icons": "*"
   }
 }
