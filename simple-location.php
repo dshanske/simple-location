@@ -5,7 +5,7 @@
  * Description: Adds Location to WordPress
  * Version: 5.0.16
  * Requires at least: 4.9
- * Requires PHP: 5.6
+ * Requires PHP: 7.0
  * Requires CP: 1.4.3
  * Author: David Shanske
  * Author URI: https://david.shanske.com
