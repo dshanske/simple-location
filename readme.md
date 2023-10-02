@@ -2,7 +2,7 @@
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske/)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
-**Tested up to:** 6.2  
+**Tested up to:** 6.3
 **Stable tag:** 5.0.16  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
