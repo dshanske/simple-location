@@ -2,8 +2,8 @@
 **Contributors:** [dshanske](https://profiles.wordpress.org/dshanske/)  
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb  
 **Requires at least:** 4.9  
-**Tested up to:** 6.3
-**Stable tag:** 5.0.16  
+**Tested up to:** 6.3  
+**Stable tag:** 5.0.17  
 **Requires PHP:** 5.6  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
@@ -287,6 +287,10 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog ##
+
+### 5.0.17 ( 2023-10-02 ) ###
+* Refresh dependencies
+* Bump minimum PHP to 7.0
 
 ### 5.0.16 ( 2023-07-15 ) ###
 * Fix issue with missing AQI icon
