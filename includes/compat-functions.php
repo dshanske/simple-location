@@ -194,7 +194,7 @@ if ( ! function_exists( 'wp_date' ) ) {
 			$format_length = strlen( $format );
 			$month         = $wp_locale->get_month( $datetime->format( 'm' ) );
 			$weekday       = $wp_locale->get_weekday( $datetime->format( 'w' ) );
-			for ( $i = 0; $i < $format_length; $i ++ ) {
+			for ( $i = 0; $i < $format_length; $i++ ) {
 				switch ( $format[ $i ] ) {
 					case 'D':
 						$new_format .= backslashit( $wp_locale->get_weekday_abbrev( $weekday ) );
@@ -272,5 +272,3 @@ if ( ! function_exists( 'str_contains' ) ) {
 			return '' === $needle || false !== strpos( $haystack, $needle );
 	}
 }
-
-

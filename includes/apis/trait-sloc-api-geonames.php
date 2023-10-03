@@ -29,5 +29,4 @@ trait Sloc_API_Geonames {
 	public static function init() {
 		self::register_settings_api( __( 'GeoNames', 'simple-location' ), 'sloc_geonames_user', __( 'User', 'simple-location' ) );
 	}
-
 }

@@ -180,5 +180,4 @@ class Geo_Provider_Here extends Geo_Provider {
 		}
 		return $return;
 	}
-
 }

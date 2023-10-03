@@ -239,5 +239,4 @@ class Sloc_Media_Metadata {
 			return $meta;
 		}
 	}
-
 }

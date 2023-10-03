@@ -17,7 +17,7 @@ $providers = Loc_Config::elevation_providers();
 			printf( '<option value="%1$s">%2$s</option>', $key, $value['name'] ); // phpcs:ignore
 		}
 		?>
-	  </select>
+		</select>
 	</p>
 	<?php wp_nonce_field( 'wp_rest' ); ?>
 	<?php submit_button( __( 'Lookup', 'simple-location' ) ); ?>

@@ -53,5 +53,4 @@ trait Sloc_API_Bing {
 			);
 		}
 	}
-
 }

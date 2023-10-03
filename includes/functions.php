@@ -532,7 +532,7 @@ function sloc_query_id_list() {
 
 
 /*
- Wrapper around get_post_datetime that adjusts if timezone property is available
+Wrapper around get_post_datetime that adjusts if timezone property is available
 */
 function sloc_get_post_datetime( $post = null, $field = 'date', $source = 'local' ) {
 	$datetime = get_post_datetime( $post, $field, $source );
@@ -546,7 +546,7 @@ function sloc_get_post_datetime( $post = null, $field = 'date', $source = 'local
 
 
 /*
- Wrapper around get_comment_datetime that adjusts if timezone property is available
+Wrapper around get_comment_datetime that adjusts if timezone property is available
 */
 function sloc_get_comment_datetime( $comment = null ) {
 	$datetime = get_comment_datetime( $comment );

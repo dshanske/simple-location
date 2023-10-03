@@ -245,4 +245,3 @@ function get_geo_archive_location_list() {
 	}
 	return $locations;
 }
-

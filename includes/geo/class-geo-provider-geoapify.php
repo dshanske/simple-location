@@ -12,6 +12,7 @@
  */
 class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 	use Sloc_API_GeoApify;
+
 	/**
 	 * Constructor for the Abstract Class.
 	 *

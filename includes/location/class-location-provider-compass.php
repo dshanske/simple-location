@@ -100,7 +100,7 @@ class Location_Provider_Compass extends Location_Provider {
 
 		// Drop Altitude if present and round.
 		$response = array_map(
-			function( $array ) {
+			function ( $array ) {
 				return array(
 					0 => clean_coordinate( $array[0] ),
 					1 => clean_coordinate( $array[1] ),
@@ -346,7 +346,4 @@ class Location_Provider_Compass extends Location_Provider {
 			)
 		);
 	}
-
-
 }
-

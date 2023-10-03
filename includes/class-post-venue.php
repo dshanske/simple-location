@@ -288,7 +288,7 @@ class Post_Venue {
 									Location_Taxonomy::set_location( $post_id, $location->term_id );
 								}
 							}
-							$count++;
+							++$count;
 						}
 					}
 				}
@@ -663,5 +663,4 @@ class Post_Venue {
 			)
 		);
 	}
-
 }

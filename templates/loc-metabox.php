@@ -87,7 +87,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 		<label for="latitude" class="quarter">
 			<?php esc_html_e( 'Latitude:', 'simple-location' ); ?>
 			<input type="text" name="latitude" id="latitude" class="widefat" value="<?php echo esc_html( ifset( $geodata['latitude'], '' ) ); ?>" />
-		   </label>
+			</label>
 
 		<label for="longitude" class="quarter">
 		<?php esc_html_e( 'Longitude:', 'simple-location' ); ?>

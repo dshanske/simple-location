@@ -82,7 +82,6 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 		}
 		echo wp_kses( self::weather_list( $weather, 'fa-plane', $instance ), Simple_Location_Plugin::kses_clean() );
 		echo wp_kses( $args['after_widget'], Simple_Location_Plugin::kses_clean() );
-
 	}
 
 	/**

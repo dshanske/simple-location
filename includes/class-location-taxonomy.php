@@ -283,7 +283,7 @@ final class Location_Taxonomy {
 		if ( array_key_exists( 'type', $address ) && array_key_exists( 'properties', $address ) ) {
 			$address = $address['properties'];
 			$address = array_map(
-				function( $v ) {
+				function ( $v ) {
 					if ( is_array( $v ) ) {
 						return $v[0];
 					}
@@ -813,12 +813,10 @@ final class Location_Taxonomy {
 						$return[] = $flag . ' ' . $term->name;
 					}
 				}
-			} else {
-				if ( $args['links'] ) {
+			} elseif ( $args['links'] ) {
 					$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $term->name );
-				} else {
-					$return[] = $term->name;
-				}
+			} else {
+				$return[] = $term->name;
 			}
 		}
 		return implode( ', ', $return );
@@ -907,7 +905,6 @@ final class Location_Taxonomy {
 		}
 		return $return;
 	}
-
 } // End Class Location_Taxonomy
 
 

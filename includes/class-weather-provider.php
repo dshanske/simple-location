@@ -12,32 +12,33 @@
  */
 abstract class Weather_Provider extends Sloc_Provider {
 	use Weather_Info_Trait;
-	 /**
-	  * Station ID.
-	  *
-	  * Many weather sites permit a station ID to be set.
-	  *
-	  * @since 1.0.0
-	  * @var $string
-	  */
+
+	/**
+	 * Station ID.
+	 *
+	 * Many weather sites permit a station ID to be set.
+	 *
+	 * @since 1.0.0
+	 * @var $string
+	 */
 	protected $station_id;
 
-	 /**
-	  * Units. si, imperial, etc.
-	  *
-	  * @since 1.0.0
-	  * @var $string
-	  */
+	/**
+	 * Units. si, imperial, etc.
+	 *
+	 * @since 1.0.0
+	 * @var $string
+	 */
 	protected $units;
 
-	 /**
-	  * Cache Time.
-	  *
-	  * Cache time in seconds. Defaults to 0.
-	  *
-	  * @since 1.0.0
-	  * @var $int
-	  */
+	/**
+	 * Cache Time.
+	 *
+	 * Cache time in seconds. Defaults to 0.
+	 *
+	 * @since 1.0.0
+	 * @var $int
+	 */
 	protected $cache_time;
 
 	/**
@@ -133,7 +134,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$return['localtime'] = $datetime->format( DATE_W3C );
 
 		/*
-		 if ( array_key_exists( 'radiation', $return ) && ! array_key_exists( 'cloudiness', $return ) ) {
+		if ( array_key_exists( 'radiation', $return ) && ! array_key_exists( 'cloudiness', $return ) ) {
 			$return['cloudiness'] = $calc->cloudiness( $return['radiation'], $return['humidity'] );
 		} */
 		return array_filter( $return );
@@ -589,7 +590,6 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'wi-moon-waxing-gibbous-6'   => __( 'Waxing Gibbous 6', 'simple-location' ),
 		);
 		return array_merge( $neutral, $day, $night, $misc, $moon );
-
 	}
 
 	/**

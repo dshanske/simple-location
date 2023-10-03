@@ -98,7 +98,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			}
 			usort(
 				$sitelist,
-				function( $a, $b ) {
+				function ( $a, $b ) {
 					return $a['distance'] > $b['distance'];
 				}
 			);
@@ -249,20 +249,20 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		}
 
 		/*
-		 MetarPhenomenon{
+		MetarPhenomenon{
 		description:
 
 		An object representing a decoded METAR phenomenon string.
-		intensity*	string
+		intensity*  string
 		nullable: trueEnum:
 		[ light, heavy ]
-		modifier*	string
+		modifier*   string
 		nullable: trueEnum:
 		[ patches, blowing, low_drifting, freezing, shallow, partial, showers ]
-		weather*	stringEnum:
+		weather*    stringEnum:
 		[ fog_mist, dust_storm, dust, drizzle, funnel_cloud, fog, smoke, hail, snow_pellets, haze, ice_crystals, ice_pellets, dust_whirls, spray, rain, sand, snow_grains, snow, squalls, sand_storm, thunderstorms, unknown, volcanic_ash ]
-		rawString*	string
-		inVicinity	boolean */
+		rawString*  string
+		inVicinity  boolean */
 
 		if ( 1 === count( $weather ) ) {
 			$weather = end( $weather );
@@ -349,4 +349,3 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		}
 	}
 }
-

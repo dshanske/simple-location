@@ -107,5 +107,4 @@ class Venue_Provider_Google extends Venue_Provider {
 
 		return $card;
 	}
-
 }

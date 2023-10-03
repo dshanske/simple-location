@@ -1089,5 +1089,4 @@ class Geo_Data {
 		$return = implode( PHP_EOL, $c );
 		return sprintf( '<%1s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], implode( ' ', $class ), $return );
 	}
-
 }

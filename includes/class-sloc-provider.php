@@ -12,88 +12,88 @@
  */
 abstract class Sloc_Provider {
 
-	 /**
-	  * Provider Slug.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Provider Slug.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $slug;
 
-	 /**
-	  * Provider Name.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Provider Name.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $name;
 
-	 /**
-	  * Provider Description.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Provider Description.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $description;
 
-	 /**
-	  * Provider URL.
-	  *
-	  * @var string
-	  */
+	/**
+	 * Provider URL.
+	 *
+	 * @var string
+	 */
 	protected $url;
 
-	 /**
-	  * Provider API Key.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Provider API Key.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $api;
 
-	 /**
-	  * Username if Applicable.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Username if Applicable.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $user;
 
-	 /**
-	  * Region.
-	  *
-	  * If null applies to all regions.
-	  * Can also be a string or array of strings representing two letter country codes.
-	  *
-	  * @since 4.0.7
-	  * @var string|array|null
-	  */
+	/**
+	 * Region.
+	 *
+	 * If null applies to all regions.
+	 * Can also be a string or array of strings representing two letter country codes.
+	 *
+	 * @since 4.0.7
+	 * @var string|array|null
+	 */
 	protected $region;
 
-	 /**
-	  * Latitude.
-	  *
-	  * @since 1.0.0
-	  * @var float
-	  */
+	/**
+	 * Latitude.
+	 *
+	 * @since 1.0.0
+	 * @var float
+	 */
 	protected $latitude;
 
-	 /**
-	  * Longitude.
-	  *
-	  * @since 1.0.0
-	  * @var float
-	  */
+	/**
+	 * Longitude.
+	 *
+	 * @since 1.0.0
+	 * @var float
+	 */
 	protected $longitude;
 
-	 /**
-	  * Altitude.
-	  *
-	  *  Denotes the height of the position, specified in meters above the [WGS84] ellipsoid. If the implementation cannot provide altitude information, the value of this attribute must be null.
-	  *
-	  * @since 1.0.0
-	  * @var float
-	  */
+	/**
+	 * Altitude.
+	 *
+	 *  Denotes the height of the position, specified in meters above the [WGS84] ellipsoid. If the implementation cannot provide altitude information, the value of this attribute must be null.
+	 *
+	 * @since 1.0.0
+	 * @var float
+	 */
 	protected $altitude;
 
 	/**

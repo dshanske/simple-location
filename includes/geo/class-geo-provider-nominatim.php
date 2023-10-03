@@ -267,5 +267,4 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 
 		return array_filter( $return );
 	}
-
 }

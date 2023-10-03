@@ -170,5 +170,4 @@ class Geo_Provider_Bing extends Geo_Provider {
 
 		return array_filter( $return );
 	}
-
 }

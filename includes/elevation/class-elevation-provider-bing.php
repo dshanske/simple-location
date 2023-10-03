@@ -76,4 +76,3 @@ class Elevation_Provider_Bing extends Elevation_Provider {
 			return round( $json['elevations'][0], 2 );
 	}
 }
-

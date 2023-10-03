@@ -78,7 +78,6 @@ class Geo_Base {
 			add_filter( sprintf( 'manage_%1$s_posts_columns', $post_type ), array( __CLASS__, 'add_location_admin_column' ) );
 			add_action( sprintf( 'manage_%1$s_posts_custom_column', $post_type ), array( __CLASS__, 'manage_location_admin_column' ), 10, 2 );
 		}
-
 	}
 
 	public static function admin_init() {
@@ -193,20 +192,20 @@ class Geo_Base {
 		if ( in_array( $screen->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
 			wp_enqueue_style(
 				'sloc_admin',
-				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),
+				plugins_url( 'css/location-admin.min.css', __DIR__ ),
 				array(),
 				Simple_Location_Plugin::$version
 			);
 			wp_enqueue_script(
 				'sloc_location',
-				plugins_url( 'js/location.js', dirname( __FILE__ ) ),
+				plugins_url( 'js/location.js', __DIR__ ),
 				array( 'jquery' ),
 				Simple_Location_Plugin::$version,
 				true
 			);
 			wp_enqueue_script(
 				'moment-timezone',
-				plugins_url( 'js/luxon.min.js', dirname( __FILE__ ) ),
+				plugins_url( 'js/luxon.min.js', __DIR__ ),
 				array(),
 				Simple_Location_Plugin::$version,
 				true
@@ -440,7 +439,6 @@ class Geo_Base {
 			return $return;
 		}
 		echo wp_kses( $return, self::kses_option() );
-
 	}
 
 
@@ -717,7 +715,6 @@ class Geo_Base {
 				),
 			)
 		);
-
 	}
 
 	/**
@@ -882,14 +879,14 @@ class Geo_Base {
 		return $response;
 	}
 
-	 /*
-	  Sets Location custom capabilities.
+	/*
+		Sets Location custom capabilities.
 	 *
 	 * @param string[] $caps    Array of the users capabilities.
-	  * @param string   $cap     Capability name.
-	  * @param int      $user_id The user ID.
+	 * @param string   $cap     Capability name.
+	 * @param int      $user_id The user ID.
 	 * @param array    $args    Adds the context to the cap. Typically the object ID.
-	  */
+	 */
 	public static function map_meta_cap( $caps, $cap, $user_id, $args ) {
 		$id = 0;
 		if ( isset( $args[0] ) ) {
@@ -954,7 +951,7 @@ class Geo_Base {
 	}
 
 	/*
-	 Current User Can Read with Object for Private Location.
+	Current User Can Read with Object for Private Location.
 	 *
 	 * @param mixed $object The object.
 	 * @return boolean True if current user can.
@@ -982,7 +979,7 @@ class Geo_Base {
 	}
 
 	/*
-	 Current User Can Read with Object for Private Location.
+	Current User Can Read with Object for Private Location.
 	 *
 	 * @param mixed $object The object.
 	 * @return boolean True if current user can.
@@ -1119,10 +1116,8 @@ class Geo_Base {
 			if ( ! current_user_can( 'edit_page', $post_id ) ) {
 				return;
 			}
-		} else {
-			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		} elseif ( ! current_user_can( 'edit_post', $post_id ) ) {
 				return;
-			}
 		}
 		if ( has_term( '', 'venue' ) ) {
 			return;
@@ -1134,12 +1129,10 @@ class Geo_Base {
 			} else {
 				delete_post_meta( $post_id, 'venue_id' );
 			}
-		} else {
-			if ( isset( $_POST['venue_radius'] ) && is_numeric( $_POST['venue_radius'] ) ) {
+		} elseif ( isset( $_POST['venue_radius'] ) && is_numeric( $_POST['venue_radius'] ) ) {
 				update_post_meta( $post_id, 'venue_radius', intval( $_POST['venue_radius'] ) );
-			} else {
-				delete_post_meta( $post_id, 'venue_radius' );
-			}
+		} else {
+			delete_post_meta( $post_id, 'venue_radius' );
 		}
 		self::save_meta( 'post', $post_id );
 	}
@@ -1179,5 +1172,4 @@ class Geo_Base {
 		}
 		self::save_meta( 'user', $user_id );
 	}
-
 }

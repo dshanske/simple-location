@@ -13,36 +13,36 @@
 abstract class Geo_Provider extends Sloc_Provider {
 	use Geolocation_Trait;
 
-	 /**
-	  * Reverse Zoom Level.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Reverse Zoom Level.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $reverse_zoom;
 
-	 /**
-	  * Timezone.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Timezone.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $timezone;
 
-	 /**
-	  * Offset.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Offset.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $offset;
 
-	 /**
-	  * Offset in Seconds.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Offset in Seconds.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $offset_seconds;
 
 	/**
@@ -149,12 +149,10 @@ abstract class Geo_Provider extends Sloc_Provider {
 		$text   = array_filter( $text );
 		if ( empty( $text ) ) {
 			$text[] = ifset( $reverse['region'] );
-		} else {
-			if ( array_key_exists( 'region-code', $reverse ) ) {
+		} elseif ( array_key_exists( 'region-code', $reverse ) ) {
 				$text[] = $reverse['region-code'];
-			} else {
-				$text[] = ifset( $reverse['region'] );
-			}
+		} else {
+			$text[] = ifset( $reverse['region'] );
 		}
 		if ( array_key_exists( 'country-code', $reverse ) ) {
 			if ( get_option( 'sloc_country' ) !== $reverse['country-code'] ) {

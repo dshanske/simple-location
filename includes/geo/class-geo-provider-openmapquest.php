@@ -105,6 +105,4 @@ class Geo_Provider_OpenMapquest extends Geo_Provider_Nominatim {
 
 		return array_filter( $return );
 	}
-
-
 }

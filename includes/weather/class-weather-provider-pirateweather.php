@@ -172,5 +172,4 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 				return '';
 		}
 	}
-
 }

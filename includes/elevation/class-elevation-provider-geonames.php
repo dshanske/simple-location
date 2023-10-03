@@ -70,4 +70,3 @@ class Elevation_Provider_Geonames extends Elevation_Provider {
 		return new WP_Error( 'unknown_error', __( 'Unknown Geonames Error', 'simple-location' ) );
 	}
 }
-

@@ -170,6 +170,5 @@ class Airport_Location {
 				return $airline;
 			}
 		}
-
 	}
 } // End Class

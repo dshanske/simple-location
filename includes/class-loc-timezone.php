@@ -56,7 +56,7 @@ class Loc_Timezone {
 
 		usort(
 			$timezones,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				return $a[3] < $b[3] ? -1 : 1;
 			}
 		);
@@ -107,7 +107,6 @@ class Loc_Timezone {
 		if ( $args && array_key_exists( 'timezone', $args ) ) {
 			update_post_meta( $args['ID'], 'geo_timezone', $args['timezone'] );
 		}
-
 	}
 
 	public static function wp_timezone_choice( $selected_zone, $locale = null ) {
@@ -318,10 +317,8 @@ class Loc_Timezone {
 			if ( ! current_user_can( 'edit_page', $post_id ) ) {
 				return;
 			}
-		} else {
-			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		} elseif ( ! current_user_can( 'edit_post', $post_id ) ) {
 				return;
-			}
 		}
 		if ( isset( $_POST['post_timezone'] ) ) {
 			$timezone = timezone_open( sanitize_text_field( $_POST['post_timezone'] ) );
@@ -499,5 +496,4 @@ class Loc_Timezone {
 		}
 		return wp_date( $d, get_comment_timestamp( $comment ), $timezone );
 	}
-
 } // End Class

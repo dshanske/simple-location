@@ -98,7 +98,7 @@ class REST_Geo {
 						),
 
 					),
-					'permission_callback' => function( $request ) {
+					'permission_callback' => function ( $request ) {
 						return current_user_can( 'read' );
 					},
 				),
@@ -187,7 +187,7 @@ class REST_Geo {
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
-					'permission_callback' => function( $request ) {
+					'permission_callback' => function ( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
@@ -214,7 +214,7 @@ class REST_Geo {
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
-					'permission_callback' => function( $request ) {
+					'permission_callback' => function ( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
@@ -239,7 +239,7 @@ class REST_Geo {
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
-					'permission_callback' => function( $request ) {
+					'permission_callback' => function ( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
@@ -270,7 +270,7 @@ class REST_Geo {
 						),
 						'time'      => array(),
 					),
-					'permission_callback' => function( $request ) {
+					'permission_callback' => function ( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
@@ -284,7 +284,7 @@ class REST_Geo {
 						'methods'             => WP_REST_Server::READABLE,
 						'callback'            => array( $this, 'lookup' ),
 						'args'                => array(),
-						'permission_callback' => function( $request ) {
+						'permission_callback' => function ( $request ) {
 							return current_user_can( 'read' );
 						},
 					),
@@ -316,7 +316,7 @@ class REST_Geo {
 							'sanitize_callback' => array( $this, 'sanitize_int' ),
 						),
 					),
-					'permission_callback' => function( $request ) {
+					'permission_callback' => function ( $request ) {
 						return current_user_can( 'publish_posts' );
 					},
 				),
@@ -717,8 +717,6 @@ class REST_Geo {
 			)
 		);
 	}
-
-
 }
 
 new REST_Geo();

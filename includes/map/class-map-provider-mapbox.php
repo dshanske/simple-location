@@ -142,7 +142,5 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$this->api
 		);
 		return $map;
-
 	}
-
 }

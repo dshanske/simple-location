@@ -18,53 +18,53 @@ add_action( 'admin_menu', array( 'Loc_Config', 'admin_menu' ), 10 );
  */
 class Loc_Config {
 
-	 /**
-	  * Store Map Providers.
-	  *
-	  * @since 1.0.0
-	  * @var array
-	  */
+	/**
+	 * Store Map Providers.
+	 *
+	 * @since 1.0.0
+	 * @var array
+	 */
 	private static $maps = array();
 
-	 /**
-	  * Store Reverse Lookup Providers.
-	  *
-	  * @since 1.0.0
-	  * @var array
-	  */
+	/**
+	 * Store Reverse Lookup Providers.
+	 *
+	 * @since 1.0.0
+	 * @var array
+	 */
 	private static $geo = array();
 
-	 /**
-	  * Store Geolocation Providers.
-	  *
-	  * @since 1.0.0
-	  * @var array
-	  */
+	/**
+	 * Store Geolocation Providers.
+	 *
+	 * @since 1.0.0
+	 * @var array
+	 */
 	private static $location = array();
 
-	 /**
-	  * Store Weather Providers.
-	  *
-	  * @since 1.0.0
-	  * @var array
-	  */
+	/**
+	 * Store Weather Providers.
+	 *
+	 * @since 1.0.0
+	 * @var array
+	 */
 	private static $weather = array();
 
-	 /**
-	  * Store Elevation Providers.
-	  *
-	  * @since 5.0.0
-	  * @var array
-	  */
+	/**
+	 * Store Elevation Providers.
+	 *
+	 * @since 5.0.0
+	 * @var array
+	 */
 	private static $elevation = array();
 
 
-	 /**
-	  * Store Venue providers.
-	  *
-	  * @since 5.0.0
-	  * @var array
-	  */
+	/**
+	 * Store Venue providers.
+	 *
+	 * @since 5.0.0
+	 * @var array
+	 */
 	private static $venue = array();
 
 	/**
@@ -85,13 +85,13 @@ class Loc_Config {
 		if ( in_array( $hook_suffix, $hooks, true ) ) {
 			wp_enqueue_style(
 				'sloc_admin',
-				plugins_url( 'css/location-admin.min.css', dirname( __FILE__ ) ),
+				plugins_url( 'css/location-admin.min.css', __DIR__ ),
 				array(),
 				Simple_Location_Plugin::$version
 			);
 			wp_enqueue_script(
 				'sloc_password',
-				plugins_url( 'js/password.js', dirname( __FILE__ ) ),
+				plugins_url( 'js/password.js', __DIR__ ),
 				array(),
 				Simple_Location_Plugin::$version,
 				true
@@ -319,7 +319,6 @@ class Loc_Config {
 				'default'      => 500,
 			)
 		);
-
 	}
 
 	/**

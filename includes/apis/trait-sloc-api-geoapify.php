@@ -56,5 +56,4 @@ trait Sloc_API_GeoApify {
 			);
 		}
 	}
-
 }

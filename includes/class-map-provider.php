@@ -12,84 +12,84 @@
  */
 abstract class Map_Provider extends Sloc_Provider {
 
-	 /**
-	  * Map Zoom Level.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Map Zoom Level.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $map_zoom;
 
-	 /**
-	  * Map Zoom Level Maximum.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Map Zoom Level Maximum.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $max_map_zoom;
 
-	 /**
-	  * Map Height.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Map Height.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $height;
 
-	 /**
-	  * Map Width.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Map Width.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $width;
 
-	 /**
-	  * Map Height Maximum Height.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Map Height Maximum Height.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $max_height;
 
-	 /**
-	  * Map Maximum Width.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Map Maximum Width.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $max_width;
 
-	 /**
-	  * Map Style.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Map Style.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $style;
 
-	 /**
-	  * Username if appropriate.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Username if appropriate.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $user;
 
-	 /**
-	  * Static Map URL.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Static Map URL.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $static;
 
-	 /**
-	  * Location Information.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Location Information.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $location;
 
 	/**

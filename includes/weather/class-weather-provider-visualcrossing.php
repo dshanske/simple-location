@@ -212,7 +212,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	}
 
 	/*
-	 Return array of station data.
+	Return array of station data.
 	 *
 	 * @param string $id Weather type ID.
 	 * @return string Icon ID.

@@ -69,4 +69,3 @@ class Elevation_Provider_OpenMapquest extends Elevation_Provider {
 		return round( $json['elevationProfile'][0]['height'], 2 );
 	}
 }
-

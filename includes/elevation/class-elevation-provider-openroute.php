@@ -67,4 +67,3 @@ class Elevation_Provider_OpenRoute extends Elevation_Provider {
 		return $json['geometry'][2];
 	}
 }
-

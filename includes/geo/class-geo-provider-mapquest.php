@@ -162,6 +162,4 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 
 		return array_filter( $return );
 	}
-
-
 }

@@ -30,6 +30,4 @@ class Location_Provider_Dummy extends Location_Provider {
 			$this->$property = ifset( $location[ $property ] );
 		}
 	}
-
-
 }

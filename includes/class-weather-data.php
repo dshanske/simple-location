@@ -62,7 +62,6 @@ class Sloc_Weather_Data {
 
 		// Add Post Type Support for Weather
 		add_post_type_support( 'post', 'weather' );
-
 	}
 
 	public static function submitbox( $screen, $object, $args ) {
@@ -558,7 +557,6 @@ class Sloc_Weather_Data {
 			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
 		}
 		return $weather;
-
 	}
 
 	/**
@@ -587,6 +585,4 @@ class Sloc_Weather_Data {
 			)
 		);
 	}
-
-
 }

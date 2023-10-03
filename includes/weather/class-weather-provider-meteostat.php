@@ -12,11 +12,11 @@
  */
 class Weather_Provider_Meteostat extends Weather_Provider {
 
-	 /**
-	  * Station Data.
-	  *
-	  * @var string
-	  */
+	/**
+	 * Station Data.
+	 *
+	 * @var string
+	 */
 	protected $station;
 
 	/**
@@ -93,7 +93,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		}
 		usort(
 			$sitelist,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				return $a['distance'] > $b['distance'];
 			}
 		);
@@ -286,6 +286,4 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		}
 		return '';
 	}
-
 }
-

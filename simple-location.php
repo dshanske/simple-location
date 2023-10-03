@@ -37,20 +37,20 @@ if ( ! defined( 'SLOC_PER_PAGE' ) ) {
  * @since 1.0.0
  */
 class Simple_Location_Plugin {
-	 /**
-	  * Version number
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Version number
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	public static $version;
 
-	 /**
-	  * Plugin Path
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Plugin Path
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	public static $path;
 
 
@@ -534,5 +534,4 @@ class Simple_Location_Plugin {
 			),
 		);
 	}
-
 }

@@ -13,28 +13,28 @@
 abstract class Venue_Provider extends Sloc_Provider {
 	use Geolocation_Trait;
 
-	 /**
-	  * Timezone.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Timezone.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $timezone;
 
-	 /**
-	  * Offset.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Offset.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $offset;
 
-	 /**
-	  * Offset in Seconds.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Offset in Seconds.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $offset_seconds;
 
 	/**

@@ -18,44 +18,44 @@ define( 'E', RAD * 23.4397 ); // obliquity of the Earth.
 class Astronomical_Calculator {
 
 
-	 /**
-	  * Zenith. Adjusted based on elevation.
-	  *
-	  * @since 4.0.0
-	  * @var float
-	  */
+	/**
+	 * Zenith. Adjusted based on elevation.
+	 *
+	 * @since 4.0.0
+	 * @var float
+	 */
 	protected $zenith;
 
-	 /**
-	  * Latitude.
-	  *
-	  * @since 4.0.0
-	  * @var float
-	  */
+	/**
+	 * Latitude.
+	 *
+	 * @since 4.0.0
+	 * @var float
+	 */
 	protected $latitude;
 
-	 /**
-	  * Longitude.
-	  *
-	  * @since 4.0.0
-	  * @var float
-	  */
+	/**
+	 * Longitude.
+	 *
+	 * @since 4.0.0
+	 * @var float
+	 */
 	protected $longitude;
 
-	 /**
-	  * Elevation in meters.
-	  *
-	  * @since 4.0.0
-	  * @var float
-	  */
+	/**
+	 * Elevation in meters.
+	 *
+	 * @since 4.0.0
+	 * @var float
+	 */
 	protected $elevation;
 
-	 /**
-	  * Timezone.
-	  *
-	  * @since 4.0.0
-	  * @var DateTimeZone
-	  */
+	/**
+	 * Timezone.
+	 *
+	 * @since 4.0.0
+	 * @var DateTimeZone
+	 */
 	protected $timezone;
 
 
@@ -125,7 +125,7 @@ class Astronomical_Calculator {
 			default:
 				$function = 'date_sunrise';
 		}
-		 return call_user_func( $function, $timestamp, SUNFUNCS_RET_TIMESTAMP, $this->latitude, $this->longitude, self::get_zenith( $this->elevation ) );
+		return call_user_func( $function, $timestamp, SUNFUNCS_RET_TIMESTAMP, $this->latitude, $this->longitude, self::get_zenith( $this->elevation ) );
 	}
 
 
@@ -406,11 +406,11 @@ class Astronomical_Calculator {
 				'icon' => 'wi-moon-alt-new',
 			);
 		} elseif ( 0 < $moon['phase'] && 0.25 > $moon['phase'] ) {
-			 $return = array(
-				 'name' => 'waxing-crescent-moon',
-				 'text' => __( 'Waxing Crescent', 'simple-location' ),
-				 'icon' => 'wi-moon-alt-waxing-crescent-6',
-			 );
+			$return = array(
+				'name' => 'waxing-crescent-moon',
+				'text' => __( 'Waxing Crescent', 'simple-location' ),
+				'icon' => 'wi-moon-alt-waxing-crescent-6',
+			);
 		} elseif ( 0.25 < $moon['phase'] && 0.5 > $moon['phase'] ) {
 			$return = array(
 				'name' => 'first-quarter-moon',
@@ -418,29 +418,29 @@ class Astronomical_Calculator {
 				'icon' => 'wi-moon-alt-first-quarter',
 			);
 		} elseif ( 0.5 === $moon['phase'] ) {
-			 $return = array(
-				 'name' => 'full-moon',
-				 'text' => __( 'Full Moon', 'simple-location' ),
-				 'icon' => 'wi-moon-alt-full',
-			 );
+			$return = array(
+				'name' => 'full-moon',
+				'text' => __( 'Full Moon', 'simple-location' ),
+				'icon' => 'wi-moon-alt-full',
+			);
 		} elseif ( 0.5 < $moon['phase'] && 0.75 > $moon['phase'] ) {
-			 $return = array(
-				 'name' => 'waning-gibbous-moon',
-				 'text' => __( 'Waning Gibbous', 'simple-location' ),
-				 'icon' => 'wi-moon-alt-waning-gibbous-1',
-			 );
+			$return = array(
+				'name' => 'waning-gibbous-moon',
+				'text' => __( 'Waning Gibbous', 'simple-location' ),
+				'icon' => 'wi-moon-alt-waning-gibbous-1',
+			);
 		} elseif ( 0.75 === $moon['phase'] ) {
-			 $return = array(
-				 'name' => 'third-quarter-moon',
-				 'text' => __( 'Third Quarter', 'simple-location' ),
-				 'icon' => 'wi-moon-alt-third-quarter',
-			 );
+			$return = array(
+				'name' => 'third-quarter-moon',
+				'text' => __( 'Third Quarter', 'simple-location' ),
+				'icon' => 'wi-moon-alt-third-quarter',
+			);
 		} elseif ( 0.75 < $moon['phase'] && 1 > $moon['phase'] ) {
-			 $return = array(
-				 'name' => 'waning-crescent-moon',
-				 'text' => __( 'Waning Crescent', 'simple-location' ),
-				 'icon' => 'wi-moon-alt-waning-crescent-1',
-			 );
+			$return = array(
+				'name' => 'waning-crescent-moon',
+				'text' => __( 'Waning Crescent', 'simple-location' ),
+				'icon' => 'wi-moon-alt-waning-crescent-1',
+			);
 		}
 		return array_merge( $moon, $return );
 	}
@@ -562,10 +562,10 @@ class Astronomical_Calculator {
 				$x1     = $xe - $dx;
 					$x2 = $xe + $dx;
 				if ( abs( $x1 ) <= 1 ) {
-					$roots++;
+					++$roots;
 				}
 				if ( abs( $x2 ) <= 1 ) {
-					$roots++;
+					++$roots;
 				}
 				if ( $x1 < -1 ) {
 					$x1 = $x2;
@@ -696,7 +696,5 @@ class Astronomical_Calculator {
 				return 20;
 			}
 		}
-
 	}
-
 }

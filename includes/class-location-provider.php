@@ -15,104 +15,104 @@
 abstract class Location_Provider extends Sloc_Provider {
 
 
-	 /**
-	  * User name.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * User name.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $user;
 
-	 /**
-	  * Accuracy. AKA as Horizontal Accuracy.
-	  *
-	  * The accuracy level of the latitude and longitude coordinates. It is specified in meters. Must be a non-negative real number.
-	  *
-	  * @since 1.0.0
-	  * @var double
-	  */
+	/**
+	 * Accuracy. AKA as Horizontal Accuracy.
+	 *
+	 * The accuracy level of the latitude and longitude coordinates. It is specified in meters. Must be a non-negative real number.
+	 *
+	 * @since 1.0.0
+	 * @var double
+	 */
 	protected $accuracy;
 
-	 /**
-	  * Altitude Accuracy. AKA Verticial Accuracy.
-	  *
-	  * Specified in meters. If not available, must be null. If available, must be a non-negative real number.
-	  *
-	  * @since 1.0.0
-	  * @var double
-	  */
+	/**
+	 * Altitude Accuracy. AKA Verticial Accuracy.
+	 *
+	 * Specified in meters. If not available, must be null. If available, must be a non-negative real number.
+	 *
+	 * @since 1.0.0
+	 * @var double
+	 */
 	protected $altitude_accuracy;
 
-	 /**
-	  * Heading.
-	  *
-	  * The direction of travel and is specified in degrees, where 0° ≤ heading < 360°, counting clockwise relative to the true north.
-	  * If the implementation cannot provide heading information, the value of this attribute must be null. If stationary (i.e. the value of the speed attribute is 0), then the value of the heading attribute must be NaN.
-	  *
-	  * @since 1.0.0
-	  * @var int
-	  */
+	/**
+	 * Heading.
+	 *
+	 * The direction of travel and is specified in degrees, where 0° ≤ heading < 360°, counting clockwise relative to the true north.
+	 * If the implementation cannot provide heading information, the value of this attribute must be null. If stationary (i.e. the value of the speed attribute is 0), then the value of the heading attribute must be NaN.
+	 *
+	 * @since 1.0.0
+	 * @var int
+	 */
 	protected $heading;
 
-	 /**
-	  * Speed.
-	  *
-	  * Magnitude of the horizontal component of the current velocity and is specified in meters per second. If not available, must be null.
-	  * Otherwise, the value must be a non-negative real number.
-	  *
-	  * @since 1.0.0
-	  * @var float
-	  */
+	/**
+	 * Speed.
+	 *
+	 * Magnitude of the horizontal component of the current velocity and is specified in meters per second. If not available, must be null.
+	 * Otherwise, the value must be a non-negative real number.
+	 *
+	 * @since 1.0.0
+	 * @var float
+	 */
 	protected $speed;
 
-	 /**
-	  * Time.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Time.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $time = null;
 
-	 /**
-	  * Activity.
-	  *
-	  * String representation of the current activity.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Activity.
+	 *
+	 * String representation of the current activity.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $activity = null;
 
 
-	 /**
-	  * Annotation.
-	  *
-	  * Any annotations on the location.
-	  *
-	  * @since 1.0.0
-	  * @var string
-	  */
+	/**
+	 * Annotation.
+	 *
+	 * Any annotations on the location.
+	 *
+	 * @since 1.0.0
+	 * @var string
+	 */
 	protected $annotation = '';
 
 
-	 /**
-	  * Extra parameters passed.
-	  *
-	  * Any extra data provided by the provider.
-	  *
-	  * @since 1.0.0
-	  * @var array
-	  */
+	/**
+	 * Extra parameters passed.
+	 *
+	 * Any extra data provided by the provider.
+	 *
+	 * @since 1.0.0
+	 * @var array
+	 */
 	protected $other = array();
 
-	 /**
-	  * Support for Whether this Provider Allows for Background Updates.
-	  *
-	  * If a provider does not allow background updates information may be stale.
-	  *
-	  * @since 1.0.0
-	  * @var boolean
-	  */
+	/**
+	 * Support for Whether this Provider Allows for Background Updates.
+	 *
+	 * If a provider does not allow background updates information may be stale.
+	 *
+	 * @since 1.0.0
+	 * @var boolean
+	 */
 	protected $background = false;
 
 	/**

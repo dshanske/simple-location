@@ -144,4 +144,3 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 		return false;
 	}
 }
-

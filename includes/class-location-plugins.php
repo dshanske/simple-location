@@ -81,7 +81,7 @@ class Location_Plugins {
 							', ',
 							array_filter(
 								$parts,
-								function( $v ) {
+								function ( $v ) {
 									return $v;
 								}
 							)
@@ -203,22 +203,20 @@ class Location_Plugins {
 			if ( isset( $properties['checkin'] ) && ! wp_is_numeric_array( $properties['checkin'] ) ) {
 				$location = array_merge( $location, $properties['checkin']['properties'] );
 			}
-		} else {
-			if ( isset( $properties['checkin'] ) ) {
+		} elseif ( isset( $properties['checkin'] ) ) {
 				$location = $properties['checkin']['properties'];
-			} elseif ( isset( $properties['latitude'] ) && isset( $properties['longitude'] ) ) {
-				$location = array(
-					'latitude'  => $properties['latitude'],
-					'longitude' => $properties['longitude'],
-				);
-			} elseif ( isset( $meta['geo_latitude'] ) && isset( $meta['geo_longitude'] ) ) {
-				$location = array(
-					'latitude'  => $meta['geo_latitude'],
-					'longitude' => $meta['geo_longitude'],
-				);
-			} else {
-				return;
-			}
+		} elseif ( isset( $properties['latitude'] ) && isset( $properties['longitude'] ) ) {
+			$location = array(
+				'latitude'  => $properties['latitude'],
+				'longitude' => $properties['longitude'],
+			);
+		} elseif ( isset( $meta['geo_latitude'] ) && isset( $meta['geo_longitude'] ) ) {
+			$location = array(
+				'latitude'  => $meta['geo_latitude'],
+				'longitude' => $meta['geo_longitude'],
+			);
+		} else {
+			return;
 		}
 
 		// Strip out anything that might not be relevant to an address.

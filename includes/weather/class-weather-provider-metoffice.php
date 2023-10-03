@@ -125,7 +125,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 			}
 			usort(
 				$sitelist,
-				function( $a, $b ) {
+				function ( $a, $b ) {
 					return $a['distance'] > $b['distance'];
 				}
 			);
@@ -325,4 +325,3 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		return $return;
 	}
 }
-

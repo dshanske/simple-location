@@ -193,4 +193,3 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 		}
 	}
 }
-

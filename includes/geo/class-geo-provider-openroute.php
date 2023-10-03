@@ -12,6 +12,7 @@
  */
 class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
 	use Sloc_API_OpenRoute;
+
 	/**
 	 * Constructor for the Abstract Class.
 	 *
