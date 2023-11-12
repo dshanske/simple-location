@@ -168,6 +168,13 @@ class Location_Provider_Compass extends Location_Provider {
 
 		$response = wp_remote_retrieve_body( $response );
 		$response = json_decode( $response, true );
+		if ( isset( $response['error'] ) ) {
+			return new WP_Error(
+				'compass_error',
+				$response['error'],
+				$response
+			);
+		}
 		if ( ! isset( $response['data'] ) ) {
 			return false;
 		}
