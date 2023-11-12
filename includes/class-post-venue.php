@@ -420,7 +420,7 @@ class Post_Venue {
 			$venue   = intval( $venue );
 			$return .= sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $venue ), selected( $current, $venue, false ), esc_html( get_the_title( $venue ) ) );
 		}
-		$return .= '</select>';
+		$return .= '</select><br />';
 		if ( $echo ) {
 			echo $return;
 		}
