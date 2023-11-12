@@ -7,6 +7,7 @@
 
 global $profileuser;
 $geodata = get_user_geodata( $profileuser );
+$geodata = is_array( $geodata ) ? $geodata : array();
 ?>
 <div id="locationbox-meta">
 <h3><?php esc_html_e( 'Last Reported Location', 'simple-location' ); ?></h3>

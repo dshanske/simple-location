@@ -58,7 +58,7 @@ function get_post_geodata( $post = null, $key = '' ) {
 
 function get_array_post_geodata( $posts ) {
 	if ( ! wp_is_numeric_array( $posts ) ) {
-		return false;
+		return array();
 	}
 	$return = array();
 	foreach ( $posts as $post_id ) {

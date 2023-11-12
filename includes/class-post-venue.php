@@ -361,9 +361,10 @@ class Post_Venue {
 	 *
 	 * @param float $lat Latitude.
 	 * @param float $lng Longitude.
+	 * @param int $radius Radius to Search In. Optional.
 	 * @return array Return the IDs of all nearby venues
 	 */
-	public static function nearby( $lat, $lng ) {
+	public static function nearby( $lat, $lng, $radius = 100 ) {
 		/**
 		 * Short-circuits the checking for a venue if it is not stored as normal.
 		 *
@@ -371,14 +372,15 @@ class Post_Venue {
 		 *                          Default null.
 		 * @param float $lat Latitude.
 		 * @param float $lnt Longitude.
+		 * @param int $radius Radius.
 		 */
-		$check = apply_filters( 'pre_nearby_venue', null, $lat, $lng );
+		$check = apply_filters( 'pre_nearby_venue', null, $lat, $lng, $radius );
 
 		if ( ! is_null( $check ) ) {
 			return $check;
 		}
 
-		$box = geo_radius_box( $lat, $lng );
+		$box = geo_radius_box( $lat, $lng, $radius );
 		return get_posts(
 			array(
 				'post_type'  => 'venue',
@@ -447,20 +449,16 @@ class Post_Venue {
 			return $check;
 		}
 
-		$venue_ids = get_posts(
-			array(
-				'post_type' => 'venue',
-				'fields'    => 'ids',
-			)
-		);
-		$venues    = get_array_post_geodata( $venue_ids );
-		foreach ( $venues as $key => $venue ) {
-			$radius = get_post_meta( $venue, 'venue_radius', true );
+		// Only look at venues that are within 500 meters.
+		$venue_ids = self::nearby( $lat, $lng, 500 );
+		$venues    = array_filter( get_array_post_geodata( $venue_ids ) );
+		foreach ( $venues as $venue_id => $venue ) {
+			$radius = get_post_meta( $venue_id, 'venue_radius', true );
 			if ( ! $radius ) {
 				$radius = 50;
 			}
 			if ( geo_in_radius( $venue['latitude'], $venue['longitude'], $lat, $lng, $radius ) ) {
-				return $key;
+				return $venue_id;
 			}
 		}
 		return false;
