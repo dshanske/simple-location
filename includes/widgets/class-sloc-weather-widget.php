@@ -14,6 +14,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			__( 'Weather', 'simple-location' ),
 			array(
 				'description' => __( 'Adds current weather conditions', 'simple-location' ),
+				'show_instance_in_rest' => true
 			)
 		);
 	}

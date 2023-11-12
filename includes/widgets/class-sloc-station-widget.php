@@ -14,6 +14,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 			__( 'Weather Station', 'simple-location' ),
 			array(
 				'description' => __( 'Adds current weather conditions', 'simple-location' ),
+				'show_instance_in_rest' => true
 			)
 		);
 	}

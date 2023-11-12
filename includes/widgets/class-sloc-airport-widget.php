@@ -14,6 +14,7 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 			__( 'Airport Weather Station', 'simple-location' ),
 			array(
 				'description' => __( 'Adds current weather conditions at an airport', 'simple-location' ),
+				'show_instance_in_rest' => true
 			)
 		);
 	}
