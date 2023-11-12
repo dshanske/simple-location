@@ -79,7 +79,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 	<?php } else { ?>
 		<label for="venue_id" class="quarter">
 			<?php esc_html_e( 'Venue:', 'simple-location' ); ?>
-			<input class="widefat" type="number" name="venue_id" id="venue_id" step="1" min="1" value="<?php echo esc_attr( ifset( $geodata['venue_id'], '0' ) ); ?>" />
+			<input class="widefat" type="number" name="venue_id" id="venue_id" step="1" min="1" value="<?php echo esc_attr( ifset( $geodata['venue_id'], '' ) ); ?>" />
 		</label>
 	<?php } ?>
 
