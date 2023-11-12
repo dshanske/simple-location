@@ -3,7 +3,7 @@ Contributors: dshanske
 Tags: geolocation, timezones, geo, maps, location, weather, indieweb
 Requires at least: 4.9
 Tested up to: 6.4
-Stable tag: 5.0.17
+Stable tag: 5.0.18
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -287,6 +287,12 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 == Changelog ==
+
+= 5.0.18 ( 2023-11-11 ) =
+* Update dependencies
+* Support Widgets in Legacy Widget Block
+* Fix Venue Being Set to 0
+* Switch venue to a pulldown. Would like to link it to location at some point, so it only shows venues in that region.
 
 = 5.0.17 ( 2023-10-02 ) = 
 * Refresh dependencies

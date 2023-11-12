@@ -2,16 +2,16 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 5.0.17\n"
+"Project-Id-Version: Simple Location 5.0.18\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-10-03T01:25:38+00:00\n"
+"POT-Creation-Date: 2023-11-12T05:50:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.8.1\n"
+"X-Generator: WP-CLI 2.9.0\n"
 "X-Domain: simple-location\n"
 
 #. Plugin Name of the plugin
@@ -228,10 +228,10 @@ msgstr[1] ""
 
 #: includes/class-geo-base.php:362
 #: includes/class-location-taxonomy.php:730
-#: includes/class-post-venue.php:416
+#: includes/class-post-venue.php:418
 #: includes/class-weather-provider.php:607
 #: includes/trait-weather-info.php:344
-#: includes/widgets/class-sloc-weather-widget.php:197
+#: includes/widgets/class-sloc-weather-widget.php:198
 #: templates/loc-metabox.php:50
 #: templates/weather-metabox.php:20
 msgid "None"
@@ -273,8 +273,8 @@ msgstr ""
 #: includes/weather/class-weather-provider-station.php:148
 #: templates/elevation-form.php:12
 #: templates/geocode-form.php:12
-#: templates/loc-user-metabox.php:20
-#: templates/loc-user-metabox.php:24
+#: templates/loc-user-metabox.php:21
+#: templates/loc-user-metabox.php:25
 #: templates/venue-form.php:12
 #: templates/weather-form.php:13
 msgid "Latitude"
@@ -285,8 +285,8 @@ msgstr ""
 #: includes/weather/class-weather-provider-station.php:149
 #: templates/elevation-form.php:13
 #: templates/geocode-form.php:13
-#: templates/loc-user-metabox.php:27
-#: templates/loc-user-metabox.php:31
+#: templates/loc-user-metabox.php:28
+#: templates/loc-user-metabox.php:32
 #: templates/venue-form.php:13
 #: templates/weather-form.php:14
 msgid "Longitude"
@@ -318,8 +318,8 @@ msgid "Is it Day Time"
 msgstr ""
 
 #: includes/class-geo-data.php:718
-#: templates/loc-user-metabox.php:43
-#: templates/loc-user-metabox.php:47
+#: templates/loc-user-metabox.php:44
+#: templates/loc-user-metabox.php:48
 msgid "Altitude"
 msgstr ""
 
@@ -1369,7 +1369,7 @@ msgstr ""
 #: includes/class-weather-data.php:108
 #: includes/trait-weather-info.php:180
 #: includes/trait-weather-info.php:323
-#: templates/loc-metabox.php:130
+#: templates/loc-metabox.php:141
 msgid "Visibility"
 msgstr ""
 
@@ -1876,18 +1876,18 @@ msgid "N/A"
 msgstr ""
 
 #: includes/class-weather-provider.php:551
-#: includes/widgets/class-sloc-lastseen-widget.php:63
 #: includes/widgets/class-sloc-lastseen-widget.php:64
-#: includes/widgets/class-sloc-weather-widget.php:120
+#: includes/widgets/class-sloc-lastseen-widget.php:65
 #: includes/widgets/class-sloc-weather-widget.php:121
+#: includes/widgets/class-sloc-weather-widget.php:122
 msgid "Sunrise"
 msgstr ""
 
 #: includes/class-weather-provider.php:552
-#: includes/widgets/class-sloc-lastseen-widget.php:70
 #: includes/widgets/class-sloc-lastseen-widget.php:71
-#: includes/widgets/class-sloc-weather-widget.php:127
+#: includes/widgets/class-sloc-lastseen-widget.php:72
 #: includes/widgets/class-sloc-weather-widget.php:128
+#: includes/widgets/class-sloc-weather-widget.php:129
 msgid "Sunset"
 msgstr ""
 
@@ -1920,18 +1920,18 @@ msgid "New Moon"
 msgstr ""
 
 #: includes/class-weather-provider.php:564
-#: includes/widgets/class-sloc-lastseen-widget.php:77
 #: includes/widgets/class-sloc-lastseen-widget.php:78
-#: includes/widgets/class-sloc-weather-widget.php:134
+#: includes/widgets/class-sloc-lastseen-widget.php:79
 #: includes/widgets/class-sloc-weather-widget.php:135
+#: includes/widgets/class-sloc-weather-widget.php:136
 msgid "Moonrise"
 msgstr ""
 
 #: includes/class-weather-provider.php:565
-#: includes/widgets/class-sloc-lastseen-widget.php:84
 #: includes/widgets/class-sloc-lastseen-widget.php:85
-#: includes/widgets/class-sloc-weather-widget.php:141
+#: includes/widgets/class-sloc-lastseen-widget.php:86
 #: includes/widgets/class-sloc-weather-widget.php:142
+#: includes/widgets/class-sloc-weather-widget.php:143
 msgid "Moonset"
 msgstr ""
 
@@ -3128,7 +3128,7 @@ msgstr ""
 
 #: includes/weather/class-weather-provider-meteostat.php:214
 #: includes/weather/class-weather-provider-visualcrossing.php:206
-#: templates/loc-metabox.php:122
+#: templates/loc-metabox.php:133
 msgid "Clear"
 msgstr ""
 
@@ -3474,31 +3474,31 @@ msgstr ""
 msgid "Adds current weather conditions at an airport"
 msgstr ""
 
-#: includes/widgets/class-sloc-airport-widget.php:96
-#: includes/widgets/class-sloc-lastseen-widget.php:155
-#: includes/widgets/class-sloc-station-widget.php:102
-#: includes/widgets/class-sloc-weather-widget.php:186
+#: includes/widgets/class-sloc-airport-widget.php:97
+#: includes/widgets/class-sloc-lastseen-widget.php:156
+#: includes/widgets/class-sloc-station-widget.php:103
+#: includes/widgets/class-sloc-weather-widget.php:187
 msgid "Title: "
 msgstr ""
 
-#: includes/widgets/class-sloc-airport-widget.php:100
+#: includes/widgets/class-sloc-airport-widget.php:101
 msgid "Displays current weather at an airport"
 msgstr ""
 
-#: includes/widgets/class-sloc-airport-widget.php:102
+#: includes/widgets/class-sloc-airport-widget.php:103
 msgid "Airport ID(3 or 4 letters): "
 msgstr ""
 
-#: includes/widgets/class-sloc-airport-widget.php:105
-#: includes/widgets/class-sloc-lastseen-widget.php:177
-#: includes/widgets/class-sloc-station-widget.php:112
-#: includes/widgets/class-sloc-weather-widget.php:208
+#: includes/widgets/class-sloc-airport-widget.php:106
+#: includes/widgets/class-sloc-lastseen-widget.php:178
+#: includes/widgets/class-sloc-station-widget.php:113
+#: includes/widgets/class-sloc-weather-widget.php:209
 msgid "Show Astronomical Info: "
 msgstr ""
 
-#: includes/widgets/class-sloc-airport-widget.php:109
-#: includes/widgets/class-sloc-station-widget.php:116
-#: includes/widgets/class-sloc-weather-widget.php:212
+#: includes/widgets/class-sloc-airport-widget.php:110
+#: includes/widgets/class-sloc-station-widget.php:117
+#: includes/widgets/class-sloc-weather-widget.php:213
 msgid "Cache Time: "
 msgstr ""
 
@@ -3510,43 +3510,43 @@ msgstr ""
 msgid "Displays the location, time, or map of a users location."
 msgstr ""
 
-#: includes/widgets/class-sloc-lastseen-widget.php:53
+#: includes/widgets/class-sloc-lastseen-widget.php:54
 msgid "Local Time"
 msgstr ""
 
-#: includes/widgets/class-sloc-lastseen-widget.php:92
 #: includes/widgets/class-sloc-lastseen-widget.php:93
-#: includes/widgets/class-sloc-weather-widget.php:149
+#: includes/widgets/class-sloc-lastseen-widget.php:94
 #: includes/widgets/class-sloc-weather-widget.php:150
+#: includes/widgets/class-sloc-weather-widget.php:151
 msgid "Moon Phase"
 msgstr ""
 
-#: includes/widgets/class-sloc-lastseen-widget.php:109
+#: includes/widgets/class-sloc-lastseen-widget.php:110
 msgid "No current location information available"
 msgstr ""
 
-#: includes/widgets/class-sloc-lastseen-widget.php:123
+#: includes/widgets/class-sloc-lastseen-widget.php:124
 msgid "No User Set"
 msgstr ""
 
-#: includes/widgets/class-sloc-lastseen-widget.php:160
+#: includes/widgets/class-sloc-lastseen-widget.php:161
 msgid "Displays last reported user location. Reporting can be set manually in the user profile, updated based on the last post with a location, or updated using a webhook"
 msgstr ""
 
-#: includes/widgets/class-sloc-lastseen-widget.php:162
-#: includes/widgets/class-sloc-weather-widget.php:191
+#: includes/widgets/class-sloc-lastseen-widget.php:163
+#: includes/widgets/class-sloc-weather-widget.php:192
 msgid "User: "
 msgstr ""
 
-#: includes/widgets/class-sloc-lastseen-widget.php:173
+#: includes/widgets/class-sloc-lastseen-widget.php:174
 msgid "Show Local Time: "
 msgstr ""
 
-#: includes/widgets/class-sloc-lastseen-widget.php:181
+#: includes/widgets/class-sloc-lastseen-widget.php:182
 msgid "Show Text: "
 msgstr ""
 
-#: includes/widgets/class-sloc-lastseen-widget.php:185
+#: includes/widgets/class-sloc-lastseen-widget.php:186
 msgid "Show Map: "
 msgstr ""
 
@@ -3559,15 +3559,15 @@ msgstr ""
 msgid "Adds current weather conditions"
 msgstr ""
 
-#: includes/widgets/class-sloc-station-widget.php:80
+#: includes/widgets/class-sloc-station-widget.php:81
 msgid "Unable to Connect to Station"
 msgstr ""
 
-#: includes/widgets/class-sloc-station-widget.php:106
+#: includes/widgets/class-sloc-station-widget.php:107
 msgid "Displays current weather at a weather station"
 msgstr ""
 
-#: includes/widgets/class-sloc-station-widget.php:109
+#: includes/widgets/class-sloc-station-widget.php:110
 msgid "Station ID: "
 msgstr ""
 
@@ -3576,19 +3576,19 @@ msgstr ""
 msgid "Weather"
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:113
+#: includes/widgets/class-sloc-weather-widget.php:114
 msgid "Current Conditions Cache Expires At"
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:189
+#: includes/widgets/class-sloc-weather-widget.php:190
 msgid "Displays current weather based on user location set in user profile. If set for none will use latitude and longitude set"
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:203
+#: includes/widgets/class-sloc-weather-widget.php:204
 msgid "Latitude: "
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:205
+#: includes/widgets/class-sloc-weather-widget.php:206
 msgid "Longitude: "
 msgstr ""
 
@@ -3608,14 +3608,14 @@ msgstr ""
 
 #: templates/elevation-form.php:23
 #: templates/geocode-form.php:26
-#: templates/loc-metabox.php:121
+#: templates/loc-metabox.php:132
 #: templates/venue-form.php:23
 #: templates/weather-form.php:26
 msgid "Lookup"
 msgstr ""
 
 #: templates/geocode-form.php:10
-#: templates/loc-user-metabox.php:16
+#: templates/loc-user-metabox.php:17
 msgid "Location Lookup"
 msgstr ""
 
@@ -3624,8 +3624,8 @@ msgid "Or Lookup By Address"
 msgstr ""
 
 #: templates/geocode-form.php:15
-#: templates/loc-user-metabox.php:50
-#: templates/loc-user-metabox.php:54
+#: templates/loc-user-metabox.php:51
+#: templates/loc-user-metabox.php:55
 msgid "Address"
 msgstr ""
 
@@ -3654,48 +3654,52 @@ msgstr ""
 msgid "Venue:"
 msgstr ""
 
-#: templates/loc-metabox.php:88
-msgid "Latitude:"
-msgstr ""
-
-#: templates/loc-metabox.php:93
-msgid "Longitude:"
+#: templates/loc-metabox.php:87
+msgid "No Venue"
 msgstr ""
 
 #: templates/loc-metabox.php:99
+msgid "Latitude:"
+msgstr ""
+
+#: templates/loc-metabox.php:104
+msgid "Longitude:"
+msgstr ""
+
+#: templates/loc-metabox.php:110
 msgid "Altitude:"
 msgstr ""
 
-#: templates/loc-metabox.php:105
+#: templates/loc-metabox.php:116
 msgid "Icon:"
 msgstr ""
 
-#: templates/loc-metabox.php:112
+#: templates/loc-metabox.php:123
 msgid "Map Zoom:"
 msgstr ""
 
-#: templates/loc-metabox.php:123
+#: templates/loc-metabox.php:134
 msgid "Minimize"
 msgstr ""
 
-#: templates/loc-metabox.php:130
+#: templates/loc-metabox.php:141
 msgid "Visibility:"
 msgstr ""
 
-#: templates/loc-user-metabox.php:12
+#: templates/loc-user-metabox.php:13
 msgid "Last Reported Location"
 msgstr ""
 
-#: templates/loc-user-metabox.php:13
+#: templates/loc-user-metabox.php:14
 msgid "This allows you to set the last reported location for this author. This can be automatically updated when you post. See Simple Location settings for options."
 msgstr ""
 
-#: templates/loc-user-metabox.php:17
+#: templates/loc-user-metabox.php:18
 msgid "Use My Current Location"
 msgstr ""
 
-#: templates/loc-user-metabox.php:34
-#: templates/loc-user-metabox.php:40
+#: templates/loc-user-metabox.php:35
+#: templates/loc-user-metabox.php:41
 msgid "Time Zone"
 msgstr ""
 
