@@ -151,12 +151,18 @@ class Location_Plugins {
 		$properties = $input['properties'];
 		$meta       = $args['meta_input'];
 
+		// If there are no location based properties then exit this.
+		if ( ! isset( $properties['checkin'] ) && ! isset( $properties['location'] ) && ! isset( $properties['latitude'] ) && ! isset( $properties['longitude'] ) && ! isset( $meta['geo_latitude'] ) && ! isset( $meta['geo_longitude'] ) ) {
+			return;
+		}
+
+		if ( isset( $properties['published'] ) ) {
+			$published = new DateTime( $properties['published'][0] );
+		} else {
+			$published = new DateTime( 'now', wp_timezone() );
+		}
+
 		if ( isset( $meta['geo_longitude'] ) && $meta['geo_latitude'] ) {
-			if ( isset( $properties['published'] ) ) {
-				$published = new DateTime( $properties['published'][0] );
-			} else {
-				$published = new DateTime();
-			}
 			// Always assume a checkin is to a building level option
 			if ( isset( $properties['checkin'] ) ) {
 				set_post_geodata( $args['ID'], 'zoom', 18 );
@@ -193,10 +199,6 @@ class Location_Plugins {
 			}
 		}
 
-		// If there are no location based properties then exit this.
-		if ( ! isset( $properties['checkin'] ) && ! isset( $properties['location'] ) && ! isset( $properties['latitude'] ) && ! isset( $properties['longitude'] ) ) {
-			return;
-		}
 
 		if ( isset( $properties['location'] ) && ! wp_is_numeric_array( $properties['location'] ) ) {
 			$location = $properties['location']['properties'];
