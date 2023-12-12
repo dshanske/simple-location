@@ -14,6 +14,7 @@ if ( 'comment' === $screen->id ) {
 	$geodata = get_post_geodata();
 	if ( 'venue' === $type ) {
 		$geodata['venue_radius'] = get_post_meta( get_the_ID(), 'venue_radius', true );
+		$geodata['venue_url'] = get_post_meta( get_the_ID(), 'venue_url', true );
 	} else {
 		$geodata['venue_id'] = get_post_meta( get_the_ID(), 'venue_id', true );
 	}
@@ -80,6 +81,11 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			<?php esc_html_e( 'Radius Around Venue:', 'simple-location' ); ?>
 			<input class="widefat" type="number" name="venue_radius" id="venue_radius" step="1" min="1" value="<?php echo esc_attr( ifset( $geodata['venue_radius'], '' ) ); ?>" />
 		</label>
+		<label for="venue_url" class="quarter">
+			<?php esc_html_e( 'Venue URL:', 'simple-location' ); ?>
+			<input class="widefat" type="url" name="venue_url" id="venue_url" value="<?php echo esc_attr( ifset( $geodata['venue_url'], '' ) ); ?>" />
+		</label>
+
 	<?php } else { ?>
 		<label for="venue_id" class="quarter">
 			<?php esc_html_e( 'Venue:', 'simple-location' ); ?>

@@ -1129,10 +1129,18 @@ class Geo_Base {
 			} else {
 				delete_post_meta( $post_id, 'venue_id' );
 			}
-		} elseif ( isset( $_POST['venue_radius'] ) && is_numeric( $_POST['venue_radius'] ) ) {
+		} else { 
+			if ( isset( $_POST['venue_radius'] ) && is_numeric( $_POST['venue_radius'] ) ) {
 				update_post_meta( $post_id, 'venue_radius', intval( $_POST['venue_radius'] ) );
-		} else {
-			delete_post_meta( $post_id, 'venue_radius' );
+			} else {
+				delete_post_meta( $post_id, 'venue_radius' );
+			}
+			if ( isset( $_POST['venue_url'] ) ) {
+				update_post_meta( $post_id, 'venue_url', sanitize_url( $_POST['venue_url'] ) );
+			} else {
+				delete_post_meta( $post_id, 'venue_url' );
+			}
+
 		}
 		self::save_meta( 'post', $post_id );
 	}
