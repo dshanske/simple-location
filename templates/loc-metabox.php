@@ -87,7 +87,8 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 					'show_option_none' => __( 'No Venue', 'simple-location' ),
 					'option_none_value' => '',
 					'hierarchical' => true,
-					'post_type' => 'venue'
+					'post_type' => 'venue',
+					'selected' => ifset( $geodata['venue_id'] )
 				)
 			); ?>
 
