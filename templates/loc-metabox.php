@@ -90,17 +90,26 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 		<label for="venue_id" class="quarter">
 			<?php esc_html_e( 'Venue:', 'simple-location' ); ?>
 		<!-- 	 <input class="widefat" type="number" name="venue_id" id="venue_id" step="1" min="1" value="<?php echo esc_attr( ifset( $geodata['venue_id'], '' ) ); ?>" /> -->
-			<?php wp_dropdown_pages( 
-				array(
+			<?php 
+			$venue_args = array(
 					'name' => 'venue_id',
 					'id' => 'venue_id',
 					'show_option_none' => __( 'No Venue', 'simple-location' ),
 					'option_none_value' => '',
 					'hierarchical' => true,
 					'post_type' => 'venue',
-					'selected' => ifset( $geodata['venue_id'] )
-				)
-			); ?>
+					'selected' => ifset( $geodata['venue_id'] ) 
+			);
+			if ( $location ) {
+				$venue_args['tax_query'] = array(
+						array(
+							'taxonomy' => 'location',
+							'terms' => $location
+						)
+					);
+			}
+				wp_dropdown_pages( $venue_args ); 
+			?>
 
 		</label>
 	<?php } ?>

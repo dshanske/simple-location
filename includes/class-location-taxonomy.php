@@ -29,11 +29,20 @@ final class Location_Taxonomy {
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
 
 		add_filter( 'get_the_archive_title', array( __CLASS__, 'archive_title' ), 10 );
+		add_filter( 'get_pages_query_args', array( __CLASS__, 'get_pages_query_args' ), 10, 2 );
 	}
 
 	public static function admin_menu() {
 		remove_meta_box( 'locationdiv', 'post', 'side' );
 		remove_meta_box( 'locationdiv', 'venue', 'side' );
+	}
+
+	// Passes Tax Queries through for get_pages
+	public static function get_pages_query_args( $query_args, $parsed_args ) {
+		if ( array_key_exists( 'tax_query', $parsed_args ) ) {
+			$query_args['tax_query'] = $parsed_args['tax_query'];
+		}
+		return $query_args;
 	}
 
 	public static function taxonomy_parent_dropdown_args( $dropdown_args, $taxonomy, $context ) {
