@@ -345,7 +345,7 @@ class Post_Venue {
 		if ( isset( $_REQUEST['venue_type'] ) ) {
 			$selected = sanitize_text_field( $_REQUEST['venue_type'] );
 		}
-		$list = array( '' => __( 'All', 'simple-location' ) );
+		$list = array( '' => __( 'All Types', 'simple-location' ) );
 		foreach ( get_terms( 'venue_type', array( 'hide_empty' => false ) ) as $type ) {
 			$list[ $type->slug ] = $type->name;
 		}
