@@ -112,8 +112,14 @@ class Astronomical_Calculator {
 			$timestamp = $timestamp->getTimestamp();
 		}
 
+		$times = date_sun_info( $timestamp, $this->latitude, $this->longitude );
+		if ( ! $times ) {
+			return false;
+		}
+
 		switch ( $type ) {
 			case 'sunset':
+				return $times['sunset'];
 				$function = 'date_sunset';
 				break;
 			case 'moonset':
@@ -123,6 +129,7 @@ class Astronomical_Calculator {
 				$moon = $this->get_moon_times( $timestamp );
 				return $moon['moonrise'];
 			default:
+				return $times['sunrise'];
 				$function = 'date_sunrise';
 		}
 		return call_user_func( $function, $timestamp, SUNFUNCS_RET_TIMESTAMP, $this->latitude, $this->longitude, self::get_zenith( $this->elevation ) );
