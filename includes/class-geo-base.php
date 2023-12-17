@@ -45,14 +45,15 @@ class Geo_Base {
 
 		add_action( 'rest_api_init', array( __CLASS__, 'rest_location' ) );
 
-		// Add Dropdown.
-		add_action( 'restrict_manage_posts', array( __CLASS__, 'geo_posts_dropdown' ), 12, 2 );
-		add_action( 'restrict_manage_comments', array( __CLASS__, 'geo_comments_dropdown' ), 12 );
-
 		// Add the Same Post Type Support JetPack uses.
 		add_post_type_support( 'post', 'geo-location' );
 		add_post_type_support( 'page', 'geo-location' );
 		add_post_type_support( 'attachment', 'geo-location' );
+
+		// Add Dropdown.
+		add_action( 'restrict_manage_posts', array( __CLASS__, 'geo_posts_dropdown' ), 12, 2 );
+		add_action( 'restrict_manage_comments', array( __CLASS__, 'geo_comments_dropdown' ), 12 );
+
 
 		add_filter( 'bulk_actions-edit-post', array( __CLASS__, 'register_bulk_edit_location' ), 10 );
 		add_filter( 'handle_bulk_actions-edit-post', array( __CLASS__, 'handle_bulk_edit_location' ), 10, 3 );
@@ -454,15 +455,16 @@ class Geo_Base {
 	 * @since 1.0.0
 	 */
 	public static function geo_posts_dropdown( $post_type, $which ) {
-		if ( 'post' !== $post_type ) {
+		if ( ! post_type_supports( $post_type, 'geo-location' ) ) {
 			return;
 		}
+		$type = get_post_type_object( $post_type );
 		$selected = 'none';
 		if ( isset( $_REQUEST['geo'] ) ) {
 			$selected = sanitize_text_field( $_REQUEST['geo'] );
 		}
 		$list = array(
-			'none'      => esc_html__( 'All Posts', 'simple-location' ),
+			'none'      => $type->labels->all_items,
 			'all'       => esc_html__( 'With Location', 'simple-location' ),
 			'private'   => esc_html__( 'Private', 'simple-location' ),
 			'public'    => esc_html__( 'Public', 'simple-location' ),

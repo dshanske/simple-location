@@ -27,6 +27,7 @@ final class Location_Taxonomy {
 		add_filter( 'manage_edit-location_columns', array( __CLASS__, 'manage_column' ), 10 );
 		add_filter( 'taxonomy_parent_dropdown_args', array( __CLASS__, 'taxonomy_parent_dropdown_args' ), 10, 3 );
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
+		add_action( 'restrict_manage_posts', array( __CLASS__, 'location_dropdown' ), 12, 2 );
 
 		add_filter( 'get_the_archive_title', array( __CLASS__, 'archive_title' ), 10 );
 		add_filter( 'get_pages_query_args', array( __CLASS__, 'get_pages_query_args' ), 10, 2 );
@@ -73,6 +74,39 @@ final class Location_Taxonomy {
 			return self::location_type( self::get_location_type( $term_id ) );
 		}
 		return $content;
+	}
+
+	/**
+	 * Generates a dropdown
+	 *
+	 * Allows visibility to be filtered on post edit screen.
+	 *
+	 * @param string $post_type The post type slug.
+	 * @param string $which     The location of the extra table nav markup:
+	 *                          'top' or 'bottom' for WP_Posts_List_Table,
+	 *                          'bar' for WP_Media_List_Table.
+	 * @since 1.0.0
+	 */
+	public static function location_dropdown( $post_type, $which ) {
+		if ( ! post_type_supports( $post_type, 'geo-location' ) ) {
+			return;
+		}
+		$type = get_post_type_object( $post_type );
+		$selected = '';
+		if ( isset( $_REQUEST['location'] ) ) {
+			$selected = sanitize_text_field( $_REQUEST['location'] );
+		}
+		wp_dropdown_categories( 
+			array(
+				'name' => 'location',
+				'id' => 'location',
+				'show_option_none' => $type->labels->all_items,
+				'hierarchical' => true,
+				'taxonomy' => 'location',
+				'value_field' => 'slug',
+				'selected' => $selected
+			)
+		);
 	}
 
 	/**
