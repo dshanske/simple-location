@@ -23,7 +23,7 @@ if ( 'comment' === $screen->id ) {
 
 $location     = wp_get_object_terms( get_the_ID(), 'location', array( 'fields' => 'ids' ) );
 $location     = count( $location ) >= 1 ? $location[0] : '';
-if ( array_key_exists( 'venue_id', $geodata ) && $geodata['venue_id'] ) {
+if ( is_array( $geodata ) && array_key_exists( 'venue_id', $geodata ) && $geodata['venue_id'] ) {
 	$display_name = get_the_title( $geodata['venue_id'] );
 } else {
 	$display_name = ifset( $geodata['address'] );
