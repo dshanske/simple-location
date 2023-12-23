@@ -251,6 +251,12 @@ class Location_Plugins {
 						),
 					)
 				);
+				if ( ! $term ) {
+					$term = Location_Taxonomy::get_post_location( $venue );
+					if ( $term ) {
+						Location_Taxonomy::set_location( $id, $term );
+					}
+				}
 			}
 		}
 
