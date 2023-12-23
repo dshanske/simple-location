@@ -6,6 +6,11 @@
  */
 
 get_header();
+if ( is_day() ) {
+	$date_format = get_option( 'time_format' );
+} else {
+	$date_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+}
 ?>
 
 <div id="primary" class="content-area">
@@ -37,6 +42,8 @@ get_header();
 							'icon'          => false,
 							'object_link'   => true,
 							'altitude'      => false,
+							'text' => true,
+							'description' => get_the_time( $date_format, get_the_ID() )
 						)
 					);
 			}
