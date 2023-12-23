@@ -1013,6 +1013,13 @@ class Geo_Data {
 		if ( ( 'post' === $type ) && ( in_array( get_post_type( $id ), get_post_types_by_support( 'geo-location' ) ) ) ) {
 			$term  = Location_Taxonomy::get_post_location( $id );
 			$venue = Post_Venue::get_post_venue( $id );
+			// If by some chance there is a venue but no term set the location to the venue location.
+			if ( $term && ! $venue ) {
+				$term = Location_Taxonomy::get_post_location( $venue );
+				if ( $term ) {
+					Location_Taxonomy::set_location( $id, $term );
+				}
+			}	
 		} else {
 			$term  = false;
 			$venue = false;
