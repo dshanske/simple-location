@@ -101,6 +101,7 @@ final class Location_Taxonomy {
 				'name' => 'location',
 				'id' => 'location',
 				'show_option_none' => $type->labels->all_items,
+				'option_none_value' => '',
 				'hierarchical' => true,
 				'taxonomy' => 'location',
 				'value_field' => 'slug',
