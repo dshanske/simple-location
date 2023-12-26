@@ -3,7 +3,7 @@
  * Plugin Name: Simple Location
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
- * Version: 5.0.21
+ * Version: 5.0.22
  * Requires at least: 4.9
  * Requires PHP: 7.0
  * Requires CP: 1.4.3
