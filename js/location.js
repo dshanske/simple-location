@@ -58,6 +58,35 @@ jQuery( document ).ready( function( $ ) {
 		}
 	}
 
+	function updateVenues() {
+		if ( 0 !== $( 'location_dropdown' ).val() ) {
+			$.ajax( {
+				type: 'GET',
+				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
+				url: slocOptions.api_url + 'venue/',
+				beforeSend( xhr ) {
+					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
+					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
+				},
+				data: {
+					location: $( '#location_dropdown' ).val(),
+					select: 'true'
+				},
+				success( response ) {
+					if ( window.console ) {
+						console.log( response );
+					}
+					if ( 'undefined' === typeof response ) {
+					} else {
+						if ( ( 'venue_select' in response ) ) {
+							$( '#venue_id' ).replaceWith( response.venue_select);
+						}
+					}
+				}
+			} );
+		}
+	}
+
 	function getCurrentPosition() {
 		let position;
 		$.ajax( {
@@ -287,6 +316,10 @@ jQuery( document ).ready( function( $ ) {
 		} )
 		.on( 'click', '.clear-location-button', function( event ) {
 			clearLocation();
+			event.preventDefault();
+		} )
+		.on( 'change', '#location_dropdown', function( event ) {
+			updateVenues();
 			event.preventDefault();
 		} )
 		.on( 'click', '.save-venue-button', function() {

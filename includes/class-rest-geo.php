@@ -238,6 +238,9 @@ class REST_Geo {
 						'provider'  => array(
 							'sanitize_callback' => 'sanitize_text_field',
 						),
+						'select' => array(
+							'sanitize_callback' => 'sanitize_text_field'
+						)
 					),
 					'permission_callback' => function ( $request ) {
 						return current_user_can( 'publish_posts' );
@@ -445,7 +448,37 @@ class REST_Geo {
 	public static function venue( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
 		$params   = $request->get_params();
+		$select = empty( $params['select'] ) ? null : $params['select'];
 		$provider = empty( $params['provider'] ) ? null : $params['provider'];
+		$location = empty( $params['location'] ) ? null : $params['location'];
+		if ( $select ) {
+			$venue_args = array(
+				'name' => 'venue_id',
+				'id' => 'venue_id',
+				'show_option_none' => __( 'No Venue', 'simple-location' ),
+				'option_none_value' => '0',
+				'hierarchical' => true,
+				'post_type' => 'venue',
+				'echo' => false,
+			);
+			if ( is_numeric( $location ) && $location > 0 ) {
+				$venue_args['tax_query'] = array(
+					array(
+						'taxonomy' => 'location',
+						'terms' => $location,
+					)
+				);
+			}
+			$response = wp_dropdown_pages( $venue_args ); 
+			if ( $response ) {
+				return array(
+					'venue_select' => $response
+				);
+			} else {
+				return $venue_args;
+			}
+			return new WP_Error( 'no_venues_found', __( 'Venues Not Found', 'simple-location' ) );
+		}
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$venue = Loc_Config::venue_provider( $provider );
 			if ( ! $venue ) {
