@@ -54,7 +54,6 @@ class Geo_Base {
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'geo_posts_dropdown' ), 12, 2 );
 		add_action( 'restrict_manage_comments', array( __CLASS__, 'geo_comments_dropdown' ), 12 );
 
-
 		add_filter( 'bulk_actions-edit-post', array( __CLASS__, 'register_bulk_edit_location' ), 10 );
 		add_filter( 'handle_bulk_actions-edit-post', array( __CLASS__, 'handle_bulk_edit_location' ), 10, 3 );
 		add_action( 'admin_notices', array( __CLASS__, 'bulk_action_admin_notices' ) );
@@ -458,7 +457,7 @@ class Geo_Base {
 		if ( ! post_type_supports( $post_type, 'geo-location' ) ) {
 			return;
 		}
-		$type = get_post_type_object( $post_type );
+		$type     = get_post_type_object( $post_type );
 		$selected = 'none';
 		if ( isset( $_REQUEST['geo'] ) ) {
 			$selected = sanitize_text_field( $_REQUEST['geo'] );
@@ -1131,7 +1130,7 @@ class Geo_Base {
 			} else {
 				delete_post_meta( $post_id, 'venue_id' );
 			}
-		} else { 
+		} else {
 			if ( isset( $_POST['venue_radius'] ) && is_numeric( $_POST['venue_radius'] ) ) {
 				update_post_meta( $post_id, 'venue_radius', intval( $_POST['venue_radius'] ) );
 			} else {
@@ -1142,7 +1141,6 @@ class Geo_Base {
 			} else {
 				delete_post_meta( $post_id, 'venue_url' );
 			}
-
 		}
 		self::save_meta( 'post', $post_id );
 	}

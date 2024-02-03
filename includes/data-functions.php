@@ -6,7 +6,6 @@
  *
  * @package Simple_Location
  */
-
 function set_post_geodata( $post, $key, $geodata ) {
 	$post = get_post( $post );
 	if ( ! $post ) {

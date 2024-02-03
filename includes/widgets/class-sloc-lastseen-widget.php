@@ -13,8 +13,8 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 			'Sloc_Lastseen_Widget',
 			__( 'User Last Seen', 'simple-location' ),
 			array(
-				'description' => __( 'Displays the location, time, or map of a users location.', 'simple-location' ),
-				'show_instance_in_rest' => true
+				'description'           => __( 'Displays the location, time, or map of a users location.', 'simple-location' ),
+				'show_instance_in_rest' => true,
 			)
 		);
 	}

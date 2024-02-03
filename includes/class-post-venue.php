@@ -361,7 +361,7 @@ class Post_Venue {
 	 *
 	 * @param float $lat Latitude.
 	 * @param float $lng Longitude.
-	 * @param int $radius Radius to Search In. Optional.
+	 * @param int   $radius Radius to Search In. Optional.
 	 * @return array Return the IDs of all nearby venues
 	 */
 	public static function nearby( $lat, $lng, $radius = 100 ) {

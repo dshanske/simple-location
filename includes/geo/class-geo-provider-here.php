@@ -87,7 +87,7 @@ class Geo_Provider_Here extends Geo_Provider {
 					'houseNumber',
 				)
 			);
-			$street               = self::ifnot(
+			$street                = self::ifnot(
 				$location,
 				array(
 					'street',

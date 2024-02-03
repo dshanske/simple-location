@@ -199,7 +199,6 @@ class Location_Plugins {
 			}
 		}
 
-
 		if ( isset( $properties['location'] ) && ! wp_is_numeric_array( $properties['location'] ) ) {
 			$location = $properties['location']['properties'];
 			if ( isset( $properties['checkin'] ) && ! wp_is_numeric_array( $properties['checkin'] ) ) {

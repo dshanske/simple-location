@@ -1019,7 +1019,7 @@ class Geo_Data {
 				if ( $term ) {
 					Location_Taxonomy::set_location( $id, $term );
 				}
-			}	
+			}
 		} else {
 			$term  = false;
 			$venue = false;

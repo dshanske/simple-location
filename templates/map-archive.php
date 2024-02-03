@@ -42,8 +42,8 @@ if ( is_day() ) {
 							'icon'          => false,
 							'object_link'   => true,
 							'altitude'      => false,
-							'text' => true,
-							'description' => get_the_time( $date_format, get_the_ID() )
+							'text'          => true,
+							'description'   => get_the_time( $date_format, get_the_ID() ),
 						)
 					);
 			}

@@ -14,15 +14,15 @@ if ( 'comment' === $screen->id ) {
 	$geodata = get_post_geodata();
 	if ( 'venue' === $type ) {
 		$geodata['venue_radius'] = get_post_meta( get_the_ID(), 'venue_radius', true );
-		$geodata['venue_url'] = get_post_meta( get_the_ID(), 'venue_url', true );
+		$geodata['venue_url']    = get_post_meta( get_the_ID(), 'venue_url', true );
 	} else {
 		$geodata['venue_id'] = get_post_meta( get_the_ID(), 'venue_id', true );
 	}
 }
 
 
-$location     = wp_get_object_terms( get_the_ID(), 'location', array( 'fields' => 'ids' ) );
-$location     = count( $location ) >= 1 ? $location[0] : '';
+$location = wp_get_object_terms( get_the_ID(), 'location', array( 'fields' => 'ids' ) );
+$location = count( $location ) >= 1 ? $location[0] : '';
 if ( is_array( $geodata ) && array_key_exists( 'venue_id', $geodata ) && $geodata['venue_id'] ) {
 	$display_name = get_the_title( $geodata['venue_id'] );
 } else {
@@ -90,25 +90,25 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 		<label for="venue_id" class="quarter">
 			<?php esc_html_e( 'Venue:', 'simple-location' ); ?>
 		<!-- 	 <input class="widefat" type="number" name="venue_id" id="venue_id" step="1" min="1" value="<?php echo esc_attr( ifset( $geodata['venue_id'], '' ) ); ?>" /> -->
-			<?php 
+			<?php
 			$venue_args = array(
-					'name' => 'venue_id',
-					'id' => 'venue_id',
-					'show_option_none' => __( 'No Venue', 'simple-location' ),
-					'option_none_value' => '',
-					'hierarchical' => true,
-					'post_type' => 'venue',
-					'selected' => ifset( $geodata['venue_id'] ) 
+				'name'              => 'venue_id',
+				'id'                => 'venue_id',
+				'show_option_none'  => __( 'No Venue', 'simple-location' ),
+				'option_none_value' => '',
+				'hierarchical'      => true,
+				'post_type'         => 'venue',
+				'selected'          => ifset( $geodata['venue_id'] ),
 			);
 			if ( $location ) {
 				$venue_args['tax_query'] = array(
-						array(
-							'taxonomy' => 'location',
-							'terms' => $location
-						)
-					);
+					array(
+						'taxonomy' => 'location',
+						'terms'    => $location,
+					),
+				);
 			}
-				wp_dropdown_pages( $venue_args ); 
+				wp_dropdown_pages( $venue_args );
 			?>
 
 		</label>

@@ -91,21 +91,21 @@ final class Location_Taxonomy {
 		if ( ! post_type_supports( $post_type, 'geo-location' ) ) {
 			return;
 		}
-		$type = get_post_type_object( $post_type );
+		$type     = get_post_type_object( $post_type );
 		$selected = '';
 		if ( isset( $_REQUEST['location'] ) ) {
 			$selected = sanitize_text_field( $_REQUEST['location'] );
 		}
-		wp_dropdown_categories( 
+		wp_dropdown_categories(
 			array(
-				'name' => 'location',
-				'id' => 'location',
-				'show_option_none' => $type->labels->all_items,
+				'name'              => 'location',
+				'id'                => 'location',
+				'show_option_none'  => $type->labels->all_items,
 				'option_none_value' => '',
-				'hierarchical' => true,
-				'taxonomy' => 'location',
-				'value_field' => 'slug',
-				'selected' => $selected
+				'hierarchical'      => true,
+				'taxonomy'          => 'location',
+				'value_field'       => 'slug',
+				'selected'          => $selected,
 			)
 		);
 	}
@@ -920,7 +920,6 @@ final class Location_Taxonomy {
 	 * Wrapper around wp_list_categories for now that outputs a list of the locations.
 	 * May be customized further in future.
 	 */
-
 	public static function list_locations() {
 		$defaults = array(
 			'taxonomy' => 'location',
