@@ -87,7 +87,7 @@ class Geo_Provider_Here extends Geo_Provider {
 					'houseNumber',
 				)
 			);
-			$street               .= self::ifnot(
+			$street               = self::ifnot(
 				$location,
 				array(
 					'street',
@@ -127,7 +127,7 @@ class Geo_Provider_Here extends Geo_Provider {
 			$addr['postal-code'] = ifset( $location['postalCode'] );
 
 			// Adjust position of house number/name based on country practice.
-			if ( self::house_number( $country_code ) ) {
+			if ( self::house_number( $addr['country_code'] ) ) {
 				$addr['street-address'] = $number . ' ' . $street;
 			} else {
 				$addr['street-address'] = $street . ' ' . $number;
