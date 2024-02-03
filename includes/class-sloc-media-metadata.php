@@ -223,12 +223,11 @@ class Sloc_Media_Metadata {
 				$update['geo_altitude'] = $reverse->elevation();
 			}
 
-			$venue = Post_Venue::at_venue( $meta['geo_latitude'], $meta['geo_longitude'] );
+			$venue = Post_Venue::at_venue( $update['geo_latitude'], $update['geo_longitude'] );
 			if ( false !== $venue ) {
 				update_post_meta( $args['ID'], 'venue_id', $venue );
 				set_post_geodata( $args['ID'], 'visibility', 'protected' );
-				$meta['geo_address'] = get_the_title( $venue );
-				set_post_geodata( $args['ID'], 'address', $meta['geo_address'] );
+				$update['geo_address'] = get_the_title( $venue );
 			} else {
 				set_post_geodata( $post_id, 'visibility', 'public' );
 			}
