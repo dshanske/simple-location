@@ -27,12 +27,12 @@ class Sloc_Media_Metadata {
 		// Grab geo data from EXIF, if it's available.
 		$wp_version = get_bloginfo( 'version' );
 		if ( version_compare( $wp_version, '5.0', '>=' ) ) {
-			add_action( 'wp_read_image_metadata', array( __CLASS__, 'exif_data' ), 10, 5 );
+			add_filter( 'wp_read_image_metadata', array( __CLASS__, 'exif_data' ), 10, 5 );
 		} else {
-			add_action( 'wp_read_image_metadata', array( __CLASS__, 'exif_data' ), 10, 3 );
+			add_filter( 'wp_read_image_metadata', array( __CLASS__, 'exif_data' ), 10, 3 );
 		}
 
-		add_action( 'wp_generate_attachment_metadata', array( __CLASS__, 'attachment' ), 20, 2 );
+		add_filter( 'wp_generate_attachment_metadata', array( __CLASS__, 'attachment' ), 20, 2 );
 		add_filter( 'attachment_fields_to_edit', array( __CLASS__, 'attachment_fields_to_edit' ), 10, 2 );
 		add_action( 'attachment_submitbox_misc_actions', array( __CLASS__, 'attachment_submitbox_metadata' ), 12 );
 	}
@@ -236,7 +236,8 @@ class Sloc_Media_Metadata {
 			foreach ( $update as $key => $value ) {
 				update_post_meta( $post_id, $key, $value );
 			}
-			return $meta;
 		}
+
+		return $meta;
 	}
 }
