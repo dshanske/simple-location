@@ -12,9 +12,12 @@
 	<config name="minimum_supported_wp_version" value="4.9"/>
 	<rule ref="WordPress.WP.DeprecatedFunctions" />
 	<rule ref="WordPress-Docs"/>
-	<rule ref="WordPress-Extra">
+	<rule ref="WordPress">
 		<exclude name="WordPress.Security.ValidatedSanitizedInput" />
 		<exclude name="WordPress.Security.NonceVerification" />
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter"/>
+		<exclude name="Squiz.Commenting"/>
+		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames"/>
 	</rule>
 	<rule ref="WordPress.Files.FileName">
 	<properties>
@@ -23,6 +26,7 @@
 	</rule>
 
 	<rule ref="WordPress-Extra" />
-        <rule ref="WordPress.WP.I18n"/>
+	<rule ref="WordPress.WP.I18n"/>
+	<rule ref="VariableAnalysis"/>
 	<config name="text_domain" value="simple-location,default"/>
 </ruleset>
