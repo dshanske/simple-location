@@ -27,6 +27,8 @@ jobs:
           coverage: none
           tools: composer, phpunit-polyfills
           extensions: mysql
+      - name: Ensure SVN is Installed
+        run: sudo apt install -y svn
       - name: Install Composer dependencies for PHP
         uses: "ramsey/composer-install@v2"
       - name: Setup Test Environment
