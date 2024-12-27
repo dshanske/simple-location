@@ -14,6 +14,13 @@ jobs:
           tools: composer:v2, cs2pr
       - name: Install Composer dependencies for PHP
         uses: "ramsey/composer-install@v2"
-      - name: Detect coding standard violations
-        run: composer lint
+      #- name: Detect coding standard violations
+      #run: composer lint
+      # Check the code-style consistency of the PHP files.
+      - name: Check PHP code style
+        id: phpcs
+        run: composer lint:wpcs -- --no-cache --report-full --report-checkstyle=./phpcs-report.xml
+      - name: Show PHPCS results in PR
+        if: ${{ always() && steps.phpcs.outcome == 'failure' }}
+          run: cs2pr ./phpcs-report.xml
 

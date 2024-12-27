@@ -56,7 +56,8 @@
       "scssphp/scssphp": "^1.13.0",
       "civicrm/composer-downloads-plugin": "^4.0",
       "simple-icons/simple-icons": "^14.0",
-      "wpreadme2markdown/wp2md": "^4.1"
+      "wpreadme2markdown/wp2md": "^4.1",
+      "akirk/extract-wp-hooks": "^1.0"
     },
     "prefer-stable" : true,
     "scripts": {
@@ -79,6 +80,7 @@
 	                 "cp -u -r vendor/sokil/php-isocodes/databases/iso_3166-2/*.json data/iso_3166-2/",
 	                 "cp -u -r vendor/sokil/php-isocodes/databases/iso_3166-1.json data/"
 	],
+	"update-docs": "./vendor/bin/extract-wp-hooks.php",
       "build-css": [
       "vendor/bin/pscss --style=expanded sass/main.scss css/location.css",
       "vendor/bin/pscss --style=compressed sass/main.scss css/location.min.css",

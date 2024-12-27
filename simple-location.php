@@ -4,9 +4,9 @@
  * Plugin URI: https://wordpress.org/plugins/simple-location/
  * Description: Adds Location to WordPress
  * Version: 5.0.23
- * Requires at least: 4.9
- * Requires PHP: 7.0
- * Requires CP: 1.4.3
+ * Requires at least: 6.2
+ * Requires PHP: 7.4
+ * Requires CP: 2.1
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * License: GPLv2 or later

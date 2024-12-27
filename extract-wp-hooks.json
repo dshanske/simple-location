@@ -1,0 +1,11 @@
+{
+	"namespace": "Simple_Location",
+	"base_dir": ".",
+	"wiki_directory": "hook_docs",
+	"github_blob_url": "https://github.com/dshanske/simple-location/blob/main/",
+	"ignore_filter": [
+		"widget_title",
+		"wp_read_image_metadata_types",
+		"wp_date"
+	]
+}
