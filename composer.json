@@ -55,7 +55,8 @@
       "sirbrillig/phpcs-variable-analysis": "^2.11",
       "scssphp/scssphp": "^1.13.0",
       "civicrm/composer-downloads-plugin": "^4.0",
-      "simple-icons/simple-icons": "^14.0"
+      "simple-icons/simple-icons": "^14.0",
+      "wpreadme2markdown/wp2md": "^4.1"
     },
     "prefer-stable" : true,
     "scripts": {
@@ -64,13 +65,15 @@
         "lint:wpcs-fix": "./vendor/bin/phpcbf",
 	"lint": "./vendor/bin/phpcs -n -q",
 	"phpunit": "./vendor/bin/phpunit",
-	"setup-local-tests": "bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest",
+	"setup-wp-tests": "bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest",
+	"setup-cp-tests": "bash bin/install-wp-tests.sh cpc_test root root 127.0.0.1 latest",
         "make-pot": "./vendor/bin/wp i18n make-pot . languages/simple-location.pot",
 	"lint:php": "@php ./vendor/bin/parallel-lint --exclude .git --exclude vendor --exclude node_modules .",
 	"plugin-check": "./vendor/bin/wp plugin check simple-location --exclude-checks=file_type --exclude-directories='./bin','./.github'",
 	"install-codestandards": [
 		"Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin::run"
 	],
+	"wp2md": "vendor/bin/wp2md -i readme.txt -o readme.md",
 	"php-isocodes": "vendor/sokil/php-isocodes/bin/update_iso_codes_db.sh all vendor/sokil/php-isocodes",
 	"copy-files": [
 	                 "cp -u -r vendor/sokil/php-isocodes/databases/iso_3166-2/*.json data/iso_3166-2/",
