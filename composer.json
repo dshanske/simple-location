@@ -15,12 +15,25 @@
      ],
     "config": {
     	"allow-plugins": {
-        	"composer/installers": true,
-	        "dealerdirect/phpcodesniffer-composer-installer": true
-    	}
+         "composer/installers": true,
+         "dealerdirect/phpcodesniffer-composer-installer": true,
+         "civicrm/composer-downloads-plugin": true
+      }
     },
      "extra": {
-		"installer-name": "simple-location"
+		"installer-name": "simple-location",
+		"downloads": {
+			"airports": {
+				"url": "https://davidmegginson.github.io/ourairports-data/airports.csv",
+				"path": "data/airports.csv",
+				"type": "file"
+			},
+			"airlines": {
+				"url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat",
+				"path": "data/airlines.csv",
+				"type": "file"
+			}
+		}
      },
     "require": {
 	"php": ">=7.0"
@@ -40,7 +53,8 @@
       "sokil/php-isocodes": "^2.0 || ^4.1.0",
       "dms/phpunit-arraysubset-asserts": "^0.4.0",
       "sirbrillig/phpcs-variable-analysis": "^2.11",
-      "scssphp/scssphp": "^1.13.0"
+      "scssphp/scssphp": "^1.13.0",
+      "civicrm/composer-downloads-plugin": "^4.0"
     },
     "prefer-stable" : true,
     "scripts": {
