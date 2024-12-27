@@ -1,4 +1,4 @@
-name: Unit Testing
+name: WordPress Unit Testing
 on:
     push:
     pull_request:
