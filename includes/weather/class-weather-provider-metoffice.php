@@ -195,10 +195,6 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	 * @return string Textual Summary of Status Code.
 	 **/
 	public static function code_map( $type ) {
-		$conditions = array();
-		if ( array_key_exists( $code, $conditions ) ) {
-			return $conditions[ $code ];
-		}
 		$types = array(
 			0  => 800,
 			1  => 800,
