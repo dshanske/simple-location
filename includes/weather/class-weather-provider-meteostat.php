@@ -83,10 +83,10 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		}
 
 		$file = trailingslashit( Simple_Location_Plugin::$path ) . 'data/meteostat.json';
-		if ( ! file_exists( $file ) ) {
+		if ( ! sloc_file_exists( $file ) ) {
 			return new WP_Error( 'filesystem_error', "File doesn't exist", wp_json_encode( $file ) );
 		}
-		$data     = file_get_contents( $file );
+		$data     = sloc_get_contents( $file );
 		$sitelist = json_decode( $data, true );
 		foreach ( $sitelist as $key => $value ) {
 				$sitelist[ $key ]['distance'] = round( geo_distance( $this->latitude, $this->longitude, $value['location']['latitude'], $value['location']['longitude'] ) );

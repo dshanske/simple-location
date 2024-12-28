@@ -236,7 +236,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'round'     => false, // False to round to 2 digits, true to round to integer, a numeric value to round to a specific precision.
 		);
 		$args          = wp_parse_args( $args, $defaults );
-		$args['units'] = ( $args['units'] === 'imperial' );
+		$args['units'] = ( 'imperial' === $args['units'] );
 		$params        = self::get_names( $property, $args['units'] );
 		if ( ! $params ) {
 			return '';

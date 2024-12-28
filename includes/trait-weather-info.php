@@ -399,7 +399,7 @@ trait Weather_Info_Trait {
 			'626'  => __( 'Diamond dust', 'simple-location' ),
 			/* Atmosphere */
 			'701'  => __( 'mist', 'simple-location' ),
-			'702'  => __( 'Frost', 'simple-locaiton' ),
+			'702'  => __( 'Frost', 'simple-location' ),
 			'703'  => __( 'Icy', 'simple-location' ),
 			'711'  => __( 'Smoke', 'simple-location' ),
 			'721'  => __( 'Haze', 'simple-location' ),

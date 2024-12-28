@@ -461,8 +461,6 @@ class Simple_Location_Plugin {
 			'li'         => array(
 				'class'       => array(),
 				'id'          => array(),
-				'class'       => array(),
-				'id'          => array(),
 				'title'       => array(),
 				'aria-label'  => array(),
 				'aria-hidden' => array(),
