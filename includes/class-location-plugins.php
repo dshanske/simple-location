@@ -36,8 +36,7 @@ class Location_Plugins {
 	}
 
 	/**
-	 *
-	 *
+	 * Adds location properties to webmention returns.
 	 */
 	public static function webmention_handler_mf2_set_properties( $meta, $handler ) {
 		$item = $handler->get_webmention_item();

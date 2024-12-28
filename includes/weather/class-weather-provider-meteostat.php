@@ -106,12 +106,6 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			return $return;
 		}
 		return self::get_fallback_conditions( $time );
-
-		$conditions = $this->get_cache();
-		if ( $conditions ) {
-			return $conditions;
-		}
-		return array();
 	}
 
 	/**

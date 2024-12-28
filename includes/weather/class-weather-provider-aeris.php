@@ -273,7 +273,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			case 'L': // Drizzle.
 				return 301;
 			case 'R': // Rain.
-				500;
+				return 500;
 			case 'RW': // Rain showers.
 				return 521;
 			case 'RS': // Rain/snow mix.

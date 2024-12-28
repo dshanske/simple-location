@@ -143,7 +143,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	}
 
 	/**
-	 * converts code into weather description.
+	 * Converts code into weather description.
 	 *
 	 * @param int $type code.
 	 * @return string description.

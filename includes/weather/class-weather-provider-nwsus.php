@@ -277,15 +277,15 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 
 		switch ( $condition ) {
 			case 'thunderstorms':
-				if ( ! isset( $weather['intensity'] ) ) {
-					return 211;
+				if ( array_key_exists( 'intensity', $weather ) ) {
+					if ( 'light' === $weather['intensity'] ) {
+						return 210;
+					}
+					if ( 'heavy' === $weather['intensity'] ) {
+						return 212;
+					}
 				}
-				if ( 'light' === $weather['intensity'] ) {
-					return 210;
-				}
-				if ( 'heavy' === $weather['intensity'] ) {
-					return 212;
-				}
+				return 211;
 			case 'fog':
 			case 'fog_mist':
 				return 741;
@@ -294,15 +294,15 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			case 'dust_whirls':
 				return 761;
 			case 'drizzle':
-				if ( ! isset( $weather['intensity'] ) ) {
-					return 301;
+				if ( array_key_exists( 'intensity', $weather ) ) {
+					if ( 'light' === $weather['intensity'] ) {
+						return 300;
+					}
+					if ( 'heavy' === $weather['intensity'] ) {
+						return 302;
+					}
 				}
-				if ( 'light' === $weather['intensity'] ) {
-					return 300;
-				}
-				if ( 'heavy' === $weather['intensity'] ) {
-					return 302;
-				}
+				return 301;
 			case 'smoke':
 				return 711;
 			case 'hail':
@@ -315,29 +315,29 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			case 'ice_pellets':
 			case 'spray':
 			case 'rain':
-				if ( ! isset( $weather['intensity'] ) ) {
-					return 521;
+				if ( array_key_exists( 'intensity', $weather ) ) {
+					if ( 'light' === $weather['intensity'] ) {
+						return 520;
+					}
+					if ( 'heavy' === $weather['intensity'] ) {
+						return 522;
+					}
 				}
-				if ( 'light' === $weather['intensity'] ) {
-					return 520;
-				}
-				if ( 'heavy' === $weather['intensity'] ) {
-					return 522;
-				}
+				return 521;
 			case 'sand':
 			case 'sand_storm':
 				return 751;
 			case 'snow_grains':
 			case 'snow':
-				if ( ! isset( $weather['intensity'] ) ) {
-					return 601;
+				if ( array_key_exists( 'intensity', $weather ) ) {
+					if ( 'light' === $weather['intensity'] ) {
+						return 600;
+					}
+					if ( 'heavy' === $weather['intensity'] ) {
+						return 602;
+					}
 				}
-				if ( 'light' === $weather['intensity'] ) {
-					return 600;
-				}
-				if ( 'heavy' === $weather['intensity'] ) {
-					return 602;
-				}
+				return 601;
 			case 'squalls':
 				return 771;
 			case 'volcanic_ash':

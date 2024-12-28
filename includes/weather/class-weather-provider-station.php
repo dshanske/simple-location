@@ -243,7 +243,6 @@ class Weather_Provider_Station extends Weather_Provider {
 	public function get_station_data() {
 		$return   = array();
 		$stations = get_option( 'sloc_stations' );
-		$endpoint = null;
 		foreach ( $stations as $key => $station ) {
 			if ( trim( $station['id'] === $this->station_id ) ) {
 				$return = $this->fetch_json( $station['url'], array() );
