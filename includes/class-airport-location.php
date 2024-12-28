@@ -56,7 +56,7 @@ class Airport_Location {
 			return $airport;
 		}
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/airports.csv';
-		if ( ! file_exists( $file ) ) {
+		if ( ! sloc_file_exists( $file ) ) {
 			return new WP_Error( 'filesystem_error', "File doesn't exist" );
 		}
 		$fp   = fopen( $file, 'r' ); // phpcs:ignore
@@ -147,7 +147,7 @@ class Airport_Location {
 			return $airline;
 		}
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/airlines.csv';
-		if ( ! file_exists( $file ) ) {
+		if ( ! sloc_file_exists( $file ) ) {
 			return new WP_Error( 'filesystem_error', "File doesn't exist" );
 		}
 		$fp   = fopen( $file, 'r' ); // phpcs:ignore

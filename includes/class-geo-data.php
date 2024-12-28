@@ -944,8 +944,8 @@ class Geo_Data {
 			$summary = array_key_exists( $icon, $list ) ? $list[ $icon ] : $icon;
 		}
 		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), $icon );
-		if ( file_exists( $svg ) ) {
-			$svg = file_get_contents( $svg );
+		if ( sloc_file_exists( $svg ) ) {
+			$svg = sloc_get_contents( $svg );
 		}
 		if ( $svg ) {
 			return PHP_EOL . sprintf( '<span class="sloc-location-icon sloc-icon-%1$s" style="display: inline-block; max-height: 1em; margin-right: 0.1em;" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), $svg );

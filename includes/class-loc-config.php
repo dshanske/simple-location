@@ -439,7 +439,7 @@ class Loc_Config {
 		<?php
 		if ( 'debug' === $active_tab ) {
 			?>
-			 
+
 			<p> <?php esc_html_e( 'Test the raw responses from the lookup features. This feature only appears if you have WP_DEBUG enabled.', 'simple-location' ); ?> </p>
 			<?php
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/geocode-form.php' );
@@ -1071,7 +1071,7 @@ class Loc_Config {
 		$name = $args['label_for'];
 
 		$file    = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
-		$codes   = json_decode( file_get_contents( $file ), true );
+		$codes   = json_decode( sloc_get_contents( $file ), true );
 		$codes   = $codes['3166-1'];
 		$country = get_option( $name );
 
@@ -1158,7 +1158,7 @@ class Loc_Config {
 		?>
 		<h4><?php esc_html_e( 'Simple Location Depends on Third Party Services', 'simple-location' ); ?></h4>
 		<p><?php esc_html_e( 'Many of these services require you to sign up for an account and provide an API key below. Many have free and paid tiers. For this reason, the plugin offers multiple providers. At this moment, Nominatim, and the US National Weather Service can be used without API keys and there is no map service that does not require an API key. Geonames requires an account, but is otherwise free to use. If you are uncertain of which to try, start with the defaults.', 'simple-location' ); ?></p>
-		
+
 		<?php
 	}
 

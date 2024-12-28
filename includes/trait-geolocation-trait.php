@@ -54,7 +54,7 @@ trait GeoLocation_Trait {
 		$iso = strtoupper( trim( $iso ) );
 
 		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
-		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = json_decode( sloc_get_contents( $file ), true );
 		$codes = $codes['3166-1'];
 		$match = wp_filter_object_list( $codes, array( 'alpha_' . strlen( $iso ) => $iso ) );
 		if ( is_array( $match ) && 1 === count( $match ) ) {
@@ -72,7 +72,7 @@ trait GeoLocation_Trait {
 	public static function country_data_name( $name ) {
 		$name  = trim( $name );
 		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
-		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = json_decode( sloc_get_contents( $file ), true );
 		$codes = $codes['3166-1'];
 		$match = wp_filter_object_list( $codes, array( 'name' => $name ) );
 		if ( is_array( $match ) && 1 === count( $match ) ) {
@@ -151,11 +151,11 @@ trait GeoLocation_Trait {
 		$codes   = array();
 
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-2/' . $country . '.json';
-		if ( ! file_exists( $file ) ) {
+		if ( ! sloc_file_exists( $file ) ) {
 			return false;
 		}
 
-		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = json_decode( sloc_get_contents( $file ), true );
 
 		$match = wp_filter_object_list( $codes, array( 'code' => $country . '-' . $code ) );
 
@@ -178,11 +178,11 @@ trait GeoLocation_Trait {
 		$codes   = array();
 
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-2/' . $country . '.json';
-		if ( ! file_exists( $file ) ) {
+		if ( ! sloc_file_exists( $file ) ) {
 			return false;
 		}
 
-		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = json_decode( sloc_get_contents( $file ), true );
 
 		$match = wp_filter_object_list( $codes, array( 'name' => $name ) );
 
@@ -260,7 +260,7 @@ trait GeoLocation_Trait {
 
 	public static function country_select( $country ) {
 		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
-		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = json_decode( sloc_get_contents( $file ), true );
 		$codes = $codes['3166-1'];
 
 		echo '<select name="country" id="country">';
@@ -276,11 +276,11 @@ trait GeoLocation_Trait {
 			return false;
 		}
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-2/' . $country . '.json';
-		if ( ! file_exists( $file ) ) {
+		if ( ! sloc_file_exists( $file ) ) {
 			return false;
 		}
 
-		$codes = json_decode( file_get_contents( $file ), true );
+		$codes = json_decode( sloc_get_contents( $file ), true );
 		$codes = wp_list_pluck( $codes, 'name', 'code' );
 		if ( ! array_key_exists( $country . '-' . $region, $codes ) && ! empty( $region ) ) {
 			printf( '<input class="widefat" type=text" name="region" value="%s" required />', esc_attr( $region ) );

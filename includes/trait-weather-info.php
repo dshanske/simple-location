@@ -74,8 +74,8 @@ trait Weather_Info_Trait {
 			$summary = $icon;
 		}
 		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), $icon );
-		if ( file_exists( $svg ) ) {
-			return PHP_EOL . sprintf( '<span class="sloc-weather-icon sloc-icon-%1$s" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), file_get_contents( $svg ) );
+		if ( sloc_file_exists( $svg ) ) {
+			return PHP_EOL . sprintf( '<span class="sloc-weather-icon sloc-icon-%1$s" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), sloc_get_contents( $svg ) );
 		}
 		return '';
 	}

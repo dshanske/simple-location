@@ -629,3 +629,24 @@ function sloc_get_attachment_datetime( $attachment, $field = 'created' ) {
 	}
 		return date_create_immutable_from_format( 'Y-m-d H:i:s', $time, wp_timezone() );
 }
+
+function sloc_file_exists( $file ) {
+		require_once ( ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php' );
+		require_once ( ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php' );
+		$wpfile = new WP_Filesystem_Direct( false );
+		return $wpfile->exists( $file );
+}
+
+function sloc_get_contents( $file ) {
+		require_once ( ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php' );
+		require_once ( ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php' );
+		$wpfile = new WP_Filesystem_Direct( false );
+		return $wpfile->get_contents( $file );
+}
+
+function sloc_get_contents_array( $file ) {
+		require_once ( ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php' );
+		require_once ( ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php' );
+		$wpfile = new WP_Filesystem_Direct( false );
+		return $wpfile->get_contents_array( $file );
+}

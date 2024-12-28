@@ -259,7 +259,7 @@ class Geo_Base {
 		);
 
 		foreach ( $look as $l ) {
-			if ( file_exists( $l . $template_name ) ) {
+			if ( sloc_file_exists( $l . $template_name ) ) {
 				return $l . $template_name;
 			}
 		}

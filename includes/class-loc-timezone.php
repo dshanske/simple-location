@@ -70,10 +70,10 @@ class Loc_Timezone {
 
 	private static function tz_data() {
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/tz_cities.txt';
-		if ( ! file_exists( $file ) ) {
+		if ( ! sloc_file_exists( $file ) ) {
 			return new WP_Error( 'filesystem_error', "File doesn't exist" );
 		}
-		return file( $file );
+		return sloc_get_contents_array( $file );
 	}
 
 	public static function rest_prepare_post( $response, $post, $request ) {
