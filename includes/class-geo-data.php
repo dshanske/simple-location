@@ -859,7 +859,6 @@ class Geo_Data {
 			'fa-suitcase'                  => __( 'Suitcase', 'simple-location' ),
 			'fa-suitcase-rolling'          => __( 'Suitcase - Rolling', 'simple-location' ),
 			'fa-walking'                   => __( 'Walking', 'simple-location' ),
-			'fa-running'                   => __( 'Running', 'simple-location' ),
 			'americanairlines'             => __( 'American Airlines', 'simple-location' ),
 			's7airlines'                   => __( 'S7 Airlines', 'simple-location' ),
 			'unitedairlines'               => __( 'United Airlines', 'simple-location' ),

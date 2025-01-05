@@ -219,7 +219,7 @@ final class Location_Taxonomy {
 				update_term_meta( $term_id, $type, sanitize_text_field( $_POST['location-code'] ) );
 			}
 			return;
-			
+
 		}
 
 		if ( array_key_exists( $type, $_POST ) ) {
@@ -438,7 +438,14 @@ final class Location_Taxonomy {
 				?>
 				<select name="<?php echo esc_attr( "tax_input[$taxonomy][]" ); ?>" class="widefat">
 					<option value="0"></option>
-					<?php foreach ( get_terms( $taxonomy, array( 'hide_empty' => false ) ) as $term ) : ?>
+					<?php
+					foreach ( get_terms(
+						array(
+							'taxonomy'   => $taxonomy,
+							'hide_empty' => false,
+						)
+					) as $term ) :
+						?>
 						<option value="<?php echo esc_attr( $term->slug ); ?>" <?php echo selected( $term->term_id, count( $selected ) >= 1 ? $selected[0] : '' ); ?>><?php echo esc_html( $term->name ); ?></option>
 					<?php endforeach; ?>
 				</select>
@@ -540,7 +547,7 @@ final class Location_Taxonomy {
 				return false;
 			}
 			if ( $addr['country-code'] === $data['country']['code'] ) {
-				if ( $data['region']['code'] === self::region_return( $addr ) ) {
+				if ( self::region_return( $addr ) === $data['region']['code'] ) {
 					return $term_id;
 				}
 			}
@@ -849,7 +856,7 @@ final class Location_Taxonomy {
 			$term = get_term( $term->parent, 'location' );
 			if ( 0 === $term->parent ) {
 				$country = get_term_meta( $term->term_id, 'country', true );
-				if ( $country !== get_option( 'sloc_country' ) ) {
+				if ( get_option( 'sloc_country' ) !== $country ) {
 					$flag = Geo_Provider::country_flag( $country );
 					if ( $args['links'] ) {
 						$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $flag . ' ' . $term->name );
@@ -885,7 +892,7 @@ final class Location_Taxonomy {
 			$term = get_term( $term->parent, 'location' );
 			if ( 0 === $term->parent ) {
 				$country = get_term_meta( $term->term_id, 'country', true );
-				if ( $country !== get_option( 'sloc_country' ) ) {
+				if ( get_option( 'sloc_country' ) !== $country ) {
 					$flag     = Geo_Provider::country_flag( $country );
 					$return[] = $flag . ' ' . $term->name;
 				}
