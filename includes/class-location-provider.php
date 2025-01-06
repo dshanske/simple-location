@@ -344,6 +344,7 @@ abstract class Location_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Converts knots to meters.
 	 *
 	 * @param float $knots Knots.
 	 * @return float $meters Meters.

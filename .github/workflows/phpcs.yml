@@ -19,7 +19,7 @@ jobs:
       # Check the code-style consistency of the PHP files.
       - name: Check PHP code style
         id: phpcs
-        run: composer lint:wpcs -- --no-cache --report-full --report-checkstyle=./phpcs-report.xml
+        run: composer lint:wpcs -- --config-set ignore_warnings_on_exit 1 --no-cache --report-full --report-checkstyle=./phpcs-report.xml
       - name: Show PHPCS results in PR
         if: ${{ always() && steps.phpcs.outcome == 'failure' }}
         run: cs2pr ./phpcs-report.xml

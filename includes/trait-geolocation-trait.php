@@ -6,7 +6,7 @@
  */
 
 /**
- *
+ * GeoLocation Trait.
  *
  * @since 5.0.0
  */

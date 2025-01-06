@@ -1,12 +1,12 @@
 <?php
 
 /**
- * adds widget to display weather with per-user profile support
+ * Adds widget to display weather with per-user profile support
  */
 class Sloc_Weather_Widget extends WP_Widget {
 
 	/**
-	 * widget constructor
+	 * Widget constructor
 	 */
 	public function __construct() {
 		parent::__construct(
@@ -20,7 +20,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	}
 
 	/**
-	 * widget worker
+	 * Widget worker
 	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
@@ -51,7 +51,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		}
 
 		if ( is_wp_error( $weather ) ) {
-			echo $weather->get_error_message();
+			echo esc_html( $weather->get_error_message() );
 		} elseif ( is_array( $weather ) ) {
 			echo wp_kses( self::weather_list( $weather, 'fa-map', $instance ), Simple_Location_Plugin::kses_clean() );
 		} elseif ( is_string( $weather ) ) {
@@ -111,7 +111,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		}
 
 		if ( isset( $weather['_expires_at'] ) ) {
-			$return[] = printf( '<!-- %1$s: %2$s -->', __( 'Current Conditions Cache Expires At', 'simple-location' ), $weather['_expires_at'] );
+			$return[] = printf( '<!-- %1$s: %2$s -->', esc_html__( 'Current Conditions Cache Expires At', 'simple-location' ), esc_html( $weather['_expires_at'] ) );
 		}
 
 		if ( isset( $instance['showastro'] ) && 1 === (int) $instance['showastro'] && array_key_exists( 'latitude', $weather ) && array_key_exists( 'longitude', $weather ) ) {
