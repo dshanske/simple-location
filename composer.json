@@ -62,8 +62,8 @@
     "prefer-stable" : true,
     "scripts": {
 	"lint:phpcpd": "./vendor/bin/phpcpd --fuzzy --exclude .git --exclude vendor --exclude node_modules .",
-        "lint:wpcs": "./vendor/bin/phpcs",
-        "lint:wpcs-fix": "./vendor/bin/phpcbf",
+        "phpcs": "./vendor/bin/phpcs",
+        "phpcbf": "./vendor/bin/phpcbf",
 	"lint": "./vendor/bin/phpcs -n -q",
 	"phpunit": "./vendor/bin/phpunit",
 	"setup-wp-tests": "bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest",
