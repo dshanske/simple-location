@@ -215,6 +215,7 @@ jQuery( document ).ready( function( $ ) {
 						$( '#post-timezone' ).val( response.timezone );
 						$( '#post-timezone-label' ).text( response.timezone );
 						$( '#local-timezone' ).val( response.timezone );
+						$( '#user-timezone' ).val( response.timezone );
 					}
 					if ( 'weather' in response ) {
 						weather = response.weather;
