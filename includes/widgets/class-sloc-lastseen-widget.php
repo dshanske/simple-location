@@ -1,15 +1,15 @@
 <?php
 
 /**
- * adds widget to display Last Seen
+ * Adds widget to display Last Seen
  */
-class Sloc_Lastseen_Widget extends WP_Widget {
+class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 
 	/**
-	 * widget constructor
+	 * Widget constructor
 	 */
 	public function __construct() {
-		parent::__construct(
+		WP_Widget::__construct(
 			'Sloc_Lastseen_Widget',
 			__( 'User Last Seen', 'simple-location' ),
 			array(
@@ -20,7 +20,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 	}
 
 	/**
-	 * widget worker
+	 * Widget worker
 	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
@@ -45,60 +45,12 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			echo '<ul class="sloc-lastseen-data">';
 			$user    = new WP_User( $instance['user'] );
-			$geodata = get_geodata( $user );
-			if ( 1 === (int) $instance['showtime'] ) {
-				$format   = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
-				$timezone = Loc_Timezone::get_timezone( $user );
-				printf(
-					'<li>%1$s<time datetime="%2$s">%3$s</time></li>',
-					Weather_Provider::get_icon( 'wi-time-1', __( 'Local Time', 'simple-location' ) ),
-					esc_attr( wp_date( DATE_W3C, null, $timezone ) ),
-					esc_html( wp_date( $format, null, $timezone ) )
-				);
-			}
-			if ( 1 === (int) $instance['showastro'] ) {
-				$calc = new Astronomical_Calculator( $geodata['latitude'], $geodata['longitude'], ifset( $geodata['altitude'], 0 ) );
-
-				printf(
-					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
-					Weather_Provider::get_icon( 'wi-sunrise', __( 'Sunrise', 'simple-location' ) ),
-					esc_html__( 'Sunrise', 'simple-location' ),
-					esc_attr( $calc->get_iso8601( null, 'sunrise' ) ),
-					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunrise' ) )
-				);
-				printf(
-					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
-					Weather_Provider::get_icon( 'wi-sunset', __( 'Sunset', 'simple-location' ) ),
-					esc_html__( 'Sunset', 'simple-location' ),
-					esc_attr( $calc->get_iso8601( null, 'sunset' ) ),
-					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunset' ) )
-				);
-				printf(
-					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
-					Weather_Provider::get_icon( 'wi-moonrise', __( 'Moonrise', 'simple-location' ) ),
-					esc_html__( 'Moonrise', 'simple-location' ),
-					esc_attr( $calc->get_iso8601( null, 'moonrise' ) ),
-					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonrise' ) )
-				);
-				printf(
-					'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
-					Weather_Provider::get_icon( 'wi-moonset', __( 'Moonset', 'simple-location' ) ),
-					esc_html__( 'Moonset', 'simple-location' ),
-					esc_attr( $calc->get_iso8601( null, 'moonset' ) ),
-					esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonset' ) )
-				);
-				$moon = $calc->get_moon_data();
-				printf(
-					'<li>%1$s%2$s: %3$s(%4$s)</li>',
-					Weather_Provider::get_icon( $moon['icon'], __( 'Moon Phase', 'simple-location' ) ),
-					esc_html__( 'Moon Phase', 'simple-location' ),
-					esc_html( $moon['text'] ),
-					esc_html( round( $moon['fraction'] * 100 ) . '%' )
-				);
-			}
+			$geodata = get_user_geodata( $user->ID );
+			$return  = self::astro_list( $geodata );
+			echo implode( $return );
 			if ( 1 === (int) $instance['showtext'] ) {
-				$location = Geo_Data::get_location(
-					$user,
+				$location = get_user_location(
+					$user->ID,
 					array(
 						'weather' => false,
 						'markup'  => false,
@@ -112,7 +64,7 @@ class Sloc_Lastseen_Widget extends WP_Widget {
 			}
 			if ( 1 === (int) $instance['showmap'] ) {
 				echo get_user_map( // phpcs:ignore
-					$user,
+					$user->ID,
 					array(
 						'height' => 150,
 						'width'  => 150,

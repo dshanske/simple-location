@@ -1,12 +1,12 @@
 <?php
 
 /**
- * adds widget to display weather station data with per-provider support
+ * Adds widget to display weather station data with per-provider support
  */
 class Sloc_Station_Widget extends Sloc_Weather_Widget {
 
 	/**
-	 * widget constructor
+	 * Widget constructor
 	 */
 	public function __construct() {
 		WP_Widget::__construct(
@@ -20,7 +20,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	}
 
 	/**
-	 * widget data updater
+	 * Widget data updater
 	 *
 	 * @param mixed $new_instance new widget data
 	 * @param mixed $old_instance current widget data
@@ -38,20 +38,16 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 
 	public static function provider_list( $option, $name, $id ) {
 		$providers = Loc_Config::weather_providers( true );
-		if ( count( $providers ) > 1 ) {
-				printf( '<select name="%1$s">', esc_attr( $name ) );
-			foreach ( $providers as $key => $value ) {
-				printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $option, $key ), $value['name'] ); // phpcs:ignore
-			}
-				echo '</select>';
-				echo '<br /><br />';
-		} else {
-				printf( '<input name="%1$s" type="radio" id="%1$s" value="%2$s" checked /><span>%3$s</span>', esc_attr( $name ), esc_attr( $value ), esc_html( reset( $providers ) ) );
+		printf( '<select name="%1$s">', esc_attr( $name ) );
+		foreach ( $providers as $key => $value ) {
+			printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $option, $key ), $value['name'] ); // phpcs:ignore
 		}
+		echo '</select>';
+		echo '<br /><br />';
 	}
 
 	/**
-	 * widget worker
+	 * Widget worker
 	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
@@ -92,7 +88,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	}
 
 	/**
-	 * widget form
+	 * Widget form
 	 *
 	 * @param mixed $instance
 	 *

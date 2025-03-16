@@ -23,7 +23,11 @@ function set_comment_geodata( $comment, $key, $geodata ) {
 }
 
 function set_user_geodata( $id, $key, $geodata ) {
-	return Geo_Data::set_geodata( 'user', $id, $key, $geodata );
+	$user = sloc_get_user( $id );
+	if ( $user ) {
+		return false;
+	}
+	return Geo_Data::set_geodata( 'user', $user->ID, $key, $geodata );
 }
 
 function set_term_geodata( $id, $key, $geodata ) {
@@ -72,6 +76,9 @@ function get_array_post_geodata( $posts ) {
  */
 function is_day_post( $post = null ) {
 	$post = get_post( $post );
+	if ( ! $post ) {
+		return false;
+	}
 	$day  = get_post_geodata( $post, 'day' );
 	if ( ! empty( $day ) ) {
 		return $day;
@@ -121,8 +128,12 @@ function is_day_comment( $comment = null ) {
  * Wrapper around get_geodata for user IDs or objects
  *
  */
-function get_user_geodata( $user_id, $key = '' ) {
-	return Geo_Data::get_geodata( 'user', $user_id, $key );
+function get_user_geodata( $user = null, $key = '' ) {
+	$user = sloc_get_user( $user );
+	if ( ! $user ) {
+		return false;
+	}
+	return Geo_Data::get_geodata( 'user', $user->ID, $key );
 }
 
 /*
@@ -133,27 +144,36 @@ function get_term_geodata( $term_id, $key = '' ) {
 	return Geo_Data::get_geodata( 'term', $term_id, $key );
 }
 
-function set_post_weatherdata( $post_id, $key, $weather ) {
-	return Sloc_Weather_Data::set_object_weatherdata( 'post', $post_id, $key, $weather );
+function set_post_weatherdata( $post, $key, $weather ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return false;
+	}
+	return Sloc_Weather_Data::set_object_weatherdata( 'post', $post->ID, $key, $weather );
 }
 
 function set_comment_weatherdata( $comment_id, $key, $weather ) {
 	return Sloc_Weather_Data::set_object_weatherdata( 'comment', $comment_id, $key, $weather );
 }
 
-function set_user_weatherdata( $user_id, $weather ) {
-	return Sloc_Weather_Data::set_object_weatherdata( 'user', $user_id, $key, $weather );
+function set_user_weatherdata( $user, $weather ) {
+	$user = sloc_get_user( $user );
+	if ( ! $user ) {
+		return false;
+	}
+	return Sloc_Weather_Data::set_object_weatherdata( 'user', $user->ID, $key, $weather );
 }
 
 function set_term_weatherdata( $term_id, $weather ) {
 	return Sloc_Weather_Data::set_object_weatherdata( 'term', $term_id, $key, $weather );
 }
 
-function get_post_weatherdata( $post_id = null, $key = '' ) {
-	if ( ! $post_id ) {
-		$post_id = get_the_ID();
+function get_post_weatherdata( $post = null, $key = '' ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return false;
 	}
-	return Sloc_Weather_Data::get_object_weatherdata( 'post', $post_id, $key );
+	return Sloc_Weather_Data::get_object_weatherdata( 'post', $post->ID, $key );
 }
 
 function get_comment_weatherdata( $comment_id, $key = '' ) {
@@ -164,19 +184,28 @@ function get_term_weatherdata( $term_id, $key = '' ) {
 	return Sloc_Weather_Data::get_object_weatherdata( 'term', $term_id, $key );
 }
 
-function get_user_weatherdata( $user_id, $key = '' ) {
-	return Sloc_Weather_Data::get_object_weatherdata( 'user', $user_id, $key );
-}
-
-function get_post_map( $post_id = null, $args = array() ) {
-	if ( ! $post_id ) {
-		$post_id = get_the_ID();
+function get_user_weatherdata( $user, $key = '' ) {
+	$user = sloc_get_user( $user );
+	if ( ! $user ) {
+		return false;
 	}
-	return Geo_Data::get_map( 'post', $post_id, $args );
+	return Sloc_Weather_Data::get_object_weatherdata( 'user', $user->ID, $key );
 }
 
-function get_user_map( $user_id, $args = array() ) {
-	return Geo_Data::get_map( 'user', $user_id, $args );
+function get_post_map( $post = null, $args = array() ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return false;
+	}
+	return Geo_Data::get_map( 'post', $post->ID, $args );
+}
+
+function get_user_map( $user, $args = array() ) {
+	$user = sloc_get_user( $user );
+	if ( ! $user ) {
+		return false;
+	}
+	return Geo_Data::get_map( 'user', $user->ID, $args );
 }
 
 function get_comment_map( $comment_id, $args = array() ) {
@@ -195,19 +224,24 @@ function get_simple_location( $object = null, $args = array() ) {
 	return Geo_Data::get_location( sloc_get_type_from_object( $object ), sloc_get_id_from_object( $object ), $args );
 }
 
-function get_post_location( $id = null, $args = array() ) {
-	if ( ! $id ) {
-		$id = get_the_ID();
+function get_post_location( $post = null, $args = array() ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return false;
 	}
-	return Geo_Data::get_location( 'post', $id, $args );
+	return Geo_Data::get_location( 'post', $post->ID, $args );
 }
 
 function get_comment_location( $id, $args = array() ) {
 	return Geo_Data::get_location( 'comment', $id, $args );
 }
 
-function get_user_location( $id, $args = array() ) {
-	return Geo_Data::get_location( 'user', $id, $args );
+function get_user_location( $user, $args = array() ) {
+	$user = sloc_get_user( $user );
+	if ( ! $user ) {
+		return false;
+	}
+	return Geo_Data::get_location( 'user', $user->ID, $args );
 }
 
 function get_term_location( $id, $args = array() ) {

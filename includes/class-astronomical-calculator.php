@@ -120,8 +120,8 @@ class Astronomical_Calculator {
 		switch ( $type ) {
 			case 'sunset':
 				return $times['sunset'];
-				$function = 'date_sunset';
-				break;
+				/* $function = 'date_sunset';
+				break; */
 			case 'moonset':
 				$moon = $this->get_moon_times( $timestamp );
 				return $moon['moonset'];
@@ -130,9 +130,9 @@ class Astronomical_Calculator {
 				return $moon['moonrise'];
 			default:
 				return $times['sunrise'];
-				$function = 'date_sunrise';
+				/* $function = 'date_sunrise'; */
 		}
-		return call_user_func( $function, $timestamp, SUNFUNCS_RET_TIMESTAMP, $this->latitude, $this->longitude, self::get_zenith( $this->elevation ) );
+		// return call_user_func( $function, $timestamp, SUNFUNCS_RET_TIMESTAMP, $this->latitude, $this->longitude, self::get_zenith( $this->elevation ) );
 	}
 
 
@@ -674,34 +674,5 @@ class Astronomical_Calculator {
 			$omega += 2.0 * pi();
 		}
 		return $omega;
-	}
-
-
-	/**
-	 *  Uses mean wm/2 for the last hour to estimate cloudiness.
-	 *
-	 * @param float $wm2 WM/2.
-	 * @param int   $humidity Humidity.
-	 * @return int Cloudiness as a percentage.
-	 */
-	public function cloudiness( $wm2, $humidity ) {
-		$clear = self::clear_sky_radiation( $this->sun_radiation( 1.0 ) );
-		$mean  = $wm2 * 0.0036;
-		if ( $clear ) {
-			// Return Cloudiness as a percentage number.
-			return round( $mean / $clear * 100 );
-		} else {
-			// If it is nighttime you cannot tell how cloudy it is this way, therefore estimate based on humidity.
-			if ( $humidity > 80 ) {
-				// Humid - Lots of Clouds.
-				return 70;
-			} elseif ( $humidity > 40 ) {
-				// Somewhat humid. Modest cloud clover.
-				return 50;
-			} else {
-				// Low humidity no clouds.
-				return 20;
-			}
-		}
 	}
 }

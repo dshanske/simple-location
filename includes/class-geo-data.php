@@ -222,6 +222,9 @@ class Geo_Data {
 		 */
 		$check = apply_filters( "delete_{$type}_geodata", null, $type, $id, $key );
 
+		if ( ! is_null( $check ) ) {
+			return $check;
+		}
 		return delete_metadata( $type, $id, 'geo_' . $key );
 	}
 
@@ -985,7 +988,7 @@ class Geo_Data {
 			'wrapper-class' => array( 'sloc-display' ), // Class or classes to wrap the entire location in
 			'wrapper-type'  => 'div', // HTML type to wrap the entire location in
 		);
-		$default  = apply_filters( 'simple_location_display_defaults', $defaults );
+		$defaults = apply_filters( 'simple_location_display_defaults', $defaults );
 		$args     = wp_parse_args( $args, $defaults );
 		$args     = array_merge( $loc, $args );
 		$map      = Loc_Config::map_provider();
@@ -1009,7 +1012,7 @@ class Geo_Data {
 			$c[] = $args['description'];
 		}
 
-		if ( ( 'post' === $type ) && ( in_array( get_post_type( $id ), get_post_types_by_support( 'geo-location' ) ) ) ) {
+		if ( ( 'post' === $type ) && ( in_array( get_post_type( $id ), get_post_types_by_support( 'geo-location' ), true ) ) ) {
 			$term  = Location_Taxonomy::get_post_location( $id );
 			$venue = Post_Venue::get_post_venue( $id );
 			// If by some chance there is a venue but no term set the location to the venue location.
@@ -1093,6 +1096,6 @@ class Geo_Data {
 		}
 
 		$return = implode( PHP_EOL, $c );
-		return sprintf( '<%1s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], implode( ' ', $class ), $return );
+		return sprintf( $wrap, $args['wrapper-type'], implode( ' ', $class ), $return );
 	}
 }

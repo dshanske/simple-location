@@ -37,6 +37,10 @@ class Sloc_Weather_Widget extends WP_Widget {
 			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore
 		}
 		$w = Loc_Config::weather_provider();
+		if ( ! $w ) {
+			esc_html_e( 'No Weather Provider Set!', 'simple-location' );
+			return;
+		}
 		if ( isset( $instance['cache_time'] ) ) {
 			$w->set_cache_time( $instance['cache_time'] );
 		}
@@ -46,7 +50,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			$w->set( $instance['latitude'], $instance['longitude'] );
 			$weather = $w->get_conditions();
 		} else {
-			echo 'no';
+			esc_html_e( 'No Input Provided', 'simple-location' );
 			return;
 		}
 
@@ -60,14 +64,58 @@ class Sloc_Weather_Widget extends WP_Widget {
 		echo $args['after_widget']; // phpcs:ignore
 	}
 
+	protected static function astro_list( $weather ) {
+		if ( ! is_array( $weather ) ) {
+			return array();
+		}
+		$calc     = new Astronomical_Calculator( $weather['latitude'], $weather['longitude'], ifset( $weather['altitude'], 0 ) );
+		$return[] = sprintf(
+			'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+			Weather_Provider::get_icon( 'wi-sunrise', __( 'Sunrise', 'simple-location' ) ),
+			esc_html__( 'Sunrise', 'simple-location' ),
+			esc_attr( $calc->get_iso8601( null, 'sunrise' ) ),
+			esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunrise' ) )
+		);
+		$return[] = sprintf(
+			'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+			Weather_Provider::get_icon( 'wi-sunset', __( 'Sunset', 'simple-location' ) ),
+			esc_html__( 'Sunset', 'simple-location' ),
+			esc_attr( $calc->get_iso8601( null, 'sunset' ) ),
+			esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunset' ) )
+		);
+		$return[] = sprintf(
+			'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+			Weather_Provider::get_icon( 'wi-moonrise', __( 'Moonrise', 'simple-location' ) ),
+			esc_html__( 'Moonrise', 'simple-location' ),
+			esc_attr( $calc->get_iso8601( null, 'moonrise' ) ),
+			esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonrise' ) )
+		);
+		$return[] = sprintf(
+			'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
+			Weather_Provider::get_icon( 'wi-moonset', __( 'Moonset', 'simple-location' ) ),
+			esc_html__( 'Moonset', 'simple-location' ),
+			esc_attr( $calc->get_iso8601( null, 'moonset' ) ),
+			esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonset' ) )
+		);
+		$moon     = $calc->get_moon_data();
+		$return[] = sprintf(
+			'<li>%1$s%2$s: %3$s(%4$s)</li>',
+			Weather_Provider::get_icon( $moon['icon'], __( 'Moon Phase', 'simple-location' ) ),
+			esc_html__( 'Moon Phase', 'simple-location' ),
+			esc_html( $moon['text'] ),
+			esc_html( round( $moon['fraction'] * 100 ) . '%' )
+		);
+		return $return;
+	}
+
 	protected static function weather_list( $weather, $icon = 'fa-map', $instance = null ) {
 		if ( ! is_array( $weather ) ) {
 			return '';
 		}
 
-		$measurements = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
-		$return       = array( PHP_EOL );
-		$return[]     = '<h2>';
+		$units    = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
+		$return   = array( PHP_EOL );
+		$return[] = '<h2>';
 
 		if ( ! empty( $weather['icon'] ) ) {
 			$return[] = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
@@ -87,8 +135,6 @@ class Sloc_Weather_Widget extends WP_Widget {
 		}
 		if ( array_key_exists( 'units', $weather ) ) {
 			$units = $weather['units'];
-		} else {
-			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		}
 		if ( 'imperial' === $units ) {
 			$weather = Weather_Provider::metric_to_imperial( $weather );
@@ -115,43 +161,8 @@ class Sloc_Weather_Widget extends WP_Widget {
 		}
 
 		if ( isset( $instance['showastro'] ) && 1 === (int) $instance['showastro'] && array_key_exists( 'latitude', $weather ) && array_key_exists( 'longitude', $weather ) ) {
-			$calc     = new Astronomical_Calculator( $weather['latitude'], $weather['longitude'], ifset( $weather['altitude'], 0 ) );
-			$return[] = sprintf(
-				'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
-				Weather_Provider::get_icon( 'wi-sunrise', __( 'Sunrise', 'simple-location' ) ),
-				esc_html__( 'Sunrise', 'simple-location' ),
-				esc_attr( $calc->get_iso8601( null, 'sunrise' ) ),
-				esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunrise' ) )
-			);
-			$return[] = sprintf(
-				'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
-				Weather_Provider::get_icon( 'wi-sunset', __( 'Sunset', 'simple-location' ) ),
-				esc_html__( 'Sunset', 'simple-location' ),
-				esc_attr( $calc->get_iso8601( null, 'sunset' ) ),
-				esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'sunset' ) )
-			);
-			$return[] = sprintf(
-				'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
-				Weather_Provider::get_icon( 'wi-moonrise', __( 'Moonrise', 'simple-location' ) ),
-				esc_html__( 'Moonrise', 'simple-location' ),
-				esc_attr( $calc->get_iso8601( null, 'moonrise' ) ),
-				esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonrise' ) )
-			);
-			$return[] = sprintf(
-				'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
-				Weather_Provider::get_icon( 'wi-moonset', __( 'Moonset', 'simple-location' ) ),
-				esc_html__( 'Moonset', 'simple-location' ),
-				esc_attr( $calc->get_iso8601( null, 'moonset' ) ),
-				esc_html( $calc->get_formatted( null, get_option( 'time_format' ), 'moonset' ) )
-			);
-			$moon     = $calc->get_moon_data();
-			$return[] = sprintf(
-				'<li>%1$s%2$s: %3$s(%4$s)</li>',
-				Weather_Provider::get_icon( $moon['icon'], __( 'Moon Phase', 'simple-location' ) ),
-				esc_html__( 'Moon Phase', 'simple-location' ),
-				esc_html( $moon['text'] ),
-				esc_html( round( $moon['fraction'] * 100 ) . '%' )
-			);
+			$astro  = self::astro_list( $weather );
+			$return = array_merge( $return, $astro );
 		}
 
 		$return[] = '</ul>';
@@ -159,7 +170,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	}
 
 	/**
-	 * widget data updater
+	 * Widget data updater
 	 *
 	 * @param mixed $new_instance new widget data
 	 * @param mixed $old_instance current widget data
@@ -176,7 +187,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	}
 
 	/**
-	 * widget form
+	 * Widget form
 	 *
 	 * @param mixed $instance
 	 *

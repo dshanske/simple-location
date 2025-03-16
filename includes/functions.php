@@ -589,7 +589,7 @@ function sloc_get_attachment_datetime( $attachment, $field = 'created' ) {
 		return false;
 	}
 
-	if ( ! in_array( $field, array( 'created', 'date', 'modified' ) ) ) {
+	if ( ! in_array( $field, array( 'created', 'date', 'modified' ), true ) ) {
 		$field = 'created';
 	}
 
@@ -649,4 +649,11 @@ function sloc_get_contents_array( $file ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
 		$wpfile = new WP_Filesystem_Direct( false );
 		return $wpfile->get_contents_array( $file );
+}
+
+function sloc_get_user( $user_id = null ) {
+	if ( ! is_numeric( $user_id ) ) {
+		$user_id = get_current_user_id();
+	}
+	return get_user_by( 'id', $user_id );
 }

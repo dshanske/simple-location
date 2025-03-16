@@ -5,8 +5,13 @@
  * @package Simple_Location
  */
 
-global $profileuser;
-$geodata = get_user_geodata( $profileuser );
+wp_reset_vars( array( 'user_id' ) );
+
+if ( ! isset( $user_id ) ) {
+	$user_id = get_current_user_id();
+}
+
+$geodata = get_user_geodata( $user_id );
 $geodata = is_array( $geodata ) ? $geodata : array();
 ?>
 <div id="locationbox-meta">

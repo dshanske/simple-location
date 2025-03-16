@@ -85,7 +85,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	public function is_active() {
 		$option   = get_option( 'sloc_weather_provider' );
 		$fallback = get_option( 'sloc_fallback_weather_provider' );
-		return ( in_array( $this->slug, array( $option, $fallback ) ) );
+		return ( in_array( $this->slug, array( $option, $fallback ), true ) );
 	}
 
 	/**
@@ -133,10 +133,6 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 		$return['localtime'] = $datetime->format( DATE_W3C );
 
-		/*
-		if ( array_key_exists( 'radiation', $return ) && ! array_key_exists( 'cloudiness', $return ) ) {
-			$return['cloudiness'] = $calc->cloudiness( $return['radiation'], $return['humidity'] );
-		} */
 		return array_filter( $return );
 	}
 
@@ -190,7 +186,6 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @return string Cache Key.
 	 **/
 	private function cache_key() {
-		$key = array();
 		if ( ! empty( $this->station_id ) ) {
 			return implode( '_', array( get_called_class(), md5( $this->station_id ) ) );
 		}

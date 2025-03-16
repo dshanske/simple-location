@@ -211,6 +211,10 @@ class Sloc_Weather_Data {
 		 */
 		$check = apply_filters( "set_{$type}_weatherdata", null, $id, $type, $key, $weather );
 
+		if ( ! is_null( $check ) ) {
+			return $check;
+		}
+
 		if ( $key ) {
 			return update_metadata( $type, $id, 'weather_' . $key, $weather );
 		}
@@ -274,6 +278,10 @@ class Sloc_Weather_Data {
 		 * @param string $key  Geo data key.
 		 */
 		$check = apply_filters( "delete_{$type}_weatherdata", null, $type, $id, $key );
+
+		if ( ! is_null( $check ) ) {
+			return $check;
+		}
 
 		return delete_metadata( $type, $id, 'weather_' . $key );
 	}
