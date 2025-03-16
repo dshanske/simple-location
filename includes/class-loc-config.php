@@ -891,7 +891,7 @@ class Loc_Config {
 		} else {
 			printf( '<input name="%1$s" type="radio" id="%1$s" value="%2$s" checked /><span>%3$s</span>', esc_attr( $name ), esc_attr( key( $providers ) ), esc_html( reset( $providers ) ) );
 		}
-		if ( is_array( $providers[ $text ] ) ) {
+		if ( array_key_exists( $text, $providers ) && is_array( $providers[ $text ] ) ) {
 			if ( array_key_exists( 'url', $providers[ $text ] ) ) {
 				printf( '<p><a href="%1$s">%2$s</a> - %3$s</p>', esc_url( $providers[ $text ]['url'] ), esc_html( $providers[ $text ]['name'] ), $providers[ $text ]['description'] );
 			} else {
