@@ -226,7 +226,7 @@ abstract class Map_Provider extends Sloc_Provider {
 
 
 	// Return HTML Code for Static Map.
-	public function get_the_static_map_html( $srcset = true ) {
+	public function get_the_static_map_html( $srcset = false ) {
 		$orig   = $this->get_the_static_map();
 		$link   = $this->get_the_map_url();
 		$height = $this->height;
