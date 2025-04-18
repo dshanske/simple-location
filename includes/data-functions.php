@@ -79,7 +79,7 @@ function is_day_post( $post = null ) {
 	if ( ! $post ) {
 		return false;
 	}
-	$day  = get_post_geodata( $post, 'day' );
+	$day = get_post_geodata( $post, 'day' );
 	if ( ! empty( $day ) ) {
 		return $day;
 	}
@@ -115,9 +115,9 @@ function is_day_comment( $comment = null ) {
 	if ( ! empty( $day ) ) {
 		return $day;
 	}
-	$latitude  = get_comment_geodata( $post, 'latitude' );
-	$longitude = get_comment_geodata( $post, 'longitude' );
-	$altitude  = get_comment_geodata( $post, 'altitude' );
+	$latitude  = get_comment_geodata( $comment, 'latitude' );
+	$longitude = get_comment_geodata( $comment, 'longitude' );
+	$altitude  = get_comment_geodata( $comment, 'altitude' );
 	$calc      = new Astronomical_Calculator( $latitude, $longitude, $altitude );
 	$day       = $calc->is_daytime( get_comment_timestamp( $comment ) );
 	set_comment_geodata( $comment, 'day', $day );
@@ -156,7 +156,7 @@ function set_comment_weatherdata( $comment_id, $key, $weather ) {
 	return Sloc_Weather_Data::set_object_weatherdata( 'comment', $comment_id, $key, $weather );
 }
 
-function set_user_weatherdata( $user, $weather ) {
+function set_user_weatherdata( $user, $key, $weather ) {
 	$user = sloc_get_user( $user );
 	if ( ! $user ) {
 		return false;
@@ -164,7 +164,7 @@ function set_user_weatherdata( $user, $weather ) {
 	return Sloc_Weather_Data::set_object_weatherdata( 'user', $user->ID, $key, $weather );
 }
 
-function set_term_weatherdata( $term_id, $weather ) {
+function set_term_weatherdata( $term_id, $key, $weather ) {
 	return Sloc_Weather_Data::set_object_weatherdata( 'term', $term_id, $key, $weather );
 }
 

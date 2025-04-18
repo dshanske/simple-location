@@ -403,7 +403,7 @@ class REST_Geo {
 				$location['longitude'] = $coord[0];
 				$location['latitude']  = $coord[1];
 				$location['altitude']  = isset( $coord[2] ) ? $coord[2] : null;
-				$properties            = $response['properties'];
+				$properties            = $json['properties'];
 				$location['accuracy']  = isset( $properties['accuracy'] ) ? $properties['accuracy'] : null;
 				$location['speed']     = isset( $properties['speed'] ) ? $properties['speed'] : null;
 				$location['heading']   = isset( $properties['heading'] ) ? $properties['heading'] : null;
