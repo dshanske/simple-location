@@ -6,7 +6,7 @@
  */
 
 /**
- * Weather Provider using AerisWeather API.
+ * Weather Provider using xWeather API formerly AerisWeather.
  *
  * @since 1.0.0
  */
@@ -20,10 +20,10 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * @param array $args Arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name        = __( 'Aeris Weather', 'simple-location' );
+		$this->name        = __( 'Vaisala Xweather', 'simple-location' );
 		$this->slug        = 'aeris';
-		$this->url         = 'https://www.aerisweather.com/';
-		$this->description = __( 'While Aeris Weather does not offer a free tier, if you share your personal weather station with PWSWeather, this gives you free access to their API, which includes historic data.', 'simple-location' );
+		$this->url         = 'https://www.xweather.com/';
+		$this->description = __( 'While Xweather does not offer a free tier, if you share your personal weather station with PWSWeather, this gives you free access to their API, which includes historic data.', 'simple-location' );
 		$this->region      = false;
 		parent::__construct( $args );
 	}
@@ -34,14 +34,14 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function init() {
-		self::register_settings_api( __( 'Aeris Client ID', 'simple-location' ), 'sloc_aeris_client_id' );
-		self::register_settings_api( __( 'Aeris Client Secret', 'simple-location' ), 'sloc_aeris_client_secret' );
+		self::register_settings_api( __( 'Xweather Client ID', 'simple-location' ), 'sloc_aeris_client_id' );
+		self::register_settings_api( __( 'Xweather Client Secret', 'simple-location' ), 'sloc_aeris_client_secret' );
 		register_setting(
 			'sloc_providers', // Option group.
 			'sloc_aeris_pws', // Option name.
 			array(
 				'type'         => 'number',
-				'description'  => 'Include Personal Weather Stations in AerisWeather Data',
+				'description'  => 'Include Personal Weather Stations in Xweather Data',
 				'show_in_rest' => false,
 				'default'      => 0,
 			)
@@ -54,13 +54,13 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * @since 4.0.0
 	 */
 	public static function admin_init() {
-		self::add_settings_parameter( __( 'AerisWeather', 'simple-location' ), 'sloc_aeris_client_id', __( 'Client ID', 'simple-location' ) );
+		self::add_settings_parameter( __( 'Xweather', 'simple-location' ), 'sloc_aeris_client_id', __( 'Client ID', 'simple-location' ) );
 
-		self::add_settings_parameter( __( 'AerisWeather', 'simple-location' ), 'sloc_aeris_client_secret', __( 'Client Secret', 'simple-location' ) );
+		self::add_settings_parameter( __( 'Xweather', 'simple-location' ), 'sloc_aeris_client_secret', __( 'Client Secret', 'simple-location' ) );
 
 		add_settings_field(
 			'aerisweatherpws', // ID.
-			__( 'Include Personal Weather Stations in AerisWeather Provider', 'simple-location' ), // Setting title.
+			__( 'Include Personal Weather Stations in Xweather Provider', 'simple-location' ), // Setting title.
 			array( 'Loc_Config', 'checkbox_callback' ), // Display callback.
 			'sloc_providers', // Settings page.
 			'sloc_api', // Settings section.
@@ -115,7 +115,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 				$args['filter'] = 'allstations';
 			}
 
-			$url  = 'https://api.aerisapi.com/observations/closest';
+			$url  = 'https://data.api.xweather.com/observations/closest';
 			$json = $this->fetch_json( $url, $args );
 			if ( array_key_exists( 'success', $json ) && 'false' === $json['success'] ) {
 				return $json;
