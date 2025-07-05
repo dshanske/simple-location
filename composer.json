@@ -32,6 +32,11 @@
 				"url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat",
 				"path": "data/airlines.csv",
 				"type": "file"
+			},
+			"meteostat": {
+				"url": "https://bulk.meteostat.net/v2/stations/lite.json.gz",
+				"path": "data/lite.json.gz",
+				"type": "gzip"
 			}
 		}
      },
