@@ -2,10 +2,10 @@
 
 **Contributors:** dshanske \
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb \
-**Requires at least:** 4.9 \
-**Tested up to:** 6.4 \
-**Stable tag:** 5.0.23 \
-**Requires PHP:** 5.6 \
+**Requires at least:** 6.2 \
+**Tested up to:** 6.8 \
+**Stable tag:** 5.0.24 \
+**Requires PHP:** 7.4 \
 **License:** GPLv2 or later \
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -288,6 +288,15 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog
+
+### 5.0.24 ( 2025-??-?? )
+
+* Fix issues with Last Seen Widget
+* Refresh data
+* Identify short circuit logic that was not triggering
+* Fix variable naming
+* Toggle srcset to false by default due load
+* Update weather providers to latest APIs where possible
 
 ### 5.0.23 ( 2024-02-02 )
 
