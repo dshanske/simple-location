@@ -30,7 +30,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		$this->name        = __( 'Meteostat', 'simple-location' );
 		$this->slug        = 'meteostat';
 		$this->url         = 'https://meteostat.net';
-		$this->description = __( 'Meteostat is an open and free archive for weather data, and offers bulk historic weather data. It does not offer current weather consistently.', 'simple-location' );
+		$this->description = __( 'Meteostat is an open archive for weather data, and offers bulk historic weather data. It does not offer current weather consistently. The data is free, but using their JSON API is free for 500 requests a month', 'simple-location' );
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_meteostat_api' );
 		}
@@ -144,8 +144,18 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		);
 
 		// For historic data.
-		$url  = 'https://api.meteostat.net/v2/stations/hourly.php';
-		$json = $this->fetch_json( $url, $args, array( 'x-api-key' => $this->api ) );
+		$url  = 'https://meteostat.p.rapidapi.com/stations/hourly';
+		$json = $this->fetch_json(
+			$url,
+			$args,
+			array(
+				'x-rapidapi-key' => $this->api,
+			       	'x-rapidapi-host' => 'meteostat.p.rapidapi.com',
+			)
+		);
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
 		if ( array_key_exists( 'meta', $json ) ) {
 			$return['meta'] = $json['meta'];
 		}

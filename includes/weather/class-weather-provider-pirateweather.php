@@ -70,11 +70,12 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			return array();
 		}
 		$return = array();
+		error_log( get_bloginfo( 'language' ) );
 		if ( $this->latitude && $this->longitude ) {
 			$data = array(
 				'units'   => 'si',
 				'exclude' => 'minutely,hourly,daily,alerts,flags',
-				'lang'    => get_bloginfo( 'language' ),
+				'lang'    => substr( get_bloginfo( 'language' ), 0, 2 ),
 			);
 
 			$datetime = $this->datetime( $time );
