@@ -359,7 +359,7 @@ class Geo_Base {
 	public static function manage_location_admin_column( $column, $post_id ) {
 		if ( 'location' === $column ) {
 			if ( ! has_post_location( $post_id ) ) {
-				echo esc_html_e( 'None', 'simple-location' );
+				esc_html_e( 'None', 'simple-location' );
 			} else {
 				$geo_public = self::geo_public();
 				$visibility = get_post_geodata( $post_id, 'visibility' );
