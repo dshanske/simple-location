@@ -18,6 +18,7 @@
  */
 
 add_action( 'plugins_loaded', array( 'Simple_Location_Plugin', 'init' ) );
+add_action( 'init', array( 'Simple_Location_Plugin', 'load_textdomain' ) );
 
 // Activation and Deactivation Hooks.
 register_activation_hook( __FILE__, array( 'Simple_Location_Plugin', 'activate' ) );
@@ -179,6 +180,15 @@ class Simple_Location_Plugin {
 
 
 	/**
+	 * Load text domain for translations.
+	 *
+	 * @since 5.0.24
+	 */
+	public static function load_textdomain() {
+		load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+	}
+
+	/**
 	 * Plugin Initializaton Function.
 	 *
 	 * Meant to be attached to plugins_loaded hook.
@@ -188,8 +198,6 @@ class Simple_Location_Plugin {
 	public static function init() {
 		self::$version = get_file_data( __FILE__, array( 'Version' => 'Version' ) )['Version'];
 		self::$path    = plugin_dir_path( __FILE__ );
-
-		load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 		// Load stylesheets.
 		add_action( 'wp_enqueue_scripts', array( static::class, 'style_load' ) );
