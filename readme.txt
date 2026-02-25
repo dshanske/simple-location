@@ -288,13 +288,14 @@ will now be required to show maps for services that require API keys.
 
 == Changelog ==
 
-= 5.0.24 ( 2025-??-?? ) =
+= 5.0.24 ( 2026-02-25 ) =
 * Fix issues with Last Seen Widget
 * Refresh data
 * Identify short circuit logic that was not triggering
 * Fix variable naming
 * Toggle srcset to false by default due load
 * Update weather providers to latest APIs where possible
+* Fix text domain warning error
 
 = 5.0.23 ( 2024-02-02 ) =
 * Fix issues with media metadata saving
