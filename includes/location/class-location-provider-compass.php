@@ -83,7 +83,8 @@ class Location_Provider_Compass extends Location_Provider {
 			'user-agent'          => 'Simple Location for WordPress',
 		);
 
-		$response = wp_remote_get( $url, $args );
+		/* Deny development sites for now */
+		$response = wp_safe_remote_get( $url, $args );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}

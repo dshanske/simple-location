@@ -68,7 +68,8 @@ class Map_Provider_Mapbox extends Map_Provider {
 					// Use an explicit user-agent for Simple Location
 					'user-agent'          => 'Simple Location for WordPress',
 				);
-				$request = wp_remote_get( $url, $args );
+				/* Disable development sites usage for now */
+				$request = wp_safe_remote_get( $url, $args );
 				if ( is_wp_error( $request ) ) {
 					return $request; // Bail early.
 				}

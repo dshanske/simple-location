@@ -148,7 +148,8 @@ abstract class Sloc_Provider {
 			$args['headers'] = array_merge( $args['headers'], $headers );
 		}
 
-		$response = wp_remote_get( $fetch, $args );
+		/* Disable development sites for now */
+		$response = wp_safe_remote_get( $fetch, $args );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
