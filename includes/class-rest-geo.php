@@ -725,6 +725,9 @@ class REST_Geo {
 			}
 		}
 		$params['altitude'] = ifset( $params['altitude'], null );
+		if ( ! array_key_exists( 'latitude', $params ) || ! array_key_exists( 'longitude', $params ) ) {
+			return new WP_Error( 'location_not_provided', __( 'No location data was provided', 'simple-location' ) );
+		}
 
 		$timezone = Loc_Timezone::timezone_for_location( $params['latitude'], $params['longitude'] );
 		if ( ! $timezone instanceof Timezone_Result ) {
