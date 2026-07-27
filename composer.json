@@ -17,7 +17,8 @@
     	"allow-plugins": {
          "composer/installers": true,
          "dealerdirect/phpcodesniffer-composer-installer": true,
-         "civicrm/composer-downloads-plugin": true
+         "civicrm/composer-downloads-plugin": true,
+         "php-http/discovery": true
       }
     },
      "extra": {
