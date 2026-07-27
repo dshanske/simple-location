@@ -1020,7 +1020,8 @@ class Geo_Base {
 		}
 
 		if ( array_key_exists( 'location_icon', $data ) && ! empty( $data['location_icon'] ) ) {
-			$data['icon'] = $data['location_icon'];
+			/* Ensure that paths cannot be saved in the database */
+			$data['icon'] = basename( $data['location_icon'] );
 			unset( $data['location_icon'] );
 		}
 
