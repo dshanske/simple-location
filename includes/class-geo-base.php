@@ -1082,7 +1082,7 @@ class Geo_Base {
 		}
 
 		if ( array_key_exists( 'weather_icon', $_POST ) ) {
-			$weather['icon'] = sanitize_text_field( $_POST['weather_icon'] );
+			$weather['icon'] = basename( sanitize_text_field( $_POST['weather_icon'] ) );
 		}
 
 		if ( 'imperial' === $units && $convert ) {
