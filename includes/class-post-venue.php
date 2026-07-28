@@ -276,19 +276,21 @@ class Post_Venue {
 			case 'venue_children':
 				$count = 0;
 				foreach ( $post_ids as $post_id ) {
-					$data = get_post_geodata( $post_id );
-					if ( ! array_key_exists( 'longitude', $data ) && ! array_key_exists( 'latitude', $data ) ) {
-						$ids = self::get_venue_posts( $post_id );
-						if ( ! empty( $ids ) ) {
-							$data = get_post_geodata( $ids[0] );
-							if ( array_key_exists( 'longitude', $data ) ) {
-								set_post_geodata( $post_id, '', $data );
-								$location = Location_Taxonomy::get_location_taxonomy( $ids[0] );
-								if ( $location ) {
-									Location_Taxonomy::set_location( $post_id, $location->term_id );
+					if ( current_user_can( 'edit_post', $post_id ) ) {
+						$data = get_post_geodata( $post_id );
+						if ( ! array_key_exists( 'longitude', $data ) && ! array_key_exists( 'latitude', $data ) ) {
+							$ids = self::get_venue_posts( $post_id );
+							if ( ! empty( $ids ) ) {
+								$data = get_post_geodata( $ids[0] );
+								if ( array_key_exists( 'longitude', $data ) ) {
+									set_post_geodata( $post_id, '', $data );
+									$location = Location_Taxonomy::get_location_taxonomy( $ids[0] );
+									if ( $location ) {
+										Location_Taxonomy::set_location( $post_id, $location->term_id );
+									}
 								}
+								++$count;
 							}
-							++$count;
 						}
 					}
 				}
