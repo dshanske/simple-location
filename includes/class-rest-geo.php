@@ -62,6 +62,16 @@ class REST_Geo {
 	}
 
 	/**
+	 * Permission check for local lookup APIs
+	 *
+	 * @return bool
+	 */
+	public static function local_permission_check() {
+		$granted = apply_filters( 'sloc_local_api_protected', false );
+		return $granted ? $granted : current_user_can( 'read' );
+	}
+
+	/**
 	 * Register the Route.
 	 */
 	public function register_routes() {
@@ -122,7 +132,7 @@ class REST_Geo {
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
-					'permission_callback' => '__return_true',
+					'permission_callback' => array( 'REST_Geo', 'local_permission_check' ),
 				),
 			)
 		);
@@ -147,7 +157,7 @@ class REST_Geo {
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
-					'permission_callback' => '__return_true',
+					'permission_callback' => array( 'REST_Geo', 'local_permission_check' ),
 				),
 			)
 		);
