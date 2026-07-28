@@ -322,7 +322,9 @@ class Geo_Base {
 		if ( 'lookup_location' === $doaction ) {
 			$return = array();
 			foreach ( $post_ids as $post_id ) {
-				$return[] = Geo_Data::bulk_edit_lookup_location( $post_id );
+				if ( current_user_can( 'edit_post', $post_id ) ) {
+					$return[] = Geo_Data::bulk_edit_lookup_location( $post_id );
+				}
 			}
 			$return      = array_filter( $return );
 			$redirect_to = add_query_arg( 'bulk_lookup_location_count', count( $return ), $redirect_to );
