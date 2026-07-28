@@ -3,8 +3,8 @@
 **Contributors:** dshanske \
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb \
 **Requires at least:** 6.2 \
-**Tested up to:** 6.8 \
-**Stable tag:** 5.0.24 \
+**Tested up to:** 7.0 \
+**Stable tag:** 5.0.25 \
 **Requires PHP:** 7.4 \
 **License:** GPLv2 or later \
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
@@ -50,18 +50,13 @@ Locations are matched using the country code, region code, and locality field, a
 
 There is no top level Location page, /location included in the plugin. You can create a page at this location and use a custom template to allow it to show a list of your locations.
 
+## Venues
+
 Venues are meant to reflect a specific location, such as a business or point of interest. Venues were originally set up as a taxonomy, and were in the plugin unimplemented for several versions. However,
 due to various changes since that was set up, they were switched to a custom post type. Under this setup, each venue is represented by a URL on the site that posts can be linked to. The URL contains
-information about the venue.
+information about the venue. At this time, venues are shared between users and it is not assumed that each user has unique venues, though this may be a consideration in future.
 
-## Zones
-
-Zones allow for geofencing. You can set coordinates and a radius around them. If you set location to a place within a zone, the default behavior is to replace the location
-with a preset Name and hide the coordinates. This allows you to protect private locations such as your home, or your place of business. For Micropub, it will set the location
-as protected if the location is in the zone and the location-visibility property is not set. For the post editor in WordPress, looking up the location of an item inside the
-zone will result in the visibility being set to protected and the name being set to the zone name. This can be overridden.
-
-Zones are replaced as of 5.0.0 with Private Venues
+Venues can be set to hide the actual location for privacy purposes, for example 'Home'.
 
 ## Weather
 
@@ -288,6 +283,13 @@ Recommend backup before upgrade to Version 3.0.0 due to the start of venue suppo
 will now be required to show maps for services that require API keys.
 
 ## Changelog
+
+### 5.0.25 ( 2026-07-27 )
+
+* Checked for compatibility with latest version
+* Remove live ability to use development sites
+* Lock airport and timezone lookup behind optional user login requirement
+* Remove ability for bulk update if the user does not have permission to do so
 
 ### 5.0.24 ( 2026-02-25 )
 

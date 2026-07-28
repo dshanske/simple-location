@@ -88,9 +88,9 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			}
 
 			$data = array(
-				'key' => $this->api,
-				'query'      => $this->latitude . ',' . $this->longitude,
-				'units'      => 'm',
+				'key'   => $this->api,
+				'query' => $this->latitude . ',' . $this->longitude,
+				'units' => 'm',
 			);
 			$url  = ' https://api.weatherbit.io/v2.0/current';
 			$url  = add_query_arg( $data, $url );

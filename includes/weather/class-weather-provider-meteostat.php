@@ -149,8 +149,8 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			$url,
 			$args,
 			array(
-				'x-rapidapi-key' => $this->api,
-			       	'x-rapidapi-host' => 'meteostat.p.rapidapi.com',
+				'x-rapidapi-key'  => $this->api,
+				'x-rapidapi-host' => 'meteostat.p.rapidapi.com',
 			)
 		);
 		if ( is_wp_error( $json ) ) {
