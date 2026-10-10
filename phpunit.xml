@@ -5,10 +5,19 @@
 	convertErrorsToExceptions="true"
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
+	convertDeprecationsToExceptions="true"
 	>
 	<testsuites>
 		<testsuite name="unit">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
 	</testsuites>
+	<!-- processUncoveredFiles must stay false: plugin files cannot be included outside of WordPress. -->
+	<coverage processUncoveredFiles="false">
+		<include>
+			<directory suffix=".php">./includes</directory>
+			<directory suffix=".php">./lib</directory>
+			<file>./simple-location.php</file>
+		</include>
+	</coverage>
 </phpunit>

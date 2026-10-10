@@ -3,7 +3,8 @@ on:
     push:
     pull_request:
 jobs:
-  phpcs:
+  phpunit:
+    name: CP ${{ matrix.cp-version }} / PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
     services:
      mysql:
@@ -16,9 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['7.4', '8.3', '8.4' ]
-        include:
-          - cp-version: latest
+        cp-version: ['latest']
+        php-versions: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -27,16 +27,14 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
-          tools: composer, phpunit-polyfills
+          tools: composer
           extensions: mysql
       - name: Install Composer dependencies for PHP
         uses: "ramsey/composer-install@v3"
       - name: Setup Test Environment
-        run: |
-          sudo apt update
-          sudo apt install subversion
-          composer setup-cp-tests
+        run: bash bin/install-cp-tests.sh cpc_test root root 127.0.0.1 ${{ matrix.cp-version }}
       - name: Unit Testing
         run: composer phpunit
-        env:
-          PHP_VERSION: ${{ matrix.php-versions }}
+      - name: Confirm ClassicPress was tested
+        run: |
+          composer phpunit -- --filter=__no_tests__ | grep 'against ClassicPress'
