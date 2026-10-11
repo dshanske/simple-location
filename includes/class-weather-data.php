@@ -536,7 +536,7 @@ class Sloc_Weather_Data {
 		if ( ! $user instanceof WP_User ) {
 			return '';
 		}
-		$loc = get_geodata( $user );
+		$loc = get_user_geodata( $user->ID );
 		if ( ! is_array( $loc ) || ! isset( $loc['latitude'] ) ) {
 			return '';
 		}

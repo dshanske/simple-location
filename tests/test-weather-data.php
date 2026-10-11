@@ -289,8 +289,22 @@ class WeatherDataTest extends WP_UnitTestCase {
 		$this->assertSame( 'wi-day-rain', $weather['icon'] );
 		$this->assertSame( 'light rain', $weather['summary'] );
 
-		// Looking up a real user calls the undefined get_geodata() (#333).
 		$this->assertSame( '', Sloc_Weather_Data::get_weather_by_user( 'nobody' ) );
+		$this->assertSame( '', Sloc_Weather_Data::get_weather_by_user( self::factory()->user->create() ) );
+
+		$user_id = self::factory()->user->create();
+		Geo_Data::set_geodata(
+			'user',
+			$user_id,
+			'',
+			array(
+				'latitude'  => 39.9524,
+				'longitude' => -75.1636,
+			)
+		);
+		$this->assertSame( 'light rain', Sloc_Weather_Data::get_weather_by_user( $user_id )['summary'] );
+		$this->assertSame( 'light rain', Sloc_Weather_Data::get_weather_by_user( new WP_User( $user_id ) )['summary'] );
+		$this->assertSame( 39.9524, Loc_Config::weather_provider()->get()['latitude'] );
 
 		$this->assertSame( 'light rain', Sloc_Weather_Data::get_weather_by_station( 'KNYC', null, 60 )['summary'] );
 		$this->assertSame( 'KNYC', Loc_Config::weather_provider()->get_station() );

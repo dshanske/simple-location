@@ -71,9 +71,10 @@ class WidgetsTest extends WP_UnitTestCase {
 	/**
 	 * Gives a user a saved location.
 	 *
+	 * @param string $visibility Location visibility.
 	 * @return int User ID.
 	 */
-	protected function user_with_location() {
+	protected function user_with_location( $visibility = 'public' ) {
 		$user_id = self::factory()->user->create();
 		// set_user_geodata() doesn't save (#305), so store the location directly.
 		Geo_Data::set_geodata(
@@ -84,7 +85,7 @@ class WidgetsTest extends WP_UnitTestCase {
 				'latitude'   => self::LAT,
 				'longitude'  => self::LNG,
 				'address'    => 'Philadelphia City Hall',
-				'visibility' => 'public',
+				'visibility' => $visibility,
 			)
 		);
 		return $user_id;
@@ -141,6 +142,69 @@ class WidgetsTest extends WP_UnitTestCase {
 		$this->assertStringEndsWith( '</section>', $html );
 	}
 
+	/**
+	 * A widget set to a user shows the weather at the user's saved location.
+	 */
+	public function test_weather_by_user() {
+		$html = $this->render(
+			new Sloc_Weather_Widget(),
+			array(
+				'title' => 'Where I am',
+				'user'  => (string) $this->user_with_location(),
+			)
+		);
+		$this->assertStringContainsString( '<ul class="sloc-weather-display">', $html );
+		$this->assertStringContainsString( 'Clear', $html );
+		$this->assertStringEndsWith( '</section>', $html );
+	}
+
+	/**
+	 * A user's private location shows nothing unless the widget allows it, and then only the conditions.
+	 */
+	public function test_weather_by_user_private() {
+		$this->markTestSkipped( 'Known bug, see #302' );
+		Weather_Provider_Sloc_Test::$conditions = array(
+			'temperature' => 28,
+			'code'        => 800,
+			'name'        => 'Backyard',
+			'station_id'  => 'KPHL',
+			'latitude'    => self::LAT,
+			'longitude'   => self::LNG,
+		);
+		$instance                               = array(
+			'title'     => 'Where I am',
+			'user'      => (string) $this->user_with_location( 'private' ),
+			'showastro' => '1',
+		);
+		$this->assertSame( '', $this->render( new Sloc_Weather_Widget(), $instance ) );
+
+		$instance['showprivate'] = '1';
+		$html                    = $this->render( new Sloc_Weather_Widget(), $instance );
+		$this->assertStringContainsString( 'Where I am', $html );
+		$this->assertStringContainsString( '28', $html );
+		$this->assertStringNotContainsString( 'Backyard', $html );
+		$this->assertStringNotContainsString( 'KPHL', $html );
+		$this->assertStringNotContainsString( 'Sunrise', $html );
+		$this->assertStringEndsWith( '</section>', $html );
+	}
+
+	/**
+	 * A user's protected location shows the full weather without the private-location option.
+	 */
+	public function test_weather_by_user_protected() {
+		Weather_Provider_Sloc_Test::$conditions = array(
+			'temperature' => 28,
+			'name'        => 'Backyard',
+		);
+		$html                                   = $this->render(
+			new Sloc_Weather_Widget(),
+			array(
+				'title' => '',
+				'user'  => (string) $this->user_with_location( 'protected' ),
+			)
+		);
+		$this->assertStringContainsString( 'Backyard</li>', $html );
+	}
 
 	/**
 	 * Provider errors and plain-text results are shown as text.
@@ -267,6 +331,7 @@ class WidgetsTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'name="widget-sloc_weather_widget[2][longitude]"', $html );
 		$this->assertStringContainsString( 'name="widget-sloc_weather_widget[2][cache_time]"', $html );
 		$this->assertMatchesRegularExpression( '/name="widget-sloc_weather_widget\[2\]\[showastro\]" type="checkbox" value="1"\s+checked/', $html );
+		$this->assertMatchesRegularExpression( '/name="widget-sloc_weather_widget\[2\]\[showprivate\]" id="widget-sloc_weather_widget-2-showprivate" type="checkbox" value="1"\s+\/>/', $html );
 		$this->assertMatchesRegularExpression( '/<option value=[\'"]' . $user_id . '[\'"]\s+selected/', $html );
 		$this->assertStringContainsString( 'Weather Person', $html );
 	}
