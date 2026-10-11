@@ -617,10 +617,11 @@ class Geo_Data {
 			$geolocation = Loc_Config::geolocation_provider();
 			if ( is_object( $geolocation ) && $geolocation->background() && $post->post_author ) {
 				$geolocation->set_user( $post->post_author );
-				$geolocation->retrieve( get_post_datetime( $post ) );
+				$found   = $geolocation->retrieve( get_post_datetime( $post ) );
 				$geodata = $geolocation->get();
-				if ( is_wp_error( $geodata ) ) {
-					return $geodata;
+				// Skip the post if the lookup failed or wasn't allowed (e.g. another author's Compass account), or found nothing.
+				if ( is_wp_error( $found ) || ! is_array( $geodata ) || ! isset( $geodata['latitude'], $geodata['longitude'] ) ) {
+					return false;
 				}
 				if ( ! empty( $geodata ) ) {
 					$geodata['visibility'] = get_post_geodata( $post, 'visibility' );

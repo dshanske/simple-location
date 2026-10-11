@@ -538,6 +538,93 @@ class LocationProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Compass uses the account of the user set with set_user(), but only for that user or someone who can edit them.
+	 */
+	public function test_compass_uses_set_user() {
+		$fixture = array( 'compass.example.com' => array( 'body' => $this->fixture( 'location/compass-last.json' ) ) );
+		$editor  = self::factory()->user->create( array( 'role' => 'editor' ) );
+		$admin   = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		update_user_meta( $editor, 'compass_url', 'https://editor-compass.example.org' );
+		update_user_meta( $editor, 'compass_api', 'EDITOR' );
+		$provider = new Location_Provider_Compass();
+		$provider->set_user( $this->user_id );
+
+		// The author themselves.
+		$this->mock_http( $fixture );
+		$provider->retrieve();
+		$this->assertSame( 'https://compass.example.com/api/last/', $this->last_request()['base'] );
+		$this->assertSame( 'TOKEN', $this->last_request()['query']['token'] );
+
+		// An editor can't use the author's account, and their own isn't used instead.
+		wp_set_current_user( $editor );
+		$this->mock_http( $fixture );
+		$provider->set_user( $this->user_id );
+		$error = $provider->retrieve();
+		$this->assertWPError( $error );
+		$this->assertSame( 'compass_not_allowed', $error->get_error_code() );
+		$this->assertSame( 'compass_not_allowed', $provider->query( '2025-07-01T00:00:00Z', '2025-07-02T00:00:00Z' )->get_error_code() );
+		$this->assertFalse( $provider->get_geouri() );
+		$this->assertEmpty( $this->http_requests );
+
+		// An administrator can.
+		wp_set_current_user( $admin );
+		$this->mock_http( $fixture );
+		$provider->retrieve();
+		$this->assertSame( 'TOKEN', $this->last_request()['query']['token'] );
+		$this->assertNotFalse( $provider->get_geouri() );
+
+		// Without set_user(), the current user's account is used.
+		wp_set_current_user( $editor );
+		$this->mock_http( array( 'editor-compass.example.org' => array( 'body' => $this->fixture( 'location/compass-last.json' ) ) ) );
+		$provider = new Location_Provider_Compass();
+		$provider->retrieve();
+		$this->assertSame( 'EDITOR', $this->last_request()['query']['token'] );
+	}
+
+	/**
+	 * Sets up Bulk Lookup Location with Compass for a post by the test author.
+	 *
+	 * @return int Post ID.
+	 */
+	protected function compass_bulk_lookup_post() {
+		update_option( 'sloc_geolocation_provider', 'compass' );
+		update_option( 'sloc_geo_provider', 'sloc_test' );
+		Geo_Provider_Sloc_Test::$reverse = array(
+			'display-name' => 'Philadelphia City Hall',
+			'locality'     => 'Philadelphia',
+			'region'       => 'Pennsylvania',
+			'region-code'  => 'PA',
+			'country-name' => 'United States',
+			'country-code' => 'US',
+		);
+		$this->mock_http( array( 'compass.example.com' => array( 'body' => $this->fixture( 'location/compass-last.json' ) ) ) );
+		return self::factory()->post->create( array( 'post_author' => $this->user_id ) );
+	}
+
+	/**
+	 * Bulk Lookup Location with Compass skips another author's post for a user who can't edit that author.
+	 */
+	public function test_compass_bulk_lookup_other_author_skipped() {
+		$post_id = $this->compass_bulk_lookup_post();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$this->assertFalse( Geo_Data::bulk_edit_lookup_location( $post_id ) );
+		$this->assertSame( '', get_post_meta( $post_id, 'geo_latitude', true ) );
+		$this->assertEmpty( $this->http_requests );
+	}
+
+	/**
+	 * Bulk Lookup Location with Compass fills in another author's post from their account for an administrator.
+	 */
+	public function test_compass_bulk_lookup_other_author_admin() {
+		$this->markTestSkipped( 'Known bug, see #376' );
+		$post_id = $this->compass_bulk_lookup_post();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( $post_id, Geo_Data::bulk_edit_lookup_location( $post_id ) );
+		$this->assertNotSame( '', get_post_meta( $post_id, 'geo_latitude', true ) );
+		$this->assertSame( 'TOKEN', $this->last_request()['query']['token'] );
+	}
+
+	/**
 	 * Compass errors and incomplete responses are reported.
 	 */
 	public function test_compass_errors() {

@@ -40,6 +40,35 @@ class Location_Provider_Compass extends Location_Provider {
 		return $array;
 	}
 
+	/**
+	 * Returns the user whose Compass account to use.
+	 *
+	 * That is the user set with set_user(), or the current user if none was set. Compass holds a person's
+	 * location history, so another user's account is only used when the current user can edit that user,
+	 * which is normally only administrators.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return int|WP_Error User ID, 0 if there is no user, or an error if the current user may not use that account.
+	 */
+	protected function compass_user() {
+		$current = get_current_user_id();
+		if ( $this->user instanceof WP_User ) {
+			$user_id = $this->user->ID;
+		} elseif ( is_numeric( $this->user ) && 0 < (int) $this->user ) {
+			$user_id = (int) $this->user;
+		} else {
+			$user_id = $current;
+		}
+		if ( ! $user_id ) {
+			return 0;
+		}
+		if ( $current !== $user_id && ! current_user_can( 'edit_user', $user_id ) ) {
+			return new WP_Error( 'compass_not_allowed', __( 'You cannot look up another user\'s location in Compass', 'simple-location' ), array( 'user' => $user_id ) );
+		}
+		return $user_id;
+	}
+
 	public function query( $start, $end ) {
 		if ( is_string( $start ) ) {
 			$start = new DateTime( $start );
@@ -48,9 +77,9 @@ class Location_Provider_Compass extends Location_Provider {
 		if ( is_string( $end ) ) {
 			$end = new DateTime( $end );
 		}
-		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			return;
+		$user_id = $this->compass_user();
+		if ( ! $user_id || is_wp_error( $user_id ) ) {
+			return $user_id ? $user_id : null;
 		}
 		$compass = get_user_meta( $user_id, 'compass_url', true );
 		if ( ! $compass ) {
@@ -121,9 +150,9 @@ class Location_Provider_Compass extends Location_Provider {
 
 	public function retrieve( $time = null, $args = array() ) {
 		$this->reset();
-		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			return;
+		$user_id = $this->compass_user();
+		if ( ! $user_id || is_wp_error( $user_id ) ) {
+			return $user_id ? $user_id : null;
 		}
 		$compass = get_user_meta( $user_id, 'compass_url', true );
 		if ( ! $compass ) {
