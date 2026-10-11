@@ -489,4 +489,35 @@ class MicropubTest extends WP_UnitTestCase {
 		$this->assertSame( '25', $meta['geo_accuracy'] );
 		$this->assertArrayNotHasKey( 'geo_address', $meta );
 	}
+
+	/**
+	 * A location with a nested h-geo and a label takes its address from the label.
+	 */
+	public function test_webmention_nested_geo_label() {
+		$raw  = array(
+			'properties' => array(
+				'location' => array(
+					array(
+						'type'       => array( 'h-card' ),
+						'properties' => array(
+							'label' => array( 'Home' ),
+							'geo'   => array(
+								array(
+									'type'       => array( 'h-geo' ),
+									'properties' => array(
+										'latitude'  => array( '39.9524' ),
+										'longitude' => array( '-75.1636' ),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+		$meta = Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) );
+		$this->assertSame( 'Home', $meta['geo_address'] );
+		$this->assertSame( '39.9524', $meta['geo_latitude'] );
+		$this->assertSame( '-75.1636', $meta['geo_longitude'] );
+	}
 }
