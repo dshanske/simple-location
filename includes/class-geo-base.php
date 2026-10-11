@@ -310,14 +310,18 @@ class Geo_Base {
 	 * @since 1.0.0
 	 */
 	public static function handle_bulk_edit_location( $redirect_to, $doaction, $post_ids ) {
-		if ( in_array( $doaction, array( 'location_public', 'location_private' ), true ) ) {
-			$visibility = str_replace( 'location_', '', $doaction );
-			foreach ( $post_ids as $post_id ) {
-				set_geo_visibility( 'post', $post_id, $visibility );
-			}
-		}
 		if ( empty( $post_ids ) ) {
 			return $redirect_to;
+		}
+		if ( in_array( $doaction, array( 'location_public', 'location_private' ), true ) ) {
+			$visibility = str_replace( 'location_', '', $doaction );
+			$count      = 0;
+			foreach ( $post_ids as $post_id ) {
+				if ( current_user_can( 'edit_post', $post_id ) && set_post_geodata( $post_id, 'visibility', $visibility ) ) {
+					++$count;
+				}
+			}
+			$redirect_to = add_query_arg( 'bulk_lookup_location_count', $count, $redirect_to );
 		}
 		if ( 'lookup_location' === $doaction ) {
 			$return = array();
