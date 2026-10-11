@@ -58,6 +58,27 @@ require __DIR__ . '/includes/load-test-providers.php';
 // Builds JPEGs with chosen EXIF data.
 require __DIR__ . '/includes/class-sloc-test-exif.php';
 
+// Mocks outgoing HTTP requests for provider tests.
+require __DIR__ . '/includes/trait-sloc-http-mock.php';
+
+/**
+ * Fails any HTTP request a test didn't mock, so tests never call live APIs.
+ *
+ * Runs after the mocks (priority 10), so it only sees requests nothing answered.
+ *
+ * @param false|array|WP_Error $pre  Short-circuit value.
+ * @param array                $args Request arguments.
+ * @param string               $url  Request URL.
+ * @return array|WP_Error
+ */
+function _sloc_block_unmocked_http( $pre, $args, $url ) {
+	if ( false !== $pre ) {
+		return $pre;
+	}
+	return new WP_Error( 'unmocked_request', 'Tests must not make live HTTP requests: ' . $url );
+}
+add_filter( 'pre_http_request', '_sloc_block_unmocked_http', 99, 3 );
+
 // Report which platform is under test so CI logs show it.
 if ( function_exists( 'classicpress_version' ) ) {
 	$_platform = sprintf( 'ClassicPress %s', classicpress_version() );

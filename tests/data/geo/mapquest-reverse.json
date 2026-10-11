@@ -1,0 +1,51 @@
+{
+  "info": {
+    "statuscode": 0,
+    "copyright": {
+      "text": "© 2026 MapQuest, Inc."
+    },
+    "messages": []
+  },
+  "options": {
+    "maxResults": 1,
+    "ignoreLatLngInput": false
+  },
+  "results": [
+    {
+      "providedLocation": {
+        "latLng": {
+          "lat": 39.9524,
+          "lng": -75.1636
+        }
+      },
+      "locations": [
+        {
+          "street": "1400 John F Kennedy Blvd",
+          "adminArea6": "Center City",
+          "adminArea6Type": "Neighborhood",
+          "adminArea5": "Philadelphia",
+          "adminArea5Type": "City",
+          "adminArea4": "Philadelphia County",
+          "adminArea4Type": "County",
+          "adminArea3": "PA",
+          "adminArea3Type": "State",
+          "adminArea1": "US",
+          "adminArea1Type": "Country",
+          "postalCode": "19107",
+          "geocodeQualityCode": "P1AAA",
+          "geocodeQuality": "POINT",
+          "sideOfStreet": "N",
+          "type": "s",
+          "latLng": {
+            "lat": 39.9524,
+            "lng": -75.1636
+          },
+          "displayLatLng": {
+            "lat": 39.9524,
+            "lng": -75.1636
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "geocoding": {
+    "version": "0.2",
+    "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
+    "query": {
+      "size": 1,
+      "point.lat": 39.9524,
+      "point.lon": -75.1636
+    },
+    "engine": {
+      "name": "Pelias",
+      "author": "Mapzen",
+      "version": "1.0"
+    },
+    "timestamp": 1760000000000
+  },
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.1636,
+          39.9524
+        ]
+      },
+      "properties": {
+        "id": "way/28331796",
+        "gid": "openstreetmap:venue:way/28331796",
+        "layer": "venue",
+        "source": "openstreetmap",
+        "source_id": "way/28331796",
+        "name": "Philadelphia City Hall",
+        "housenumber": "1400",
+        "street": "John F. Kennedy Boulevard",
+        "postalcode": "19107",
+        "distance": 0.012,
+        "confidence": 0.9,
+        "accuracy": "point",
+        "country": "United States",
+        "country_gid": "whosonfirst:country:85633793",
+        "country_a": "USA",
+        "region": "Pennsylvania",
+        "region_gid": "whosonfirst:region:85688481",
+        "region_a": "PA",
+        "county": "Philadelphia County",
+        "county_a": "PH",
+        "locality": "Philadelphia",
+        "neighbourhood": "Center City",
+        "continent": "North America",
+        "label": "Philadelphia City Hall, Philadelphia, PA, USA"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.1655,
+          39.9541
+        ]
+      },
+      "properties": {
+        "id": "node/1",
+        "gid": "openstreetmap:venue:node/1",
+        "layer": "venue",
+        "source": "openstreetmap",
+        "source_id": "way/28331796",
+        "name": "Love Park",
+        "street": "Arch Street",
+        "postalcode": "19107",
+        "distance": 0.2,
+        "confidence": 0.6,
+        "accuracy": "point",
+        "country": "United States",
+        "country_gid": "whosonfirst:country:85633793",
+        "country_a": "USA",
+        "region": "Pennsylvania",
+        "region_gid": "whosonfirst:region:85688481",
+        "region_a": "PA",
+        "county": "Philadelphia County",
+        "county_a": "PH",
+        "locality": "Philadelphia",
+        "neighbourhood": "Center City",
+        "continent": "North America",
+        "label": "Philadelphia City Hall, Philadelphia, PA, USA"
+      }
+    }
+  ],
+  "bbox": [
+    -75.1655,
+    39.9524,
+    -75.1636,
+    39.9541
+  ]
+}

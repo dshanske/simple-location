@@ -1,0 +1,48 @@
+{
+  "authenticationResultCode": "ValidCredentials",
+  "brandLogoUri": "https://dev.virtualearth.net/Branding/logo_powered_by.png",
+  "copyright": "Copyright © 2026 Microsoft and its suppliers.",
+  "resourceSets": [
+    {
+      "estimatedTotal": 1,
+      "resources": [
+        {
+          "__type": "Location:http://schemas.microsoft.com/search/local/ws/rest/v1",
+          "bbox": [
+            39.95,
+            -75.17,
+            39.96,
+            -75.16
+          ],
+          "name": "1400 John F Kennedy Blvd, Philadelphia, PA 19107",
+          "point": {
+            "type": "Point",
+            "coordinates": [
+              39.9524,
+              -75.1636
+            ]
+          },
+          "address": {
+            "addressLine": "1400 John F Kennedy Blvd",
+            "adminDistrict": "PA",
+            "adminDistrict2": "Philadelphia County",
+            "countryRegion": "United States",
+            "countryRegionIso2": "US",
+            "formattedAddress": "1400 John F Kennedy Blvd, Philadelphia, PA 19107",
+            "locality": "Philadelphia",
+            "neighborhood": "Center City",
+            "postalCode": "19107"
+          },
+          "confidence": "High",
+          "entityType": "Address",
+          "matchCodes": [
+            "Good"
+          ]
+        }
+      ]
+    }
+  ],
+  "statusCode": 200,
+  "statusDescription": "OK",
+  "traceId": "abc"
+}
