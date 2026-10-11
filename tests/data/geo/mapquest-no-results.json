@@ -1,0 +1,11 @@
+{
+  "info": {
+    "statuscode": 403,
+    "copyright": {
+      "text": "\u00a9 2026 MapQuest, Inc."
+    },
+    "messages": [
+      "This key is not authorized for this service."
+    ]
+  }
+}

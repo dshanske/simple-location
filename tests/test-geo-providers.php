@@ -45,24 +45,26 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Asserts the parsed City Hall address.
+	 * Asserts the parts of the City Hall address every provider should agree on.
 	 *
-	 * @param array $addr    Parsed address.
-	 * @param array $exclude Keys this provider doesn't return.
+	 * Fixtures may be replaced with real captures (see tests/data/README.md), so only stable
+	 * facts are checked here; vendor-specific details are compared with the fixture itself.
+	 *
+	 * @param array $addr Parsed address.
 	 */
-	protected function assertCityHall( $addr, $exclude = array() ) {
+	protected function assertCityHall( $addr ) {
 		$expected = array(
-			'street-address' => '1400 John F. Kennedy Boulevard',
-			'locality'       => 'Philadelphia',
-			'region'         => 'Pennsylvania',
-			'region-code'    => 'PA',
-			'country-code'   => 'US',
-			'postal-code'    => '19107',
+			'locality'     => 'Philadelphia',
+			'region'       => 'Pennsylvania',
+			'region-code'  => 'PA',
+			'country-code' => 'US',
 		);
-		foreach ( array_diff_key( $expected, array_flip( $exclude ) ) as $key => $value ) {
+		foreach ( $expected as $key => $value ) {
 			$this->assertArrayHasKey( $key, $addr, $key );
 			$this->assertSame( $value, $addr[ $key ], $key );
 		}
+		$this->assertStringStartsWith( '191', $addr['postal-code'], 'A Philadelphia ZIP code.' );
+		$this->assertMatchesRegularExpression( '/Kennedy|JFK/i', $addr['street-address'] );
 		$this->assertEquals( self::LAT, $addr['latitude'] );
 		$this->assertEquals( self::LNG, $addr['longitude'] );
 	}
@@ -126,7 +128,8 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	 * Nominatim reverse geocoding sends the documented parameters and parses the address.
 	 */
 	public function test_nominatim_reverse() {
-		$this->mock_http( array( 'nominatim.openstreetmap.org/reverse' => array( 'body' => $this->fixture( 'geo/nominatim-reverse.json' ) ) ) );
+		$fixture = $this->fixture( 'geo/nominatim-reverse.json' );
+		$this->mock_http( array( 'nominatim.openstreetmap.org/reverse' => array( 'body' => $fixture ) ) );
 		$addr = $this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup();
 
 		$request = $this->last_request();
@@ -136,20 +139,22 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertEquals( 18, $request['query']['zoom'] );
 
 		$this->assertCityHall( $addr );
-		$this->assertSame( 'Philadelphia City Hall', $addr['name'] );
-		$this->assertSame( 'Center City', $addr['extended-address'] );
-		$this->assertSame( 'United States', $addr['country-name'] );
-		$this->assertSame( 'https://www.phila.gov/', $addr['url'] );
-		$this->assertSame( 'Philadelphia City Hall, Philadelphia, PA, US', $addr['display-name'] );
+		$address = $fixture['address'];
+		$this->assertSame( $address['house_number'] . ' ' . $address['road'], $addr['street-address'] );
+		$this->assertSame( $address['tourism'], $addr['name'] );
+		$this->assertSame( $address['neighbourhood'], $addr['extended-address'] );
+		$this->assertSame( $address['country'], $addr['country-name'] );
+		$this->assertSame( $fixture['extratags']['website'], $addr['url'] );
+		$this->assertSame( $address['tourism'] . ', Philadelphia, PA, US', $addr['display-name'] );
 		$this->assertSame( 'America/New_York', $addr['timezone'] );
-		$this->assertArrayHasKey( 'raw', $addr );
+		$this->assertSame( $fixture, $addr['raw'] );
 	}
 
 	/**
 	 * Nominatim reverse geocoding passes errors on, and returns nothing without an address.
 	 */
 	public function test_nominatim_reverse_errors() {
-		$this->mock_http( array( 'nominatim' => array( 'body' => array( 'error' => 'Unable to geocode' ) ) ) );
+		$this->mock_http( array( 'nominatim' => array( 'body' => $this->fixture( 'geo/nominatim-error.json' ) ) ) );
 		$this->assertSame( array(), $this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup() );
 
 		$this->mock_http(
@@ -167,12 +172,14 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	 * Nominatim forward geocoding returns the coordinates of the first result.
 	 */
 	public function test_nominatim_geocode() {
-		$this->mock_http( array( 'nominatim.openstreetmap.org/search' => array( 'body' => $this->fixture( 'geo/nominatim-search.json' ) ) ) );
+		$fixture = $this->fixture( 'geo/nominatim-search.json' );
+		$this->mock_http( array( 'nominatim.openstreetmap.org/search' => array( 'body' => $fixture ) ) );
 		$result = ( new Geo_Provider_Nominatim() )->geocode( 'Philadelphia City Hall' );
 		$this->assertSame( 'Philadelphia City Hall', $this->last_request()['query']['q'] );
-		$this->assertSame( '39.9524', $result['latitude'] );
-		$this->assertSame( '-75.1636', $result['longitude'] );
-		$this->assertSame( 'https://www.phila.gov/', $result['url'] );
+		$this->assertSame( $fixture[0]['lat'], $result['latitude'] );
+		$this->assertSame( $fixture[0]['lon'], $result['longitude'] );
+		$this->assertEqualsWithDelta( self::LAT, (float) $result['latitude'], 0.001 );
+		$this->assertSame( $fixture[0]['extratags']['website'], $result['url'] );
 	}
 
 	/**
@@ -195,17 +202,18 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	public function test_google_reverse() {
 		$this->assertSame( 'missing_api_key', $this->provider( 'Geo_Provider_Google', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
 
-		$this->mock_http( array( 'maps.googleapis.com/maps/api/geocode/json' => array( 'body' => $this->fixture( 'geo/google-reverse.json' ) ) ) );
+		$fixture = $this->fixture( 'geo/google-reverse.json' );
+		$this->mock_http( array( 'maps.googleapis.com/maps/api/geocode/json' => array( 'body' => $fixture ) ) );
 		$addr    = $this->provider( 'Geo_Provider_Google', array( 'api' => 'g-key' ) )->reverse_lookup();
 		$request = $this->last_request();
 		$this->assertSame( 'g-key', $request['query']['key'] );
 		$this->assertSame( self::LAT . ',' . self::LNG, $request['query']['latlng'] );
 
-		$this->assertCityHall( $addr, array( 'street-address' ) );
-		$this->assertSame( '1400 John F Kennedy Blvd', $addr['street-address'] );
-		$this->assertSame( 'Center City', $addr['extended-address'] );
+		$this->assertCityHall( $addr );
+		$components = wp_list_pluck( $fixture['results'][0]['address_components'], 'short_name' );
+		$this->assertSame( $components[0] . ' ' . $components[1], $addr['street-address'], 'Street number and route.' );
 		$this->assertSame( 'United States', $addr['country-name'] );
-		$this->assertSame( '87F6WWX6+XG', $addr['plus-code'] );
+		$this->assertSame( $fixture['plus_code']['global_code'], $addr['plus-code'] );
 	}
 
 	/**
@@ -223,15 +231,17 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	public function test_bing_reverse() {
 		$this->assertSame( 'missing_api_key', $this->provider( 'Geo_Provider_Bing', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
 
-		$this->mock_http( array( 'dev.virtualearth.net/REST/v1/Locations/' => array( 'body' => $this->fixture( 'geo/bing-locations.json' ) ) ) );
+		$fixture = $this->fixture( 'geo/bing-locations.json' );
+		$this->mock_http( array( 'dev.virtualearth.net/REST/v1/Locations/' => array( 'body' => $fixture ) ) );
 		$addr    = $this->provider( 'Geo_Provider_Bing', array( 'api' => 'b-key' ) )->reverse_lookup();
 		$request = $this->last_request();
 		$this->assertSame( 'https://dev.virtualearth.net/REST/v1/Locations/' . self::LAT . ',' . self::LNG, $request['base'] );
 		$this->assertSame( 'b-key', $request['query']['key'] );
 
-		$this->assertCityHall( $addr, array( 'street-address' ) );
-		$this->assertSame( '1400 John F Kennedy Blvd', $addr['street-address'] );
-		$this->assertSame( 'Center City', $addr['extended-address'] );
+		$this->assertCityHall( $addr );
+		$address = $fixture['resourceSets'][0]['resources'][0]['address'];
+		$this->assertSame( $address['addressLine'], $addr['street-address'] );
+		$this->assertSame( ifset( $address['neighborhood'] ), ifset( $addr['extended-address'] ) );
 	}
 
 	/**
@@ -241,7 +251,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array( 'virtualearth' => array( 'body' => $this->fixture( 'geo/bing-invalid-key.json' ) ) ) );
 		$this->assertSame( 'invalid_api_key', $this->provider( 'Geo_Provider_Bing', array( 'api' => 'b-key' ) )->reverse_lookup()->get_error_code() );
 
-		$this->mock_http( array( 'virtualearth' => array( 'body' => array( 'authenticationResultCode' => 'ValidCredentials' ) ) ) );
+		$this->mock_http( array( 'virtualearth' => array( 'body' => $this->fixture( 'geo/bing-empty.json' ) ) ) );
 		$this->assertSame( 'unknown_error', $this->provider( 'Geo_Provider_Bing', array( 'api' => 'b-key' ) )->reverse_lookup()->get_error_code() );
 	}
 
@@ -251,11 +261,13 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	public function test_bing_geocode() {
 		$this->assertNull( ( new Geo_Provider_Bing( array( 'api' => '' ) ) )->geocode( 'City Hall' ) );
 
-		$this->mock_http( array( 'virtualearth.net/REST/v1/Locations' => array( 'body' => $this->fixture( 'geo/bing-locations.json' ) ) ) );
+		$fixture = $this->fixture( 'geo/bing-locations.json' );
+		$this->mock_http( array( 'virtualearth.net/REST/v1/Locations' => array( 'body' => $fixture ) ) );
 		$result = ( new Geo_Provider_Bing( array( 'api' => 'b-key' ) ) )->geocode( 'City Hall, Philadelphia' );
 		$this->assertSame( 'City Hall, Philadelphia', $this->last_request()['query']['q'] );
-		$this->assertSame( self::LAT, $result['latitude'] );
-		$this->assertSame( self::LNG, $result['longitude'] );
+		$point = $fixture['resourceSets'][0]['resources'][0]['point']['coordinates'];
+		$this->assertSame( $point[0], $result['latitude'] );
+		$this->assertSame( $point[1], $result['longitude'] );
 		$this->assertSame( 'Philadelphia', $result['locality'] );
 	}
 
@@ -266,28 +278,31 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'missing_api_key', $this->provider( 'Geo_Provider_Mapquest', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
 		$this->assertSame( 'missing_api_key', ( new Geo_Provider_Mapquest( array( 'api' => '' ) ) )->geocode( 'x' )->get_error_code() );
 
-		$this->mock_http( array( 'mapquestapi.com/geocoding/v1/' => array( 'body' => $this->fixture( 'geo/mapquest-reverse.json' ) ) ) );
+		$fixture  = $this->fixture( 'geo/mapquest-reverse.json' );
+		$location = $fixture['results'][0]['locations'][0];
+		$this->mock_http( array( 'mapquestapi.com/geocoding/v1/' => array( 'body' => $fixture ) ) );
 		$addr    = $this->provider( 'Geo_Provider_Mapquest', array( 'api' => 'mq-key' ) )->reverse_lookup();
 		$request = $this->last_request();
 		$this->assertStringEndsWith( 'mapquestapi.com/geocoding/v1/reverse', $request['base'] );
 		$this->assertSame( 'mq-key', $request['query']['key'] );
-		$this->assertCityHall( $addr, array( 'street-address' ) );
+		$this->assertCityHall( $addr );
+		$this->assertSame( $location['street'], $addr['street-address'] );
 		$this->assertSame( 'United States', $addr['country-name'] );
-		$this->assertSame( 'Center City', $addr['extended-address'] );
+		$this->assertSame( ifset( $location['adminArea6'] ), ifset( $addr['extended-address'] ) );
 
 		$result = ( new Geo_Provider_Mapquest( array( 'api' => 'mq-key' ) ) )->geocode( 'City Hall' );
 		$this->assertStringEndsWith( 'mapquestapi.com/geocoding/v1/address', $this->last_request()['base'] );
-		$this->assertSame( self::LAT, $result['latitude'] );
+		$this->assertSame( $location['latLng']['lat'], $result['latitude'] );
 	}
 
 	/**
 	 * MapQuest responses without results or locations are errors.
 	 */
 	public function test_mapquest_errors() {
-		$this->mock_http( array( 'mapquestapi.com' => array( 'body' => array( 'info' => array( 'statuscode' => 403 ) ) ) ) );
+		$this->mock_http( array( 'mapquestapi.com' => array( 'body' => $this->fixture( 'geo/mapquest-no-results.json' ) ) ) );
 		$this->assertSame( 'no_results', $this->provider( 'Geo_Provider_Mapquest', array( 'api' => 'mq-key' ) )->reverse_lookup()->get_error_code() );
 
-		$this->mock_http( array( 'mapquestapi.com' => array( 'body' => array( 'results' => array( array( 'providedLocation' => array() ) ) ) ) ) );
+		$this->mock_http( array( 'mapquestapi.com' => array( 'body' => $this->fixture( 'geo/mapquest-no-locations.json' ) ) ) );
 		$this->assertSame( 'no_locations', $this->provider( 'Geo_Provider_Mapquest', array( 'api' => 'mq-key' ) )->reverse_lookup()->get_error_code() );
 	}
 
@@ -300,28 +315,32 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'missing_pelias_url', $this->provider( 'Geo_Provider_Pelias', array( 'api' => 'p-key' ) )->reverse_lookup()->get_error_code() );
 		update_option( 'sloc_pelias_url', 'https://203.0.113.10/v1' );
 
-		$this->mock_http( array( '203.0.113.10/v1/reverse/' => array( 'body' => $this->fixture( 'geo/pelias-reverse.json' ) ) ) );
+		$fixture    = $this->fixture( 'geo/pelias-reverse.json' );
+		$properties = $fixture['features'][0]['properties'];
+		$this->mock_http( array( '203.0.113.10/v1/reverse/' => array( 'body' => $fixture ) ) );
 		$addr    = $this->provider( 'Geo_Provider_Pelias', array( 'api' => 'p-key' ) )->reverse_lookup();
 		$request = $this->last_request();
 		$this->assertSame( 'p-key', $request['query']['api_key'] );
 		$this->assertEquals( self::LAT, $request['query']['point_lat'] );
 
 		$this->assertCityHall( $addr );
-		$this->assertSame( 'Philadelphia City Hall', $addr['name'] );
-		$this->assertSame( 'Center City', $addr['extended-address'] );
-		$this->assertSame( 'Philadelphia City Hall, Philadelphia, PA, US', $addr['display-name'] );
+		$this->assertSame( $properties['housenumber'] . ' ' . $properties['street'], $addr['street-address'] );
+		$this->assertSame( $properties['name'], $addr['name'] );
+		$this->assertSame( $properties['neighbourhood'], $addr['extended-address'] );
+		$this->assertSame( $properties['name'] . ', Philadelphia, PA, US', $addr['display-name'] );
 	}
 
 	/**
 	 * Pelias forward geocoding takes the coordinates from the first feature.
 	 */
 	public function test_pelias_geocode() {
-		$this->mock_http( array( '203.0.113.10/v1/search/' => array( 'body' => $this->fixture( 'geo/pelias-reverse.json' ) ) ) );
+		$fixture = $this->fixture( 'geo/pelias-search.json' );
+		$this->mock_http( array( '203.0.113.10/v1/search/' => array( 'body' => $fixture ) ) );
 		$result = ( new Geo_Provider_Pelias( array( 'api' => 'p-key' ) ) )->geocode( 'City Hall' );
 		$this->assertSame( 'City Hall', $this->last_request()['query']['text'] );
-		$this->assertSame( self::LAT, $result['latitude'] );
-		$this->assertSame( self::LNG, $result['longitude'] );
-		$this->assertSame( 'Philadelphia City Hall', $result['name'] );
+		$this->assertSame( $fixture['features'][0]['geometry']['coordinates'][1], $result['latitude'] );
+		$this->assertSame( $fixture['features'][0]['geometry']['coordinates'][0], $result['longitude'] );
+		$this->assertSame( $fixture['features'][0]['properties']['name'], $result['name'] );
 	}
 
 	/**
@@ -331,14 +350,16 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'missing_api_key', $this->provider( 'Geo_Provider_OpenRoute', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
 		$this->assertSame( 'missing_api_key', ( new Geo_Provider_OpenRoute( array( 'api' => '' ) ) )->geocode( 'x' )->get_error_code() );
 
-		$this->mock_http( array( 'api.openrouteservice.org/geocode/' => array( 'body' => $this->fixture( 'geo/pelias-reverse.json' ) ) ) );
+		$this->mock_http( array( 'api.openrouteservice.org/geocode/reverse' => array( 'body' => $this->fixture( 'geo/openroute-reverse.json' ) ) ) );
 		$addr = $this->provider( 'Geo_Provider_OpenRoute', array( 'api' => 'ors-key' ) )->reverse_lookup();
 		$this->assertSame( 'https://api.openrouteservice.org/geocode/reverse', $this->last_request()['base'] );
 		$this->assertCityHall( $addr );
 
+		$fixture = $this->fixture( 'geo/openroute-search.json' );
+		$this->mock_http( array( 'api.openrouteservice.org/geocode/search' => array( 'body' => $fixture ) ) );
 		$result = ( new Geo_Provider_OpenRoute( array( 'api' => 'ors-key' ) ) )->geocode( 'City Hall' );
 		$this->assertSame( 'https://api.openrouteservice.org/geocode/search', $this->last_request()['base'] );
-		$this->assertSame( self::LAT, $result['latitude'] );
+		$this->assertSame( $fixture['features'][0]['geometry']['coordinates'][1], $result['latitude'] );
 	}
 
 	/**

@@ -1,7 +1,6 @@
 {
   "geocoding": {
     "version": "0.2",
-    "attribution": "https://openrouteservice.org/terms-of-service/#attribution-geocode",
     "query": {
       "size": 1,
       "point.lat": 39.9524,
