@@ -175,7 +175,6 @@ class GeoBaseTest extends WP_UnitTestCase {
 	 * Authors get the location metabox on their own posts.
 	 */
 	public function test_metabox_own_post() {
-		$this->markTestSkipped( 'Known bug, see #330' );
 		set_current_screen( 'post' );
 		$post_id = self::factory()->post->create( array( 'post_author' => self::$users['author'] ) );
 		wp_set_current_user( self::$users['author'] );
@@ -567,7 +566,6 @@ class GeoBaseTest extends WP_UnitTestCase {
 	 * Authors can read and edit the location of their own posts.
 	 */
 	public function test_capabilities_own_post() {
-		$this->markTestSkipped( 'Known bug, see #330' );
 		$post_id = self::factory()->post->create( array( 'post_author' => self::$users['author'] ) );
 		wp_set_current_user( self::$users['author'] );
 		$this->assertTrue( current_user_can( 'read_posts_location', $post_id ) );
@@ -578,7 +576,6 @@ class GeoBaseTest extends WP_UnitTestCase {
 	 * Commenters can read and edit the location of their own comments.
 	 */
 	public function test_capabilities_own_comment() {
-		$this->markTestSkipped( 'Known bug, see #330' );
 		$comment_id = self::factory()->comment->create(
 			array(
 				'comment_post_ID' => self::factory()->post->create(),
@@ -588,6 +585,34 @@ class GeoBaseTest extends WP_UnitTestCase {
 		wp_set_current_user( self::$users['author'] );
 		$this->assertTrue( current_user_can( 'read_comments_location', $comment_id ) );
 		$this->assertTrue( current_user_can( 'edit_comments_location', $comment_id ) );
+	}
+
+	/**
+	 * A comment left without an account isn't treated as the current visitor's own comment.
+	 */
+	public function test_capabilities_guest_comment() {
+		$comment_id = self::factory()->comment->create(
+			array(
+				'comment_post_ID' => self::factory()->post->create(),
+				'user_id'         => 0,
+			)
+		);
+		$this->assertSame( array( 'read_private_posts' ), Geo_Base::map_meta_cap( array(), 'read_comments_location', 0, array( $comment_id ) ) );
+		$this->assertSame( array( 'moderate_comments' ), Geo_Base::map_meta_cap( array(), 'edit_comments_location', 0, array( $comment_id ) ) );
+	}
+
+	/**
+	 * Term locations: editing follows the term's own edit capability, and reading private ones needs read_private_posts.
+	 */
+	public function test_capabilities_terms() {
+		$term_id = self::factory()->term->create( array( 'taxonomy' => 'location' ) );
+		wp_set_current_user( self::$users['editor'] );
+		$this->assertTrue( current_user_can( 'read_terms_location', $term_id ) );
+		$this->assertSame( current_user_can( 'edit_term', $term_id ), current_user_can( 'edit_terms_location', $term_id ) );
+		$this->assertTrue( current_user_can( 'edit_terms_location', $term_id ) );
+		wp_set_current_user( self::$users['author'] );
+		$this->assertFalse( current_user_can( 'read_terms_location', $term_id ) );
+		$this->assertFalse( current_user_can( 'edit_terms_location', $term_id ) );
 	}
 
 	/**
