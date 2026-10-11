@@ -24,6 +24,31 @@ class Location_Plugins {
 		add_filter( 'webmention_handler_mf2_set_properties', array( 'Location_Plugins', 'webmention_handler_mf2_set_properties' ), 10, 2 );
 	}
 
+	/**
+	 * Returns the location visibility a Micropub request asked for.
+	 *
+	 * The location-visibility property is experimental in Micropub. Only public, private and protected are accepted;
+	 * like the Micropub plugin, the last value wins.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array $properties Micropub properties.
+	 * @return string|false public, private or protected, or false if none or an unknown value was sent.
+	 */
+	protected static function requested_visibility( $properties ) {
+		if ( ! is_array( $properties ) || ! isset( $properties['location-visibility'] ) ) {
+			return false;
+		}
+		$visibility = $properties['location-visibility'];
+		if ( is_array( $visibility ) ) {
+			$visibility = end( $visibility );
+		}
+		if ( in_array( $visibility, array( 'public', 'private', 'protected' ), true ) ) {
+			return $visibility;
+		}
+		return false;
+	}
+
 	public static function array_get( $array, $key, $default = array(), $index = true ) {
 		$return = $default;
 		if ( is_array( $array ) && isset( $array[ $key ] ) ) {
@@ -189,7 +214,11 @@ class Location_Plugins {
 				update_post_meta( $args['ID'], 'venue_id', $venue );
 			}
 
-			if ( ! isset( $properties['location-visibility'] ) && false !== $venue ) {
+			$requested = self::requested_visibility( $properties );
+			if ( $requested ) {
+				// The client asked for a visibility, so use it.
+				set_post_geodata( $args['ID'], 'visibility', $requested );
+			} elseif ( false !== $venue ) {
 				set_post_geodata( $args['ID'], 'visibility', 'protected' );
 				// Set the Address to Null
 				set_post_geodata( $args['ID'], 'address', '' );
