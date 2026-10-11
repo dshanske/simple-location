@@ -1,0 +1,47 @@
+{
+  "data": [
+    {
+      "rh": 60,
+      "pod": "d",
+      "lon": -75.1636,
+      "pres": 1014.2,
+      "timezone": "America/New_York",
+      "ob_time": "2026-10-11 14:00",
+      "country_code": "US",
+      "clouds": 20,
+      "ts": 1760191200,
+      "solar_rad": 512.3,
+      "state_code": "PA",
+      "city_name": "Philadelphia",
+      "wind_spd": 3.6,
+      "wind_cdir_full": "southwest",
+      "wind_cdir": "SW",
+      "slp": 1016,
+      "vis": 16,
+      "h_angle": -12,
+      "sunset": "22:24",
+      "dni": 810.2,
+      "dewpt": 13.4,
+      "snow": 0,
+      "uv": 5.2,
+      "precip": 0,
+      "wind_dir": 230,
+      "sunrise": "11:05",
+      "ghi": 612.4,
+      "dhi": 98.1,
+      "aqi": 38,
+      "lat": 39.9524,
+      "weather": {
+        "icon": "c02d",
+        "description": "Few clouds",
+        "code": 801
+      },
+      "datetime": "2026-10-11:14",
+      "temp": 21.5,
+      "station": "KPHL",
+      "elev_angle": 45.2,
+      "app_temp": 21.3
+    }
+  ],
+  "count": 1
+}

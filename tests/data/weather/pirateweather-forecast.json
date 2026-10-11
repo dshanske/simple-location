@@ -1,0 +1,30 @@
+{
+  "latitude": 39.9524,
+  "longitude": -75.1636,
+  "timezone": "America/New_York",
+  "offset": -4.0,
+  "elevation": 12,
+  "currently": {
+    "time": 1760191200,
+    "summary": "Partly Cloudy",
+    "icon": "partly-cloudy-day",
+    "nearestStormDistance": 0,
+    "nearestStormBearing": 0,
+    "precipIntensity": 0.0,
+    "precipProbability": 0.0,
+    "precipIntensityError": 0.0,
+    "precipType": "none",
+    "temperature": 21.5,
+    "apparentTemperature": 21.3,
+    "dewPoint": 13.4,
+    "humidity": 0.6,
+    "pressure": 1016.2,
+    "windSpeed": 3.6,
+    "windGust": 6.2,
+    "windBearing": 230,
+    "cloudCover": 0.2,
+    "uvIndex": 5.2,
+    "visibility": 16.09,
+    "ozone": 285.4
+  }
+}

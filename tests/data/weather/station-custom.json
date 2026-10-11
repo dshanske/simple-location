@@ -1,0 +1,17 @@
+{
+  "station_id": "backyard",
+  "name": "Backyard",
+  "latitude": 39.95,
+  "longitude": -75.16,
+  "timestamp": 0,
+  "temperature": 21.5,
+  "humidity": 60,
+  "pressure": 1016,
+  "summary": "Partly Cloudy",
+  "wind": {
+    "speed": 3.6,
+    "degree": 230,
+    "gust": 6.2
+  },
+  "rain": "N/A"
+}

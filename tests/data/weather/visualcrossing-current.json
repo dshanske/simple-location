@@ -1,0 +1,40 @@
+{
+  "queryCost": 1,
+  "latitude": 39.9524,
+  "longitude": -75.1636,
+  "resolvedAddress": "39.9524,-75.1636",
+  "address": "39.9524,-75.1636",
+  "timezone": "America/New_York",
+  "tzoffset": -4.0,
+  "currentConditions": {
+    "datetime": "10:00:00",
+    "datetimeEpoch": 1760191200,
+    "temp": 21.5,
+    "feelslike": 21.5,
+    "humidity": 60.0,
+    "dew": 13.4,
+    "precip": 0.0,
+    "precipprob": 0.0,
+    "snow": 0.0,
+    "snowdepth": 0.0,
+    "preciptype": null,
+    "windgust": 22.3,
+    "windspeed": 13.0,
+    "winddir": 230.0,
+    "pressure": 1016.0,
+    "visibility": 16.0,
+    "cloudcover": 20.0,
+    "solarradiation": 512.0,
+    "solarenergy": 1.8,
+    "uvindex": 5.0,
+    "conditions": "type_42",
+    "icon": "partly-cloudy-day",
+    "stations": [
+      "KPHL"
+    ],
+    "source": "obs",
+    "sunrise": "07:05:12",
+    "sunset": "18:24:30",
+    "moonphase": 0.6
+  }
+}
