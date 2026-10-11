@@ -436,8 +436,32 @@ class LocationProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( '2025-07-01T16:00:00', $this->last_request()['query']['before'] );
 		$this->assertSame( '2025-07-01T16:00:00+00:00', $provider->get()['time'] );
 
-		$provider->retrieve( new DateTime( '2025-07-01T12:00:00-04:00' ) );
+		$time = new DateTime( '2025-07-01T12:00:00-04:00' );
+		$provider->retrieve( $time );
 		$this->assertSame( '2025-07-01T16:00:00', $this->last_request()['query']['before'] );
+		$this->assertSame( '-04:00', $time->format( 'P' ), 'The caller\'s DateTime is not changed.' );
+	}
+
+	/**
+	 * Compass converts immutable dates and Unix timestamps to UTC, and rejects times it can't parse.
+	 */
+	public function test_compass_before_immutable_and_timestamp() {
+		update_option( 'timezone_string', 'America/New_York' );
+		$this->mock_http( array( 'compass.example.com' => array( 'body' => $this->fixture( 'location/compass-last.json' ) ) ) );
+		$provider = new Location_Provider_Compass();
+
+		$provider->retrieve( new DateTimeImmutable( '2025-07-01 20:00', wp_timezone() ) );
+		$this->assertSame( '2025-07-02T00:00:00', $this->last_request()['query']['before'] );
+		$this->assertSame( '2025-07-02T00:00:00+00:00', $provider->get()['time'] );
+
+		$provider->retrieve( 1751400000 );
+		$this->assertSame( '2025-07-01T20:00:00', $this->last_request()['query']['before'] );
+
+		$this->http_requests = array();
+		$error               = $provider->retrieve( 'not a time' );
+		$this->assertWPError( $error );
+		$this->assertSame( 'invalid_time', $error->get_error_code() );
+		$this->assertEmpty( $this->http_requests );
 	}
 
 	/**
@@ -616,7 +640,6 @@ class LocationProvidersTest extends WP_UnitTestCase {
 	 * Bulk Lookup Location with Compass fills in another author's post from their account for an administrator.
 	 */
 	public function test_compass_bulk_lookup_other_author_admin() {
-		$this->markTestSkipped( 'Known bug, see #376' );
 		$post_id = $this->compass_bulk_lookup_post();
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->assertSame( $post_id, Geo_Data::bulk_edit_lookup_location( $post_id ) );
@@ -676,6 +699,18 @@ class LocationProvidersTest extends WP_UnitTestCase {
 		$this->assertFalse( $provider->get_geouri() );
 		$this->assertArrayNotHasKey( 'speed', $provider->get() );
 		$this->assertArrayNotHasKey( 'activity', $provider->get() );
+	}
+
+	/**
+	 * Compass queries send a UTC offset timezone intact.
+	 */
+	public function test_compass_query_offset_timezone() {
+		update_option( 'timezone_string', '' );
+		update_option( 'gmt_offset', 5.5 );
+		$this->mock_http( array( 'compass.example.com/api/query/' => array( 'body' => $this->fixture( 'location/compass-query.json' ) ) ) );
+		$provider = new Location_Provider_Compass();
+		$provider->query( '2025-07-01T16:00:00', '2025-07-01T17:00:00' );
+		$this->assertSame( '+05:30', $this->last_request()['query']['tz'] );
 	}
 
 	/**

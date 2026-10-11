@@ -69,6 +69,32 @@ class Location_Provider_Compass extends Location_Provider {
 		return $user_id;
 	}
 
+	/**
+	 * Converts a time to UTC.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param DateTimeInterface|int|string $time A date and time, a Unix timestamp, or a string DateTime can parse.
+	 * @return DateTimeImmutable|WP_Error The time in UTC, or an error if it can't be parsed.
+	 */
+	protected function utc_time( $time ) {
+		try {
+			if ( $time instanceof DateTime ) {
+				$time = DateTimeImmutable::createFromMutable( $time );
+			} elseif ( is_int( $time ) ) {
+				$time = new DateTimeImmutable( '@' . $time );
+			} elseif ( is_string( $time ) ) {
+				$time = new DateTimeImmutable( $time );
+			}
+		} catch ( Exception $e ) {
+			return new WP_Error( 'invalid_time', __( 'Invalid time', 'simple-location' ), array( 'time' => $time ) );
+		}
+		if ( ! $time instanceof DateTimeImmutable ) {
+			return new WP_Error( 'invalid_time', __( 'Invalid time', 'simple-location' ), array( 'time' => $time ) );
+		}
+		return $time->setTimezone( new DateTimeZone( 'UTC' ) );
+	}
+
 	public function query( $start, $end ) {
 		if ( is_string( $start ) ) {
 			$start = new DateTime( $start );
@@ -96,7 +122,7 @@ class Location_Provider_Compass extends Location_Provider {
 				'format' => 'linestring',
 				'start'  => $start->format( 'Y-m-d\TH:i:s' ),
 				'end'    => $end->format( 'Y-m-d\TH:i:s' ),
-				'tz'     => wp_timezone_string(),
+				'tz'     => rawurlencode( wp_timezone_string() ),
 			),
 			$url
 		);
@@ -174,10 +200,10 @@ class Location_Provider_Compass extends Location_Provider {
 			'user-agent'          => 'Simple Location for WordPress',
 		);
 		if ( $time ) {
-			if ( is_string( $time ) ) {
-				$time = new DateTime( $time );
+			$time = $this->utc_time( $time );
+			if ( is_wp_error( $time ) ) {
+				return $time;
 			}
-			$time->setTimezone( new DateTimeZone( 'GMT' ) );
 			$this->time = $time->format( DATE_W3C );
 			$url        = add_query_arg( 'before', $time->format( 'Y-m-d\TH:i:s' ), $url );
 		}
