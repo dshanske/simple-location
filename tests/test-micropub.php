@@ -305,6 +305,23 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A failed weather lookup stores no weather, and the rest of the location is still saved.
+	 */
+	public function test_set_location_weather_error() {
+		update_option( 'sloc_weather_provider', 'sloc_test' );
+		Weather_Provider_Sloc_Test::$conditions = new WP_Error( 'http_request_failed', 'Weather service unavailable' );
+		$args                                   = $this->micropub_post(
+			array(
+				'geo_latitude'  => self::LAT,
+				'geo_longitude' => self::LNG,
+			)
+		);
+		Location_Plugins::micropub_set_location( array( 'properties' => array() ), $args );
+		$this->assertEmpty( get_post_weatherdata( $args['ID'] ) );
+		$this->assertSame( 'public', get_post_geodata( $args['ID'], 'visibility' ) );
+	}
+
+	/**
 	 * Coordinates at a venue link the venue and hide the address and coordinates.
 	 */
 	public function test_set_location_at_venue() {

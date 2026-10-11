@@ -177,7 +177,7 @@ class Location_Plugins {
 			if ( $weather ) {
 				$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
 				$conditions = $weather->get_conditions( $published->getTimestamp() );
-				if ( ! empty( $conditions ) || ! is_wp_error( $conditions ) ) {
+				if ( ! empty( $conditions ) && ! is_wp_error( $conditions ) ) {
 					// if debug mode is on remove the raw data from storage.
 					unset( $conditions['raw'] );
 					set_post_weatherdata( $args['ID'], '', $conditions );
