@@ -924,13 +924,15 @@ class Geo_Base {
 	public static function map_meta_cap( $caps, $cap, $user_id, $args ) {
 		$id = 0;
 		if ( isset( $args[0] ) ) {
-			$id = $args[0];
+			$id = (int) $args[0];
 		}
+		// IDs on WP_Post and WP_Comment are numeric strings, so compare them as integers.
+		$user_id = (int) $user_id;
 		switch ( $cap ) {
 			case 'read_posts_location':
 				$post = get_post( $id );
 				// If it is your post you just need to be able to read it. Otherwise you need the private posts capability.
-				if ( $post && ( $user_id === $post->post_author ) ) {
+				if ( $post && ( $user_id === (int) $post->post_author ) ) {
 					$caps = array( 'read' );
 				} else {
 					$caps = array( 'read_private_posts' );
@@ -939,7 +941,7 @@ class Geo_Base {
 			case 'read_comments_location':
 				$comment = get_comment( $id );
 				// If it is your comment you just need to be able to read it. Otherwise you need the private posts capability.
-				if ( $comment && ( $user_id === $comment->user_id ) && ( 0 !== $comment->user_id ) ) {
+				if ( $comment && ( $user_id === (int) $comment->user_id ) && ( 0 !== (int) $comment->user_id ) ) {
 					$caps = array( 'read' );
 				} else {
 					$caps = array( 'read_private_posts' );
@@ -956,7 +958,7 @@ class Geo_Base {
 			case 'edit_posts_location':
 				$post = get_post( $id );
 				// If it is your post you just need to be able to read it. Otherwise you need the private posts capability.
-				if ( $post && ( $user_id === $post->post_author ) ) {
+				if ( $post && ( $user_id === (int) $post->post_author ) ) {
 					$caps = array( 'edit_posts' );
 				} else {
 					$caps = array( 'edit_others_posts' );
@@ -965,7 +967,7 @@ class Geo_Base {
 			case 'edit_comments_location':
 				$comment = get_comment( $id );
 				// If it is your comment you just need to be able to read it. Otherwise you need the private posts capability.
-				if ( $comment && ( $user_id === $comment->user_id ) && ( 0 !== $comment->user_id ) ) {
+				if ( $comment && ( $user_id === (int) $comment->user_id ) && ( 0 !== (int) $comment->user_id ) ) {
 					$caps = array( 'edit_posts' );
 				} else {
 					$caps = array( 'moderate_comments' );
@@ -978,6 +980,14 @@ class Geo_Base {
 				} else {
 					$caps = array( 'edit_users' );
 				}
+				break;
+			case 'read_terms_location':
+				// A private term location is readable by those who can read others' private post locations.
+				$caps = array( 'read_private_posts' );
+				break;
+			case 'edit_terms_location':
+				// Editing a term's location needs the same capability as editing the term.
+				$caps = map_meta_cap( 'edit_term', $user_id, $id );
 				break;
 
 		}
