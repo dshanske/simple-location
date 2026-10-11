@@ -35,6 +35,38 @@ class Sloc_Media_Metadata {
 		add_filter( 'wp_generate_attachment_metadata', array( __CLASS__, 'attachment' ), 20, 2 );
 		add_filter( 'attachment_fields_to_edit', array( __CLASS__, 'attachment_fields_to_edit' ), 10, 2 );
 		add_action( 'attachment_submitbox_misc_actions', array( __CLASS__, 'attachment_submitbox_metadata' ), 12 );
+		add_filter( 'rest_prepare_attachment', array( __CLASS__, 'rest_prepare_attachment' ), 10, 3 );
+	}
+
+	/**
+	 * Removes a photo's coordinates from its REST image metadata unless its location is public.
+	 *
+	 * Photos uploaded before 5.0.26 still have the GPS location in their stored image metadata,
+	 * which core returns as media_details.image_meta to anyone who can view the attachment.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param WP_REST_Response $response The response.
+	 * @param WP_Post          $post     The attachment.
+	 * @param WP_REST_Request  $request  The request.
+	 * @return WP_REST_Response The response.
+	 */
+	public static function rest_prepare_attachment( $response, $post, $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Required by the filter.
+		$data = $response->get_data();
+		if ( ! isset( $data['media_details'] ) || ! is_array( $data['media_details'] ) ) {
+			return $response;
+		}
+		if ( ! isset( $data['media_details']['image_meta'] ) || ! is_array( $data['media_details']['image_meta'] ) ) {
+			return $response;
+		}
+		if ( ! array_key_exists( 'location', $data['media_details']['image_meta'] ) ) {
+			return $response;
+		}
+		if ( 'public' !== get_post_geodata( $post->ID, 'visibility' ) ) {
+			unset( $data['media_details']['image_meta']['location'] );
+			$response->set_data( $data );
+		}
+		return $response;
 	}
 
 	/**
@@ -196,6 +228,7 @@ class Sloc_Media_Metadata {
 	 * @return array $meta The updated metadata.
 	 *
 	 * @since 1.0.0
+	 * @since 5.0.26 The location is removed from the image metadata, and no visibility is stored.
 	 */
 	public static function attachment( $meta, $post_id ) {
 		if ( ! isset( $meta['image_meta'] ) ) {
@@ -240,6 +273,10 @@ class Sloc_Media_Metadata {
 			foreach ( $update as $key => $value ) {
 				update_post_meta( $post_id, $key, $value );
 			}
+
+			// The location now lives in the geo fields, where its visibility applies; don't also keep it in the image metadata,
+			// which core exposes to anyone, for example in the REST API.
+			unset( $meta['image_meta']['location'] );
 		}
 
 		return $meta;
