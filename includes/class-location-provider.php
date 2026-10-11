@@ -297,6 +297,30 @@ abstract class Location_Provider extends Sloc_Provider {
 	 */
 	public function set_user( $user ) {
 		$this->user = $user;
+		$this->reset();
+	}
+
+	/**
+	 * Clears the location found by the last lookup.
+	 *
+	 * Providers are shared, so each lookup must start empty; otherwise a lookup that finds nothing
+	 * would return the previous lookup's location, possibly another user's.
+	 * Settings such as the user and the API key are kept.
+	 *
+	 * @since 5.0.26
+	 */
+	protected function reset() {
+		$this->latitude          = null;
+		$this->longitude         = null;
+		$this->altitude          = null;
+		$this->accuracy          = null;
+		$this->altitude_accuracy = null;
+		$this->heading           = null;
+		$this->speed             = null;
+		$this->time              = null;
+		$this->activity          = null;
+		$this->annotation        = '';
+		$this->other             = array();
 	}
 
 
@@ -312,6 +336,8 @@ abstract class Location_Provider extends Sloc_Provider {
 
 	/**
 	 * Get Coordinates in H-Geo MF2 Format.
+	 *
+	 * Implementations should call reset() first, so a lookup that finds nothing doesn't keep the previous location.
 	 *
 	 * @param string|int|DateTime $time An ISO8601 time string, unix timestamp, or DateTime.
 	 * @param array               $args Optional arguments to be passed.

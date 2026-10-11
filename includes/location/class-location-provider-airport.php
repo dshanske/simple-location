@@ -36,6 +36,7 @@ class Location_Provider_Airport extends Location_Provider {
 	 * @return array|boolean Array with h-geo mf2 false if null
 	 */
 	public function retrieve( $time = null, $args = array() ) {
+		$this->reset();
 		if ( ! array_key_exists( 'address', $args ) ) {
 			return new WP_Error( 'empty', __( 'No code passed through', 'simple-location' ) );
 		}

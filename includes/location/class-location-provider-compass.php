@@ -120,6 +120,7 @@ class Location_Provider_Compass extends Location_Provider {
 	}
 
 	public function retrieve( $time = null, $args = array() ) {
+		$this->reset();
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
 			return;

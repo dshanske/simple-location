@@ -269,6 +269,39 @@ class LocationProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A lookup for a user without a location doesn't return the previous user's location.
+	 */
+	public function test_dummy_does_not_keep_previous_location() {
+		$other_user = self::factory()->user->create();
+		set_user_geodata(
+			$this->user_id,
+			'',
+			array(
+				'latitude'  => 39.9524,
+				'longitude' => -75.1636,
+			)
+		);
+		$provider = new Location_Provider_Dummy();
+		$provider->set_user( $this->user_id );
+		$provider->retrieve();
+		$this->assertSame( 'geo:39.9524,-75.1636', $provider->get_geouri() );
+
+		$provider->set_user( $other_user );
+		$this->assertFalse( $provider->get_geouri(), 'Changing the user clears the location.' );
+		$this->assertNull( $provider->retrieve() );
+		$this->assertFalse( $provider->get_geouri() );
+		$this->assertFalse( $provider->get_mf2() );
+
+		// The same user, after their location is removed.
+		$provider->set_user( $this->user_id );
+		$provider->retrieve();
+		delete_user_meta( $this->user_id, 'geo_latitude' );
+		delete_user_meta( $this->user_id, 'geo_longitude' );
+		$this->assertNull( $provider->retrieve() );
+		$this->assertFalse( $provider->get_geouri() );
+	}
+
+	/**
 	 * The address provider geocodes the address with the chosen geo provider.
 	 */
 	public function test_address() {
@@ -301,6 +334,29 @@ class LocationProvidersTest extends WP_UnitTestCase {
 		Geo_Provider_Sloc_Test::$geocode = new WP_Error( 'not_found', 'Not found' );
 		$this->assertNull( $provider->retrieve( null, array( 'address' => 'Nowhere' ) ) );
 		$this->assertSame( 'No Item Found', $provider->get()['annotation'] );
+	}
+
+	/**
+	 * A failed address lookup doesn't return the previous lookup's location.
+	 */
+	public function test_address_does_not_keep_previous_location() {
+		update_option( 'sloc_geo_provider', 'sloc_test' );
+		Geo_Provider_Sloc_Test::$geocode = array(
+			'latitude'     => 39.9524,
+			'longitude'    => -75.1636,
+			'display_name' => 'Philadelphia City Hall',
+		);
+		$provider                        = new Location_Provider_Address();
+		$provider->retrieve( null, array( 'address' => 'City Hall' ) );
+		$this->assertSame( 'geo:39.9524,-75.1636', $provider->get_geouri() );
+
+		Geo_Provider_Sloc_Test::$geocode = new WP_Error( 'not_found', 'Not found' );
+		$provider->retrieve( null, array( 'address' => 'Nowhere' ) );
+		$this->assertFalse( $provider->get_geouri() );
+		$this->assertArrayNotHasKey( 'latitude', $provider->get() );
+
+		$provider->retrieve( null, array() );
+		$this->assertFalse( $provider->get_geouri() );
 	}
 
 	/**
@@ -510,6 +566,29 @@ class LocationProvidersTest extends WP_UnitTestCase {
 
 		$this->mock_http( array( 'compass.example.com' => array( 'body' => array( 'data' => array( 'type' => 'Feature' ) ) ) ) );
 		$this->assertFalse( $provider->retrieve() );
+	}
+
+	/**
+	 * A failed Compass lookup doesn't return the previous lookup's location.
+	 */
+	public function test_compass_does_not_keep_previous_location() {
+		$provider = new Location_Provider_Compass();
+		$this->mock_http( array( 'compass.example.com' => array( 'body' => $this->fixture( 'location/compass-last.json' ) ) ) );
+		$provider->retrieve();
+		$this->assertNotFalse( $provider->get_geouri() );
+
+		$this->mock_http(
+			array(
+				'compass.example.com' => array(
+					'code' => 401,
+					'body' => array( 'error' => 'invalid token' ),
+				),
+			)
+		);
+		$provider->retrieve();
+		$this->assertFalse( $provider->get_geouri() );
+		$this->assertArrayNotHasKey( 'speed', $provider->get() );
+		$this->assertArrayNotHasKey( 'activity', $provider->get() );
 	}
 
 	/**
