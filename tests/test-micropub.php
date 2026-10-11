@@ -344,6 +344,66 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data for a requested location-visibility, with and without a venue.
+	 *
+	 * @return array Visibility and whether the post is at a venue.
+	 */
+	public function data_requested_visibility() {
+		return array(
+			'private'            => array( 'private', false ),
+			'protected'          => array( 'protected', false ),
+			'public'             => array( 'public', false ),
+			'private at a venue' => array( 'private', true ),
+			'public at a venue'  => array( 'public', true ),
+		);
+	}
+
+	/**
+	 * A location-visibility sent by the client is used, with or without a venue.
+	 *
+	 * @dataProvider data_requested_visibility
+	 *
+	 * @param string $visibility Visibility sent by the client.
+	 * @param bool   $at_venue   Whether the coordinates are at a venue.
+	 */
+	public function test_set_location_uses_requested_visibility( $visibility, $at_venue ) {
+		$venue = function () use ( $at_venue ) {
+			return $at_venue ? self::factory()->post->create( array( 'post_type' => 'venue' ) ) : false;
+		};
+		add_filter( 'pre_at_venue', $venue );
+		$args = $this->micropub_post(
+			array(
+				'geo_latitude'  => self::LAT,
+				'geo_longitude' => self::LNG,
+			)
+		);
+		Location_Plugins::micropub_set_location( array( 'properties' => array( 'location-visibility' => array( $visibility ) ) ), $args );
+		remove_filter( 'pre_at_venue', $venue );
+
+		$this->assertSame( $visibility, get_post_geodata( $args['ID'], 'visibility' ) );
+	}
+
+	/**
+	 * Only the last location-visibility value counts, and an unknown value falls back to the default.
+	 */
+	public function test_set_location_visibility_values() {
+		$args = $this->micropub_post(
+			array(
+				'geo_latitude'  => self::LAT,
+				'geo_longitude' => self::LNG,
+			)
+		);
+		Location_Plugins::micropub_set_location( array( 'properties' => array( 'location-visibility' => array( 'public', 'private' ) ) ), $args );
+		$this->assertSame( 'private', get_post_geodata( $args['ID'], 'visibility' ) );
+
+		Location_Plugins::micropub_set_location( array( 'properties' => array( 'location-visibility' => 'protected' ) ), $args );
+		$this->assertSame( 'protected', get_post_geodata( $args['ID'], 'visibility' ) );
+
+		Location_Plugins::micropub_set_location( array( 'properties' => array( 'location-visibility' => array( 'secret' ) ) ), $args );
+		$this->assertSame( 'public', get_post_geodata( $args['ID'], 'visibility' ) );
+	}
+
+	/**
 	 * A check-in uses building-level zoom and creates a venue from the h-card.
 	 */
 	public function test_set_location_checkin() {
