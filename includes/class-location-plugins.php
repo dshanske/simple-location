@@ -60,7 +60,7 @@ class Location_Plugins {
 				$props = $location['properties'];
 				if ( isset( $props['geo'] ) ) {
 					if ( array_key_exists( 'label', $props ) ) {
-						$meta['geo_address'] = static::get_first_array_item( $props['label'] );
+						$meta['geo_address'] = $handler->get_first_array_item( $props['label'] );
 					}
 					$props = $handler->get_first_array_item( $props['geo'] );
 					$props = $props['properties'];

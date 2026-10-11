@@ -241,7 +241,7 @@ class Post_Venue {
 				);
 				printf( '<a href="%s">%s</a>', esc_url( $url ), $count );
 			} else {
-				__e( 'None', 'simple-location' );
+				esc_html_e( 'None', 'simple-location' );
 			}
 		}
 	}

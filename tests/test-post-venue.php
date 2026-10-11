@@ -177,6 +177,13 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The Checkins column shows "None" for a row that isn't a venue.
+	 */
+	public function test_admin_column_not_a_venue() {
+		$this->assertSame( 'None', $this->capture( array( 'Post_Venue', 'manage_checkins_admin_column' ), 'checkins', self::factory()->post->create() ) );
+	}
+
+	/**
 	 * The bulk action is registered and its notice reports the count.
 	 */
 	public function test_bulk_edit_registration_and_notice() {
