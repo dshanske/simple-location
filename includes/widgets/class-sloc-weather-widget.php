@@ -28,6 +28,14 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @output echoes current weather
 	 */
 	public function widget( $args, $instance ) {
+		$hide_location = false;
+		if ( self::uses_user( $instance ) && 'private' === get_user_geodata( (int) $instance['user'], 'visibility' ) ) {
+			if ( empty( $instance['showprivate'] ) ) {
+				return;
+			}
+			$hide_location = true;
+		}
+
 		echo $args['before_widget']; // phpcs:ignore
 
 		/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
@@ -44,7 +52,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		if ( isset( $instance['cache_time'] ) ) {
 			$w->set_cache_time( $instance['cache_time'] );
 		}
-		if ( isset( $instance['user'] ) && '-1' !== $instance['user'] ) {
+		if ( self::uses_user( $instance ) ) {
 			$weather = Sloc_Weather_Data::get_weather_by_user( $instance['user'] ); // phpcs:ignore
 		} elseif ( ! empty( $instance['latitude'] ) && ! empty( $instance['longitude'] ) ) {
 			$w->set( $instance['latitude'], $instance['longitude'] );
@@ -52,6 +60,10 @@ class Sloc_Weather_Widget extends WP_Widget {
 		} else {
 			esc_html_e( 'No Input Provided', 'simple-location' );
 			return;
+		}
+
+		if ( $hide_location && is_array( $weather ) ) {
+			$weather = self::without_location( $weather );
 		}
 
 		if ( is_wp_error( $weather ) ) {
@@ -62,6 +74,32 @@ class Sloc_Weather_Widget extends WP_Widget {
 			echo esc_html( $weather );
 		}
 		echo $args['after_widget']; // phpcs:ignore
+	}
+
+	/**
+	 * Whether the widget shows a user's weather rather than a fixed location.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array $instance Saved widget settings.
+	 * @return bool True if a user is selected.
+	 */
+	protected static function uses_user( $instance ) {
+		return isset( $instance['user'] ) && '-1' !== (string) $instance['user'];
+	}
+
+	/**
+	 * Removes the parts of the weather that reveal where it was measured.
+	 *
+	 * Drops the station name and ID, and the coordinates that the astronomical information is calculated from.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array $weather Weather conditions.
+	 * @return array Weather conditions without location details.
+	 */
+	protected static function without_location( $weather ) {
+		return array_diff_key( $weather, array_flip( array( 'name', 'station_id', 'latitude', 'longitude', 'altitude' ) ) );
 	}
 
 	protected static function astro_list( $weather ) {
@@ -220,6 +258,11 @@ class Sloc_Weather_Widget extends WP_Widget {
 		<p><label for="showastro"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="hidden" value="0" />
 			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
+		</p>
+		<p><label for="<?php echo esc_attr( $this->get_field_id( 'showprivate' ) ); ?>"><?php esc_html_e( 'Show weather when the user\'s location is private: ', 'simple-location' ); ?></label>
+		<input name="<?php echo esc_attr( $this->get_field_name( 'showprivate' ) ); ?>" type="hidden" value="0" />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showprivate' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showprivate' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showprivate'] ) ); ?> />
+			<br /><small><?php esc_html_e( 'The station name and astronomical information are left out, so only the conditions are shown.', 'simple-location' ); ?></small>
 		</p>
 		<p><label for="cache_time"><?php esc_html_e( 'Cache Time: ', 'simple-location' ); ?></label>
 			<input type="number" name="<?php echo esc_attr( $this->get_field_name( 'cache_time' ) ); ?>" id="<?php $this->get_field_id( 'cache_time' ); ?>" value="<?php echo esc_attr( ifset( $instance['cache_time'] ) ); ?>" />
