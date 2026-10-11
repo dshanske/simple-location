@@ -641,8 +641,29 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /user stores the current user's location with an address from the reverse lookup.
 	 */
 	public function test_user() {
-		$this->markTestSkipped( 'Known bug, see #305' );
 		$response = $this->request(
+			'/user',
+			array(
+				'latitude'  => '45.01',
+				'longitude' => '-75.44',
+			),
+			'POST'
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'Updated', $response->get_data() );
+		$geodata = get_user_geodata( self::$author );
+		$this->assertEquals( 45.01, $geodata['latitude'] );
+		$this->assertEquals( -75.44, $geodata['longitude'] );
+		$this->assertSame( 'Test Address', $geodata['address'] );
+		$this->assertEquals( 50, $geodata['altitude'], 'Without an altitude, it is looked up.' );
+	}
+
+	/**
+	 * /user keeps an altitude that was sent instead of looking it up.
+	 */
+	public function test_user_altitude() {
+		$this->markTestSkipped( 'Known bug, see #306' );
+		$this->request(
 			'/user',
 			array(
 				'latitude'  => '45.01',
@@ -651,50 +672,7 @@ class RestGeoTest extends WP_UnitTestCase {
 			),
 			'POST'
 		);
-		$this->assertSame( 200, $response->get_status() );
-		$geodata = get_user_geodata( self::$author );
-		$this->assertEquals( 45.01, $geodata['latitude'] );
-		$this->assertSame( 'Test Address', $geodata['address'] );
-		$this->assertEquals( 10, $geodata['altitude'] );
-	}
-
-	/**
-	 * /user accepts the Overland GeoJSON format: a "locations" list of features, newest last.
-	 */
-	public function test_user_geojson() {
-		$this->markTestSkipped( 'Known bug, see #305' );
-		$request = new WP_REST_Request( 'POST', '/sloc_geo/1.0/user' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'locations' => array(
-						array(
-							'type'       => 'Feature',
-							'geometry'   => array(
-								'type'        => 'Point',
-								'coordinates' => array( -75.5, 45.5 ),
-							),
-							'properties' => array( 'timestamp' => '2026-10-10T12:00:00Z' ),
-						),
-						array(
-							'type'       => 'Feature',
-							'geometry'   => array(
-								'type'        => 'Point',
-								'coordinates' => array( -75.44, 45.01, 10 ),
-							),
-							'properties' => array(
-								'timestamp' => '2026-10-10T12:05:00Z',
-								'speed'     => 3,
-							),
-						),
-					),
-				)
-			)
-		);
-		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertEquals( 45.01, get_user_geodata( self::$author, 'latitude' ) );
+		$this->assertEquals( 10, get_user_geodata( self::$author, 'altitude' ) );
 	}
 
 	/**

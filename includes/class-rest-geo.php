@@ -434,7 +434,8 @@ class REST_Geo {
 			if ( isset( $reverse_adr['display-name'] ) ) {
 				$location['address'] = $reverse_adr['display-name'];
 			}
-			if ( isset( $location['altitude'] ) && 0 !== $location['altitude'] && 'NaN' !== $location['altitude'] ) {
+			// Discard an altitude that isn't a number, so it is looked up instead.
+			if ( isset( $location['altitude'] ) && ( ! is_numeric( $location['altitude'] ) || is_nan( (float) $location['altitude'] ) ) ) {
 				unset( $location['altitude'] );
 			}
 			if ( ! isset( $location['altitude'] ) ) {
@@ -442,7 +443,7 @@ class REST_Geo {
 			}
 		}
 
-		$return = set_user_geodata( wp_get_current_user()->ID, $location );
+		$return = set_user_geodata( get_current_user_id(), '', $location );
 		if ( is_wp_error( $return ) ) {
 			return $return;
 		} else {
