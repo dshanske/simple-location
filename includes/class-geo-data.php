@@ -492,7 +492,8 @@ class Geo_Data {
 
 		if ( 'visibility' === $key ) {
 			$visibility = get_metadata( $type, $id, 'geo_public', true );
-			if ( empty( $visibility ) ) {
+			// Only a missing value uses the default; '0' means private.
+			if ( ! is_string( $visibility ) || '' === $visibility ) {
 				return self::get_default_visibility();
 			}
 			switch ( (int) $visibility ) {
