@@ -1,0 +1,79 @@
+{
+  "html_attributions": [],
+  "results": [
+    {
+      "business_status": "OPERATIONAL",
+      "geometry": {
+        "location": {
+          "lat": 39.9526,
+          "lng": -75.1635
+        },
+        "viewport": {
+          "northeast": {
+            "lat": 39.95395,
+            "lng": -75.16215
+          },
+          "southwest": {
+            "lat": 39.95125,
+            "lng": -75.16485
+          }
+        }
+      },
+      "name": "Philadelphia City Hall",
+      "place_id": "ChIJ-0aoJS7GxokRkHmKyYQ5yX0",
+      "plus_code": {
+        "compound_code": "XR3P+2H Philadelphia, PA, USA",
+        "global_code": "87F6XR3P+2H"
+      },
+      "rating": 4.7,
+      "reference": "ChIJ-0aoJS7GxokRkHmKyYQ5yX0",
+      "scope": "GOOGLE",
+      "types": [
+        "city_hall",
+        "tourist_attraction",
+        "point_of_interest",
+        "local_government_office",
+        "establishment"
+      ],
+      "user_ratings_total": 9000,
+      "vicinity": "1400 John F Kennedy Blvd, Philadelphia"
+    },
+    {
+      "business_status": "OPERATIONAL",
+      "geometry": {
+        "location": {
+          "lat": 39.9529,
+          "lng": -75.1647
+        },
+        "viewport": {
+          "northeast": {
+            "lat": 39.95425,
+            "lng": -75.16335
+          },
+          "southwest": {
+            "lat": 39.95155,
+            "lng": -75.16605
+          }
+        }
+      },
+      "name": "Dilworth Park",
+      "place_id": "ChIJBVNy2S_GxokR1vB7SrIoCUo",
+      "plus_code": {
+        "compound_code": "XR3P+5R Philadelphia, PA, USA",
+        "global_code": "87F6XR3P+5R"
+      },
+      "rating": 4.6,
+      "reference": "ChIJBVNy2S_GxokR1vB7SrIoCUo",
+      "scope": "GOOGLE",
+      "types": [
+        "park",
+        "tourist_attraction",
+        "point_of_interest",
+        "establishment"
+      ],
+      "user_ratings_total": 4000,
+      "vicinity": "1 S 15th St, Philadelphia"
+    }
+  ],
+  "status": "OK"
+}

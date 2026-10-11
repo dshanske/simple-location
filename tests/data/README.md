@@ -10,7 +10,8 @@ Each file is the body of one HTTP response from a provider's API, used by the pr
    keys, but some echo the query.
 3. Save it over the file with the same name, pretty-printed JSON, and update its **Status** below to
    `Captured YYYY-MM-DD`.
-4. Run `./vendor/bin/phpunit --filter GeoProvidersTest` (or `WeatherProvidersTest`).
+4. Run `./vendor/bin/phpunit --filter GeoProvidersTest` (or `WeatherProvidersTest`, `ElevationProvidersTest`,
+   `VenueProvidersTest`, `MapProvidersTest`).
 
 The tests check stable facts for every provider: city (Philadelphia), region (Pennsylvania / `PA`),
 country (`US`), a `191xx` ZIP code, a street containing "Kennedy" or "JFK", and the requested
@@ -72,3 +73,37 @@ Current conditions are for Philadelphia (`39.9524,-75.1636`); station requests u
 
 Weatherstack (API-5), HERE weather (API-4), Met Office (API-3) and the location lookups that sort
 stations (NWS, Meteostat, custom station; #316) have no fixtures yet.
+
+## Elevation providers (`elevation/`)
+
+Each test checks that the elevation the plugin returns is the one in the fixture, rounded to two places.
+
+| File | Request | Status |
+|---|---|---|
+| `bing-elevation.json` | `GET http://dev.virtualearth.net/REST/v1/Elevation/List?points=39.9524,-75.1636&key=…` | Hand-built from docs |
+| `geonames-srtm1.json` | `GET https://secure.geonames.org/srtm1?username=…&lat=39.9524&lng=-75.1636` (errors reuse `geo/geonames-error.json`) | Hand-built from docs |
+| `google-elevation.json` | `GET https://maps.googleapis.com/maps/api/elevation/json?locations=39.9524,-75.1636&key=…` (errors reuse `geo/google-denied.json`) | Hand-built from docs |
+| `openroute-point.json` | `GET https://api.openrouteservice.org/elevation/point?api_key=…&format_out=point&geometry=-75.1636,39.9524` | Hand-built from docs |
+
+The MapQuest and OpenMapQuest elevation providers call shut-down APIs (API-2) and have no fixtures.
+
+## Venue providers (`venue/`)
+
+The venue tests check the same stable address facts as the geo tests for every venue, plus the
+timezone. Nominatim venues reuse `geo/nominatim-reverse.json`, since it is the same request.
+
+| File | Request | Status |
+|---|---|---|
+| `google-nearbysearch.json` | `GET https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=39.9524,-75.1636&radius=200&type=establishment&language=en-US&key=…` | Hand-built from docs |
+| `locationiq-nearby.json` | `GET https://us1.locationiq.com/v1/nearby?key=…&lat=39.9524&lon=-75.1636` | Hand-built from docs |
+
+## Map providers (`map/`)
+
+Map providers only build image and link URLs, so their tests need no fixtures except Mapbox's list of
+a user's styles.
+
+| File | Request | Status |
+|---|---|---|
+| `mapbox-styles.json` | `GET https://api.mapbox.com/styles/v1/{user}?access_token=…&limit=50` | Hand-built from docs |
+
+HERE map URLs (API-4) and MapQuest archive maps (API-2) use retired APIs and aren't tested.

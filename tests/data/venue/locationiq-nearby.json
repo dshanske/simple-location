@@ -1,0 +1,64 @@
+[
+  {
+    "place_id": "331543432",
+    "osm_type": "way",
+    "osm_id": "28331796",
+    "lat": "39.9526",
+    "lon": "-75.1635",
+    "class": "tourism",
+    "type": "attraction",
+    "tag_type": "attraction",
+    "name": "Philadelphia City Hall",
+    "display_name": "Philadelphia City Hall, 1400, John F. Kennedy Boulevard, Center City, Philadelphia, Philadelphia County, Pennsylvania, 19107, USA",
+    "address": {
+      "name": "Philadelphia City Hall",
+      "house_number": "1400",
+      "road": "John F. Kennedy Boulevard",
+      "neighbourhood": "Center City",
+      "city": "Philadelphia",
+      "county": "Philadelphia County",
+      "state": "Pennsylvania",
+      "postcode": "19107",
+      "country": "United States of America",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "39.9518",
+      "39.953",
+      "-75.1643",
+      "-75.1629"
+    ],
+    "distance": 22
+  },
+  {
+    "place_id": "331543987",
+    "osm_type": "way",
+    "osm_id": "126713011",
+    "lat": "39.9529",
+    "lon": "-75.1647",
+    "class": "leisure",
+    "type": "park",
+    "tag_type": "park",
+    "name": "Dilworth Park",
+    "display_name": "Dilworth Park, 1, South 15th Street, Center City, Philadelphia, Philadelphia County, Pennsylvania, 19102, USA",
+    "address": {
+      "name": "Dilworth Park",
+      "house_number": "1",
+      "road": "South 15th Street",
+      "neighbourhood": "Center City",
+      "city": "Philadelphia",
+      "county": "Philadelphia County",
+      "state": "Pennsylvania",
+      "postcode": "19102",
+      "country": "United States of America",
+      "country_code": "us"
+    },
+    "boundingbox": [
+      "39.9524",
+      "39.9534",
+      "-75.1652",
+      "-75.1642"
+    ],
+    "distance": 104
+  }
+]
