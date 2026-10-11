@@ -162,7 +162,6 @@ class WidgetsTest extends WP_UnitTestCase {
 	 * A user's private location shows nothing unless the widget allows it, and then only the conditions.
 	 */
 	public function test_weather_by_user_private() {
-		$this->markTestSkipped( 'Known bug, see #302' );
 		Weather_Provider_Sloc_Test::$conditions = array(
 			'temperature' => 28,
 			'code'        => 800,
