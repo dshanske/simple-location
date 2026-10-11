@@ -579,6 +579,23 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * /weather with a provider that isn't registered is an error and leaves the site's provider alone.
+	 */
+	public function test_weather_unknown_provider() {
+		update_option( 'sloc_weather_provider', 'sloc_test' );
+		$response = $this->request(
+			'/weather',
+			array(
+				'latitude'  => '45.01',
+				'longitude' => '-75.44',
+				'provider'  => 'not-a-provider',
+			)
+		);
+		$this->assertErrorResponse( 'no_provider', $response );
+		$this->assertSame( 'sloc_test', get_option( 'sloc_weather_provider' ), "The site's weather provider is kept." );
+	}
+
+	/**
 	 * /weather passes on a provider error, including with imperial units.
 	 */
 	public function test_weather_provider_error() {

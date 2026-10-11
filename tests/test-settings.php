@@ -612,5 +612,25 @@ class SettingsTest extends WP_UnitTestCase {
 		update_option( 'sloc_geolocation_provider', 'HTML5' );
 		$this->assertNull( Loc_Config::geolocation_provider() );
 		$this->assertSame( 'HTML5', get_option( 'sloc_geolocation_provider' ) );
+		$this->assertNull( Loc_Config::geolocation_provider( 'HTML5' ) );
+	}
+
+	/**
+	 * Asking for a provider that isn't registered returns nothing and leaves the site's choice alone.
+	 */
+	public function test_provider_getters_unknown_slug() {
+		$getters = array(
+			'geo_provider'         => array( 'sloc_geo_provider', 'sloc_test' ),
+			'geolocation_provider' => array( 'sloc_geolocation_provider', 'dummy' ),
+			'weather_provider'     => array( 'sloc_weather_provider', 'sloc_test' ),
+			'elevation_provider'   => array( 'sloc_elevation_provider', 'sloc_test' ),
+			'venue_provider'       => array( 'sloc_venue_provider', 'sloc_test' ),
+		);
+		foreach ( $getters as $method => list( $option, $slug ) ) {
+			update_option( $option, $slug );
+			$this->assertNull( call_user_func( array( 'Loc_Config', $method ), 'not-a-provider' ), $method );
+			$this->assertNull( call_user_func( array( 'Loc_Config', $method ), array( 'not', 'a', 'slug' ) ), $method );
+			$this->assertSame( $slug, get_option( $option ), $method );
+		}
 	}
 }
