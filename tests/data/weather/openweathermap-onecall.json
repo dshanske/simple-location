@@ -1,0 +1,33 @@
+{
+  "lat": 39.9524,
+  "lon": -75.1636,
+  "timezone": "America/New_York",
+  "timezone_offset": -14400,
+  "current": {
+    "dt": 1760191200,
+    "sunrise": 1760180712,
+    "sunset": 1760221470,
+    "temp": 21.5,
+    "feels_like": 21.3,
+    "pressure": 1016,
+    "humidity": 60,
+    "dew_point": 13.4,
+    "uvi": 5.2,
+    "clouds": 20,
+    "visibility": 10000,
+    "wind_speed": 3.6,
+    "wind_deg": 230,
+    "wind_gust": 6.2,
+    "weather": [
+      {
+        "id": 801,
+        "main": "Clouds",
+        "description": "few clouds",
+        "icon": "02d"
+      }
+    ],
+    "rain": {
+      "1h": 0.25
+    }
+  }
+}

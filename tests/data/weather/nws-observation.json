@@ -1,0 +1,114 @@
+{
+  "id": "https://api.weather.gov/stations/KPHL/observations/2026-10-11T13:54:00+00:00",
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      -75.23,
+      39.87
+    ]
+  },
+  "properties": {
+    "@id": "https://api.weather.gov/stations/KPHL/observations/2026-10-11T13:54:00+00:00",
+    "@type": "wx:ObservationStation",
+    "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2
+    },
+    "station": "https://api.weather.gov/stations/KPHL",
+    "timestamp": "2026-10-11T13:54:00+00:00",
+    "rawMessage": "KPHL 111354Z 23007KT 10SM SCT050 22/13 A3000",
+    "textDescription": "Partly Cloudy",
+    "icon": "https://api.weather.gov/icons/land/day/sct?size=medium",
+    "presentWeather": [],
+    "temperature": {
+      "unitCode": "wmoUnit:degC",
+      "value": 21.5,
+      "qualityControl": "V"
+    },
+    "dewpoint": {
+      "unitCode": "wmoUnit:degC",
+      "value": 13.4,
+      "qualityControl": "V"
+    },
+    "windDirection": {
+      "unitCode": "wmoUnit:degree_(angle)",
+      "value": 230,
+      "qualityControl": "V"
+    },
+    "windSpeed": {
+      "unitCode": "wmoUnit:km_h-1",
+      "value": 13,
+      "qualityControl": "V"
+    },
+    "windGust": {
+      "unitCode": "wmoUnit:km_h-1",
+      "value": 22.3,
+      "qualityControl": "V"
+    },
+    "barometricPressure": {
+      "unitCode": "wmoUnit:Pa",
+      "value": 101600,
+      "qualityControl": "V"
+    },
+    "seaLevelPressure": {
+      "unitCode": "wmoUnit:Pa",
+      "value": 101620,
+      "qualityControl": "V"
+    },
+    "visibility": {
+      "unitCode": "wmoUnit:m",
+      "value": 16090,
+      "qualityControl": "C"
+    },
+    "maxTemperatureLast24Hours": {
+      "unitCode": "wmoUnit:degC",
+      "value": null,
+      "qualityControl": "V"
+    },
+    "minTemperatureLast24Hours": {
+      "unitCode": "wmoUnit:degC",
+      "value": null,
+      "qualityControl": "V"
+    },
+    "precipitationLastHour": {
+      "unitCode": "wmoUnit:mm",
+      "value": null,
+      "qualityControl": "Z"
+    },
+    "precipitationLast3Hours": {
+      "unitCode": "wmoUnit:mm",
+      "value": null,
+      "qualityControl": "Z"
+    },
+    "precipitationLast6Hours": {
+      "unitCode": "wmoUnit:mm",
+      "value": null,
+      "qualityControl": "Z"
+    },
+    "relativeHumidity": {
+      "unitCode": "wmoUnit:percent",
+      "value": 60.2,
+      "qualityControl": "V"
+    },
+    "windChill": {
+      "unitCode": "wmoUnit:degC",
+      "value": null,
+      "qualityControl": "V"
+    },
+    "heatIndex": {
+      "unitCode": "wmoUnit:degC",
+      "value": null,
+      "qualityControl": "V"
+    },
+    "cloudLayers": [
+      {
+        "base": {
+          "unitCode": "wmoUnit:m",
+          "value": 1520
+        },
+        "amount": "SCT"
+      }
+    ]
+  }
+}

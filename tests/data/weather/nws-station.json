@@ -1,0 +1,25 @@
+{
+  "id": "https://api.weather.gov/stations/KPHL",
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      -75.23,
+      39.87
+    ]
+  },
+  "properties": {
+    "@id": "https://api.weather.gov/stations/KPHL",
+    "@type": "wx:ObservationStation",
+    "elevation": {
+      "unitCode": "wmoUnit:m",
+      "value": 2
+    },
+    "stationIdentifier": "KPHL",
+    "name": "Philadelphia, Philadelphia International Airport",
+    "timeZone": "America/New_York",
+    "forecast": "https://api.weather.gov/zones/forecast/PAZ071",
+    "county": "https://api.weather.gov/zones/county/PAC101",
+    "fireWeatherZone": "https://api.weather.gov/zones/fire/PAZ071"
+  }
+}

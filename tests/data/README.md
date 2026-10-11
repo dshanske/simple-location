@@ -10,7 +10,7 @@ Each file is the body of one HTTP response from a provider's API, used by the pr
    keys, but some echo the query.
 3. Save it over the file with the same name, pretty-printed JSON, and update its **Status** below to
    `Captured YYYY-MM-DD`.
-4. Run `./vendor/bin/phpunit --filter GeoProvidersTest`.
+4. Run `./vendor/bin/phpunit --filter GeoProvidersTest` (or `WeatherProvidersTest`).
 
 The tests check stable facts for every provider: city (Philadelphia), region (Pennsylvania / `PA`),
 country (`US`), a `191xx` ZIP code, a street containing "Kennedy" or "JFK", and the requested
@@ -18,6 +18,10 @@ coordinates. Vendor-specific details (names, neighborhoods, URLs, plus codes, re
 compared against the fixture file itself, so a real capture passes as long as the parser handles it. If
 a real capture fails, either the vendor's format differs from what the plugin expects (a bug to file)
 or the place really has different data (adjust the test).
+
+Weather fixtures work the same way: each test reads the expected values from its fixture and checks
+the plugin's keys and unit conversions (for example km/h to m/s, kilometers to meters, fractions to
+percent).
 
 ## Location
 
@@ -48,3 +52,23 @@ Philadelphia City Hall: latitude `39.9524`, longitude `-75.1636`; forward-geocod
 
 HERE (#338), Geoapify (#339) and GeoNames parsing (#321, #343) have no response fixtures yet; add them
 with the fixes.
+
+## Weather providers (`weather/`)
+
+Current conditions are for Philadelphia (`39.9524,-75.1636`); station requests use the station shown.
+
+| File | Request | Status |
+|---|---|---|
+| `openweathermap-onecall.json` | `GET https://api.openweathermap.org/data/3.0/onecall?appid=…&units=metric&lat=39.9524&lon=-75.1636` | Hand-built from docs |
+| `pirateweather-forecast.json` | `GET https://api.pirateweather.net/forecast/{key}/39.9524,-75.1636?units=si&exclude=minutely,hourly,daily,alerts,flags` | Hand-built from docs |
+| `weatherbit-current.json` | `GET https://api.weatherbit.io/v2.0/current?key=…&lat=39.9524&lon=-75.1636&units=M` | Hand-built from docs |
+| `visualcrossing-current.json` | `GET https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/39.9524,-75.1636?key=…&unitGroup=metric&lang=id` | Hand-built from docs |
+| `visualcrossing-timeline.json` | The same with `/{timestamp}` for 2025-07-01 14:00 America/New_York | Hand-built from docs |
+| `aeris-observations.json` | `GET https://data.api.xweather.com/observations/closest?client_id=…&client_secret=…&p=39.9524,-75.1636&filter=allstations` (also used for `https://api.aerisapi.com/observations/closest?p=KPHL`) | Hand-built from docs |
+| `nws-observation.json` | `GET https://api.weather.gov/stations/KPHL/observations/latest` | Hand-built from docs |
+| `nws-station.json` | `GET https://api.weather.gov/stations/KPHL` | Hand-built from docs |
+| `meteostat-hourly.json` | `GET https://meteostat.p.rapidapi.com/stations/hourly?station=72408&start=2025-07-01&end=2025-07-02` with `x-rapidapi-key` | Hand-built from docs |
+| `station-custom.json` | A custom station URL (the plugin's own format; `timestamp` is set by the test) | Hand-built from the plugin's parser |
+
+Weatherstack (API-5), HERE weather (API-4), Met Office (API-3) and the location lookups that sort
+stations (NWS, Meteostat, custom station; #316) have no fixtures yet.

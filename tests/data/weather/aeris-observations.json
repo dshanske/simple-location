@@ -1,0 +1,85 @@
+{
+  "success": true,
+  "error": null,
+  "response": [
+    {
+      "id": "KPHL",
+      "dataSource": "METAR_NOAA",
+      "loc": {
+        "long": -75.25,
+        "lat": 39.87
+      },
+      "place": {
+        "name": "philadelphia",
+        "city": "philadelphia",
+        "state": "pa",
+        "country": "us"
+      },
+      "profile": {
+        "tz": "America/New_York",
+        "tzname": "EDT",
+        "tzoffset": -14400,
+        "isDST": true,
+        "elevM": 2,
+        "elevFT": 7
+      },
+      "obTimestamp": 1760191200,
+      "obDateTime": "2026-10-11T10:00:00-04:00",
+      "ob": {
+        "type": "station",
+        "timestamp": 1760191200,
+        "dateTimeISO": "2026-10-11T10:00:00-04:00",
+        "tempC": 21.5,
+        "tempF": 70.7,
+        "dewpointC": 13.4,
+        "dewpointF": 56.1,
+        "humidity": 60,
+        "pressureMB": 1016,
+        "pressureIN": 30,
+        "spressureMB": 1015,
+        "spressureIN": 29.97,
+        "altimeterMB": 1016,
+        "altimeterIN": 30,
+        "windKTS": 7,
+        "windKPH": 13,
+        "windMPH": 8,
+        "windSpeedKTS": 7,
+        "windSpeedKPH": 13,
+        "windSpeedMPH": 8,
+        "windDirDEG": 230,
+        "windDir": "SW",
+        "windGustKTS": 12,
+        "windGustKPH": 22,
+        "windGustMPH": 14,
+        "flightRule": "VFR",
+        "visibilityKM": 16.09,
+        "visibilityMI": 10,
+        "weather": "Mostly Sunny",
+        "weatherShort": "Mostly Sunny",
+        "weatherCoded": "::FW",
+        "weatherPrimary": "Mostly Sunny",
+        "weatherPrimaryCoded": "::FW",
+        "cloudsCoded": "FW",
+        "icon": "fair.png",
+        "heatindexC": 21.5,
+        "windchillC": 21.5,
+        "feelslikeC": 21.5,
+        "uvi": 5,
+        "solradWM2": 512,
+        "sky": 20,
+        "precipMM": 0,
+        "snowDepthCM": null,
+        "isDay": true
+      },
+      "raw": "KPHL 111400Z 23007KT 10SM FEW050 22/13 A3000",
+      "relativeTo": {
+        "lat": 39.9524,
+        "long": -75.1636,
+        "bearing": 225,
+        "bearingENG": "SW",
+        "distanceKM": 13.2,
+        "distanceMI": 8.2
+      }
+    }
+  ]
+}
