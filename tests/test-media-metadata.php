@@ -381,7 +381,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Away from a private venue, a photo location uses the site's default visibility.
+	 * A photo that isn't attached to a post, away from a private venue, uses the site's default visibility.
 	 *
 	 * @dataProvider data_default_visibility
 	 *
@@ -389,24 +389,82 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * @param string $visibility Expected visibility.
 	 */
 	public function test_attachment_location_default_visibility( $option, $visibility ) {
-		$this->markTestSkipped( 'Known bug, see #69' );
 		$this->full_address();
 		update_option( 'geo_public', $option );
 		$attachment_id = self::factory()->attachment->create();
 		$this->save_photo_location( $attachment_id );
+		$this->assertSame( '', get_post_meta( $attachment_id, 'geo_public', true ), 'No visibility is stored on upload.' );
 		$this->assertSame( $visibility, get_post_geodata( $attachment_id, 'visibility' ) );
 	}
 
 	/**
-	 * Data provider of site defaults. Private also depends on #302, since 0 currently reads back as public.
+	 * Data provider of site defaults.
 	 *
 	 * @return array
 	 */
 	public function data_default_visibility() {
 		return array(
+			'public'    => array( 1, 'public' ),
 			'protected' => array( 2, 'protected' ),
 			'private'   => array( 0, 'private' ),
 		);
+	}
+
+	/**
+	 * A photo attached to a post inherits the post's visibility, and follows it when it changes.
+	 */
+	public function test_attachment_inherits_parent_visibility() {
+		$this->full_address();
+		update_option( 'geo_public', 1 );
+		$post_id       = self::factory()->post->create();
+		$attachment_id = self::factory()->attachment->create( array( 'post_parent' => $post_id ) );
+		$this->save_photo_location( $attachment_id );
+
+		foreach ( array( 'private', 'protected', 'public' ) as $visibility ) {
+			set_post_geodata( $post_id, 'visibility', $visibility );
+			$this->assertSame( $visibility, get_post_geodata( $attachment_id, 'visibility' ), "Post is $visibility" );
+		}
+
+		// A post with no visibility of its own uses the site default, and so does the photo.
+		set_post_geodata( $post_id, 'visibility', 'inherit' );
+		update_option( 'geo_public', 0 );
+		$this->assertSame( 'private', get_post_geodata( $attachment_id, 'visibility' ) );
+	}
+
+	/**
+	 * A visibility set on the photo itself wins over the post's, and "inherit" removes it again.
+	 */
+	public function test_attachment_own_visibility() {
+		$post_id       = self::factory()->post->create();
+		$attachment_id = self::factory()->attachment->create( array( 'post_parent' => $post_id ) );
+		set_post_geodata( $post_id, 'visibility', 'public' );
+
+		set_post_geodata( $attachment_id, 'visibility', 'private' );
+		$this->assertSame( 'private', get_post_geodata( $attachment_id, 'visibility' ) );
+
+		$this->assertTrue( set_post_geodata( $attachment_id, 'visibility', 'inherit' ) );
+		$this->assertSame( '', get_post_meta( $attachment_id, 'geo_public', true ) );
+		$this->assertSame( 'public', get_post_geodata( $attachment_id, 'visibility' ) );
+	}
+
+	/**
+	 * At a private venue, an inherited public visibility becomes protected, but a stricter one is kept.
+	 */
+	public function test_attachment_private_venue_with_parent() {
+		$this->at_venue( 'private' );
+		$post_id       = self::factory()->post->create();
+		$attachment_id = self::factory()->attachment->create( array( 'post_parent' => $post_id ) );
+		$this->save_photo_location( $attachment_id );
+
+		$expected = array(
+			'public'    => 'protected',
+			'protected' => 'protected',
+			'private'   => 'private',
+		);
+		foreach ( $expected as $parent => $visibility ) {
+			set_post_geodata( $post_id, 'visibility', $parent );
+			$this->assertSame( $visibility, get_post_geodata( $attachment_id, 'visibility' ), "Post is $parent" );
+		}
 	}
 
 	/**
@@ -414,7 +472,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * so the venue name shows but the coordinates don't.
 	 */
 	public function test_attachment_at_private_venue() {
-		$this->markTestSkipped( 'Known bug, see #321 and #302' );
+		update_option( 'geo_public', 1 );
 		$venue_id      = $this->at_venue( 'private' );
 		$attachment_id = self::factory()->attachment->create();
 		$this->save_photo_location( $attachment_id );
@@ -427,7 +485,6 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * A photo taken at a venue that isn't private is linked to it and uses the site's default visibility.
 	 */
 	public function test_attachment_at_public_venue() {
-		$this->markTestSkipped( 'Known bug, see #321 and #69' );
 		update_option( 'geo_public', 1 );
 		$venue_id      = $this->at_venue( 'public' );
 		$attachment_id = self::factory()->attachment->create();

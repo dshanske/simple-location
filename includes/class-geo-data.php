@@ -86,6 +86,36 @@ class Geo_Data {
 	}
 
 	/**
+	 * Returns the visibility an attachment inherits when it has none of its own.
+	 *
+	 * A photo uses its parent post's visibility, or the site default if it isn't attached to a post.
+	 * If it was taken at a private venue, a public result becomes protected, so the venue name
+	 * shows but not the coordinates; a private result stays private.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return string private, public, or protected.
+	 */
+	public static function get_attachment_visibility( $attachment_id ) {
+		$attachment = get_post( $attachment_id );
+		$parent_id  = $attachment ? (int) $attachment->post_parent : 0;
+		if ( $parent_id && 'attachment' !== get_post_type( $parent_id ) ) {
+			$visibility = self::get_geodata( 'post', $parent_id, 'visibility' );
+		} else {
+			$visibility = self::get_default_visibility();
+		}
+
+		if ( 'public' === $visibility ) {
+			$venue_id = (int) get_post_meta( $attachment_id, 'venue_id', true );
+			if ( $venue_id && 'private' === self::get_geodata( 'post', $venue_id, 'visibility' ) ) {
+				return 'protected';
+			}
+		}
+		return $visibility;
+	}
+
+	/**
 	 * Converts a default visibility to the number stored in the geo_public option.
 	 *
 	 * Accepts the stored numbers and the visibility names, which earlier versions of the settings page saved.
@@ -324,6 +354,9 @@ class Geo_Data {
 				case 'protected':
 					$geodata = '2';
 					break;
+				case 'inherit':
+					// No visibility of its own: attachments inherit, everything else uses the site default.
+					return delete_metadata( $type, $id, 'geo_public' );
 				default:
 					delete_metadata( $type, $id, 'geo_public' );
 					return false;
@@ -517,6 +550,9 @@ class Geo_Data {
 			$visibility = get_metadata( $type, $id, 'geo_public', true );
 			// Only a missing value uses the default; '0' means private.
 			if ( ! is_string( $visibility ) || '' === $visibility ) {
+				if ( 'post' === $type && 'attachment' === get_post_type( $id ) ) {
+					return self::get_attachment_visibility( $id );
+				}
 				return self::get_default_visibility();
 			}
 			switch ( (int) $visibility ) {

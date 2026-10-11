@@ -215,10 +215,10 @@ class Sloc_Media_Metadata {
 				}
 			}
 
+			// No visibility is stored: the photo inherits it (see Geo_Data::get_attachment_visibility()).
 			$venue = Post_Venue::at_venue( $update['geo_latitude'], $update['geo_longitude'] );
 			if ( false !== $venue ) {
-				update_post_meta( $args['ID'], 'venue_id', $venue );
-				set_post_geodata( $args['ID'], 'visibility', 'protected' );
+				update_post_meta( $post_id, 'venue_id', $venue );
 				$update['geo_address'] = get_the_title( $venue );
 			} else {
 				$reverse = Loc_Config::geo_provider();
@@ -234,8 +234,6 @@ class Sloc_Media_Metadata {
 				if ( ! array_key_exists( 'geo_altitude', $update ) ) {
 					$update['geo_altitude'] = $reverse->elevation();
 				}
-				set_post_geodata( $post_id, 'visibility', 'public' );
-
 			}
 
 			$update = array_filter( $update );

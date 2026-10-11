@@ -222,7 +222,7 @@ class Geo_Base {
 			$options = array(
 				'lookup'             => get_option( 'sloc_geolocation_provider' ),
 				'units'              => get_option( 'sloc_measurements' ),
-				'visibility_options' => self::geo_public(),
+				'visibility_options' => self::visibility_choices( 'attachment' === $screen->post_type ? get_post() : null ),
 				'api_nonce'          => wp_create_nonce( 'wp_rest' ),
 				'api_url'            => rest_url( '/sloc_geo/1.0/' ),
 				'weather'            => $weather,
@@ -426,18 +426,45 @@ class Geo_Base {
 
 
 	/**
+	 * Returns the visibility choices for an object's location box.
+	 *
+	 * Attachments get an extra "inherit" choice, labeled with the visibility they currently inherit.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param WP_Post|int|null $post Post being edited, if any.
+	 * @return array Choices keyed by value.
+	 */
+	public static function visibility_choices( $post = null ) {
+		$choices = self::geo_public();
+		$post    = $post ? get_post( $post ) : null;
+		if ( $post && 'attachment' === $post->post_type ) {
+			$inherited          = Geo_Data::get_attachment_visibility( $post->ID );
+			$choices['inherit'] = sprintf(
+				/* translators: %s: The visibility the attachment currently inherits, such as Public. */
+				__( 'Inherit (currently %s)', 'simple-location' ),
+				wp_strip_all_tags( $choices[ $inherited ] )
+			);
+		}
+		return $choices;
+	}
+
+	/**
 	 * Offers a formatted list of visibility options for a select form object.
 	 *
 	 * Allows for echo or return.
 	 *
 	 * @param string  $public The value to set the select field to.
 	 * @param boolean $echo True to echo, false to return.
+	 * @param array   $choices Optional. Choices keyed by value. Default geo_public(). Since 5.0.26.
 	 * @return string $return Optional. Returns the created string.
 	 * @since 1.0.0
 	 */
-	public static function geo_public_select( $public, $echo = false ) {
-		$choices = self::geo_public();
-		$return  = '';
+	public static function geo_public_select( $public, $echo = false, $choices = null ) {
+		if ( ! is_array( $choices ) ) {
+			$choices = self::geo_public();
+		}
+		$return = '';
 		foreach ( $choices as $value => $text ) {
 			$return .= sprintf( '<option value="%1s" %2s>%3s</option>', esc_attr( $value ), selected( $public, $value, false ), esc_html( $text ) );
 		}
