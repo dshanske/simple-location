@@ -78,18 +78,61 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The geo_public option maps to the default visibility.
+	 * The geo_public option maps to the default visibility; anything unrecognized is private.
 	 */
 	public function test_get_default_visibility() {
 		$expected = array(
 			0 => 'private',
 			1 => 'public',
 			2 => 'protected',
-			7 => false,
+			7 => 'private',
 		);
 		foreach ( $expected as $option => $visibility ) {
 			update_option( 'geo_public', $option );
 			$this->assertSame( $visibility, Geo_Data::get_default_visibility(), "geo_public = $option" );
+		}
+	}
+
+	/**
+	 * Visibility names saved by earlier versions of the settings page are read correctly.
+	 */
+	public function test_get_default_visibility_from_names() {
+		$expected = array(
+			'public'    => 'public',
+			'private'   => 'private',
+			'protected' => 'protected',
+			'none'      => 'private',
+			''          => 'private',
+		);
+		foreach ( $expected as $option => $visibility ) {
+			// Store the raw value, as the old settings form did, without the sanitize callback.
+			remove_all_filters( 'sanitize_option_geo_public' );
+			update_option( 'geo_public', $option );
+			$this->assertSame( $visibility, Geo_Data::get_default_visibility(), "geo_public = '$option'" );
+		}
+	}
+
+	/**
+	 * Default visibility values are stored as 0, 1 or 2.
+	 */
+	public function test_sanitize_default_visibility() {
+		$expected = array(
+			array( 0, 0 ),
+			array( '0', 0 ),
+			array( 1, 1 ),
+			array( '1', 1 ),
+			array( '2', 2 ),
+			array( 'private', 0 ),
+			array( 'public', 1 ),
+			array( 'protected', 2 ),
+			array( 'none', 0 ),
+			array( '7', 0 ),
+			array( '1.5', 0 ),
+			array( null, 0 ),
+			array( array( 1 ), 0 ),
+		);
+		foreach ( $expected as $case ) {
+			$this->assertSame( $case[1], Geo_Data::sanitize_default_visibility( $case[0] ), wp_json_encode( $case[0] ) );
 		}
 	}
 

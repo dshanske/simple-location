@@ -109,10 +109,11 @@ class Loc_Config {
 			'simloc', // option group.
 			'geo_public', // option name.
 			array(
-				'type'         => 'number',
-				'description'  => 'Default Setting for Geodata',
-				'show_in_rest' => true,
-				'default'      => 1,
+				'type'              => 'number',
+				'description'       => 'Default Setting for Geodata',
+				'show_in_rest'      => true,
+				'default'           => 1,
+				'sanitize_callback' => array( 'Geo_Data', 'sanitize_default_visibility' ),
 				// WordPress Geodata defaults to public but this allows a global override for new posts.
 			)
 		);
@@ -513,12 +514,11 @@ class Loc_Config {
 		add_settings_field(
 			'geo_public', // id.
 			__( 'Default Visibility for Location', 'simple-location' ), // setting title.
-			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			array( 'Loc_Config', 'visibility_callback' ), // display callback.
 			'simloc', // settings page.
 			'sloc_general', // settings section.
 			array(
 				'label_for' => 'geo_public',
-				'providers' => self::geo_public(),
 			)
 		);
 		add_settings_field(
@@ -1102,6 +1102,29 @@ class Loc_Config {
 		}
 		$text = get_option( $name );
 		self::select_callback( $name, $text, $styles );
+	}
+
+	/**
+	 * Echo the default visibility select box.
+	 *
+	 * The option is stored as a number: 0 for private, 1 for public, 2 for protected.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array $args {
+	 *  Arguments for the select box.
+	 *  @type string $label_for Option name.
+	 * }
+	 */
+	public static function visibility_callback( array $args ) {
+		$name   = $args['label_for'];
+		$labels = self::geo_public();
+		$values = array(
+			0 => $labels['private'],
+			1 => $labels['public'],
+			2 => $labels['protected'],
+		);
+		self::select_callback( $name, Geo_Data::sanitize_default_visibility( get_option( $name ) ), $values );
 	}
 
 	/**
