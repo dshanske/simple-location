@@ -97,7 +97,6 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * Metadata is unchanged when the EXIF data is missing or unreadable, rather than failing.
 	 */
 	public function test_exif_data_not_an_array() {
-		$this->markTestSkipped( 'Known bug, see #320' );
 		$meta = array( 'title' => 'Photo' );
 		$this->assertSame( $meta, Sloc_Media_Metadata::exif_data( $meta, '', IMAGETYPE_PNG, array(), null ) );
 		$this->assertSame( $meta, Sloc_Media_Metadata::exif_data( $meta, __FILE__, IMAGETYPE_JPEG ) );
