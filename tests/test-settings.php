@@ -420,6 +420,42 @@ class SettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The default visibility field offers private, public and protected as stored numbers, with the saved one selected.
+	 */
+	public function test_visibility_callback() {
+		update_option( 'geo_public', 2 );
+		$html = $this->capture( array( 'Loc_Config', 'visibility_callback' ), array( 'label_for' => 'geo_public' ) );
+		$this->assertStringContainsString( '<select name="geo_public">', $html );
+		$this->assertMatchesRegularExpression( '/<option value="0"\s*>Private<\/option>/', $html );
+		$this->assertMatchesRegularExpression( '/<option value="1"\s*>Public<\/option>/', $html );
+		$this->assertMatchesRegularExpression( '/<option value="2"\s+selected(=["\']selected["\'])?>Protected<\/option>/', $html );
+		$this->assertStringNotContainsString( 'None', $html );
+
+		// A name saved by the old form selects the matching number.
+		remove_all_filters( 'sanitize_option_geo_public' );
+		update_option( 'geo_public', 'public' );
+		$html = $this->capture( array( 'Loc_Config', 'visibility_callback' ), array( 'label_for' => 'geo_public' ) );
+		$this->assertMatchesRegularExpression( '/<option value="1"\s+selected(=["\']selected["\'])?>Public<\/option>/', $html );
+	}
+
+	/**
+	 * Saving the default visibility stores a number, whatever form it arrives in.
+	 */
+	public function test_visibility_saved_as_number() {
+		Loc_Config::register_general_settings();
+		foreach ( array(
+			'1'         => 1,
+			'0'         => 0,
+			'protected' => 2,
+			'public'    => 1,
+			'none'      => 0,
+		) as $input => $stored ) {
+			update_option( 'geo_public', (string) $input );
+			$this->assertSame( $stored, get_option( 'geo_public' ), "Saving '$input'" );
+		}
+	}
+
+	/**
 	 * Unit, country, style, value and select lists mark the saved choice.
 	 */
 	public function test_select_callbacks() {

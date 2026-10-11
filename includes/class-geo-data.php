@@ -73,19 +73,42 @@ class Geo_Data {
 
 	/**
 	 * Retrieves default visibility option
+	 *
+	 * @return string private, public, or protected.
 	 */
 	public static function get_default_visibility() {
-		$status = (int) get_option( 'geo_public' );
-		switch ( (int) $status ) {
-			case 0:
-				return 'private';
-			case 1:
-				return 'public';
-			case 2:
-				return 'protected';
-			default:
-				return false;
+		$visibility = array(
+			0 => 'private',
+			1 => 'public',
+			2 => 'protected',
+		);
+		return $visibility[ self::sanitize_default_visibility( get_option( 'geo_public' ) ) ];
+	}
+
+	/**
+	 * Converts a default visibility to the number stored in the geo_public option.
+	 *
+	 * Accepts the stored numbers and the visibility names, which earlier versions of the settings page saved.
+	 * Anything else is treated as private.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param mixed $value 0, 1 or 2, or private, public or protected.
+	 * @return int 0 for private, 1 for public, 2 for protected.
+	 */
+	public static function sanitize_default_visibility( $value ) {
+		$names = array(
+			'private'   => 0,
+			'public'    => 1,
+			'protected' => 2,
+		);
+		if ( is_string( $value ) && array_key_exists( $value, $names ) ) {
+			return $names[ $value ];
 		}
+		if ( is_numeric( $value ) && in_array( (string) $value, array( '0', '1', '2' ), true ) ) {
+			return (int) $value;
+		}
+		return 0;
 	}
 
 	/**
