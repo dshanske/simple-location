@@ -227,7 +227,10 @@ abstract class Map_Provider extends Sloc_Provider {
 
 	// Return HTML Code for Static Map.
 	public function get_the_static_map_html( $srcset = false ) {
-		$orig   = $this->get_the_static_map();
+		$orig = $this->get_the_static_map();
+		if ( is_wp_error( $orig ) ) {
+			return $this->static_map_error( $orig );
+		}
 		$link   = $this->get_the_map_url();
 		$height = $this->height;
 		$width  = $this->width;
@@ -239,7 +242,7 @@ abstract class Map_Provider extends Sloc_Provider {
 				$this->width  = round( $width * floatval( $mult ) );
 				$image        = $this->get_the_static_map();
 				if ( is_wp_error( $image ) ) {
-					return $image->get_error_message();
+					return $this->static_map_error( $image );
 				}
 				$srcset[] = sprintf( '%1$s %2$sx', $image, $mult );
 
@@ -248,6 +251,23 @@ abstract class Map_Provider extends Sloc_Provider {
 			return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" srcset="%3$s" width="%4$s" height="%5$s" loading="lazy" /></a>', $link, $orig, $srcset, $width, $height );
 		}
 		return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" width="%3$s" height="%4$s" loading="lazy" /></a>', $link, $orig, $width, $height );
+	}
+
+	/**
+	 * Returns what to show in place of a static map that couldn't be built.
+	 *
+	 * Site administrators see the reason, such as a missing API key; everyone else sees nothing.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param WP_Error $error Error from get_the_static_map().
+	 * @return string Escaped error message, or an empty string.
+	 */
+	protected function static_map_error( $error ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return '';
+		}
+		return esc_html( $error->get_error_message() );
 	}
 
 	/**
