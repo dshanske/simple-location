@@ -1204,6 +1204,34 @@ class Loc_Config {
 	}
 
 	/**
+	 * Returns a registered provider, either the one asked for or the site's chosen one.
+	 *
+	 * Asking for a provider that isn't registered returns null and leaves the site's setting alone.
+	 * If the site's chosen provider is no longer registered, the setting is cleared.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array       $providers Registered providers of one type, keyed by slug.
+	 * @param string      $option    Option holding the site's chosen provider.
+	 * @param string|null $provider  Slug of the provider to return. Optional; defaults to the site's choice.
+	 * @return Sloc_Provider|null The provider, or null.
+	 */
+	protected static function get_provider( $providers, $option, $provider = null ) {
+		if ( $provider ) {
+			if ( is_string( $provider ) && isset( $providers[ $provider ] ) ) {
+				return $providers[ $provider ];
+			}
+			return null;
+		}
+		$provider = get_option( $option );
+		if ( is_string( $provider ) && isset( $providers[ $provider ] ) ) {
+			return $providers[ $provider ];
+		}
+		delete_option( $option );
+		return null;
+	}
+
+	/**
 	 * Returns the current map provider.
 	 *
 	 * @return Map_Provider $return Map Provider.
@@ -1211,13 +1239,7 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function map_provider() {
-		$option = get_option( 'sloc_map_provider' );
-		if ( isset( static::$maps[ $option ] ) ) {
-			return static::$maps[ $option ];
-		} else {
-			delete_option( 'sloc_map_provider' );
-		}
-		return null;
+		return self::get_provider( static::$maps, 'sloc_map_provider' );
 	}
 
 	/**
@@ -1229,15 +1251,7 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function geo_provider( $provider = null ) {
-		if ( ! $provider ) {
-			$provider = get_option( 'sloc_geo_provider' );
-		}
-		if ( isset( static::$geo[ $provider ] ) ) {
-			return static::$geo[ $provider ];
-		} else {
-			delete_option( 'sloc_geo_provider' );
-		}
-		return null;
+		return self::get_provider( static::$geo, 'sloc_geo_provider', $provider );
 	}
 
 	/**
@@ -1249,18 +1263,11 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function geolocation_provider( $provider = null ) {
-		if ( ! $provider ) {
-			$provider = get_option( 'sloc_geolocation_provider' );
-		}
-		if ( 'HTML5' === $provider ) {
+		// The browser (HTML5) provider has no server-side object.
+		if ( 'HTML5' === ( $provider ? $provider : get_option( 'sloc_geolocation_provider' ) ) ) {
 			return null;
 		}
-		if ( isset( static::$location [ $provider ] ) ) {
-			return static::$location[ $provider ];
-		} else {
-			delete_option( 'sloc_geolocation_provider' );
-		}
-		return null;
+		return self::get_provider( static::$location, 'sloc_geolocation_provider', $provider );
 	}
 
 	/**
@@ -1272,15 +1279,7 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function weather_provider( $provider = null ) {
-		if ( ! $provider ) {
-			$provider = get_option( 'sloc_weather_provider' );
-		}
-		if ( isset( static::$weather[ $provider ] ) ) {
-			return static::$weather[ $provider ];
-		} else {
-			delete_option( 'sloc_weather_provider' );
-		}
-		return null;
+		return self::get_provider( static::$weather, 'sloc_weather_provider', $provider );
 	}
 
 	/**
@@ -1292,15 +1291,7 @@ class Loc_Config {
 	 * @since 5.0.0
 	 */
 	public static function elevation_provider( $provider = null ) {
-		if ( ! $provider ) {
-			$provider = get_option( 'sloc_elevation_provider' );
-		}
-		if ( isset( static::$elevation[ $provider ] ) ) {
-			return static::$elevation[ $provider ];
-		} else {
-			delete_option( 'sloc_elevation_provider' );
-		}
-		return null;
+		return self::get_provider( static::$elevation, 'sloc_elevation_provider', $provider );
 	}
 
 	/**
@@ -1312,14 +1303,6 @@ class Loc_Config {
 	 * @since 5.0.0
 	 */
 	public static function venue_provider( $provider = null ) {
-		if ( ! $provider ) {
-			$provider = get_option( 'sloc_venue_provider' );
-		}
-		if ( isset( static::$venue[ $provider ] ) ) {
-			return static::$venue[ $provider ];
-		} else {
-			delete_option( 'sloc_venue_provider' );
-		}
-		return null;
+		return self::get_provider( static::$venue, 'sloc_venue_provider', $provider );
 	}
 }
