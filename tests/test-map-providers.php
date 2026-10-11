@@ -434,4 +434,37 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$map = $this->provider( 'Map_Provider_TomTom', array( 'api' => '' ) );
 		$this->assertSame( '', $map->get_the_static_map() );
 	}
+
+	/**
+	 * Providers that need a key or URL.
+	 *
+	 * @return array Provider class and the message shown to administrators.
+	 */
+	public function data_missing_key() {
+		return array(
+			'Geoapify'   => array( 'Map_Provider_Geoapify', 'You have not set an API key for GeoApify' ),
+			'LocationIQ' => array( 'Map_Provider_LocationIQ', 'You have not set an API key for Location IQ' ),
+			'StaticMap'  => array( 'Map_Provider_StaticMap', 'You have not set a URL for your custom map endpoint' ),
+		);
+	}
+
+	/**
+	 * Without a key or URL, visitors get no map and administrators get the reason, instead of a fatal error.
+	 *
+	 * @dataProvider data_missing_key
+	 *
+	 * @param string $class   Provider class.
+	 * @param string $message Message shown to administrators.
+	 */
+	public function test_static_map_html_missing_key( $class, $message ) {
+		update_option( 'sloc_staticmap_url', '' );
+		$map = $this->provider( $class, array( 'api' => '' ) );
+
+		$this->assertSame( '', $map->get_the_map() );
+		$this->assertSame( '', $map->get_the_static_map_html( true ) );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( $message, $map->get_the_map() );
+		$this->assertSame( $message, $map->get_the_static_map_html( true ) );
+	}
 }
