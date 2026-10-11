@@ -21,6 +21,7 @@ class Location_Provider_Dummy extends Location_Provider {
 	}
 
 	public function retrieve( $time = null, $args = array() ) {
+		$this->reset();
 		$location = get_user_geodata( $this->user );
 		if ( ! $location ) {
 			return null;
