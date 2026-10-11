@@ -96,22 +96,21 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	 */
 	public function form( $instance ) {
 		?>
-		<p><label for="title"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
-		<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?> id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" value="
-			<?php echo esc_html( ifset( $instance['title'] ) ); ?>" /></p>
+		<p><label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
+		<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['title'] ) ); ?>" /></p>
 		<p>
 		<?php esc_html_e( 'Displays current weather at a weather station', 'simple-location' ); ?>
 		</p>
 		<p><?php self::provider_list( ifset( $instance['provider'] ), $this->get_field_name( 'provider' ), $this->get_field_id( 'provider' ) ); ?>
-			<p><label for="station"><?php esc_html_e( 'Station ID: ', 'simple-location' ); ?></label>
+			<p><label for="<?php echo esc_attr( $this->get_field_id( 'station' ) ); ?>"><?php esc_html_e( 'Station ID: ', 'simple-location' ); ?></label>
 			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'station' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'station' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['station'] ) ); ?>" />
 			</p>
-		<p><label for="showastro"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
+		<p><label for="<?php echo esc_attr( $this->get_field_id( 'showastro' ) ); ?>"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="hidden" value="0" />
-			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
 		</p>
-		<p><label for="cache_time"><?php esc_html_e( 'Cache Time: ', 'simple-location' ); ?></label>
-			<input type="number" name="<?php echo esc_attr( $this->get_field_name( 'cache_time' ) ); ?>" id="<?php $this->get_field_id( 'cache_time' ); ?>" value="<?php echo esc_attr( ifset( $instance['cache_time'] ) ); ?>" />
+		<p><label for="<?php echo esc_attr( $this->get_field_id( 'cache_time' ) ); ?>"><?php esc_html_e( 'Cache Time: ', 'simple-location' ); ?></label>
+			<input type="number" name="<?php echo esc_attr( $this->get_field_name( 'cache_time' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'cache_time' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['cache_time'] ) ); ?>" />
 		</p>
 		<?php
 	}

@@ -329,7 +329,7 @@ class WidgetsTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'value="39.9524"', $html );
 		$this->assertStringContainsString( 'name="widget-sloc_weather_widget[2][longitude]"', $html );
 		$this->assertStringContainsString( 'name="widget-sloc_weather_widget[2][cache_time]"', $html );
-		$this->assertMatchesRegularExpression( '/name="widget-sloc_weather_widget\[2\]\[showastro\]" type="checkbox" value="1"\s+checked/', $html );
+		$this->assertMatchesRegularExpression( '/name="widget-sloc_weather_widget\[2\]\[showastro\]" id="widget-sloc_weather_widget-2-showastro" type="checkbox" value="1"\s+checked/', $html );
 		$this->assertMatchesRegularExpression( '/name="widget-sloc_weather_widget\[2\]\[showprivate\]" id="widget-sloc_weather_widget-2-showprivate" type="checkbox" value="1"\s+\/>/', $html );
 		$this->assertMatchesRegularExpression( '/<option value=[\'"]' . $user_id . '[\'"]\s+selected/', $html );
 		$this->assertStringContainsString( 'Weather Person', $html );
@@ -491,8 +491,57 @@ class WidgetsTest extends WP_UnitTestCase {
 		$this->assertMatchesRegularExpression( '/name=[\'"]widget-sloc_lastseen_widget\[2\]\[user\][\'"]/', $html );
 		$this->assertStringContainsString( 'Traveler', $html );
 		foreach ( array( 'showtime', 'showastro', 'showtext', 'showmap' ) as $field ) {
-			$this->assertStringContainsString( 'name="widget-sloc_lastseen_widget[2][' . $field . ']" type="checkbox"', $html, $field );
+			$this->assertStringContainsString( 'name="widget-sloc_lastseen_widget[2][' . $field . ']" id="widget-sloc_lastseen_widget-2-' . $field . '" type="checkbox"', $html, $field );
 		}
-		$this->assertMatchesRegularExpression( '/\[showmap\]" type="checkbox" value="1"\s+checked/', $html );
+		$this->assertMatchesRegularExpression( '/\[showmap\]" id="widget-sloc_lastseen_widget-2-showmap" type="checkbox" value="1"\s+checked/', $html );
+	}
+
+	/**
+	 * Every widget.
+	 *
+	 * @return array Widget class.
+	 */
+	public function data_widgets() {
+		return array(
+			'Weather'   => array( 'Sloc_Weather_Widget' ),
+			'Station'   => array( 'Sloc_Station_Widget' ),
+			'Airport'   => array( 'Sloc_Airport_Widget' ),
+			'Last Seen' => array( 'Sloc_Lastseen_Widget' ),
+		);
+	}
+
+	/**
+	 * Widget forms submit the title, give every field an id, and point every label at a field.
+	 *
+	 * @dataProvider data_widgets
+	 *
+	 * @param string $class Widget class.
+	 */
+	public function test_form_fields( $class ) {
+		$widget = new $class();
+		$html   = $this->form( $widget, array( 'title' => 'My title' ) );
+
+		$dom      = new DOMDocument();
+		$previous = libxml_use_internal_errors( true );
+		$dom->loadHTML( '<html><body>' . $html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous );
+		$xpath = new DOMXPath( $dom );
+
+		$title = $xpath->query( '//input[@id="' . $widget->get_field_id( 'title' ) . '"]' );
+		$this->assertSame( 1, $title->length, 'Title input' );
+		$this->assertSame( $widget->get_field_name( 'title' ), $title->item( 0 )->getAttribute( 'name' ) );
+		$this->assertSame( 'My title', $title->item( 0 )->getAttribute( 'value' ) );
+
+		foreach ( $xpath->query( '//*[@id]' ) as $element ) {
+			$this->assertNotSame( '', $element->getAttribute( 'id' ), 'Empty id on ' . $element->getAttribute( 'name' ) );
+		}
+
+		$labels = $xpath->query( '//label[@for]' );
+		$this->assertGreaterThan( 0, $labels->length );
+		foreach ( $labels as $label ) {
+			$for = $label->getAttribute( 'for' );
+			$this->assertSame( 1, $xpath->query( '//*[@id="' . $for . '"]' )->length, "Label for \"$for\" has a field" );
+		}
 	}
 }
