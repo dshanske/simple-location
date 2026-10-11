@@ -1,0 +1,16 @@
+{
+  "info": {
+    "statuscode": 0,
+    "messages": []
+  },
+  "results": [
+    {
+      "providedLocation": {
+        "latLng": {
+          "lat": 39.9524,
+          "lng": -75.1636
+        }
+      }
+    }
+  ]
+}

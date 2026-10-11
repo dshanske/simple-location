@@ -1,0 +1,96 @@
+{
+  "plus_code": {
+    "compound_code": "WWX6+XG Philadelphia, PA, USA",
+    "global_code": "87F6WWX6+XG"
+  },
+  "results": [
+    {
+      "address_components": [
+        {
+          "long_name": "1400",
+          "short_name": "1400",
+          "types": [
+            "street_number"
+          ]
+        },
+        {
+          "long_name": "John F. Kennedy Boulevard",
+          "short_name": "John F Kennedy Blvd",
+          "types": [
+            "route"
+          ]
+        },
+        {
+          "long_name": "Center City",
+          "short_name": "Center City",
+          "types": [
+            "neighborhood",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Philadelphia",
+          "short_name": "Philadelphia",
+          "types": [
+            "locality",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Philadelphia County",
+          "short_name": "Philadelphia County",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ]
+        },
+        {
+          "long_name": "Pennsylvania",
+          "short_name": "PA",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ]
+        },
+        {
+          "long_name": "United States",
+          "short_name": "US",
+          "types": [
+            "country",
+            "political"
+          ]
+        },
+        {
+          "long_name": "19107",
+          "short_name": "19107",
+          "types": [
+            "postal_code"
+          ]
+        }
+      ],
+      "formatted_address": "1400 John F Kennedy Blvd, Philadelphia, PA 19107, USA",
+      "geometry": {
+        "location": {
+          "lat": 39.9524,
+          "lng": -75.1636
+        },
+        "location_type": "ROOFTOP",
+        "viewport": {
+          "northeast": {
+            "lat": 39.9537,
+            "lng": -75.1622
+          },
+          "southwest": {
+            "lat": 39.951,
+            "lng": -75.1649
+          }
+        }
+      },
+      "place_id": "ChIJh0K8xi7GxokR7sEbZqI0V4o",
+      "types": [
+        "street_address"
+      ]
+    }
+  ],
+  "status": "OK"
+}

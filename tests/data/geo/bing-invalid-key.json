@@ -1,0 +1,9 @@
+{
+  "authenticationResultCode": "InvalidCredentials",
+  "errorDetails": [
+    "Access was denied. You may have entered your credentials incorrectly."
+  ],
+  "resourceSets": [],
+  "statusCode": 401,
+  "statusDescription": "Unauthorized"
+}

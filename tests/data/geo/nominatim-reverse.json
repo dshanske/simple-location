@@ -1,0 +1,41 @@
+{
+  "place_id": 299497145,
+  "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+  "osm_type": "way",
+  "osm_id": 28331796,
+  "lat": "39.9524",
+  "lon": "-75.1636",
+  "category": "tourism",
+  "type": "attraction",
+  "place_rank": 30,
+  "importance": 0.45,
+  "addresstype": "tourism",
+  "name": "Philadelphia City Hall",
+  "display_name": "Philadelphia City Hall, 1400, John F. Kennedy Boulevard, Center City, Philadelphia, Philadelphia County, Pennsylvania, 19107, United States",
+  "address": {
+    "tourism": "Philadelphia City Hall",
+    "house_number": "1400",
+    "road": "John F. Kennedy Boulevard",
+    "neighbourhood": "Center City",
+    "city": "Philadelphia",
+    "county": "Philadelphia County",
+    "state": "Pennsylvania",
+    "ISO3166-2-lvl4": "US-PA",
+    "postcode": "19107",
+    "country": "United States",
+    "country_code": "us"
+  },
+  "extratags": {
+    "website": "https://www.phila.gov/",
+    "image": "https://upload.wikimedia.org/cityhall.jpg"
+  },
+  "namedetails": {
+    "name": "Philadelphia City Hall"
+  },
+  "boundingbox": [
+    "39.9518",
+    "39.9530",
+    "-75.1643",
+    "-75.1629"
+  ]
+}
