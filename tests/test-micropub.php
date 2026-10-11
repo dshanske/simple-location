@@ -597,4 +597,74 @@ class MicropubTest extends WP_UnitTestCase {
 		$this->assertSame( '39.9524', $meta['geo_latitude'] );
 		$this->assertSame( '-75.1636', $meta['geo_longitude'] );
 	}
+
+	/**
+	 * Data for photos sideloaded with a Micropub post: the requested visibility and the photo's result.
+	 *
+	 * @return array Requested location-visibility (or null), whether the post is at a venue, expected photo visibility.
+	 */
+	public function data_sideloaded_photo_visibility() {
+		return array(
+			'private post'     => array( 'private', false, 'private' ),
+			'protected post'   => array( 'protected', false, 'protected' ),
+			'public post'      => array( 'public', false, 'public' ),
+			'no visibility'    => array( null, false, 'public' ),
+			'at a venue'       => array( null, true, 'protected' ),
+			'private at venue' => array( 'private', true, 'private' ),
+		);
+	}
+
+	/**
+	 * A photo sideloaded with a Micropub post follows the post's final location visibility.
+	 *
+	 * Mirrors the Micropub plugin's order: the post is inserted, its photos are sideloaded as attachments
+	 * of the post (which runs the attachment metadata hook), and then after_micropub sets the post's location.
+	 *
+	 * @dataProvider data_sideloaded_photo_visibility
+	 *
+	 * @param string|null $requested Requested location-visibility, or null for none.
+	 * @param bool        $at_venue  Whether the post's coordinates are at a venue.
+	 * @param string      $expected  Expected visibility of the photo.
+	 */
+	public function test_sideloaded_photo_follows_post_visibility( $requested, $at_venue, $expected ) {
+		update_option( 'geo_public', 1 );
+		$venue = function () use ( $at_venue ) {
+			return $at_venue ? self::factory()->post->create( array( 'post_type' => 'venue' ) ) : false;
+		};
+		add_filter( 'pre_at_venue', $venue );
+
+		// 1. The post is inserted.
+		$args = $this->micropub_post(
+			array(
+				'geo_latitude'  => self::LAT,
+				'geo_longitude' => self::LNG,
+			)
+		);
+
+		// 2. The photo is sideloaded as an attachment of the post, and its metadata generated.
+		$photo_id = self::factory()->attachment->create( array( 'post_parent' => $args['ID'] ) );
+		Sloc_Media_Metadata::attachment(
+			array(
+				'image_meta' => array(
+					'location' => array(
+						'latitude'  => self::LAT,
+						'longitude' => self::LNG,
+					),
+				),
+			),
+			$photo_id
+		);
+		$this->assertSame( '', get_post_meta( $photo_id, 'geo_public', true ), 'No visibility is stored on the photo.' );
+
+		// 3. after_micropub sets the post's location.
+		$properties = array();
+		if ( $requested ) {
+			$properties['location-visibility'] = array( $requested );
+		}
+		Location_Plugins::micropub_set_location( array( 'properties' => $properties ), $args );
+		remove_filter( 'pre_at_venue', $venue );
+
+		$this->assertSame( $expected, get_post_geodata( $photo_id, 'visibility' ) );
+		$this->assertEquals( self::LAT, get_post_meta( $photo_id, 'geo_latitude', true ) );
+	}
 }
