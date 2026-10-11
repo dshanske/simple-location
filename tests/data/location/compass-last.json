@@ -1,0 +1,26 @@
+{
+  "data": {
+    "type": "Feature",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        -75.1636,
+        39.9524,
+        14.3
+      ]
+    },
+    "properties": {
+      "timestamp": "2025-07-01T16:00:00Z",
+      "horizontal_accuracy": 10,
+      "vertical_accuracy": 4,
+      "speed": 1.4,
+      "motion": [
+        "walking"
+      ],
+      "battery_state": "unplugged",
+      "battery_level": 0.82,
+      "wifi": "CityHallGuest",
+      "device_id": "phone"
+    }
+  }
+}
