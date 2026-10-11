@@ -3,7 +3,8 @@ on:
     push:
     pull_request:
 jobs:
-  phpcs:
+  phpunit:
+    name: WP ${{ matrix.wp-version }} / PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
     services:
      mysql:
@@ -16,7 +17,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['7.4', '8.0', '8.2', '8.3', '8.4']
+        # Test the minimum supported WordPress (Requires at least) and the latest release.
+        wp-version: ['6.2', 'latest']
+        php-versions: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
+        exclude:
+          # WordPress 6.2 supports PHP up to 8.2.
+          - wp-version: '6.2'
+            php-versions: '8.3'
+          - wp-version: '6.2'
+            php-versions: '8.4'
+          - wp-version: '6.2'
+            php-versions: '8.5'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -25,7 +36,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: none
-          tools: composer, phpunit-polyfills
+          tools: composer
           extensions: mysql
       - name: Install Composer dependencies for PHP
         uses: "ramsey/composer-install@v3"
@@ -33,8 +44,51 @@ jobs:
         run: |
           sudo apt update
           sudo apt install subversion
-          composer setup-wp-tests
+          bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 ${{ matrix.wp-version }}
       - name: Unit Testing
         run: composer phpunit
-        env:
-          PHP_VERSION: ${{ matrix.php-versions }}
+
+  coverage:
+    name: Code coverage (WP latest / PHP 8.4)
+    runs-on: ubuntu-latest
+    services:
+     mysql:
+       image: mariadb:10.4
+       env:
+         MYSQL_ROOT_PASSWORD: root
+       ports:
+         - 3306:3306
+       options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: pcov
+          tools: composer
+          extensions: mysql
+      - name: Install Composer dependencies for PHP
+        uses: "ramsey/composer-install@v3"
+      - name: Setup Test Environment
+        run: |
+          sudo apt update
+          sudo apt install subversion
+          bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 latest
+      - name: Unit Testing with Coverage
+        run: php -d pcov.directory=. ./vendor/bin/phpunit --coverage-text=coverage.txt --coverage-clover=coverage.xml
+      - name: Coverage Summary
+        if: always()
+        run: |
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          sed -n '1,10p' coverage.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            coverage.txt
+            coverage.xml
