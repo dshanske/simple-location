@@ -419,7 +419,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /geocode at a private venue returns protected visibility, so the name shows but not the coordinates.
 	 */
 	public function test_geocode_at_private_venue() {
-		$this->markTestSkipped( 'Known bug, see #302' );
 		$term_id  = self::factory()->term->create( array( 'taxonomy' => 'location' ) );
 		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
 		wp_set_object_terms( $venue_id, $term_id, 'location' );

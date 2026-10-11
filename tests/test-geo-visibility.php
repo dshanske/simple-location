@@ -116,7 +116,6 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 	 * @param string $type Object type.
 	 */
 	public function test_private_round_trip( $type ) {
-		$this->markTestSkipped( 'Known bug, see #302' );
 		$id = $this->create_object( $type );
 		foreach ( array( 1, 2 ) as $default ) {
 			update_option( 'geo_public', $default );
@@ -267,7 +266,6 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 	 * No head meta tags for a private location.
 	 */
 	public function test_meta_tags_private() {
-		$this->markTestSkipped( 'Known bug, see #302' );
 		$this->go_to( get_permalink( $this->post_with_location( 'private' ) ) );
 		$this->assertSame( '', $this->capture( array( 'Geo_Base', 'meta_tags' ) ) );
 	}
@@ -329,7 +327,6 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 	 * A visitor sees nothing for a private location.
 	 */
 	public function test_get_location_private_visitor() {
-		$this->markTestSkipped( 'Known bug, see #302' );
 		$this->assertSame( '', Geo_Data::get_location( 'post', $this->post_with_location( 'private' ) ) );
 	}
 
