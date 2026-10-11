@@ -452,7 +452,7 @@ class SettingsTest extends WP_UnitTestCase {
 				'list'      => Loc_Config::get_zoom_levels(),
 			)
 		);
-		$this->assertMatchesRegularExpression( '/<option value="16"\s+selected(="selected")?>Street<\/option>/', $html );
+		$this->assertMatchesRegularExpression( '/<option value="16"\s+selected(=["\']selected["\'])?>Street<\/option>/', $html );
 
 		$html = $this->capture(
 			array( 'Loc_Config', 'values_callback' ),
@@ -473,7 +473,7 @@ class SettingsTest extends WP_UnitTestCase {
 			)
 		);
 		$this->assertMatchesRegularExpression( '/^<select name="pick"><option value="a"\s*>A &amp; a<\/option>/', $html );
-		$this->assertMatchesRegularExpression( '/<option value="b"\s+selected(="selected")?>B<\/option>/', $html );
+		$this->assertMatchesRegularExpression( '/<option value="b"\s+selected(=["\']selected["\'])?>B<\/option>/', $html );
 	}
 
 	/**
