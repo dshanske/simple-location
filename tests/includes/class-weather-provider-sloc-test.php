@@ -61,7 +61,7 @@ class Weather_Provider_Sloc_Test extends Weather_Provider {
 	 * @param mixed $time Time.
 	 * @return array|WP_Error
 	 */
-	public function get_conditions( $time ) {
+	public function get_conditions( $time = null ) {
 		static::$time = $time;
 		return static::$conditions;
 	}
