@@ -1,0 +1,38 @@
+[
+  {
+    "version": 8,
+    "name": "Philly Streets",
+    "center": [
+      -75.1636,
+      39.9524
+    ],
+    "zoom": 12,
+    "bearing": 0,
+    "pitch": 0,
+    "created": "2025-03-01T12:00:00.000Z",
+    "id": "cm7abc123def456ghi789jkl",
+    "modified": "2025-03-02T12:00:00.000Z",
+    "owner": "someone",
+    "visibility": "private",
+    "protected": false,
+    "draft": false
+  },
+  {
+    "version": 8,
+    "name": "Night Ride",
+    "center": [
+      0,
+      0
+    ],
+    "zoom": 1,
+    "bearing": 0,
+    "pitch": 0,
+    "created": "2025-04-01T12:00:00.000Z",
+    "id": "cm8mno123pqr456stu789vwx",
+    "modified": "2025-04-02T12:00:00.000Z",
+    "owner": "someone",
+    "visibility": "public",
+    "protected": false,
+    "draft": false
+  }
+]
