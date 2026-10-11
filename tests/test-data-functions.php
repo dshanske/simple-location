@@ -94,7 +94,6 @@ class DataFunctionsTest extends WP_UnitTestCase {
 	 * A geo URI is only produced when there is a location.
 	 */
 	public function test_get_geouri_without_location() {
-		$this->markTestSkipped( 'Known bug, see #307' );
 		$post_id = self::factory()->post->create();
 		$this->assertFalse( Geo_Data::get_geouri( 'post', $post_id ) );
 	}

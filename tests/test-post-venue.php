@@ -208,6 +208,28 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The bulk update gives a venue without a location the location of a post checked in there.
+	 */
+	public function test_handle_bulk_edit_venue_without_location() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$empty    = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		$post_id  = self::factory()->post->create();
+		update_post_meta( $post_id, 'venue_id', $venue_id );
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'  => 40.7128,
+				'longitude' => -74.006,
+			)
+		);
+		$this->assertSame( 'edit.php?bulk_venue_children=1', Post_Venue::handle_bulk_edit( 'edit.php', 'venue_children', array( $empty, $venue_id ) ) );
+		$this->assertEquals( 40.7128, get_post_geodata( $venue_id, 'latitude' ) );
+		$this->assertNull( get_post_geodata( $empty ) );
+	}
+
+	/**
 	 * The venue type filter lists every type, only on the venue list.
 	 */
 	public function test_venue_types_dropdown() {

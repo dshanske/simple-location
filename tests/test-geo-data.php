@@ -70,5 +70,18 @@ class GeoDataTest extends WP_UnitTestCase {
 		$return = get_post_geodata( $post_id, 'day' );
 		$this->assertEquals( '1', $return, wp_json_encode( $return ) );
 	}
+
+	/**
+	 * Term geo meta can be registered for a single taxonomy given as a string.
+	 */
+	public function test_register_terms_meta_string() {
+		$method = new ReflectionMethod( 'Geo_Data', 'register_terms_meta' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$method->setAccessible( true );
+		}
+		$method->invoke( null, 'category', 'sloc_test_key', array( 'type' => 'string' ) );
+		$this->assertArrayHasKey( 'sloc_test_key', get_registered_meta_keys( 'term', 'category' ) );
+		unregister_term_meta( 'category', 'sloc_test_key' );
+	}
 }
 

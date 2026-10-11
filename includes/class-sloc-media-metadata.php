@@ -241,7 +241,7 @@ class Sloc_Media_Metadata {
 			$update['mf2_published'] = $data['created'];
 		}
 
-		if ( isset( $data['location'] ) ) {
+		if ( isset( $data['location']['latitude'], $data['location']['longitude'] ) ) {
 			foreach ( array( 'latitude', 'longitude', 'altitude' ) as $prop ) {
 				if ( array_key_exists( $prop, $data['location'] ) ) {
 					$update[ 'geo_' . $prop ] = $data['location'][ $prop ];
@@ -254,17 +254,20 @@ class Sloc_Media_Metadata {
 				update_post_meta( $post_id, 'venue_id', $venue );
 				$update['geo_address'] = get_the_title( $venue );
 			} else {
-				$reverse = Loc_Config::geo_provider();
-				$reverse->set( $data['location']['latitude'], $data['location']['longitude'] );
-				$reverse_adr = $reverse->reverse_lookup();
-				if ( ! is_wp_error( $reverse_adr ) ) {
+				$reverse     = Loc_Config::geo_provider();
+				$reverse_adr = null;
+				if ( is_object( $reverse ) ) {
+					$reverse->set( $data['location']['latitude'], $data['location']['longitude'] );
+					$reverse_adr = $reverse->reverse_lookup();
+				}
+				if ( is_array( $reverse_adr ) ) {
 					$term = Location_Taxonomy::get_location( $reverse_adr, true );
 					Location_Taxonomy::set_location( $post_id, $term );
 					if ( isset( $reverse_adr['display-name'] ) ) {
 						$update['geo_address'] = $reverse_adr['display-name'];
 					}
 				}
-				if ( ! array_key_exists( 'geo_altitude', $update ) ) {
+				if ( ! array_key_exists( 'geo_altitude', $update ) && is_object( $reverse ) ) {
 					$update['geo_altitude'] = $reverse->elevation();
 				}
 			}

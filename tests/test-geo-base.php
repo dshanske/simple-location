@@ -327,6 +327,116 @@ class GeoBaseTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Bulk lookup doesn't count a post when no location could be looked up for it.
+	 */
+	public function test_bulk_lookup_location_not_found() {
+		wp_set_current_user( self::$users['administrator'] );
+		foreach ( array( 'HTML5', 'address', 'missing' ) as $provider ) {
+			update_option( 'sloc_geolocation_provider', $provider );
+			$post_id = self::factory()->post->create( array( 'post_author' => self::$users['author'] ) );
+			$this->assertSame( 'edit.php?bulk_lookup_location_count=0', Geo_Base::handle_bulk_edit_location( 'edit.php', 'lookup_location', array( $post_id ) ), $provider );
+			$this->assertNull( get_post_geodata( $post_id ), $provider );
+			$this->assertEmpty( get_post_weatherdata( $post_id ), $provider );
+		}
+	}
+
+	/**
+	 * Bulk lookup turns a check-in without coordinates into a venue, without a location lookup.
+	 */
+	public function test_bulk_lookup_location_checkin_without_location() {
+		update_option( 'sloc_geolocation_provider', 'HTML5' );
+		wp_set_current_user( self::$users['administrator'] );
+		$post_id = self::factory()->post->create();
+		update_post_meta(
+			$post_id,
+			'mf2_checkin',
+			array(
+				'name'         => 'Corner Cafe',
+				'country-name' => 'United States',
+				'country-code' => 'US',
+			)
+		);
+		$this->assertSame( 'edit.php?bulk_lookup_location_count=1', Geo_Base::handle_bulk_edit_location( 'edit.php', 'lookup_location', array( $post_id ) ) );
+		$this->assertSame( 'Corner Cafe', get_the_title( get_post_meta( $post_id, 'venue_id', true ) ) );
+		$this->assertEmpty( get_post_weatherdata( $post_id ) );
+	}
+
+	/**
+	 * Bulk lookup doesn't look up weather for a post that has an address but no coordinates.
+	 */
+	public function test_bulk_lookup_location_address_only() {
+		wp_set_current_user( self::$users['administrator'] );
+		$post_id = self::factory()->post->create();
+		update_post_meta( $post_id, 'geo_address', 'Somewhere' );
+		$this->assertSame( 'edit.php?bulk_lookup_location_count=0', Geo_Base::handle_bulk_edit_location( 'edit.php', 'lookup_location', array( $post_id ) ) );
+		$this->assertEmpty( get_post_weatherdata( $post_id ) );
+	}
+
+	/**
+	 * Bulk lookup stores a location found without a reverse geocoding provider.
+	 */
+	public function test_bulk_lookup_location_without_geo_provider() {
+		update_option( 'sloc_geolocation_provider', 'dummy' );
+		update_option( 'sloc_geo_provider', 'missing' );
+		$author = self::$users['author'];
+		Geo_Data::set_geodata(
+			'user',
+			$author,
+			'',
+			array(
+				'latitude'  => 40.71,
+				'longitude' => -74.01,
+			)
+		);
+		wp_set_current_user( self::$users['administrator'] );
+		$post_id = self::factory()->post->create( array( 'post_author' => $author ) );
+		$this->assertSame( 'edit.php?bulk_lookup_location_count=1', Geo_Base::handle_bulk_edit_location( 'edit.php', 'lookup_location', array( $post_id ) ) );
+		$this->assertEquals( 40.71, get_post_geodata( $post_id, 'latitude' ) );
+	}
+
+	/**
+	 * Bulk lookup skips posts that no longer exist.
+	 */
+	public function test_bulk_lookup_location_missing_post() {
+		$this->assertFalse( Geo_Data::bulk_edit_lookup_location( PHP_INT_MAX ) );
+	}
+
+	/**
+	 * A new public post updates its author's last seen location, and a location without a visibility is skipped.
+	 */
+	public function test_last_seen() {
+		update_option( 'sloc_last_report', 1 );
+		$author  = self::$users['author'];
+		$post_id = self::factory()->post->create( array( 'post_author' => $author ) );
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'   => 40.71,
+				'longitude'  => -74.01,
+				'visibility' => 'public',
+			)
+		);
+		Geo_Base::last_seen( $post_id, get_post( $post_id ) );
+		$this->assertEquals( 40.71, get_user_geodata( $author, 'latitude' ) );
+
+		delete_user_meta( $author, 'geo_latitude' );
+		$filter = function ( $check, $id, $key ) {
+			if ( '' !== $key ) {
+				return $check;
+			}
+			return array(
+				'latitude'  => 1.5,
+				'longitude' => 2.5,
+			);
+		};
+		add_filter( 'get_post_geodata', $filter, 10, 3 );
+		Geo_Base::last_seen( $post_id, get_post( $post_id ) );
+		remove_filter( 'get_post_geodata', $filter, 10 );
+		$this->assertSame( '', get_user_meta( $author, 'geo_latitude', true ) );
+	}
+
+	/**
 	 * The admin list shows a Location column with the visibility.
 	 */
 	public function test_location_admin_column() {
@@ -338,6 +448,13 @@ class GeoBaseTest extends WP_UnitTestCase {
 		set_post_geodata( $post_id, 'visibility', 'protected' );
 		$this->assertSame( 'Protected', $this->capture( array( 'Geo_Base', 'manage_location_admin_column' ), 'location', $post_id ) );
 		$this->assertSame( '', $this->capture( array( 'Geo_Base', 'manage_location_admin_column' ), 'title', $post_id ) );
+
+		$filter = function ( $check, $id, $key ) {
+			return 'visibility' === $key ? 'friends' : $check;
+		};
+		add_filter( 'get_post_geodata', $filter, 10, 3 );
+		$this->assertSame( 'friends', $this->capture( array( 'Geo_Base', 'manage_location_admin_column' ), 'location', $post_id ), 'An unknown visibility is shown as is.' );
+		remove_filter( 'get_post_geodata', $filter, 10 );
 	}
 
 	/**

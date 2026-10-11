@@ -266,7 +266,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /map returns an error when no map provider is set.
 	 */
 	public function test_map_without_provider() {
-		$this->markTestSkipped( 'Known bug, see #307' );
 		update_option( 'sloc_map_provider', 'none' );
 		$response = $this->request(
 			'/map',
@@ -442,7 +441,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /geocode at a venue with no location term doesn't fail.
 	 */
 	public function test_geocode_at_venue_without_term() {
-		$this->markTestSkipped( 'Known bug, see #307' );
 		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
 		$at_venue = function () use ( $venue_id ) {
 			return $venue_id;

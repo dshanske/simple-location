@@ -362,6 +362,9 @@ class REST_Geo {
 			}
 
 			$map = Loc_Config::map_provider();
+			if ( ! is_object( $map ) ) {
+				return new WP_Error( 'no_provider', __( 'No Map Provider Set', 'simple-location' ), array( 'status' => 400 ) );
+			}
 			$map->set( $args );
 			$args['url']    = $map->get_the_map_url();
 			$args['map']    = $map->get_the_static_map();
@@ -547,11 +550,12 @@ class REST_Geo {
 			$venue = Post_Venue::at_venue( $params['latitude'], $params['longitude'] );
 			if ( false !== $venue ) {
 				$term        = Location_Taxonomy::get_location_taxonomy( $venue );
+				$term_id     = ( $term instanceof WP_Term ) ? $term->term_id : 0;
 				$reverse_adr = array(
 					'venue_id'      => $venue,
 					'display-name'  => get_the_title( $venue ),
-					'term_id'       => $term->term_id,
-					'term_details'  => Location_Taxonomy::get_location_data( $term->term_id ),
+					'term_id'       => $term_id,
+					'term_details'  => $term_id ? Location_Taxonomy::get_location_data( $term_id ) : array(),
 					'terms'         => wp_dropdown_categories(
 						array(
 							'echo'             => 0,
@@ -562,7 +566,7 @@ class REST_Geo {
 							'id'               => 'location_dropdown',
 							'orderby'          => 'name',
 							'hierarchical'     => true,
-							'selected'         => $term->term_id,
+							'selected'         => $term_id,
 							'show_option_none' => __( 'No Location', 'simple-location' ),
 						)
 					),
@@ -678,12 +682,11 @@ class REST_Geo {
 				return new WP_Error( 'missing_geo', __( 'Missing Coordinates or Station for Weather Lookup', 'simple-location' ), array( 'status' => 400 ) );
 		}
 		$conditions = $weather->get_conditions( $time );
-		if ( array_key_exists( 'units', $params ) && 'imperial' === $params['units'] ) {
-			$conditions = $weather->metric_to_imperial( $conditions );
-		}
-
 		if ( is_wp_error( $conditions ) ) {
 			return $conditions;
+		}
+		if ( array_key_exists( 'units', $params ) && 'imperial' === $params['units'] ) {
+			$conditions = $weather->metric_to_imperial( $conditions );
 		}
 		$return = array_filter( $return );
 		if ( is_array( $conditions ) ) {

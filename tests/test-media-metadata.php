@@ -579,7 +579,6 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * A photo location is saved even when no geo provider is set.
 	 */
 	public function test_attachment_without_geo_provider() {
-		$this->markTestSkipped( 'Known bug, see #307' );
 		update_option( 'sloc_geo_provider', 'none' );
 		$attachment_id = self::factory()->attachment->create();
 		Sloc_Media_Metadata::attachment(
