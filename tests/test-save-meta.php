@@ -225,27 +225,27 @@ class SaveMetaTest extends WP_UnitTestCase {
 	 * Bulk "Public Location" and "Private Location" change visibility on posts the user can edit.
 	 */
 	public function test_bulk_visibility_actions() {
-		$this->markTestSkipped( 'Known bug, see #303' );
 		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin );
-		$post_id = self::factory()->post->create();
-		Geo_Base::handle_bulk_edit_location( 'edit.php', 'location_private', array( $post_id ) );
-		$this->assertSame( 'private', get_post_geodata( $post_id, 'visibility' ) );
-		Geo_Base::handle_bulk_edit_location( 'edit.php', 'location_public', array( $post_id ) );
-		$this->assertSame( 'public', get_post_geodata( $post_id, 'visibility' ) );
+		$post_ids = self::factory()->post->create_many( 2 );
+		$this->assertSame( 'edit.php?bulk_lookup_location_count=2', Geo_Base::handle_bulk_edit_location( 'edit.php', 'location_private', $post_ids ) );
+		$this->assertSame( 'private', get_post_geodata( $post_ids[0], 'visibility' ) );
+		$this->assertSame( 'private', get_post_geodata( $post_ids[1], 'visibility' ) );
+		$this->assertSame( 'edit.php?bulk_lookup_location_count=1', Geo_Base::handle_bulk_edit_location( 'edit.php', 'location_public', array( $post_ids[0] ) ) );
+		$this->assertSame( 'public', get_post_geodata( $post_ids[0], 'visibility' ) );
+		$this->assertSame( 'private', get_post_geodata( $post_ids[1], 'visibility' ) );
 	}
 
 	/**
 	 * Bulk visibility actions skip posts the user can't edit.
 	 */
 	public function test_bulk_visibility_actions_check_capability() {
-		$this->markTestSkipped( 'Known bug, see #303' );
 		$owner       = self::factory()->user->create( array( 'role' => 'author' ) );
 		$contributor = self::factory()->user->create( array( 'role' => 'contributor' ) );
 		$post_id     = self::factory()->post->create( array( 'post_author' => $owner ) );
 		set_post_geodata( $post_id, 'visibility', 'private' );
 		wp_set_current_user( $contributor );
-		Geo_Base::handle_bulk_edit_location( 'edit.php', 'location_public', array( $post_id ) );
+		$this->assertSame( 'edit.php?bulk_lookup_location_count=0', Geo_Base::handle_bulk_edit_location( 'edit.php', 'location_public', array( $post_id ) ) );
 		$this->assertSame( '0', get_post_meta( $post_id, 'geo_public', true ) );
 	}
 
