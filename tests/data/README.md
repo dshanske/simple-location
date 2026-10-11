@@ -11,7 +11,7 @@ Each file is the body of one HTTP response from a provider's API, used by the pr
 3. Save it over the file with the same name, pretty-printed JSON, and update its **Status** below to
    `Captured YYYY-MM-DD`.
 4. Run `./vendor/bin/phpunit --filter GeoProvidersTest` (or `WeatherProvidersTest`, `ElevationProvidersTest`,
-   `VenueProvidersTest`, `MapProvidersTest`).
+   `VenueProvidersTest`, `MapProvidersTest`, `LocationProvidersTest`).
 
 The tests check stable facts for every provider: city (Philadelphia), region (Pennsylvania / `PA`),
 country (`US`), a `191xx` ZIP code, a street containing "Kennedy" or "JFK", and the requested
@@ -107,3 +107,15 @@ a user's styles.
 | `mapbox-styles.json` | `GET https://api.mapbox.com/styles/v1/{user}?access_token=…&limit=50` | Hand-built from docs |
 
 HERE map URLs (API-4) and MapQuest archive maps (API-2) use retired APIs and aren't tested.
+
+## Location providers (`location/`)
+
+Compass is a self-hosted location tracker, so the requests go to the user's own Compass URL (the tests
+use `https://compass.example.com`). `compass-last.json` is a GeoJSON point at Philadelphia City
+Hall; `compass-query.json` is a GeoJSON line starting there. The tests compare coordinates, altitude,
+speed, heading and activity against the fixture itself.
+
+| File | Request | Status |
+|---|---|---|
+| `compass-last.json` | `GET {compass_url}/api/last/?token=…` (optionally `&before=YYYY-MM-DDTHH:MM:SS` in UTC) | Hand-built from docs |
+| `compass-query.json` | `GET {compass_url}/api/query/?token=…&format=linestring&start=…&end=…&tz=…` | Hand-built from docs |
