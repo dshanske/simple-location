@@ -376,6 +376,25 @@ class GeoBaseTest extends WP_UnitTestCase {
 		$echoed = $this->capture( array( 'Geo_Base', 'geo_public_select' ), 'public', true );
 		$this->assertSame( 3, substr_count( $echoed, '<option' ) );
 		$this->assertMatchesRegularExpression( '/value="public"\s+selected/', $echoed );
+
+		$options = Geo_Base::geo_public_select( 'inherit', false, Geo_Base::geo_public() + array( 'inherit' => 'Inherit' ) );
+		$this->assertSame( 4, substr_count( $options, '<option' ) );
+		$this->assertMatchesRegularExpression( '/value="inherit"\s+selected/', $options );
+	}
+
+	/**
+	 * Attachments get an "inherit" choice labeled with what they currently inherit; other posts don't.
+	 */
+	public function test_visibility_choices() {
+		$this->assertSame( Geo_Base::geo_public(), Geo_Base::visibility_choices() );
+		$this->assertSame( Geo_Base::geo_public(), Geo_Base::visibility_choices( self::factory()->post->create() ) );
+
+		$post_id       = self::factory()->post->create();
+		$attachment_id = self::factory()->attachment->create( array( 'post_parent' => $post_id ) );
+		set_post_geodata( $post_id, 'visibility', 'protected' );
+		$choices = Geo_Base::visibility_choices( $attachment_id );
+		$this->assertSame( array( 'private', 'public', 'protected', 'inherit' ), array_keys( $choices ) );
+		$this->assertSame( 'Inherit (currently Protected)', $choices['inherit'] );
 	}
 
 	/**

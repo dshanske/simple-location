@@ -32,6 +32,13 @@ if ( is_array( $geodata ) && array_key_exists( 'venue_id', $geodata ) && $geodat
 $public     = array_key_exists( 'visibility', $geodata ) ? $geodata['visibility'] : get_option( 'geo_public' );
 $choices    = Geo_Base::geo_public();
 $map_return = '';
+if ( 'attachment' === $type ) {
+	$choices = Geo_Base::visibility_choices( get_the_ID() );
+	// An attachment without a visibility of its own inherits one.
+	if ( '' === get_post_meta( get_the_ID(), 'geo_public', true ) ) {
+		$public = 'inherit';
+	}
+}
 if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 	$map_provider = Loc_Config::map_provider();
 	$map_args     = array(
@@ -164,7 +171,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 
 	<div id="location-visibility-select" class="hide-if-js">
 		<input type="hidden" name="hidden_location_visibility" id="hidden_location_visibility" value="<?php echo esc_attr( $public ); ?>" />
-		<select name="geo_public" id="location-visibility" width="90%"><?php echo Geo_Base::geo_public_select( $public ); // phpcs:ignore ?></select>
+		<select name="geo_public" id="location-visibility" width="90%"><?php echo Geo_Base::geo_public_select( $public, false, $choices ); // phpcs:ignore ?></select>
 		<a href="#location-visibility" class="save-location-visibility hide-if-no-js button">OK</a>
 		<a href="#location-visibility" class="cancel-location-visibility hide-if-no-js button-cancel">Cancel</a>
 	</div><!-- #location-visibility-select -->

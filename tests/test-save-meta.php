@@ -41,6 +41,28 @@ class SaveMetaTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Choosing "inherit" on a photo removes its own visibility, so it follows its post again.
+	 */
+	public function test_save_meta_attachment_inherit() {
+		$post_id       = self::factory()->post->create();
+		$attachment_id = self::factory()->attachment->create( array( 'post_parent' => $post_id ) );
+		set_post_geodata( $post_id, 'visibility', 'private' );
+		$_POST = array(
+			'latitude'   => '45.01',
+			'longitude'  => '-75.44',
+			'geo_public' => 'public',
+		);
+		Geo_Base::save_meta( 'post', $attachment_id );
+		$this->assertSame( '1', get_post_meta( $attachment_id, 'geo_public', true ) );
+		$this->assertSame( 'public', get_post_geodata( $attachment_id, 'visibility' ) );
+
+		$_POST['geo_public'] = 'inherit';
+		Geo_Base::save_meta( 'post', $attachment_id );
+		$this->assertSame( '', get_post_meta( $attachment_id, 'geo_public', true ) );
+		$this->assertSame( 'private', get_post_geodata( $attachment_id, 'visibility' ) );
+	}
+
+	/**
 	 * Only a file name is stored for the icon, never a path.
 	 */
 	public function test_save_meta_icon_basename() {

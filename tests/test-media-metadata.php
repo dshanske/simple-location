@@ -80,6 +80,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * The filters are registered.
 	 */
 	public function test_hooks_registered() {
+		$this->assertSame( 10, has_filter( 'rest_prepare_attachment', array( 'Sloc_Media_Metadata', 'rest_prepare_attachment' ) ) );
 		$this->assertSame( 10, has_filter( 'wp_read_image_metadata', array( 'Sloc_Media_Metadata', 'exif_data' ) ) );
 		$this->assertSame( 20, has_filter( 'wp_generate_attachment_metadata', array( 'Sloc_Media_Metadata', 'attachment' ) ) );
 		$this->assertSame( 10, has_filter( 'attachment_fields_to_edit', array( 'Sloc_Media_Metadata', 'attachment_fields_to_edit' ) ) );
@@ -301,7 +302,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 				),
 			),
 		);
-		$this->assertSame( $meta, Sloc_Media_Metadata::attachment( $meta, $attachment_id ) );
+		$this->assertSame( array( 'image_meta' => array() ), Sloc_Media_Metadata::attachment( $meta, $attachment_id ), 'The location is moved out of the image metadata.' );
 
 		$geodata = get_post_geodata( $attachment_id );
 		$this->assertEquals( 40.7128, $geodata['latitude'] );
@@ -381,7 +382,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Away from a private venue, a photo location uses the site's default visibility.
+	 * A photo that isn't attached to a post, away from a private venue, uses the site's default visibility.
 	 *
 	 * @dataProvider data_default_visibility
 	 *
@@ -389,24 +390,82 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * @param string $visibility Expected visibility.
 	 */
 	public function test_attachment_location_default_visibility( $option, $visibility ) {
-		$this->markTestSkipped( 'Known bug, see #69' );
 		$this->full_address();
 		update_option( 'geo_public', $option );
 		$attachment_id = self::factory()->attachment->create();
 		$this->save_photo_location( $attachment_id );
+		$this->assertSame( '', get_post_meta( $attachment_id, 'geo_public', true ), 'No visibility is stored on upload.' );
 		$this->assertSame( $visibility, get_post_geodata( $attachment_id, 'visibility' ) );
 	}
 
 	/**
-	 * Data provider of site defaults. Private also depends on #302, since 0 currently reads back as public.
+	 * Data provider of site defaults.
 	 *
 	 * @return array
 	 */
 	public function data_default_visibility() {
 		return array(
+			'public'    => array( 1, 'public' ),
 			'protected' => array( 2, 'protected' ),
 			'private'   => array( 0, 'private' ),
 		);
+	}
+
+	/**
+	 * A photo attached to a post inherits the post's visibility, and follows it when it changes.
+	 */
+	public function test_attachment_inherits_parent_visibility() {
+		$this->full_address();
+		update_option( 'geo_public', 1 );
+		$post_id       = self::factory()->post->create();
+		$attachment_id = self::factory()->attachment->create( array( 'post_parent' => $post_id ) );
+		$this->save_photo_location( $attachment_id );
+
+		foreach ( array( 'private', 'protected', 'public' ) as $visibility ) {
+			set_post_geodata( $post_id, 'visibility', $visibility );
+			$this->assertSame( $visibility, get_post_geodata( $attachment_id, 'visibility' ), "Post is $visibility" );
+		}
+
+		// A post with no visibility of its own uses the site default, and so does the photo.
+		set_post_geodata( $post_id, 'visibility', 'inherit' );
+		update_option( 'geo_public', 0 );
+		$this->assertSame( 'private', get_post_geodata( $attachment_id, 'visibility' ) );
+	}
+
+	/**
+	 * A visibility set on the photo itself wins over the post's, and "inherit" removes it again.
+	 */
+	public function test_attachment_own_visibility() {
+		$post_id       = self::factory()->post->create();
+		$attachment_id = self::factory()->attachment->create( array( 'post_parent' => $post_id ) );
+		set_post_geodata( $post_id, 'visibility', 'public' );
+
+		set_post_geodata( $attachment_id, 'visibility', 'private' );
+		$this->assertSame( 'private', get_post_geodata( $attachment_id, 'visibility' ) );
+
+		$this->assertTrue( set_post_geodata( $attachment_id, 'visibility', 'inherit' ) );
+		$this->assertSame( '', get_post_meta( $attachment_id, 'geo_public', true ) );
+		$this->assertSame( 'public', get_post_geodata( $attachment_id, 'visibility' ) );
+	}
+
+	/**
+	 * At a private venue, an inherited public visibility becomes protected, but a stricter one is kept.
+	 */
+	public function test_attachment_private_venue_with_parent() {
+		$this->at_venue( 'private' );
+		$post_id       = self::factory()->post->create();
+		$attachment_id = self::factory()->attachment->create( array( 'post_parent' => $post_id ) );
+		$this->save_photo_location( $attachment_id );
+
+		$expected = array(
+			'public'    => 'protected',
+			'protected' => 'protected',
+			'private'   => 'private',
+		);
+		foreach ( $expected as $parent => $visibility ) {
+			set_post_geodata( $post_id, 'visibility', $parent );
+			$this->assertSame( $visibility, get_post_geodata( $attachment_id, 'visibility' ), "Post is $parent" );
+		}
 	}
 
 	/**
@@ -414,7 +473,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * so the venue name shows but the coordinates don't.
 	 */
 	public function test_attachment_at_private_venue() {
-		$this->markTestSkipped( 'Known bug, see #321 and #302' );
+		update_option( 'geo_public', 1 );
 		$venue_id      = $this->at_venue( 'private' );
 		$attachment_id = self::factory()->attachment->create();
 		$this->save_photo_location( $attachment_id );
@@ -427,13 +486,93 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * A photo taken at a venue that isn't private is linked to it and uses the site's default visibility.
 	 */
 	public function test_attachment_at_public_venue() {
-		$this->markTestSkipped( 'Known bug, see #321 and #69' );
 		update_option( 'geo_public', 1 );
 		$venue_id      = $this->at_venue( 'public' );
 		$attachment_id = self::factory()->attachment->create();
 		$this->save_photo_location( $attachment_id );
 		$this->assertEquals( $venue_id, get_post_meta( $attachment_id, 'venue_id', true ) );
 		$this->assertSame( 'public', get_post_geodata( $attachment_id, 'visibility' ) );
+	}
+
+	/**
+	 * Fetches an attachment from the REST API as a visitor.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return array Response data.
+	 */
+	protected function rest_media( $attachment_id ) {
+		wp_set_current_user( 0 );
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'GET', '/wp/v2/media/' . $attachment_id ) );
+		$this->assertSame( 200, $response->get_status() );
+		return $response->get_data();
+	}
+
+	/**
+	 * Creates an attachment of a published post with GPS coordinates left in its image metadata,
+	 * as photos uploaded before 5.0.26 have.
+	 *
+	 * @param string $visibility Visibility of the post.
+	 * @return int Attachment ID.
+	 */
+	protected function photo_with_stored_location( $visibility ) {
+		$post_id = self::factory()->post->create();
+		set_post_geodata( $post_id, 'visibility', $visibility );
+		$attachment_id = self::factory()->attachment->create(
+			array(
+				'post_parent'    => $post_id,
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $attachment_id, 'geo_latitude', 40.7128 );
+		update_post_meta( $attachment_id, 'geo_longitude', -74.006 );
+		wp_update_attachment_metadata(
+			$attachment_id,
+			array(
+				'width'      => 10,
+				'height'     => 10,
+				'file'       => 'photo.jpg',
+				'sizes'      => array(),
+				'image_meta' => array(
+					'camera'   => 'Phone',
+					'location' => array(
+						'latitude'  => 40.7128,
+						'longitude' => -74.006,
+					),
+				),
+			)
+		);
+		return $attachment_id;
+	}
+
+	/**
+	 * The REST API doesn't show visitors the coordinates in a photo's image metadata unless its location is public.
+	 */
+	public function test_rest_hides_image_meta_location() {
+		foreach ( array( 'private', 'protected' ) as $visibility ) {
+			$image_meta = $this->rest_media( $this->photo_with_stored_location( $visibility ) )['media_details']['image_meta'];
+			$this->assertArrayNotHasKey( 'location', $image_meta, $visibility );
+			$this->assertSame( 'Phone', $image_meta['camera'], 'The rest of the image metadata is kept.' );
+		}
+
+		$image_meta = $this->rest_media( $this->photo_with_stored_location( 'public' ) )['media_details']['image_meta'];
+		$this->assertSame(
+			array(
+				'latitude'  => 40.7128,
+				'longitude' => -74.006,
+			),
+			$image_meta['location']
+		);
+	}
+
+	/**
+	 * The REST filter leaves responses without image metadata alone.
+	 */
+	public function test_rest_prepare_attachment_without_image_meta() {
+		$attachment_id = self::factory()->attachment->create( array( 'post_mime_type' => 'application/pdf' ) );
+		$response      = new WP_REST_Response( array( 'media_details' => new stdClass() ) );
+		$this->assertSame( $response, Sloc_Media_Metadata::rest_prepare_attachment( $response, get_post( $attachment_id ), new WP_REST_Request() ) );
+		$response = new WP_REST_Response( array( 'media_details' => array( 'image_meta' => array( 'camera' => 'Phone' ) ) ) );
+		$this->assertSame( array( 'camera' => 'Phone' ), Sloc_Media_Metadata::rest_prepare_attachment( $response, get_post( $attachment_id ), new WP_REST_Request() )->get_data()['media_details']['image_meta'] );
 	}
 
 	/**
@@ -480,6 +619,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 		$this->assertEqualsWithDelta( -74.006, $geodata['longitude'], 0.000001 );
 		$this->assertEquals( 10, $geodata['altitude'] );
 		$this->assertSame( 'Lower Manhattan, New York', $geodata['address'] );
+		$this->assertArrayNotHasKey( 'location', wp_get_attachment_metadata( $attachment_id )['image_meta'], 'Coordinates are not kept in the image metadata.' );
 		$this->assertSame( '2024-07-01T12:00:00-04:00', get_post_meta( $attachment_id, 'mf2_published', true ) );
 
 		$created = sloc_get_attachment_datetime( $attachment_id );
