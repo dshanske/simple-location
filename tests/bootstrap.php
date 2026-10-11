@@ -32,7 +32,7 @@ if ( ! $_tests_dir ) {
 }
 
 if ( ! $_tests_dir || ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
-	echo "Could not find the test library, have you run bin/install-wp-tests.sh or bin/install-cp-tests.sh ?" . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo 'Could not find the test library, have you run bin/install-wp-tests.sh or bin/install-cp-tests.sh ?' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	exit( 1 );
 }
 
@@ -51,6 +51,9 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Fake providers, so tests never call live APIs.
+require __DIR__ . '/includes/load-test-providers.php';
 
 // Report which platform is under test so CI logs show it.
 if ( function_exists( 'classicpress_version' ) ) {
