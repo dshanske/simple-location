@@ -46,7 +46,6 @@ class DataFunctionsTest extends WP_UnitTestCase {
 	 * User geodata round-trips through the wrappers.
 	 */
 	public function test_user_geodata() {
-		$this->markTestSkipped( 'Known bug, see #305' );
 		$user_id = self::factory()->user->create();
 		$this->assertTrue( set_user_geodata( $user_id, '', static::$geo ) );
 		Assert::assertArraySubset( static::$geo, get_user_geodata( $user_id ) );
@@ -56,7 +55,6 @@ class DataFunctionsTest extends WP_UnitTestCase {
 	 * Setting user geodata for a user that doesn't exist fails cleanly.
 	 */
 	public function test_user_geodata_invalid_user() {
-		$this->markTestSkipped( 'Known bug, see #305' );
 		$this->assertFalse( set_user_geodata( 999999, '', static::$geo ) );
 	}
 

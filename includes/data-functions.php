@@ -24,7 +24,7 @@ function set_comment_geodata( $comment, $key, $geodata ) {
 
 function set_user_geodata( $id, $key, $geodata ) {
 	$user = sloc_get_user( $id );
-	if ( $user ) {
+	if ( ! $user ) {
 		return false;
 	}
 	return Geo_Data::set_geodata( 'user', $user->ID, $key, $geodata );
