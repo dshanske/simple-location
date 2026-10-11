@@ -55,6 +55,9 @@ require $_tests_dir . '/includes/bootstrap.php';
 // Fake providers, so tests never call live APIs.
 require __DIR__ . '/includes/load-test-providers.php';
 
+// Builds JPEGs with chosen EXIF data.
+require __DIR__ . '/includes/class-sloc-test-exif.php';
+
 // Report which platform is under test so CI logs show it.
 if ( function_exists( 'classicpress_version' ) ) {
 	$_platform = sprintf( 'ClassicPress %s', classicpress_version() );
