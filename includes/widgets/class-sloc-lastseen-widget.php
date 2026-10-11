@@ -105,14 +105,14 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 	 */
 	public function form( $instance ) {
 		?>
-				<p><label for="title"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
-				<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?> id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"
-				value="<?php echo esc_html( ifset( $instance['title'] ) ); ?>" /></p><p>
+				<p><label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
+				<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"
+				value="<?php echo esc_attr( ifset( $instance['title'] ) ); ?>" /></p><p>
 
 		<p>
 		<?php esc_html_e( 'Displays last reported user location. Reporting can be set manually in the user profile, updated based on the last post with a location, or updated using a webhook', 'simple-location' ); ?>
 		</p>
-		<p><label for="user"><?php esc_html_e( 'User: ', 'simple-location' ); ?></label>
+		<p><label for="<?php echo esc_attr( $this->get_field_id( 'user' ) ); ?>"><?php esc_html_e( 'User: ', 'simple-location' ); ?></label>
 		<?php
 		wp_dropdown_users(
 			array(
@@ -123,21 +123,21 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 		);
 		?>
 		</p>
-		<p><label for="showtime"><?php esc_html_e( 'Show Local Time: ', 'simple-location' ); ?></label>
+		<p><label for="<?php echo esc_attr( $this->get_field_id( 'showtime' ) ); ?>"><?php esc_html_e( 'Show Local Time: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showtime' ) ); ?>" type="hidden" value="0" />
-			<input name="<?php echo esc_attr( $this->get_field_name( 'showtime' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showtime'] ) ); ?> />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showtime' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showtime' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showtime'] ) ); ?> />
 		</p>
-		<p><label for="showastro"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
+		<p><label for="<?php echo esc_attr( $this->get_field_id( 'showastro' ) ); ?>"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="hidden" value="0" />
-			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
 		</p>
-		<p><label for="showtext"><?php esc_html_e( 'Show Text: ', 'simple-location' ); ?></label>
+		<p><label for="<?php echo esc_attr( $this->get_field_id( 'showtext' ) ); ?>"><?php esc_html_e( 'Show Text: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showtext' ) ); ?>" type="hidden" value="0" />
-			<input name="<?php echo esc_attr( $this->get_field_name( 'showtext' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showtext'] ) ); ?> />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showtext' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showtext' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showtext'] ) ); ?> />
 		</p>
-		<p><label for="showmap"><?php esc_html_e( 'Show Map: ', 'simple-location' ); ?></label>
+		<p><label for="<?php echo esc_attr( $this->get_field_id( 'showmap' ) ); ?>"><?php esc_html_e( 'Show Map: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showmap' ) ); ?>" type="hidden" value="0" />
-			<input name="<?php echo esc_attr( $this->get_field_name( 'showmap' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showmap'] ) ); ?> />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showmap' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showmap' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showmap'] ) ); ?> />
 		</p>
 		<?php
 	}
