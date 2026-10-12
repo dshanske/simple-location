@@ -48,7 +48,7 @@ class Geo_Provider_Here extends Geo_Provider {
 	 */
 	public function reverse_lookup() {
 		if ( empty( $this->api ) ) {
-			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for HERE', 'simple-location' ) );
 		}
 		$args = array(
 			'apiKey' => $this->api,
@@ -127,10 +127,10 @@ class Geo_Provider_Here extends Geo_Provider {
 			$addr['postal-code'] = ifset( $location['postalCode'] );
 
 			// Adjust position of house number/name based on country practice.
-			if ( self::house_number( $addr['country_code'] ) ) {
-				$addr['street-address'] = $number . ' ' . $street;
+			if ( self::house_number( $addr['country-code'] ) ) {
+				$addr['street-address'] = trim( $number . ' ' . $street );
 			} else {
-				$addr['street-address'] = $street . ' ' . $number;
+				$addr['street-address'] = trim( $street . ' ' . $number );
 			}
 		}
 
@@ -156,7 +156,7 @@ class Geo_Provider_Here extends Geo_Provider {
 	 */
 	public function geocode( $address ) {
 		if ( empty( $this->api ) ) {
-			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for HERE', 'simple-location' ) );
 		}
 		$args = array(
 			'apiKey' => $this->api,
@@ -164,7 +164,7 @@ class Geo_Provider_Here extends Geo_Provider {
 			'lang'   => get_bloginfo( 'language' ),
 
 		);
-		$url  = 'https://revgeocode.search.hereapi.com/v1/geocode';
+		$url  = 'https://geocode.search.hereapi.com/v1/geocode';
 		$json = $this->fetch_json( $url, $args );
 		if ( is_wp_error( $json ) ) {
 			return $json;
