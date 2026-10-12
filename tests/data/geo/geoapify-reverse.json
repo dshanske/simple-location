@@ -1,0 +1,68 @@
+{
+	"type": "FeatureCollection",
+	"features": [
+		{
+			"type": "Feature",
+			"properties": {
+				"datasource": {
+					"sourcename": "openstreetmap",
+					"attribution": "© OpenStreetMap contributors",
+					"license": "Open Database License",
+					"url": "https://www.openstreetmap.org/copyright"
+				},
+				"name": "Philadelphia City Hall",
+				"country": "United States",
+				"country_code": "us",
+				"state": "Pennsylvania",
+				"county": "Philadelphia County",
+				"city": "Philadelphia",
+				"postcode": "19107",
+				"suburb": "Center City",
+				"street": "John F. Kennedy Boulevard",
+				"housenumber": "1400",
+				"lon": -75.16362,
+				"lat": 39.95238,
+				"state_code": "PA",
+				"distance": 2.4,
+				"result_type": "amenity",
+				"formatted": "Philadelphia City Hall, 1400 John F. Kennedy Boulevard, Philadelphia, PA 19107, United States of America",
+				"address_line1": "Philadelphia City Hall",
+				"address_line2": "1400 John F. Kennedy Boulevard, Philadelphia, PA 19107, United States of America",
+				"category": "building.public_and_civic",
+				"timezone": {
+					"name": "America/New_York",
+					"offset_STD": "-05:00",
+					"offset_STD_seconds": -18000,
+					"offset_DST": "-04:00",
+					"offset_DST_seconds": -14400,
+					"abbreviation_STD": "EST",
+					"abbreviation_DST": "EDT"
+				},
+				"plus_code": "87F6WRX6+XH",
+				"rank": {
+					"importance": 0.5,
+					"popularity": 9.9
+				},
+				"place_id": "hand-built-fixture"
+			},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					-75.16362,
+					39.95238
+				]
+			},
+			"bbox": [
+				-75.16479,
+				39.95148,
+				-75.16245,
+				39.95328
+			]
+		}
+	],
+	"query": {
+		"lat": 39.9524,
+		"lon": -75.1636,
+		"plus_code": "87F6WRX6+XF"
+	}
+}
