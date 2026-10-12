@@ -486,6 +486,181 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A longitude without a latitude is ignored without a warning.
+	 */
+	public function test_set_location_longitude_only() {
+		$args = $this->micropub_post( array( 'geo_longitude' => -75.16 ) );
+		Location_Plugins::micropub_set_location( array( 'properties' => array() ), $args );
+		$this->assertSame( '', get_post_meta( $args['ID'], 'geo_public', true ) );
+	}
+
+	/**
+	 * A latitude of 0 is a real coordinate.
+	 */
+	public function test_set_location_zero_latitude() {
+		$this->markTestSkipped( 'Known bug, see #306' );
+		$args = $this->micropub_post(
+			array(
+				'geo_latitude'  => 0,
+				'geo_longitude' => 10,
+				'geo_accuracy'  => 500,
+			)
+		);
+		Location_Plugins::micropub_set_location( array( 'properties' => array() ), $args );
+		$this->assertEquals( 16, get_post_geodata( $args['ID'], 'zoom' ) );
+		$this->assertSame( '1', get_post_meta( $args['ID'], 'geo_public', true ) );
+	}
+
+	/**
+	 * Without a geo provider, or when its lookup fails, the location is still saved.
+	 */
+	public function test_set_location_without_geo_provider() {
+		update_option( 'sloc_geo_provider', 'missing' );
+		$args = $this->micropub_post(
+			array(
+				'geo_latitude'  => self::LAT,
+				'geo_longitude' => self::LNG,
+			)
+		);
+		Location_Plugins::micropub_set_location( array( 'properties' => array() ), $args );
+		$this->assertSame( 'public', get_post_geodata( $args['ID'], 'visibility' ) );
+		$this->assertSame( '', get_post_meta( $args['ID'], 'geo_address', true ) );
+		$this->assertFalse( Location_Taxonomy::get_post_location( $args['ID'] ) );
+
+		update_option( 'sloc_geo_provider', 'sloc_test' );
+		Geo_Provider_Sloc_Test::$reverse = new WP_Error( 'invalid_response', 'Lookup failed' );
+		$args                            = $this->micropub_post(
+			array(
+				'geo_latitude'  => self::LAT,
+				'geo_longitude' => self::LNG,
+			)
+		);
+		Location_Plugins::micropub_set_location( array( 'properties' => array() ), $args );
+		$this->assertSame( 'public', get_post_geodata( $args['ID'], 'visibility' ) );
+		$this->assertSame( '', get_post_meta( $args['ID'], 'geo_address', true ) );
+	}
+
+	/**
+	 * A geo query without usable coordinates returns the response unchanged.
+	 */
+	public function test_query_geo_without_coordinates() {
+		$resp   = array( 'resp' );
+		$inputs = array(
+			'no query'         => array(),
+			'no coordinates'   => array( 'q' => 'geo' ),
+			'latitude only'    => array(
+				'q'   => 'geo',
+				'lat' => '39.95',
+			),
+			'one-part geo URI' => array(
+				'q'   => 'geo',
+				'uri' => 'geo:39.95',
+			),
+			'not numbers'      => array(
+				'q'   => 'geo',
+				'lat' => 'north',
+				'lon' => 'west',
+			),
+		);
+		foreach ( $inputs as $label => $input ) {
+			$this->assertSame( $resp, Location_Plugins::micropub_query_geo( $resp, $input ), $label );
+		}
+	}
+
+	/**
+	 * A geo query returns the place, nearby venues and the visibility to use.
+	 */
+	public function test_query_geo() {
+		update_option( 'sloc_venue_provider', 'sloc_test' );
+		update_option( 'geo_public', 1 );
+		$result = Location_Plugins::micropub_query_geo(
+			array(),
+			array(
+				'q'   => 'geo',
+				'uri' => 'geo:' . self::LAT . ',' . self::LNG . ';u=35',
+			)
+		);
+		$this->assertSame( array( self::LAT, self::LNG ), Geo_Provider_Sloc_Test::$last );
+		$this->assertSame( 'Philadelphia City Hall', $result['geo']['label'] );
+		$this->assertSame( self::LAT, $result['geo']['latitude'] );
+		$this->assertSame( self::LNG, $result['geo']['longitude'] );
+		$this->assertSame( 'public', $result['geo']['visibility'] );
+		$this->assertSame( 'Test Cafe', $result['venues']['name'] );
+		$this->assertEquals( self::LAT, $result['venues']['latitude'] );
+
+		// The site default applies.
+		update_option( 'geo_public', 2 );
+		$result = Location_Plugins::micropub_query_geo(
+			array(),
+			array(
+				'q'   => 'geo',
+				'lat' => self::LAT,
+				'lon' => self::LNG,
+			)
+		);
+		$this->assertSame( 'protected', $result['geo']['visibility'] );
+	}
+
+	/**
+	 * A geo query at latitude 0 or a whole-number longitude is answered.
+	 */
+	public function test_query_geo_whole_numbers() {
+		$this->markTestSkipped( 'Known bug, see #306' );
+		$result = Location_Plugins::micropub_query_geo(
+			array(),
+			array(
+				'q'   => 'geo',
+				'lat' => '0',
+				'lon' => '10',
+			)
+		);
+		$this->assertSame( 0.0, $result['geo']['latitude'] );
+		$this->assertSame( 10.0, $result['geo']['longitude'] );
+	}
+
+	/**
+	 * A geo query at a private venue suggests protected, so the place shows without the coordinates.
+	 */
+	public function test_query_geo_private_venue() {
+		update_option( 'geo_public', 1 );
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		set_post_geodata( $venue_id, 'visibility', 'private' );
+		$at_venue = function () use ( $venue_id ) {
+			return $venue_id;
+		};
+		add_filter( 'pre_at_venue', $at_venue );
+		$result = Location_Plugins::micropub_query_geo(
+			array(),
+			array(
+				'q'   => 'geo',
+				'lat' => self::LAT,
+				'lon' => self::LNG,
+			)
+		);
+		remove_filter( 'pre_at_venue', $at_venue );
+		$this->assertSame( 'protected', $result['geo']['visibility'] );
+	}
+
+	/**
+	 * A geo query without geo or venue providers still answers with the coordinates.
+	 */
+	public function test_query_geo_without_providers() {
+		update_option( 'sloc_geo_provider', 'missing' );
+		update_option( 'sloc_venue_provider', 'missing' );
+		$result = Location_Plugins::micropub_query_geo(
+			array(),
+			array(
+				'q'   => 'geo',
+				'lat' => self::LAT,
+				'lon' => self::LNG,
+			)
+		);
+		$this->assertNull( $result['geo']['label'] );
+		$this->assertSame( array(), $result['venues'] );
+		$this->assertSame( self::LAT, $result['geo']['latitude'] );
+	}
+
+	/**
 	 * Only geo queries are answered.
 	 */
 	public function test_query_other() {
