@@ -43,7 +43,7 @@ class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 	/**
 	 * Return an address.
 	 *
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @return array|WP_Error $reverse microformats2 address elements in an array.
 	 */
 	public function reverse_lookup() {
 		if ( empty( $this->api ) ) {
@@ -61,18 +61,107 @@ class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
+		if ( empty( $json['features'][0]['properties'] ) ) {
+			return new WP_Error( 'invalid_response', __( 'No results', 'simple-location' ) );
+		}
 		return $this->address_to_mf( $json );
+	}
+
+	/**
+	 * Convert a Geoapify result to mf2.
+	 *
+	 * Geoapify returns GeoJSON like Pelias, but with its own property names, and sorts results by relevance.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param  array $json Raw JSON, a GeoJSON feature collection.
+	 * @return array $reverse microformats2 address elements in an array.
+	 */
+	protected function address_to_mf( $json ) {
+		$address = $json['features'][0]['properties'];
+
+		$number       = self::ifnot( $address, array( 'housenumber' ) );
+		$street       = self::ifnot( $address, array( 'street' ) );
+		$country_code = strtoupper( (string) ifset( $address['country_code'] ) );
+
+		// Adjust position of house number/name based on country practice.
+		if ( self::house_number( $country_code ) ) {
+			$street_address = $number . ' ' . $street;
+		} else {
+			$street_address = $street . ' ' . $number;
+		}
+
+		$addr = array(
+			'name'             => ifset( $address['name'] ),
+			'street-address'   => trim( $street_address ),
+			'street'           => $street,
+			'street-number'    => $number,
+			'extended-address' => self::ifnot(
+				$address,
+				array(
+					'suburb',
+					'district',
+					'quarter',
+				)
+			),
+			'locality'         => self::ifnot(
+				$address,
+				array(
+					'city',
+					'town',
+					'village',
+					'hamlet',
+				)
+			),
+			'region'           => self::ifnot(
+				$address,
+				array(
+					'state',
+					'county',
+				)
+			),
+			'region-code'      => self::ifnot(
+				$address,
+				array(
+					'state_code',
+					'county_code',
+				)
+			),
+			'country-name'     => ifset( $address['country'] ),
+			'country-code'     => $country_code,
+			'postal-code'      => ifset( $address['postcode'] ),
+			'latitude'         => $this->latitude,
+			'longitude'        => $this->longitude,
+		);
+
+		if ( WP_DEBUG ) {
+			$addr['raw'] = $json;
+		}
+
+		$addr = array_filter( $addr );
+		if ( ! array_key_exists( 'country-code', $addr ) && array_key_exists( 'country-name', $addr ) ) {
+			$addr['country-code'] = self::country_code( $addr['country-name'] );
+		}
+		if ( ! array_key_exists( 'region-code', $addr ) && array_key_exists( 'region', $addr ) && array_key_exists( 'country-code', $addr ) ) {
+			$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] );
+		}
+		$addr['display-name'] = $this->display_name( $addr );
+		$tz                   = $this->timezone();
+		if ( $tz ) {
+			$addr = array_merge( $addr, $tz );
+		}
+		return array_filter( $addr );
 	}
 
 	/**
 	 * Geocode address.
 	 *
 	 * @param  string $address String representation of location.
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @return array|WP_Error $reverse microformats2 address elements in an array.
 	 */
 	public function geocode( $address ) {
 		if ( empty( $this->api ) ) {
-			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for OpenRoute', 'simple-location' ) );
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for GeoApify', 'simple-location' ) );
 		}
 
 		$args = array(
@@ -87,14 +176,14 @@ class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-
-		if ( wp_is_numeric_array( $json ) ) {
-			$json = $json[0];
+		if ( empty( $json['features'][0]['geometry']['coordinates'] ) ) {
+			return new WP_Error( 'invalid_response', __( 'No results', 'simple-location' ) );
 		}
-		$address             = $json['features'][0];
+
+		$coordinates         = $json['features'][0]['geometry']['coordinates'];
 		$return              = $this->address_to_mf( $json );
-		$return['latitude']  = $address['geometry']['coordinates'][1];
-		$return['longitude'] = $address['geometry']['coordinates'][0];
+		$return['latitude']  = $coordinates[1];
+		$return['longitude'] = $coordinates[0];
 		return array_filter( $return );
 	}
 }

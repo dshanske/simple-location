@@ -344,6 +344,68 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Geoapify reverse geocoding parses Geoapify's own property names.
+	 */
+	public function test_geoapify_reverse() {
+		$fixture    = $this->fixture( 'geo/geoapify-reverse.json' );
+		$properties = $fixture['features'][0]['properties'];
+		$this->mock_http( array( 'api.geoapify.com/v1/geocode/reverse/' => array( 'body' => $fixture ) ) );
+		$addr    = $this->provider( 'Geo_Provider_GeoApify', array( 'api' => 'ga-key' ) )->reverse_lookup();
+		$request = $this->last_request();
+		$this->assertSame( 'https://api.geoapify.com/v1/geocode/reverse/', $request['base'] );
+		$this->assertSame( 'ga-key', $request['query']['apiKey'] );
+		$this->assertEquals( self::LAT, $request['query']['lat'] );
+		$this->assertEquals( self::LNG, $request['query']['lon'] );
+
+		$this->assertCityHall( $addr );
+		$this->assertSame( $properties['housenumber'] . ' ' . $properties['street'], $addr['street-address'] );
+		$this->assertSame( $properties['name'], $addr['name'] );
+		$this->assertSame( $properties['suburb'], $addr['extended-address'] );
+		$this->assertSame( $properties['country'], $addr['country-name'] );
+		$this->assertSame( $properties['name'] . ', Philadelphia, PA, US', $addr['display-name'] );
+	}
+
+	/**
+	 * Geoapify looks up a region code from the region name when there's no state code.
+	 */
+	public function test_geoapify_reverse_without_state_code() {
+		$fixture = $this->fixture( 'geo/geoapify-reverse.json' );
+		unset( $fixture['features'][0]['properties']['state_code'] );
+		$this->mock_http( array( 'api.geoapify.com' => array( 'body' => $fixture ) ) );
+		$addr = $this->provider( 'Geo_Provider_GeoApify', array( 'api' => 'ga-key' ) )->reverse_lookup();
+		$this->assertSame( 'PA', $addr['region-code'] );
+	}
+
+	/**
+	 * Geoapify forward geocoding takes the coordinates from the first feature.
+	 */
+	public function test_geoapify_geocode() {
+		$error = ( new Geo_Provider_GeoApify( array( 'api' => '' ) ) )->geocode( 'x' );
+		$this->assertSame( 'missing_api_key', $error->get_error_code() );
+		$this->assertStringContainsString( 'GeoApify', $error->get_error_message() );
+
+		$fixture = $this->fixture( 'geo/geoapify-search.json' );
+		$this->mock_http( array( 'api.geoapify.com/v1/geocode/search' => array( 'body' => $fixture ) ) );
+		$result  = ( new Geo_Provider_GeoApify( array( 'api' => 'ga-key' ) ) )->geocode( 'City Hall, Philadelphia' );
+		$request = $this->last_request();
+		$this->assertSame( 'https://api.geoapify.com/v1/geocode/search', $request['base'] );
+		$this->assertSame( 'City Hall, Philadelphia', $request['query']['text'] );
+		$this->assertSame( $fixture['features'][0]['geometry']['coordinates'][1], $result['latitude'] );
+		$this->assertSame( $fixture['features'][0]['geometry']['coordinates'][0], $result['longitude'] );
+		$this->assertSame( 'Philadelphia', $result['locality'] );
+		$this->assertSame( 'US', $result['country-code'] );
+	}
+
+	/**
+	 * Geoapify responses without features are errors.
+	 */
+	public function test_geoapify_no_results() {
+		$this->mock_http( array( 'api.geoapify.com' => array( 'body' => $this->fixture( 'geo/geoapify-empty.json' ) ) ) );
+		$this->assertSame( 'invalid_response', $this->provider( 'Geo_Provider_GeoApify', array( 'api' => 'ga-key' ) )->reverse_lookup()->get_error_code() );
+		$this->assertSame( 'invalid_response', ( new Geo_Provider_GeoApify( array( 'api' => 'ga-key' ) ) )->geocode( 'nowhere' )->get_error_code() );
+	}
+
+	/**
 	 * OpenRoute uses the Pelias format at its own endpoint.
 	 */
 	public function test_openroute() {

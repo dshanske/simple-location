@@ -47,6 +47,9 @@ Philadelphia City Hall: latitude `39.9524`, longitude `-75.1636`; forward-geocod
 | `mapquest-no-locations.json` | A result with no `locations` | Hand-built |
 | `pelias-reverse.json` | `GET {Pelias URL}/reverse/?point.lat=39.9524&point.lon=-75.1636&size=1&api_key=…` | Hand-built from docs |
 | `pelias-search.json` | `GET {Pelias URL}/search/?text=City Hall&api_key=…` | Hand-built from docs |
+| `geoapify-reverse.json` | `GET https://api.geoapify.com/v1/geocode/reverse/?apiKey=…&lat=39.9524&lon=-75.1636&type=building` | Hand-built from docs |
+| `geoapify-search.json` | `GET https://api.geoapify.com/v1/geocode/search?text=City Hall, Philadelphia&apiKey=…` | Hand-built from docs |
+| `geoapify-empty.json` | A Geoapify request that finds nothing (`features` is empty) | Hand-built from docs |
 | `openroute-reverse.json` | `GET https://api.openrouteservice.org/geocode/reverse?point.lat=39.9524&point.lon=-75.1636&api_key=…` | Hand-built from docs |
 | `openroute-search.json` | `GET https://api.openrouteservice.org/geocode/search?text=City Hall&api_key=…` | Hand-built from docs |
 | `here-revgeocode.json` | `GET https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=…&at=39.9524,-75.1636&lang=en-US` (also used for `https://geocode.search.hereapi.com/v1/geocode?q=City Hall, Philadelphia`) | Hand-built from docs |
