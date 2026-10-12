@@ -705,50 +705,67 @@ class Geo_Base {
 	 * @since 1.0.0
 	 */
 	public static function rest_location() {
-		register_rest_field(
-			array( 'post', 'comment', 'user', 'term' ),
-			'latitude',
-			array(
-				'get_callback' => array( __CLASS__, 'rest_get_latitude' ),
-				'schema'       => array(
-					'latitude' => __( 'Latitude', 'simple-location' ),
-					'type'     => 'float',
-				),
-			)
+		$fields = array(
+			'latitude'    => array(
+				'callback'    => 'rest_get_latitude',
+				'description' => __( 'Latitude', 'simple-location' ),
+				'type'        => 'number',
+			),
+			'longitude'   => array(
+				'callback'    => 'rest_get_longitude',
+				'description' => __( 'Longitude', 'simple-location' ),
+				'type'        => 'number',
+			),
+			'geo_address' => array(
+				'callback'    => 'rest_get_address',
+				'description' => __( 'Location', 'simple-location' ),
+				'type'        => 'string',
+			),
+			'timezone'    => array(
+				'callback'    => 'rest_get_timezone',
+				'description' => __( 'Last Reported Timezone', 'simple-location' ),
+				'type'        => 'string',
+			),
 		);
-		register_rest_field(
-			array( 'post', 'comment', 'user', 'term' ),
-			'longitude',
-			array(
-				'get_callback' => array( __CLASS__, 'rest_get_longitude' ),
-				'schema'       => array(
-					'longitude' => __( 'Longitude', 'simple-location' ),
-					'type'      => 'float',
-				),
-			)
-		);
-		register_rest_field(
-			array( 'post', 'comment', 'term', 'user' ),
-			'geo_address',
-			array(
-				'get_callback' => array( __CLASS__, 'rest_get_address' ),
-				'schema'       => array(
-					'geo_address' => __( 'Location', 'simple-location' ),
-					'type'        => 'string',
-				),
-			)
-		);
-		register_rest_field(
-			array( 'post', 'comment', 'term', 'user' ),
-			'timezone',
-			array(
-				'get_callback' => array( __CLASS__, 'rest_get_timezone' ),
-				'schema'       => array(
-					'geo_public' => __( 'Last Reported Timezone', 'simple-location' ),
-					'type'       => 'string',
-				),
-			)
-		);
+		foreach ( $fields as $name => $field ) {
+			register_rest_field(
+				array( 'post', 'comment', 'user' ),
+				$name,
+				array(
+					'get_callback' => array( __CLASS__, $field['callback'] ),
+					'schema'       => array(
+						'description' => $field['description'],
+						'type'        => $field['type'],
+						'context'     => array( 'view', 'edit', 'embed' ),
+						'readonly'    => true,
+					),
+				)
+			);
+		}
+	}
+
+	/**
+	 * Returns the location data for a REST field callback.
+	 *
+	 * WordPress passes field callbacks the prepared response array, which holds the ID; objects are accepted too.
+	 * A user's location is their last reported one, so it is only returned to that user or someone who can edit them.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array|object $object      The prepared response array, or the object.
+	 * @param string       $object_type Object type: post, comment or user.
+	 * @return array|null Location data, or null if there is none or it may not be shown.
+	 */
+	protected static function rest_geodata( $object, $object_type ) {
+		$id = ( is_array( $object ) && isset( $object['id'] ) ) ? (int) $object['id'] : (int) sloc_get_id_from_object( $object );
+		if ( ! $id ) {
+			return null;
+		}
+		if ( 'user' === $object_type && get_current_user_id() !== $id && ! current_user_can( 'edit_user', $id ) ) {
+			return null;
+		}
+		$geodata = Geo_Data::get_geodata( $object_type, $id );
+		return is_array( $geodata ) ? $geodata : null;
 	}
 
 	/**
@@ -758,21 +775,20 @@ class Geo_Base {
 	 * @param string          $attr Not Used but Required by Filter.
 	 * @param WP_Rest_Request $request REST Request Object.
 	 * @param string          $object_type Object Type.
-	 * @return string Return data.
+	 * @return float|string The coordinate, or an empty string if there is none or it isn't public.
 	 *
 	 * @since 1.0.0
 	 */
 	public static function rest_get_longitude( $object, $attr, $request, $object_type ) {
-		$id      = sloc_get_id_from_object( $object );
-		$geodata = Geo_Data::get_geodata( $object_type, $id );
+		$geodata = self::rest_geodata( $object, $object_type );
 		if ( ! is_array( $geodata ) ) {
 			return '';
 		}
-		if ( empty( $geodata['latitude'] ) ) {
+		if ( empty( $geodata['longitude'] ) ) {
 			return '';
 		}
 		if ( 'public' === $geodata['visibility'] ) {
-			return $geodata['longitude'];
+			return (float) $geodata['longitude'];
 		}
 		return '';
 	}
@@ -784,14 +800,12 @@ class Geo_Base {
 	 * @param string          $attr Not used but required by filter.
 	 * @param WP_Rest_Request $request REST Request Object.
 	 * @param string          $object_type Object Type.
-	 * @return string Return data.
+	 * @return float|string The coordinate, or an empty string if there is none or it isn't public.
 	 *
 	 * @since 1.0.0
 	 */
 	public static function rest_get_latitude( $object, $attr, $request, $object_type ) {
-		$id      = sloc_get_id_from_object( $object );
-		$geodata = Geo_Data::get_geodata( $object_type, $id );
-
+		$geodata = self::rest_geodata( $object, $object_type );
 		if ( ! is_array( $geodata ) ) {
 			return '';
 		}
@@ -799,7 +813,7 @@ class Geo_Base {
 			return '';
 		}
 		if ( 'public' === $geodata['visibility'] ) {
-			return $geodata['latitude'];
+			return (float) $geodata['latitude'];
 		}
 		return '';
 	}
@@ -817,8 +831,7 @@ class Geo_Base {
 	 * @since 1.0.0
 	 */
 	public static function rest_get_address( $object, $attr, $request, $object_type ) {
-		$id      = sloc_get_id_from_object( $object, $object_type );
-		$geodata = Geo_Data::get_geodata( $object_type, $id );
+		$geodata = self::rest_geodata( $object, $object_type );
 
 		if ( ! is_array( $geodata ) ) {
 			return '';
@@ -845,8 +858,7 @@ class Geo_Base {
 	 * @since 1.0.0
 	 */
 	public static function rest_get_timezone( $object, $attr, $request, $object_type ) {
-		$id      = sloc_get_id_from_object( $object, $object_type );
-		$geodata = Geo_Data::get_geodata( $object_type, $id );
+		$geodata = self::rest_geodata( $object, $object_type );
 
 		if ( ! is_array( $geodata ) ) {
 			return '';

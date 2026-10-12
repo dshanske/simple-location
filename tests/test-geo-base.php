@@ -560,7 +560,7 @@ class GeoBaseTest extends WP_UnitTestCase {
 	public function test_rest_fields_registered() {
 		global $wp_rest_additional_fields;
 		Geo_Base::rest_location();
-		foreach ( array( 'post', 'comment', 'user', 'term' ) as $type ) {
+		foreach ( array( 'post', 'comment', 'user' ) as $type ) {
 			foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
 				$this->assertArrayHasKey( $field, $wp_rest_additional_fields[ $type ], "$type $field" );
 			}
@@ -572,7 +572,6 @@ class GeoBaseTest extends WP_UnitTestCase {
 	 */
 	public function test_rest_get_timezone() {
 		update_option( 'timezone_string', 'America/Toronto' );
-		// Post objects are passed because REST passes an array, which is #312.
 		$post = get_post( $this->post_with_location() );
 		$this->assertSame( 'America/Toronto', Geo_Base::rest_get_timezone( $post, 'timezone', null, 'post' ) );
 
