@@ -234,7 +234,6 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 	 * WordPress passes the prepared response array to REST field callbacks, so the tests do the same.
 	 */
 	public function test_rest_fields_public_and_protected() {
-		$this->markTestSkipped( 'Known bug, see #312' );
 		$public    = array( 'id' => $this->post_with_location( 'public' ) );
 		$protected = array( 'id' => $this->post_with_location( 'protected' ) );
 
@@ -251,7 +250,6 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 	 * A public location appears in the posts endpoint.
 	 */
 	public function test_rest_fields_through_rest_api() {
-		$this->markTestSkipped( 'Known bug, see #312' );
 		$post_id  = $this->post_with_location( 'public' );
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/posts/' . $post_id );
 		$response = rest_get_server()->dispatch( $request );
@@ -259,6 +257,84 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 		$this->assertEquals( 45.01, $data['latitude'] );
 		$this->assertEquals( -75.44, $data['longitude'] );
 		$this->assertSame( 'Test Location', $data['geo_address'] );
+	}
+
+	/**
+	 * A protected location shows only its address through the REST API, for posts and comments.
+	 */
+	public function test_rest_fields_protected_through_rest_api() {
+		$post_id = $this->post_with_location( 'protected' );
+		$data    = rest_get_server()->dispatch( new WP_REST_Request( 'GET', '/wp/v2/posts/' . $post_id ) )->get_data();
+		$this->assertArrayNotHasKey( 'latitude', $data );
+		$this->assertArrayNotHasKey( 'longitude', $data );
+		$this->assertSame( 'Test Location', $data['geo_address'] );
+
+		$comment_id = self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => 1,
+			)
+		);
+		set_comment_geodata(
+			$comment_id,
+			'',
+			array(
+				'latitude'   => 45.01,
+				'longitude'  => -75.44,
+				'address'    => 'Comment Place',
+				'visibility' => 'public',
+			)
+		);
+		$data = rest_get_server()->dispatch( new WP_REST_Request( 'GET', '/wp/v2/comments/' . $comment_id ) )->get_data();
+		$this->assertSame( 45.01, $data['latitude'] );
+		$this->assertSame( 'Comment Place', $data['geo_address'] );
+	}
+
+	/**
+	 * A user's location is only in the REST API for that user or someone who can edit them.
+	 */
+	public function test_rest_fields_user() {
+		$user_id = self::factory()->user->create( array( 'role' => 'author' ) );
+		self::factory()->post->create( array( 'post_author' => $user_id ) );
+		set_user_geodata(
+			$user_id,
+			'',
+			array(
+				'latitude'   => 45.01,
+				'longitude'  => -75.44,
+				'address'    => 'Home Town',
+				'visibility' => 'public',
+			)
+		);
+		$fields   = function () use ( $user_id ) {
+			$data = rest_get_server()->dispatch( new WP_REST_Request( 'GET', '/wp/v2/users/' . $user_id ) )->get_data();
+			return array_intersect_key( $data, array_flip( array( 'latitude', 'longitude', 'geo_address' ) ) );
+		};
+		$expected = array(
+			'latitude'    => 45.01,
+			'longitude'   => -75.44,
+			'geo_address' => 'Home Town',
+		);
+
+		wp_set_current_user( 0 );
+		$this->assertSame( array(), $fields(), 'Visitors' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$this->assertSame( array(), $fields(), 'Editors' );
+		wp_set_current_user( $user_id );
+		$this->assertEquals( $expected, $fields(), 'The user' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertEquals( $expected, $fields(), 'Administrators' );
+	}
+
+	/**
+	 * The REST fields have a valid schema.
+	 */
+	public function test_rest_fields_schema() {
+		$schema = ( new WP_REST_Posts_Controller( 'post' ) )->get_public_item_schema()['properties'];
+		$this->assertSame( 'number', $schema['latitude']['type'] );
+		$this->assertSame( 'Latitude', $schema['latitude']['description'] );
+		$this->assertSame( 'string', $schema['timezone']['type'] );
+		$this->assertTrue( $schema['geo_address']['readonly'] );
 	}
 
 	/**
