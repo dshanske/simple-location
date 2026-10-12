@@ -49,9 +49,11 @@ Philadelphia City Hall: latitude `39.9524`, longitude `-75.1636`; forward-geocod
 | `pelias-search.json` | `GET {Pelias URL}/search/?text=City Hall&api_key=…` | Hand-built from docs |
 | `openroute-reverse.json` | `GET https://api.openrouteservice.org/geocode/reverse?point.lat=39.9524&point.lon=-75.1636&api_key=…` | Hand-built from docs |
 | `openroute-search.json` | `GET https://api.openrouteservice.org/geocode/search?text=City Hall&api_key=…` | Hand-built from docs |
+| `here-revgeocode.json` | `GET https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=…&at=39.9524,-75.1636&lang=en-US` (also used for `https://geocode.search.hereapi.com/v1/geocode?q=City Hall, Philadelphia`) | Hand-built from docs |
+| `here-empty.json` | A HERE request that finds nothing (`items` is empty) | Hand-built from docs |
 | `geonames-error.json` | `GET https://secure.geonames.org/search?q=Philadelphia&type=json&style=FULL&username=…` with an account that isn't enabled | Hand-built from docs |
 
-HERE (#338), Geoapify (#339) and GeoNames parsing (#321, #343) have no response fixtures yet; add them
+Geoapify (#339) and GeoNames parsing (#321, #343) have no response fixtures yet; add them
 with the fixes.
 
 ## Weather providers (`weather/`)

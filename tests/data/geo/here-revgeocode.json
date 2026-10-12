@@ -1,0 +1,40 @@
+{
+	"items": [
+		{
+			"title": "1400 John F Kennedy Blvd, Philadelphia, PA 19107-3200, United States",
+			"id": "here:af:streetsection:hand-built-fixture",
+			"resultType": "houseNumber",
+			"houseNumberType": "PA",
+			"address": {
+				"label": "1400 John F Kennedy Blvd, Philadelphia, PA 19107-3200, United States",
+				"countryCode": "USA",
+				"countryName": "United States",
+				"stateCode": "PA",
+				"state": "Pennsylvania",
+				"county": "Philadelphia",
+				"city": "Philadelphia",
+				"district": "Center City",
+				"street": "John F Kennedy Blvd",
+				"postalCode": "19107-3200",
+				"houseNumber": "1400"
+			},
+			"position": {
+				"lat": 39.95238,
+				"lng": -75.16362
+			},
+			"access": [
+				{
+					"lat": 39.95256,
+					"lng": -75.16361
+				}
+			],
+			"distance": 13,
+			"mapView": {
+				"west": -75.16479,
+				"south": 39.95148,
+				"east": -75.16245,
+				"north": 39.95328
+			}
+		}
+	]
+}

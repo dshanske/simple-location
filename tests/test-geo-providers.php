@@ -363,12 +363,80 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * HERE reverse geocoding converts the ISO3 country code and puts the house number first in the US.
+	 */
+	public function test_here_reverse() {
+		$error = $this->provider( 'Geo_Provider_Here', array( 'api' => '' ) )->reverse_lookup();
+		$this->assertSame( 'missing_api_key', $error->get_error_code() );
+		$this->assertStringContainsString( 'HERE', $error->get_error_message() );
+
+		$fixture = $this->fixture( 'geo/here-revgeocode.json' );
+		$address = $fixture['items'][0]['address'];
+		$this->mock_http( array( 'revgeocode.search.hereapi.com/v1/revgeocode' => array( 'body' => $fixture ) ) );
+		$addr    = $this->provider( 'Geo_Provider_Here', array( 'api' => 'here-key' ) )->reverse_lookup();
+		$request = $this->last_request();
+		$this->assertSame( 'https://revgeocode.search.hereapi.com/v1/revgeocode', $request['base'] );
+		$this->assertSame( 'here-key', $request['query']['apiKey'] );
+		$this->assertSame( self::LAT . ',' . self::LNG, $request['query']['at'] );
+
+		$this->assertCityHall( $addr );
+		$this->assertSame( $address['houseNumber'] . ' ' . $address['street'], $addr['street-address'] );
+		$this->assertSame( $address['countryName'], $addr['country-name'] );
+		$this->assertSame( $address['district'], $addr['extended-address'] );
+		$this->assertSame( $fixture['items'][0]['title'], $addr['name'] );
+	}
+
+	/**
+	 * HERE puts the house number after the street where that's the local practice, without stray spaces.
+	 */
+	public function test_here_reverse_street_order() {
+		$fixture = $this->fixture( 'geo/here-revgeocode.json' );
+
+		// Germany puts the house number after the street.
+		$fixture['items'][0]['address']['countryCode'] = 'DEU';
+		$this->mock_http( array( 'hereapi.com' => array( 'body' => $fixture ) ) );
+		$addr = $this->provider( 'Geo_Provider_Here', array( 'api' => 'here-key' ) )->reverse_lookup();
+		$this->assertSame( 'John F Kennedy Blvd 1400', $addr['street-address'] );
+
+		unset( $fixture['items'][0]['address']['houseNumber'] );
+		$this->mock_http( array( 'hereapi.com' => array( 'body' => $fixture ) ) );
+		$addr = $this->provider( 'Geo_Provider_Here', array( 'api' => 'here-key' ) )->reverse_lookup();
+		$this->assertSame( 'John F Kennedy Blvd', $addr['street-address'] );
+	}
+
+	/**
+	 * HERE forward geocoding uses the geocode host and takes the coordinates from the first item.
+	 */
+	public function test_here_geocode() {
+		$error = ( new Geo_Provider_Here( array( 'api' => '' ) ) )->geocode( 'x' );
+		$this->assertSame( 'missing_api_key', $error->get_error_code() );
+		$this->assertStringContainsString( 'HERE', $error->get_error_message() );
+
+		$fixture = $this->fixture( 'geo/here-revgeocode.json' );
+		$this->mock_http( array( 'geocode.search.hereapi.com/v1/geocode' => array( 'body' => $fixture ) ) );
+		$result  = ( new Geo_Provider_Here( array( 'api' => 'here-key' ) ) )->geocode( 'City Hall, Philadelphia' );
+		$request = $this->last_request();
+		$this->assertSame( 'https://geocode.search.hereapi.com/v1/geocode', $request['base'] );
+		$this->assertSame( 'City Hall, Philadelphia', $request['query']['q'] );
+		$this->assertSame( $fixture['items'][0]['position']['lat'], $result['latitude'] );
+		$this->assertSame( $fixture['items'][0]['position']['lng'], $result['longitude'] );
+		$this->assertSame( 'Philadelphia', $result['locality'] );
+	}
+
+	/**
+	 * HERE responses without items are errors.
+	 */
+	public function test_here_no_results() {
+		$this->mock_http( array( 'hereapi.com' => array( 'body' => $this->fixture( 'geo/here-empty.json' ) ) ) );
+		$this->assertSame( 'invalid_response', $this->provider( 'Geo_Provider_Here', array( 'api' => 'here-key' ) )->reverse_lookup()->get_error_code() );
+		$this->assertSame( 'invalid_response', ( new Geo_Provider_Here( array( 'api' => 'here-key' ) ) )->geocode( 'nowhere' )->get_error_code() );
+	}
+
+	/**
 	 * Providers whose parsing is blocked by open issues still refuse to run without credentials.
 	 */
 	public function test_missing_credentials() {
 		$this->mock_http( array() );
-		$this->assertSame( 'missing_api_key', $this->provider( 'Geo_Provider_Here', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
-		$this->assertSame( 'missing_api_key', ( new Geo_Provider_Here( array( 'api' => '' ) ) )->geocode( 'x' )->get_error_code() );
 		$this->assertSame( 'missing_api_key', $this->provider( 'Geo_Provider_GeoApify', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
 		$this->assertSame( 'missing_api_key', ( new Geo_Provider_GeoApify( array( 'api' => '' ) ) )->geocode( 'x' )->get_error_code() );
 		$this->assertSame( 'missing_api_key', ( new Geo_Provider_Google( array( 'api' => '' ) ) )->geocode( 'x' )->get_error_code() );
