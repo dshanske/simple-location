@@ -1081,11 +1081,7 @@ class Geo_Base {
 		}
 
 		if ( array_key_exists( 'timezone', $data ) ) {
-			try {
-				$timezone = timezone_open( $data['timezone'] );
-			} catch(Exception $e) {
-				$timezone = wp_timezone();
-			}
+			$timezone = Loc_Timezone::timezone_from_string( $data['timezone'] );
 			if ( $timezone && ( ! Loc_Timezone::compare_timezones( wp_timezone(), $timezone  ) ) ) {
 				$data['timezone'] = $timezone->getName();
 			} else {
