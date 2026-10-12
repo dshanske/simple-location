@@ -146,6 +146,22 @@ class TimezoneTest extends WP_UnitTestCase {
 		// Offsets saved by the timezone dropdown work.
 		$post_id = $this->post_with_timezone( '+05:30' );
 		$this->assertSame( '+05:30', Loc_Timezone::get_timezone( $post_id )->getName() );
+
+		// An unknown timezone is ignored, so the post date uses the site timezone.
+		$post_id = $this->post_with_timezone( 'Not/AZone' );
+		$this->assertNull( Loc_Timezone::get_timezone( $post_id ) );
+		$this->assertSame( '08:00', get_the_time( '', $post_id ) );
+	}
+
+	/**
+	 * Timezone strings become timezones, and invalid ones become false without an error.
+	 */
+	public function test_timezone_from_string() {
+		$this->assertSame( 'Europe/Paris', Loc_Timezone::timezone_from_string( 'Europe/Paris' )->getName() );
+		$this->assertSame( '+05:30', Loc_Timezone::timezone_from_string( ' +05:30 ' )->getName() );
+		foreach ( array( 'Not/AZone', '', '   ', null, false, 5, array( 'UTC' ) ) as $i => $value ) {
+			$this->assertFalse( Loc_Timezone::timezone_from_string( $value ), "Value $i" );
+		}
 	}
 
 	/**
@@ -226,6 +242,17 @@ class TimezoneTest extends WP_UnitTestCase {
 		);
 		$this->assertSame( 'Europe/Paris', get_post_meta( $post_id, 'geo_timezone', true ) );
 
+		// An invalid timezone from the Micropub client isn't saved.
+		$post_id = self::factory()->post->create();
+		Loc_Timezone::after_micropub(
+			array(),
+			array(
+				'ID'       => $post_id,
+				'timezone' => 'Not/AZone',
+			)
+		);
+		$this->assertSame( '', get_post_meta( $post_id, 'geo_timezone', true ) );
+
 		// Neither coordinates nor a timezone: nothing is saved.
 		$post_id = self::factory()->post->create();
 		Loc_Timezone::after_micropub( array(), array( 'ID' => $post_id ) );
@@ -301,6 +328,11 @@ class TimezoneTest extends WP_UnitTestCase {
 		$_POST['post_timezone'] = '+5:30';
 		Loc_Timezone::postbox_save_post_meta( $post_id );
 		$this->assertSame( '+05:30', get_post_meta( $post_id, 'geo_timezone', true ) );
+
+		// An invalid timezone removes the override.
+		$_POST['post_timezone'] = 'Not/AZone';
+		Loc_Timezone::postbox_save_post_meta( $post_id );
+		$this->assertSame( '', get_post_meta( $post_id, 'geo_timezone', true ) );
 
 		// Pages are checked with edit_page.
 		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );

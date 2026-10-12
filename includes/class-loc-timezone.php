@@ -19,6 +19,27 @@ class Loc_Timezone {
 	}
 
 	/**
+	 * Returns a timezone for a timezone identifier or UTC offset, or false if it isn't valid.
+	 *
+	 * Unlike `new DateTimeZone()` this doesn't throw, and unlike `timezone_open()` it doesn't warn.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param mixed $timezone Timezone identifier (e.g. Europe/Paris) or offset (e.g. +05:30).
+	 * @return DateTimeZone|false The timezone, or false if it isn't valid.
+	 */
+	public static function timezone_from_string( $timezone ) {
+		if ( ! is_string( $timezone ) || '' === trim( $timezone ) ) {
+			return false;
+		}
+		try {
+			return new DateTimeZone( trim( $timezone ) );
+		} catch ( Exception $e ) {
+			return false;
+		}
+	}
+
+	/**
 	 * Compare two DateTimeZone objects by offset
 	 *
 	 * @param DateTimeZone $tz1 First Timezone.
@@ -105,7 +126,10 @@ class Loc_Timezone {
 			return;
 		}
 		if ( $args && array_key_exists( 'timezone', $args ) ) {
-			update_post_meta( $args['ID'], 'geo_timezone', $args['timezone'] );
+			$timezone = self::timezone_from_string( $args['timezone'] );
+			if ( $timezone ) {
+				update_post_meta( $args['ID'], 'geo_timezone', $timezone->getName() );
+			}
 		}
 	}
 
@@ -321,7 +345,7 @@ class Loc_Timezone {
 				return;
 		}
 		if ( isset( $_POST['post_timezone'] ) ) {
-			$timezone = timezone_open( sanitize_text_field( $_POST['post_timezone'] ) );
+			$timezone = self::timezone_from_string( sanitize_text_field( wp_unslash( $_POST['post_timezone'] ) ) );
 			if ( $timezone && ! self::compare_timezones( $timezone, wp_timezone() ) ) {
 				update_post_meta( $post_id, 'geo_timezone', $timezone->getName() );
 				return;
@@ -381,7 +405,12 @@ class Loc_Timezone {
 			return null;
 		}
 
-		$timezone = new DateTimeZone( $timezone );
+		// An unknown timezone is ignored, so the site timezone applies.
+		$timezone = self::timezone_from_string( $timezone );
+		if ( ! $timezone ) {
+			wp_cache_set( $id, null, $type . '_timezone', DAY_IN_SECONDS );
+			return null;
+		}
 		wp_cache_set( $id, $timezone, $type . '_timezone', DAY_IN_SECONDS );
 		return $timezone;
 	}
