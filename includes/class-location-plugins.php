@@ -186,7 +186,7 @@ class Location_Plugins {
 			$published = new DateTime( 'now', wp_timezone() );
 		}
 
-		if ( isset( $meta['geo_longitude'] ) && $meta['geo_latitude'] ) {
+		if ( isset( $meta['geo_latitude'], $meta['geo_longitude'] ) ) {
 			// Always assume a checkin is to a building level option
 			if ( isset( $properties['checkin'] ) ) {
 				set_post_geodata( $args['ID'], 'zoom', 18 );
@@ -292,16 +292,20 @@ class Location_Plugins {
 				$term = Location_Taxonomy::get_location( $location, true );
 			}
 			Location_Taxonomy::set_location( $args['ID'], $term );
-		} elseif ( isset( $location['latitude'] ) && isset( $location['longitude'] ) ) {
+		} elseif ( isset( $location['latitude'] ) && isset( $location['longitude'] ) && is_object( $reverse ) ) {
 			$reverse->set( $location['latitude'], $location['longitude'] );
 			$reverse_adr = $reverse->reverse_lookup();
+			if ( ! is_array( $reverse_adr ) ) {
+				// The lookup failed; keep what the client sent.
+				$reverse_adr = array();
+			}
 			if ( isset( $meta['geo_altitude'] ) && 0 !== $meta['altitude'] && 'NaN' !== $meta['altitude'] ) {
 				unset( $meta['geo_altitude'] );
 			}
 			if ( ! isset( $meta['geo_altitude'] ) && isset( $meta['geo_latitude'] ) && isset( $meta['geo_longitude'] ) ) {
 				update_post_meta( $args['ID'], 'geo_altitude', $reverse->elevation() );
 			}
-			if ( ! $term ) {
+			if ( ! $term && ! empty( $reverse_adr ) ) {
 				$term = Location_Taxonomy::get_location( $reverse_adr, true );
 				Location_Taxonomy::set_location( $args['ID'], $term );
 			}
@@ -322,7 +326,7 @@ class Location_Plugins {
 	 */
 	public static function micropub_query_geo( $resp, $input ) {
 		// Only modify geo.
-		if ( 'geo' !== $input['q'] ) {
+		if ( ! isset( $input['q'] ) || 'geo' !== $input['q'] ) {
 			return $resp;
 		}
 		if ( isset( $input['uri'] ) && 'geo:' === substr( $input['uri'], 0, 4 ) ) {
@@ -333,33 +337,45 @@ class Location_Plugins {
 			 */
 			$geo          = explode( ':', substr( urldecode( $input['uri'] ), 4 ) );
 			$geo          = explode( ';', $geo[0] );
-			$coords       = explode( ',', $geo[0] );
-			$input['lat'] = trim( $coords[0] );
-			$input['lon'] = trim( $coords[1] );
+			$coords = explode( ',', $geo[0] );
+			if ( 2 <= count( $coords ) ) {
+				$input['lat'] = trim( $coords[0] );
+				$input['lon'] = trim( $coords[1] );
+			}
 		}
-		if ( ! isset( $input['lat'] ) && ! isset( $input['lon'] ) ) {
-			return $input;
+		if ( ! isset( $input['lat'], $input['lon'] ) || ! is_numeric( $input['lat'] ) || ! is_numeric( $input['lon'] ) ) {
+			return $resp;
 		}
+		$lat = round( (float) $input['lat'], 7 );
+		$lon = round( (float) $input['lon'], 7 );
 
 		$venues      = array();
 		$reverse_adr = array();
 		$reverse     = Loc_Config::geo_provider();
-		if ( $reverse ) {
-			$reverse->set( $input['lat'], $input['lon'] );
+		if ( is_object( $reverse ) ) {
+			$reverse->set( $lat, $lon );
 			$reverse_adr = $reverse->reverse_lookup();
 		}
-		$venue = Loc_Config::venue_provider( $provider );
-		if ( $venue ) {
-			$venue->set( $params );
+		$venue = Loc_Config::venue_provider();
+		if ( is_object( $venue ) ) {
+			$venue->set( $lat, $lon );
 			$venues = $venue->reverse_lookup();
 		}
+
+		// Use the site default, but at a private venue show the place without the coordinates (see Geo_Data::get_attachment_visibility()).
+		$visibility = Geo_Data::get_default_visibility();
+		$venue_id   = Post_Venue::at_venue( $lat, $lon );
+		if ( $venue_id && 'public' === $visibility && 'private' === get_post_geodata( $venue_id, 'visibility' ) ) {
+			$visibility = 'protected';
+		}
+
 		return array(
-			'venues' => $venues,
+			'venues' => is_array( $venues ) ? $venues : array(),
 			'geo'    => array(
-				'label'      => ifset( $reverse_adr['display-name'] ),
-				'latitude'   => $input['lat'],
-				'longitude'  => $input['lon'],
-				'visibility' => empty( $zone ) ? 'public' : 'protected',
+				'label'      => is_array( $reverse_adr ) && isset( $reverse_adr['display-name'] ) ? $reverse_adr['display-name'] : null,
+				'latitude'   => $lat,
+				'longitude'  => $lon,
+				'visibility' => $visibility,
 			),
 		);
 	}
