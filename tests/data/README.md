@@ -56,7 +56,7 @@ Philadelphia City Hall: latitude `39.9524`, longitude `-75.1636`; forward-geocod
 | `here-empty.json` | A HERE request that finds nothing (`items` is empty) | Hand-built from docs |
 | `geonames-error.json` | `GET https://secure.geonames.org/search?q=Philadelphia&type=json&style=FULL&username=…` with an account that isn't enabled | Hand-built from docs |
 
-Geoapify (#339) and GeoNames parsing (#321, #343) have no response fixtures yet; add them
+GeoNames parsing (#321, #343) has no response fixtures yet; add them
 with the fixes.
 
 ## Weather providers (`weather/`)
