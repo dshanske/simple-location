@@ -22,15 +22,24 @@ class REST_Geo {
 	/**
 	 * Trims, sanitizes, and converts coordinate parameters.
 	 *
-	 * The value must be a float stored as a string.
-	 *
-	 * @param string          $value   The value passed.
+	 * @param string|float    $value   The value passed.
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @param string          $param   The parameter that is being sanitized.
-	 * @return int|bool|WP_Error
+	 * @return float|WP_Error The coordinate, or an error if it is not a valid latitude or longitude.
+	 *
+	 * @since 5.0.26 Returns a WP_Error for invalid or out-of-range coordinates instead of false.
 	 */
 	public static function sanitize_coordinates( $value, $request, $param ) {
-		return clean_coordinate( $value );
+		$coordinate = clean_coordinate( $value, $param );
+		if ( false === $coordinate ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				/* translators: %s: Parameter name. */
+				sprintf( __( '%s is not a valid coordinate.', 'simple-location' ), $param ),
+				array( 'status' => 400 )
+			);
+		}
+		return $coordinate;
 	}
 
 	/**
@@ -39,12 +48,16 @@ class REST_Geo {
 	 * @param string          $value   The value passed.
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @param string          $param   The parameter that is being sanitized.
-	 * @return int|bool|WP_Error
+	 * @return float|null The number, or null if it is not numeric.
+	 *
+	 * @since 5.0.26 Numeric strings are converted instead of always being discarded.
 	 */
 	public static function sanitize_float( $value, $request, $param ) {
 		// Remove whitespace.
-		$value = trim( $value );
-		return is_float( $value ) ? floatval( $value ) : false;
+		if ( is_string( $value ) ) {
+			$value = trim( $value );
+		}
+		return is_numeric( $value ) ? (float) $value : null;
 	}
 
 	/**

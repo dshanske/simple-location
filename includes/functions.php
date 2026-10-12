@@ -496,21 +496,38 @@ function sloc_segment_rdp( $segment, $tolerance_squared ) {
 
 if ( ! function_exists( 'clean_coordinate' ) ) {
 	/**
-	 * Sanitize and round coordinates.
+	 * Sanitize, validate and round coordinates.
 	 *
-	 * @param string $coordinate Coordinate.
+	 * Whole numbers are accepted. Values outside the valid range are rejected: ±90 for a latitude,
+	 * and ±180 for a longitude or when the type is not given.
+	 *
+	 * @param string|int|float $coordinate Coordinate.
+	 * @param string           $type       Optional. 'latitude' (or 'lat', 'geo_latitude') or 'longitude'
+	 *                                     (or 'lng', 'lon', 'geo_longitude'). Meta keys are accepted
+	 *                                     because this is also a meta sanitize callback. Default ''.
 	 * @return float|false $coordinate Sanitized, rounded and converted coordinate. False if not valid coordinate
 	 *
 	 * @since 1.0.0
+	 * @since 5.0.26 Accepts whole numbers, checks the range, and added the `$type` parameter.
 	 */
-	function clean_coordinate( $coordinate ) {
-		$coordinate = trim( $coordinate );
-		$pattern    = '/^(\-)?(\d{1,3})\.(\d{1,15})/';
-		preg_match( $pattern, $coordinate, $matches );
-		if ( wp_is_numeric_array( $matches ) ) {
-			return round( (float) $matches[0], 7 );
+	function clean_coordinate( $coordinate, $type = '' ) {
+		if ( is_int( $coordinate ) || is_float( $coordinate ) ) {
+			$value = (float) $coordinate;
+		} elseif ( is_string( $coordinate ) ) {
+			// Leading digits only, so trailing text such as a direction letter is ignored.
+			if ( ! preg_match( '/^[+-]?\d{1,3}(\.\d+)?(?![\d.])/', trim( $coordinate ), $matches ) ) {
+				return false;
+			}
+			$value = (float) $matches[0];
+		} else {
+			return false;
 		}
-		return false;
+
+		$max = in_array( $type, array( 'latitude', 'lat', 'geo_latitude' ), true ) ? 90 : 180;
+		if ( ! is_finite( $value ) || abs( $value ) > $max ) {
+			return false;
+		}
+		return round( $value, 7 );
 	}
 }
 
