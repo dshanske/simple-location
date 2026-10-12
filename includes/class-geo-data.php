@@ -438,6 +438,9 @@ class Geo_Data {
 	 */
 	public static function get_geouri( $type, $id ) {
 		$point = self::get_geopoint( $type, $id );
+		if ( ! $point ) {
+			return false;
+		}
 		return 'geo:' . implode( ',', $point );
 	}
 
@@ -598,10 +601,11 @@ class Geo_Data {
 	private static function register_terms_meta( $taxonomies, $meta_key, $args ) {
 		if ( empty( $taxonomies ) ) {
 			register_term_meta( '', $meta_key, $args );
+			return;
 		}
 
 		if ( is_string( $taxonomies ) ) {
-			$taxonomy = array( $taxonomies );
+			$taxonomies = array( $taxonomies );
 		}
 		foreach ( $taxonomies as $taxonomy ) {
 			register_term_meta( $taxonomy, $meta_key, $args );
@@ -609,31 +613,31 @@ class Geo_Data {
 	}
 
 	public static function bulk_edit_lookup_location( $post_id ) {
-		$update  = false;
-		$post    = get_post( $post_id );
+		$update = false;
+		$post   = get_post( $post_id );
+		if ( ! $post ) {
+			return false;
+		}
 		$geodata = get_post_geodata( $post_id );
 		if ( ! $geodata ) {
-			$update      = true;
+			$geodata     = array();
 			$geolocation = Loc_Config::geolocation_provider();
 			if ( is_object( $geolocation ) && $geolocation->background() && $post->post_author ) {
 				$geolocation->set_user( $post->post_author );
-				$found   = $geolocation->retrieve( get_post_datetime( $post ) );
-				$geodata = $geolocation->get();
-				// Skip the post if the lookup failed or wasn't allowed (e.g. another author's Compass account), or found nothing.
-				if ( is_wp_error( $found ) || ! is_array( $geodata ) || ! isset( $geodata['latitude'], $geodata['longitude'] ) ) {
-					return false;
-				}
-				if ( ! empty( $geodata ) ) {
+				$found = $geolocation->retrieve( get_post_datetime( $post ) );
+				$found = is_wp_error( $found ) ? array() : $geolocation->get();
+				// Use the location only if the lookup worked, was allowed (e.g. not another author's Compass account), and found coordinates.
+				if ( is_array( $found ) && isset( $found['latitude'], $found['longitude'] ) ) {
+					$geodata               = $found;
 					$geodata['visibility'] = get_post_geodata( $post, 'visibility' );
 					// Determine if we need to look up the location again.
-					$term = Location_Taxonomy::get_location_taxonomy( $post );
-					if ( empty( $term ) || ! array_key_exists( 'address', $geodata ) ) {
-						$reverse = Loc_Config::geo_provider();
+					$term    = Location_Taxonomy::get_location_taxonomy( $post );
+					$reverse = Loc_Config::geo_provider();
+					if ( ( empty( $term ) || ! array_key_exists( 'address', $geodata ) ) && is_object( $reverse ) ) {
 						$reverse->set( $geodata['latitude'], $geodata['longitude'] );
 						$reverse_adr = $reverse->reverse_lookup();
-						if ( ! is_wp_error( $reverse_adr ) ) {
-							$update = true;
-							$term   = Location_Taxonomy::get_location( $reverse_adr );
+						if ( is_array( $reverse_adr ) ) {
+							$term = Location_Taxonomy::get_location( $reverse_adr );
 							Location_Taxonomy::set_location( $post_id, $term );
 							$venue = Post_Venue::at_venue( $geodata['latitude'], $geodata['longitude'] );
 							if ( $venue ) {
@@ -643,9 +647,8 @@ class Geo_Data {
 							}
 						}
 					}
-					if ( true === $update ) {
-						set_post_geodata( $post, '', $geodata );
-					}
+					set_post_geodata( $post, '', $geodata );
+					$update = true;
 				}
 			}
 		}
@@ -675,7 +678,7 @@ class Geo_Data {
 		}
 
 		$weather = get_post_weatherdata( $post_id );
-		if ( empty( $weather ) && ( 'post' === get_post_type( $post_id ) ) ) {
+		if ( empty( $weather ) && ( 'post' === get_post_type( $post_id ) ) && isset( $geodata['latitude'], $geodata['longitude'] ) ) {
 			$weather = Loc_Config::weather_provider();
 			if ( $weather ) {
 				$weather->set( $geodata['latitude'], $geodata['longitude'] );

@@ -168,7 +168,7 @@ class Geo_Base {
 		if ( ! is_array( $geodata ) ) {
 			return;
 		}
-		if ( 'private' !== $geodata['visibility'] ) {
+		if ( isset( $geodata['visibility'] ) && 'private' !== $geodata['visibility'] ) {
 			set_user_geodata( $post->post_author, '', $geodata );
 		}
 	}
@@ -369,7 +369,7 @@ class Geo_Base {
 			} else {
 				$geo_public = self::geo_public();
 				$visibility = get_post_geodata( $post_id, 'visibility' );
-				echo esc_html( $geo_public[ $visibility ] );
+				echo esc_html( isset( $geo_public[ $visibility ] ) ? $geo_public[ $visibility ] : $visibility );
 			}
 		}
 	}
