@@ -502,7 +502,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * Location archives show visitors posts that rely on the site's public default visibility.
 	 */
 	public function test_filter_location_posts_default_visibility() {
-		$this->markTestSkipped( 'Known bug, see #325' );
 		update_option( 'geo_public', 1 );
 		$terms   = $this->hierarchy();
 		$post_id = self::factory()->post->create();
@@ -512,6 +511,56 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 		$this->assertSame( 'public', get_post_geodata( $post_id, 'visibility' ) );
 		$this->go_to( get_term_link( $terms['locality'] ) );
 		$this->assertSame( array( $post_id ), wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ) );
+	}
+
+	/**
+	 * With a public default, location archives still hide private and protected posts, and show posts with an empty visibility.
+	 */
+	public function test_filter_location_posts_default_visibility_explicit() {
+		update_option( 'geo_public', 1 );
+		$terms = $this->hierarchy();
+		$posts = array();
+		foreach ( array( 'private', 'protected', 'empty' ) as $visibility ) {
+			$posts[ $visibility ] = self::factory()->post->create();
+			update_post_meta( $posts[ $visibility ], 'geo_latitude', 39.95 );
+			update_post_meta( $posts[ $visibility ], 'geo_longitude', -75.16 );
+			if ( 'empty' === $visibility ) {
+				update_post_meta( $posts[ $visibility ], 'geo_public', '' );
+			} else {
+				set_post_geodata( $posts[ $visibility ], 'visibility', $visibility );
+			}
+			wp_set_object_terms( $posts[ $visibility ], $terms['locality'], 'location' );
+		}
+		$this->assertSame( 'public', get_post_geodata( $posts['empty'], 'visibility' ) );
+		$this->go_to( get_term_link( $terms['locality'] ) );
+		$this->assertSame( array( $posts['empty'] ), wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ) );
+	}
+
+	/**
+	 * With a default that isn't public, location archives hide posts without a stored visibility.
+	 */
+	public function test_filter_location_posts_default_not_public() {
+		update_option( 'geo_public', 2 );
+		$terms   = $this->hierarchy();
+		$post_id = self::factory()->post->create();
+		update_post_meta( $post_id, 'geo_latitude', 39.95 );
+		update_post_meta( $post_id, 'geo_longitude', -75.16 );
+		wp_set_object_terms( $post_id, $terms['locality'], 'location' );
+		$this->go_to( get_term_link( $terms['locality'] ) );
+		$this->assertSame( array(), $GLOBALS['wp_query']->posts );
+	}
+
+	/**
+	 * Location archives keep every post type when venues don't support locations.
+	 */
+	public function test_filter_location_posts_without_venue_support() {
+		remove_post_type_support( 'venue', 'geo-location' );
+		$expected = array_values( get_post_types_by_support( 'geo-location' ) );
+		$terms    = $this->hierarchy();
+		$this->go_to( get_term_link( $terms['locality'] ) );
+		add_post_type_support( 'venue', 'geo-location' );
+		$this->assertContains( 'post', $expected );
+		$this->assertSame( $expected, $GLOBALS['wp_query']->get( 'post_type' ) );
 	}
 
 	/**
