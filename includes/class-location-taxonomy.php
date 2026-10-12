@@ -111,6 +111,46 @@ final class Location_Taxonomy {
 	}
 
 	/**
+	 * Returns a meta query clause matching posts whose location is public.
+	 *
+	 * A post without a stored visibility, or with an empty or unknown one, uses the site default
+	 * (see Geo_Data::get_geodata()), so when the default is public those posts match too.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return array Meta query clause.
+	 */
+	public static function public_meta_query() {
+		$public = array(
+			'key'     => 'geo_public',
+			'type'    => 'numeric',
+			'compare' => '=',
+			'value'   => 1,
+		);
+		if ( 'public' !== Geo_Data::get_default_visibility() ) {
+			return $public;
+		}
+		return array(
+			'relation' => 'OR',
+			array(
+				'key'     => 'geo_public',
+				'compare' => 'NOT EXISTS',
+			),
+			array(
+				'key'     => 'geo_public',
+				'compare' => '=',
+				'value'   => '',
+			),
+			array(
+				'key'     => 'geo_public',
+				'type'    => 'numeric',
+				'compare' => 'NOT IN',
+				'value'   => array( 0, 2 ),
+			),
+		);
+	}
+
+	/**
 	 * Filters Location in Posts.
 	 *
 	 * @param WP_Query $query Query Object.
@@ -123,18 +163,14 @@ final class Location_Taxonomy {
 		}
 		if ( is_tax( 'location' ) ) {
 			if ( ! current_user_can( 'read_posts_location' ) ) {
-				$public = array(
-					'key'     => 'geo_public',
-					'type'    => 'numeric',
-					'compare' => '=',
-					'value'   => 1,
-				);
-				$query->set( 'meta_query', array( $public ) );
+				$query->set( 'meta_query', array( self::public_meta_query() ) );
 			}
 			$post_types = get_post_types_by_support( 'geo-location' );
 			$search     = array_search( 'venue', $post_types, true );
-			unset( $post_types[ $search ] );
-			$query->set( 'post_type', $post_types );
+			if ( false !== $search ) {
+				unset( $post_types[ $search ] );
+			}
+			$query->set( 'post_type', array_values( $post_types ) );
 		}
 		return $query;
 	}
