@@ -119,7 +119,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * The float sanitizer accepts numeric strings.
 	 */
 	public function test_sanitize_float() {
-		$this->markTestSkipped( 'Known bug, see #306' );
 		$this->assertSame( 12.5, REST_Geo::sanitize_float( '12.5', null, 'altitude' ) );
 		$this->assertSame( 100.0, REST_Geo::sanitize_float( ' 100 ', null, 'altitude' ) );
 	}
@@ -129,6 +128,25 @@ class RestGeoTest extends WP_UnitTestCase {
 	 */
 	public function test_sanitize_coordinates() {
 		$this->assertSame( clean_coordinate( '45.123456789' ), REST_Geo::sanitize_coordinates( '45.123456789', null, 'latitude' ) );
+	}
+
+	/**
+	 * The float sanitizer returns null for values that are not numbers.
+	 */
+	public function test_sanitize_float_rejects_text() {
+		$this->assertNull( REST_Geo::sanitize_float( 'high', null, 'altitude' ) );
+		$this->assertNull( REST_Geo::sanitize_float( null, null, 'altitude' ) );
+		$this->assertSame( 3.0, REST_Geo::sanitize_float( 3, null, 'altitude' ) );
+	}
+
+	/**
+	 * The coordinate sanitizer returns an error for invalid or out-of-range values.
+	 */
+	public function test_sanitize_coordinates_invalid() {
+		$this->assertWPError( REST_Geo::sanitize_coordinates( 'north', null, 'latitude' ) );
+		$this->assertWPError( REST_Geo::sanitize_coordinates( '91', null, 'latitude' ) );
+		$this->assertWPError( REST_Geo::sanitize_coordinates( '300', null, 'longitude' ) );
+		$this->assertSame( 91.0, REST_Geo::sanitize_coordinates( '91', null, 'longitude' ) );
 	}
 
 	/**
@@ -677,7 +695,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /user keeps an altitude that was sent instead of looking it up.
 	 */
 	public function test_user_altitude() {
-		$this->markTestSkipped( 'Known bug, see #306' );
 		$this->request(
 			'/user',
 			array(
@@ -688,6 +705,22 @@ class RestGeoTest extends WP_UnitTestCase {
 			'POST'
 		);
 		$this->assertEquals( 10, get_user_geodata( self::$author, 'altitude' ) );
+	}
+
+	/**
+	 * /user rejects an impossible coordinate and leaves the stored location alone.
+	 */
+	public function test_user_rejects_out_of_range() {
+		$response = $this->request(
+			'/user',
+			array(
+				'latitude'  => '45.01',
+				'longitude' => '300',
+			),
+			'POST'
+		);
+		$this->assertErrorResponse( 'rest_invalid_param', $response, 400 );
+		$this->assertEmpty( get_user_meta( self::$author, 'geo_longitude', true ) );
 	}
 
 	/**

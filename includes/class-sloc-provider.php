@@ -321,26 +321,26 @@ abstract class Sloc_Provider {
 	 * @param float       $lng Longitude. Optional if first property is an array.
 	 * @param float       $alt Altitude. Optional.
 	 * @return boolean Return False if Validation Failed
+	 *
+	 * @since 5.0.26 Invalid or out-of-range coordinates return false and leave the coordinates unchanged.
 	 */
 	public function set( $lat, $lng = null, $alt = null ) {
-		if ( ! $lng && is_array( $lat ) ) {
-			if ( isset( $lat['latitude'] ) && isset( $lat['longitude'] ) ) {
-				$this->latitude  = clean_coordinate( $lat['latitude'] );
-				$this->longitude = clean_coordinate( $lat['longitude'] );
-				if ( isset( $lat['altitude'] ) && is_numeric( $lat['altitude'] ) ) {
-					$this->altitude = floatval( $lat['altitude'] );
-				}
-				return true;
-			} else {
+		if ( null === $lng && is_array( $lat ) ) {
+			if ( ! isset( $lat['latitude'] ) || ! isset( $lat['longitude'] ) ) {
 				return false;
 			}
+			$alt = isset( $lat['altitude'] ) ? $lat['altitude'] : null;
+			$lng = $lat['longitude'];
+			$lat = $lat['latitude'];
 		}
 		// Validate inputs.
-		if ( ( ! is_numeric( $lat ) ) && ( ! is_numeric( $lng ) ) ) {
+		$latitude  = clean_coordinate( $lat, 'latitude' );
+		$longitude = clean_coordinate( $lng, 'longitude' );
+		if ( false === $latitude || false === $longitude ) {
 			return false;
 		}
-		$this->latitude  = clean_coordinate( $lat );
-		$this->longitude = clean_coordinate( $lng );
+		$this->latitude  = $latitude;
+		$this->longitude = $longitude;
 		if ( is_numeric( $alt ) ) {
 			$this->altitude = floatval( $alt );
 		}

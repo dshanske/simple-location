@@ -158,8 +158,8 @@ class Location_Provider_Compass extends Location_Provider {
 		$response = array_map(
 			function ( $array ) {
 				return array(
-					0 => clean_coordinate( $array[0] ),
-					1 => clean_coordinate( $array[1] ),
+					0 => clean_coordinate( $array[0], 'longitude' ),
+					1 => clean_coordinate( $array[1], 'latitude' ),
 				);
 			},
 			$response
@@ -240,8 +240,8 @@ class Location_Provider_Compass extends Location_Provider {
 			return false;
 		}
 		$coord           = $response['geometry']['coordinates'];
-		$this->longitude = clean_coordinate( $coord[0] );
-		$this->latitude  = clean_coordinate( $coord[1] );
+		$this->longitude = clean_coordinate( $coord[0], 'longitude' );
+		$this->latitude  = clean_coordinate( $coord[1], 'latitude' );
 		$properties      = array_filter( $response['properties'] );
 		$this->heading   = array_key_exists( 'heading', $properties ) ? $properties['heading'] : null;
 		$this->speed     = $this->set_speed( $properties );

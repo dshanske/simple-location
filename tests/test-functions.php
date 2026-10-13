@@ -23,7 +23,6 @@ class FunctionsTest extends WP_UnitTestCase {
 	 * Non-numeric input is rejected.
 	 */
 	public function test_clean_coordinate_rejects_text() {
-		$this->markTestSkipped( 'Known bug, see #306' );
 		$this->assertFalse( clean_coordinate( 'abc' ) );
 		$this->assertFalse( clean_coordinate( '' ) );
 	}
@@ -32,7 +31,6 @@ class FunctionsTest extends WP_UnitTestCase {
 	 * Whole-number coordinates are valid and must not become 0.
 	 */
 	public function test_clean_coordinate_integer() {
-		$this->markTestSkipped( 'Known bug, see #306' );
 		$this->assertSame( 45.0, clean_coordinate( '45' ) );
 		$this->assertSame( -75.0, clean_coordinate( -75 ) );
 	}
@@ -41,9 +39,64 @@ class FunctionsTest extends WP_UnitTestCase {
 	 * Values outside the valid coordinate range are rejected.
 	 */
 	public function test_clean_coordinate_out_of_range() {
-		$this->markTestSkipped( 'Known bug, see #306' );
 		$this->assertFalse( clean_coordinate( '191.5' ) );
 		$this->assertFalse( clean_coordinate( '-181.2' ) );
+	}
+
+	/**
+	 * Latitudes are limited to ±90 and longitudes to ±180, including impossible values like 300.
+	 */
+	public function test_clean_coordinate_range_by_type() {
+		$this->assertSame( 90.0, clean_coordinate( '90', 'latitude' ) );
+		$this->assertSame( -90.0, clean_coordinate( -90, 'lat' ) );
+		$this->assertFalse( clean_coordinate( '90.5', 'latitude' ) );
+		$this->assertFalse( clean_coordinate( -91, 'geo_latitude' ) );
+		$this->assertSame( 120.5, clean_coordinate( '120.5', 'longitude' ) );
+		$this->assertSame( 180.0, clean_coordinate( 180, 'geo_longitude' ) );
+		$this->assertFalse( clean_coordinate( '300', 'longitude' ) );
+		$this->assertFalse( clean_coordinate( 300 ) );
+		$this->assertFalse( clean_coordinate( '-300.25' ) );
+		$this->assertFalse( clean_coordinate( 300.0, 'latitude' ) );
+	}
+
+	/**
+	 * Numbers with more than three whole digits are rejected rather than truncated.
+	 */
+	public function test_clean_coordinate_too_many_digits() {
+		$this->assertFalse( clean_coordinate( '1234' ) );
+		$this->assertFalse( clean_coordinate( '1234.5' ) );
+		$this->assertFalse( clean_coordinate( '45.5.5' ) );
+	}
+
+	/**
+	 * Leading numbers are kept when followed by text, and a plus sign is allowed.
+	 */
+	public function test_clean_coordinate_trailing_text() {
+		$this->assertSame( 45.5, clean_coordinate( '45.5 N' ) );
+		$this->assertSame( 45.5, clean_coordinate( '+45.5' ) );
+		$this->assertSame( 0.0, clean_coordinate( '0' ) );
+	}
+
+	/**
+	 * Values that are not strings or numbers are rejected without warnings.
+	 */
+	public function test_clean_coordinate_non_scalar() {
+		$this->assertFalse( clean_coordinate( null ) );
+		$this->assertFalse( clean_coordinate( array( 45 ) ) );
+		$this->assertFalse( clean_coordinate( true ) );
+		$this->assertFalse( clean_coordinate( NAN ) );
+		$this->assertFalse( clean_coordinate( INF ) );
+	}
+
+	/**
+	 * The meta sanitizer rejects an impossible latitude, using the meta key as the type.
+	 */
+	public function test_meta_sanitizer_rejects_out_of_range() {
+		$post_id = self::factory()->post->create();
+		update_post_meta( $post_id, 'geo_latitude', '95' );
+		update_post_meta( $post_id, 'geo_longitude', '95' );
+		$this->assertEmpty( get_post_meta( $post_id, 'geo_latitude', true ) );
+		$this->assertEquals( 95, get_post_meta( $post_id, 'geo_longitude', true ) );
 	}
 
 	/**

@@ -82,6 +82,39 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Impossible coordinates are rejected by set(), which keeps the previous ones.
+	 */
+	public function test_set_rejects_invalid_coordinates() {
+		$provider = $this->provider( 'Geo_Provider_Nominatim' );
+		$this->assertFalse( $provider->set( 95, self::LNG ) );
+		$this->assertFalse( $provider->set( self::LAT, 300 ) );
+		$this->assertFalse( $provider->set( 'north', 'west' ) );
+		$this->assertFalse(
+			$provider->set(
+				array(
+					'latitude'  => 300,
+					'longitude' => self::LNG,
+				)
+			)
+		);
+		$geo = $provider->get();
+		$this->assertEquals( self::LAT, $geo['latitude'] );
+		$this->assertEquals( self::LNG, $geo['longitude'] );
+	}
+
+	/**
+	 * Whole numbers are accepted by set().
+	 */
+	public function test_set_whole_numbers() {
+		$provider = $this->provider( 'Geo_Provider_Nominatim' );
+		$this->assertTrue( $provider->set( '45', -75, '5' ) );
+		$geo = $provider->get();
+		$this->assertSame( 45.0, $geo['latitude'] );
+		$this->assertSame( -75.0, $geo['longitude'] );
+		$this->assertSame( 5.0, $geo['altitude'] );
+	}
+
+	/**
 	 * Requests go through wp_safe_remote_get() with JSON headers, a user agent and a timeout.
 	 */
 	public function test_fetch_json_request() {

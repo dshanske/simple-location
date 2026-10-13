@@ -498,7 +498,6 @@ class MicropubTest extends WP_UnitTestCase {
 	 * A latitude of 0 is a real coordinate.
 	 */
 	public function test_set_location_zero_latitude() {
-		$this->markTestSkipped( 'Known bug, see #306' );
 		$args = $this->micropub_post(
 			array(
 				'geo_latitude'  => 0,
@@ -605,7 +604,6 @@ class MicropubTest extends WP_UnitTestCase {
 	 * A geo query at latitude 0 or a whole-number longitude is answered.
 	 */
 	public function test_query_geo_whole_numbers() {
-		$this->markTestSkipped( 'Known bug, see #306' );
 		$result = Location_Plugins::micropub_query_geo(
 			array(),
 			array(
