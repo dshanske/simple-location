@@ -147,6 +147,8 @@ abstract class Location_Provider extends Sloc_Provider {
 	/**
 	 * Get Coordinates.
 	 *
+	 * @since 5.0.26 Values of 0 are kept.
+	 *
 	 * @return array|boolean Array with all properties, false if null.
 	 */
 	public function get() {
@@ -187,7 +189,7 @@ abstract class Location_Provider extends Sloc_Provider {
 		}
 		$return['annotation'] = $this->annotation;
 		$return['other']      = $this->other;
-		$return               = array_filter( $return );
+		$return               = self::filter_unset( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
 		}
@@ -216,14 +218,16 @@ abstract class Location_Provider extends Sloc_Provider {
 	/**
 	 * Get Coordinates in Geo URI.
 	 *
+	 * @since 5.0.26 Coordinates and altitude of 0 are kept.
+	 *
 	 * @return string|boolean GEOURI false if null.
 	 */
 	public function get_geouri() {
-		if ( empty( $this->latitude ) && empty( $this->longitude ) ) {
+		if ( ! is_numeric( $this->latitude ) || ! is_numeric( $this->longitude ) ) {
 			return false;
 		}
 		$coords = array( $this->latitude, $this->longitude );
-		if ( ! empty( $this->altitude ) ) {
+		if ( is_numeric( $this->altitude ) ) {
 			$coords[] = $this->altitude;
 		}
 		$return = 'geo:' . implode( ',', $coords );
@@ -236,14 +240,16 @@ abstract class Location_Provider extends Sloc_Provider {
 	/**
 	 * Get Coordinates in GeoJSON.
 	 *
+	 * @since 5.0.26 Coordinates and altitude of 0 are kept.
+	 *
 	 * @return array|boolean Array in GeoJSON format false if null.
 	 */
 	public function get_geojson() {
-		if ( empty( $this->latitude ) && empty( $this->longitude ) ) {
+		if ( ! is_numeric( $this->latitude ) || ! is_numeric( $this->longitude ) ) {
 			return false;
 		}
 		$coords = array( $this->longitude, $this->latitude );
-		if ( ! empty( $this->altitude ) ) {
+		if ( is_numeric( $this->altitude ) ) {
 			$coords[] = $this->altitude;
 		}
 		$properties = array();
@@ -267,6 +273,8 @@ abstract class Location_Provider extends Sloc_Provider {
 	/**
 	 * Get Coordinates in H-Geo MF2 Format.
 	 *
+	 * @since 5.0.26 Values of 0 are kept.
+	 *
 	 * @return array|boolean Array with h-geo mf2 false if null.
 	 */
 	public function get_mf2() {
@@ -277,7 +285,7 @@ abstract class Location_Provider extends Sloc_Provider {
 		$properties['heading']   = $this->heading;
 		$properties['speed']     = $this->speed;
 		$properties['name']      = $this->annotation; // If there is an annotation set that as the name.
-		$properties              = array_filter( $properties );
+		$properties              = self::filter_unset( $properties );
 		if ( empty( $properties ) ) {
 			return false;
 		}

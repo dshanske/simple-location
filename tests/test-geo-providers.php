@@ -115,6 +115,24 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Coordinates and altitude of 0 are kept by get().
+	 */
+	public function test_get_keeps_zero() {
+		$provider = $this->provider( 'Geo_Provider_Nominatim' );
+		$this->assertTrue( $provider->set( 0, 10, 0 ) );
+		$this->assertSame(
+			array(
+				'latitude'  => 0.0,
+				'longitude' => 10.0,
+				'altitude'  => 0.0,
+			),
+			$provider->get()
+		);
+		$this->assertTrue( $provider->set( 10, 0 ) );
+		$this->assertSame( 0.0, $provider->get()['longitude'] );
+	}
+
+	/**
 	 * Requests go through wp_safe_remote_get() with JSON headers, a user agent and a timeout.
 	 */
 	public function test_fetch_json_request() {
