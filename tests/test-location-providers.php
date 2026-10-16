@@ -235,6 +235,53 @@ class LocationProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Values of 0 (equator, prime meridian, sea level, due north, stationary) are real values and are kept.
+	 */
+	public function test_zero_values_kept() {
+		$provider = $this->provider_with(
+			array(
+				'latitude'  => 0.0,
+				'longitude' => 0.0,
+				'altitude'  => 0.0,
+				'heading'   => 0,
+				'speed'     => 0.0,
+			)
+		);
+		$this->assertSame(
+			array(
+				'latitude'  => 0.0,
+				'longitude' => 0.0,
+				'altitude'  => 0.0,
+				'heading'   => 0,
+				'speed'     => 0.0,
+				'zoom'      => 14,
+			),
+			$provider->get()
+		);
+		$this->assertSame( 'geo:0,0,0', $provider->get_geouri() );
+		$this->assertSame( array( 0.0, 0.0, 0.0 ), $provider->get_geojson()['geometry']['coordinates'] );
+		$this->assertSame(
+			array(
+				'latitude'  => array( 0.0 ),
+				'longitude' => array( 0.0 ),
+				'altitude'  => array( 0.0 ),
+				'heading'   => array( 0 ),
+				'speed'     => array( 0.0 ),
+			),
+			$provider->get_mf2()['properties']
+		);
+	}
+
+	/**
+	 * A single coordinate is not enough for a geo URI or GeoJSON point.
+	 */
+	public function test_partial_coordinates() {
+		$provider = $this->provider_with( array( 'latitude' => 39.9524 ) );
+		$this->assertFalse( $provider->get_geouri() );
+		$this->assertFalse( $provider->get_geojson() );
+	}
+
+	/**
 	 * Helpers: activity labels and knots to meters per second.
 	 */
 	public function test_helpers() {

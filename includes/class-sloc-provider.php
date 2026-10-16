@@ -350,6 +350,9 @@ abstract class Sloc_Provider {
 	/**
 	 * Get Coordinates.
 	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Values of 0 are kept.
+	 *
 	 * @return array|boolean Array with Latitude and Longitude false if null
 	 */
 	public function get() {
@@ -357,11 +360,29 @@ abstract class Sloc_Provider {
 		$return['latitude']  = $this->latitude;
 		$return['longitude'] = $this->longitude;
 		$return['altitude']  = $this->altitude;
-		$return              = array_filter( $return );
+		$return              = self::filter_unset( $return );
 		if ( ! empty( $return ) ) {
 			return $return;
 		}
 		return false;
+	}
+
+	/**
+	 * Removes unset values from an array.
+	 *
+	 * Unlike array_filter() without a callback, this keeps 0, 0.0 and '0', which are
+	 * real values for coordinates, altitude, heading and speed.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array $values Values to filter.
+	 * @return array Values that are not null, an empty string or an empty array.
+	 */
+	protected static function filter_unset( $values ) {
+		return array_filter(
+			$values,
+			fn( $value ) => null !== $value && '' !== $value && array() !== $value
+		);
 	}
 
 	/**
