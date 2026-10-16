@@ -199,7 +199,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * An address with a country code but no country name still creates the country.
 	 */
 	public function test_get_location_without_country_name() {
-		$this->markTestSkipped( 'Known bug, see #326' );
 		$addr = static::$addr;
 		unset( $addr['country-name'] );
 		$terms = $this->hierarchy( $addr );
@@ -211,7 +210,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * Looking up a locality or region without a country code doesn't raise warnings.
 	 */
 	public function test_lookups_without_country_code() {
-		$this->markTestSkipped( 'Known bug, see #326' );
 		$this->hierarchy();
 		$this->assertFalse( Location_Taxonomy::get_locality( array( 'locality' => 'Philadelphia' ) ) );
 		$this->assertFalse( Location_Taxonomy::get_region( array( 'region-code' => 'PA' ) ) );
@@ -244,7 +242,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * The regions of a country are listed.
 	 */
 	public function test_get_country_regions() {
-		$this->markTestSkipped( 'Known bug, see #321' );
 		$terms = $this->hierarchy();
 		$this->assertSame( array( $terms['region'] => 'Pennsylvania' ), Location_Taxonomy::get_country_regions( 'US' ) );
 		$this->assertFalse( Location_Taxonomy::get_country_regions( 'FR' ) );
@@ -254,7 +251,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * The localities of a region are listed.
 	 */
 	public function test_get_region_localities() {
-		$this->markTestSkipped( 'Known bug, see #326' );
 		$terms = $this->hierarchy();
 		$this->assertSame( array( $terms['locality'] => 'Philadelphia' ), Location_Taxonomy::get_region_localities( 'PA', 'US' ) );
 	}
@@ -370,7 +366,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * Display names and links for terms that don't exist are empty, without warnings.
 	 */
 	public function test_display_name_missing_term() {
-		$this->markTestSkipped( 'Known bug, see #326' );
 		$this->assertSame( '', Location_Taxonomy::display_name( 999999 ) );
 		$this->assertSame( '', Location_Taxonomy::get_location_link( 999999 ) );
 	}
@@ -428,7 +423,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * A region without a code keeps the region as its code.
 	 */
 	public function test_normalize_address_region_code() {
-		$this->markTestSkipped( 'Known bug, see #326' );
 		$address = Location_Taxonomy::normalize_address( array( 'region' => 'Pennsylvania' ) );
 		$this->assertSame( 'Pennsylvania', $address['region'] );
 		$this->assertSame( 'Pennsylvania', $address['region-code'] );
@@ -438,7 +432,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * A country code fills in the country name.
 	 */
 	public function test_normalize_address_country_name() {
-		$this->markTestSkipped( 'Known bug, see #326' );
 		$address = Location_Taxonomy::normalize_address( array( 'country-code' => 'US' ) );
 		$this->assertSame( 'US', $address['country-code'] );
 		$this->assertSame( 'United States', $address['country-name'] );

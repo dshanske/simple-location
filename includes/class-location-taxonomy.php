@@ -356,6 +356,11 @@ final class Location_Taxonomy {
 	/**
 	 * Normalizes address data.
 	 *
+	 * Fills in the country name or code from the other, and the region code from the region name.
+	 *
+	 * @since 4.0.0
+	 * @since 5.0.26 A country code fills in the country name, and region codes are no longer lost.
+	 *
 	 * @param array $address Address data.
 	 * @return array Normalized Address Data.
 	 */
@@ -375,16 +380,18 @@ final class Location_Taxonomy {
 			$address['country-code'] = Geo_Provider::country_code( $address['country-name'] );
 		}
 		if ( ! array_key_exists( 'country-name', $address ) && array_key_exists( 'country-code', $address ) ) {
-			$address['country-code'] = Geo_Provider::country_name( $address['country-code'] );
+			$address['country-name'] = Geo_Provider::country_name( $address['country-code'] );
+		}
+		// The region is a name. Use its code when the country is known, so it matches reverse lookups.
+		if ( ! array_key_exists( 'region', $address ) && array_key_exists( 'region-name', $address ) ) {
+			$address['region'] = $address['region-name'];
 		}
 		if ( array_key_exists( 'region', $address ) && ! array_key_exists( 'region-code', $address ) ) {
-			$address['region-code'] = $address['region'];
+			$code                   = empty( $address['country-code'] ) ? false : Geo_Provider::region_code( $address['region'], $address['country-code'] );
+			$address['region-code'] = $code ? $code : $address['region'];
 		}
-		if ( ! array_key_exists( 'region-code', $address ) && array_key_exists( 'region-name', $address ) ) {
-			$address['region-code'] = Geo_Provider::country_code( $address['region-name'] );
-		}
-		if ( ! array_key_exists( 'region-name', $address ) && array_key_exists( 'region-code', $address ) ) {
-			$address['region-code'] = Geo_Provider::country_name( $address['region-code'] );
+		if ( ! array_key_exists( 'region', $address ) && ! empty( $address['region-code'] ) && ! empty( $address['country-code'] ) ) {
+			$address['region'] = Geo_Provider::region_name( $address['region-code'], $address['country-code'] );
 		}
 		return array_filter( $address );
 	}
@@ -512,14 +519,19 @@ final class Location_Taxonomy {
 	/**
 	 * Return an array of term_ids for localities in this region.
 	 *
-	 * @param int|string $country_code Term ID or Country Code.
+	 * @since 4.0.0
+	 * @since 5.0.26 Finds the region, and added the `$childless` parameter.
+	 *
+	 * @param string  $region_code  Region Code.
+	 * @param string  $country_code Country Code.
+	 * @param boolean $childless    Optional. Only return localities with no children. Default false.
 	 * @return array|false Associative array of Term IDs as key and name as value or false if not found.
 	 */
-	public static function get_region_localities( $region_code, $country_code ) {
+	public static function get_region_localities( $region_code, $country_code, $childless = false ) {
 		$region = self::get_region(
 			array(
-				'region_code'  => $region_code,
-				'country_code' => $country_code,
+				'region-code'  => $region_code,
+				'country-code' => $country_code,
 			)
 		);
 		if ( ! $region ) {
@@ -552,7 +564,7 @@ final class Location_Taxonomy {
 			return false;
 		}
 
-		if ( ! array_key_exists( 'locality', $addr ) ) {
+		if ( ! array_key_exists( 'locality', $addr ) || empty( $addr['country-code'] ) ) {
 			return false;
 		}
 
@@ -583,7 +595,7 @@ final class Location_Taxonomy {
 				return false;
 			}
 			if ( $addr['country-code'] === $data['country']['code'] ) {
-				if ( self::region_return( $addr ) === $data['region']['code'] ) {
+				if ( isset( $data['region']['code'] ) && self::region_return( $addr ) === $data['region']['code'] ) {
 					return $term_id;
 				}
 			}
@@ -595,10 +607,14 @@ final class Location_Taxonomy {
 	/**
 	 * Return an array of term_ids for regions in this country.
 	 *
+	 * @since 4.0.0
+	 * @since 5.0.26 Added the `$childless` parameter.
+	 *
 	 * @param int|string $country_code Term ID or Country Code.
+	 * @param boolean    $childless    Optional. Only return regions with no localities. Default false.
 	 * @return array|false Associative array of Term IDs as key and name as value or false if not found.
 	 */
-	public static function get_country_regions( $country_code ) {
+	public static function get_country_regions( $country_code, $childless = false ) {
 		if ( is_string( $country_code ) ) {
 			$country_code = self::get_country( $country_code );
 		}
@@ -629,7 +645,7 @@ final class Location_Taxonomy {
 	 * @return int|false Term ID or false if not found.
 	 */
 	public static function get_region( $addr, $childless = false ) {
-		if ( empty( $addr ) ) {
+		if ( empty( $addr ) || empty( $addr['country-code'] ) ) {
 			return false;
 		}
 
@@ -654,7 +670,7 @@ final class Location_Taxonomy {
 			);
 			foreach ( $terms as $term ) {
 				$data = self::get_location_data( $term );
-				if ( ! array_key_exists( 'locality', $data ) ) {
+				if ( ! array_key_exists( 'locality', $data ) && isset( $data['country']['code'] ) ) {
 					if ( $addr['country-code'] === $data['country']['code'] ) {
 						return $term;
 					}
@@ -669,7 +685,7 @@ final class Location_Taxonomy {
 	 * Return the term_id for the country if it exists.
 	 *
 	 * @param string  $country_code Country Code.
-	 * @param bookean $childless Only look for countries that have no regions currently.
+	 * @param boolean $childless Only look for countries that have no regions currently.
 	 * @return false|int Term ID or false if not found.
 	 */
 	public static function get_country( $country_code, $childless = false ) {
@@ -713,6 +729,12 @@ final class Location_Taxonomy {
 			return false;
 		}
 
+		// A new term needs a country, and its name if only the code is known.
+		$addr = self::normalize_address( $addr );
+		if ( empty( $addr['country-code'] ) || empty( $addr['country-name'] ) ) {
+			return false;
+		}
+
 		$region = self::get_region( $addr );
 		if ( ! $region ) {
 			$country = self::get_country( $addr['country-code'] );
@@ -732,7 +754,7 @@ final class Location_Taxonomy {
 			$region_code = self::region_return( $addr );
 			if ( $region_code ) {
 				$return = wp_insert_term(
-					$addr['region'],
+					ifset( $addr['region'], $region_code ),
 					'location',
 					array(
 						'slug'   => $region_code,
@@ -873,7 +895,7 @@ final class Location_Taxonomy {
 
 		$args = wp_parse_args( $args, $defaults );
 		$term = get_term( $term_id );
-		if ( is_wp_error( $term ) ) {
+		if ( ! $term instanceof WP_Term ) {
 			return '';
 		}
 		$return = array();
@@ -918,6 +940,9 @@ final class Location_Taxonomy {
 		if ( is_wp_error( $term ) ) {
 			return $term;
 		}
+		if ( ! $term instanceof WP_Term ) {
+			return '';
+		}
 		$link   = get_term_link( $term->term_id, 'location' );
 		$return = array();
 		if ( 0 === $term->parent ) {
@@ -929,6 +954,9 @@ final class Location_Taxonomy {
 		}
 		while ( 0 !== $term->parent ) {
 			$term = get_term( $term->parent, 'location' );
+			if ( ! $term instanceof WP_Term ) {
+				break;
+			}
 			if ( 0 === $term->parent ) {
 				$country = get_term_meta( $term->term_id, 'country', true );
 				if ( get_option( 'sloc_country' ) !== $country ) {
