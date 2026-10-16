@@ -152,6 +152,26 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A single ID or a comma-separated list works too; nothing usable leaves the query alone.
+	 */
+	public function test_post__in_string() {
+		set_current_screen( 'edit-post' );
+		$query            = new WP_Query();
+		$_GET['post__in'] = '5';
+		Post_Venue::post__in( $query );
+		$this->assertSame( array( 5 ), $query->get( 'post__in' ) );
+
+		$_GET['post__in'] = '3,7';
+		Post_Venue::post__in( $query );
+		$this->assertSame( array( 3, 7 ), $query->get( 'post__in' ) );
+
+		$query            = new WP_Query();
+		$_GET['post__in'] = 'none';
+		Post_Venue::post__in( $query );
+		$this->assertSame( '', $query->get( 'post__in' ) );
+	}
+
+	/**
 	 * The venue list has a Checkins column linking to the checked-in posts, and no Date column.
 	 */
 	public function test_admin_columns() {
@@ -241,6 +261,13 @@ class PostVenueTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'value="restaurant"', $output );
 		$this->assertStringContainsString( '>Park</option>', $output );
 		$this->assertSame( '', $this->capture( array( 'Post_Venue', 'venue_types_dropdown' ), 'post', 'top' ) );
+
+		$_REQUEST['venue_type'] = 'park';
+		$output                 = $this->capture( array( 'Post_Venue', 'venue_types_dropdown' ), 'venue', 'top' );
+		unset( $_REQUEST['venue_type'] );
+		$this->assertStringStartsWith( '<select', $output );
+		$this->assertMatchesRegularExpression( '#<option value="park" selected(=["\']selected["\'])?>Park</option>#', $output );
+		$this->assertSame( 1, substr_count( $output, ' selected' ) );
 	}
 
 	/**
@@ -341,6 +368,7 @@ class PostVenueTest extends WP_UnitTestCase {
 		$this->assertSame( 'publish', $venue->post_status );
 		$this->assertSame( 'Corner Cafe', $venue->post_title );
 		$this->assertStringStartsWith( 'corner-cafe-new-york-new-york-', $venue->post_name );
+		$this->assertStringNotContainsString( '%', $venue->post_name, 'No encoded flag emoji.' );
 		$this->assertSame( 'https://cafe.example.com/', get_post_meta( $venue_id, 'venue_url', true ) );
 		$this->assertSame( '1 Main St', get_post_meta( $venue_id, 'venue_street_address', true ) );
 
@@ -389,6 +417,39 @@ class PostVenueTest extends WP_UnitTestCase {
 				)
 			)
 		);
+	}
+
+	/**
+	 * An existing venue with the URL among its alternate URLs is returned instead of a new venue.
+	 */
+	public function test_add_new_venue_alternate_url() {
+		$venue_id = $this->venue();
+		update_post_meta( $venue_id, 'venue_alternate', 'https://old.example.com/cafe' );
+		$this->assertSame(
+			$venue_id,
+			Post_Venue::add_new_venue(
+				array(
+					'name' => 'Cafe',
+					'url'  => 'https://old.example.com/cafe',
+				)
+			)
+		);
+	}
+
+	/**
+	 * Child venues are found among venues, not posts, and all of them are returned.
+	 */
+	public function test_get_venue_children() {
+		$mall     = $this->venue();
+		$children = array();
+		for ( $i = 0; $i < 6; $i++ ) {
+			$children[] = $this->venue( 40.7128, -74.006, array( 'post_parent' => $mall ) );
+		}
+		self::factory()->post->create( array( 'post_parent' => $mall ) );
+		$found = Post_Venue::get_venue_children( $mall );
+		sort( $found );
+		$this->assertSame( $children, $found );
+		$this->assertSame( array(), Post_Venue::get_venue_children( $children[0] ) );
 	}
 
 	/**

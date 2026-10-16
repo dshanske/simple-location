@@ -345,6 +345,16 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 		$this->assertSame( 'Philadelphia, Pennsylvania, 🇺🇸 United States of America', Location_Taxonomy::display_name( $terms['locality'], array( 'links' => false ) ) );
 		$this->assertSame( '🇺🇸 United States of America', Location_Taxonomy::display_name( $terms['country'] ) );
 		$this->assertSame( 'United States of America', Location_Taxonomy::display_name( $terms['country'], array( 'flag' => false ) ) );
+		$this->assertSame(
+			'Philadelphia, Pennsylvania, United States of America',
+			Location_Taxonomy::display_name(
+				$terms['locality'],
+				array(
+					'links' => false,
+					'flag'  => false,
+				)
+			)
+		);
 	}
 
 	/**

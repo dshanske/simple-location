@@ -193,21 +193,25 @@ class Post_Venue {
 	/**
 	 * Adds posts__in support to edit post screen.
 	 *
+	 * @since 5.0.26 Accepts a single ID or a comma-separated list.
+	 *
 	 * @param WP_Query $query Query Object.
 	 */
 	public static function post__in( $query ) {
 		if ( ! is_admin() ) {
-			return $query;
+			return;
 		}
 
-		if ( ! array_key_exists( 'post__in', $_GET ) ) {
-			return $query;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only list filter.
+		if ( ! isset( $_GET['post__in'] ) ) {
+			return;
 		}
 
-		$ids = $_GET['post__in'];
-		$ids = array_map( 'intval', $ids );
-
-		$query->set( 'post__in', $ids );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only list filter.
+		$ids = array_filter( wp_parse_id_list( wp_unslash( $_GET['post__in'] ) ) );
+		if ( ! empty( $ids ) ) {
+			$query->set( 'post__in', $ids );
+		}
 	}
 
 	/**
@@ -353,7 +357,7 @@ class Post_Venue {
 		}
 		echo '<select id="venue_type" name="venue_type">';
 		foreach ( $list as $key => $value ) {
-			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value ), Geo_Base::kses_option() );
+			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key, false ), esc_html( $value ) ), Geo_Base::kses_option() );
 		}
 		echo '</select>';
 	}
@@ -524,7 +528,7 @@ class Post_Venue {
 					'meta_query' => array(
 						array(
 							'compare' => 'LIKE',
-							'key'     => 'venue_alternative',
+							'key'     => 'venue_alternate',
 							'value'   => $venue['url'],
 						),
 					),
@@ -595,6 +599,14 @@ class Post_Venue {
 		return wp_get_post_parent_id( $venue_id );
 	}
 
+	/**
+	 * Returns the IDs of a venue's published child venues.
+	 *
+	 * @since 5.0.26 Searches venues instead of posts and returns every child.
+	 *
+	 * @param int|WP_Post|null $venue_id Venue. Defaults to the current post.
+	 * @return int[]|false Child venue IDs, or false if the venue doesn't exist.
+	 */
 	public static function get_venue_children( $venue_id = null ) {
 		$venue = get_post( $venue_id );
 		if ( ! $venue ) {
@@ -603,8 +615,10 @@ class Post_Venue {
 
 		return get_posts(
 			array(
+				'post_type'   => 'venue',
 				'post_parent' => $venue->ID,
 				'fields'      => 'ids',
+				'numberposts' => -1,
 			)
 		);
 	}
