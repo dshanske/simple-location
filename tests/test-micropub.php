@@ -677,6 +677,73 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A plain-text location is used as the address; a URL is ignored.
+	 */
+	public function test_webmention_string_location() {
+		$raw = array(
+			'properties' => array(
+				'location' => array( 'https://example.com/venue' ),
+			),
+		);
+		$this->assertSame( array(), Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) ) );
+
+		$raw['properties']['location'] = array( 'Philadelphia, PA' );
+		$this->assertSame(
+			array( 'geo_address' => 'Philadelphia, PA' ),
+			Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) )
+		);
+	}
+
+	/**
+	 * Malformed locations are ignored instead of causing errors.
+	 */
+	public function test_webmention_malformed_location() {
+		foreach ( array(
+			'not a list'          => 'Philadelphia',
+			'no properties'       => array( array( 'type' => array( 'h-card' ) ) ),
+			'string properties'   => array( array( 'properties' => 'Philadelphia' ) ),
+			'number'              => array( 42 ),
+			'nested list'         => array( array( 'Philadelphia' ) ),
+			'string geo'          => array( array( 'properties' => array( 'geo' => array( 'geo:39.9524,-75.1636' ) ) ) ),
+			'geo, no properties'  => array( array( 'properties' => array( 'geo' => array( array( 'type' => array( 'h-geo' ) ) ) ) ) ),
+			'nested label'        => array(
+				array(
+					'properties' => array(
+						'label' => array( array( 'type' => array( 'h-adr' ) ) ),
+						'geo'   => array( 'geo:39.9524,-75.1636' ),
+					),
+				),
+			),
+			'array coordinate'    => array( array( 'properties' => array( 'latitude' => array( array( 'value' => '39.9524' ) ) ) ) ),
+			'array address parts' => array( array( 'properties' => array( 'name' => array( array( 'type' => array( 'h-card' ) ) ) ) ) ),
+		) as $label => $location ) {
+			$raw = array( 'properties' => array( 'location' => $location ) );
+			$this->assertSame( array(), Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) ), $label );
+		}
+	}
+
+	/**
+	 * Coordinates given as single values rather than lists are kept.
+	 */
+	public function test_webmention_scalar_coordinates() {
+		$raw  = array(
+			'properties' => array(
+				'location' => array(
+					array(
+						'properties' => array(
+							'latitude'  => '39.9524',
+							'longitude' => '-75.1636',
+						),
+					),
+				),
+			),
+		);
+		$meta = Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) );
+		$this->assertSame( '39.9524', $meta['geo_latitude'] );
+		$this->assertSame( '-75.1636', $meta['geo_longitude'] );
+	}
+
+	/**
 	 * A webmention's h-card location becomes the address and coordinates.
 	 */
 	public function test_webmention_hcard_location() {
