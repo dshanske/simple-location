@@ -61,8 +61,10 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @since 5.0.26 Returns the WP_Error for a failed request instead of causing a TypeError.
+	 *
 	 * @param int $time Time. Optional.
-	 * @return array Current Conditions in Array
+	 * @return array|WP_Error Current Conditions in Array, or an error.
 	 */
 	public function get_conditions( $time = null ) {
 		if ( empty( $this->api ) ) {
@@ -102,16 +104,24 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 		}
 
 		$json = $this->fetch_json( $url, $args );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( ! is_array( $json ) ) {
+			return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
+		}
 		$json = array_filter( $json );
-		if ( array_key_exists( 'currentConditions', $json ) ) {
+		if ( isset( $json['currentConditions'] ) && is_array( $json['currentConditions'] ) ) {
 			$json = $json['currentConditions'];
-		} elseif ( array_key_exists( 'days', $json ) ) {
+		} elseif ( isset( $json['days'][0]['hours'] ) && is_array( $json['days'][0]['hours'] ) ) {
 			$json = $json['days'][0]['hours'];
-			if ( array_key_exists( $datetime->format( 'G' ), $json ) ) {
+			if ( isset( $json[ $datetime->format( 'G' ) ] ) && is_array( $json[ $datetime->format( 'G' ) ] ) ) {
 				$json = $json[ $datetime->format( 'G' ) ];
 			} else {
 				return array();
 			}
+		} else {
+			return array();
 		}
 
 		$return = $this->convert_data( $json );
@@ -236,7 +246,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 			'type_15' => 781,
 			'type_16' => 624,
 			'type_17' => 513,
-			'type_18' => 791,
+			'type_18' => 790,
 			'type_19' => 701,
 			'type_20' => 900,
 			'type_21' => 503,

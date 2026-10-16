@@ -260,6 +260,39 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Visual Crossing: HTTP errors return the WP_Error, and responses without conditions return nothing.
+	 */
+	public function test_visualcrossing_errors() {
+		$this->mock_http(
+			array(
+				'weather.visualcrossing.com' => array(
+					'code' => 401,
+					'body' => 'No account found with API key',
+				),
+			)
+		);
+		$this->assertWPError( $this->provider( 'Weather_Provider_VisualCrossing', array( 'api' => 'bad-key' ) )->get_conditions() );
+
+		$this->mock_http( array( 'weather.visualcrossing.com' => array( 'body' => array( 'queryCost' => 1 ) ) ) );
+		$this->assertSame( array(), $this->provider( 'Weather_Provider_VisualCrossing', array( 'api' => 'vc-key' ) )->get_conditions() );
+
+		$this->mock_http( array( 'weather.visualcrossing.com' => array( 'body' => array( 'days' => array( array( 'datetime' => '2025-07-01' ) ) ) ) ) );
+		$this->assertSame( array(), $this->provider( 'Weather_Provider_VisualCrossing', array( 'api' => 'vc-key' ) )->get_conditions( strtotime( '2025-07-01T14:00:00-04:00' ) ) );
+	}
+
+	/**
+	 * Visual Crossing: lightning without thunder maps to the lightning code.
+	 */
+	public function test_visualcrossing_lightning() {
+		$fixture                                    = $this->fixture( 'weather/visualcrossing-current.json' );
+		$fixture['currentConditions']['conditions'] = 'type_18';
+		$this->mock_http( array( 'weather.visualcrossing.com' => array( 'body' => $fixture ) ) );
+		$conditions = $this->provider( 'Weather_Provider_VisualCrossing', array( 'api' => 'vc-key' ) )->get_conditions();
+		$this->assertSame( 790, $conditions['code'] );
+		$this->assertSame( 'Lightning Without Thunder', $conditions['summary'] );
+	}
+
+	/**
 	 * Xweather (Aeris): the closest observation to a location.
 	 */
 	public function test_aeris_location() {
