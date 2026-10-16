@@ -357,7 +357,7 @@ class LocationProvidersTest extends WP_UnitTestCase {
 			'latitude'     => 39.9524,
 			'longitude'    => -75.1636,
 			'altitude'     => 14.3,
-			'display_name' => 'Philadelphia City Hall',
+			'display-name' => 'Philadelphia City Hall',
 		);
 		$provider                        = new Location_Provider_Address();
 		$this->assertNull( $provider->retrieve( null, array( 'address' => '  City Hall, Philadelphia ' ) ) );
@@ -366,6 +366,22 @@ class LocationProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( -75.1636, $location['longitude'] );
 		$this->assertSame( 14.3, $location['altitude'] );
 		$this->assertSame( 'Philadelphia City Hall', $location['annotation'] );
+	}
+
+	/**
+	 * The annotation comes from a real geo provider's geocode() result.
+	 */
+	public function test_address_with_nominatim() {
+		update_option( 'sloc_geo_provider', 'nominatim' );
+		$this->mock_http( array( 'nominatim.openstreetmap.org/search' => array( 'body' => $this->fixture( 'geo/nominatim-search.json' ) ) ) );
+		$geocode = ( new Geo_Provider_Nominatim() )->geocode( 'City Hall, Philadelphia' );
+		$this->assertNotEmpty( $geocode['display-name'] );
+
+		$provider = new Location_Provider_Address();
+		$this->assertNull( $provider->retrieve( null, array( 'address' => 'City Hall, Philadelphia' ) ) );
+		$location = $provider->get();
+		$this->assertEqualsWithDelta( 39.9524, $location['latitude'], 0.001 );
+		$this->assertSame( $geocode['display-name'], $location['annotation'] );
 	}
 
 	/**
@@ -391,7 +407,7 @@ class LocationProvidersTest extends WP_UnitTestCase {
 		Geo_Provider_Sloc_Test::$geocode = array(
 			'latitude'     => 39.9524,
 			'longitude'    => -75.1636,
-			'display_name' => 'Philadelphia City Hall',
+			'display-name' => 'Philadelphia City Hall',
 		);
 		$provider                        = new Location_Provider_Address();
 		$provider->retrieve( null, array( 'address' => 'City Hall' ) );
