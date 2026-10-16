@@ -55,7 +55,7 @@ class Location_Provider_Airport extends Location_Provider {
 		}
 		$this->latitude   = $airport['latitude'];
 		$this->longitude  = $airport['longitude'];
-		$this->altitude   = $airport['elevation'];
+		$this->altitude   = ifset( $airport['elevation'], null );
 		$this->annotation = $airport['name'];
 	}
 }

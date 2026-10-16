@@ -452,6 +452,22 @@ class LocationProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The airport provider uses an elevation of 0, and works for airports with no elevation.
+	 */
+	public function test_airport_elevation() {
+		$this->skip_airports_on_php84();
+		$provider = new Location_Provider_Airport();
+		$this->assertNull( $provider->retrieve( null, array( 'address' => 'ELW' ) ) );
+		$this->assertEquals( 0, $provider->get()['altitude'] );
+
+		$provider = new Location_Provider_Airport();
+		$this->assertNull( $provider->retrieve( null, array( 'address' => 'WLR' ) ) );
+		$location = $provider->get();
+		$this->assertSame( 'Loring Seaplane Base', $location['annotation'] );
+		$this->assertArrayNotHasKey( 'altitude', $location );
+	}
+
+	/**
 	 * Compass adds its URL and key fields to the user profile.
 	 */
 	public function test_compass_profile_fields() {
