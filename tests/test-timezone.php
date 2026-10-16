@@ -428,6 +428,66 @@ class TimezoneTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * REST post responses give the modified date in the post's timezone.
+	 */
+	public function test_rest_post_modified() {
+		$post_id = $this->post_with_timezone( 'Asia/Tokyo' );
+		$this->set_modified( $post_id );
+		$data = rest_do_request( new WP_REST_Request( 'GET', '/wp/v2/posts/' . $post_id ) )->get_data();
+		$this->assertSame( '2025-08-01T21:00:00+09:00', $data['modified'] );
+		$this->assertSame( '2025-08-01T12:00:00+00:00', $data['modified_gmt'] );
+	}
+
+	/**
+	 * Without a usable post timezone, REST post responses keep core's local dates.
+	 */
+	public function test_rest_post_dates_unusable_timezone() {
+		$post_id = $this->post_with_timezone( 'UTC+5' );
+		$this->set_modified( $post_id );
+		$data = rest_do_request( new WP_REST_Request( 'GET', '/wp/v2/posts/' . $post_id ) )->get_data();
+		$this->assertSame( '2025-07-01T08:00:00', $data['date'] );
+		$this->assertSame( '2025-08-01T08:00:00', $data['modified'] );
+		$this->assertSame( '2025-07-01T12:00:00+00:00', $data['date_gmt'] );
+	}
+
+	/**
+	 * A null GMT date is left null rather than becoming the current time.
+	 */
+	public function test_rest_post_null_date_gmt() {
+		$post_id = $this->post_with_timezone( 'Asia/Tokyo' );
+		$null    = function ( $response ) {
+			$data             = $response->get_data();
+			$data['date_gmt'] = null;
+			$response->set_data( $data );
+			return $response;
+		};
+		add_filter( 'rest_prepare_post', $null, 5 );
+		$data = rest_do_request( new WP_REST_Request( 'GET', '/wp/v2/posts/' . $post_id ) )->get_data();
+		remove_filter( 'rest_prepare_post', $null, 5 );
+		$this->assertNull( $data['date_gmt'] );
+		$this->assertSame( '2025-07-01T21:00:00+09:00', $data['date'] );
+	}
+
+	/**
+	 * Sets a post's modified date to 12:00 UTC on 2025-08-01.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	protected function set_modified( $post_id ) {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- wp_update_post() always sets the modified date to now.
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => '2025-08-01 08:00:00',
+				'post_modified_gmt' => '2025-08-01 12:00:00',
+			),
+			array( 'ID' => $post_id )
+		);
+		clean_post_cache( $post_id );
+	}
+
+	/**
 	 * REST comment responses give the GMT date in W3C format.
 	 */
 	public function test_rest_comment_date_gmt() {

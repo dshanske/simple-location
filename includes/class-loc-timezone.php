@@ -97,14 +97,33 @@ class Loc_Timezone {
 		return sloc_get_contents_array( $file );
 	}
 
+	/**
+	 * Gives REST post dates in the post's timezone, and GMT dates with their offset.
+	 *
+	 * @since 4.0.0
+	 * @since 5.0.26 Without a usable post timezone, core's local dates are kept, and modified is no longer the
+	 *               publish date. A missing or null date is left alone instead of becoming the current time.
+	 *
+	 * @param WP_REST_Response $response Response.
+	 * @param WP_Post          $post     Post.
+	 * @param WP_REST_Request  $request  Request.
+	 * @return WP_REST_Response Response.
+	 */
 	public static function rest_prepare_post( $response, $post, $request ) {
-		$data                 = $response->get_data();
-		$data['date']         = self::get_the_date( $data['date_gmt'], DATE_W3C, $post );
-		$data['modified']     = self::get_the_modified_date( $data['date_gmt'], DATE_W3C, $post );
-		$date_gmt             = new DateTime( $data['date_gmt'], new DatetimeZone( 'GMT' ) );
-		$data['date_gmt']     = $date_gmt->format( DATE_W3C );
-		$modified_gmt         = new DateTime( $data['modified_gmt'], new DatetimeZone( 'GMT' ) );
-		$data['modified_gmt'] = $modified_gmt->format( DATE_W3C );
+		$data = $response->get_data();
+		// Core's local dates are the fallback when the post has no usable timezone.
+		if ( isset( $data['date'] ) ) {
+			$data['date'] = self::get_the_date( $data['date'], DATE_W3C, $post );
+		}
+		if ( isset( $data['modified'] ) ) {
+			$data['modified'] = self::get_the_modified_date( $data['modified'], DATE_W3C, $post );
+		}
+		foreach ( array( 'date_gmt', 'modified_gmt' ) as $key ) {
+			if ( ! empty( $data[ $key ] ) ) {
+				$gmt          = new DateTime( $data[ $key ], new DateTimeZone( 'GMT' ) );
+				$data[ $key ] = $gmt->format( DATE_W3C );
+			}
+		}
 		$response->set_data( $data );
 		return $response;
 	}
