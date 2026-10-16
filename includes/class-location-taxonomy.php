@@ -890,14 +890,17 @@ final class Location_Taxonomy {
 		}
 		while ( 0 !== $term->parent ) {
 			$term = get_term( $term->parent, 'location' );
+			if ( ! $term instanceof WP_Term ) {
+				break;
+			}
 			if ( 0 === $term->parent ) {
 				$country = get_term_meta( $term->term_id, 'country', true );
 				if ( get_option( 'sloc_country' ) !== $country ) {
-					$flag = Geo_Provider::country_flag( $country );
+					$name = $args['flag'] ? Geo_Provider::country_flag( $country ) . ' ' . $term->name : $term->name;
 					if ( $args['links'] ) {
-						$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $flag . ' ' . $term->name );
+						$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $name );
 					} else {
-						$return[] = $flag . ' ' . $term->name;
+						$return[] = $name;
 					}
 				}
 			} elseif ( $args['links'] ) {
