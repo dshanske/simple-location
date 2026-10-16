@@ -186,7 +186,6 @@ class GeoBaseTest extends WP_UnitTestCase {
 	 * The user profile section is shown to users who can edit that user's location.
 	 */
 	public function test_user_profile() {
-		// load_template() uses require_once, so only the first allowed call renders.
 		$subscriber = get_userdata( self::$users['subscriber'] );
 		wp_set_current_user( self::$users['author'] );
 		$this->assertSame( '', $this->capture( array( 'Geo_Base', 'user_profile' ), $subscriber ) );
@@ -196,6 +195,36 @@ class GeoBaseTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Last Reported Location', $output );
 		$this->assertStringContainsString( 'name="latitude"', $output );
 		$this->assertStringContainsString( 'name="location_user_nonce"', $output );
+
+		// The template renders on every call, not only the first.
+		$this->assertStringContainsString( 'Last Reported Location', $this->capture( array( 'Geo_Base', 'user_profile' ), $subscriber ) );
+	}
+
+	/**
+	 * Another user's profile shows that user's location, not the current user's.
+	 */
+	public function test_user_profile_shows_edited_user() {
+		update_user_meta( self::$users['administrator'], 'geo_latitude', '40.1' );
+		update_user_meta( self::$users['administrator'], 'geo_longitude', '-70.1' );
+		update_user_meta( self::$users['administrator'], 'geo_address', 'Admin Place' );
+		update_user_meta( self::$users['subscriber'], 'geo_latitude', '51.5' );
+		update_user_meta( self::$users['subscriber'], 'geo_longitude', '-0.12' );
+		update_user_meta( self::$users['subscriber'], 'geo_address', 'Subscriber Place' );
+
+		wp_set_current_user( self::$users['administrator'] );
+		// user-edit.php sets the global $user_id.
+		$GLOBALS['user_id'] = self::$users['subscriber'];
+		$output             = $this->capture( array( 'Geo_Base', 'user_profile' ), get_userdata( self::$users['subscriber'] ) );
+		unset( $GLOBALS['user_id'] );
+
+		$this->assertStringContainsString( 'value="51.5"', $output );
+		$this->assertStringContainsString( 'value="Subscriber Place"', $output );
+		$this->assertStringNotContainsString( 'Admin Place', $output );
+		$this->assertStringNotContainsString( 'value="40.1"', $output );
+
+		// The administrator's own profile still shows their location.
+		$output = $this->capture( array( 'Geo_Base', 'user_profile' ), get_userdata( self::$users['administrator'] ) );
+		$this->assertStringContainsString( 'value="Admin Place"', $output );
 	}
 
 	/**

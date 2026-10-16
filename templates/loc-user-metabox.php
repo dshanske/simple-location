@@ -5,11 +5,8 @@
  * @package Simple_Location
  */
 
-wp_reset_vars( array( 'user_id' ) );
-
-if ( ! isset( $user_id ) ) {
-	$user_id = get_current_user_id();
-}
+// The user being edited is passed by Geo_Base::user_profile().
+$user_id = ( isset( $args['user'] ) && $args['user'] instanceof WP_User ) ? $args['user']->ID : get_current_user_id(); // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable -- Set by load_template().
 
 $geodata = get_user_geodata( $user_id );
 $geodata = is_array( $geodata ) ? $geodata : array();
