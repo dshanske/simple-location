@@ -62,4 +62,5 @@ $geodata = is_array( $geodata ) ? $geodata : array();
 </tr>
 <?php Geo_Base::geo_public_user( ifset( $geodata['visibility'] ) ); // phpcs:ignore ?>
 </table>
+<?php wp_nonce_field( 'location_user', 'location_user_nonce' ); ?>
 </div>

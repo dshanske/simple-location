@@ -94,10 +94,9 @@ class SaveMetaTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Non-numeric coordinates are not stored.
+	 * Non-numeric coordinates are not stored, and neither is the other half of the pair.
 	 */
 	public function test_save_meta_rejects_invalid_coordinates() {
-		$this->markTestSkipped( 'Known bug, see #304' );
 		$post_id = self::factory()->post->create();
 		$_POST   = array(
 			'latitude'  => 'north',
@@ -105,6 +104,89 @@ class SaveMetaTest extends WP_UnitTestCase {
 		);
 		Geo_Base::save_meta( 'post', $post_id );
 		$this->assertSame( '', get_post_meta( $post_id, 'geo_latitude', true ) );
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'geo_latitude' ) );
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'geo_longitude' ) );
+	}
+
+	/**
+	 * A coordinate out of range clears a previously saved location.
+	 */
+	public function test_save_meta_out_of_range_coordinates() {
+		$post_id = self::factory()->post->create();
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'  => 45.01,
+				'longitude' => -75.44,
+			)
+		);
+		$_POST = array(
+			'latitude'  => '95',
+			'longitude' => '-75.44',
+		);
+		Geo_Base::save_meta( 'post', $post_id );
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'geo_latitude' ) );
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'geo_longitude' ) );
+	}
+
+	/**
+	 * Coordinates and numeric fields of 0 are saved.
+	 */
+	public function test_save_meta_zero_values() {
+		$post_id = self::factory()->post->create();
+		$_POST   = array(
+			'latitude'   => '0',
+			'longitude'  => '0',
+			'altitude'   => '0',
+			'heading'    => '0',
+			'geo_public' => 'public',
+		);
+		Geo_Base::save_meta( 'post', $post_id );
+		$this->assertSame( '0', get_post_meta( $post_id, 'geo_latitude', true ) );
+		$this->assertSame( '0', get_post_meta( $post_id, 'geo_longitude', true ) );
+		$this->assertSame( '0', get_post_meta( $post_id, 'geo_altitude', true ) );
+		$this->assertSame( '0', get_post_meta( $post_id, 'geo_heading', true ) );
+		$this->assertSame( 'public', get_post_geodata( $post_id, 'visibility' ) );
+	}
+
+	/**
+	 * Altitude, speed, heading and zoom are saved only if they are numbers.
+	 */
+	public function test_save_meta_numeric_fields() {
+		$post_id = self::factory()->post->create();
+		$_POST   = array(
+			'latitude'  => '45.01',
+			'longitude' => '-75.44',
+			'altitude'  => 'high',
+			'speed'     => 'fast',
+			'heading'   => '270',
+			'map_zoom'  => 'big',
+		);
+		Geo_Base::save_meta( 'post', $post_id );
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'geo_altitude' ) );
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'geo_speed' ) );
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'geo_zoom' ) );
+		$this->assertSame( '270', get_post_meta( $post_id, 'geo_heading', true ) );
+	}
+
+	/**
+	 * Form input arrives slashed; text is stored exactly as typed.
+	 */
+	public function test_save_meta_unslashes_input() {
+		$post_id = self::factory()->post->create();
+		$_POST   = wp_slash(
+			array(
+				'latitude'        => '41.98',
+				'longitude'       => '-87.90',
+				'address'         => 'O\'Hare \\ Terminal "5"',
+				'weather_code'    => '800',
+				'weather_summary' => 'Clear',
+			)
+		);
+		Geo_Base::save_meta( 'post', $post_id );
+		$this->assertSame( 'O\'Hare \\ Terminal "5"', get_post_meta( $post_id, 'geo_address', true ) );
+		$this->assertEquals( 800, get_post_weatherdata( $post_id, 'code' ) );
 	}
 
 	/**

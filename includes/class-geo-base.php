@@ -1062,16 +1062,48 @@ class Geo_Base {
 		return false;
 	}
 
+	/**
+	 * Saves the location and weather fields submitted from a metabox or the user profile.
+	 *
+	 * Callers verify the nonce and capability first.
+	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Coordinates are validated and saved only as a pair, numeric fields that aren't numbers are not
+	 *               saved, values of 0 are kept, and input is unslashed.
+	 *
+	 * @param string  $meta_type Object type: post, comment or user.
+	 * @param int     $object_id Object ID.
+	 * @param boolean $convert   Whether to convert imperial weather values to metric. Default true.
+	 */
 	public static function save_meta( $meta_type, $object_id, $convert = true ) {
 		// phpcs:disable
 		$units              = get_option( 'sloc_measurements' );
 		$params = array( 'latitude', 'longitude', 'map_zoom', 'altitude', 'speed', 'heading', 'address','location_icon', 'timezone', 'geo_public' );
-		$data = wp_array_slice_assoc( $_POST, $params );
+		$data = wp_array_slice_assoc( wp_unslash( $_POST ), $params );
 		$data = array_map( 'sanitize_text_field', $data );
 
 		if ( array_key_exists( 'map_zoom', $data ) ) {
 			$data['zoom'] = $data['map_zoom'];
 			unset( $data['map_zoom'] );
+		}
+
+		// A coordinate is saved only if both halves are valid; anything else clears both.
+		if ( array_key_exists( 'latitude', $data ) || array_key_exists( 'longitude', $data ) ) {
+			$latitude  = clean_coordinate( ifset( $data['latitude'], '' ), 'latitude' );
+			$longitude = clean_coordinate( ifset( $data['longitude'], '' ), 'longitude' );
+			if ( false === $latitude || false === $longitude ) {
+				$latitude  = '';
+				$longitude = '';
+			}
+			$data['latitude']  = $latitude;
+			$data['longitude'] = $longitude;
+		}
+
+		// Other numeric fields are saved only if they are numbers.
+		foreach ( array( 'zoom', 'altitude', 'speed', 'heading' ) as $key ) {
+			if ( array_key_exists( $key, $data ) ) {
+				$data[ $key ] = is_numeric( $data[ $key ] ) ? floatval( $data[ $key ] ) : '';
+			}
 		}
 
 		if ( array_key_exists( 'location_icon', $data ) && ! empty( $data['location_icon'] ) ) {
@@ -1089,7 +1121,7 @@ class Geo_Base {
 			}
 		}
 
-		if ( ! empty( $data['latitude'] ) || ! empty( $data['longitude'] ) || ! empty( $data['address'] ) ) {
+		if ( is_float( ifset( $data['latitude'] ) ) || ! empty( $data['address'] ) ) {
 			$data['visibility'] = ifset( $data['geo_public'] );
 		} else {
 			Geo_Data::delete_geodata( $meta_type, $object_id, 'visibility' );
@@ -1098,11 +1130,11 @@ class Geo_Base {
 		unset( $data['geo_public'] );
 
 		foreach ( $data as $key => $value ) {
-			if ( ! empty( $value ) ) {
-				if ( is_numeric( $value ) ) {
-					$value = floatval( $value );
-				}
+			if ( is_float( $value ) ) {
 				Geo_Data::set_geodata( $meta_type, $object_id, $key, $value );
+			} elseif ( ! empty( $value ) ) {
+				// The input was unslashed above, and the meta functions unslash again.
+				Geo_Data::set_geodata( $meta_type, $object_id, $key, wp_slash( $value ) );
 			} else {
 				Geo_Data::delete_geodata( $meta_type, $object_id, $key );
 			}
@@ -1110,15 +1142,15 @@ class Geo_Base {
 
 		// Numeric Properties
 		$wtr_params = array( 'temperature', 'humidity', 'pressure', 'cloudiness', 'rain', 'snow', 'windspeed', 'winddegree', 'windgust' );
-		$weather = wp_array_slice_assoc( $_POST, $wtr_params );
+		$weather = wp_array_slice_assoc( wp_unslash( $_POST ), $wtr_params );
 
 		if ( array_key_exists( 'weather_visibility', $_POST ) ) {
-			$weather['visibility'] = $_POST['weather_visibility'];
+			$weather['visibility'] = wp_unslash( $_POST['weather_visibility'] );
 		}
 
 
 		if ( array_key_exists( 'weather_code', $_POST ) ) {
-			$weather['code'] = $_POST['weather_code'];
+			$weather['code'] = wp_unslash( $_POST['weather_code'] );
 		}
 
 		foreach( $weather as $key => $value ) {
@@ -1224,10 +1256,21 @@ class Geo_Base {
 	}
 
 
-	/* Save the user metadata. */
+	/**
+	 * Saves the location fields from the user profile.
+	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Checks the location form's own nonce and the edit_users_location capability.
+	 *
+	 * @param int $user_id User ID.
+	 */
 	public static function save_user_meta( $user_id ) {
+		// The nonce is only present when the profile showed the location fields.
+		if ( ! isset( $_POST['location_user_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['location_user_nonce'] ) ), 'location_user' ) ) {
+			return;
+		}
 		// Check the user's permissions.
-		if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		if ( ! current_user_can( 'edit_user', $user_id ) || ! current_user_can( 'edit_users_location', $user_id ) ) {
 			return;
 		}
 		self::save_meta( 'user', $user_id );
