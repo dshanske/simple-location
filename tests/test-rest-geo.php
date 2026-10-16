@@ -897,4 +897,31 @@ class RestGeoTest extends WP_UnitTestCase {
 		$this->assertTrue( $this->request( '/airport', array( 'iata_code' => 'ZZZ' ) )->is_error() );
 		$this->assertErrorResponse( 'airport_not_found', $this->request( '/airport' ) );
 	}
+
+	/**
+	 * Airlines are found by IATA or ICAO code, including the first row of the file, which has no header.
+	 */
+	public function test_get_airline() {
+		$this->skip_airport_lookup_on_php84();
+		$airline = Airport_Location::get_airline( 'B6' );
+		$this->assertSame( 'JetBlue Airways', $airline['name'] );
+		$this->assertSame( 'JBU', $airline['icao_code'] );
+		// \N means no value.
+		$this->assertArrayNotHasKey( 'alias', $airline );
+
+		$this->assertSame( 'JetBlue Airways', Airport_Location::get_airline( ' jbu ', 'icao_code' )['name'] );
+		$this->assertSame( '-1', Airport_Location::get_airline( 'Unknown', 'name' )['id'] );
+	}
+
+	/**
+	 * Unknown airlines, empty searches and unknown fields return an error, and misses are cached.
+	 */
+	public function test_get_airline_not_found() {
+		$this->skip_airport_lookup_on_php84();
+		$this->assertSame( 'unable_to_find', Airport_Location::get_airline( 'ZZZZ' )->get_error_code() );
+		$this->assertSame( array(), get_transient( 'sloc_airline_' . md5( 'zzzz|iata_code' ) ) );
+		$this->assertWPError( Airport_Location::get_airline( 'zzzz' ) );
+		$this->assertWPError( Airport_Location::get_airline( '' ) );
+		$this->assertWPError( Airport_Location::get_airline( 'B6', 'nonexistent_field' ) );
+	}
 }

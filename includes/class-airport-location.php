@@ -142,9 +142,9 @@ class Airport_Location {
 	 *
 	 * @param string $search Value to Search For.
 	 * @param string $field Field to Search. Defaults to IATA Code.
-	 * @return null|array $airport {
-	 *  An array of details about the airport. Or for certain fields, an array of matching airports.
-	 *  See https://ourairports.com/help/data-dictionary.html#airports.
+	 * @return WP_Error|array $airline {
+	 *  An array of details about the airline, or a WP_Error if it isn't found.
+	 *  See https://openflights.org/data.php#airline.
 	 *
 	 *  @type int $id Openflights Identifier for Airline.
 	 *  @type string $name Name of Airline.
@@ -156,6 +156,8 @@ class Airport_Location {
 	 *  @type string $active Y or N, however information is dated.
 	 * }
 	 * @since 4.0.0
+	 * @since 5.0.26 The first airline in the file can be found, a WP_Error is returned when nothing is found,
+	 *              searches that find nothing are cached too, cache keys are hashed, and `\N` (no value) is dropped.
 	 */
 	public static function get_airline( $search, $field = 'iata_code' ) {
 		$keys = array(
@@ -169,33 +171,60 @@ class Airport_Location {
 			'active'    => 7,
 		);
 
-		$airline = get_transient( 'airline_' . $search . '_' . $field );
+		$search    = trim( (string) $search );
+		$transient = 'sloc_airline_' . md5( strtolower( $search ) . '|' . $field );
+		$airline   = get_transient( $transient );
+		if ( array() === $airline ) {
+			return self::airline_not_found();
+		}
 		if ( false !== $airline ) {
 			return $airline;
+		}
+		if ( '' === $search || ! isset( $keys[ $field ] ) ) {
+			return self::airline_not_found();
 		}
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/airlines.csv';
 		if ( ! sloc_file_exists( $file ) ) {
 			return new WP_Error( 'filesystem_error', "File doesn't exist" );
 		}
-		$fp   = fopen( $file, 'r' ); // phpcs:ignore
+		$fp = fopen( $file, 'r' ); // phpcs:ignore
 		rewind( $fp );
-		$return = array();
-		$line   = fgetcsv( $fp );
+		// The file has no header row, so every line is an airline.
+		$line = fgetcsv( $fp );
 		while ( $line ) {
-			$line = fgetcsv( $fp );
-			if ( is_array( $line ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
+			if ( is_array( $line ) && isset( $line[ $keys[ $field ] ] ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
 				$airline = array();
 				foreach ( $keys as $key => $value ) {
-					$airline[ $key ] = $line[ $value ];
+					// OpenFlights writes \N for no value.
+					if ( isset( $line[ $value ] ) && '\N' !== $line[ $value ] ) {
+						$airline[ $key ] = $line[ $value ];
+					}
 				}
-				$airline = array_filter( $airline );
-				set_transient(
-					'airline_' . $search . '_' . $field,
-					$airline,
-					DAY_IN_SECONDS
-				);
-				return $airline;
+				$airline = array_filter( $airline, 'strlen' );
+				break;
 			}
+			$line = fgetcsv( $fp );
 		}
+
+		fclose( $fp ); // phpcs:ignore
+
+		if ( empty( $airline ) ) {
+			// Remember the miss so repeating an unknown code doesn't search the file again.
+			set_transient( $transient, array(), DAY_IN_SECONDS );
+			return self::airline_not_found();
+		}
+		set_transient( $transient, $airline, DAY_IN_SECONDS );
+		return $airline;
+	}
+
+	/**
+	 * Returns the error for an airline that wasn't found.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return WP_Error Error.
+	 */
+	protected static function airline_not_found() {
+		return new WP_Error( 'unable_to_find', __( 'Unable To Find Airline', 'simple-location' ), array( 'status' => 404 ) );
 	}
 } // End Class
