@@ -241,11 +241,22 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The sloc_local_api_protected filter opens the local lookup endpoints to everyone.
+	 * The sloc_local_api_public filter opens the local lookup endpoints to everyone.
 	 */
 	public function test_local_permission_filter() {
 		wp_set_current_user( 0 );
 		$this->assertFalse( REST_Geo::local_permission_check() );
+		add_filter( 'sloc_local_api_public', '__return_true' );
+		$this->assertTrue( REST_Geo::local_permission_check() );
+		remove_filter( 'sloc_local_api_public', '__return_true' );
+	}
+
+	/**
+	 * The old sloc_local_api_protected filter name still works, with a deprecation notice.
+	 */
+	public function test_local_permission_deprecated_filter() {
+		$this->setExpectedDeprecated( 'sloc_local_api_protected' );
+		wp_set_current_user( 0 );
 		add_filter( 'sloc_local_api_protected', '__return_true' );
 		$this->assertTrue( REST_Geo::local_permission_check() );
 		remove_filter( 'sloc_local_api_protected', '__return_true' );
@@ -770,8 +781,56 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /timezone for an unknown airport code is an error.
 	 */
 	public function test_timezone_unknown_airport() {
-		$this->markTestSkipped( 'Known bug, see #317' );
-		$this->assertErrorResponse( 'airport_not_found', $this->request( '/timezone', array( 'airport' => 'ZZZ' ) ) );
+		$this->skip_airport_lookup_on_php84();
+		$this->assertErrorResponse( 'airport_not_found', $this->request( '/timezone', array( 'airport' => 'ZZZ' ) ), 404 );
+	}
+
+	/**
+	 * Codes that can't be valid are rejected before the airport data file is searched.
+	 */
+	public function test_airport_params_validated() {
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/timezone', array( 'airport' => 'ZZZZ' ) ), 400 );
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/timezone', array( 'airport' => 'J K' ) ), 400 );
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/airport', array( 'iata_code' => 'TORONTO' ) ), 400 );
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/airport', array( 'ident' => '../../etc' ) ), 400 );
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/airport', array( 'gps_code' => 'CYYZ1' ) ), 400 );
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/airport', array( 'municipality' => str_repeat( 'a', 101 ) ) ), 400 );
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/airport', array( 'municipality' => ' ' ) ), 400 );
+	}
+
+	/**
+	 * The validator accepts the formats in the airport data.
+	 */
+	public function test_validate_airport_param() {
+		$this->assertTrue( REST_Geo::validate_airport_param( 'JFK', null, 'airport' ) );
+		$this->assertTrue( REST_Geo::validate_airport_param( 'yyz', null, 'iata_code' ) );
+		$this->assertTrue( REST_Geo::validate_airport_param( 'CYYZ', null, 'ident' ) );
+		$this->assertTrue( REST_Geo::validate_airport_param( 'US-0123', null, 'ident' ) );
+		$this->assertTrue( REST_Geo::validate_airport_param( '00A', null, 'gps_code' ) );
+		$this->assertTrue( REST_Geo::validate_airport_param( 'Toronto', null, 'municipality' ) );
+		$this->assertWPError( REST_Geo::validate_airport_param( array( 'JFK' ), null, 'airport' ) );
+		$this->assertWPError( REST_Geo::validate_airport_param( 'JFK', null, 'unknown' ) );
+	}
+
+	/**
+	 * Searches that find nothing are cached under a hashed key, so repeating them doesn't search the file again.
+	 */
+	public function test_airport_miss_cached() {
+		$this->skip_airport_lookup_on_php84();
+		$transient = 'sloc_airport_' . md5( 'zzz|iata_code' );
+		$this->assertWPError( Airport_Location::get( 'ZZZ' ) );
+		$this->assertSame( array(), get_transient( $transient ) );
+		$this->assertWPError( Airport_Location::get( 'zzz' ) );
+		$this->assertFalse( get_transient( 'airports_ZZZ_iata_code' ) );
+	}
+
+	/**
+	 * Empty searches and unknown fields return an error.
+	 */
+	public function test_airport_invalid_search() {
+		$this->skip_airport_lookup_on_php84();
+		$this->assertWPError( Airport_Location::get( '' ) );
+		$this->assertWPError( Airport_Location::get( 'JFK', 'nonexistent_field' ) );
 	}
 
 	/**

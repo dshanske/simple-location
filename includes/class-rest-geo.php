@@ -75,13 +75,65 @@ class REST_Geo {
 	}
 
 	/**
+	 * Validates an airport code or municipality before the airport data file is searched.
+	 *
+	 * IATA codes are 3 characters, ICAO idents 3 to 8 letters, digits or dashes, and GPS codes 3 or 4. Municipality
+	 * names are limited to 100 characters.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param mixed           $value   The value passed.
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @param string          $param   The parameter being validated.
+	 * @return true|WP_Error True if valid.
+	 */
+	public static function validate_airport_param( $value, $request, $param ) {
+		if ( ! is_string( $value ) ) {
+			$valid = false;
+		} elseif ( 'municipality' === $param ) {
+			$length = strlen( trim( $value ) );
+			$valid  = $length > 0 && $length <= 100;
+		} else {
+			$patterns = array(
+				'airport'   => '/^[A-Za-z0-9]{3}$/',
+				'iata_code' => '/^[A-Za-z0-9]{3}$/',
+				'ident'     => '/^[A-Za-z0-9-]{3,8}$/',
+				'gps_code'  => '/^[A-Za-z0-9]{3,4}$/',
+			);
+			$valid    = isset( $patterns[ $param ] ) && preg_match( $patterns[ $param ], trim( $value ) );
+		}
+		if ( $valid ) {
+			return true;
+		}
+		return new WP_Error(
+			'rest_invalid_param',
+			/* translators: %s: Parameter name. */
+			sprintf( __( 'Invalid %s.', 'simple-location' ), $param ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
 	 * Permission check for local lookup APIs
+	 *
+	 * @since 5.0.26 The sloc_local_api_protected filter is deprecated in favor of sloc_local_api_public.
 	 *
 	 * @return bool
 	 */
 	public static function local_permission_check() {
-		$granted = apply_filters( 'sloc_local_api_protected', false );
-		return $granted ? $granted : current_user_can( 'read' );
+		$granted = apply_filters_deprecated( 'sloc_local_api_protected', array( false ), '5.0.26', 'sloc_local_api_public' );
+
+		/**
+		 * Filters whether the local airport and timezone lookup endpoints are open to everyone.
+		 *
+		 * By default they require a logged-in user who can read.
+		 *
+		 * @since 5.0.26
+		 *
+		 * @param bool $public Whether anyone, including logged-out visitors, can use the endpoints.
+		 */
+		$granted = apply_filters( 'sloc_local_api_public', $granted );
+		return $granted ? true : current_user_can( 'read' );
 	}
 
 	/**
@@ -143,6 +195,7 @@ class REST_Geo {
 						),
 						'airport'   => array(
 							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => array( $this, 'validate_airport_param' ),
 						),
 					),
 					'permission_callback' => array( 'REST_Geo', 'local_permission_check' ),
@@ -159,15 +212,19 @@ class REST_Geo {
 					'args'                => array(
 						'iata_code'    => array(
 							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => array( $this, 'validate_airport_param' ),
 						),
 						'municipality' => array(
 							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => array( $this, 'validate_airport_param' ),
 						),
 						'ident'        => array(
 							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => array( $this, 'validate_airport_param' ),
 						),
 						'gps_code'     => array(
 							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => array( $this, 'validate_airport_param' ),
 						),
 					),
 					'permission_callback' => array( 'REST_Geo', 'local_permission_check' ),
@@ -726,11 +783,10 @@ class REST_Geo {
 			$return = Airport_Location::get( $params['municipality'], 'municipality' );
 		}
 
-		if ( $return ) {
+		if ( $return && ! is_wp_error( $return ) ) {
 			return $return;
-		} else {
-			return new WP_Error( 'airport_not_found', __( 'This Airport Code was Not Found', 'simple-location' ) );
 		}
+		return new WP_Error( 'airport_not_found', __( 'This Airport Code was Not Found', 'simple-location' ), array( 'status' => 404 ) );
 	}
 
 	/**
@@ -743,13 +799,12 @@ class REST_Geo {
 		$return = array();
 		if ( isset( $params['airport'] ) ) {
 			$return = Airport_Location::get( $params['airport'] );
-			if ( $return ) {
-				$params['latitude']  = $return['latitude'];
-				$params['longitude'] = $return['longitude'];
-				$params['altitude']  = $return['elevation'];
-			} else {
-				return new WP_Error( 'airport_not_found', __( 'This Airport Code was Not Found', 'simple-location' ) );
+			if ( ! is_array( $return ) || ! isset( $return['latitude'], $return['longitude'] ) ) {
+				return new WP_Error( 'airport_not_found', __( 'This Airport Code was Not Found', 'simple-location' ), array( 'status' => 404 ) );
 			}
+			$params['latitude']  = $return['latitude'];
+			$params['longitude'] = $return['longitude'];
+			$params['altitude']  = ifset( $return['elevation'], null );
 		}
 		$params['altitude'] = ifset( $params['altitude'], null );
 		if ( ! array_key_exists( 'latitude', $params ) || ! array_key_exists( 'longitude', $params ) ) {
