@@ -94,6 +94,8 @@ class Sloc_Polyline
     /**
      * Reverse Google Polyline algorithm on encoded string.
      *
+     * @since 5.0.26 No deprecation on PHP 8.5, and a value cut off at the end of the string is dropped.
+     *
      * @param string $string Encoded string to extract points from.
      *
      * @return array points
@@ -103,10 +105,16 @@ class Sloc_Polyline
         $points = array();
         $index = $i = 0;
         $previous = array(0,0);
-        while ($i < strlen($string)) {
+        $length = strlen($string);
+        while ($i < $length) {
             $shift = $result = 0x00;
             do {
-                $bit = ord(substr($string, $i++)) - 63;
+                // A truncated string ends in the middle of a value, which is dropped.
+                if ($i >= $length) {
+                    break 2;
+                }
+                // One byte at a time: ord() on a longer string is deprecated in PHP 8.5.
+                $bit = ord($string[$i++]) - 63;
                 $result |= ($bit & 0x1f) << $shift;
                 $shift += 5;
             } while ($bit >= 0x20);
