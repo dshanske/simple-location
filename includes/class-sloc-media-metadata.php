@@ -82,6 +82,8 @@ class Sloc_Media_Metadata {
 	 * @return array $meta Updated metadata.
 	 *
 	 * @since 1.0.0
+	 * @since 5.0.26 Uses the offset stored in the photo whatever the EXIF version, and reads it under the tag
+	 *               names current PHP gives it. Otherwise uses the timezone at the location, then the site's.
 	 */
 	public static function exif_data( $meta, $file, $image_type, $iptc = null, $exif = null ) {
 		if ( ! is_array( $exif ) && is_callable( 'exif_read_data' ) && in_array( $image_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ), true ) ) {
@@ -91,8 +93,6 @@ class Sloc_Media_Metadata {
 		if ( ! is_array( $exif ) || ! array_key_exists( 'ExifVersion', $exif ) ) {
 			return $meta;
 		}
-		$version = (int) $exif['ExifVersion'];
-		// The changes between EXIF Versions mean different approaches are required.
 		$meta['ExifVersion'] = sanitize_text_field( $exif['ExifVersion'] );
 		if ( ! empty( $exif['GPSLongitude'] ) && count( $exif['GPSLongitude'] ) === 3 && ! empty( $exif['GPSLongitudeRef'] ) ) {
 			$meta['location']['longitude'] = round( ( 'W' === $exif['GPSLongitudeRef'] ? - 1 : 1 ) * wp_exif_gps_convert( $exif['GPSLongitude'] ), 7 );
@@ -102,29 +102,36 @@ class Sloc_Media_Metadata {
 		}
 		$datetime = null;
 
-		if ( $version <= 232 ) {
-			// In Version 231 the timezone offset was stored in a separate field.
-			foreach (
-				array(
-					'DateTimeOriginal'  => 'UndefinedTag:0x9011',
-					'DateTimeDigitized' => 'UndefinedTag:0x9012',
-				)
-				as $time => $offset
-			) {
-				if ( ! empty( $exif[ $time ] ) && ! empty( $exif[ $offset ] ) ) {
-					$datetime = wp_exif_datetime( $exif[ $time ], $exif[ $offset ] );
-					break;
+		// EXIF dates are local time. Since EXIF 2.31 the offset can be stored in tags 0x9011 and 0x9012, which
+		// current PHP names OffsetTimeOriginal and OffsetTimeDigitized, and older PHP reports as unknown tags.
+		foreach (
+			array(
+				'DateTimeOriginal'  => array( 'OffsetTimeOriginal', 'UndefinedTag:0x9011' ),
+				'DateTimeDigitized' => array( 'OffsetTimeDigitized', 'UndefinedTag:0x9012' ),
+			)
+			as $time => $offsets
+		) {
+			if ( empty( $exif[ $time ] ) ) {
+				continue;
+			}
+			foreach ( $offsets as $offset ) {
+				if ( ! empty( $exif[ $offset ] ) && is_string( $exif[ $offset ] ) && preg_match( '/^[+-]\d{2}:\d{2}$/', trim( $exif[ $offset ] ) ) ) {
+					$datetime = wp_exif_datetime( $exif[ $time ], trim( $exif[ $offset ] ) );
+					break 2;
 				}
 			}
-		} else {
-			// Otherwise the timezone will be derived from the location.
-			if ( ! empty( $meta['location'] ) ) {
-				// Try to get the right timezone from the location.
+		}
+
+		// Without an offset, use the timezone at the photo's location, or else the site's.
+		if ( ! $datetime ) {
+			$timezone = null;
+			if ( isset( $meta['location']['latitude'], $meta['location']['longitude'] ) ) {
 				$timezone = Loc_Timezone::timezone_for_location( $meta['location']['latitude'], $meta['location']['longitude'] );
 				if ( $timezone instanceof Timezone_Result ) {
 					$timezone = $timezone->timezone;
 				}
-			} else {
+			}
+			if ( ! $timezone instanceof DateTimeZone ) {
 				$timezone = wp_timezone();
 			}
 			if ( ! empty( $exif['DateTimeOriginal'] ) ) {
@@ -228,7 +235,8 @@ class Sloc_Media_Metadata {
 	 * @return array $meta The updated metadata.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 The location is removed from the image metadata, and no visibility is stored.
+	 * @since 5.0.26 The location is removed from the image metadata, and no visibility is stored. The creation date is
+	 *               saved for photos without a location.
 	 */
 	public static function attachment( $meta, $post_id ) {
 		if ( ! isset( $meta['image_meta'] ) ) {
@@ -272,14 +280,15 @@ class Sloc_Media_Metadata {
 				}
 			}
 
-			$update = array_filter( $update );
-			foreach ( $update as $key => $value ) {
-				update_post_meta( $post_id, $key, $value );
-			}
-
 			// The location now lives in the geo fields, where its visibility applies; don't also keep it in the image metadata,
 			// which core exposes to anyone, for example in the REST API.
 			unset( $meta['image_meta']['location'] );
+		}
+
+		// The creation date is saved whether or not the photo has a location.
+		$update = array_filter( $update );
+		foreach ( $update as $key => $value ) {
+			update_post_meta( $post_id, $key, $value );
 		}
 
 		return $meta;
