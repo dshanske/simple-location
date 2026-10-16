@@ -355,6 +355,15 @@ class Loc_Timezone {
 		}
 	}
 
+	/**
+	 * Returns the timezone stored for an object, or the site timezone.
+	 *
+	 * @since 4.0.0
+	 * @since 5.0.26 A comment uses its own timezone when it has one, otherwise its post's.
+	 *
+	 * @param WP_Post|WP_Comment|WP_Term|WP_User|int|null $object Object, or post ID. Default the current post.
+	 * @return DateTimeZone|null Timezone, or null to leave dates unchanged.
+	 */
 	public static function get_timezone( $object = null ) {
 		if ( ! $object ) {
 			$object = get_post();
@@ -368,8 +377,13 @@ class Loc_Timezone {
 			$id   = $object->ID;
 		}
 		if ( $object instanceof WP_Comment ) {
-			$id   = $object->comment_post_ID;
-			$type = 'post';
+			if ( get_comment_meta( $object->comment_ID, 'geo_timezone', true ) ) {
+				$id   = $object->comment_ID;
+				$type = 'comment';
+			} else {
+				$id   = $object->comment_post_ID;
+				$type = 'post';
+			}
 		}
 		if ( $object instanceof WP_Term ) {
 			$id   = $object->term_id;
@@ -512,9 +526,29 @@ class Loc_Timezone {
 		return wp_date( $d, get_comment_timestamp( $comment ), $timezone );
 	}
 
+	/**
+	 * Filters the comment time to show it in the comment's timezone.
+	 *
+	 * @since 4.0.0
+	 * @since 5.0.26 A GMT time is returned in GMT.
+	 *
+	 * @param string|int $date      Formatted time.
+	 * @param string     $d         Format.
+	 * @param bool       $gmt       Whether the GMT time was requested.
+	 * @param bool       $translate Whether the time was translated.
+	 * @param WP_Comment $comment   Comment.
+	 * @return string|int Formatted time.
+	 */
 	public static function get_comment_time( $date, $d, $gmt, $translate, $comment ) {
 		if ( '' === $d ) {
 			$d = get_option( 'time_format' );
+		}
+		if ( $gmt ) {
+			// Timestamps are already correct; core labels other GMT times with the site offset.
+			if ( in_array( $d, array( 'U', 'G' ), true ) ) {
+				return $date;
+			}
+			return wp_date( $d, get_comment_timestamp( $comment ), new DateTimeZone( 'UTC' ) );
 		}
 		$timezone = self::get_timezone( $comment );
 		if ( is_null( $timezone ) ) {
