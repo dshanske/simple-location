@@ -739,8 +739,66 @@ class MicropubTest extends WP_UnitTestCase {
 			),
 		);
 		$meta = Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) );
-		$this->assertSame( '39.9524', $meta['geo_latitude'] );
-		$this->assertSame( '-75.1636', $meta['geo_longitude'] );
+		$this->assertSame( 39.9524, $meta['geo_latitude'] );
+		$this->assertSame( -75.1636, $meta['geo_longitude'] );
+	}
+
+	/**
+	 * Coordinates that aren't valid or in range are dropped, along with altitude and accuracy.
+	 */
+	public function test_webmention_invalid_coordinates() {
+		foreach ( array(
+			'text latitude'         => array( 'abc', '-75.1636' ),
+			'latitude out of range' => array( '91', '-75.1636' ),
+			'longitude too large'   => array( '39.9524', '999' ),
+			'boolean latitude'      => array( true, '-75.1636' ),
+			'missing longitude'     => array( '39.9524', null ),
+		) as $label => $coordinates ) {
+			$props = array(
+				'latitude' => array( $coordinates[0] ),
+				'altitude' => array( '14' ),
+				'accuracy' => array( '25' ),
+			);
+			if ( null !== $coordinates[1] ) {
+				$props['longitude'] = array( $coordinates[1] );
+			}
+			$raw = array( 'properties' => array( 'location' => array( array( 'properties' => $props ) ) ) );
+			$this->assertSame( array(), Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) ), $label );
+		}
+	}
+
+	/**
+	 * Altitude and accuracy that aren't numbers, and negative accuracy, are dropped while valid coordinates are kept.
+	 */
+	public function test_webmention_invalid_altitude_accuracy() {
+		$raw  = array(
+			'properties' => array(
+				'location' => array(
+					array(
+						'properties' => array(
+							'latitude'  => array( '0' ),
+							'longitude' => array( '-75.1636' ),
+							'altitude'  => array( 'high' ),
+							'accuracy'  => array( '-5' ),
+						),
+					),
+				),
+			),
+		);
+		$meta = Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) );
+		$this->assertSame(
+			array(
+				'geo_latitude'  => 0.0,
+				'geo_longitude' => -75.1636,
+			),
+			$meta
+		);
+
+		$raw['properties']['location'][0]['properties']['altitude'] = array( '-10.5' );
+		$raw['properties']['location'][0]['properties']['accuracy'] = array( true );
+		$meta = Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) );
+		$this->assertSame( -10.5, $meta['geo_altitude'] );
+		$this->assertArrayNotHasKey( 'geo_accuracy', $meta );
 	}
 
 	/**
@@ -768,9 +826,9 @@ class MicropubTest extends WP_UnitTestCase {
 		);
 		$meta = Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) );
 		$this->assertSame( 'Philadelphia City Hall, Philadelphia, Pennsylvania, United States', $meta['geo_address'] );
-		$this->assertSame( '39.9524', $meta['geo_latitude'] );
-		$this->assertSame( '-75.1636', $meta['geo_longitude'] );
-		$this->assertSame( '14', $meta['geo_altitude'] );
+		$this->assertSame( 39.9524, $meta['geo_latitude'] );
+		$this->assertSame( -75.1636, $meta['geo_longitude'] );
+		$this->assertSame( 14.0, $meta['geo_altitude'] );
 		$this->assertArrayNotHasKey( 'geo_accuracy', $meta );
 	}
 
@@ -801,9 +859,9 @@ class MicropubTest extends WP_UnitTestCase {
 			),
 		);
 		$meta = Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) );
-		$this->assertSame( '39.9524', $meta['geo_latitude'] );
-		$this->assertSame( '-75.1636', $meta['geo_longitude'] );
-		$this->assertSame( '25', $meta['geo_accuracy'] );
+		$this->assertSame( 39.9524, $meta['geo_latitude'] );
+		$this->assertSame( -75.1636, $meta['geo_longitude'] );
+		$this->assertSame( 25.0, $meta['geo_accuracy'] );
 		$this->assertArrayNotHasKey( 'geo_address', $meta );
 	}
 
@@ -834,8 +892,8 @@ class MicropubTest extends WP_UnitTestCase {
 		);
 		$meta = Location_Plugins::webmention_handler_mf2_set_properties( array(), $this->webmention_handler( $raw ) );
 		$this->assertSame( 'Home', $meta['geo_address'] );
-		$this->assertSame( '39.9524', $meta['geo_latitude'] );
-		$this->assertSame( '-75.1636', $meta['geo_longitude'] );
+		$this->assertSame( 39.9524, $meta['geo_latitude'] );
+		$this->assertSame( -75.1636, $meta['geo_longitude'] );
 	}
 
 	/**

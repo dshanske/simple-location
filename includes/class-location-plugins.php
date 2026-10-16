@@ -132,6 +132,8 @@ class Location_Plugins {
 	 * Adds location properties to webmention returns.
 	 *
 	 * @since 5.0.26 A location that is a string, or a location or h-geo without properties, no longer causes errors.
+	 * @since 5.0.26 Coordinates are only kept if both are valid and in range, and altitude and accuracy only if numeric
+	 *              (and accuracy only if not negative).
 	 *
 	 * @param array  $meta    Comment meta.
 	 * @param object $handler Webmention handler.
@@ -194,11 +196,24 @@ class Location_Plugins {
 				$meta['geo_address'] = implode( ', ', $parts );
 			}
 		}
-		foreach ( array( 'latitude', 'longitude', 'altitude', 'accuracy' ) as $property ) {
+		// The source is untrusted, so only keep coordinates that are valid and in range.
+		$latitude  = clean_coordinate( static::array_get( $props, 'latitude', null, true ), 'latitude' );
+		$longitude = clean_coordinate( static::array_get( $props, 'longitude', null, true ), 'longitude' );
+		if ( false === $latitude || false === $longitude ) {
+			return $meta;
+		}
+		$meta['geo_latitude']  = $latitude;
+		$meta['geo_longitude'] = $longitude;
+		foreach ( array( 'altitude', 'accuracy' ) as $property ) {
 			$value = static::array_get( $props, $property, null, true );
-			if ( is_scalar( $value ) ) {
-				$meta[ 'geo_' . $property ] = $value;
+			if ( ! is_numeric( $value ) || ! is_finite( (float) $value ) ) {
+				continue;
 			}
+			// Accuracy is a radius in meters, so it can't be negative.
+			if ( 'accuracy' === $property && 0 > (float) $value ) {
+				continue;
+			}
+			$meta[ 'geo_' . $property ] = (float) $value;
 		}
 		return $meta;
 	}
