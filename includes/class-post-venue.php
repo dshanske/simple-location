@@ -194,11 +194,17 @@ class Post_Venue {
 	 * Adds posts__in support to edit post screen.
 	 *
 	 * @since 5.0.26 Accepts a single ID or a comma-separated list.
+	 * @since 5.0.26 Only changes the main query on a post list screen, not every query on the page.
 	 *
 	 * @param WP_Query $query Query Object.
 	 */
 	public static function post__in( $query ) {
-		if ( ! is_admin() ) {
+		if ( ! is_admin() || ! $query->is_main_query() ) {
+			return;
+		}
+
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'edit' !== $screen->base ) {
 			return;
 		}
 
