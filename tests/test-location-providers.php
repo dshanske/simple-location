@@ -33,15 +33,6 @@ class LocationProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Skips tests that look up airports on PHP 8.4 and later.
-	 */
-	protected function skip_airports_on_php84() {
-		if ( PHP_VERSION_ID >= 80400 ) {
-			$this->markTestSkipped( 'Known bug on PHP 8.4 and later, see #316' );
-		}
-	}
-
-	/**
 	 * A Location_Provider whose properties can be set directly.
 	 *
 	 * @param array $properties Property values.
@@ -436,7 +427,6 @@ class LocationProvidersTest extends WP_UnitTestCase {
 	 * The airport provider looks up IATA and ICAO codes.
 	 */
 	public function test_airport() {
-		$this->skip_airports_on_php84();
 		$provider = new Location_Provider_Airport();
 		$this->assertNull( $provider->retrieve( null, array( 'address' => ' PHL ' ) ) );
 		$location = $provider->get();
@@ -455,7 +445,6 @@ class LocationProvidersTest extends WP_UnitTestCase {
 	 * The airport provider uses an elevation of 0, and works for airports with no elevation.
 	 */
 	public function test_airport_elevation() {
-		$this->skip_airports_on_php84();
 		$provider = new Location_Provider_Airport();
 		$this->assertNull( $provider->retrieve( null, array( 'address' => 'ELW' ) ) );
 		$this->assertEquals( 0, $provider->get()['altitude'] );

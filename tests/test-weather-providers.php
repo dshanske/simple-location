@@ -508,6 +508,34 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * NWS: a location lookup uses the nearest station, wherever it is in the station list.
+	 */
+	public function test_nws_nearest_station() {
+		$stations = array();
+		foreach ( array(
+			'KFAR' => array( -75.16, 40.5 ),
+			'KMID' => array( -75.16, 40.1 ),
+			'KNEA' => array( -75.17, 39.96 ),
+		) as $id => $coordinates ) {
+			$stations[] = array(
+				'geometry'   => array( 'coordinates' => $coordinates ),
+				'properties' => array( 'stationIdentifier' => $id ),
+			);
+		}
+		$this->mock_http(
+			array(
+				'api.weather.gov/points/'           => array( 'body' => array( 'properties' => array( 'observationStations' => 'https://api.weather.gov/gridpoints/PHI/49,75/stations' ) ) ),
+				'gridpoints/PHI/49,75/stations'     => array( 'body' => array( 'features' => $stations ) ),
+				'stations/KNEA/observations/latest' => array( 'body' => $this->fixture( 'weather/nws-observation.json' ) ),
+				'stations/KNEA'                     => array( 'body' => $this->fixture( 'weather/nws-station.json' ) ),
+			)
+		);
+		$conditions = $this->provider( 'Weather_Provider_NWSUS' )->get_conditions();
+		$this->assertSame( 'KNEA', $conditions['station_id'] );
+		$this->assertStringContainsString( 'stations/KNEA/observations/latest', $this->http_requests[2]['url'] );
+	}
+
+	/**
 	 * NWS: readings of 0 are kept, and readings NWS sends as null are left out instead of becoming 0.
 	 */
 	public function test_nws_zero_and_missing_values() {
@@ -690,6 +718,34 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$provider->set( array( 'station_id' => 'backyard' ) );
 		$this->assertWPError( $provider->get_conditions() );
 		$this->assertWPError( $provider->get_conditions( strtotime( '-1 day' ) ), 'Past times go straight to the fallback.' );
+	}
+
+	/**
+	 * Custom station: a location lookup uses the nearest station within 10 km.
+	 */
+	public function test_custom_station_nearest() {
+		$stations = array();
+		foreach ( array(
+			'far'  => '39.99',
+			'near' => '39.951',
+			'mid'  => '39.97',
+		) as $id => $latitude ) {
+			$stations[] = array(
+				'id'        => $id,
+				'url'       => 'https://station.example.com/' . $id . '.json',
+				'latitude'  => $latitude,
+				'longitude' => (string) self::LNG,
+			);
+		}
+		update_option( 'sloc_stations', $stations );
+		$fixture              = $this->fixture( 'weather/station-custom.json' );
+		$fixture['timestamp'] = time();
+		$this->mock_http( array( 'station.example.com/near.json' => array( 'body' => $fixture ) ) );
+
+		$conditions = $this->provider( 'Weather_Provider_Station' )->get_conditions();
+		$this->assertCount( 1, $this->http_requests );
+		$this->assertSame( 'https://station.example.com/near.json', $this->http_requests[0]['url'] );
+		$this->assertEqualsWithDelta( 156, $conditions['distance'], 2 );
 	}
 
 	/**

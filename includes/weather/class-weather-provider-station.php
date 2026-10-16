@@ -211,7 +211,7 @@ class Weather_Provider_Station extends Weather_Provider {
 			usort(
 				$sitelist,
 				function ( $a, $b ) {
-					return $a['distance'] > $b['distance'];
+					return $a['distance'] <=> $b['distance'];
 				}
 			);
 			if ( 10000 > $sitelist[0]['distance'] ) {
