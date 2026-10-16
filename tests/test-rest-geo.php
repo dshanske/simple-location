@@ -861,6 +861,27 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Airports at sea level keep an elevation of 0; airports with no elevation in the file have none.
+	 */
+	public function test_airport_sea_level() {
+		$this->skip_airport_lookup_on_php84();
+		$airport = Airport_Location::get( 'ELW' );
+		$this->assertSame( 'Ellamar Seaplane Base', $airport['name'] );
+		$this->assertEquals( 0, $airport['elevation'] );
+		$this->assertSame( 0, $airport['elevation_ft'] );
+
+		$data = $this->request( '/airport', array( 'iata_code' => 'HBH' ) )->get_data();
+		$this->assertEquals( 0, $data['elevation'] );
+
+		$airport = Airport_Location::get( 'WLR' );
+		$this->assertSame( 'Loring Seaplane Base', $airport['name'] );
+		$this->assertArrayNotHasKey( 'elevation', $airport );
+		$this->assertArrayNotHasKey( 'elevation_ft', $airport );
+		// Still dropped when not scheduled, as documented.
+		$this->assertArrayNotHasKey( 'scheduled_service', $airport );
+	}
+
+	/**
 	 * /airport by municipality returns a list of airports.
 	 */
 	public function test_airport_municipality() {
