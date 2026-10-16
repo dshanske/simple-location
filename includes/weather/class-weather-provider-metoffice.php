@@ -314,7 +314,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		$return['windgust']    = self::mph_to_mps( ifset( $properties['G'] ) );
 		$return['summary']     = $this->weather_type( ifset( $properties['W'] ) );
 		$return['code']        = $this->code_map( ifset( $properties['W'] ) );
-		$return                = array_filter( $this->extra_data( $return ) );
+		$return                = self::filter_weather( $this->extra_data( $return ) );
 
 		$this->set_cache( $return );
 

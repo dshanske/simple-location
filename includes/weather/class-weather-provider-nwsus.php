@@ -177,7 +177,8 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$return['winddegree']  = self::get_value( $properties, 'windDirection' );
 		$return['windspeed']   = self::kmh_to_ms( self::get_value( $properties, 'windSpeed' ) );
 		$return['windgust']    = self::get_value( $properties, 'windGust' );
-		$return['pressure']    = round( self::get_value( $properties, 'barometricPressure' ) / 100, 2 );
+		$pressure              = self::get_value( $properties, 'barometricPressure' );
+		$return['pressure']    = is_numeric( $pressure ) ? round( $pressure / 100, 2 ) : null;
 
 		$return['summary'] = ifset( $properties['textDescription'] );
 
@@ -191,7 +192,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$url      = sprintf( 'https://api.weather.gov/stations/%1$s', $this->station_id );
 		$response = wp_remote_get( $url, $args );
 		if ( is_wp_error( $response ) ) {
-			return array_filter( $return );
+			return self::filter_weather( $return );
 		}
 		$response = wp_remote_retrieve_body( $response );
 		$response = json_decode( $response, true );
@@ -199,7 +200,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			$return['name']     = ifset( $response['properties']['name'] );
 			$return['timezone'] = ifset( $response['properties']['timeZone'] );
 		}
-		$return = array_filter( $this->extra_data( $return ) );
+		$return = self::filter_weather( $this->extra_data( $return ) );
 		$this->set_cache( $return );
 
 		if ( WP_DEBUG ) {

@@ -132,7 +132,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 
 			$return = $this->extra_data( $return, $time );
 
-			return array_filter( $return );
+			return self::filter_weather( $return );
 		}
 		return false;
 	}

@@ -154,8 +154,8 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 		$return['summary']     = self::conditions_map( ifset( $json['conditions'] ) );
 		$return['code']        = self::code_map( ifset( $json['conditions'] ) );
 
-		$return['windspeed']  = round( self::kmh_to_ms( ifset( $json['windspeed'] ) ), 1 );
-		$return['windgust']   = round( self::kmh_to_ms( ifset( $json['windgust'] ) ), 1 );
+		$return['windspeed']  = self::round_value( self::kmh_to_ms( ifset( $json['windspeed'] ) ), 1 );
+		$return['windgust']   = self::round_value( self::kmh_to_ms( ifset( $json['windgust'] ) ), 1 );
 		$return['winddegree'] = ifset_round( $json['winddir'], 1 );
 		$return['rain']       = ifset_round( $json['precip'], 2 );
 		$return['snow']       = self::cm_to_mm( ifset_round( $json['snow'], 2 ) );
@@ -165,7 +165,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 			$return['visibility'] = round( self::km_to_meters( (float) $json['visibility'] ) );
 		}
 
-		return array_filter( $return );
+		return self::filter_weather( $return );
 	}
 
 	/**

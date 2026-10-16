@@ -269,7 +269,7 @@ class Weather_Provider_Station extends Weather_Provider {
 					if ( isset( $return['summary'] ) ) {
 						$return['code'] = self::code_map( $return['summary'] );
 					}
-					$return = array_filter( $this->extra_data( $return, null ) );
+					$return = self::filter_weather( $this->extra_data( $return, null ) );
 					break;
 				}
 			}

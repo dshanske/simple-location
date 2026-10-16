@@ -149,6 +149,69 @@ class WeatherDataTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Readings of 0 are saved and returned, including when they replace another value.
+	 */
+	public function test_zero_values_saved() {
+		$post_id = self::factory()->post->create();
+		set_post_weatherdata( $post_id, '', static::$weather );
+		set_post_weatherdata(
+			$post_id,
+			'',
+			array(
+				'temperature' => 0,
+				'windspeed'   => 0.0,
+				'rain'        => '0',
+				'humidity'    => '',
+			)
+		);
+		$this->assertSame( '0', get_post_meta( $post_id, 'weather_temperature', true ) );
+		$weather = get_post_weatherdata( $post_id );
+		$this->assertSame( '0', $weather['temperature'] );
+		$this->assertSame( '0', $weather['windspeed'] );
+		$this->assertSame( '0', $weather['rain'] );
+		// An empty value still deletes the stored value.
+		$this->assertArrayNotHasKey( 'humidity', $weather );
+
+		// A post at exactly 0 °C shows its temperature.
+		$this->assertStringContainsString( '<data class="p-num" value="0">0</data>', Sloc_Weather_Data::get_the_weather( 'post', $post_id ) );
+	}
+
+	/**
+	 * Only null, '', false and empty arrays count as no value.
+	 */
+	public function test_has_value() {
+		foreach ( array( 0, 0.0, '0', 'Clear', 12.5 ) as $value ) {
+			$this->assertTrue( Sloc_Weather_Data::has_value( $value ), wp_json_encode( $value ) );
+		}
+		foreach ( array( null, '', false, array() ) as $value ) {
+			$this->assertFalse( Sloc_Weather_Data::has_value( $value ), wp_json_encode( $value ) );
+		}
+	}
+
+	/**
+	 * Old-format weather with no wind keeps a wind speed of 0 when migrated.
+	 */
+	public function test_migrate_weather_keeps_zero() {
+		$post_id = self::factory()->post->create();
+		update_post_meta(
+			$post_id,
+			'geo_weather',
+			array(
+				'temperature' => 0,
+				'wind'        => array(
+					'speed'  => 0,
+					'degree' => 90,
+				),
+			)
+		);
+		$weather = get_post_weatherdata( $post_id );
+		$this->assertSame( '0', $weather['temperature'] );
+		$this->assertSame( '0', $weather['windspeed'] );
+		$this->assertSame( '90', $weather['winddegree'] );
+		$this->assertArrayNotHasKey( 'windgust', $weather );
+	}
+
+	/**
 	 * Invalid types, IDs and keys are refused.
 	 */
 	public function test_invalid_arguments() {
@@ -593,6 +656,49 @@ class WeatherDataTest extends WP_UnitTestCase {
 			$this->assertMatchesRegularExpression( '/^\d{4}-\d\d-\d\dT/', $data[ $key ], $key );
 		}
 		$this->assertSame( 20, $data['temperature'] );
+	}
+
+	/**
+	 * Extra data keeps readings of 0 and `day` at night, and drops values that aren't set.
+	 */
+	public function test_extra_data_keeps_zero_and_night() {
+		$provider = new Weather_Provider_Sloc_Test();
+		$data     = $provider->extra_data(
+			array(
+				'latitude'    => 40.7128,
+				'longitude'   => -74.006,
+				'temperature' => 0,
+				'rain'        => 0.0,
+				'humidity'    => '0',
+				'windgust'    => false,
+				'snow'        => null,
+				'summary'     => '',
+			),
+			strtotime( '2024-07-01T06:00:00Z' )
+		);
+		$this->assertFalse( $data['day'] );
+		$this->assertSame( 0, $data['temperature'] );
+		$this->assertSame( 0.0, $data['rain'] );
+		$this->assertSame( '0', $data['humidity'] );
+		foreach ( array( 'windgust', 'snow', 'summary' ) as $key ) {
+			$this->assertArrayNotHasKey( $key, $data, $key );
+		}
+	}
+
+	/**
+	 * Unit conversions return null for values that aren't numbers, instead of 0.
+	 */
+	public function test_unit_conversions_not_a_number() {
+		$helpers = array( 'mm_to_inches', 'inches_to_mm', 'feet_to_meters', 'meters_to_feet', 'meters_to_miles', 'miles_to_meters', 'km_to_meters', 'kmh_to_ms', 'm_to_mm', 'cm_to_mm', 'miph_to_mps', 'mps_to_miph', 'mph_to_mps' );
+		foreach ( $helpers as $helper ) {
+			foreach ( array( null, false, '', 'abc', array() ) as $value ) {
+				$this->assertNull( call_user_func( array( 'Sloc_Provider', $helper ), $value ), $helper . ' ' . wp_json_encode( $value ) );
+			}
+			$this->assertEquals( 0, call_user_func( array( 'Sloc_Provider', $helper ), 0 ), $helper );
+		}
+		$this->assertSame( 10.0, Sloc_Provider::kmh_to_ms( '36' ) );
+		$this->assertSame( 400.0, Sloc_Provider::km_to_meters( 0.4 ) );
+		$this->assertSame( 25.0, Sloc_Provider::cm_to_mm( 2.5 ) );
 	}
 
 	/**
