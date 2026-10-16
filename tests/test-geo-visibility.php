@@ -443,6 +443,35 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The address, description and wrapper class are escaped, whatever is stored.
+	 */
+	public function test_get_location_escaped() {
+		$post_id = $this->post_with_location( 'public' );
+		// Bypass the address sanitizer to check the output itself is escaped.
+		remove_all_filters( 'sanitize_post_meta_geo_address' );
+		update_post_meta( $post_id, 'geo_address', '<script>alert(1)</script>' );
+		$html = Geo_Data::get_location(
+			'post',
+			$post_id,
+			array(
+				'text'          => true,
+				'description'   => '<script>alert(2)</script><strong>At</strong> ',
+				'wrapper-class' => array( 'x"><script>alert(3)</script>' ),
+			)
+		);
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringContainsString( '&lt;script&gt;alert(1)&lt;/script&gt;', $html );
+		$this->assertStringContainsString( '<strong>At</strong>', $html );
+
+		// The protected display escapes the address too.
+		$post_id = $this->post_with_location( 'protected' );
+		update_post_meta( $post_id, 'geo_address', '<script>alert(4)</script>' );
+		$html = Geo_Data::get_location( 'post', $post_id );
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringContainsString( '&lt;script&gt;alert(4)&lt;/script&gt;', $html );
+	}
+
+	/**
 	 * A visitor sees nothing for a private location.
 	 */
 	public function test_get_location_private_visitor() {

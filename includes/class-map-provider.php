@@ -225,7 +225,15 @@ abstract class Map_Provider extends Sloc_Provider {
 	abstract public function get_the_map( $static = false );
 
 
-	// Return HTML Code for Static Map.
+	/**
+	 * Returns the HTML for a static map image linked to the full map.
+	 *
+	 * @since 4.1.10
+	 * @since 5.0.26 The URLs and sizes are escaped.
+	 *
+	 * @param bool $srcset Optional. Add a srcset with 0.5x to 3x images. Default false.
+	 * @return string HTML.
+	 */
 	public function get_the_static_map_html( $srcset = false ) {
 		$orig = $this->get_the_static_map();
 		if ( is_wp_error( $orig ) ) {
@@ -244,13 +252,13 @@ abstract class Map_Provider extends Sloc_Provider {
 				if ( is_wp_error( $image ) ) {
 					return $this->static_map_error( $image );
 				}
-				$srcset[] = sprintf( '%1$s %2$sx', $image, $mult );
+				$srcset[] = sprintf( '%1$s %2$sx', esc_url( $image ), $mult );
 
 			}
 			$srcset = implode( ',', $srcset );
-			return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" srcset="%3$s" width="%4$s" height="%5$s" loading="lazy" /></a>', $link, $orig, $srcset, $width, $height );
+			return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" srcset="%3$s" width="%4$s" height="%5$s" loading="lazy" /></a>', esc_url( $link ), esc_url( $orig ), esc_attr( $srcset ), esc_attr( $width ), esc_attr( $height ) );
 		}
-		return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" width="%3$s" height="%4$s" loading="lazy" /></a>', $link, $orig, $width, $height );
+		return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" width="%3$s" height="%4$s" loading="lazy" /></a>', esc_url( $link ), esc_url( $orig ), esc_attr( $width ), esc_attr( $height ) );
 	}
 
 	/**

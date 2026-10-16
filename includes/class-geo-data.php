@@ -1019,6 +1019,17 @@ class Geo_Data {
 		return '';
 	}
 
+	/**
+	 * Returns the location of an object marked up for display.
+	 *
+	 * @since 5.0.0
+	 * @since 5.0.26 The address, link, description and wrapper are escaped.
+	 *
+	 * @param string $type Object type: post, comment, term or user.
+	 * @param int    $id   Object ID.
+	 * @param array  $args Optional. Display arguments; see the defaults below and the `simple_location_display_defaults` filter.
+	 * @return string HTML, or an empty string if there is no location to show.
+	 */
 	public static function get_location( $type, $id, $args = array() ) {
 		$loc = self::get_geodata( $type, $id );
 		if ( ! is_array( $loc ) ) {
@@ -1086,7 +1097,7 @@ class Geo_Data {
 		$c = array( PHP_EOL );
 
 		if ( $args['text'] ) {
-			$c[] = $args['description'];
+			$c[] = wp_kses( $args['description'], Simple_Location_Plugin::kses_clean() );
 		}
 
 		if ( ( 'post' === $type ) && ( in_array( get_post_type( $id ), get_post_types_by_support( 'geo-location' ), true ) ) ) {
@@ -1143,9 +1154,9 @@ class Geo_Data {
 			}
 			$adclass = $args['markup'] ? 'p-label' : '';
 			if ( $args['link'] && $url ) {
-				$c[] = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', $adclass, $url, $loc['address'] );
+				$c[] = sprintf( '<a class="%1$s" href="%2$s">%3$s</a>', esc_attr( $adclass ), esc_url( $url ), esc_html( $loc['address'] ) );
 			} else {
-				$c[] = sprintf( '<span class="%1$s">%2$s</span>', $adclass, $loc['address'] );
+				$c[] = sprintf( '<span class="%1$s">%2$s</span>', esc_attr( $adclass ), esc_html( $loc['address'] ) );
 			}
 			// Else this is protected.
 		} else {
@@ -1157,7 +1168,7 @@ class Geo_Data {
 				$loc['address'] = Location_Taxonomy::display_name( $term, array( 'links' => false ) );
 				$url            = get_term_link( $term );
 			} elseif ( isset( $loc['address'] ) ) {
-				$c[] = $loc['address'];
+				$c[] = esc_html( $loc['address'] );
 			}
 
 			if ( $args['object_link'] ) {
@@ -1173,6 +1184,6 @@ class Geo_Data {
 		}
 
 		$return = implode( PHP_EOL, $c );
-		return sprintf( $wrap, $args['wrapper-type'], implode( ' ', $class ), $return );
+		return sprintf( $wrap, tag_escape( $args['wrapper-type'] ), esc_attr( implode( ' ', $class ) ), $return );
 	}
 }

@@ -40,7 +40,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 		$providers = Loc_Config::weather_providers( true );
 		printf( '<select name="%1$s">', esc_attr( $name ) );
 		foreach ( $providers as $key => $value ) {
-			printf( '<option value="%1$s" %2$s>%3$s</option>', $key, selected( $option, $key ), $value['name'] ); // phpcs:ignore
+			printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $option, $key, false ), esc_html( $value['name'] ) );
 		}
 		echo '</select>';
 		echo '<br /><br />';

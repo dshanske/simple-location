@@ -887,6 +887,21 @@ final class Location_Taxonomy {
 		return get_term_meta( $term->term_id, 'country', true );
 	}
 
+	/**
+	 * Returns the name of a location term with its parents, such as "Philadelphia, Pennsylvania".
+	 *
+	 * @since 4.4.0
+	 * @since 5.0.26 Term names and links are escaped.
+	 *
+	 * @param int|WP_Term $term_id Term ID or object.
+	 * @param array       $args {
+	 *     Optional. Arguments.
+	 *
+	 *     @type bool $links Link each parent to its archive. Default true.
+	 *     @type bool $flag  Show the country flag. Default true.
+	 * }
+	 * @return string HTML.
+	 */
 	public static function display_name( $term_id, $args = array() ) {
 		$defaults = array(
 			'links' => true,
@@ -903,12 +918,12 @@ final class Location_Taxonomy {
 			$country = get_term_meta( $term->term_id, 'country', true );
 			if ( $args['flag'] ) {
 				$flag     = Geo_Provider::country_flag( $country );
-				$return[] = $flag . ' ' . $term->name;
+				$return[] = $flag . ' ' . esc_html( $term->name );
 			} else {
-				$return[] = $term->name;
+				$return[] = esc_html( $term->name );
 			}
 		} else {
-			$return[] = $term->name;
+			$return[] = esc_html( $term->name );
 		}
 		while ( 0 !== $term->parent ) {
 			$term = get_term( $term->parent, 'location' );
@@ -918,23 +933,35 @@ final class Location_Taxonomy {
 			if ( 0 === $term->parent ) {
 				$country = get_term_meta( $term->term_id, 'country', true );
 				if ( get_option( 'sloc_country' ) !== $country ) {
-					$name = $args['flag'] ? Geo_Provider::country_flag( $country ) . ' ' . $term->name : $term->name;
+					$name = esc_html( $term->name );
+					if ( $args['flag'] ) {
+						$name = Geo_Provider::country_flag( $country ) . ' ' . $name;
+					}
 					if ( $args['links'] ) {
-						$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $name );
+						$return[] = sprintf( '<a href="%1$s">%2$s</a>', esc_url( get_term_link( $term->term_id, 'location' ) ), $name );
 					} else {
 						$return[] = $name;
 					}
 				}
 			} elseif ( $args['links'] ) {
-					$return[] = sprintf( '<a href="%1$s">%2$s</a>', get_term_link( $term->term_id, 'location' ), $term->name );
+					$return[] = sprintf( '<a href="%1$s">%2$s</a>', esc_url( get_term_link( $term->term_id, 'location' ) ), esc_html( $term->name ) );
 			} else {
-				$return[] = $term->name;
+				$return[] = esc_html( $term->name );
 			}
 		}
 		return implode( ', ', $return );
 	}
 
 
+	/**
+	 * Returns a link to a location term's archive, named with the term and its parents.
+	 *
+	 * @since 4.4.14
+	 * @since 5.0.26 Term names and the link are escaped.
+	 *
+	 * @param int|WP_Term $term_id Term ID or object.
+	 * @return string|WP_Error HTML link, an empty string if there is no term, or an error.
+	 */
 	public static function get_location_link( $term_id ) {
 		$term = get_term( $term_id );
 		if ( is_wp_error( $term ) ) {
@@ -948,9 +975,9 @@ final class Location_Taxonomy {
 		if ( 0 === $term->parent ) {
 			$country  = get_term_meta( $term->term_id, 'country', true );
 			$flag     = Geo_Provider::country_flag( $country );
-			$return[] = $flag . ' ' . $term->name;
+			$return[] = $flag . ' ' . esc_html( $term->name );
 		} else {
-			$return[] = $term->name;
+			$return[] = esc_html( $term->name );
 		}
 		while ( 0 !== $term->parent ) {
 			$term = get_term( $term->parent, 'location' );
@@ -961,13 +988,13 @@ final class Location_Taxonomy {
 				$country = get_term_meta( $term->term_id, 'country', true );
 				if ( get_option( 'sloc_country' ) !== $country ) {
 					$flag     = Geo_Provider::country_flag( $country );
-					$return[] = $flag . ' ' . $term->name;
+					$return[] = $flag . ' ' . esc_html( $term->name );
 				}
 			} else {
-				$return[] = $term->name;
+				$return[] = esc_html( $term->name );
 			}
 		}
-		return sprintf( '<a href="%1$s">%2$s</a>', $link, implode( ', ', $return ) );
+		return sprintf( '<a href="%1$s">%2$s</a>', esc_url( $link ), implode( ', ', $return ) );
 	}
 
 	public static function get_post_location( $post_id = null ) {

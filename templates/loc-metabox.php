@@ -115,7 +115,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 					),
 				);
 			}
-				wp_dropdown_pages( $venue_args );
+				wp_dropdown_pages( $venue_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core escapes the list.
 			?>
 
 		</label>

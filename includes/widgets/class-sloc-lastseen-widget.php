@@ -22,6 +22,8 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 	/**
 	 * Widget worker
 	 *
+	 * @since 5.0.26 The sun and moon list, location and map are passed through wp_kses().
+	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
 	 *
@@ -47,7 +49,7 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 			$user    = new WP_User( $instance['user'] );
 			$geodata = get_user_geodata( $user->ID );
 			$return  = self::astro_list( $geodata );
-			echo implode( $return );
+			echo wp_kses( implode( $return ), Simple_Location_Plugin::kses_clean() );
 			if ( 1 === (int) $instance['showtext'] ) {
 				$location = get_user_location(
 					$user->ID,
@@ -57,19 +59,22 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 					)
 				);
 				if ( ! empty( $location ) ) {
-					printf( '<li>%1$s</li>', $location ); // phpcs:ignore
+					echo wp_kses( '<li>' . $location . '</li>', Simple_Location_Plugin::kses_clean() );
 				} else {
 					printf( '<li>%1$s</li>', esc_html__( 'No current location information available', 'simple-location' ) );
 				}
 			}
 			if ( 1 === (int) $instance['showmap'] ) {
-				echo get_user_map( // phpcs:ignore
-					$user->ID,
-					array(
-						'height' => 150,
-						'width'  => 150,
-					)
-				); // phpcs:ignore
+				echo wp_kses(
+					get_user_map(
+						$user->ID,
+						array(
+							'height' => 150,
+							'width'  => 150,
+						)
+					),
+					Simple_Location_Plugin::kses_clean()
+				);
 			}
 			echo '</ul>';
 		} else {

@@ -411,14 +411,22 @@ class Simple_Location_Plugin {
 	/**
 	 * Generic Filter Set of HTML paramaters for KSES
 	 *
-	 * @return return array Array of HTML elements.
+	 * @since 5.0.26 Allows the markup the plugin's own location and map output uses: `target` on links, `style`
+	 *               on spans (filtered by safecss_filter_attr()), `loading` on images, and `data` elements.
+	 *
+	 * @return array Array of HTML elements.
 	 */
 	public static function kses_clean() {
 		return array(
 			'a'          => array(
+				'class'  => array(),
+				'href'   => array(),
+				'name'   => array(),
+				'target' => array(),
+			),
+			'data'       => array(
 				'class' => array(),
-				'href'  => array(),
-				'name'  => array(),
+				'value' => array(),
 			),
 			'abbr'       => array(),
 			'b'          => array(),
@@ -477,6 +485,7 @@ class Simple_Location_Plugin {
 			'span'       => array(
 				'class'       => array(),
 				'id'          => array(),
+				'style'       => array(),
 				'title'       => array(),
 				'aria-label'  => array(),
 				'aria-hidden' => array(),
@@ -488,14 +497,15 @@ class Simple_Location_Plugin {
 				'id'    => array(),
 			),
 			'img'        => array(
-				'src'    => array(),
-				'class'  => array(),
-				'id'     => array(),
-				'alt'    => array(),
-				'title'  => array(),
-				'width'  => array(),
-				'height' => array(),
-				'srcset' => array(),
+				'src'     => array(),
+				'class'   => array(),
+				'id'      => array(),
+				'alt'     => array(),
+				'title'   => array(),
+				'width'   => array(),
+				'height'  => array(),
+				'srcset'  => array(),
+				'loading' => array(),
 			),
 			'figure'     => array(),
 			'figcaption' => array(),

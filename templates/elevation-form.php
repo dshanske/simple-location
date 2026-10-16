@@ -14,7 +14,7 @@ $providers = Loc_Config::elevation_providers();
 	<p><label for="provider"><?php esc_html_e( 'Elevation Provider', 'simple-location' ); ?></label><select name="provider">
 		<?php
 		foreach ( $providers as $key => $value ) {
-			printf( '<option value="%1$s">%2$s</option>', $key, $value['name'] ); // phpcs:ignore
+			printf( '<option value="%1$s">%2$s</option>', esc_attr( $key ), esc_html( $value['name'] ) );
 		}
 		?>
 		</select>

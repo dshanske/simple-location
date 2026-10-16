@@ -191,6 +191,7 @@ class Sloc_Media_Metadata {
 	 * @return array $form_fields Updated with extra fields.
 	 *
 	 * @since 1.0.0
+	 * @since 5.0.26 Values are escaped.
 	 */
 	public static function attachment_fields_to_edit( $form_fields, $post ) {
 		$geodata                    = get_post_geodata( $post->ID );
@@ -199,7 +200,7 @@ class Sloc_Media_Metadata {
 			'label'        => __( 'Location', 'simple-location' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
-			'html'         => sprintf( '<span>%1$s</span>', ifset( $geodata['address'] ) ),
+			'html'         => sprintf( '<span>%1$s</span>', esc_html( ifset( $geodata['address'], '' ) ) ),
 		);
 		if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			$form_fields['location'] = array(
@@ -207,7 +208,7 @@ class Sloc_Media_Metadata {
 				'label'        => __( 'Geo Coordinates', 'simple-location' ),
 				'input'        => 'html',
 				'show_in_edit' => false,
-				'html'         => sprintf( '<span>%1$s, %2$s</span>', $geodata['latitude'], $geodata['longitude'] ),
+				'html'         => sprintf( '<span>%1$s, %2$s</span>', esc_html( $geodata['latitude'] ), esc_html( $geodata['longitude'] ) ),
 			);
 		}
 
@@ -218,7 +219,7 @@ class Sloc_Media_Metadata {
 				'label'        => __( 'Creation Time', 'simple-location' ),
 				'input'        => 'html',
 				'show_in_edit' => false,
-				'html'         => sprintf( '<time dateime="%1$s" />%1$s</time><br />', $time ),
+				'html'         => sprintf( '<time dateime="%1$s" />%2$s</time><br />', esc_attr( $time ), esc_html( $time ) ),
 			);
 		}
 		return $form_fields;

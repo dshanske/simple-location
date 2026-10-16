@@ -680,7 +680,6 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * The attachment editor fields escape the stored values.
 	 */
 	public function test_attachment_fields_to_edit_escaped() {
-		$this->markTestSkipped( 'Known bug, see #322' );
 		$attachment = self::factory()->attachment->create_and_get();
 		update_post_meta( $attachment->ID, 'geo_address', '<script>alert(1)</script>' );
 		update_post_meta( $attachment->ID, 'mf2_published', '"><script>alert(2)</script>' );
