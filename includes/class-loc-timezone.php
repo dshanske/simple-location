@@ -16,6 +16,11 @@ class Loc_Timezone {
 		add_action( 'after_micropub', array( __CLASS__, 'after_micropub' ), 10, 2 );
 		add_filter( 'rest_prepare_post', array( __CLASS__, 'rest_prepare_post' ), 10, 3 );
 		add_filter( 'rest_prepare_comment', array( __CLASS__, 'rest_prepare_comment' ), 10, 3 );
+		foreach ( array( 'post', 'comment', 'term', 'user' ) as $type ) {
+			foreach ( array( 'added', 'updated', 'deleted' ) as $change ) {
+				add_action( "{$change}_{$type}_meta", array( __CLASS__, 'clear_timezone_cache' ), 10, 3 );
+			}
+		}
 	}
 
 	/**
@@ -372,6 +377,27 @@ class Loc_Timezone {
 				delete_post_meta( $post_id, 'geo_timezone' );
 			}
 		}
+	}
+
+	/**
+	 * Clears the cached timezone of an object when its geo_timezone meta changes.
+	 *
+	 * Hooked to the added, updated and deleted meta actions for posts, comments, terms and users.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param int|int[] $meta_ids  Meta ID, or IDs when deleted.
+	 * @param int       $object_id Object ID.
+	 * @param string    $meta_key  Meta key.
+	 */
+	public static function clear_timezone_cache( $meta_ids, $object_id, $meta_key ) {
+		if ( 'geo_timezone' !== $meta_key ) {
+			return;
+		}
+		if ( ! preg_match( '/^(?:added|updated|deleted)_(post|comment|term|user)_meta$/', current_action(), $matches ) ) {
+			return;
+		}
+		wp_cache_delete( $object_id, $matches[1] . '_timezone' );
 	}
 
 	/**

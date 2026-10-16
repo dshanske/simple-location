@@ -130,6 +130,64 @@ class TimezoneTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The cached timezone is cleared when geo_timezone is added, changed or deleted.
+	 */
+	public function test_get_timezone_cache_cleared() {
+		$post_id = $this->post_with_timezone();
+		$this->assertSame( 'America/New_York', Loc_Timezone::get_timezone( $post_id )->getName() );
+		add_post_meta( $post_id, 'geo_timezone', 'Asia/Tokyo' );
+		$this->assertSame( 'Asia/Tokyo', Loc_Timezone::get_timezone( $post_id )->getName() );
+		update_post_meta( $post_id, 'geo_timezone', 'Europe/Paris' );
+		$this->assertSame( 'Europe/Paris', Loc_Timezone::get_timezone( $post_id )->getName() );
+		delete_post_meta( $post_id, 'geo_timezone' );
+		$this->assertSame( 'America/New_York', Loc_Timezone::get_timezone( $post_id )->getName() );
+
+		// A cached unusable value is cleared too.
+		update_post_meta( $post_id, 'geo_timezone', 'UTC+5' );
+		$this->assertNull( Loc_Timezone::get_timezone( $post_id ) );
+		update_post_meta( $post_id, 'geo_timezone', 'Asia/Tokyo' );
+		$this->assertSame( 'Asia/Tokyo', Loc_Timezone::get_timezone( $post_id )->getName() );
+
+		// A comment without its own timezone follows its post's.
+		$comment = get_comment( self::factory()->comment->create( array( 'comment_post_ID' => $post_id ) ) );
+		$this->assertSame( 'Asia/Tokyo', Loc_Timezone::get_timezone( $comment )->getName() );
+		update_post_meta( $post_id, 'geo_timezone', 'Europe/Paris' );
+		$this->assertSame( 'Europe/Paris', Loc_Timezone::get_timezone( $comment )->getName() );
+		update_comment_meta( $comment->comment_ID, 'geo_timezone', 'Asia/Tokyo' );
+		$this->assertSame( 'Asia/Tokyo', Loc_Timezone::get_timezone( $comment )->getName() );
+		update_comment_meta( $comment->comment_ID, 'geo_timezone', 'Africa/Cairo' );
+		$this->assertSame( 'Africa/Cairo', Loc_Timezone::get_timezone( $comment )->getName() );
+
+		$user = get_user_by( 'id', self::factory()->user->create() );
+		update_user_meta( $user->ID, 'geo_timezone', 'Europe/Paris' );
+		$this->assertSame( 'Europe/Paris', Loc_Timezone::get_timezone( $user )->getName() );
+		update_user_meta( $user->ID, 'geo_timezone', 'Asia/Tokyo' );
+		$this->assertSame( 'Asia/Tokyo', Loc_Timezone::get_timezone( $user )->getName() );
+
+		$term = get_term( self::factory()->term->create( array( 'taxonomy' => 'category' ) ) );
+		update_term_meta( $term->term_id, 'geo_timezone', 'Africa/Cairo' );
+		$this->assertSame( 'Africa/Cairo', Loc_Timezone::get_timezone( $term )->getName() );
+		delete_term_meta( $term->term_id, 'geo_timezone' );
+		$this->assertSame( 'America/New_York', Loc_Timezone::get_timezone( $term )->getName() );
+	}
+
+	/**
+	 * Other meta keys, and meta of the same ID on another object type, don't clear the cache.
+	 */
+	public function test_clear_timezone_cache_only_geo_timezone() {
+		wp_cache_set( 5, 'cached', 'post_timezone' );
+		wp_cache_set( 5, 'cached', 'user_timezone' );
+		Loc_Timezone::clear_timezone_cache( 1, 5, 'geo_latitude' );
+		$this->assertSame( 'cached', wp_cache_get( 5, 'post_timezone' ) );
+
+		do_action( 'updated_user_meta', 1, 5, 'geo_timezone', 'Asia/Tokyo' );
+		$this->assertFalse( wp_cache_get( 5, 'user_timezone' ) );
+		$this->assertSame( 'cached', wp_cache_get( 5, 'post_timezone' ) );
+
+		$this->assertSame( 10, has_action( 'deleted_term_meta', array( 'Loc_Timezone', 'clear_timezone_cache' ) ) );
+	}
+
+	/**
 	 * Manual offsets in the old "UTC+n" format are ignored, and one-character values are removed.
 	 */
 	public function test_get_timezone_unusable_values() {
