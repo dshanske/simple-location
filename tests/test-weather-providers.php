@@ -247,6 +247,28 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Visual Crossing: visibility is converted to meters before it is rounded, so short distances are kept.
+	 */
+	public function test_visualcrossing_visibility() {
+		$fixture = $this->fixture( 'weather/visualcrossing-current.json' );
+		foreach ( array(
+			'0.4'  => 400.0,
+			'9.6'  => 9600.0,
+			'0.05' => 50.0,
+		) as $km => $meters ) {
+			$fixture['currentConditions']['visibility'] = (float) $km;
+			$this->mock_http( array( 'weather.visualcrossing.com' => array( 'body' => $fixture ) ) );
+			$conditions = $this->provider( 'Weather_Provider_VisualCrossing', array( 'api' => 'vc-key' ) )->get_conditions();
+			$this->assertSame( $meters, $conditions['visibility'], $km );
+		}
+
+		unset( $fixture['currentConditions']['visibility'] );
+		$this->mock_http( array( 'weather.visualcrossing.com' => array( 'body' => $fixture ) ) );
+		$conditions = $this->provider( 'Weather_Provider_VisualCrossing', array( 'api' => 'vc-key' ) )->get_conditions();
+		$this->assertArrayNotHasKey( 'visibility', $conditions );
+	}
+
+	/**
 	 * Visual Crossing: past conditions use the timeline for that moment and pick the matching hour.
 	 */
 	public function test_visualcrossing_past() {
