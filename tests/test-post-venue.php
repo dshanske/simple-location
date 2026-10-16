@@ -21,7 +21,7 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Address fields for a venue. Venues without a country can't be created yet (#326).
+	 * Address fields for a venue.
 	 *
 	 * @return array
 	 */
@@ -377,6 +377,33 @@ class PostVenueTest extends WP_UnitTestCase {
 		$this->assertSame( 'public', $geodata['visibility'] );
 		$this->assertEquals( 18, $geodata['zoom'] );
 		$this->assertSame( 'New York', Location_Taxonomy::get_location_taxonomy( $venue_id )->name );
+	}
+
+	/**
+	 * A venue without a country is created without a location term.
+	 */
+	public function test_add_new_venue_without_country() {
+		$venue_id = Post_Venue::add_new_venue(
+			array(
+				'name'      => 'Somewhere Cafe',
+				'locality'  => 'Springfield',
+				'latitude'  => 40.7128,
+				'longitude' => -74.006,
+			)
+		);
+		$this->assertIsInt( $venue_id );
+		$this->assertSame( 'Somewhere Cafe', get_the_title( $venue_id ) );
+		$this->assertFalse( Location_Taxonomy::get_location_taxonomy( $venue_id ) );
+		$this->assertSame(
+			array(),
+			get_terms(
+				array(
+					'taxonomy'   => 'location',
+					'hide_empty' => false,
+					'fields'     => 'ids',
+				)
+			)
+		);
 	}
 
 	/**
