@@ -50,6 +50,8 @@ class Airport_Location {
 	 * }
 	 * @since 4.0.0
 	 * @since 5.0.26 Searches that find nothing are cached too, and cache keys are hashed.
+	 * @since 5.0.26 Elevation is converted from feet to meters correctly, the first airport in the file can be found, and
+	 *              searches that return a list are cached as a list.
 	 */
 	public static function get( $search, $field = 'iata_code' ) {
 		$search    = trim( (string) $search );
@@ -75,8 +77,7 @@ class Airport_Location {
 		$return = array();
 		$line   = fgetcsv( $fp );
 		while ( $line ) {
-			$line = fgetcsv( $fp );
-			if ( is_array( $line ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
+			if ( is_array( $line ) && isset( $line[ $keys[ $field ] ] ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
 				$airport = array();
 				foreach ( $keys as $key => $value ) {
 					if ( 'keywords' === $key ) {
@@ -90,7 +91,7 @@ class Airport_Location {
 					} elseif ( 'longitude_deg' === $key ) {
 						$airport['longitude'] = clean_coordinate( $line[ $value ], 'longitude' );
 					} elseif ( 'elevation_ft' === $key ) {
-						$airport['elevation']    = round( (int) $line[ $value ] * 3.28 );
+						$airport['elevation']    = round( (int) $line[ $value ] * 0.3048 );
 						$airport['elevation_ft'] = (int) $line[ $value ];
 					} elseif ( 'scheduled_service' === $key ) {
 						$airport['scheduled_service'] = ( 'yes' === $line[ $value ] );
@@ -106,6 +107,7 @@ class Airport_Location {
 					$return[] = $airport;
 				}
 			}
+			$line = fgetcsv( $fp );
 		}
 
 		fclose( $fp ); // phpcs:ignore
@@ -117,7 +119,7 @@ class Airport_Location {
 		}
 		set_transient(
 			$transient,
-			$airport,
+			$return,
 			DAY_IN_SECONDS
 		);
 		return $return;

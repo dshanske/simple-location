@@ -855,7 +855,7 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /airport reports elevation in meters.
 	 */
 	public function test_airport_elevation_in_meters() {
-		$this->markTestSkipped( 'Known bug, see #318' );
+		$this->skip_airport_lookup_on_php84();
 		$data = $this->request( '/airport', array( 'iata_code' => 'YYZ' ) )->get_data();
 		$this->assertEqualsWithDelta( 173, $data['elevation'], 1 );
 	}
@@ -874,7 +874,7 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /airport returns the same results from the cache.
 	 */
 	public function test_airport_municipality_cached() {
-		$this->markTestSkipped( 'Known bug, see #318' );
+		$this->skip_airport_lookup_on_php84();
 		$first  = $this->request( '/airport', array( 'municipality' => 'Toronto' ) )->get_data();
 		$second = $this->request( '/airport', array( 'municipality' => 'Toronto' ) )->get_data();
 		$this->assertSame( $first, $second );
@@ -884,7 +884,7 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /airport finds the first airport in the data file.
 	 */
 	public function test_airport_first_row() {
-		$this->markTestSkipped( 'Known bug, see #318' );
+		$this->skip_airport_lookup_on_php84();
 		$data = $this->request( '/airport', array( 'ident' => '00A' ) )->get_data();
 		$this->assertSame( 'Total RF Heliport', $data['name'] );
 	}
