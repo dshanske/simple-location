@@ -39,11 +39,27 @@ set -ex
 
 CP_RELEASE=y
 if [[ "$CP_VERSION" == latest ]]; then
-	# Find the version number of the latest release
-	download \
-		https://api.github.com/repos/ClassicPress/ClassicPress-release/releases/latest \
-		"$TMPDIR/cp-latest.json"
-	CP_VERSION="$(grep -Po '"tag_name":\s*"[^"]+"' "$TMPDIR/cp-latest.json" | cut -d'"' -f4)"
+	# Find the version number of the latest release. Unauthenticated API
+	# requests share a low per-IP rate limit, so send $GITHUB_TOKEN when it
+	# is set (as in CI) and retry a few times before giving up.
+	CP_LATEST_URL=https://api.github.com/repos/ClassicPress/ClassicPress-release/releases/latest
+	for attempt in 1 2 3; do
+		# Keep the token out of the trace output.
+		{ set +x; } 2>/dev/null
+		if [ -n "$GITHUB_TOKEN" ] && [ `which curl` ]; then
+			curl -L -s -H "Authorization: Bearer $GITHUB_TOKEN" "$CP_LATEST_URL" -o "$TMPDIR/cp-latest.json" || true
+		elif [ -n "$GITHUB_TOKEN" ]; then
+			wget -nv --header="Authorization: Bearer $GITHUB_TOKEN" -O "$TMPDIR/cp-latest.json" "$CP_LATEST_URL" || true
+		else
+			download "$CP_LATEST_URL" "$TMPDIR/cp-latest.json" || true
+		fi
+		set -x
+		CP_VERSION="$(grep -Po '"tag_name":\s*"[^"]+"' "$TMPDIR/cp-latest.json" | cut -d'"' -f4)"
+		if [ -n "$CP_VERSION" ] || [ $attempt -eq 3 ]; then
+			break
+		fi
+		sleep $((attempt * 5))
+	done
 
 	if [ -z "$CP_VERSION" ]; then
 		echo "ClassicPress version not detected correctly!"
