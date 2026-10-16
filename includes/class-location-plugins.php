@@ -130,6 +130,12 @@ class Location_Plugins {
 
 	/**
 	 * Adds location properties to webmention returns.
+	 *
+	 * @since 5.0.26 A location that is a string, or a location or h-geo without properties, no longer causes errors.
+	 *
+	 * @param array  $meta    Comment meta.
+	 * @param object $handler Webmention handler.
+	 * @return array Comment meta.
 	 */
 	public static function webmention_handler_mf2_set_properties( $meta, $handler ) {
 		$item = $handler->get_webmention_item();
@@ -146,47 +152,52 @@ class Location_Plugins {
 		}
 
 		$location = ifset( $mf_array['properties']['location'] );
-		if ( wp_is_numeric_array( $location ) ) {
-			$location = $location[0];
-			$props    = $location['properties'];
-			if ( is_array( $location ) ) {
-				$props = $location['properties'];
-				if ( isset( $props['geo'] ) ) {
-					if ( array_key_exists( 'label', $props ) ) {
-						$meta['geo_address'] = $handler->get_first_array_item( $props['label'] );
-					}
-					$props = $handler->get_first_array_item( $props['geo'] );
-					$props = $props['properties'];
-				} else {
-					$parts = array(
-						static::array_get( $props, 'name', array(), true ),
-						static::array_get( $props, 'street-address', array(), true ),
-						static::array_get( $props, 'locality', array(), true ),
-						static::array_get( $props, 'region', array(), true ),
-						static::array_get( $props, 'postal-code', array(), true ),
-						static::array_get( $props, 'country-name', array(), true ),
+		if ( ! wp_is_numeric_array( $location ) ) {
+			return $meta;
+		}
+		$location = $location[0];
 
-					);
-					$parts = array_filter( $parts );
-					if ( ! empty( $parts ) ) {
-						$meta['geo_address'] = implode(
-							', ',
-							array_filter(
-								$parts,
-								function ( $v ) {
-									return $v;
-								}
-							)
-						);
-					}
-				}
-				foreach ( array( 'latitude', 'longitude', 'altitude', 'accuracy' ) as $property ) {
-					if ( array_key_exists( $property, $props ) ) {
-						$meta[ 'geo_' . $property ] = $props[ $property ][0];
-					}
-				}
-			} elseif ( 'http' !== substr( $location, 0, 4 ) ) {
+		// A plain-text location is an address; a URL can't be used.
+		if ( is_string( $location ) ) {
+			if ( 'http' !== substr( $location, 0, 4 ) ) {
 				$meta['geo_address'] = $location;
+			}
+			return $meta;
+		}
+		if ( ! is_array( $location ) || ! isset( $location['properties'] ) || ! is_array( $location['properties'] ) ) {
+			return $meta;
+		}
+
+		$props = $location['properties'];
+		if ( isset( $props['geo'] ) ) {
+			$label = array_key_exists( 'label', $props ) ? $handler->get_first_array_item( $props['label'] ) : null;
+			if ( is_string( $label ) ) {
+				$meta['geo_address'] = $label;
+			}
+			$geo = $handler->get_first_array_item( $props['geo'] );
+			if ( ! is_array( $geo ) || ! isset( $geo['properties'] ) || ! is_array( $geo['properties'] ) ) {
+				return $meta;
+			}
+			$props = $geo['properties'];
+		} else {
+			$parts = array(
+				static::array_get( $props, 'name', array(), true ),
+				static::array_get( $props, 'street-address', array(), true ),
+				static::array_get( $props, 'locality', array(), true ),
+				static::array_get( $props, 'region', array(), true ),
+				static::array_get( $props, 'postal-code', array(), true ),
+				static::array_get( $props, 'country-name', array(), true ),
+			);
+			$parts = array_filter( $parts, 'is_string' );
+			$parts = array_filter( $parts );
+			if ( ! empty( $parts ) ) {
+				$meta['geo_address'] = implode( ', ', $parts );
+			}
+		}
+		foreach ( array( 'latitude', 'longitude', 'altitude', 'accuracy' ) as $property ) {
+			$value = static::array_get( $props, $property, null, true );
+			if ( is_scalar( $value ) ) {
+				$meta[ 'geo_' . $property ] = $value;
 			}
 		}
 		return $meta;
