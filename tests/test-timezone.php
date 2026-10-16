@@ -385,6 +385,49 @@ class TimezoneTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A comment uses its own timezone when it has one, otherwise its post's.
+	 */
+	public function test_comment_timezone() {
+		$post_id = $this->post_with_timezone( 'America/Los_Angeles' );
+		$args    = array(
+			'comment_post_ID'  => $post_id,
+			'comment_approved' => 1,
+			'comment_date'     => '2025-07-01 08:00:00',
+			'comment_date_gmt' => '2025-07-01 12:00:00',
+		);
+
+		$inherits = self::factory()->comment->create( $args );
+		$this->assertSame( 'America/Los_Angeles', Loc_Timezone::get_timezone( get_comment( $inherits ) )->getName() );
+		$this->assertSame( '05:00', get_comment_time( '', false, true, get_comment( $inherits ) ) );
+
+		$own = self::factory()->comment->create( $args );
+		update_comment_meta( $own, 'geo_timezone', 'Asia/Tokyo' );
+		$this->assertSame( 'Asia/Tokyo', Loc_Timezone::get_timezone( get_comment( $own ) )->getName() );
+		$this->assertSame( '21:00', get_comment_time( '', false, true, get_comment( $own ) ) );
+		$this->assertSame( '2025-07-01', get_comment_date( '', $own ) );
+	}
+
+	/**
+	 * Asking for the GMT comment time returns GMT.
+	 */
+	public function test_comment_time_gmt() {
+		$post_id    = $this->post_with_timezone( 'Asia/Tokyo' );
+		$comment_id = self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => 1,
+				'comment_date'     => '2025-07-01 08:00:00',
+				'comment_date_gmt' => '2025-07-01 12:00:00',
+			)
+		);
+		$comment    = get_comment( $comment_id );
+		$this->assertSame( '2025-07-01T12:00:00+00:00', get_comment_time( 'c', true, true, $comment ) );
+		$this->assertSame( '2025-07-01T21:00:00+09:00', get_comment_time( 'c', false, true, $comment ) );
+		$this->assertSame( '12:00', get_comment_time( '', true, true, $comment ) );
+		$this->assertSame( strtotime( '2025-07-01T12:00:00Z' ), (int) get_comment_time( 'U', true, true, $comment ) );
+	}
+
+	/**
 	 * REST comment responses give the GMT date in W3C format.
 	 */
 	public function test_rest_comment_date_gmt() {
