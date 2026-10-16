@@ -220,7 +220,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Nominatim forward geocoding returns the coordinates of the first result.
+	 * Nominatim forward geocoding returns the address and coordinates of the first result.
 	 */
 	public function test_nominatim_geocode() {
 		$fixture = $this->fixture( 'geo/nominatim-search.json' );
@@ -231,6 +231,43 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( $fixture[0]['lon'], $result['longitude'] );
 		$this->assertEqualsWithDelta( self::LAT, (float) $result['latitude'], 0.001 );
 		$this->assertSame( $fixture[0]['extratags']['website'], $result['url'] );
+		$this->assertCityHall( $result );
+		$this->assertSame( 'United States', $result['country-name'] );
+		$this->assertSame( 'America/New_York', $result['timezone'] );
+	}
+
+	/**
+	 * Forward geocoding returns an error when nothing is found, and leaves the provider's own location alone.
+	 */
+	public function test_nominatim_geocode_no_results() {
+		// fetch_json() already treats an empty list as an error.
+		$this->mock_http( array( 'nominatim.openstreetmap.org/search' => array( 'body' => '[]' ) ) );
+		$provider = $this->provider( 'Geo_Provider_Nominatim' );
+		$this->assertWPError( $provider->geocode( 'Nowhere at all' ) );
+
+		$this->mock_http( array( 'nominatim.openstreetmap.org/search' => array( 'body' => array( 'error' => 'Unable to geocode' ) ) ) );
+		$this->assertSame( 'no_results', $provider->geocode( 'Nowhere at all' )->get_error_code() );
+
+		$this->mock_http( array( 'nominatim.openstreetmap.org/search' => array( 'body' => $this->fixture( 'geo/nominatim-search.json' ) ) ) );
+		$provider->set( 51.5, -0.12 );
+		$provider->geocode( 'Philadelphia City Hall' );
+		$this->assertEquals( 51.5, $provider->get()['latitude'] );
+	}
+
+	/**
+	 * LocationIQ forward geocoding needs a key and returns the address of the first result.
+	 */
+	public function test_locationiq_geocode() {
+		$this->assertSame( 'missing_api_key', ( new Geo_Provider_LocationIQ( array( 'api' => '' ) ) )->geocode( 'Philadelphia City Hall' )->get_error_code() );
+
+		// LocationIQ returns the same format as Nominatim.
+		$this->mock_http( array( 'locationiq.com/v1/search' => array( 'body' => $this->fixture( 'geo/nominatim-search.json' ) ) ) );
+		$result = ( new Geo_Provider_LocationIQ( array( 'api' => 'liq-key' ) ) )->geocode( 'Philadelphia City Hall' );
+		$this->assertSame( 'liq-key', $this->last_request()['query']['key'] );
+		$this->assertCityHall( $result );
+
+		$this->mock_http( array( 'locationiq.com/v1/search' => array( 'body' => array( 'error' => 'Unable to geocode' ) ) ) );
+		$this->assertSame( 'no_results', ( new Geo_Provider_LocationIQ( array( 'api' => 'liq-key' ) ) )->geocode( 'Nowhere' )->get_error_code() );
 	}
 
 	/**
@@ -265,6 +302,45 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( $components[0] . ' ' . $components[1], $addr['street-address'], 'Street number and route.' );
 		$this->assertSame( 'United States', $addr['country-name'] );
 		$this->assertSame( $fixture['plus_code']['global_code'], $addr['plus-code'] );
+	}
+
+	/**
+	 * Google forward geocoding returns the address and coordinates of the first result.
+	 */
+	public function test_google_geocode() {
+		$this->assertSame( 'missing_api_key', ( new Geo_Provider_Google( array( 'api' => '' ) ) )->geocode( 'Philadelphia City Hall' )->get_error_code() );
+
+		// A search returns the same format as a reverse lookup.
+		$fixture = $this->fixture( 'geo/google-reverse.json' );
+		$this->mock_http( array( 'maps.googleapis.com/maps/api/geocode/json' => array( 'body' => $fixture ) ) );
+		$result = ( new Geo_Provider_Google( array( 'api' => 'g-key' ) ) )->geocode( 'Philadelphia City Hall' );
+		$this->assertSame( 'Philadelphia City Hall', $this->last_request()['query']['address'] );
+		$this->assertCityHall( $result );
+		$this->assertSame( $fixture['results'][0]['formatted_address'], $result['display-name'] );
+		$this->assertSame( 'America/New_York', $result['timezone'] );
+	}
+
+	/**
+	 * Google forward geocoding returns an error when nothing is found or the request fails.
+	 */
+	public function test_google_geocode_errors() {
+		$provider = new Geo_Provider_Google( array( 'api' => 'g-key' ) );
+		$this->mock_http(
+			array(
+				'maps.googleapis.com' => array(
+					'body' => array(
+						'results' => array(),
+						'status'  => 'ZERO_RESULTS',
+					),
+				),
+			)
+		);
+		$this->assertSame( 'no_results', $provider->geocode( 'Nowhere' )->get_error_code() );
+
+		$this->mock_http( array( 'maps.googleapis.com' => array( 'body' => $this->fixture( 'geo/google-denied.json' ) ) ) );
+		$error = $provider->geocode( 'Philadelphia City Hall' );
+		$this->assertSame( 'REQUEST_DENIED', $error->get_error_code() );
+		$this->assertSame( 'The provided API key is invalid.', $error->get_error_message() );
 	}
 
 	/**
