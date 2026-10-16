@@ -22,6 +22,74 @@ class Location_Plugins {
 		add_action( 'after_micropub', array( 'Location_Plugins', 'micropub_set_location' ), 10, 2 );
 		add_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_geo' ), 10, 2 );
 		add_filter( 'webmention_handler_mf2_set_properties', array( 'Location_Plugins', 'webmention_handler_mf2_set_properties' ), 10, 2 );
+		add_filter( 'activitypub_post_location', array( 'Location_Plugins', 'activitypub_post_location' ), 10, 3 );
+		add_action( 'activitypub_before_get_content', array( 'Location_Plugins', 'activitypub_before_get_content' ) );
+		add_filter( 'activitypub_the_content', array( 'Location_Plugins', 'activitypub_the_content' ), 1 );
+	}
+
+	/**
+	 * Applies the post's location visibility to the Place the ActivityPub plugin federates.
+	 *
+	 * The ActivityPub plugin reads the geo meta itself and only withholds a location when geo_public is '0', so a
+	 * location that is private by default, protected, or inherited would be federated with its coordinates.
+	 * A private location is removed; a protected location keeps its name but loses its coordinates.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array|null $place   ActivityStreams Place object.
+	 * @param WP_Post    $post    Post being federated.
+	 * @param int        $post_id Post ID.
+	 * @return array|null Place object, or null for no location.
+	 */
+	public static function activitypub_post_location( $place, $post, $post_id ) {
+		if ( ! is_array( $place ) ) {
+			return $place;
+		}
+		$visibility = get_post_geodata( $post_id, 'visibility' );
+		if ( 'public' === $visibility ) {
+			return $place;
+		}
+		if ( 'protected' === $visibility && ! empty( $place['name'] ) ) {
+			unset( $place['latitude'], $place['longitude'], $place['altitude'], $place['accuracy'], $place['radius'] );
+			return $place;
+		}
+		return null;
+	}
+
+	/**
+	 * Hides private and protected locations while the ActivityPub plugin renders post content.
+	 *
+	 * The content is rendered as whoever triggered it, often the logged-in author saving the post, who would
+	 * otherwise see a hidden location marked as hidden and send it to every follower.
+	 *
+	 * @since 5.0.26
+	 */
+	public static function activitypub_before_get_content() {
+		add_filter( 'sloc_show_hidden_location', array( 'Location_Plugins', 'hide_hidden_location' ), 99 );
+	}
+
+	/**
+	 * Restores hidden location display once the ActivityPub plugin has rendered post content.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param string $content Content rendered for ActivityPub.
+	 * @return string Unchanged content.
+	 */
+	public static function activitypub_the_content( $content ) {
+		remove_filter( 'sloc_show_hidden_location', array( 'Location_Plugins', 'hide_hidden_location' ), 99 );
+		return $content;
+	}
+
+	/**
+	 * Filter callback that never shows a hidden location.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return bool False.
+	 */
+	public static function hide_hidden_location() {
+		return false;
 	}
 
 	/**
