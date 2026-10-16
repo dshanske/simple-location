@@ -233,8 +233,11 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	/**
 	 * Geocode address.
 	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 The address is parsed, and a search with no results returns an error.
+	 *
 	 * @param  string $address String representation of location.
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @return array|WP_Error $reverse microformats2 address elements in an array.
 	 */
 	public function geocode( $address ) {
 		$args = array(
@@ -252,12 +255,29 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
+		return $this->search_result_to_mf( $json );
+	}
+
+	/**
+	 * Parses the first result of a search.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array $json Search response.
+	 * @return array|WP_Error Microformats2 address elements, or an error if nothing was found.
+	 */
+	protected function search_result_to_mf( $json ) {
+		if ( ! is_array( $json ) || empty( $json ) || isset( $json['error'] ) ) {
+			return new WP_Error( 'no_results', __( 'No results found', 'simple-location' ), array( 'status' => 404 ) );
+		}
 		if ( wp_is_numeric_array( $json ) ) {
 			$json = $json[0];
 		}
 
-		$address             = $json['address'];
-		$return              = $this->address_to_mf( $address );
+		// Parse on a copy set to the result's location, so the address gets its coordinates and timezone.
+		$result = clone $this;
+		$result->set( ifset( $json['lat'] ), ifset( $json['lon'] ) );
+		$return              = $result->address_to_mf( $json );
 		$return['latitude']  = ifset( $json['lat'] );
 		$return['longitude'] = ifset( $json['lon'] );
 		if ( isset( $json['extratags'] ) ) {

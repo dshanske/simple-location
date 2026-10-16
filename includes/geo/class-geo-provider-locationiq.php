@@ -71,8 +71,11 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 	/**
 	 * Geocode address.
 	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 The address is parsed, and a search with no results returns an error.
+	 *
 	 * @param  string $address String representation of location.
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @return array|WP_Error $reverse microformats2 address elements in an array.
 	 */
 	public function geocode( $address ) {
 		if ( empty( $this->api ) ) {
@@ -95,18 +98,6 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 			return $json;
 		}
 
-		if ( wp_is_numeric_array( $json ) ) {
-			$json = $json[0];
-		}
-
-		$address             = $json['address'];
-		$return              = $this->address_to_mf( $address );
-		$return['latitude']  = ifset( $json['lat'] );
-		$return['longitude'] = ifset( $json['lon'] );
-		if ( isset( $json['extratags'] ) ) {
-			$return['url']   = ifset( $json['extratags']['website'] );
-			$return['photo'] = ifset( $json['extratags']['image'] );
-		}
-		return array_filter( $return );
+		return $this->search_result_to_mf( $json );
 	}
 }
