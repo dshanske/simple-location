@@ -120,9 +120,16 @@ class Geo_Base {
 		}
 	}
 
+	/**
+	 * Show the location fields on a user profile.
+	 *
+	 * @since 5.0.26 The template is passed the user being edited, and is loaded on every call.
+	 *
+	 * @param WP_User $user The user whose profile is being edited.
+	 */
 	public static function user_profile( $user ) {
 		if ( current_user_can( 'edit_users_location', $user->ID ) ) {
-			load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-user-metabox.php' );
+			load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-user-metabox.php', false, array( 'user' => $user ) );
 		}
 	}
 
