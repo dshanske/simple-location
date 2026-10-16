@@ -70,7 +70,7 @@ Current conditions are for Philadelphia (`39.9524,-75.1636`); station requests u
 | `weatherbit-current.json` | `GET https://api.weatherbit.io/v2.0/current?key=…&lat=39.9524&lon=-75.1636&units=M` | Hand-built from docs |
 | `visualcrossing-current.json` | `GET https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/39.9524,-75.1636?key=…&unitGroup=metric&lang=id` | Hand-built from docs |
 | `visualcrossing-timeline.json` | The same with `/{timestamp}` for 2025-07-01 14:00 America/New_York | Hand-built from docs |
-| `aeris-observations.json` | `GET https://data.api.xweather.com/observations/closest?client_id=…&client_secret=…&p=39.9524,-75.1636&filter=allstations` (also used for `https://api.aerisapi.com/observations/closest?p=KPHL`) | Hand-built from docs |
+| `aeris-observations.json` | `GET https://data.api.xweather.com/observations/closest?client_id=…&client_secret=…&p=39.9524,-75.1636&filter=allstations` (also used for `…&p=KPHL`) | Hand-built from docs |
 | `nws-observation.json` | `GET https://api.weather.gov/stations/KPHL/observations/latest` | Hand-built from docs |
 | `nws-station.json` | `GET https://api.weather.gov/stations/KPHL` | Hand-built from docs |
 | `meteostat-hourly.json` | `GET https://meteostat.p.rapidapi.com/stations/hourly?station=72408&start=2025-07-01&end=2025-07-02` with `x-rapidapi-key` | Hand-built from docs |
