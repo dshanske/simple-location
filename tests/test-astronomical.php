@@ -63,6 +63,32 @@ class AstronomicalTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * In the evening west of UTC, sunrise and sunset are for the local date, not the next UTC day.
+	 */
+	public function test_sun_times_use_local_date_west() {
+		$calc    = $this->philadelphia();
+		$evening = strtotime( '2025-07-01T20:15:00-04:00' ); // 2025-07-02 00:15 UTC.
+
+		$this->assertEqualsWithDelta( strtotime( '2025-07-01T05:35:00-04:00' ), $calc->get_timestamp( $evening ), 180 );
+		$this->assertEqualsWithDelta( strtotime( '2025-07-01T20:33:00-04:00' ), $calc->get_timestamp( $evening, 'sunset' ), 180 );
+		$this->assertTrue( $calc->is_daytime( $evening ) );
+		$this->assertFalse( $calc->is_daytime( strtotime( '2025-07-01T21:00:00-04:00' ) ) );
+	}
+
+	/**
+	 * In the morning east of UTC, sunrise and sunset are for the local date, not the previous UTC day.
+	 */
+	public function test_sun_times_use_local_date_east() {
+		$calc    = new Astronomical_Calculator( 35.6812, 139.7671 ); // Tokyo Station.
+		$morning = strtotime( '2025-07-01T07:00:00+09:00' ); // 2025-06-30 22:00 UTC.
+
+		$this->assertSame( 'Asia/Tokyo', $calc->get_datetime( $morning )->getTimezone()->getName() );
+		$this->assertEqualsWithDelta( strtotime( '2025-07-01T04:28:00+09:00' ), $calc->get_timestamp( $morning ), 180 );
+		$this->assertEqualsWithDelta( strtotime( '2025-07-01T19:01:00+09:00' ), $calc->get_timestamp( $morning, 'sunset' ), 180 );
+		$this->assertTrue( $calc->is_daytime( $morning ) );
+	}
+
+	/**
 	 * Daytime is between sunrise and sunset.
 	 */
 	public function test_is_daytime() {
@@ -128,11 +154,11 @@ class AstronomicalTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Moonrise and moonset fall within the UTC day, at times when the moon is on the horizon.
+	 * Moonrise and moonset fall within the local day, at times when the moon is on the horizon.
 	 */
 	public function test_moon_times() {
 		$calc  = $this->philadelphia();
-		$day   = strtotime( '2025-07-10T00:00:00Z' );
+		$day   = strtotime( '2025-07-10T00:00:00-04:00' );
 		$times = $calc->get_moon_times( strtotime( '2025-07-10T12:00:00Z' ) );
 
 		foreach ( array( 'moonrise', 'moonset' ) as $event ) {
@@ -143,6 +169,9 @@ class AstronomicalTest extends WP_UnitTestCase {
 		}
 		$this->assertSame( $times['moonrise'], $calc->get_timestamp( strtotime( '2025-07-10T12:00:00Z' ), 'moonrise' ) );
 		$this->assertSame( $times['moonset'], $calc->get_timestamp( strtotime( '2025-07-10T12:00:00Z' ), 'moonset' ) );
+
+		// In the evening, after the UTC date has changed, the times are still for the local day.
+		$this->assertSame( $times, $calc->get_moon_times( strtotime( '2025-07-10T23:30:00-04:00' ) ) );
 	}
 
 	/**

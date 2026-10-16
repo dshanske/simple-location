@@ -95,6 +95,7 @@ class Astronomical_Calculator {
 	 * @return int $timestamp Unix timestamp reflecting sunrise or sunset as requested.
 	 *
 	 * @since 4.0.0
+	 * @since 5.0.26 Uses the date at the location rather than the UTC date.
 	 */
 	public function get_timestamp( $timestamp, $type = 'sunrise' ) {
 		if ( ! is_numeric( $this->latitude ) && ! is_numeric( $this->longitude ) ) {
@@ -112,7 +113,16 @@ class Astronomical_Calculator {
 			$timestamp = $timestamp->getTimestamp();
 		}
 
-		$times = date_sun_info( $timestamp, $this->latitude, $this->longitude );
+		switch ( $type ) {
+			case 'moonset':
+				$moon = $this->get_moon_times( $timestamp );
+				return $moon['moonset'];
+			case 'moonrise':
+				$moon = $this->get_moon_times( $timestamp );
+				return $moon['moonrise'];
+		}
+
+		$times = date_sun_info( $this->local_noon( $timestamp ), $this->latitude, $this->longitude );
 		if ( ! $times ) {
 			return false;
 		}
@@ -122,12 +132,6 @@ class Astronomical_Calculator {
 				return $times['sunset'];
 				/* $function = 'date_sunset';
 				break; */
-			case 'moonset':
-				$moon = $this->get_moon_times( $timestamp );
-				return $moon['moonset'];
-			case 'moonrise':
-				$moon = $this->get_moon_times( $timestamp );
-				return $moon['moonrise'];
 			default:
 				return $times['sunrise'];
 				/* $function = 'date_sunrise'; */
@@ -135,6 +139,24 @@ class Astronomical_Calculator {
 		// return call_user_func( $function, $timestamp, SUNFUNCS_RET_TIMESTAMP, $this->latitude, $this->longitude, self::get_zenith( $this->elevation ) );
 	}
 
+
+	/**
+	 * Returns a timestamp that date_sun_info() reads as the date at this location.
+	 *
+	 * The date_sun_info() function takes the date of the timestamp in PHP's default timezone, which is UTC in WordPress. In the
+	 * evening west of UTC, or the morning east of it, that is a different day from the one at the location. Noon on
+	 * the local date, in the default timezone, gives date_sun_info() the local date.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param int $timestamp Unix timestamp.
+	 * @return int Unix timestamp.
+	 */
+	protected function local_noon( $timestamp ) {
+		$local = ( new DateTimeImmutable( '@' . $timestamp ) )->setTimezone( $this->timezone );
+		$noon  = new DateTimeImmutable( $local->format( 'Y-m-d' ) . ' 12:00:00', new DateTimeZone( date_default_timezone_get() ) );
+		return $noon->getTimestamp();
+	}
 
 	/**
 	 * Returns a DateTime object adjusting into the calculated timezone.
@@ -539,10 +561,15 @@ class Astronomical_Calculator {
 	 * @return array Moon times.
 	 *
 	 * @since 4.1.6
+	 * @since 5.0.26 Uses the date at the location rather than the UTC date. No timestamp means now.
 	 */
 	public function get_moon_times( $timestamp = null ) {
+		if ( ! $timestamp ) {
+			$timestamp = time();
+		}
+		// Start at midnight on the date at the location.
 		$datetime = new DateTime();
-		$datetime->setTimezone( new DateTimeZone( 'UTC' ) );
+		$datetime->setTimezone( $this->timezone );
 		$datetime->setTimestamp( $timestamp );
 		$datetime->setTime( 0, 0, 0 );
 		$timestamp = $datetime->getTimestamp();
