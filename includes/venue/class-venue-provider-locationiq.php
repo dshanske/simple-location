@@ -42,9 +42,14 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 	/**
 	 * Return an address.
 	 *
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @since 5.0.26 Returns an error without an API key or for an error response.
+	 *
+	 * @return array|WP_Error $reverse microformats2 address elements in an array.
 	 */
 	public function reverse_lookup() {
+		if ( empty( $this->api ) ) {
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Location IQ', 'simple-location' ) );
+		}
 		$args = array(
 			'key' => $this->api,
 			'lat' => $this->latitude,
@@ -58,10 +63,22 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 			return $json;
 		}
 
+		// Errors can come back as an object with a 200 status.
+		if ( ! wp_is_numeric_array( $json ) ) {
+			$message = isset( $json['error'] ) && is_string( $json['error'] ) ? $json['error'] : __( 'Unable to Retrieve', 'simple-location' );
+			return new WP_Error( 'unable_to_retrieve', $message );
+		}
+
 		$return = array();
 
 		foreach ( $json as $item ) {
-			$return[] = $this->address_to_hcard( $item );
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+			$card = $this->address_to_hcard( $item );
+			if ( ! empty( $card ) ) {
+				$return[] = $card;
+			}
 		}
 
 		return array( 'items' => $return );
@@ -70,15 +87,18 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 	/**
 	 * Convert address properties to hcard
 	 *
+	 * @since 5.0.26 Uses the venue's own coordinates and name; no longer sets the search point's altitude.
+	 *
 	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
 	protected function address_to_hcard( $json ) {
-		if ( ! array_key_exists( 'address', $json ) ) {
+		if ( ! is_array( $json ) || ! isset( $json['address'] ) || ! is_array( $json['address'] ) ) {
 			return array();
 		}
 
 		$address      = $json['address'];
+		$region_code  = null;
 		$country_code = strtoupper( ifset( $address['country_code'] ) );
 
 		if ( in_array( $country_code, array( 'US', 'FR' ) ) ) {
@@ -135,6 +155,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 			'name'             => self::ifnot(
 				$address,
 				array(
+					'name',
 					'attraction',
 					'library',
 					'parking',
@@ -220,11 +241,14 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 				)
 			),
 
-			'latitude'         => $this->latitude,
-			'longitude'        => $this->longitude,
-			'altitude'         => $this->altitude,
+			// Each venue's own coordinates, not the search point's.
+			'latitude'         => isset( $json['lat'] ) && is_numeric( $json['lat'] ) ? (float) $json['lat'] : null,
+			'longitude'        => isset( $json['lon'] ) && is_numeric( $json['lon'] ) ? (float) $json['lon'] : null,
 			'raw'              => $json,
 		);
+		if ( isset( $json['name'] ) && is_string( $json['name'] ) && '' !== $json['name'] ) {
+			$addr['name'] = $json['name'];
+		}
 		if ( is_null( $addr['country-name'] ) ) {
 			$addr['country-name'] = self::country_name( $addr['country-code'] );
 		}

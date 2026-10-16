@@ -165,7 +165,44 @@ class VenueProvidersTest extends WP_UnitTestCase {
 			$this->assertSame( $item['address']['road'], $card['street'] );
 			$this->assertSame( $item['type'], $card['category'] );
 			$this->assertSame( $item['boundingbox'], $card['boundingbox'] );
+			$this->assertSame( (float) $item['lat'], $card['latitude'] );
+			$this->assertSame( (float) $item['lon'], $card['longitude'] );
+			$this->assertSame( $item['name'], $card['name'] );
 		}
+	}
+
+	/**
+	 * LocationIQ falls back to the address name, then the address type keys, for venues without a name.
+	 */
+	public function test_locationiq_name_fallback() {
+		$fixture = $this->fixture( 'venue/locationiq-nearby.json' );
+		unset( $fixture[0]['name'], $fixture[1]['name'], $fixture[1]['address']['name'] );
+		$fixture[1]['address']['leisure'] = 'Dilworth Park';
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => $fixture ) ) );
+		$items = $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->reverse_lookup()['items'];
+		$this->assertSame( 'Philadelphia City Hall', $items[0]['name'] );
+		$this->assertSame( 'Dilworth Park', $items[1]['name'] );
+	}
+
+	/**
+	 * LocationIQ needs a key, and error objects or malformed items don't cause errors.
+	 */
+	public function test_locationiq_errors() {
+		$this->mock_http( array() );
+		$this->assertSame( 'missing_api_key', $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
+		$this->assertEmpty( $this->http_requests );
+
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => array( 'error' => 'No results' ) ) ) );
+		$result = $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->reverse_lookup();
+		$this->assertWPError( $result );
+		$this->assertSame( 'No results', $result->get_error_message() );
+
+		$fixture   = $this->fixture( 'venue/locationiq-nearby.json' );
+		$fixture[] = 'not a venue';
+		$fixture[] = array( 'place_id' => '1' );
+		$fixture[] = array( 'address' => 'Philadelphia' );
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => $fixture ) ) );
+		$this->assertCount( 2, $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->reverse_lookup()['items'] );
 	}
 
 	/**
