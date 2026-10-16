@@ -442,6 +442,40 @@ class WidgetsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The Last Seen widget escapes the user's address.
+	 */
+	public function test_lastseen_escaped() {
+		$user_id = $this->user_with_location();
+		remove_all_filters( 'sanitize_user_meta_geo_address' );
+		update_user_meta( $user_id, 'geo_address', '<script>alert(1)</script>' );
+		$html = $this->render(
+			new Sloc_Lastseen_Widget(),
+			array(
+				'title'    => '',
+				'user'     => $user_id,
+				'showtext' => '1',
+				'showmap'  => '1',
+			)
+		);
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringContainsString( '&lt;script&gt;alert(1)&lt;/script&gt;', $html );
+		$this->assertStringContainsString( '<img src="https://maps.example.com/static?', $html );
+	}
+
+	/**
+	 * The station widget's provider list marks the saved provider inside its option, with no stray text.
+	 */
+	public function test_station_provider_list() {
+		foreach ( array( 'Sloc_Station_Widget', 'Sloc_Airport_Widget' ) as $class ) {
+			ob_start();
+			$class::provider_list( 'nwsus', 'provider', 'provider' );
+			$html = ob_get_clean();
+			$this->assertStringStartsWith( '<select name="provider"><option', $html, $class );
+			$this->assertMatchesRegularExpression( "/<option value=\"nwsus\"\s+selected(='selected')?>[^<]+<\\/option>/", $html, $class );
+		}
+	}
+
+	/**
 	 * The last seen widget can hide the text and map.
 	 */
 	public function test_lastseen_without_text_or_map() {

@@ -553,7 +553,7 @@ class REST_Geo {
 					),
 				);
 			}
-			$response = wp_dropdown_pages( $venue_args );
+			$response = wp_dropdown_pages( $venue_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Not printed ('echo' is false); core escapes the list.
 			if ( $response ) {
 				return array(
 					'venue_select' => $response,

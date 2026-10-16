@@ -363,6 +363,28 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Term names are escaped in display names and links.
+	 */
+	public function test_display_name_escaped() {
+		global $wpdb;
+		$terms = $this->hierarchy();
+		// Term names are sanitized when saved, so write one directly.
+		foreach ( array( 'locality', 'region' ) as $level ) {
+			$wpdb->update( $wpdb->terms, array( 'name' => '<script>' . $level . '</script>' ), array( 'term_id' => $terms[ $level ] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Bypasses term name sanitizing.
+			clean_term_cache( $terms[ $level ], 'location' );
+		}
+		foreach ( array(
+			Location_Taxonomy::display_name( $terms['locality'] ),
+			Location_Taxonomy::display_name( $terms['locality'], array( 'links' => false ) ),
+			Location_Taxonomy::get_location_link( $terms['locality'] ),
+		) as $html ) {
+			$this->assertStringNotContainsString( '<script>', $html );
+			$this->assertStringContainsString( '&lt;script&gt;locality&lt;/script&gt;', $html );
+			$this->assertStringContainsString( '&lt;script&gt;region&lt;/script&gt;', $html );
+		}
+	}
+
+	/**
 	 * Display names and links for terms that don't exist are empty, without warnings.
 	 */
 	public function test_display_name_missing_term() {

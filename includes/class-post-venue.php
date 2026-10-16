@@ -249,7 +249,7 @@ class Post_Venue {
 					),
 					'edit.php'
 				);
-				printf( '<a href="%s">%s</a>', esc_url( $url ), $count );
+				printf( '<a href="%s">%s</a>', esc_url( $url ), esc_html( number_format_i18n( $count ) ) );
 			} else {
 				esc_html_e( 'None', 'simple-location' );
 			}
@@ -421,7 +421,8 @@ class Post_Venue {
 	 * @param float $lat Latitude.
 	 * @param float $lng Longitude.
 	 * @param int   $current Current venue.
-	 * @return array Return select
+	 * @param bool  $echo    Optional. Whether to print the list. Default true.
+	 * @return string HTML select list.
 	 */
 	public static function nearby_select( $lat, $lng, $current = 0, $echo = true ) {
 		$current = intval( $current );
@@ -434,7 +435,7 @@ class Post_Venue {
 		}
 		$return .= '</select><br />';
 		if ( $echo ) {
-			echo $return;
+			echo $return; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Each part is escaped above as the list is built.
 		}
 		return $return;
 	}

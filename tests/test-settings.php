@@ -420,6 +420,28 @@ class SettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A provider's description is escaped.
+	 */
+	public function test_provider_callback_escapes_description() {
+		update_option( 'sloc_map_provider', 'evil' );
+		$html = $this->capture(
+			array( 'Loc_Config', 'provider_callback' ),
+			array(
+				'label_for' => 'sloc_map_provider',
+				'providers' => array(
+					'evil' => array(
+						'name'        => 'Evil',
+						'url'         => 'https://evil.example.com/',
+						'description' => '<script>alert(1)</script>',
+					),
+				),
+			)
+		);
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringContainsString( '&lt;script&gt;alert(1)&lt;/script&gt;', $html );
+	}
+
+	/**
 	 * The default visibility field offers private, public and protected as stored numbers, with the saved one selected.
 	 */
 	public function test_visibility_callback() {

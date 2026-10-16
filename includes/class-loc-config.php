@@ -893,7 +893,7 @@ class Loc_Config {
 		}
 		if ( array_key_exists( $text, $providers ) && is_array( $providers[ $text ] ) ) {
 			if ( array_key_exists( 'url', $providers[ $text ] ) ) {
-				printf( '<p><a href="%1$s">%2$s</a> - %3$s</p>', esc_url( $providers[ $text ]['url'] ), esc_html( $providers[ $text ]['name'] ), $providers[ $text ]['description'] );
+				printf( '<p><a href="%1$s">%2$s</a> - %3$s</p>', esc_url( $providers[ $text ]['url'] ), esc_html( $providers[ $text ]['name'] ), esc_html( $providers[ $text ]['description'] ) );
 			} else {
 				printf( '<p>%1$s - %2$s</p>', esc_html( $providers[ $text ]['name'] ), esc_html( $providers[ $text ]['description'] ) );
 			}

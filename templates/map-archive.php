@@ -23,7 +23,7 @@ if ( is_day() ) {
 				?>
 			</header><!-- .page-header -->
 			<?php $map_provider = Loc_Config::map_provider(); ?>
-		<img class="archive-map sloc-map" src="<?php echo wp_kses_post( $map_provider->get_archive_map( get_geo_archive_location_list() ) ); ?>" />
+		<img class="archive-map sloc-map" src="<?php echo esc_url( $map_provider->get_archive_map( get_geo_archive_location_list() ) ); ?>" />
 		<ul>
 			<?php
 		}
@@ -32,19 +32,22 @@ if ( is_day() ) {
 			the_post();
 
 			if ( 'public' === get_post_geodata( get_the_ID(), 'visibility' ) ) {
-					echo get_post_location(
-						get_the_ID(),
-						array(
-							'weather'       => false,
-							'wrapper-type'  => 'li',
-							'wrapper-class' => 'h-entry',
-							'markup'        => false,
-							'icon'          => false,
-							'object_link'   => true,
-							'altitude'      => false,
-							'text'          => true,
-							'description'   => get_the_time( $date_format, get_the_ID() ),
-						)
+					echo wp_kses(
+						get_post_location(
+							get_the_ID(),
+							array(
+								'weather'       => false,
+								'wrapper-type'  => 'li',
+								'wrapper-class' => 'h-entry',
+								'markup'        => false,
+								'icon'          => false,
+								'object_link'   => true,
+								'altitude'      => false,
+								'text'          => true,
+								'description'   => get_the_time( $date_format, get_the_ID() ),
+							)
+						),
+						Simple_Location_Plugin::kses_clean()
 					);
 			}
 		}

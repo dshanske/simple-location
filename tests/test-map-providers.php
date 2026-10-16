@@ -141,11 +141,42 @@ class MapProvidersTest extends WP_UnitTestCase {
 	public function test_static_map_html() {
 		$map  = $this->provider( 'Map_Provider_Sloc_Test' );
 		$html = $map->get_the_static_map_html();
-		$this->assertSame( '<a target="_blank" href="https://maps.example.com/?c=39.9524,-75.1636"><img class="sloc-map" src="https://maps.example.com/static?c=39.9524,-75.1636&z=15&s=600x400" width="600" height="400" loading="lazy" /></a>', $html );
+		$this->assertSame( '<a target="_blank" href="https://maps.example.com/?c=39.9524,-75.1636"><img class="sloc-map" src="https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400" width="600" height="400" loading="lazy" /></a>', $html );
 
 		$html = $map->get_the_static_map_html( true );
-		$this->assertStringContainsString( 'srcset="https://maps.example.com/static?c=39.9524,-75.1636&z=15&s=300x200 0.5x,https://maps.example.com/static?c=39.9524,-75.1636&z=15&s=600x400 1x,https://maps.example.com/static?c=39.9524,-75.1636&z=15&s=1200x800 2x,https://maps.example.com/static?c=39.9524,-75.1636&z=15&s=1800x1200 3x"', $html );
+		$this->assertStringContainsString( 'srcset="https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=300x200 0.5x,https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400 1x,https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=1200x800 2x,https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=1800x1200 3x"', $html );
 		$this->assertStringContainsString( 'width="600" height="400"', $html );
+	}
+
+	/**
+	 * The map URLs and sizes in the static map HTML are escaped.
+	 */
+	public function test_static_map_html_escaped() {
+		$map = new class() extends Map_Provider_Sloc_Test {
+			/**
+			 * A static map URL that tries to break out of the attribute.
+			 *
+			 * @return string
+			 */
+			public function get_the_static_map() {
+				return 'https://maps.example.com/static?x="><script>alert(1)</script>';
+			}
+
+			/**
+			 * A map link with a script URL.
+			 *
+			 * @return string
+			 */
+			public function get_the_map_url() {
+				return 'javascript:alert(2)';
+			}
+		};
+		$map->set( self::LAT, self::LNG );
+		foreach ( array( $map->get_the_static_map_html(), $map->get_the_static_map_html( true ) ) as $html ) {
+			$this->assertStringNotContainsString( '<script>', $html );
+			$this->assertStringNotContainsString( '">', substr( $html, 0, strpos( $html, '<img' ) - 1 ) );
+			$this->assertStringNotContainsString( 'javascript:', $html );
+		}
 	}
 
 	/**
