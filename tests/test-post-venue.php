@@ -42,6 +42,9 @@ class PostVenueTest extends WP_UnitTestCase {
 		$_GET     = array();
 		$_REQUEST = array();
 		set_current_screen( 'front' );
+		// main_query() replaces the main query; put back one shared with $wp_query, as WordPress sets it up.
+		$GLOBALS['wp_the_query'] = new WP_Query();
+		$GLOBALS['wp_query']     = $GLOBALS['wp_the_query'];
 		parent::tear_down();
 	}
 
@@ -135,10 +138,20 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Makes a query the main query, as edit.php's list query is.
+	 *
+	 * @return WP_Query
+	 */
+	protected function main_query() {
+		$GLOBALS['wp_the_query'] = new WP_Query();
+		return $GLOBALS['wp_the_query'];
+	}
+
+	/**
 	 * In the admin, ?post__in limits the post list to those IDs.
 	 */
 	public function test_post__in() {
-		$query = new WP_Query();
+		$query = $this->main_query();
 		Post_Venue::post__in( $query );
 		$this->assertSame( '', $query->get( 'post__in' ), 'Not in the admin.' );
 
@@ -156,7 +169,7 @@ class PostVenueTest extends WP_UnitTestCase {
 	 */
 	public function test_post__in_string() {
 		set_current_screen( 'edit-post' );
-		$query            = new WP_Query();
+		$query            = $this->main_query();
 		$_GET['post__in'] = '5';
 		Post_Venue::post__in( $query );
 		$this->assertSame( array( 5 ), $query->get( 'post__in' ) );
@@ -165,10 +178,42 @@ class PostVenueTest extends WP_UnitTestCase {
 		Post_Venue::post__in( $query );
 		$this->assertSame( array( 3, 7 ), $query->get( 'post__in' ) );
 
-		$query            = new WP_Query();
+		$query            = $this->main_query();
 		$_GET['post__in'] = 'none';
 		Post_Venue::post__in( $query );
 		$this->assertSame( '', $query->get( 'post__in' ) );
+	}
+
+	/**
+	 * Other queries on the page, and other admin screens, are left alone.
+	 */
+	public function test_post__in_only_main_list_query() {
+		$_GET['post__in'] = '5';
+		set_current_screen( 'edit-post' );
+		$main = $this->main_query();
+
+		// A secondary query, such as one a widget or another plugin runs.
+		$query = new WP_Query();
+		Post_Venue::post__in( $query );
+		$this->assertSame( '', $query->get( 'post__in' ) );
+
+		$posts = self::factory()->post->create_many( 2 );
+		$found = get_posts(
+			array(
+				'post__in'         => $posts,
+				'suppress_filters' => false,
+			)
+		);
+		$this->assertCount( 2, $found );
+
+		// The main query on a screen that isn't a post list.
+		set_current_screen( 'dashboard' );
+		Post_Venue::post__in( $main );
+		$this->assertSame( '', $main->get( 'post__in' ) );
+
+		set_current_screen( 'edit-venue' );
+		Post_Venue::post__in( $main );
+		$this->assertSame( array( 5 ), $main->get( 'post__in' ) );
 	}
 
 	/**
