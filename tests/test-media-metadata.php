@@ -190,7 +190,6 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * The date uses the offset stored in the photo, under the tag name current PHP gives it.
 	 */
 	public function test_exif_data_offset() {
-		$this->markTestSkipped( 'Known bug, see #323' );
 		$meta = $this->read(
 			array(
 				'version'  => '0232',
@@ -205,7 +204,6 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * Without an offset, the date uses the timezone at the photo's location.
 	 */
 	public function test_exif_data_timezone_from_location() {
-		$this->markTestSkipped( 'Known bug, see #323' );
 		$meta = $this->read(
 			array(
 				'version'   => '0232',
@@ -215,6 +213,28 @@ class MediaMetadataTest extends WP_UnitTestCase {
 			)
 		);
 		$this->assertSame( '2024-07-01T12:00:00-04:00', $meta['created'] );
+	}
+
+	/**
+	 * The offset is used whatever the EXIF version, with the digitized date as a fallback; a malformed offset is ignored.
+	 */
+	public function test_exif_data_offset_tags() {
+		$exif = array(
+			'ExifVersion'         => '0300',
+			'DateTimeDigitized'   => '2024:07:01 12:00:00',
+			'OffsetTimeDigitized' => '+05:30',
+		);
+		$meta = Sloc_Media_Metadata::exif_data( array(), '', IMAGETYPE_JPEG, array(), $exif );
+		$this->assertSame( '2024-07-01T12:00:00+05:30', $meta['created'] );
+
+		// Cameras without a clock offset can write blanks.
+		$exif = array(
+			'ExifVersion'        => '0232',
+			'DateTimeOriginal'   => '2024:07:01 12:00:00',
+			'OffsetTimeOriginal' => '   :  ',
+		);
+		$meta = Sloc_Media_Metadata::exif_data( array(), '', IMAGETYPE_JPEG, array(), $exif );
+		$this->assertSame( '2024-07-01T12:00:00+01:00', $meta['created'] );
 	}
 
 	/**
@@ -281,7 +301,6 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * The created date is copied to mf2_published.
 	 */
 	public function test_attachment_created_date() {
-		$this->markTestSkipped( 'Known bug, see #323' );
 		$attachment_id = self::factory()->attachment->create();
 		Sloc_Media_Metadata::attachment( array( 'image_meta' => array( 'created' => '2024-07-01T12:00:00-04:00' ) ), $attachment_id );
 		$this->assertSame( '2024-07-01T12:00:00-04:00', get_post_meta( $attachment_id, 'mf2_published', true ) );
