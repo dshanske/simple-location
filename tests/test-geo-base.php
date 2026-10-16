@@ -195,6 +195,7 @@ class GeoBaseTest extends WP_UnitTestCase {
 		$output = $this->capture( array( 'Geo_Base', 'user_profile' ), $subscriber );
 		$this->assertStringContainsString( 'Last Reported Location', $output );
 		$this->assertStringContainsString( 'name="latitude"', $output );
+		$this->assertStringContainsString( 'name="location_user_nonce"', $output );
 	}
 
 	/**
@@ -796,20 +797,47 @@ class GeoBaseTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Saving a profile requires permission to edit the user.
+	 * Saving a profile requires the location form's nonce and permission to edit the user's location.
 	 */
 	public function test_save_user_meta() {
 		$_POST = array(
 			'latitude'  => '45.01',
 			'longitude' => '-75.44',
 		);
+
+		// Without the nonce, the location fields weren't on the form.
+		wp_set_current_user( self::$users['subscriber'] );
+		Geo_Base::save_user_meta( self::$users['subscriber'] );
+		$this->assertSame( '', get_user_meta( self::$users['subscriber'], 'geo_latitude', true ) );
+
 		wp_set_current_user( self::$users['author'] );
+		$_POST['location_user_nonce'] = wp_create_nonce( 'location_user' );
 		Geo_Base::save_user_meta( self::$users['subscriber'] );
 		$this->assertSame( '', get_user_meta( self::$users['subscriber'], 'geo_latitude', true ) );
 
 		wp_set_current_user( self::$users['subscriber'] );
+		$_POST['location_user_nonce'] = wp_create_nonce( 'location_user' );
 		Geo_Base::save_user_meta( self::$users['subscriber'] );
 		$this->assertEquals( 45.01, get_user_meta( self::$users['subscriber'], 'geo_latitude', true ) );
+	}
+
+	/**
+	 * The edit_users_location capability can be denied separately from edit_user.
+	 */
+	public function test_save_user_meta_location_capability() {
+		$deny = function ( $caps, $cap ) {
+			return 'edit_users_location' === $cap ? array( 'do_not_allow' ) : $caps;
+		};
+		add_filter( 'map_meta_cap', $deny, 20, 2 );
+		wp_set_current_user( self::$users['subscriber'] );
+		$_POST = array(
+			'latitude'            => '45.01',
+			'longitude'           => '-75.44',
+			'location_user_nonce' => wp_create_nonce( 'location_user' ),
+		);
+		Geo_Base::save_user_meta( self::$users['subscriber'] );
+		remove_filter( 'map_meta_cap', $deny, 20 );
+		$this->assertSame( '', get_user_meta( self::$users['subscriber'], 'geo_latitude', true ) );
 	}
 
 	/**
