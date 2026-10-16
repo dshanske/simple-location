@@ -85,6 +85,43 @@ class TimezoneTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Lookups, including ones that find nothing, are cached per coordinate rounded to 2 decimal places.
+	 */
+	public function test_timezone_for_location_caches_result() {
+		Loc_Timezone::timezone_for_location( 39.9524, -75.1636 );
+		$this->assertSame( 'America/New_York', wp_cache_get( '39.95,-75.16', 'sloc_timezone' ) );
+
+		Loc_Timezone::timezone_for_location( 30.0, -40.0 );
+		$found = false;
+		$this->assertSame( '', wp_cache_get( '30.00,-40.00', 'sloc_timezone', false, $found ) );
+		$this->assertTrue( $found );
+	}
+
+	/**
+	 * A cached result is used without reading the city list.
+	 */
+	public function test_timezone_for_location_uses_cache() {
+		wp_cache_set( '12.35,45.68', 'Pacific/Auckland', 'sloc_timezone' );
+		$result = Loc_Timezone::timezone_for_location( 12.3456, 45.6789 );
+		$this->assertSame( 'Pacific/Auckland', $result->name );
+
+		// A cached miss returns null even where the list has a city.
+		wp_cache_set( '51.51,-0.13', '', 'sloc_timezone' );
+		$this->assertNull( Loc_Timezone::timezone_for_location( 51.5072, -0.1276 ) );
+	}
+
+	/**
+	 * Points that round to the same coordinate share a result, and the date still applies to each call.
+	 */
+	public function test_timezone_for_location_cached_date() {
+		$summer = Loc_Timezone::timezone_for_location( 39.9524, -75.1636, '2025-07-01T12:00:00Z' );
+		$winter = Loc_Timezone::timezone_for_location( 39.9521, -75.1639, '2025-01-15T12:00:00Z' );
+		$this->assertSame( 'America/New_York', $winter->name );
+		$this->assertSame( '-04:00', $summer->offset );
+		$this->assertSame( '-05:00', $winter->offset );
+	}
+
+	/**
 	 * The result reports the offset at the given date, or now.
 	 */
 	public function test_timezone_result() {
