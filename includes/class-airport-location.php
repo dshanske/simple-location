@@ -70,13 +70,13 @@ class Airport_Location {
 		}
 		$fp   = fopen( $file, 'r' ); // phpcs:ignore
 		rewind( $fp );
-		$keys = array_flip( fgetcsv( $fp ) );
+		$keys = array_flip( fgetcsv( $fp, 0, ',', '"', '' ) );
 		if ( '' === $search || ! isset( $keys[ $field ] ) ) {
 			fclose( $fp ); // phpcs:ignore
 			return self::not_found();
 		}
 		$return = array();
-		$line   = fgetcsv( $fp );
+		$line   = fgetcsv( $fp, 0, ',', '"', '' );
 		while ( $line ) {
 			if ( is_array( $line ) && isset( $line[ $keys[ $field ] ] ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
 				$airport = array();
@@ -115,7 +115,7 @@ class Airport_Location {
 					$return[] = $airport;
 				}
 			}
-			$line = fgetcsv( $fp );
+			$line = fgetcsv( $fp, 0, ',', '"', '' );
 		}
 
 		fclose( $fp ); // phpcs:ignore
@@ -198,7 +198,7 @@ class Airport_Location {
 		$fp = fopen( $file, 'r' ); // phpcs:ignore
 		rewind( $fp );
 		// The file has no header row, so every line is an airline.
-		$line = fgetcsv( $fp );
+		$line = fgetcsv( $fp, 0, ',', '"', '' );
 		while ( $line ) {
 			if ( is_array( $line ) && isset( $line[ $keys[ $field ] ] ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
 				$airline = array();
@@ -211,7 +211,7 @@ class Airport_Location {
 				$airline = array_filter( $airline, 'strlen' );
 				break;
 			}
-			$line = fgetcsv( $fp );
+			$line = fgetcsv( $fp, 0, ',', '"', '' );
 		}
 
 		fclose( $fp ); // phpcs:ignore

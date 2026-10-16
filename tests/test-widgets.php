@@ -396,9 +396,6 @@ class WidgetsTest extends WP_UnitTestCase {
 	 * The airport widget shows the weather at an airport.
 	 */
 	public function test_airport() {
-		if ( PHP_VERSION_ID >= 80400 ) {
-			$this->markTestSkipped( 'Known bug on PHP 8.4 and later, see #316' );
-		}
 		$html = $this->render(
 			new Sloc_Airport_Widget(),
 			array(

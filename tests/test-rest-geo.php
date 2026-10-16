@@ -98,15 +98,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Skips tests that read airports.csv on PHP 8.4+, where fgetcsv() raises a deprecation.
-	 */
-	protected function skip_airport_lookup_on_php84() {
-		if ( PHP_VERSION_ID >= 80400 ) {
-			$this->markTestSkipped( 'Known bug, see #316' );
-		}
-	}
-
-	/**
 	 * The integer sanitizer accepts numbers and rejects anything else.
 	 */
 	public function test_sanitize_int() {
@@ -771,7 +762,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /timezone for an airport code uses the airport's location.
 	 */
 	public function test_timezone_airport() {
-		$this->skip_airport_lookup_on_php84();
 		$data = $this->request( '/timezone', array( 'airport' => 'JFK' ) )->get_data();
 		$this->assertSame( 'America/New_York', $data['timezone'] );
 		$this->assertSame( 'JFK', $data['code'] );
@@ -781,7 +771,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /timezone for an unknown airport code is an error.
 	 */
 	public function test_timezone_unknown_airport() {
-		$this->skip_airport_lookup_on_php84();
 		$this->assertErrorResponse( 'airport_not_found', $this->request( '/timezone', array( 'airport' => 'ZZZ' ) ), 404 );
 	}
 
@@ -816,7 +805,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * Searches that find nothing are cached under a hashed key, so repeating them doesn't search the file again.
 	 */
 	public function test_airport_miss_cached() {
-		$this->skip_airport_lookup_on_php84();
 		$transient = 'sloc_airport_' . md5( 'zzz|iata_code' );
 		$this->assertWPError( Airport_Location::get( 'ZZZ' ) );
 		$this->assertSame( array(), get_transient( $transient ) );
@@ -828,7 +816,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * Empty searches and unknown fields return an error.
 	 */
 	public function test_airport_invalid_search() {
-		$this->skip_airport_lookup_on_php84();
 		$this->assertWPError( Airport_Location::get( '' ) );
 		$this->assertWPError( Airport_Location::get( 'JFK', 'nonexistent_field' ) );
 	}
@@ -837,7 +824,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /airport finds an airport by IATA code, ICAO ident, or GPS code.
 	 */
 	public function test_airport_codes() {
-		$this->skip_airport_lookup_on_php84();
 		foreach ( array(
 			'iata_code' => 'YYZ',
 			'ident'     => 'CYYZ',
@@ -855,7 +841,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /airport reports elevation in meters.
 	 */
 	public function test_airport_elevation_in_meters() {
-		$this->skip_airport_lookup_on_php84();
 		$data = $this->request( '/airport', array( 'iata_code' => 'YYZ' ) )->get_data();
 		$this->assertEqualsWithDelta( 173, $data['elevation'], 1 );
 	}
@@ -864,7 +849,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * Airports at sea level keep an elevation of 0; airports with no elevation in the file have none.
 	 */
 	public function test_airport_sea_level() {
-		$this->skip_airport_lookup_on_php84();
 		$airport = Airport_Location::get( 'ELW' );
 		$this->assertSame( 'Ellamar Seaplane Base', $airport['name'] );
 		$this->assertEquals( 0, $airport['elevation'] );
@@ -885,7 +869,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /airport by municipality returns a list of airports.
 	 */
 	public function test_airport_municipality() {
-		$this->skip_airport_lookup_on_php84();
 		$data = $this->request( '/airport', array( 'municipality' => 'toronto' ) )->get_data();
 		$this->assertGreaterThan( 1, count( $data ) );
 		$this->assertSame( array( 'Toronto' ), array_unique( wp_list_pluck( $data, 'municipality' ) ) );
@@ -895,7 +878,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /airport returns the same results from the cache.
 	 */
 	public function test_airport_municipality_cached() {
-		$this->skip_airport_lookup_on_php84();
 		$first  = $this->request( '/airport', array( 'municipality' => 'Toronto' ) )->get_data();
 		$second = $this->request( '/airport', array( 'municipality' => 'Toronto' ) )->get_data();
 		$this->assertSame( $first, $second );
@@ -905,7 +887,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /airport finds the first airport in the data file.
 	 */
 	public function test_airport_first_row() {
-		$this->skip_airport_lookup_on_php84();
 		$data = $this->request( '/airport', array( 'ident' => '00A' ) )->get_data();
 		$this->assertSame( 'Total RF Heliport', $data['name'] );
 	}
@@ -914,7 +895,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /airport errors for unknown codes and when no code is given.
 	 */
 	public function test_airport_not_found() {
-		$this->skip_airport_lookup_on_php84();
 		$this->assertTrue( $this->request( '/airport', array( 'iata_code' => 'ZZZ' ) )->is_error() );
 		$this->assertErrorResponse( 'airport_not_found', $this->request( '/airport' ) );
 	}
@@ -923,7 +903,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * Airlines are found by IATA or ICAO code, including the first row of the file, which has no header.
 	 */
 	public function test_get_airline() {
-		$this->skip_airport_lookup_on_php84();
 		$airline = Airport_Location::get_airline( 'B6' );
 		$this->assertSame( 'JetBlue Airways', $airline['name'] );
 		$this->assertSame( 'JBU', $airline['icao_code'] );
@@ -938,7 +917,6 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * Unknown airlines, empty searches and unknown fields return an error, and misses are cached.
 	 */
 	public function test_get_airline_not_found() {
-		$this->skip_airport_lookup_on_php84();
 		$this->assertSame( 'unable_to_find', Airport_Location::get_airline( 'ZZZZ' )->get_error_code() );
 		$this->assertSame( array(), get_transient( 'sloc_airline_' . md5( 'zzzz|iata_code' ) ) );
 		$this->assertWPError( Airport_Location::get_airline( 'zzzz' ) );

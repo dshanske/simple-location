@@ -99,7 +99,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			usort(
 				$sitelist,
 				function ( $a, $b ) {
-					return $a['distance'] > $b['distance'];
+					return $a['distance'] <=> $b['distance'];
 				}
 			);
 
