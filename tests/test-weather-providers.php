@@ -247,6 +247,27 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Visual Crossing: readings of 0 are kept, and missing readings are left out instead of becoming 0.
+	 */
+	public function test_visualcrossing_zero_and_missing_values() {
+		$fixture = $this->fixture( 'weather/visualcrossing-current.json' );
+		foreach ( array( 'temp', 'windspeed', 'precip', 'cloudcover', 'visibility' ) as $key ) {
+			$fixture['currentConditions'][ $key ] = 0;
+		}
+		unset( $fixture['currentConditions']['windgust'], $fixture['currentConditions']['snow'] );
+		$this->mock_http( array( 'weather.visualcrossing.com' => array( 'body' => $fixture ) ) );
+		$conditions = $this->provider( 'Weather_Provider_VisualCrossing', array( 'api' => 'vc-key' ) )->get_conditions();
+
+		$this->assertSame( 0, $conditions['temperature'] );
+		$this->assertSame( 0.0, $conditions['windspeed'] );
+		$this->assertSame( 0, $conditions['rain'] );
+		$this->assertSame( 0, $conditions['cloudiness'] );
+		$this->assertSame( 0.0, $conditions['visibility'] );
+		$this->assertArrayNotHasKey( 'windgust', $conditions );
+		$this->assertArrayNotHasKey( 'snow', $conditions );
+	}
+
+	/**
 	 * Visual Crossing: visibility is converted to meters before it is rounded, so short distances are kept.
 	 */
 	public function test_visualcrossing_visibility() {
@@ -487,6 +508,35 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * NWS: readings of 0 are kept, and readings NWS sends as null are left out instead of becoming 0.
+	 */
+	public function test_nws_zero_and_missing_values() {
+		$observation = $this->fixture( 'weather/nws-observation.json' );
+		foreach ( array( 'temperature', 'windSpeed', 'windDirection', 'precipitationLastHour' ) as $key ) {
+			$observation['properties'][ $key ]['value'] = 0;
+		}
+		$observation['properties']['barometricPressure']['value'] = null;
+		$this->mock_http(
+			array(
+				'observations/latest' => array( 'body' => $observation ),
+				'stations/KPHL'       => array( 'body' => $this->fixture( 'weather/nws-station.json' ) ),
+			)
+		);
+		$provider = new Weather_Provider_NWSUS();
+		$provider->set( array( 'station_id' => 'KPHL' ) );
+		$conditions = $provider->get_conditions();
+
+		$this->assertSame( 0, $conditions['temperature'] );
+		$this->assertSame( 0.0, $conditions['windspeed'] );
+		$this->assertSame( 0, $conditions['winddegree'] );
+		$this->assertSame( 0.0, $conditions['rain'] );
+		// Null in the fixture: no reading, not 0.
+		$this->assertArrayNotHasKey( 'pressure', $conditions );
+		$this->assertArrayNotHasKey( 'windchill', $conditions );
+		$this->assertArrayNotHasKey( 'heatindex', $conditions );
+	}
+
+	/**
 	 * NWS: a thunderstorm in the present weather sets the condition code.
 	 */
 	public function test_nws_present_weather() {
@@ -541,6 +591,29 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 			),
 			$conditions
 		);
+	}
+
+	/**
+	 * Meteostat: readings of 0 are kept, and missing readings are left out instead of becoming 0.
+	 */
+	public function test_meteostat_zero_and_missing_values() {
+		$fixture                     = $this->fixture( 'weather/meteostat-hourly.json' );
+		$fixture['data'][14]['temp'] = 0;
+		$fixture['data'][14]['prcp'] = 0;
+		$fixture['data'][14]['wspd'] = 0;
+		$fixture['data'][14]['wpgt'] = null;
+		$fixture['data'][14]['snow'] = null;
+		$this->mock_http( array( 'meteostat.p.rapidapi.com/stations/hourly' => array( 'body' => $fixture ) ) );
+		$provider = new Weather_Provider_Meteostat( array( 'api' => 'ms-key' ) );
+		$provider->set( array( 'station_id' => '72408' ) );
+		$conditions = $provider->get_conditions( strtotime( '2025-07-01T14:00:00Z' ) );
+
+		// JSON has no 0.0, so the mocked response has the integer 0.
+		$this->assertSame( 0, $conditions['temperature'] );
+		$this->assertSame( 0, $conditions['rain'] );
+		$this->assertSame( 0.0, $conditions['windspeed'] );
+		$this->assertArrayNotHasKey( 'windgust', $conditions );
+		$this->assertArrayNotHasKey( 'snow', $conditions );
 	}
 
 	/**

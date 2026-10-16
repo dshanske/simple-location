@@ -179,7 +179,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 
 		$return['code'] = $this->code_map( ifset( $observation['weatherCoded'], '' ) );
 
-		return array_filter( $return );
+		return self::filter_weather( $return );
 	}
 
 	/**

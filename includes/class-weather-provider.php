@@ -89,13 +89,53 @@ abstract class Weather_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Removes unset values from weather data.
+	 *
+	 * Unlike array_filter() without a callback, this keeps 0, 0.0 and '0', which are real
+	 * readings (0 °C, no wind, no rain). It removes null, '', false and empty arrays, since
+	 * ifset() returns false for a missing value. `day` is kept when it is false (night).
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array $values Weather data.
+	 * @return array Weather data without unset values.
+	 */
+	protected static function filter_weather( $values ) {
+		return array_filter(
+			$values,
+			function ( $value, $key ) {
+				if ( 'day' === $key ) {
+					return is_bool( $value );
+				}
+				return null !== $value && '' !== $value && false !== $value && array() !== $value;
+			},
+			ARRAY_FILTER_USE_BOTH
+		);
+	}
+
+	/**
+	 * Rounds a value if it is a number.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param mixed $value     Value.
+	 * @param int   $precision Optional. Number of decimal places. Default 0.
+	 * @return float|null Rounded value, or null if the value isn't a number.
+	 */
+	protected static function round_value( $value, $precision = 0 ) {
+		return is_numeric( $value ) ? round( $value, $precision ) : null;
+	}
+
+	/**
 	 * Extra Parameters for location.
+	 *
+	 * @since 5.0.26 Values of 0, and `day` when it is false, are kept.
 	 *
 	 * @param array $return Weather data.
 	 * @param int   $timestamp Unix timestamp. Optional.
 	 * @return array {
 	 *  Arguments.
-	 *  @type string $day 'true' if daytime, 'false' if night.
+	 *  @type bool   $day True if daytime, false if night.
 	 *  @type string $sunset Sunset in iso8601 format.
 	 *  @type string $sunrise Sunrise in iso8601 format.
 	 *  @type string $moonset Moonset in iso8601 format.
@@ -133,7 +173,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 		$return['localtime'] = $datetime->format( DATE_W3C );
 
-		return array_filter( $return );
+		return self::filter_weather( $return );
 	}
 
 	/**

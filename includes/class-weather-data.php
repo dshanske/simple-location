@@ -173,6 +173,7 @@ class Sloc_Weather_Data {
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
 	 * @since 5.0.0
+	 * @since 5.0.26 Values of 0 are saved instead of deleted.
 	 */
 	public static function set_object_weatherdata( $type, $id, $key, $weather ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
@@ -222,7 +223,7 @@ class Sloc_Weather_Data {
 		$weather = wp_array_slice_assoc( $weather, static::$properties );
 
 		foreach ( $weather as $prop => $value ) {
-			if ( ! empty( $value ) ) {
+			if ( self::has_value( $value ) ) {
 				update_metadata( $type, $id, 'weather_' . $prop, $value );
 			} else {
 				delete_metadata( $type, $id, 'weather_' . $prop );
@@ -296,6 +297,7 @@ class Sloc_Weather_Data {
 	 * @return array $weather
 	 *
 	 * @since 5.0.0
+	 * @since 5.0.26 Values of 0 are returned.
 	 */
 	public static function get_object_weatherdata( $type, $id, $key = '' ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
@@ -348,7 +350,21 @@ class Sloc_Weather_Data {
 			$weather[ $prop ] = get_metadata( $type, $id, 'weather_' . $prop, true );
 		}
 
-		return array_filter( $weather );
+		return array_filter( $weather, array( __CLASS__, 'has_value' ) );
+	}
+
+	/**
+	 * Whether a weather value is set.
+	 *
+	 * Unlike empty(), this treats 0 and '0' as set, since they are real readings (0 °C, no wind, no rain).
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param mixed $value Value.
+	 * @return bool True unless the value is null, '', false or an empty array.
+	 */
+	public static function has_value( $value ) {
+		return null !== $value && '' !== $value && false !== $value && array() !== $value;
 	}
 
 	/**
@@ -372,7 +388,7 @@ class Sloc_Weather_Data {
 				'winddegree' => ifset( $weather['wind']['degree'] ),
 				'windspeed'  => ifset( $weather['wind']['speed'] ),
 			);
-			$w = array_filter( $w );
+			$w = array_filter( $w, array( __CLASS__, 'has_value' ) );
 			unset( $weather['wind'] );
 			$weather = array_merge( $w, $weather );
 		}

@@ -388,20 +388,30 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts millimeters to inches.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $mm Millimeters.
-	 * @return float Inches.
+	 * @return float|null Inches, or null if the value isn't a number.
 	 */
 	public static function mm_to_inches( $mm ) {
-		return floatval( $mm ) / 25.4;
+		if ( ! is_numeric( $mm ) ) {
+			return null;
+		}
+		return $mm / 25.4;
 	}
 
 	/**
 	 * Converts inches to millimeters.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $inch Inches.
-	 * @return float Millimeters.
+	 * @return float|null Millimeters, or null if the value isn't a number.
 	 */
 	public static function inches_to_mm( $inch ) {
+		if ( ! is_numeric( $inch ) ) {
+			return null;
+		}
 		return round( $inch * 25.4, 2 );
 	}
 
@@ -409,10 +419,15 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts feet to meters.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $feet Feet.
-	 * @return float Meters.
+	 * @return float|null Meters, or null if the value isn't a number.
 	 */
 	public static function feet_to_meters( $feet ) {
+		if ( ! is_numeric( $feet ) ) {
+			return null;
+		}
 		return round( $feet / 3.2808399, 2 );
 	}
 
@@ -420,72 +435,104 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts meters to feet.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $meters Meters.
-	 * @return float Feet.
+	 * @return float|null Feet, or null if the value isn't a number.
 	 */
 	public static function meters_to_feet( $meters ) {
+		if ( ! is_numeric( $meters ) ) {
+			return null;
+		}
 		return round( $meters * 3.2808399, 2 );
 	}
 
 	/**
 	 * Converts meters to miles.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $meters Meters.
-	 * @return float Miles.
+	 * @return float|null Miles, or null if the value isn't a number.
 	 */
 	public static function meters_to_miles( $meters ) {
+		if ( ! is_numeric( $meters ) ) {
+			return null;
+		}
 		return round( $meters / 1609, 2 );
 	}
 
 	/**
 	 * Converts miles to meters.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $miles Miles.
-	 * @return float Meters.
+	 * @return float|null Meters, or null if the value isn't a number.
 	 */
 	public static function miles_to_meters( $miles ) {
+		if ( ! is_numeric( $miles ) ) {
+			return null;
+		}
 		return round( $miles * 1609, 2 );
 	}
 
 	/**
 	 * Converts kilometers to meters.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $km Kilometers.
-	 * @return float Meters.
+	 * @return float|null Meters, or null if the value isn't a number.
 	 */
 	public static function km_to_meters( $km ) {
+		if ( ! is_numeric( $km ) ) {
+			return null;
+		}
 		return round( $km * 1000, 2 );
 	}
 
 	/**
 	 * Converts km/h to m/s
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $kmh km/h.
-	 * @return float m/s.
+	 * @return float|null m/s, or null if the value isn't a number.
 	 */
 	public static function kmh_to_ms( $kmh ) {
+		if ( ! is_numeric( $kmh ) ) {
+			return null;
+		}
 		return round( $kmh / 3.6, 2 );
 	}
 
 	/**
 	 * Converts m to mm.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $m meters.
-	 * @return float millmeters.
+	 * @return float|null millmeters, or null if the value isn't a number.
 	 */
 	public static function m_to_mm( $m ) {
+		if ( ! is_numeric( $m ) ) {
+			return null;
+		}
 		return round( $m * 1000, 2 );
 	}
 
 	/**
 	 * Converts cm to mm.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of the value itself.
+	 *
 	 * @param float $cm centimeters.
-	 * @return float millmeters.
+	 * @return float|null millmeters, or null if the value isn't a number.
 	 */
 	public static function cm_to_mm( $cm ) {
 		if ( ! is_numeric( $cm ) ) {
-			return( $cm );
+			return null;
 		}
 		return round( $cm * 10, 2 );
 	}
@@ -493,20 +540,30 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts miles per hour to meters per second.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $miles Miles per hour.
-	 * @return float Meters per second.
+	 * @return float|null Meters per second, or null if the value isn't a number.
 	 */
 	public static function miph_to_mps( $miles ) {
+		if ( ! is_numeric( $miles ) ) {
+			return null;
+		}
 		return round( $miles * 0.44704, 2 );
 	}
 
 	/**
 	 * Converts meters per second to miles per hour
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $mps Meters per second.
-	 * @rerturn float Miles per hour.
+	 * @return float|null Miles per hour, or null if the value isn't a number.
 	 */
 	public static function mps_to_miph( $mps ) {
+		if ( ! is_numeric( $mps ) ) {
+			return null;
+		}
 		return round( $mps * 2.237, 2 );
 	}
 
@@ -515,10 +572,15 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts meters per hour to meters per second.
 	 *
+	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 *
 	 * @param float $mph Meters per hour.
-	 * @return float Meters per second.
+	 * @return float|null Meters per second, or null if the value isn't a number.
 	 */
 	public static function mph_to_mps( $mph ) {
+		if ( ! is_numeric( $mph ) ) {
+			return null;
+		}
 		return round( $mph / 3600, 2 );
 	}
 

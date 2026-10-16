@@ -149,7 +149,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				$return['summary'] = $current['weather']['description'];
 			}
 
-			$return = array_filter( $this->extra_data( $return ) );
+			$return = self::filter_weather( $this->extra_data( $return ) );
 
 			$this->set_cache( $return );
 
@@ -208,7 +208,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			if ( isset( $response['pressure'] ) ) {
 				$return['pressure'] = round( $response['pressure']['average'], 1 );
 			}
-			$return = array_filter( $return );
+			$return = self::filter_weather( $return );
 			$this->set_cache( $return );
 
 			return $return;
