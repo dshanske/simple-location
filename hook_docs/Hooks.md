@@ -32,6 +32,10 @@
 - [`pre_at_venue`](pre_at_venue) Short-circuits the checking for a venue if it is not stored as normal.
 - [`pre_nearby_venue`](pre_nearby_venue) Short-circuits the checking for a venue if it is not stored as normal.
 
+## class-rest-geo.php
+
+- [`sloc_local_api_public`](sloc_local_api_public) Filters whether the local airport and timezone lookup endpoints are open to everyone.
+
 ## class-venue-provider.php
 
 - [`sloc_venue_provider_defaults`](sloc_venue_provider_defaults)

@@ -49,9 +49,15 @@ class Airport_Location {
 	 *   @type array $keywords Extra keywords/phrases to assist with search, comma-separated. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc.
 	 * }
 	 * @since 4.0.0
+	 * @since 5.0.26 Searches that find nothing are cached too, and cache keys are hashed.
 	 */
 	public static function get( $search, $field = 'iata_code' ) {
-		$airport = get_transient( 'airports_' . $search . '_' . $field );
+		$search    = trim( (string) $search );
+		$transient = 'sloc_airport_' . md5( strtolower( $search ) . '|' . $field );
+		$airport   = get_transient( $transient );
+		if ( array() === $airport ) {
+			return self::not_found();
+		}
 		if ( false !== $airport ) {
 			return $airport;
 		}
@@ -61,7 +67,11 @@ class Airport_Location {
 		}
 		$fp   = fopen( $file, 'r' ); // phpcs:ignore
 		rewind( $fp );
-		$keys   = array_flip( fgetcsv( $fp ) );
+		$keys = array_flip( fgetcsv( $fp ) );
+		if ( '' === $search || ! isset( $keys[ $field ] ) ) {
+			fclose( $fp ); // phpcs:ignore
+			return self::not_found();
+		}
 		$return = array();
 		$line   = fgetcsv( $fp );
 		while ( $line ) {
@@ -98,15 +108,30 @@ class Airport_Location {
 			}
 		}
 
+		fclose( $fp ); // phpcs:ignore
+
 		if ( empty( $return ) ) {
-			return new WP_Error( 'unable_to_find', __( 'Unable To Find Airport Code', 'simple-location' ), $return );
+			// Remember the miss so repeating an unknown code doesn't search the file again.
+			set_transient( $transient, array(), DAY_IN_SECONDS );
+			return self::not_found();
 		}
 		set_transient(
-			'airports_' . $search . '_' . $field,
+			$transient,
 			$airport,
 			DAY_IN_SECONDS
 		);
 		return $return;
+	}
+
+	/**
+	 * Returns the error for an airport that wasn't found.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return WP_Error Error.
+	 */
+	protected static function not_found() {
+		return new WP_Error( 'unable_to_find', __( 'Unable To Find Airport Code', 'simple-location' ), array( 'status' => 404 ) );
 	}
 
 
