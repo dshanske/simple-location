@@ -27,15 +27,6 @@ class PolylineTest extends WP_UnitTestCase {
 	const ENCODED = '_p~iF~ps|U_ulLnnqC_mqNvxq`@';
 
 	/**
-	 * Skips decoding on PHP 8.5 and later, where decode() calls ord() on a whole string.
-	 */
-	protected function skip_decode_on_php85() {
-		if ( PHP_VERSION_ID >= 80500 ) {
-			$this->markTestSkipped( 'Known bug on PHP 8.5, see #367' );
-		}
-	}
-
-	/**
 	 * Points encode to Google's documented string.
 	 */
 	public function test_encode() {
@@ -67,7 +58,6 @@ class PolylineTest extends WP_UnitTestCase {
 	 * Decoding returns the flat list of coordinates.
 	 */
 	public function test_decode() {
-		$this->skip_decode_on_php85();
 		$decoded = Sloc_Polyline::decode( self::ENCODED );
 		$this->assertCount( 6, $decoded );
 		foreach ( Sloc_Polyline::flatten( $this->points ) as $i => $value ) {
@@ -77,10 +67,19 @@ class PolylineTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A string cut off in the middle of a value decodes the complete values and drops the last one.
+	 */
+	public function test_decode_truncated() {
+		$decoded = Sloc_Polyline::decode( substr( self::ENCODED, 0, -1 ) );
+		$this->assertCount( 5, $decoded );
+		$this->assertEqualsWithDelta( 38.5, $decoded[0], 0.000001 );
+		$this->assertEqualsWithDelta( 43.252, $decoded[4], 0.000001 );
+	}
+
+	/**
 	 * Encoding then decoding returns the original points.
 	 */
 	public function test_round_trip() {
-		$this->skip_decode_on_php85();
 		$points = array(
 			array( 39.9524, -75.1636 ),
 			array( 39.9489, -75.15 ),
