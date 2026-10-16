@@ -1024,7 +1024,20 @@ class Geo_Data {
 		if ( ! is_array( $loc ) ) {
 			return '';
 		}
-		if ( Geo_Base::current_user_can_read( sloc_get_object_from_id( $type, $id ) ) && 'public' !== $loc['visibility'] ) {
+		/**
+		 * Filters whether a hidden location is shown to the current user.
+		 *
+		 * Users who can read an object's location see a private or protected location, marked as hidden. Return false
+		 * when the output is generated for others to see, such as content sent to a federated service.
+		 *
+		 * @since 5.0.26
+		 *
+		 * @param bool   $show Whether to show a hidden location. Defaults to whether the current user can read it.
+		 * @param string $type Object type: post, comment, term or user.
+		 * @param int    $id   Object ID.
+		 */
+		$show_hidden = apply_filters( 'sloc_show_hidden_location', Geo_Base::current_user_can_read( sloc_get_object_from_id( $type, $id ) ), $type, $id );
+		if ( $show_hidden && 'public' !== $loc['visibility'] ) {
 			$loc['visibility'] = 'public';
 			if ( isset( $loc['address'] ) ) {
 				/* translators: Prefaces the address 1. with the private status */
