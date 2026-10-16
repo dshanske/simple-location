@@ -258,7 +258,9 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	 * LocationIQ forward geocoding needs a key and returns the address of the first result.
 	 */
 	public function test_locationiq_geocode() {
-		$this->assertSame( 'missing_api_key', ( new Geo_Provider_LocationIQ( array( 'api' => '' ) ) )->geocode( 'Philadelphia City Hall' )->get_error_code() );
+		$error = ( new Geo_Provider_LocationIQ( array( 'api' => '' ) ) )->geocode( 'Philadelphia City Hall' );
+		$this->assertSame( 'missing_api_key', $error->get_error_code() );
+		$this->assertSame( 'You have not set an API key for LocationIQ', $error->get_error_message() );
 
 		// LocationIQ returns the same format as Nominatim.
 		$this->mock_http( array( 'locationiq.com/v1/search' => array( 'body' => $this->fixture( 'geo/nominatim-search.json' ) ) ) );
@@ -271,10 +273,12 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * LocationIQ uses its own endpoint and key, and the state code it returns.
+	 * LocationIQ needs its own key, uses its own endpoint, and the state code it returns.
 	 */
 	public function test_locationiq_reverse() {
-		$this->assertWPError( $this->provider( 'Geo_Provider_LocationIQ', array( 'api' => '' ) )->reverse_lookup() );
+		$error = $this->provider( 'Geo_Provider_LocationIQ', array( 'api' => '' ) )->reverse_lookup();
+		$this->assertSame( 'missing_api_key', $error->get_error_code() );
+		$this->assertSame( 'You have not set an API key for LocationIQ', $error->get_error_message() );
 
 		$this->mock_http( array( 'locationiq.com/v1/reverse' => array( 'body' => $this->fixture( 'geo/locationiq-reverse.json' ) ) ) );
 		$addr    = $this->provider( 'Geo_Provider_LocationIQ', array( 'api' => 'liq-key' ) )->reverse_lookup();
