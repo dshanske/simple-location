@@ -115,12 +115,13 @@ class Weather_Provider_Aeris extends Weather_Provider {
 				$args['filter'] = 'allstations';
 			}
 
-			$url  = 'https://data.api.xweather.com/observations/closest';
-			$json = $this->fetch_json( $url, $args );
-			if ( array_key_exists( 'success', $json ) && 'false' === $json['success'] ) {
-				return $json;
+			$url         = 'https://data.api.xweather.com/observations/closest';
+			$json        = $this->fetch_json( $url, $args );
+			$observation = $this->first_observation( $json );
+			if ( is_wp_error( $observation ) ) {
+				return $observation;
 			}
-			$return = $this->convert_data( $json['response'][0] );
+			$return = $this->convert_data( $observation );
 			$return = $this->extra_data( $return, $time );
 
 			$this->set_cache( $return );
@@ -140,6 +141,9 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * @return array Current Conditions in Array
 	 */
 	public function convert_data( $json ) {
+		if ( ! is_array( $json ) || ! isset( $json['ob'] ) || ! is_array( $json['ob'] ) ) {
+			return array();
+		}
 		$return               = array();
 		$return['station_id'] = ifset( $json['id'] );
 		if ( array_key_exists( 'loc', $json ) ) {
@@ -149,16 +153,16 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		if ( array_key_exists( 'profile', $json ) ) {
 			$return['altitude'] = ifset( $json['profile']['elevM'] );
 		}
-		if ( array_key_exists( 'relativeTo', $json ) && array_key_exists( 'distanceKm', $json['relativeTo'] ) ) {
-			$return['distance'] = $json['relativeTo']['distanceKm'] * 1000;
+		if ( isset( $json['relativeTo']['distanceKM'] ) && is_numeric( $json['relativeTo']['distanceKM'] ) ) {
+			$return['distance'] = self::km_to_meters( $json['relativeTo']['distanceKM'] );
 		}
 
 		$observation           = $json['ob'];
-		$return['temperature'] = round( $observation['tempC'], 1 );
+		$return['temperature'] = ifset_round( $observation['tempC'], 1 );
 		$return['dewpoint']    = ifset_round( $observation['dewpointC'], 1 );
 		$return['heatindex']   = ifset_round( $observation['heatindexC'], 1 );
 		$return['windchill']   = ifset_round( $observation['windchillC'], 1 );
-		$return['humidity']    = round( $observation['humidity'], 1 );
+		$return['humidity']    = ifset_round( $observation['humidity'], 1 );
 		$return['pressure']    = ifset_round( $observation['spressureMB'], 1 );
 		$return['summary']     = ifset( $observation['weather'] );
 		$return['cloudiness']  = ifset( $observation['sky'] );
@@ -170,9 +174,10 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$return['snow']       = self::cm_to_mm( ifset_round( $observation['snowDepthCM'], 2 ) );
 		$return['radiation']  = ifset_round( $observation['solradWM2'], 2 );
 		$return['uv']         = ifset_round( $observation['uvi'], 2 );
-		$return['visibility'] = self::km_to_meters( ifset_round( $observation['visibilityKM'] ) );
+		$visibility           = ifset( $observation['visibilityKM'] );
+		$return['visibility'] = is_numeric( $visibility ) ? round( self::km_to_meters( $visibility ) ) : null;
 
-		$return['code'] = $this->code_map( $observation['weatherCoded'] );
+		$return['code'] = $this->code_map( ifset( $observation['weatherCoded'], '' ) );
 
 		return array_filter( $return );
 	}
@@ -210,14 +215,15 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			$args['from'] = $time;
 		}
 
-		$url = 'https://api.aerisapi.com/observations/closest';
+		$url = 'https://data.api.xweather.com/observations/closest';
 
-		$json = $this->fetch_json( $url, $args );
-		if ( array_key_exists( 'success', $json ) && 'false' === $json['success'] ) {
-			return $json;
+		$json        = $this->fetch_json( $url, $args );
+		$observation = $this->first_observation( $json );
+		if ( is_wp_error( $observation ) ) {
+			return $observation;
 		}
 
-		$return = $this->convert_data( $json['response'][0] );
+		$return = $this->convert_data( $observation );
 		if ( empty( $return ) ) {
 			return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
 		}
@@ -231,12 +237,44 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	}
 
 	/**
+	 * Returns the first observation in an Xweather response.
+	 *
+	 * Xweather reports errors in the body with "success": false, and an empty response when there is no data.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array|WP_Error $json Decoded response.
+	 * @return array|WP_Error Observation, or an error.
+	 */
+	protected function first_observation( $json ) {
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		if ( ! is_array( $json ) || empty( $json['success'] ) ) {
+			$code    = isset( $json['error']['code'] ) && is_string( $json['error']['code'] ) ? $json['error']['code'] : 'unable_to_retrieve';
+			$message = isset( $json['error']['description'] ) && is_string( $json['error']['description'] ) ? $json['error']['description'] : __( 'Unable to Retrieve', 'simple-location' );
+			return new WP_Error( $code, $message );
+		}
+		$response = ifset( $json['response'], array() );
+		if ( is_array( $response ) && wp_is_numeric_array( $response ) ) {
+			$response = reset( $response );
+		}
+		if ( ! is_array( $response ) || empty( $response['ob'] ) ) {
+			return new WP_Error( 'unable_to_retrieve', __( 'No Observation Found', 'simple-location' ) );
+		}
+		return $response;
+	}
+
+	/**
 	 * Return array of station data.
 	 *
 	 * @param string $id Weather type ID.
 	 * @return string Icon ID.
 	 */
 	private function code_map( $id ) {
+		if ( ! is_string( $id ) ) {
+			return '';
+		}
 		$id = explode( ':', $id );
 		if ( 3 !== count( $id ) ) {
 			return '';

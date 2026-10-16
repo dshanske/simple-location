@@ -290,8 +290,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 				'winddegree'  => $ob['windDirDEG'],
 				'uv'          => $ob['uvi'],
 				'radiation'   => $ob['solradWM2'],
-				// Visibility is rounded to whole kilometers before converting.
-				'visibility'  => round( $ob['visibilityKM'] ) * 1000,
+				'visibility'  => round( $ob['visibilityKM'] * 1000 ),
 				'summary'     => $ob['weather'],
 				'code'        => 801,
 			),
@@ -299,6 +298,85 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		);
 		$this->assertEquals( $station['loc']['lat'], $conditions['latitude'] );
 		$this->assertEquals( $station['profile']['elevM'], $conditions['altitude'] );
+		$this->assertEquals( $station['relativeTo']['distanceKM'] * 1000, $conditions['distance'] );
+	}
+
+	/**
+	 * Xweather (Aeris): errors in the body, HTTP errors and empty responses return a WP_Error.
+	 */
+	public function test_aeris_errors() {
+		update_option( 'sloc_aeris_client_id', 'client' );
+		update_option( 'sloc_aeris_client_secret', 'secret' );
+
+		$this->mock_http(
+			array(
+				'data.api.xweather.com/observations/closest' => array(
+					'body' => array(
+						'success'  => false,
+						'error'    => array(
+							'code'        => 'invalid_client',
+							'description' => 'The client provided is invalid.',
+						),
+						'response' => array(),
+					),
+				),
+			)
+		);
+		$location = $this->provider( 'Weather_Provider_Aeris' )->get_conditions();
+		$this->assertWPError( $location );
+		$this->assertSame( 'invalid_client', $location->get_error_code() );
+		$this->assertSame( 'The client provided is invalid.', $location->get_error_message() );
+
+		$station = new Weather_Provider_Aeris();
+		$station->set( array( 'station_id' => 'KPHL' ) );
+		$this->assertSame( 'invalid_client', $station->get_conditions()->get_error_code() );
+
+		$this->mock_http(
+			array(
+				'data.api.xweather.com/observations/closest' => array(
+					'body' => array(
+						'success'  => true,
+						'error'    => array(
+							'code'        => 'warn_no_data',
+							'description' => 'No data available.',
+						),
+						'response' => array(),
+					),
+				),
+			)
+		);
+		$this->assertWPError( $this->provider( 'Weather_Provider_Aeris' )->get_conditions() );
+
+		$this->mock_http(
+			array(
+				'data.api.xweather.com/observations/closest' => array(
+					'code' => 500,
+					'body' => 'Server Error',
+				),
+			)
+		);
+		$this->assertWPError( $this->provider( 'Weather_Provider_Aeris' )->get_conditions() );
+		$this->assertWPError( $station->get_conditions() );
+	}
+
+	/**
+	 * Xweather (Aeris): an observation with missing fields converts without errors.
+	 */
+	public function test_aeris_partial_observation() {
+		$provider = new Weather_Provider_Aeris();
+		$this->assertSame( array(), $provider->convert_data( array( 'id' => 'KPHL' ) ) );
+		$this->assertSame(
+			array(
+				'station_id'  => 'KPHL',
+				'temperature' => 20.5,
+			),
+			$provider->convert_data(
+				array(
+					'id' => 'KPHL',
+					'ob' => array( 'tempC' => 20.5 ),
+				)
+			)
+		);
 	}
 
 	/**
@@ -307,7 +385,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	public function test_aeris_station() {
 		update_option( 'sloc_aeris_client_id', 'client' );
 		update_option( 'sloc_aeris_client_secret', 'secret' );
-		$this->mock_http( array( 'api.aerisapi.com/observations/closest' => array( 'body' => $this->fixture( 'weather/aeris-observations.json' ) ) ) );
+		$this->mock_http( array( 'data.api.xweather.com/observations/closest' => array( 'body' => $this->fixture( 'weather/aeris-observations.json' ) ) ) );
 		$provider = new Weather_Provider_Aeris();
 		$provider->set( array( 'station_id' => 'KPHL' ) );
 		$conditions = $provider->get_conditions();
