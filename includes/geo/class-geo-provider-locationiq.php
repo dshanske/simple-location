@@ -47,7 +47,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 	 */
 	public function reverse_lookup() {
 		if ( empty( $this->api ) ) {
-			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for LocationIQ', 'simple-location' ) );
 		}
 		$args = array(
 			'key'             => $this->api,
@@ -79,7 +79,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 	 */
 	public function geocode( $address ) {
 		if ( empty( $this->api ) ) {
-			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Bing', 'simple-location' ) );
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for LocationIQ', 'simple-location' ) );
 		}
 		$args = array(
 			'key'             => $this->api,
