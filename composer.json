@@ -42,7 +42,7 @@
 		}
      },
     "require": {
-	"php": ">=7.0"
+	"php": ">=7.4"
     },
     "require-dev": {
 	"composer/installers": "^1.0 | ^2.0",
