@@ -320,6 +320,26 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * /geocode leaves the altitude out when the elevation lookup fails.
+	 */
+	public function test_geocode_without_elevation() {
+		Elevation_Provider_Sloc_Test::$elevation = new WP_Error( 'no_results', 'No elevation found' );
+		try {
+			$data = $this->request(
+				'/geocode',
+				array(
+					'latitude'  => '45.01',
+					'longitude' => '-75.44',
+				)
+			)->get_data();
+		} finally {
+			Elevation_Provider_Sloc_Test::$elevation = 123.0;
+		}
+		$this->assertArrayNotHasKey( 'altitude', $data );
+		$this->assertSame( 'Test Address', $data['display-name'] );
+	}
+
+	/**
 	 * /geocode keeps an altitude that the reverse lookup returned.
 	 */
 	public function test_geocode_keeps_provider_altitude() {

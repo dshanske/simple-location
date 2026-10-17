@@ -277,7 +277,11 @@ class Sloc_Media_Metadata {
 					}
 				}
 				if ( ! array_key_exists( 'geo_altitude', $update ) && is_object( $reverse ) ) {
-					$update['geo_altitude'] = $reverse->elevation();
+					$elevation = $reverse->elevation();
+					// Store only a number, never an error from the elevation lookup.
+					if ( is_numeric( $elevation ) ) {
+						$update['geo_altitude'] = $elevation;
+					}
 				}
 			}
 

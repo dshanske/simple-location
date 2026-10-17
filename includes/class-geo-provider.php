@@ -93,14 +93,15 @@ abstract class Geo_Provider extends Sloc_Provider {
 	/**
 	 * Returns elevation from provider.
 	 *
-	 * @return float $elevation Elevation.
+	 * @return float|WP_Error $elevation Elevation, or an error.
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 Returns an error instead of 0 (sea level) when no elevation provider is set.
 	 */
 	public function elevation() {
 		$provider = Loc_Config::elevation_provider();
 		if ( ! $provider ) {
-			return 0;
+			return new WP_Error( 'no_elevation_provider', __( 'No elevation provider is set', 'simple-location' ) );
 		}
 
 		$provider->set( $this->latitude, $this->longitude );

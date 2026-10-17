@@ -758,14 +758,14 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Geo providers get elevation from the elevation provider, or 0 without one.
+	 * Geo providers get elevation from the elevation provider, or an error without one rather than sea level.
 	 */
 	public function test_elevation() {
 		$provider = new Geo_Provider_Nominatim();
 		$provider->set( self::LAT, self::LNG );
 		$this->assertSame( 123.0, $provider->elevation() );
 		update_option( 'sloc_elevation_provider', 'none' );
-		$this->assertSame( 0, $provider->elevation() );
+		$this->assertSame( 'no_elevation_provider', $provider->elevation()->get_error_code() );
 	}
 
 	/**

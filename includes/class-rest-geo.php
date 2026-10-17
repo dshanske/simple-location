@@ -699,7 +699,11 @@ class REST_Geo {
 				$provider = Loc_Config::elevation_provider();
 				if ( $provider ) {
 					$provider->set( $params['latitude'], $params['longitude'] );
-					$reverse_adr['altitude'] = $provider->elevation();
+					$elevation = $provider->elevation();
+					// Leave the altitude out when it can't be looked up.
+					if ( is_numeric( $elevation ) ) {
+						$reverse_adr['altitude'] = $elevation;
+					}
 				}
 			}
 

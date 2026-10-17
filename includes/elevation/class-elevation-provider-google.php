@@ -43,13 +43,14 @@ class Elevation_Provider_Google extends Elevation_Provider {
 	/**
 	 * Returns elevation.
 	 *
-	 * @return float $elevation Elevation.
+	 * @return float|WP_Error $elevation Elevation, or an error.
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 Returns an error without an API key or results, and shows Google's error message.
 	 */
 	public function elevation() {
 		if ( empty( $this->api ) ) {
-			return null;
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Google', 'simple-location' ) );
 		}
 		$args = array(
 			'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
@@ -62,11 +63,11 @@ class Elevation_Provider_Google extends Elevation_Provider {
 		}
 
 		if ( array_key_exists( 'status', $json ) && 'OK' !== $json['status'] ) {
-			return new WP_Error( $json['status'], ifset( $json['errormessage'], __( 'Error Returning Results from Google', 'simple-location' ) ) );
+			return new WP_Error( $json['status'], ifset( $json['error_message'], __( 'Error Returning Results from Google', 'simple-location' ) ) );
 		}
 
-		if ( ! isset( $json['results'] ) ) {
-			return null;
+		if ( ! isset( $json['results'][0]['elevation'] ) || ! is_numeric( $json['results'][0]['elevation'] ) ) {
+			return new WP_Error( 'no_results', __( 'No elevation found', 'simple-location' ), array( 'status' => 404 ) );
 		}
 		return round( $json['results'][0]['elevation'], 2 );
 	}
