@@ -51,6 +51,8 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	/**
 	 * Widget worker
 	 *
+	 * @since 6.0.0 Always closes the widget wrapper, and shows nothing without a station.
+	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
 	 *
@@ -72,8 +74,10 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 			$cache_time = null;
 		}
 
-		if ( isset( $instance['station'] ) ) {
-			$weather = Sloc_Weather_Data::get_weather_by_station( $instance['station'], $instance['provider'], $cache_time ); // phpcs:ignore
+		// Without a station there is nothing to show; weather_list() returns an empty string.
+		$weather = null;
+		if ( ! empty( $instance['station'] ) ) {
+			$weather = Sloc_Weather_Data::get_weather_by_station( $instance['station'], ifset( $instance['provider'] ), $cache_time ); // phpcs:ignore
 			if ( is_wp_error( $weather ) ) {
 				if ( 'http_request_failed' === $weather->get_error_code() ) {
 					echo esc_html__( 'Unable to Connect to Station', 'simple-location' );
@@ -86,7 +90,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 			}
 		}
 		echo wp_kses( self::weather_list( $weather, 'fa-map', $instance ), Simple_Location_Plugin::kses_clean() );
-		// echo $args['after_widget']; // phpcs:ignore
+		echo $args['after_widget']; // phpcs:ignore
 	}
 
 	/**
