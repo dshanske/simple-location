@@ -15,7 +15,9 @@ jobs:
     - name: Run plugin check
       uses: wordpress/plugin-check-action@v1
       with:
+        # Tests aren't shipped (see .distignore).
         exclude-directories: |
           './bin'
           './.github'
+          './tests'
         exclude-checks: 'file_type'
