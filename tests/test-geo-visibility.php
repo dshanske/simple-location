@@ -407,7 +407,6 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 	 * GeoRSS output contains real whitespace, not literal backslash sequences.
 	 */
 	public function test_georss_item_whitespace() {
-		$this->markTestSkipped( 'Known bug, see #308' );
 		$this->go_to( get_permalink( $this->post_with_location( 'public' ) ) );
 		$output = $this->capture( array( 'Geo_Base', 'georss_item' ) );
 		$this->assertStringNotContainsString( '\t', $output );

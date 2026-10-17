@@ -157,7 +157,7 @@ abstract class Sloc_Provider {
 		}
 		$code = wp_remote_retrieve_response_code( $response );
 		$body = wp_remote_retrieve_body( $response );
-		if ( ( $code / 100 ) !== 2 ) {
+		if ( $code < 200 || $code >= 300 ) {
 			return new WP_Error( 'invalid_response', $body, array( 'status' => $code ) );
 		}
 		$json = json_decode( $body, true );

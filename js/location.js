@@ -59,7 +59,8 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function updateVenues() {
-		if ( 0 !== $( 'location_dropdown' ).val() ) {
+		// "No Location" is -1 (the wp_dropdown_categories() default).
+		if ( 0 < parseInt( $( '#location_dropdown' ).val(), 10 ) ) {
 			$.ajax( {
 				type: 'GET',
 				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
