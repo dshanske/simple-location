@@ -301,6 +301,26 @@ class SettingsTest extends WP_UnitTestCase {
 		Loc_Config::admin_enqueue( 'indieweb_page_simloc' );
 		$this->assertTrue( wp_style_is( 'sloc_admin', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'sloc_password', 'enqueued' ) );
+
+		// Without the IndieWeb plugin the page is under Settings.
+		$GLOBALS['wp_styles']  = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['wp_scripts'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		Loc_Config::admin_enqueue( 'settings_page_simloc' );
+		$this->assertTrue( wp_style_is( 'sloc_admin', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'sloc_password', 'enqueued' ) );
+	}
+
+	/**
+	 * Until it's saved, the aspect ratio is the first ratio in the list, and the settings page selects it.
+	 */
+	public function test_aspect_ratio_default() {
+		delete_option( 'sloc_aspect' );
+		Loc_Config::init();
+		$this->assertSame( '1.77777777778', (string) get_option( 'sloc_aspect' ) );
+
+		Loc_Config::admin_init();
+		$html = $this->capture( array( 'Loc_Config', 'simloc_options' ) );
+		$this->assertMatchesRegularExpression( "/<option value=\"1\.77777777778\"\s+selected(=['\"]selected['\"])?>/", $html );
 	}
 
 	/**
@@ -308,8 +328,6 @@ class SettingsTest extends WP_UnitTestCase {
 	 */
 	public function test_options_page() {
 		Loc_Config::admin_init();
-		// The registered default for the aspect ratio is the whole list of ratios, so save one.
-		update_option( 'sloc_aspect', '1' );
 		$html = $this->capture( array( 'Loc_Config', 'simloc_options' ) );
 		$this->assertStringContainsString( 'nav-tab-wrapper', $html );
 		foreach ( array( 'general', 'providers', 'stations', 'api' ) as $tab ) {
