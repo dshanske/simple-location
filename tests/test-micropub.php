@@ -253,6 +253,40 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * An altitude the client sent is kept; 0 or NaN is replaced by the elevation lookup.
+	 *
+	 * @dataProvider data_sent_altitude
+	 *
+	 * @param mixed $sent     Altitude in the request.
+	 * @param float $expected Stored altitude.
+	 */
+	public function test_set_location_sent_altitude( $sent, $expected ) {
+		$args = $this->micropub_post(
+			array(
+				'geo_latitude'  => self::LAT,
+				'geo_longitude' => self::LNG,
+				'geo_altitude'  => $sent,
+			)
+		);
+		Location_Plugins::micropub_set_location( array( 'properties' => array() ), $args );
+		$this->assertEquals( $expected, get_post_meta( $args['ID'], 'geo_altitude', true ) );
+	}
+
+	/**
+	 * Sent altitudes and the altitude that should be stored.
+	 *
+	 * @return array
+	 */
+	public function data_sent_altitude() {
+		return array(
+			'sent'       => array( 120, 120 ),
+			'below sea'  => array( -10.5, -10.5 ),
+			'zero'       => array( 0, 50 ),
+			'not number' => array( 'NaN', 50 ),
+		);
+	}
+
+	/**
 	 * Coordinates are made public, and the address, location term and elevation are looked up.
 	 */
 	public function test_set_location_coordinates() {

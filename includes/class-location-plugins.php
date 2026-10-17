@@ -395,7 +395,8 @@ class Location_Plugins {
 				// The lookup failed; keep what the client sent.
 				$reverse_adr = array();
 			}
-			if ( isset( $meta['geo_altitude'] ) && 0 !== $meta['altitude'] && 'NaN' !== $meta['altitude'] ) {
+			// Keep an altitude the client sent; look it up when there is none, or it's 0 or NaN, which some clients send instead.
+			if ( isset( $meta['geo_altitude'] ) && ( ! is_numeric( $meta['geo_altitude'] ) || 0.0 === (float) $meta['geo_altitude'] ) ) {
 				unset( $meta['geo_altitude'] );
 			}
 			if ( ! isset( $meta['geo_altitude'] ) && isset( $meta['geo_latitude'] ) && isset( $meta['geo_longitude'] ) ) {
