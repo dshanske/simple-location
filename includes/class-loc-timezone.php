@@ -66,32 +66,67 @@ class Loc_Timezone {
 	}
 
 
+	/**
+	 * Returns the timezone of the nearest listed city within 200 km.
+	 *
+	 * @since 4.0.0
+	 * @since 5.0.26 Results are cached per coordinate rounded to 2 decimal places (about 1 km), and the lookup uses
+	 *               those rounded coordinates.
+	 *
+	 * @param float                    $lat  Latitude.
+	 * @param float                    $lng  Longitude.
+	 * @param string|int|DateTime|bool $date Optional. Date to report the offset at. Default now.
+	 * @return Timezone_Result|null The timezone, or null if no listed city is within 200 km.
+	 */
 	public static function timezone_for_location( $lat, $lng, $date = false ) {
-		$start = microtime( true );
+		$lat   = round( (float) $lat, 2 );
+		$lng   = round( (float) $lng, 2 );
+		$key   = sprintf( '%.2f,%.2f', $lat, $lng );
+		$found = false;
+		$name  = wp_cache_get( $key, 'sloc_timezone', false, $found );
+		if ( ! $found ) {
+			$name = self::nearest_timezone( $lat, $lng );
+			// An empty string caches that there is no timezone here.
+			wp_cache_set( $key, $name, 'sloc_timezone' );
+		}
 
+		if ( $name ) {
+			return new Timezone_Result( $name, $date );
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the timezone name of the nearest listed city within 200 km.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param float $lat Latitude.
+	 * @param float $lng Longitude.
+	 * @return string Timezone name, or an empty string if no listed city is within 200 km.
+	 */
+	private static function nearest_timezone( $lat, $lng ) {
 		$tzfile = self::tz_data();
+		if ( ! is_array( $tzfile ) ) {
+			return '';
+		}
 
-		$timezones = array();
+		$nearest = '';
+		$min     = 200000;
+		// A city further away in latitude alone than this can't be within range.
+		$max_lat = rad2deg( $min / 6378100 );
 		foreach ( $tzfile as $line ) {
-			$tz       = explode( ' ', trim( $line ) );
+			$tz = explode( ' ', trim( $line ) );
+			if ( count( $tz ) < 3 || abs( (float) $tz[0] - $lat ) > $max_lat ) {
+				continue;
+			}
 			$distance = geo_distance( (float) $tz[0], (float) $tz[1], $lat, $lng );
-			if ( $distance < 200000 ) {
-				$timezones[] = array_merge( $tz, array( $distance ) );
+			if ( $distance < $min ) {
+				$min     = $distance;
+				$nearest = $tz[2];
 			}
 		}
-
-		usort(
-			$timezones,
-			function ( $a, $b ) {
-				return $a[3] < $b[3] ? -1 : 1;
-			}
-		);
-
-		if ( count( $timezones ) > 0 ) {
-			return new Timezone_Result( $timezones[0][2], $date );
-		} else {
-			return null;
-		}
+		return $nearest;
 	}
 
 	private static function tz_data() {
