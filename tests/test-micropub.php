@@ -584,8 +584,8 @@ class MicropubTest extends WP_UnitTestCase {
 		$this->assertSame( self::LAT, $result['geo']['latitude'] );
 		$this->assertSame( self::LNG, $result['geo']['longitude'] );
 		$this->assertSame( 'public', $result['geo']['visibility'] );
-		$this->assertSame( 'Test Cafe', $result['venues']['name'] );
-		$this->assertEquals( self::LAT, $result['venues']['latitude'] );
+		$this->assertSame( 'Test Cafe', $result['venues']['items'][0]['name'] );
+		$this->assertEquals( self::LAT, $result['venues']['items'][0]['latitude'] );
 
 		// The site default applies.
 		update_option( 'geo_public', 2 );

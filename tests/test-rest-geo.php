@@ -538,8 +538,8 @@ class RestGeoTest extends WP_UnitTestCase {
 				'longitude' => '-75.44',
 			)
 		)->get_data();
-		$this->assertSame( 'Test Cafe', $data['name'] );
-		$this->assertSame( 45.01, $data['latitude'] );
+		$this->assertSame( 'Test Cafe', $data['items'][0]['name'] );
+		$this->assertSame( 45.01, $data['items'][0]['latitude'] );
 	}
 
 	/**
