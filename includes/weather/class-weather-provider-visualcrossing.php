@@ -148,20 +148,20 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	 */
 	public function convert_data( $json ) {
 		$return                = array();
-		$return['temperature'] = ifset_round( $json['temp'], 1 );
-		$return['dewpoint']    = ifset_round( $json['dew'], 1 );
-		$return['humidity']    = ifset_round( $json['humidity'], 1 );
-		$return['pressure']    = ifset_round( $json['pressure'], 1 );
-		$return['cloudiness']  = ifset( $json['cloudcover'] );
-		$return['summary']     = self::conditions_map( ifset( $json['conditions'] ) );
-		$return['code']        = self::code_map( ifset( $json['conditions'] ) );
+		$return['temperature'] = self::round_value( $json['temp'] ?? null, 1 );
+		$return['dewpoint']    = self::round_value( $json['dew'] ?? null, 1 );
+		$return['humidity']    = self::round_value( $json['humidity'] ?? null, 1 );
+		$return['pressure']    = self::round_value( $json['pressure'] ?? null, 1 );
+		$return['cloudiness']  = $json['cloudcover'] ?? null;
+		$return['summary']     = self::conditions_map( $json['conditions'] ?? '' );
+		$return['code']        = self::code_map( $json['conditions'] ?? '' );
 
-		$return['windspeed']  = self::round_value( self::kmh_to_ms( ifset( $json['windspeed'] ) ), 1 );
-		$return['windgust']   = self::round_value( self::kmh_to_ms( ifset( $json['windgust'] ) ), 1 );
-		$return['winddegree'] = ifset_round( $json['winddir'], 1 );
-		$return['rain']       = ifset_round( $json['precip'], 2 );
-		$return['snow']       = self::cm_to_mm( ifset_round( $json['snow'], 2 ) );
-		$return['radiation']  = ifset_round( $json['solarradiation'], 2 );
+		$return['windspeed']  = self::round_value( self::kmh_to_ms( $json['windspeed'] ?? null ), 1 );
+		$return['windgust']   = self::round_value( self::kmh_to_ms( $json['windgust'] ?? null ), 1 );
+		$return['winddegree'] = self::round_value( $json['winddir'] ?? null, 1 );
+		$return['rain']       = self::round_value( $json['precip'] ?? null, 2 );
+		$return['snow']       = self::cm_to_mm( self::round_value( $json['snow'] ?? null, 2 ) );
+		$return['radiation']  = self::round_value( $json['solarradiation'] ?? null, 2 );
 		// Convert before rounding, so visibility under 1 km isn't rounded away.
 		if ( isset( $json['visibility'] ) && is_numeric( $json['visibility'] ) ) {
 			$return['visibility'] = round( self::km_to_meters( (float) $json['visibility'] ) );

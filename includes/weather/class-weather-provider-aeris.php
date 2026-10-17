@@ -147,39 +147,39 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			return array();
 		}
 		$return               = array();
-		$return['station_id'] = ifset( $json['id'] );
+		$return['station_id'] = $json['id'] ?? null;
 		if ( array_key_exists( 'loc', $json ) ) {
 			$return['latitude']  = $json['loc']['lat'];
 			$return['longitude'] = $json['loc']['long'];
 		}
 		if ( array_key_exists( 'profile', $json ) ) {
-			$return['altitude'] = ifset( $json['profile']['elevM'] );
+			$return['altitude'] = $json['profile']['elevM'] ?? null;
 		}
 		if ( isset( $json['relativeTo']['distanceKM'] ) && is_numeric( $json['relativeTo']['distanceKM'] ) ) {
 			$return['distance'] = self::km_to_meters( $json['relativeTo']['distanceKM'] );
 		}
 
 		$observation           = $json['ob'];
-		$return['temperature'] = ifset_round( $observation['tempC'], 1 );
-		$return['dewpoint']    = ifset_round( $observation['dewpointC'], 1 );
-		$return['heatindex']   = ifset_round( $observation['heatindexC'], 1 );
-		$return['windchill']   = ifset_round( $observation['windchillC'], 1 );
-		$return['humidity']    = ifset_round( $observation['humidity'], 1 );
-		$return['pressure']    = ifset_round( $observation['spressureMB'], 1 );
-		$return['summary']     = ifset( $observation['weather'] );
-		$return['cloudiness']  = ifset( $observation['sky'] );
+		$return['temperature'] = self::round_value( $observation['tempC'] ?? null, 1 );
+		$return['dewpoint']    = self::round_value( $observation['dewpointC'] ?? null, 1 );
+		$return['heatindex']   = self::round_value( $observation['heatindexC'] ?? null, 1 );
+		$return['windchill']   = self::round_value( $observation['windchillC'] ?? null, 1 );
+		$return['humidity']    = self::round_value( $observation['humidity'] ?? null, 1 );
+		$return['pressure']    = self::round_value( $observation['spressureMB'] ?? null, 1 );
+		$return['summary']     = $observation['weather'] ?? null;
+		$return['cloudiness']  = $observation['sky'] ?? null;
 
-		$return['windspeed']  = self::kmh_to_ms( ifset_round( $observation['windSpeedKPH'] ) );
-		$return['windgust']   = self::kmh_to_ms( ifset_round( $observation['windGustKPH'] ) );
-		$return['winddegree'] = ifset_round( $observation['windDirDEG'], 1 );
-		$return['rain']       = ifset_round( $observation['precipMM'], 2 );
-		$return['snow']       = self::cm_to_mm( ifset_round( $observation['snowDepthCM'], 2 ) );
-		$return['radiation']  = ifset_round( $observation['solradWM2'], 2 );
-		$return['uv']         = ifset_round( $observation['uvi'], 2 );
-		$visibility           = ifset( $observation['visibilityKM'] );
+		$return['windspeed']  = self::kmh_to_ms( self::round_value( $observation['windSpeedKPH'] ?? null ) );
+		$return['windgust']   = self::kmh_to_ms( self::round_value( $observation['windGustKPH'] ?? null ) );
+		$return['winddegree'] = self::round_value( $observation['windDirDEG'] ?? null, 1 );
+		$return['rain']       = self::round_value( $observation['precipMM'] ?? null, 2 );
+		$return['snow']       = self::cm_to_mm( self::round_value( $observation['snowDepthCM'] ?? null, 2 ) );
+		$return['radiation']  = self::round_value( $observation['solradWM2'] ?? null, 2 );
+		$return['uv']         = self::round_value( $observation['uvi'] ?? null, 2 );
+		$visibility           = $observation['visibilityKM'] ?? null;
 		$return['visibility'] = is_numeric( $visibility ) ? round( self::km_to_meters( $visibility ) ) : null;
 
-		$return['code'] = $this->code_map( ifset( $observation['weatherCoded'], '' ) );
+		$return['code'] = $this->code_map( $observation['weatherCoded'] ?? '' );
 
 		return self::filter_weather( $return );
 	}
@@ -257,7 +257,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			$message = isset( $json['error']['description'] ) && is_string( $json['error']['description'] ) ? $json['error']['description'] : __( 'Unable to Retrieve', 'simple-location' );
 			return new WP_Error( $code, $message );
 		}
-		$response = ifset( $json['response'], array() );
+		$response = $json['response'] ?? array();
 		if ( is_array( $response ) && wp_is_numeric_array( $response ) ) {
 			$response = reset( $response );
 		}

@@ -102,21 +102,21 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			if ( ! isset( $response['currently'] ) ) {
 				return $return;
 			}
-			$current               = ifset( $response['currently'] );
-			$return['temperature'] = ifset_round( $current['temperature'], 1 );
+			$current               = $response['currently'] ?? null;
+			$return['temperature'] = self::round_value( $current['temperature'] ?? null, 1 );
 			if ( isset( $current['humidity'] ) ) {
 				$return['humidity'] = round( $current['humidity'] * 100, 1 );
 			}
-			$return['pressure'] = ifset_round( $current['pressure'], 1 );
+			$return['pressure'] = self::round_value( $current['pressure'] ?? null, 1 );
 			if ( isset( $current['cloudCover'] ) ) {
 				$return['cloudiness'] = round( $current['cloudCover'] * 100, 1 );
 			}
-			$return['windspeed']  = ifset_round( $current['windSpeed'] );
-			$return['winddegree'] = ifset_round( $current['windBearing'], 1 );
-			$return['windgust']   = ifset_round( $current['windGust'], 1 );
-			$return['uv']         = ifset_round( $current['uvIndex'], 1 );
-			$return['summary']    = ifset( $current['summary'] );
-			$return['code']       = $this->code_map( ifset( $current['icon'] ) );
+			$return['windspeed']  = self::round_value( $current['windSpeed'] ?? null );
+			$return['winddegree'] = self::round_value( $current['windBearing'] ?? null, 1 );
+			$return['windgust']   = self::round_value( $current['windGust'] ?? null, 1 );
+			$return['uv']         = self::round_value( $current['uvIndex'] ?? null, 1 );
+			$return['summary']    = $current['summary'] ?? null;
+			$return['code']       = $this->code_map( $current['icon'] ?? '' );
 			if ( isset( $current['visibility'] ) ) {
 				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
@@ -146,7 +146,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			return array();
 		}
 		$intensity = round( (float) $current['precipIntensity'], 2 );
-		if ( 'snow' === ifset( $current['precipType'] ) ) {
+		if ( 'snow' === ( $current['precipType'] ?? null ) ) {
 			return array( 'snow' => round( $intensity * 10, 2 ) );
 		}
 		return array( 'rain' => $intensity );

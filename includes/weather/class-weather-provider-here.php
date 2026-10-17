@@ -89,19 +89,19 @@ class Weather_Provider_HERE extends Weather_Provider {
 			}
 			$current = $response['places'][0]['observations'][0];
 
-			$return['temperature'] = ifset_round( $current['temperature'], 1 );
-			$return['dewpoint']    = ifset_round( $current['dewPoint'], 1 );
+			$return['temperature'] = self::round_value( $current['temperature'] ?? null, 1 );
+			$return['dewpoint']    = self::round_value( $current['dewPoint'] ?? null, 1 );
 			// Humidity is a string in v3.
 			$return['humidity']   = isset( $current['humidity'] ) && is_numeric( $current['humidity'] ) ? round( (float) $current['humidity'], 1 ) : null;
-			$return['pressure']   = ifset_round( $current['barometerPressure'], 1 );
-			$return['uv']         = ifset_round( $current['uvIndex'], 1 );
-			$return['windspeed']  = self::kmh_to_ms( ifset_round( $current['windSpeed'], 2 ) );
-			$return['winddegree'] = ifset_round( $current['windDirection'], 1 );
-			$return['rain']       = self::cm_to_mm( ifset_round( $current['precipitation1H'], 2 ) );
-			$return['snow']       = self::cm_to_mm( ifset_round( $current['snowFall'], 2 ) );
-			$return['summary']    = ifset( $current['description'] );
-			$return['code']       = $this->code_map( ifset( $current['iconId'] ) );
-			$return['visibility'] = self::km_to_meters( ifset( $current['visibility'] ) );
+			$return['pressure']   = self::round_value( $current['barometerPressure'] ?? null, 1 );
+			$return['uv']         = self::round_value( $current['uvIndex'] ?? null, 1 );
+			$return['windspeed']  = self::kmh_to_ms( self::round_value( $current['windSpeed'] ?? null, 2 ) );
+			$return['winddegree'] = self::round_value( $current['windDirection'] ?? null, 1 );
+			$return['rain']       = self::cm_to_mm( self::round_value( $current['precipitation1H'] ?? null, 2 ) );
+			$return['snow']       = self::cm_to_mm( self::round_value( $current['snowFall'] ?? null, 2 ) );
+			$return['summary']    = $current['description'] ?? null;
+			$return['code']       = $this->code_map( $current['iconId'] ?? '' );
+			$return['visibility'] = self::km_to_meters( $current['visibility'] ?? null );
 			$return               = self::filter_weather( $this->extra_data( $return, $time ) );
 
 			$this->set_cache( $return );

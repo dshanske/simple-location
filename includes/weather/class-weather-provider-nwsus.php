@@ -179,7 +179,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		}
 		$response   = wp_remote_retrieve_body( $response );
 		$response   = json_decode( $response, true );
-		$properties = ifset( $response['properties'] );
+		$properties = $response['properties'] ?? null;
 		if ( isset( $response['geometry'] ) ) {
 			$return['latitude']  = $response['geometry']['coordinates'][1];
 			$return['longitude'] = $response['geometry']['coordinates'][0];
@@ -204,13 +204,13 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$pressure              = self::get_value( $properties, 'barometricPressure' );
 		$return['pressure']    = is_numeric( $pressure ) ? round( $pressure / 100, 2 ) : null;
 
-		$return['summary'] = ifset( $properties['textDescription'] );
+		$return['summary'] = $properties['textDescription'] ?? null;
 
 		if ( ! empty( $properties['presentWeather'] ) ) {
 			$return['code'] = self::phenomenon_code_map( $properties['presentWeather'] );
 		}
 		if ( ! isset( $return['code'] ) ) {
-			$return['code'] = self::cloud_code_map( ifset( $properties['cloudLayers'] ) );
+			$return['code'] = self::cloud_code_map( $properties['cloudLayers'] ?? null );
 		}
 
 		$url      = sprintf( 'https://api.weather.gov/stations/%1$s', $this->station_id );
@@ -221,8 +221,8 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$response = wp_remote_retrieve_body( $response );
 		$response = json_decode( $response, true );
 		if ( isset( $response['properties'] ) ) {
-			$return['name']     = ifset( $response['properties']['name'] );
-			$return['timezone'] = ifset( $response['properties']['timeZone'] );
+			$return['name']     = $response['properties']['name'] ?? null;
+			$return['timezone'] = $response['properties']['timeZone'] ?? null;
 		}
 		$return = self::filter_weather( $this->extra_data( $return ) );
 		$this->set_cache( $return );
@@ -247,7 +247,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			return null;
 		}
 		$layer = end( $layers );
-		$code  = ifset( $layer['amount'] );
+		$code  = $layer['amount'] ?? null;
 		/* cloudLayers use MetarSkyCoverage codes: OVC, BKN, SCT, FEW, SKC, CLR, VV */
 		switch ( $code ) {
 			case 'OVC':
@@ -304,7 +304,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			}
 		}
 
-		$condition = ifset( $weather['weather'] );
+		$condition = $weather['weather'] ?? '';
 
 		switch ( $condition ) {
 			case 'thunderstorms':

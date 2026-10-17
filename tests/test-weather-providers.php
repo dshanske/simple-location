@@ -443,9 +443,9 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array( 'weather.visualcrossing.com' => array( 'body' => $fixture ) ) );
 		$conditions = $this->provider( 'Weather_Provider_VisualCrossing', array( 'api' => 'vc-key' ) )->get_conditions();
 
-		$this->assertSame( 0, $conditions['temperature'] );
+		$this->assertSame( 0.0, $conditions['temperature'] );
 		$this->assertSame( 0.0, $conditions['windspeed'] );
-		$this->assertSame( 0, $conditions['rain'] );
+		$this->assertSame( 0.0, $conditions['rain'] );
 		$this->assertSame( 0, $conditions['cloudiness'] );
 		$this->assertSame( 0.0, $conditions['visibility'] );
 		$this->assertArrayNotHasKey( 'windgust', $conditions );
@@ -989,9 +989,9 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$provider->set( array( 'station_id' => '72408' ) );
 		$conditions = $provider->get_conditions( strtotime( '2025-07-01T14:00:00Z' ) );
 
-		// JSON has no 0.0, so the mocked response has the integer 0.
-		$this->assertSame( 0, $conditions['temperature'] );
-		$this->assertSame( 0, $conditions['rain'] );
+		// Rounded readings are floats, even when the response has the integer 0.
+		$this->assertSame( 0.0, $conditions['temperature'] );
+		$this->assertSame( 0.0, $conditions['rain'] );
 		$this->assertSame( 0.0, $conditions['windspeed'] );
 		$this->assertArrayNotHasKey( 'windgust', $conditions );
 		$this->assertArrayNotHasKey( 'snow', $conditions );
