@@ -183,16 +183,15 @@ class FunctionsTest extends WP_UnitTestCase {
 	 * Degrees and decimal minutes formatting.
 	 */
 	public function test_dec_to_dms() {
-		$this->assertSame( '40° 30 N 75° 15 E', dec_to_dms( 40.5, 75.25 ) );
-		$this->assertSame( '40° 30 N 75° 15 E100m', dec_to_dms( 40.5, 75.25, 100 ) );
+		$this->assertSame( '40° 30′ N 75° 15′ E', dec_to_dms( 40.5, 75.25 ) );
+		$this->assertSame( '40° 30′ N 75° 15′ E 100m', dec_to_dms( 40.5, 75.25, 100 ) );
 	}
 
 	/**
 	 * Southern and western coordinates use a direction letter, not a minus sign as well.
 	 */
 	public function test_dec_to_dms_no_double_negative() {
-		$this->markTestSkipped( 'Known bug, see #310' );
-		$this->assertStringNotContainsString( '-', dec_to_dms( -33.5, -70.5 ) );
+		$this->assertSame( '33° 30′ S 70° 30′ W', dec_to_dms( -33.5, -70.5 ) );
 	}
 
 	/**

@@ -54,18 +54,18 @@ if ( ! function_exists( 'wp_exif_datetime' ) ) {
 /**
  * Convert decimal location to a textual representation
  *
+ * Degrees and decimal minutes with a direction letter, e.g. 33° 30′ S 70° 30′ W.
+ *
+ * @since 6.0.0 Uses the direction letter without a minus sign, marks the minutes, and separates the altitude.
+ *
  * @param float        $latitude Latitude.
  * @param float        $longitude Longitude.
  * @param float|string $altitude Altitude. Optional.
-
  * @return string Textual Representation of Location.
  */
 function dec_to_dms( $latitude, $longitude, $altitude = '' ) {
 	$latitudedirection  = $latitude < 0 ? 'S' : 'N';
 	$longitudedirection = $longitude < 0 ? 'W' : 'E';
-
-	$latitudenotation  = $latitude < 0 ? '-' : '';
-	$longitudenotation = $longitude < 0 ? '-' : '';
 
 	$latitudeindegrees  = floor( abs( $latitude ) );
 	$longitudeindegrees = floor( abs( $longitude ) );
@@ -77,17 +77,15 @@ function dec_to_dms( $latitude, $longitude, $altitude = '' ) {
 	$latitudeminutes  = round( $latitudedecimal * 60, $_precision );
 	$longitudeminutes = round( $longitudedecimal * 60, $_precision );
 	if ( ! empty( $altitude ) && is_numeric( $altitude ) ) {
-		$altitudedisplay = sprintf( '%1$s%2$s', $altitude, __( 'm', 'simple-location' ) );
+		$altitudedisplay = sprintf( ' %1$s%2$s', $altitude, __( 'm', 'simple-location' ) );
 	} else {
 		$altitudedisplay = '';
 	}
 	return sprintf(
-		'%s%s° %s %s %s%s° %s %s%s',
-		$latitudenotation,
+		'%s° %s′ %s %s° %s′ %s%s',
 		$latitudeindegrees,
 		$latitudeminutes,
 		$latitudedirection,
-		$longitudenotation,
 		$longitudeindegrees,
 		$longitudeminutes,
 		$longitudedirection,
