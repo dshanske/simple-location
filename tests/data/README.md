@@ -113,8 +113,6 @@ a user's styles.
 |---|---|---|
 | `mapbox-styles.json` | `GET https://api.mapbox.com/styles/v1/{user}?access_token=…&limit=50` | Hand-built from docs |
 
-HERE map URLs (API-4) and MapQuest archive maps (API-2) use retired APIs and aren't tested.
-
 ## Location providers (`location/`)
 
 Compass is a self-hosted location tracker, so the requests go to the user's own Compass URL (the tests
