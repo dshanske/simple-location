@@ -10,14 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Run plugin check
       uses: wordpress/plugin-check-action@v1
       with:
-        # Tests aren't shipped (see .distignore).
-        exclude-directories: |
-          './bin'
-          './.github'
-          './tests'
+        # Tests aren't shipped (see .distignore). Plain names: Plugin Check skips a file
+        # when its path contains /<name>/, so quotes or a ./ prefix never match.
+        exclude-directories: 'bin,.github,tests'
         exclude-checks: 'file_type'
