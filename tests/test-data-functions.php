@@ -150,7 +150,6 @@ class DataFunctionsTest extends WP_UnitTestCase {
 	 * Deleting visibility removes the stored geo_public value.
 	 */
 	public function test_delete_visibility() {
-		$this->markTestSkipped( 'Known bug, see #314' );
 		$post_id = self::factory()->post->create();
 		set_post_geodata( $post_id, 'visibility', 'protected' );
 		Geo_Data::delete_geodata( 'post', $post_id, 'visibility' );
