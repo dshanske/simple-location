@@ -89,7 +89,6 @@ class Map_Provider_Mapquest extends Map_Provider {
 		$map = add_query_arg(
 			array(
 				'key'       => $this->api,
-				// 'center' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
 				'size'      => sprintf( '%1$s,%2$s', $this->width, $this->height ),
 				'type'      => $this->style,
 				'locations' => implode( '||', $markers ),

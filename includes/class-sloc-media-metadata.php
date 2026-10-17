@@ -89,7 +89,8 @@ class Sloc_Media_Metadata {
 	 */
 	public static function exif_data( $meta, $file, $image_type, $iptc = null, $exif = null ) {
 		if ( ! is_array( $exif ) && is_callable( 'exif_read_data' ) && in_array( $image_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ), true ) ) {
-			$exif = @exif_read_data( $file );
+			// As in wp_read_image_metadata(), corrupt EXIF data raises warnings that aren't useful here.
+			$exif = @exif_read_data( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		}
 		// If the EXIF data is missing or unreadable, or there is no Exif Version set, return.
 		if ( ! is_array( $exif ) || ! array_key_exists( 'ExifVersion', $exif ) ) {

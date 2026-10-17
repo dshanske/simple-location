@@ -20,8 +20,9 @@ if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
 	 */
 	function wp_exif_gps_convert( $coordinate ) {
 		if ( is_array( $coordinate ) ) {
-			@list( $degree, $minute, $second ) = $coordinate;
-			$float                             = wp_exif_frac2dec( $degree ) + ( wp_exif_frac2dec( $minute ) / 60 ) + ( wp_exif_frac2dec( $second ) / 3600 );
+			// Missing minutes or seconds count as zero.
+			list( $degree, $minute, $second ) = array_pad( array_values( $coordinate ), 3, 0 );
+			$float                            = wp_exif_frac2dec( $degree ) + ( wp_exif_frac2dec( $minute ) / 60 ) + ( wp_exif_frac2dec( $second ) / 3600 );
 
 			return ( ( is_float( $float ) || ( is_int( $float ) && $degree === $float ) ) && ( abs( $float ) <= 180 ) ) ? $float : 999;
 		}

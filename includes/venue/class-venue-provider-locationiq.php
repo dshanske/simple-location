@@ -104,7 +104,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 		$region_code  = null;
 		$country_code = strtoupper( ifset( $address['country_code'] ) );
 
-		if ( in_array( $country_code, array( 'US', 'FR' ) ) ) {
+		if ( in_array( $country_code, array( 'US', 'FR' ), true ) ) {
 			$region = self::ifnot(
 				$address,
 				array(

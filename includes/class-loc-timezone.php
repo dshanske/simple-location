@@ -64,7 +64,7 @@ class Loc_Timezone {
 		}
 		$dt1 = $datetime->setTimezone( $tz1 );
 		$dt2 = $datetime->setTimezone( $tz2 );
-		return ( $dt1->getOffset() == $dt2->getOffset() );
+		return ( $dt1->getOffset() === $dt2->getOffset() );
 	}
 
 

@@ -246,4 +246,14 @@ class FunctionsTest extends WP_UnitTestCase {
 		ifset( $array['b'] );
 		$this->assertArrayNotHasKey( 'b', $array );
 	}
+
+	/**
+	 * EXIF GPS degrees, minutes and seconds become decimal degrees, and missing seconds count as zero without a warning.
+	 */
+	public function test_wp_exif_gps_convert() {
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		$this->assertEqualsWithDelta( 39.9524, wp_exif_gps_convert( array( '39/1', '57/1', '864/100' ) ), 0.00001 );
+		$this->assertEqualsWithDelta( 39.95, wp_exif_gps_convert( array( '39/1', '57/1' ) ), 0.0001 );
+		$this->assertFalse( wp_exif_gps_convert( '39.9524' ) );
+	}
 }

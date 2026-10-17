@@ -55,7 +55,6 @@ class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
 			'api_key'   => $this->api,
 			'point.lat' => $this->latitude,
 			'point.lon' => $this->longitude,
-		// 'size'      => 1,
 		);
 
 		$json = $this->fetch_json( 'https://api.openrouteservice.org/geocode/reverse', $args );

@@ -435,8 +435,8 @@ class Location_Plugins {
 			 * http://en.wikipedia.org/wiki/Geo_URI#Example
 			 * e.g. geo:37.786971,-122.399677;u=35
 			 */
-			$geo          = explode( ':', substr( urldecode( $input['uri'] ), 4 ) );
-			$geo          = explode( ';', $geo[0] );
+			$geo    = explode( ':', substr( urldecode( $input['uri'] ), 4 ) );
+			$geo    = explode( ';', $geo[0] );
 			$coords = explode( ',', $geo[0] );
 			if ( 2 <= count( $coords ) ) {
 				$input['lat'] = trim( $coords[0] );
