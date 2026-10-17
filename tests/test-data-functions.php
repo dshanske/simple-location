@@ -213,9 +213,16 @@ class DataFunctionsTest extends WP_UnitTestCase {
 	 * Malformed geo URIs don't raise warnings.
 	 */
 	public function test_parse_geo_uri_malformed() {
-		$this->markTestSkipped( 'Known bug, see #313' );
-		$this->assertIsArray( Geo_Data::parse_geo_uri( 'geo:37.78' ) );
-		$this->assertIsArray( Geo_Data::parse_geo_uri( 'geo:37.78,-122.39;crs' ) );
+		$this->assertFalse( Geo_Data::parse_geo_uri( 'geo:37.78' ), 'No longitude.' );
+
+		$parsed = Geo_Data::parse_geo_uri( 'geo:37.78,-122.39;crs;;u=35' );
+		$this->assertSame( '37.78', $parsed['latitude'] );
+		$this->assertSame( '-122.39', $parsed['longitude'] );
+		$this->assertSame( '', $parsed['crs'], 'A parameter without a value.' );
+		$this->assertSame( '35', $parsed['accuracy'] );
+
+		$parsed = Geo_Data::parse_geo_uri( 'geo:37.78,-122.39;name=a=b' );
+		$this->assertSame( 'a=b', $parsed['address'], 'Only the first = separates the value.' );
 	}
 
 	/**

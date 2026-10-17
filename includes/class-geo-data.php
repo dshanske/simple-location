@@ -450,6 +450,11 @@ class Geo_Data {
 
 	/**
 	 * Parse a GEO URI into properties
+	 *
+	 * @since 6.0.0 Returns false for a geo URI without a latitude and longitude, and accepts parameters without a value.
+	 *
+	 * @param mixed $uri Geo URI, e.g. geo:37.786971,-122.399677;u=35.
+	 * @return array|false|mixed Properties, false for a malformed geo URI, or the input if it isn't a geo URI.
 	 */
 	public static function parse_geo_uri( $uri ) {
 		if ( ! is_string( $uri ) ) {
@@ -465,9 +470,12 @@ class Geo_Data {
 		// https://indieweb.org/Micropub#h-entry
 		//
 		// e.g. geo:37.786971,-122.399677;u=35
-		$geo                     = str_replace( 'geo:', '', urldecode( $uri ) );
-		$geo                     = explode( ';', $geo );
-		$coords                  = explode( ',', $geo[0] );
+		$geo    = str_replace( 'geo:', '', urldecode( $uri ) );
+		$geo    = explode( ';', $geo );
+		$coords = explode( ',', $geo[0] );
+		if ( count( $coords ) < 2 ) {
+			return false;
+		}
 		$properties['latitude']  = trim( $coords[0] );
 		$properties['longitude'] = trim( $coords[1] );
 		// Geo URI optionally allows for altitude to be stored as a third csv
@@ -477,7 +485,11 @@ class Geo_Data {
 		// Store additional parameters
 		array_shift( $geo ); // Remove coordinates to check for other parameters
 		foreach ( $geo as $g ) {
-			$g = explode( '=', $g );
+			if ( '' === $g ) {
+				continue;
+			}
+			// A parameter may have no value, e.g. ;crs.
+			$g = explode( '=', $g, 2 ) + array( 1 => '' );
 			if ( 'u' === $g[0] ) {
 				$g[0] = 'accuracy';
 			}
