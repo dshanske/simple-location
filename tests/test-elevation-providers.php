@@ -114,6 +114,35 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * GeoNames' -32768 marks a point without data, such as the ocean, and is an error rather than an altitude.
+	 */
+	public function test_geonames_no_data() {
+		$this->mock_http(
+			array(
+				'secure.geonames.org/srtm1' => array(
+					'body' => array(
+						'srtm1' => -32768,
+						'lat'   => 39.5,
+						'lng'   => -70.5,
+					),
+				),
+			)
+		);
+		$result = $this->provider( 'Elevation_Provider_Geonames', array( 'user' => 'someone' ) )->elevation();
+		$this->assertWPError( $result );
+		$this->assertSame( 'no_elevation_data', $result->get_error_code() );
+	}
+
+	/**
+	 * The GeoNames provider links to GeoNames and describes itself in the description.
+	 */
+	public function test_geonames_details() {
+		$provider = $this->provider( 'Elevation_Provider_Geonames' );
+		$this->assertSame( 'https://www.geonames.org/', $provider->get_url() );
+		$this->assertStringContainsString( 'creative commons', $provider->get_description() );
+	}
+
+	/**
 	 * Google's Elevation API returns the first result, rounded.
 	 */
 	public function test_google() {
