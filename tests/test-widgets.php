@@ -546,6 +546,55 @@ class WidgetsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The last seen widget shows the local time and the sun and moon only when asked.
+	 */
+	public function test_lastseen_time_and_astro() {
+		$user_id = $this->user_with_location();
+		update_user_meta( $user_id, 'geo_timezone', 'Asia/Tokyo' );
+
+		$html = $this->render(
+			new Sloc_Lastseen_Widget(),
+			array(
+				'title'     => '',
+				'user'      => $user_id,
+				'showtime'  => '1',
+				'showastro' => '0',
+			)
+		);
+		$this->assertStringContainsString( 'datetime="' . wp_date( 'Y-m-d', null, new DateTimeZone( 'Asia/Tokyo' ) ), $html );
+		$this->assertStringContainsString( '+09:00"', $html, 'The time is in the user\'s timezone.' );
+		$this->assertStringNotContainsString( 'Sunrise:', $html );
+
+		$html = $this->render(
+			new Sloc_Lastseen_Widget(),
+			array(
+				'title'     => '',
+				'user'      => $user_id,
+				'showtime'  => '0',
+				'showastro' => '1',
+			)
+		);
+		$this->assertStringNotContainsString( '<time datetime="' . wp_date( 'Y-m-d', null, new DateTimeZone( 'Asia/Tokyo' ) ), $html );
+		$this->assertStringContainsString( 'Sunrise:', $html );
+	}
+
+	/**
+	 * A widget saved before the display options existed shows the sun and moon, as it did, without warnings.
+	 */
+	public function test_lastseen_older_instance() {
+		$html = $this->render(
+			new Sloc_Lastseen_Widget(),
+			array(
+				'title' => '',
+				'user'  => $this->user_with_location(),
+			)
+		);
+		$this->assertStringContainsString( 'Sunrise:', $html );
+		$this->assertStringNotContainsString( 'Philadelphia City Hall', $html );
+		$this->assertStringEndsWith( '</ul></section>', $html );
+	}
+
+	/**
 	 * Users without a location are reported as such, and the widget needs a user.
 	 */
 	public function test_lastseen_without_location() {

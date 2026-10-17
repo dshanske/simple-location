@@ -25,6 +25,7 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 	 * Widget worker
 	 *
 	 * @since 6.0.0 The sun and moon list, location and map are passed through wp_kses().
+	 * @since 6.0.0 Respects Show Local Time and Show Astronomical Info; options missing from older widgets use their defaults.
 	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
@@ -40,12 +41,37 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 			echo wp_kses( $args['before_title'] . $title . $args['after_title'], Simple_Location_Plugin::kses_clean() );
 		}
 
+		// Widgets saved before an option existed get its default. Astronomical info was always shown before it had a setting.
+		$instance = wp_parse_args(
+			$instance,
+			array(
+				'showtime'  => 0,
+				'showastro' => 1,
+				'showtext'  => 0,
+				'showmap'   => 0,
+			)
+		);
+
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			echo '<ul class="sloc-lastseen-data">';
 			$user    = new WP_User( $instance['user'] );
 			$geodata = get_user_geodata( $user->ID );
-			$return  = self::astro_list( $geodata );
-			echo wp_kses( implode( $return ), Simple_Location_Plugin::kses_clean() );
+			if ( 1 === (int) $instance['showtime'] ) {
+				$format   = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+				$timezone = Loc_Timezone::get_timezone( $user );
+				echo wp_kses(
+					sprintf(
+						'<li>%1$s<time datetime="%2$s">%3$s</time></li>',
+						Weather_Provider::get_icon( 'wi-time-1', __( 'Local Time', 'simple-location' ) ),
+						esc_attr( wp_date( DATE_W3C, null, $timezone ) ),
+						esc_html( wp_date( $format, null, $timezone ) )
+					),
+					Simple_Location_Plugin::kses_clean()
+				);
+			}
+			if ( 1 === (int) $instance['showastro'] ) {
+				echo wp_kses( implode( self::astro_list( $geodata ) ), Simple_Location_Plugin::kses_clean() );
+			}
 			if ( 1 === (int) $instance['showtext'] ) {
 				$location = get_user_location(
 					$user->ID,
