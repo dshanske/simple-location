@@ -28,6 +28,10 @@ class Map_Provider_Google extends Map_Provider {
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_google_style' );
 		}
+		// The style setting is only registered, with its default, while Google is the map provider.
+		if ( empty( $args['style'] ) ) {
+			$args['style'] = 'roadmap';
+		}
 
 		parent::__construct( $args );
 	}
@@ -74,8 +78,17 @@ class Map_Provider_Google extends Map_Provider {
 	}
 
 
+	/**
+	 * Returns the URL of a static map with a marker at each location and a path joining them.
+	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Uses the roadmap style when none is set, and has no empty marker location.
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string URL, or an empty string without an API key or locations.
+	 */
 	public function get_archive_map( $locations ) {
-		if ( empty( $this->api ) || empty( $this->style ) || empty( $locations ) ) {
+		if ( empty( $this->api ) || empty( $locations ) ) {
 			return '';
 		}
 		$url = 'https://maps.googleapis.com/maps/api/staticmap';
@@ -88,7 +101,7 @@ class Map_Provider_Google extends Map_Provider {
 
 		$map = add_query_arg(
 			array(
-				'markers'  => 'size:tiny%7Ccolor:red%7Clabel:P%7C|' . implode( '|', $markers ),
+				'markers'  => 'size:tiny|color:red|label:P|' . implode( '|', $markers ),
 				'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
 				'maptype'  => $this->style,
 				'language' => get_bloginfo( 'language' ),
@@ -100,8 +113,16 @@ class Map_Provider_Google extends Map_Provider {
 		return $map;
 	}
 
+	/**
+	 * Returns a link to the location on Google Maps.
+	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Uses the documented Maps URLs search link over HTTPS.
+	 *
+	 * @return string URL.
+	 */
 	public function get_the_map_url() {
-		return 'http://maps.google.com/maps?q=loc:' . $this->latitude . ',' . $this->longitude;
+		return sprintf( 'https://www.google.com/maps/search/?api=1&query=%1$s%%2C%2$s', $this->latitude, $this->longitude );
 	}
 
 	// Return code for map
