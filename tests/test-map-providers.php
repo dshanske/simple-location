@@ -425,7 +425,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * LocationIQ builds v3 static map URLs with a marker.
+	 * LocationIQ builds v3 static map URLs: centered with a marker, or with a marker per location and a path.
 	 */
 	public function test_locationiq() {
 		$map = $this->provider( 'Map_Provider_LocationIQ' );
@@ -433,15 +433,33 @@ class MapProvidersTest extends WP_UnitTestCase {
 
 		$url = $this->parse( $map->get_the_static_map() );
 		$this->assertSame( 'https://maps.locationiq.com/v3/staticmap', $url['base'] );
-		$this->assertSame( 'KEY', $url['query']['key'] );
-		$this->assertSame( '600x400', $url['query']['size'] );
-		$this->assertSame( 'size:small|color:red|39.9524,-75.1636', $url['query']['markers'] );
+		$this->assertSame(
+			array(
+				'key'     => 'KEY',
+				'center'  => '39.9524,-75.1636',
+				'zoom'    => '15',
+				'size'    => '600x400',
+				'markers' => 'icon:large-red-cutout|39.9524,-75.1636',
+			),
+			$url['query']
+		);
 
-		$url = $this->parse( $map->get_archive_map( $this->locations ) );
-		$this->assertSame( 'icon:small-red-blank|size:small|color:red|39.9524,-75.1636|39.9489,-75.15', $url['query']['markers'] );
+		$this->assertSame(
+			'https://maps.locationiq.com/v3/staticmap?key=KEY&format=png&size=600x400&markers=icon:large-red-cutout|39.9524,-75.1636&markers=icon:large-red-cutout|39.9489,-75.15&path=weight:2|color:blue|39.9524,-75.1636|39.9489,-75.15',
+			$map->get_archive_map( $this->locations )
+		);
+
+		// One location is a marker without a path.
+		$this->assertSame(
+			'https://maps.locationiq.com/v3/staticmap?key=KEY&format=png&size=600x400&markers=icon:large-red-cutout|39.9524,-75.1636',
+			$map->get_archive_map( array( $this->locations[0] ) )
+		);
+
+		$this->assertSame( 'https://www.openstreetmap.org/?mlat=39.9524&mlon=-75.1636#map=15/39.9524/-75.1636', $map->get_the_map_url() );
 
 		$map = $this->provider( 'Map_Provider_LocationIQ', array( 'api' => '' ) );
 		$this->assertSame( 'missing_api_key', $map->get_the_static_map()->get_error_code() );
+		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
 	}
 
 	/**
