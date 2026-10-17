@@ -363,7 +363,7 @@ class Location_Provider_Compass extends Location_Provider {
 		if ( array_key_exists( 'source', $properties ) && is_null( $this->activity ) ) {
 			if ( in_array( $properties['source'], array( 'flight wifi', 'flight', 'flightaware.com' ), true ) ) {
 				$this->activity = 'plane';
-			} elseif ( in_array( $properties['source'], $this->get_activity_list(), true ) ) {
+			} elseif ( is_string( $properties['source'] ) && array_key_exists( $properties['source'], $this->get_activity_list() ) ) {
 				$this->activity = $properties['source'];
 			} else {
 				$this->activity = 'unknown';
