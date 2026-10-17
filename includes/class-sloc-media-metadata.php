@@ -53,7 +53,7 @@ class Sloc_Media_Metadata {
 	 * @param WP_REST_Request  $request  The request.
 	 * @return WP_REST_Response The response.
 	 */
-	public static function rest_prepare_attachment( $response, $post, $request ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable -- Required by the filter.
+	public static function rest_prepare_attachment( $response, $post, $request ) {
 		$data = $response->get_data();
 		if ( ! isset( $data['media_details'] ) || ! is_array( $data['media_details'] ) ) {
 			return $response;
