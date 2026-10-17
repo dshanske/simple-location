@@ -170,10 +170,26 @@ class Loc_Timezone {
 		return $response;
 	}
 
+	/**
+	 * Gives REST comment dates in the comment's timezone, and the GMT date in W3C format.
+	 *
+	 * @since 4.0.0
+	 * @since 6.0.0 Leaves the dates alone when the response doesn't include date_gmt, e.g. with ?_fields=.
+	 *
+	 * @param WP_REST_Response $response Response.
+	 * @param WP_Comment       $comment  Comment.
+	 * @param WP_REST_Request  $request  Request.
+	 * @return WP_REST_Response Response.
+	 */
 	public static function rest_prepare_comment( $response, $comment, $request ) {
-		$data             = $response->get_data();
-		$data['date']     = self::get_comment_date( $data['date_gmt'], DATE_W3C, $comment );
-		$date_gmt         = new DateTime( $data['date_gmt'], new DatetimeZone( 'GMT' ) );
+		$data = $response->get_data();
+		if ( empty( $data['date_gmt'] ) ) {
+			return $response;
+		}
+		if ( isset( $data['date'] ) ) {
+			$data['date'] = self::get_comment_date( $data['date_gmt'], DATE_W3C, $comment );
+		}
+		$date_gmt         = new DateTime( $data['date_gmt'], new DateTimeZone( 'GMT' ) );
 		$data['date_gmt'] = $date_gmt->format( DATE_W3C );
 		$response->set_data( $data );
 		return $response;

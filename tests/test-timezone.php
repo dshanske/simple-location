@@ -583,6 +583,25 @@ class TimezoneTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Responses limited with _fields don't need the date fields.
+	 */
+	public function test_rest_fields_without_dates() {
+		$post_id    = $this->post_with_timezone();
+		$comment_id = self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => 1,
+			)
+		);
+		foreach ( array( '/wp/v2/comments/' . $comment_id, '/wp/v2/posts/' . $post_id ) as $route ) {
+			$request = new WP_REST_Request( 'GET', $route );
+			$request->set_param( '_fields', 'id' );
+			$data = rest_get_server()->response_to_data( rest_do_request( $request ), false );
+			$this->assertSame( array( 'id' ), array_keys( $data ), $route );
+		}
+	}
+
+	/**
 	 * REST comment responses give the GMT date in W3C format.
 	 */
 	public function test_rest_comment_date_gmt() {
