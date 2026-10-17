@@ -416,12 +416,27 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'KEY', $url['query']['key'] );
 
 		$url = $this->parse( $map->get_archive_map( $this->locations ) );
+		$this->assertSame( 'size:tiny|color:red|label:P|39.9524,-75.1636|39.9489,-75.15', $url['query']['markers'] );
 		$this->assertSame( 'color:0xff0000ff|weight:5|enc:' . Sloc_Polyline::encode( $this->locations ), $url['query']['path'] );
 
-		$this->assertStringContainsString( 'q=loc:39.9524,-75.1636', $map->get_the_map_url() );
+		$this->assertSame( 'https://www.google.com/maps/search/?api=1&query=39.9524%2C-75.1636', $map->get_the_map_url() );
 
 		$map = $this->provider( 'Map_Provider_Google', array( 'api' => '' ) );
 		$this->assertSame( '', $map->get_the_static_map() );
+		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
+	}
+
+	/**
+	 * Without a style setting, both Google maps use the roadmap style.
+	 */
+	public function test_google_default_style() {
+		delete_option( 'sloc_google_style' );
+		$map = $this->provider( 'Map_Provider_Google' );
+		$this->assertSame( 'roadmap', $this->parse( $map->get_the_static_map() )['query']['maptype'] );
+		$this->assertSame( 'roadmap', $this->parse( $map->get_archive_map( $this->locations ) )['query']['maptype'] );
+
+		$map = $this->provider( 'Map_Provider_Google', array( 'style' => '' ) );
+		$this->assertSame( 'roadmap', $this->parse( $map->get_archive_map( $this->locations ) )['query']['maptype'] );
 	}
 
 	/**
