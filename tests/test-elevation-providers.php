@@ -67,7 +67,7 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::elevation_providers();
-		foreach ( array( 'bing', 'geonames', 'google', 'mapquest', 'openmapquest', 'openroute' ) as $slug ) {
+		foreach ( array( 'geonames', 'google', 'mapquest', 'openmapquest', 'openroute' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}
@@ -79,9 +79,9 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 	public function test_active_provider() {
 		update_option( 'sloc_elevation_provider', 'google' );
 		$this->assertTrue( $this->provider( 'Elevation_Provider_Google' )->is_active() );
-		$this->assertFalse( $this->provider( 'Elevation_Provider_Bing' )->is_active() );
+		$this->assertFalse( $this->provider( 'Elevation_Provider_Geonames' )->is_active() );
 		$this->assertInstanceOf( 'Elevation_Provider_Google', Loc_Config::elevation_provider() );
-		$this->assertInstanceOf( 'Elevation_Provider_Bing', Loc_Config::elevation_provider( 'bing' ) );
+		$this->assertInstanceOf( 'Elevation_Provider_Geonames', Loc_Config::elevation_provider( 'geonames' ) );
 	}
 
 	/**
@@ -89,39 +89,10 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_missing_credentials() {
 		$this->mock_http( array() );
-		$this->assertSame( 'no_key', $this->provider( 'Elevation_Provider_Bing', array( 'api' => '' ) )->elevation()->get_error_code() );
 		$this->assertSame( 'missing_username', $this->provider( 'Elevation_Provider_Geonames', array( 'user' => '' ) )->elevation()->get_error_code() );
 		$this->assertSame( 'missing_api_key', $this->provider( 'Elevation_Provider_OpenRoute', array( 'api' => '' ) )->elevation()->get_error_code() );
 		$this->assertNull( $this->provider( 'Elevation_Provider_Google', array( 'api' => '' ) )->elevation() );
 		$this->assertEmpty( $this->http_requests );
-	}
-
-	/**
-	 * Bing's Elevation List API returns the first elevation.
-	 */
-	public function test_bing() {
-		$fixture = $this->fixture( 'elevation/bing-elevation.json' );
-		$this->mock_http( array( 'dev.virtualearth.net/REST/v1/Elevation/List' => array( 'body' => $fixture ) ) );
-		$elevation = $this->provider( 'Elevation_Provider_Bing', array( 'api' => 'KEY' ) )->elevation();
-
-		$request = $this->last_request();
-		$this->assertSame( '39.9524,-75.1636', $request['query']['points'] );
-		$this->assertSame( 'KEY', $request['query']['key'] );
-		$this->assertEquals( round( $fixture['resourceSets'][0]['resources'][0]['elevations'][0], 2 ), $elevation );
-	}
-
-	/**
-	 * Bing reports a failed key in authenticationResultCode, and the body may lack results.
-	 */
-	public function test_bing_errors() {
-		$fixture = $this->fixture( 'elevation/bing-elevation.json' );
-		$denied  = array_merge( $fixture, array( 'authenticationResultCode' => 'InvalidCredentials' ) );
-		$this->mock_http( array( 'virtualearth.net' => array( 'body' => $denied ) ) );
-		$this->assertSame( 'invalid_api_key', $this->provider( 'Elevation_Provider_Bing', array( 'api' => 'KEY' ) )->elevation()->get_error_code() );
-
-		unset( $fixture['resourceSets'] );
-		$this->mock_http( array( 'virtualearth.net' => array( 'body' => $fixture ) ) );
-		$this->assertSame( 'no_resource_sets', $this->provider( 'Elevation_Provider_Bing', array( 'api' => 'KEY' ) )->elevation()->get_error_code() );
 	}
 
 	/**

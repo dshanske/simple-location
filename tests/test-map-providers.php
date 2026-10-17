@@ -78,7 +78,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::map_providers();
-		foreach ( array( 'bing', 'geoapify', 'google', 'here', 'locationiq', 'mapbox', 'mapquest', 'staticmap', 'tomtom' ) as $slug ) {
+		foreach ( array( 'geoapify', 'google', 'here', 'locationiq', 'mapbox', 'mapquest', 'staticmap', 'tomtom' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}
@@ -132,7 +132,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 	public function test_is_active() {
 		update_option( 'sloc_map_provider', 'google' );
 		$this->assertTrue( $this->provider( 'Map_Provider_Google' )->is_active() );
-		$this->assertFalse( $this->provider( 'Map_Provider_Bing' )->is_active() );
+		$this->assertFalse( $this->provider( 'Map_Provider_Mapbox' )->is_active() );
 	}
 
 	/**
@@ -198,33 +198,6 @@ class MapProvidersTest extends WP_UnitTestCase {
 
 		set_post_geodata( $post_id, 'visibility', 'protected' );
 		$this->assertSame( '', Geo_Data::get_map( 'post', $post_id ) );
-	}
-
-	/**
-	 * Bing builds Imagery/Map URLs with a pushpin.
-	 */
-	public function test_bing() {
-		$map = $this->provider( 'Map_Provider_Bing', array( 'style' => 'Road' ) );
-		$this->assertArrayHasKey( 'CanvasDark', $map->get_styles() );
-
-		$url = $this->parse( $map->get_the_static_map() );
-		$this->assertSame( 'https://dev.virtualearth.net/REST/v1/Imagery/Map/Road/39.9524,-75.1636/15', $url['base'] );
-		$this->assertSame( '39.9524,-75.1636;45', $url['query']['pushpin'] );
-		$this->assertSame( '600,400', $url['query']['mapSize'] );
-		$this->assertSame( 'KEY', $url['query']['key'] );
-
-		$archive = $map->get_archive_map( $this->locations );
-		$this->assertStringStartsWith( 'https://dev.virtualearth.net/REST/v1/Imagery/Map/Road/?', $archive );
-		$this->assertStringContainsString( 'mapArea=39.9489,-75.1636,39.9524,-75.15', $archive );
-		$this->assertStringContainsString( 'enc:' . Sloc_Polyline::encode( $this->locations ), $archive );
-		$this->assertStringEndsWith( '&pp=39.9524,-75.1636;51&pp=39.9489,-75.15;51', $archive );
-
-		$this->assertSame( 'https://bing.com/maps/default.aspx?cp=39.9524,-75.1636&lvl=15', $map->get_the_map_url() );
-		$this->assertStringContainsString( 'Imagery/Map/Road', $map->get_the_map() );
-
-		$map = $this->provider( 'Map_Provider_Bing', array( 'api' => '' ) );
-		$this->assertSame( '', $map->get_the_static_map() );
-		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
 	}
 
 	/**

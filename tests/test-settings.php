@@ -638,6 +638,31 @@ class SettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Sites that chose Bing, which was removed, have the choice cleared and show no map.
+	 */
+	public function test_removed_bing_provider() {
+		foreach ( array( 'map_provider', 'geo_provider', 'elevation_provider' ) as $method ) {
+			$option = 'sloc_' . $method;
+			update_option( $option, 'bing' );
+			$this->assertNull( call_user_func( array( 'Loc_Config', $method ) ), $method );
+			$this->assertNotSame( 'bing', get_option( $option ), $method );
+		}
+
+		update_option( 'sloc_map_provider', 'bing' );
+		$post_id = self::factory()->post->create();
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'   => 39.9524,
+				'longitude'  => -75.1636,
+				'visibility' => 'public',
+			)
+		);
+		$this->assertSame( '', Geo_Data::get_map( 'post', $post_id ) );
+	}
+
+	/**
 	 * Asking for a provider that isn't registered returns nothing and leaves the site's choice alone.
 	 */
 	public function test_provider_getters_unknown_slug() {

@@ -261,7 +261,6 @@ class Simple_Location_Plugin {
 		// Load API Traits. These are common code for the providers that offer different types of data.
 		$traits = array(
 			'trait-sloc-api-google.php', // Google Maps API Traits.
-			'trait-sloc-api-bing.php', // Bing Maps API Traits.
 			'trait-sloc-api-here.php', // HERE API Traits.
 			'trait-sloc-api-locationiq.php', // LocationIQ API Traits.
 			'trait-sloc-api-mapquest.php', // MapQuest API Traits.
@@ -305,7 +304,6 @@ class Simple_Location_Plugin {
 		$providers = array(
 			'class-map-provider-mapbox.php', // MapBox.
 			'class-map-provider-google.php', // Google.
-			'class-map-provider-bing.php', // Bing.
 			'class-map-provider-mapquest.php', // MapQuest.
 			'class-map-provider-here.php', // HERE.
 			'class-map-provider-locationiq.php', // LocationIQ.
@@ -324,7 +322,6 @@ class Simple_Location_Plugin {
 			'class-geo-provider-google.php', // Google.
 			'class-geo-provider-geoapify.php', // Geoapify.
 			'class-geo-provider-here.php', // HERE.
-			'class-geo-provider-bing.php', // Bing.
 			'class-geo-provider-locationiq.php', // LocationIQ.
 			'class-geo-provider-geonames.php', // Geonames.
 			'class-geo-provider-openroute.php', // OpenRoute.
@@ -333,7 +330,6 @@ class Simple_Location_Plugin {
 
 		// Load Elevation Providers.
 		$providers = array(
-			'class-elevation-provider-bing.php', // Bing.
 			'class-elevation-provider-geonames.php', // Geonames.
 			'class-elevation-provider-google.php', // Google.
 			'class-elevation-provider-mapquest.php', // MapQuest.
