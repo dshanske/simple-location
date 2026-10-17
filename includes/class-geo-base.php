@@ -1100,8 +1100,8 @@ class Geo_Base {
 
 		// A coordinate is saved only if both halves are valid; anything else clears both.
 		if ( array_key_exists( 'latitude', $data ) || array_key_exists( 'longitude', $data ) ) {
-			$latitude  = clean_coordinate( ifset( $data['latitude'], '' ), 'latitude' );
-			$longitude = clean_coordinate( ifset( $data['longitude'], '' ), 'longitude' );
+			$latitude  = clean_coordinate( $data['latitude'] ?? '', 'latitude' );
+			$longitude = clean_coordinate( $data['longitude'] ?? '', 'longitude' );
 			if ( false === $latitude || false === $longitude ) {
 				$latitude  = '';
 				$longitude = '';
@@ -1132,8 +1132,8 @@ class Geo_Base {
 			}
 		}
 
-		if ( is_float( ifset( $data['latitude'] ) ) || ! empty( $data['address'] ) ) {
-			$data['visibility'] = ifset( $data['geo_public'] );
+		if ( is_float( $data['latitude'] ?? null ) || ! empty( $data['address'] ) ) {
+			$data['visibility'] = $data['geo_public'] ?? false;
 		} else {
 			Geo_Data::delete_geodata( $meta_type, $object_id, 'visibility' );
 		}

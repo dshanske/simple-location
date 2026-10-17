@@ -143,26 +143,26 @@ abstract class Geo_Provider extends Sloc_Provider {
 		if ( array_key_exists( 'name', $reverse ) ) {
 			$text[] = $reverse['name'];
 		} elseif ( ! array_key_exists( 'street-address', $reverse ) ) {
-			$text[] = ifset( $reverse['extended-address'] );
+			$text[] = $reverse['extended-address'] ?? '';
 		} else {
-			$text[] = ifset( $reverse['street-address'] );
+			$text[] = $reverse['street-address'] ?? '';
 		}
 
-		$text[] = ifset( $reverse['locality'] );
+		$text[] = $reverse['locality'] ?? '';
 		$text   = array_filter( $text );
 		if ( empty( $text ) ) {
-			$text[] = ifset( $reverse['region'] );
+			$text[] = $reverse['region'] ?? '';
 		} elseif ( array_key_exists( 'region-code', $reverse ) ) {
 				$text[] = $reverse['region-code'];
 		} else {
-			$text[] = ifset( $reverse['region'] );
+			$text[] = $reverse['region'] ?? '';
 		}
 		if ( array_key_exists( 'country-code', $reverse ) ) {
 			if ( get_option( 'sloc_country' ) !== $reverse['country-code'] ) {
 				$text[] = $reverse['country-code'];
 			}
 		} else {
-			$text[] = ifset( $reverse['country-name'] );
+			$text[] = $reverse['country-name'] ?? '';
 		}
 		$text   = array_filter( $text );
 		$return = join( ', ', $text );

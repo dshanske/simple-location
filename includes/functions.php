@@ -129,6 +129,22 @@ if ( ! function_exists( 'ifset_round' ) ) {
 	}
 }
 
+/**
+ * Rounds a value if it is a number.
+ *
+ * Use with the null coalescing operator in place of ifset_round(), for example
+ * `sloc_round_value( $data['speed'] ?? '', 2 )`.
+ *
+ * @since 6.0.0
+ *
+ * @param mixed $value     Value.
+ * @param int   $precision Optional. Number of decimal places. Default 0.
+ * @return mixed The rounded value as a float, or the value unchanged if it isn't a number.
+ */
+function sloc_round_value( $value, $precision = 0 ) {
+	return is_numeric( $value ) ? round( (float) $value, $precision ) : $value;
+}
+
 
 if ( ! function_exists( 'array_key_return' ) ) {
 
