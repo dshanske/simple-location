@@ -140,9 +140,11 @@ abstract class Location_Provider extends Sloc_Provider {
 
 	/**
 	 * Is Provider Active
+	 *
+	 * @since 6.0.0 Reads the sloc_geolocation_provider setting, where the chosen provider is saved.
 	 */
 	public function is_active() {
-		$option = get_option( 'sloc_location_provider' );
+		$option = get_option( 'sloc_geolocation_provider' );
 		return ( $this->slug === $option );
 	}
 
@@ -150,6 +152,7 @@ abstract class Location_Provider extends Sloc_Provider {
 	 * Get Coordinates.
 	 *
 	 * @since 6.0.0 Values of 0 are kept.
+	 * @since 6.0.0 Every activity in get_activity_list() with a matching icon gets one.
 	 *
 	 * @return array|boolean Array with all properties, false if null.
 	 */
@@ -165,28 +168,22 @@ abstract class Location_Provider extends Sloc_Provider {
 		$return['time']              = $this->time;
 		$return['zoom']              = self::derive_zoom();
 		$return['activity']          = $this->activity;
-		if ( ! empty( $this->activity ) ) {
-			switch ( $this->activity ) {
-				case 'plane':
-					$return['icon'] = 'fa-plane';
-					break;
-				case 'train':
-					$return['icon'] = 'fa-train';
-					break;
-				case 'walking':
-					$return['icon'] = 'fa-walking';
-					break;
-				case 'running':
-					$return['icon'] = 'fa-running';
-					break;
-				case 'driving':
-					$return['icon'] = 'fa-driving';
-					break;
-				case 'cycling':
-					$return['icon'] = 'fa-biking';
-					break;
 
-			}
+		$icons = array(
+			'car'     => 'fa-car',
+			'bus'     => 'fa-bus',
+			'train'   => 'fa-train',
+			'subway'  => 'fa-subway',
+			'tram'    => 'fa-tram',
+			'plane'   => 'fa-plane',
+			'walking' => 'fa-walking',
+			'running' => 'fa-running',
+			'taxi'    => 'fa-taxi',
+			'horse'   => 'fa-horse',
+			'bike'    => 'fa-biking',
+		);
+		if ( is_string( $this->activity ) && isset( $icons[ $this->activity ] ) ) {
+			$return['icon'] = $icons[ $this->activity ];
 		}
 		$return['annotation'] = $this->annotation;
 		$return['other']      = $this->other;

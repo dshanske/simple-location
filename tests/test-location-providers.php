@@ -132,6 +132,10 @@ class LocationProvidersTest extends WP_UnitTestCase {
 			'plane'   => 'fa-plane',
 			'train'   => 'fa-train',
 			'running' => 'fa-running',
+			'car'     => 'fa-car',
+			'bike'    => 'fa-biking',
+			'subway'  => 'fa-subway',
+			'horse'   => 'fa-horse',
 		) as $activity => $icon ) {
 			$this->assertSame( $icon, $this->provider_with( array( 'activity' => $activity ) )->get()['icon'], $activity );
 		}
@@ -593,6 +597,29 @@ class LocationProvidersTest extends WP_UnitTestCase {
 		$provider = new Location_Provider_Compass();
 		$provider->retrieve();
 		$this->assertSame( '105', $provider->get()['annotation'] );
+	}
+
+	/**
+	 * A source that names a known activity, such as train, becomes that activity.
+	 */
+	public function test_compass_known_source() {
+		$fixture                       = $this->fixture( 'location/compass-last.json' );
+		$fixture['data']['properties'] = array( 'source' => 'train' );
+		$this->mock_http( array( 'compass.example.com' => array( 'body' => $fixture ) ) );
+		$provider = new Location_Provider_Compass();
+		$provider->retrieve();
+		$this->assertSame( 'train', $provider->get()['activity'] );
+		$this->assertSame( 'fa-train', $provider->get()['icon'] );
+	}
+
+	/**
+	 * A location provider is active when it is the chosen geolocation provider.
+	 */
+	public function test_is_active() {
+		update_option( 'sloc_geolocation_provider', 'compass' );
+		$this->assertTrue( ( new Location_Provider_Compass() )->is_active() );
+		update_option( 'sloc_geolocation_provider', 'dummy' );
+		$this->assertFalse( ( new Location_Provider_Compass() )->is_active() );
 	}
 
 	/**
