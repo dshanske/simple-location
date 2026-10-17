@@ -438,10 +438,12 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @return string Summary of Current conditions.
 	 */
 	public function get_current_condition() {
-		$return     = '';
-		$conditions = $this->get_conditions();
-		$return     = '<div class="sloc-weather">';
-		$return    .= $this->get_icon( ifset( $conditions['icon'] ), ifset( $conditions['summary'] ) );
+		$conditions = $this->get_conditions( null );
+		if ( ! is_array( $conditions ) ) {
+			$conditions = array();
+		}
+		$return  = '<div class="sloc-weather">';
+		$return .= $this->get_icon( ifset( $conditions['icon'] ), ifset( $conditions['summary'] ) );
 		if ( isset( $conditions['temperature'] ) ) {
 			$return .= $this->get_temp( $conditions['temperature'] );
 		}
@@ -489,8 +491,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @return string Marked up temperature in proper untis.
 	 */
 	public function get_current_temperature() {
-		$conditions = $this->get_conditions();
-		if ( isset( $conditions['temperature'] ) ) {
+		$conditions = $this->get_conditions( null );
+		if ( is_array( $conditions ) && isset( $conditions['temperature'] ) ) {
 			return $this->get_temp( $conditions['temperature'] );
 		}
 		return '';
@@ -616,36 +618,36 @@ abstract class Weather_Provider extends Sloc_Provider {
 		);
 
 		$moon = array(
-			'wi-moon-first-quarter'      => __( 'First Quarter Moon', 'simple-location' ),
-			'wi-moon-full'               => __( 'Full Moon', 'simple-location' ),
-			'wi-moon-new'                => __( 'New Moon', 'simple-location' ),
-			'wi-moonrise'                => __( 'Moonrise', 'simple-location' ),
-			'wi-moonset'                 => __( 'Moonset', 'simple-location' ),
-			'wi-moon-third-quarter'      => __( 'Third Quarter Moon', 'simple-location' ),
-			'wi-moon-waning-crescent-1'  => __( 'Waning Crescent 1', 'simple-location' ),
-			'wi-moon-waning-crescent-2'  => __( 'Waning Crescent 2', 'simple-location' ),
-			'wi-moon-waning-crescent-3'  => __( 'Waning Crescent 3', 'simple-location' ),
-			'wi-moon-waning-crescent-4 ' => __( 'Waning Crescent 4', 'simple-location' ),
-			'wi-moon-waning-crescent-5'  => __( 'Waning Crescent 5', 'simple-location' ),
-			'wi-moon-waning-crescent-6'  => __( 'Waning Crescent 6', 'simple-location' ),
-			'wi-moon-waning-gibbous-1'   => __( 'Waning Gibbous 1', 'simple-location' ),
-			'wi-moon-waning-gibbous-2'   => __( 'Waning Gibbous 2', 'simple-location' ),
-			'wi-moon-waning-gibbous-3'   => __( 'Waning Gibbous 3', 'simple-location' ),
-			'wi-moon-waning-gibbous-4'   => __( 'Waning Gibbous 4', 'simple-location' ),
-			'wi-moon-waning-gibbous-5 '  => __( 'Waning Gibbous 5', 'simple-location' ),
-			'wi-moon-waning-gibbous-6'   => __( 'Waning Gibbous 6', 'simple-location' ),
-			'wi-moon-waxing-crescent-1'  => __( 'Waxing Crescent 1', 'simple-location' ),
-			'wi-moon-waxing-crescent-2'  => __( 'Waxing Crescent 2', 'simple-location' ),
-			'wi-moon-waxing-crescent-3'  => __( 'Waxing Crescent 3', 'simple-location' ),
-			'wi-moon-waxing-crescent-4'  => __( 'Waxing Crescent 4', 'simple-location' ),
-			'wi-moon-waxing-crescent-5'  => __( 'Waxing Crescent 5', 'simple-location' ),
-			'wi-moon-waxing-crescent-6 ' => __( 'Waxing Crescent 6', 'simple-location' ),
-			'wi-moon-waxing-gibbous-1'   => __( 'Waxing Gibbous 1', 'simple-location' ),
-			'wi-moon-waxing-gibbous-2'   => __( 'Waxing Gibbous 2', 'simple-location' ),
-			'wi-moon-waxing-gibbous-3'   => __( 'Waxing Gibbous 3', 'simple-location' ),
-			'wi-moon-waxing-gibbous-4 '  => __( 'Waxing Gibbous 4', 'simple-location' ),
-			'wi-moon-waxing-gibbous-5'   => __( 'Waxing Gibbous 5', 'simple-location' ),
-			'wi-moon-waxing-gibbous-6'   => __( 'Waxing Gibbous 6', 'simple-location' ),
+			'wi-moon-first-quarter'     => __( 'First Quarter Moon', 'simple-location' ),
+			'wi-moon-full'              => __( 'Full Moon', 'simple-location' ),
+			'wi-moon-new'               => __( 'New Moon', 'simple-location' ),
+			'wi-moonrise'               => __( 'Moonrise', 'simple-location' ),
+			'wi-moonset'                => __( 'Moonset', 'simple-location' ),
+			'wi-moon-third-quarter'     => __( 'Third Quarter Moon', 'simple-location' ),
+			'wi-moon-waning-crescent-1' => __( 'Waning Crescent 1', 'simple-location' ),
+			'wi-moon-waning-crescent-2' => __( 'Waning Crescent 2', 'simple-location' ),
+			'wi-moon-waning-crescent-3' => __( 'Waning Crescent 3', 'simple-location' ),
+			'wi-moon-waning-crescent-4' => __( 'Waning Crescent 4', 'simple-location' ),
+			'wi-moon-waning-crescent-5' => __( 'Waning Crescent 5', 'simple-location' ),
+			'wi-moon-waning-crescent-6' => __( 'Waning Crescent 6', 'simple-location' ),
+			'wi-moon-waning-gibbous-1'  => __( 'Waning Gibbous 1', 'simple-location' ),
+			'wi-moon-waning-gibbous-2'  => __( 'Waning Gibbous 2', 'simple-location' ),
+			'wi-moon-waning-gibbous-3'  => __( 'Waning Gibbous 3', 'simple-location' ),
+			'wi-moon-waning-gibbous-4'  => __( 'Waning Gibbous 4', 'simple-location' ),
+			'wi-moon-waning-gibbous-5'  => __( 'Waning Gibbous 5', 'simple-location' ),
+			'wi-moon-waning-gibbous-6'  => __( 'Waning Gibbous 6', 'simple-location' ),
+			'wi-moon-waxing-crescent-1' => __( 'Waxing Crescent 1', 'simple-location' ),
+			'wi-moon-waxing-crescent-2' => __( 'Waxing Crescent 2', 'simple-location' ),
+			'wi-moon-waxing-crescent-3' => __( 'Waxing Crescent 3', 'simple-location' ),
+			'wi-moon-waxing-crescent-4' => __( 'Waxing Crescent 4', 'simple-location' ),
+			'wi-moon-waxing-crescent-5' => __( 'Waxing Crescent 5', 'simple-location' ),
+			'wi-moon-waxing-crescent-6' => __( 'Waxing Crescent 6', 'simple-location' ),
+			'wi-moon-waxing-gibbous-1'  => __( 'Waxing Gibbous 1', 'simple-location' ),
+			'wi-moon-waxing-gibbous-2'  => __( 'Waxing Gibbous 2', 'simple-location' ),
+			'wi-moon-waxing-gibbous-3'  => __( 'Waxing Gibbous 3', 'simple-location' ),
+			'wi-moon-waxing-gibbous-4'  => __( 'Waxing Gibbous 4', 'simple-location' ),
+			'wi-moon-waxing-gibbous-5'  => __( 'Waxing Gibbous 5', 'simple-location' ),
+			'wi-moon-waxing-gibbous-6'  => __( 'Waxing Gibbous 6', 'simple-location' ),
 		);
 		return array_merge( $neutral, $day, $night, $misc, $moon );
 	}

@@ -270,13 +270,31 @@ class WeatherDataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Objects with weather report it.
+	 * Objects with weather report it, and objects without it don't.
 	 */
 	public function test_has_weather() {
 		$post_id = self::factory()->post->create();
+		$this->assertFalse( Sloc_Weather_Data::has_weather( 'post', $post_id ), 'No weather stored.' );
 		set_post_weatherdata( $post_id, '', static::$weather );
 		$this->assertTrue( Sloc_Weather_Data::has_weather( 'post', $post_id ) );
 		$this->assertFalse( Sloc_Weather_Data::has_weather( 'post', 'abc' ) );
+	}
+
+	/**
+	 * Summary and icon meta are sanitized however they're saved, and every numeric property is described.
+	 */
+	public function test_meta_sanitized() {
+		// The test framework clears registered meta between tests.
+		Sloc_Weather_Data::register_meta();
+		$post_id = self::factory()->post->create();
+		update_post_meta( $post_id, 'weather_summary', '<script>x</script>Clear' );
+		update_post_meta( $post_id, 'weather_icon', 'wi-day-sunny" onload="x' );
+		$this->assertSame( 'Clear', get_post_meta( $post_id, 'weather_summary', true ) );
+		$this->assertSame( 'wi-day-sunnyonloadx', get_post_meta( $post_id, 'weather_icon', true ) );
+
+		$registered = get_registered_meta_keys( 'post' );
+		$this->assertSame( 'Temperature', $registered['weather_temperature']['description'] );
+		$this->assertSame( 'Wind Gust', $registered['weather_windgust']['description'] );
 	}
 
 	/**
@@ -334,6 +352,13 @@ class WeatherDataTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'sloc-humidity', $output );
 		$this->assertStringContainsString( 'value="1">1</data>', $output, 'Visibility in miles.' );
 
+		// Extras that aren't stored are left out instead of warning.
+		$sparse = self::factory()->post->create();
+		set_post_weatherdata( $sparse, '', array( 'temperature' => 20 ) );
+		$output = Sloc_Weather_Data::get_the_weather( 'post', $sparse, array( 'style' => 'complete' ) );
+		$this->assertStringContainsString( 'value="68">68</data>', $output );
+		$this->assertStringNotContainsString( '<ul>', $output );
+
 		$graphic = Sloc_Weather_Data::get_the_weather( 'post', $post_id, array( 'style' => 'graphic' ) );
 		$this->assertStringContainsString( 'sloc-weather-icon', $graphic );
 		$this->assertStringNotContainsString( 'p-weather', $graphic );
@@ -374,6 +399,17 @@ class WeatherDataTest extends WP_UnitTestCase {
 
 		Weather_Provider_Sloc_Test::$conditions = new WP_Error( 'down', 'Down' );
 		$this->assertWPError( Sloc_Weather_Data::get_weather_by_station( 'KNYC' ) );
+
+		// No weather provider set.
+		update_option( 'sloc_weather_provider', 'none' );
+		foreach ( array(
+			Sloc_Weather_Data::get_weather_by_location( 40.71, -74.01 ),
+			Sloc_Weather_Data::get_weather_by_user( $user_id ),
+			Sloc_Weather_Data::get_weather_by_station( 'KNYC' ),
+		) as $weather ) {
+			$this->assertWPError( $weather );
+			$this->assertSame( 'no_provider', $weather->get_error_code() );
+		}
 	}
 
 	/**
@@ -429,8 +465,8 @@ class WeatherDataTest extends WP_UnitTestCase {
 	public function test_conversions() {
 		$this->assertSame( 212.0, Weather_Provider::celsius_to_fahrenheit( 100 ) );
 		$this->assertSame( 100.0, Weather_Provider::fahrenheit_to_celsius( 212 ) );
-		$this->assertEqualsWithDelta( 30.0, Weather_Provider::hpa_to_inhg( 1000 ), 0.01 );
-		$this->assertEqualsWithDelta( 1000.0, Weather_Provider::inhg_to_hpa( 30 ), 0.01 );
+		$this->assertSame( 29.91, Weather_Provider::hpa_to_inhg( 1013 ) );
+		$this->assertEqualsWithDelta( 1013.2, Weather_Provider::inhg_to_hpa( 29.92 ), 0.1 );
 
 		$this->assertSame( 'C', Weather_Provider::temp_unit() );
 		update_option( 'sloc_measurements', 'imperial' );
@@ -561,6 +597,9 @@ class WeatherDataTest extends WP_UnitTestCase {
 		$list = Weather_Provider::get_iconlist();
 		$this->assertArrayHasKey( 'wi-day-sunny', $list );
 		$this->assertArrayHasKey( 'wi-moon-full', $list );
+		foreach ( array_keys( $list ) as $icon ) {
+			$this->assertSame( sanitize_html_class( $icon ), $icon, 'Every icon is a usable class name.' );
+		}
 
 		$options = Weather_Provider::icon_select( '' );
 		$this->assertMatchesRegularExpression( '/value="none"\s+selected/', $options );
@@ -614,6 +653,29 @@ class WeatherDataTest extends WP_UnitTestCase {
 
 		Weather_Provider_Sloc_Test::$conditions = array();
 		$this->assertSame( '', $provider->get_current_temperature() );
+
+		Weather_Provider_Sloc_Test::$conditions = new WP_Error( 'down', 'Down' );
+		$this->assertSame( '', $provider->get_current_temperature() );
+		$this->assertStringStartsWith( '<div class="sloc-weather">', $provider->get_current_condition(), 'An error shows no weather.' );
+	}
+
+	/**
+	 * The current temperature and condition work with a provider that follows the abstract signature, with no default time.
+	 */
+	public function test_current_condition_required_time() {
+		$provider = new class() extends Weather_Provider {
+			/**
+			 * Returns 10 °C for current conditions.
+			 *
+			 * @param mixed $time Time.
+			 * @return array
+			 */
+			public function get_conditions( $time ) {
+				return array( 'temperature' => null === $time ? 10 : 0 );
+			}
+		};
+		$this->assertSame( '10&deg;C', $provider->get_current_temperature() );
+		$this->assertStringContainsString( '10&deg;C', $provider->get_current_condition() );
 	}
 
 	/**
