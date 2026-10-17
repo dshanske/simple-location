@@ -38,7 +38,9 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 	/**
 	 * Return an address.
 	 *
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @since 6.0.0 An error response is an error, or an empty list when there is nothing at the point.
+	 *
+	 * @return array|WP_Error $reverse microformats2 address elements in an array.
 	 */
 	public function reverse_lookup() {
 		$args = array(
@@ -59,6 +61,15 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 			return $json;
 		}
 
+		// Errors come back as an object with a 200 status; "Unable to geocode" means there is nothing at the point.
+		if ( isset( $json['error'] ) ) {
+			$message = is_string( $json['error'] ) ? $json['error'] : ifset( $json['error']['message'], '' );
+			if ( 'Unable to geocode' === $message ) {
+				return array( 'items' => array() );
+			}
+			return new WP_Error( 'unable_to_retrieve', $message ? $message : __( 'Unable to Retrieve', 'simple-location' ) );
+		}
+
 		$return = array();
 		if ( wp_is_numeric_array( $json ) ) {
 			foreach ( $json as $item ) {
@@ -74,6 +85,8 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 
 	/**
 	 * Convert address properties to hcard
+	 *
+	 * @since 6.0.0 Handles Wikipedia tags without a language prefix.
 	 *
 	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.
@@ -236,8 +249,7 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 		if ( isset( $json['extratags'] ) ) {
 			$addr['url'] = ifset( $json['extratags']['website'] );
 			if ( empty( $addr['url'] ) && isset( $json['extratags']['wikipedia'] ) ) {
-				$wiki        = explode( ':', $json['extratags']['wikipedia'] );
-				$addr['url'] = 'https://' . $wiki[0] . '.wikipedia.org/wiki/' . str_replace( ' ', '_', $wiki[1] );
+				$addr['url'] = self::wikipedia_url( $json['extratags']['wikipedia'] );
 			}
 			$addr['photo'] = ifset( $json['extratags']['image'] );
 			$addr['tel']   = ifset( $json['extratags']['phone'] );

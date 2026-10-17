@@ -98,6 +98,31 @@ abstract class Venue_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns the Wikipedia URL for an OpenStreetMap wikipedia tag.
+	 *
+	 * The tag is usually "language:Title". A tag without a language prefix is taken as an English title.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param string $tag Value of the wikipedia tag.
+	 * @return string URL, or an empty string for an empty tag.
+	 */
+	public static function wikipedia_url( $tag ) {
+		if ( ! is_string( $tag ) || '' === trim( $tag ) ) {
+			return '';
+		}
+		$language = 'en';
+		$title    = trim( $tag );
+		$parts    = explode( ':', $title, 2 );
+		// Titles can contain colons, so only a language code counts as a prefix.
+		if ( 2 === count( $parts ) && preg_match( '/^[a-z]{2,3}(-[a-z0-9]+)*$/i', trim( $parts[0] ) ) ) {
+			$language = strtolower( trim( $parts[0] ) );
+			$title    = trim( $parts[1] );
+		}
+		return 'https://' . $language . '.wikipedia.org/wiki/' . rawurlencode( str_replace( ' ', '_', $title ) );
+	}
+
+	/**
 	 * Returns a list of one or more possible venues in h-card jf2 format.
 	 *
 	 * @return array Array of jf2 h-card elements under property items.

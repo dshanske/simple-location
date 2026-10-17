@@ -88,6 +88,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 	 * Convert address properties to hcard
 	 *
 	 * @since 6.0.0 Uses the venue's own coordinates and name; no longer sets the search point's altitude.
+	 * @since 6.0.0 Handles Wikipedia tags without a language prefix.
 	 *
 	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.
@@ -255,8 +256,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 		if ( isset( $json['extratags'] ) ) {
 			$addr['url'] = ifset( $json['extratags']['website'] );
 			if ( empty( $addr['url'] ) && isset( $json['extratags']['wikipedia'] ) ) {
-				$wiki        = explode( ':', $json['extratags']['wikipedia'] );
-				$addr['url'] = 'https://' . $wiki[0] . '.wikipedia.org/wiki/' . str_replace( ' ', '_', $wiki[1] );
+				$addr['url'] = self::wikipedia_url( $json['extratags']['wikipedia'] );
 			}
 			$addr['photo'] = ifset( $json['extratags']['image'] );
 			$addr['tel']   = ifset( $json['extratags']['phone'] );

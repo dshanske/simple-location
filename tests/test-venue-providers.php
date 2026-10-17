@@ -144,6 +144,64 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A Wikipedia tag without a language prefix is an English title, and titles may contain colons.
+	 */
+	public function test_wikipedia_url() {
+		$this->assertSame( 'https://en.wikipedia.org/wiki/Philadelphia_City_Hall', Venue_Provider::wikipedia_url( 'en:Philadelphia City Hall' ) );
+		$this->assertSame( 'https://en.wikipedia.org/wiki/Philadelphia_City_Hall', Venue_Provider::wikipedia_url( 'Philadelphia City Hall' ) );
+		$this->assertSame( 'https://de.wikipedia.org/wiki/K%C3%B6lner_Dom', Venue_Provider::wikipedia_url( 'de:Kölner Dom' ) );
+		$this->assertSame( 'https://zh-yue.wikipedia.org/wiki/%E9%A6%99%E6%B8%AF', Venue_Provider::wikipedia_url( 'zh-yue:香港' ) );
+		$this->assertSame( 'https://en.wikipedia.org/wiki/Star_Trek%3A_Voyager', Venue_Provider::wikipedia_url( 'en:Star Trek: Voyager' ) );
+		$this->assertSame( 'https://en.wikipedia.org/wiki/Star_Trek%3A_Voyager', Venue_Provider::wikipedia_url( 'Star Trek: Voyager' ) );
+		$this->assertSame( 'https://en.wikipedia.org/wiki/AT%26T_Stadium', Venue_Provider::wikipedia_url( 'AT&T Stadium' ) );
+		$this->assertSame( '', Venue_Provider::wikipedia_url( '' ) );
+		$this->assertSame( '', Venue_Provider::wikipedia_url( array() ) );
+	}
+
+	/**
+	 * Venue parsers build a URL from a Wikipedia tag without a language prefix instead of warning.
+	 */
+	public function test_wikipedia_tag_without_language() {
+		$fixture              = $this->fixture( 'geo/nominatim-reverse.json' );
+		$fixture['extratags'] = array( 'wikipedia' => 'Philadelphia City Hall' );
+		$this->mock_http( array( 'nominatim.openstreetmap.org' => array( 'body' => $fixture ) ) );
+		$card = $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup()['items'][0];
+		$this->assertSame( 'https://en.wikipedia.org/wiki/Philadelphia_City_Hall', $card['url'] );
+
+		$fixture = $this->fixture( 'venue/locationiq-nearby.json' );
+		foreach ( array_keys( $fixture ) as $i ) {
+			$fixture[ $i ]['extratags'] = array( 'wikipedia' => 'Philadelphia City Hall' );
+		}
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => $fixture ) ) );
+		$card = $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->reverse_lookup()['items'][0];
+		$this->assertSame( 'https://en.wikipedia.org/wiki/Philadelphia_City_Hall', $card['url'] );
+	}
+
+	/**
+	 * A Nominatim error body is an empty list when there is nothing at the point, and an error otherwise.
+	 */
+	public function test_nominatim_error_body() {
+		$this->mock_http( array( 'nominatim.openstreetmap.org' => array( 'body' => array( 'error' => 'Unable to geocode' ) ) ) );
+		$this->assertSame( array( 'items' => array() ), $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup() );
+
+		$this->mock_http(
+			array(
+				'nominatim.openstreetmap.org' => array(
+					'body' => array(
+						'error' => array(
+							'code'    => 400,
+							'message' => 'Parameter lat out of range',
+						),
+					),
+				),
+			)
+		);
+		$result = $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup();
+		$this->assertWPError( $result );
+		$this->assertSame( 'Parameter lat out of range', $result->get_error_message() );
+	}
+
+	/**
 	 * LocationIQ's Nearby API returns a list of venues with their addresses.
 	 */
 	public function test_locationiq() {
