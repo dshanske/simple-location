@@ -128,7 +128,7 @@ class Sloc_Weather_Data {
 		foreach ( $numerics as $prop => $description ) {
 			$args = array(
 				'type'         => 'number',
-				'description'  => 'Altitude',
+				'description'  => $description,
 				'single'       => true,
 				'show_in_rest' => false,
 			);
@@ -138,7 +138,7 @@ class Sloc_Weather_Data {
 		}
 
 		$args = array(
-			'sanitize_callback' => array( __CLASS__, 'sanitize_text_field' ),
+			'sanitize_callback' => array( __CLASS__, 'sanitize_summary' ),
 			'type'              => 'string',
 			'description'       => __( 'Weather Summary', 'simple-location' ),
 			'single'            => true,
@@ -150,7 +150,7 @@ class Sloc_Weather_Data {
 		register_meta( 'term', 'weather_summary', $args );
 
 		$args = array(
-			'sanitize_callback' => array( __CLASS__, 'esc_attr' ),
+			'sanitize_callback' => array( __CLASS__, 'sanitize_icon' ),
 			'type'              => 'string',
 			'description'       => __( 'Weather Icon', 'simple-location' ),
 			'single'            => true,
@@ -160,6 +160,30 @@ class Sloc_Weather_Data {
 		register_meta( 'comment', 'weather_icon', $args );
 		register_meta( 'user', 'weather_icon', $args );
 		register_meta( 'term', 'weather_icon', $args );
+	}
+
+	/**
+	 * Sanitizes a stored weather summary.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param mixed $value Summary.
+	 * @return string Summary as plain text.
+	 */
+	public static function sanitize_summary( $value ) {
+		return sanitize_text_field( (string) $value );
+	}
+
+	/**
+	 * Sanitizes a stored weather icon name.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param mixed $value Icon name, such as `wi-day-sunny`.
+	 * @return string Icon name usable as a class.
+	 */
+	public static function sanitize_icon( $value ) {
+		return sanitize_html_class( (string) $value );
 	}
 
 
@@ -439,7 +463,7 @@ class Sloc_Weather_Data {
 	 * @since 1.0.0
 	 */
 	public static function has_weather( $type, $id ) {
-		return is_array( self::get_object_weatherdata( $type, $id ) );
+		return ! empty( self::get_object_weatherdata( $type, $id ) );
 	}
 
 	public static function get_the_weather( $type, $id, $args = null ) {
@@ -518,6 +542,9 @@ class Sloc_Weather_Data {
 
 		$return = array();
 		foreach ( array( 'humidity', 'cloudiness', 'visibility' ) as $param ) {
+			if ( ! isset( $weather[ $param ] ) ) {
+				continue;
+			}
 			$return[] = Weather_Provider::markup_value(
 				$param,
 				$weather[ $param ],
@@ -526,11 +553,17 @@ class Sloc_Weather_Data {
 				)
 			);
 		}
+		if ( empty( $return ) ) {
+			return '';
+		}
 		return '<ul>' . implode( '', $return ) . '</ul>';
 	}
 
 	public static function get_weather_data( $lat, $lng, $cache_time = null ) {
 		$provider = Loc_Config::weather_provider();
+		if ( ! $provider ) {
+			return self::no_provider_error();
+		}
 		$provider->set( $lat, $lng );
 		if ( is_numeric( $cache_time ) ) {
 			$provider->set_cache_time( $cache_time );
@@ -543,6 +576,17 @@ class Sloc_Weather_Data {
 			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
 		}
 		return $weather;
+	}
+
+	/**
+	 * Returns the error for a lookup with no weather provider set.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return WP_Error
+	 */
+	private static function no_provider_error() {
+		return new WP_Error( 'no_provider', __( 'No Weather Provider Set', 'simple-location' ) );
 	}
 
 	public static function get_weather_by_user( $user, $cache_time = null ) {
@@ -565,6 +609,9 @@ class Sloc_Weather_Data {
 
 	public static function get_weather_by_station( $station, $provider = null, $cache_time = null ) {
 		$provider = Loc_Config::weather_provider( $provider );
+		if ( ! $provider ) {
+			return self::no_provider_error();
+		}
 		$provider->set( array( 'station_id' => $station ) );
 
 		if ( is_numeric( $cache_time ) ) {

@@ -33,21 +33,25 @@ trait Weather_Info_Trait {
 	/**
 	 * Converts hPa to inHg.
 	 *
+	 * @since 5.0.26 Uses 0.02953 inHg per hPa; it used 0.03, which was 1.6% high.
+	 *
 	 * @param float $hpa HectoPascals.
 	 * @return float Inches of Mercury.
 	 */
 	public static function hpa_to_inhg( $hpa ) {
-		return round( $hpa * 0.03, 2 );
+		return round( $hpa * 0.02953, 2 );
 	}
 
 	/**
 	 * Converts inHg to hPa
 	 *
+	 * @since 5.0.26 Uses 0.02953 inHg per hPa; it used 0.03.
+	 *
 	 * @param float $inhg Inches of Mercury.
 	 * @return float HectoPascals.
 	 */
 	public static function inhg_to_hpa( $inhg ) {
-		return round( $inhg / 0.03, 2 );
+		return round( $inhg / 0.02953, 2 );
 	}
 
 	public static function temp_unit() {
