@@ -481,11 +481,28 @@ class Post_Venue {
 		return get_post_meta( $post_id, 'venue_id', true );
 	}
 
+	/**
+	 * Sets the venue of a post.
+	 *
+	 * @since 5.0.0
+	 * @since 5.0.26 A post without a location is given the venue's location.
+	 *
+	 * @param int $post_id  Post ID.
+	 * @param int $venue_id Venue ID.
+	 * @return int|bool Meta ID if the venue was added, true if it was changed, false otherwise.
+	 */
 	public static function set_post_venue( $post_id, $venue_id ) {
 		if ( ! is_numeric( $venue_id ) ) {
 			return false;
 		}
-		return update_post_meta( $post_id, 'venue_id', $venue_id );
+		$return = update_post_meta( $post_id, 'venue_id', $venue_id );
+		if ( (int) $venue_id > 0 && ! Location_Taxonomy::get_post_location( $post_id ) ) {
+			$term = Location_Taxonomy::get_post_location( $venue_id );
+			if ( $term ) {
+				Location_Taxonomy::set_location( $post_id, $term );
+			}
+		}
+		return $return;
 	}
 
 	public static function add_new_venue( $venue ) {
