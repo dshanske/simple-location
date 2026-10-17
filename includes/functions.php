@@ -273,23 +273,26 @@ function geo_distance( $lat1, $lng1, $lat2, $lng2 ) {
 /**
  * Returns a bounding box around a location
  *
- * @param float $lat1 Latitude 1.
- * @param float $lng1 Longitude 1.
- * @param float $lat2 Latitude 2.
- * @param float $lng2 Longitude 2.
- * @return float $meters Distance in meters between the two points.
- *
  * @since 1.0.0
+ * @since 6.0.0 The box is centered on the location, with the longitude span widened by the latitude.
+ *
+ * @param float $lat    Latitude.
+ * @param float $lng    Longitude.
+ * @param float $radius Optional. Distance from the location to each side, in meters. Default 50.
+ * @return float[] Minimum latitude, minimum longitude, maximum latitude, maximum longitude.
  */
 function geo_radius_box( $lat, $lng, $radius = 50 ) {
-	$lat = floatval( $lat );
-	$lng = floatval( $lng );
-	$r   = $radius / 6378100;
+	$lat  = floatval( $lat );
+	$lng  = floatval( $lng );
+	$r    = $radius / 6378100;
+	$dlat = rad2deg( $r );
+	// A degree of longitude shrinks towards the poles; cap the span there rather than dividing by zero.
+	$dlng = rad2deg( $r / max( cos( deg2rad( $lat ) ), 0.000001 ) );
 	return array(
-		$lat - rad2deg( $r / cos( deg2rad( $lat ) ) ),
-		$lng - rad2deg( $r / cos( deg2rad( $lng ) ) ),
-		$lat + rad2deg( $r ),
-		$lng + rad2deg( $r ),
+		$lat - $dlat,
+		$lng - $dlng,
+		$lat + $dlat,
+		$lng + $dlng,
 	);
 }
 
