@@ -132,13 +132,16 @@ class FunctionsTest extends WP_UnitTestCase {
 	 * The radius box is centered on the point and every corner is the radius away along each axis.
 	 */
 	public function test_geo_radius_box_is_symmetric() {
-		$this->markTestSkipped( 'Known bug, see #309' );
 		$box = geo_radius_box( 40.0, -75.0, 1000 );
 		// Order: min lat, min lng, max lat, max lng.
 		$this->assertEqualsWithDelta( 40.0 - $box[0], $box[2] - 40.0, 0.000001, 'Latitude span is not symmetric' );
 		$this->assertEqualsWithDelta( -75.0 - $box[1], $box[3] + 75.0, 0.000001, 'Longitude span is not symmetric' );
 		$this->assertEqualsWithDelta( 1000, geo_distance( 40.0, -75.0, $box[2], -75.0 ), 1 );
 		$this->assertEqualsWithDelta( 1000, geo_distance( 40.0, -75.0, 40.0, $box[3] ), 1 );
+
+		// The span depends on the latitude, not the longitude: near 90° longitude it used to approach infinity.
+		$east = geo_radius_box( 40.0, 90.0, 1000 );
+		$this->assertEqualsWithDelta( $box[3] - $box[1], $east[3] - $east[1], 0.000001 );
 	}
 
 	/**
