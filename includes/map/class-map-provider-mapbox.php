@@ -49,6 +49,14 @@ class Map_Provider_Mapbox extends Map_Provider {
 		);
 	}
 
+	/**
+	 * Returns the built-in styles, plus the user's own styles for a user other than mapbox.
+	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Errors carry the HTTP status, and Mapbox's message when there is one.
+	 *
+	 * @return array|WP_Error Style names keyed by ID, or an error if the user's styles can't be fetched.
+	 */
 	public function get_styles() {
 		if ( empty( $this->user ) ) {
 			return array();
@@ -57,33 +65,36 @@ class Map_Provider_Mapbox extends Map_Provider {
 		if ( 'mapbox' === $this->user ) {
 			return $return;
 		}
-		$url          = 'https://api.mapbox.com/styles/v1/' . $this->user . '?access_token=' . $this->api . '&limit=50';
-				$args = array(
-					'headers'             => array(
-						'Accept' => 'application/json',
-					),
-					'timeout'             => 10,
-					'limit_response_size' => 1048576,
-					'redirection'         => 1,
-					// Use an explicit user-agent for Simple Location
-					'user-agent'          => 'Simple Location for WordPress',
-				);
-				/* Disable development sites usage for now */
-				$request = wp_safe_remote_get( $url, $args );
-				if ( is_wp_error( $request ) ) {
-					return $request; // Bail early.
-				}
-				$body = wp_remote_retrieve_body( $request );
-				$data = json_decode( $body );
-				if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-					return new WP_Error( '403', $data->message );
-				}
-				foreach ( $data as $style ) {
-					if ( is_object( $style ) ) {
-						$return[ $style->id ] = $style->name;
-					}
-				}
+		$json = $this->fetch_json(
+			'https://api.mapbox.com/styles/v1/' . rawurlencode( $this->user ),
+			array(
+				'access_token' => $this->api,
+				'limit'        => 50,
+			)
+		);
+		if ( is_wp_error( $json ) ) {
+			// A user without styles of their own gets an empty list.
+			if ( 'not_json_response' === $json->get_error_code() && '[]' === trim( $json->get_error_message() ) ) {
 				return $return;
+			}
+			if ( 'invalid_response' !== $json->get_error_code() ) {
+				return $json;
+			}
+			$data    = $json->get_error_data();
+			$status  = isset( $data['status'] ) ? (int) $data['status'] : 0;
+			$body    = json_decode( $json->get_error_message(), true );
+			$message = ( is_array( $body ) && ! empty( $body['message'] ) && is_string( $body['message'] ) )
+				? $body['message']
+				/* translators: %d: HTTP status code. */
+				: sprintf( __( 'Mapbox styles could not be loaded (HTTP status %d).', 'simple-location' ), $status );
+			return new WP_Error( 'mapbox_styles', $message, array( 'status' => $status ) );
+		}
+		foreach ( $json as $style ) {
+			if ( is_array( $style ) && isset( $style['id'], $style['name'] ) ) {
+				$return[ $style['id'] ] = $style['name'];
+			}
+		}
+		return $return;
 	}
 
 
