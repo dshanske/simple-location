@@ -101,7 +101,8 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			$this->station_id = $sitelist[0]['id'];
 			$this->station    = array_filter( $sitelist[0] );
 			$return           = self::get_station_data( $time );
-			unset( $this->station_id );
+			// Cache by the location that was asked for, not the station.
+			$this->station_id = null;
 			$this->set_cache( $return );
 			return $return;
 		}
@@ -128,8 +129,8 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			'station_id'   => $this->station_id,
 			'station_data' => $this->station,
 		);
-		if ( ! empty( $this->station ) & array_key_exists( 'latitude', $this->station ) ) {
-			$return['distance'] = round( geo_distance( $this->latitude, $this->longitude, $return['station_data']['latitude'], $return['station_data']['longitude'] ) );
+		if ( ! empty( $this->latitude ) && isset( $this->station['location']['latitude'], $this->station['location']['longitude'] ) ) {
+			$return['distance'] = round( geo_distance( $this->latitude, $this->longitude, $this->station['location']['latitude'], $this->station['location']['longitude'] ) );
 		}
 
 		$datetime = $this->datetime( $time );
@@ -185,6 +186,8 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	/**
 	 * Convert Data into common format
 	 *
+	 * @since 5.0.26 The summary is the condition's name, not its numeric code.
+	 *
 	 * @param string $json Raw JSON.
 	 * @return array Current Conditions in Array
 	 */
@@ -194,15 +197,17 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		$return['dewpoint']    = ifset_round( $json['dwpt'], 1 );
 		$return['humidity']    = ifset_round( $json['rhum'], 1 );
 		$return['pressure']    = ifset_round( $json['pres'], 1 );
-		$return['summary']     = ifset( $json['conditions'] );
 
 		$return['windspeed']  = self::round_value( self::kmh_to_ms( ifset( $json['wspd'] ) ), 1 );
 		$return['windgust']   = self::round_value( self::kmh_to_ms( ifset( $json['wpgt'] ) ), 1 );
 		$return['winddegree'] = ifset_round( $json['wdir'], 1 );
 		$return['rain']       = ifset_round( $json['prcp'], 2 );
 		$return['snow']       = self::cm_to_mm( ifset_round( $json['snow'], 2 ) );
-		$return['summary']    = ifset( $json['coco'] );
-		$return['code']       = $this->code_map( $json['coco'] );
+		$coco                 = ifset( $json['coco'] );
+		if ( is_numeric( $coco ) ) {
+			$return['summary'] = self::get_status( (int) $coco );
+			$return['code']    = self::code_map( (int) $coco );
+		}
 
 		return self::filter_weather( $return );
 	}
