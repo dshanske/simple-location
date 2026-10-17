@@ -47,6 +47,7 @@ class Weather_Provider_HERE extends Weather_Provider {
 	 *
 	 * @since 4.0.0
 	 * @since 5.0.26 Uses the HERE Destination Weather API v3; the legacy Weather API was retired.
+	 * @since 5.0.26 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
 	 *
 	 * @param int $time Time Optional.
 	 * @return array|WP_Error Current Conditions in Array, or an error from the API.
@@ -59,10 +60,7 @@ class Weather_Provider_HERE extends Weather_Provider {
 		$datetime = $this->datetime( $time );
 
 		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
-			return array(
-				'time'     => $time,
-				'datetime' => $datetime,
-			);
+			return $this->get_unsupported_time_conditions( $time );
 		}
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {

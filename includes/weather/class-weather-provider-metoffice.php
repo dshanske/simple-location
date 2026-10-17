@@ -97,18 +97,17 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @since 5.0.26 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
+	 *
 	 * @param int $time Time. Optional.
-	 * @return array Current Conditions in Array.
+	 * @return array|WP_Error Current Conditions in Array, or an error.
 	 */
 	public function get_conditions( $time = null ) {
 		$return   = array();
 		$datetime = $this->datetime( $time );
 
 		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
-			return array(
-				'time'     => $time,
-				'datetime' => $datetime,
-			);
+			return $this->get_unsupported_time_conditions( $time );
 		}
 		if ( ! empty( $this->station_id ) ) {
 			return self::get_station_data();

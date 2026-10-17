@@ -410,6 +410,29 @@ abstract class Weather_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Return conditions for a time this provider has no weather for.
+	 *
+	 * Providers with only current conditions call this for times more than an hour from now.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param string|int|DateTime $time ISO8601, timestamp, or DateTime.
+	 * @return WP_Error|array The fallback provider's conditions, or a `historic_unsupported` error when no fallback is set.
+	 */
+	protected function get_unsupported_time_conditions( $time ) {
+		$fallback = get_option( 'sloc_fallback_weather_provider' );
+		if ( ! empty( $fallback ) && 'none' !== $fallback && $fallback !== $this->get_slug() ) {
+			return $this->get_fallback_conditions( $time );
+		}
+		return new WP_Error(
+			'historic_unsupported',
+			/* translators: %s: Weather provider name. */
+			sprintf( __( '%s only provides current weather.', 'simple-location' ), $this->get_name() ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
 	 * Return summary of current conditions.
 	 *
 	 * @return string Summary of Current conditions.
