@@ -80,7 +80,6 @@ class SaveMetaTest extends WP_UnitTestCase {
 	 * Clearing every location field removes the stored visibility.
 	 */
 	public function test_save_meta_clearing_location_removes_visibility() {
-		$this->markTestSkipped( 'Known bug, see #314' );
 		$post_id = self::factory()->post->create();
 		set_post_geodata( $post_id, 'visibility', 'protected' );
 		$_POST = array(

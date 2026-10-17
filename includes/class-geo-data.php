@@ -232,15 +232,13 @@ class Geo_Data {
 	/**
 	 * Delete a Single Piece of GeoData.
 	 *
-	 * @param string $type
-	 * @param int    $id
-	 * @param array  $geodata {
-	 *   An array of details about a location.
-	 *
-	 * }
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @param string $key  Geo data key, e.g. 'address' or 'visibility'.
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 Deleting visibility deletes geo_public, where it is stored.
 	 */
 	public static function delete_geodata( $type, $id, $key ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
@@ -280,6 +278,10 @@ class Geo_Data {
 
 		if ( ! is_null( $check ) ) {
 			return $check;
+		}
+		// Visibility is stored as geo_public, as in set_geodata() and get_geodata().
+		if ( 'visibility' === $key ) {
+			return delete_metadata( $type, $id, 'geo_public' );
 		}
 		return delete_metadata( $type, $id, 'geo_' . $key );
 	}
