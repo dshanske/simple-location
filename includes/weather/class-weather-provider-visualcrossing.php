@@ -61,7 +61,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
-	 * @since 5.0.26 Returns the WP_Error for a failed request instead of causing a TypeError.
+	 * @since 6.0.0 Returns the WP_Error for a failed request instead of causing a TypeError.
 	 *
 	 * @param int $time Time. Optional.
 	 * @return array|WP_Error Current Conditions in Array, or an error.
@@ -139,7 +139,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	/**
 	 * Convert Data into common format
 	 *
-	 * @since 5.0.26 Visibility is converted to meters before it is rounded.
+	 * @since 6.0.0 Visibility is converted to meters before it is rounded.
 	 *
 	 * @param string $json Raw JSON.
 	 * @return array Current Conditions in Array

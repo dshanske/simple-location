@@ -123,7 +123,7 @@ class Geo_Base {
 	/**
 	 * Show the location fields on a user profile.
 	 *
-	 * @since 5.0.26 The template is passed the user being edited, and is loaded on every call.
+	 * @since 6.0.0 The template is passed the user being edited, and is loaded on every call.
 	 *
 	 * @param WP_User $user The user whose profile is being edited.
 	 */
@@ -437,7 +437,7 @@ class Geo_Base {
 	 *
 	 * Attachments get an extra "inherit" choice, labeled with the visibility they currently inherit.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param WP_Post|int|null $post Post being edited, if any.
 	 * @return array Choices keyed by value.
@@ -463,7 +463,7 @@ class Geo_Base {
 	 *
 	 * @param string  $public The value to set the select field to.
 	 * @param boolean $echo True to echo, false to return.
-	 * @param array   $choices Optional. Choices keyed by value. Default geo_public(). Since 5.0.26.
+	 * @param array   $choices Optional. Choices keyed by value. Default geo_public(). Since 6.0.0.
 	 * @return string $return Optional. Returns the created string.
 	 * @since 1.0.0
 	 */
@@ -757,7 +757,7 @@ class Geo_Base {
 	 * WordPress passes field callbacks the prepared response array, which holds the ID; objects are accepted too.
 	 * A user's location is their last reported one, so it is only returned to that user or someone who can edit them.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array|object $object      The prepared response array, or the object.
 	 * @param string       $object_type Object type: post, comment or user.
@@ -1075,7 +1075,7 @@ class Geo_Base {
 	 * Callers verify the nonce and capability first.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Coordinates are validated and saved only as a pair, numeric fields that aren't numbers are not
+	 * @since 6.0.0 Coordinates are validated and saved only as a pair, numeric fields that aren't numbers are not
 	 *               saved, values of 0 are kept, and input is unslashed.
 	 *
 	 * @param string  $meta_type Object type: post, comment or user.
@@ -1267,7 +1267,7 @@ class Geo_Base {
 	 * Saves the location fields from the user profile.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Checks the location form's own nonce and the edit_users_location capability.
+	 * @since 6.0.0 Checks the location form's own nonce and the edit_users_location capability.
 	 *
 	 * @param int $user_id User ID.
 	 */

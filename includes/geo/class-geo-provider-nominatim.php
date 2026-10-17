@@ -234,7 +234,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	 * Geocode address.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 The address is parsed, and a search with no results returns an error.
+	 * @since 6.0.0 The address is parsed, and a search with no results returns an error.
 	 *
 	 * @param  string $address String representation of location.
 	 * @return array|WP_Error $reverse microformats2 address elements in an array.
@@ -261,7 +261,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	/**
 	 * Parses the first result of a search.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array $json Search response.
 	 * @return array|WP_Error Microformats2 address elements, or an error if nothing was found.

@@ -241,7 +241,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 *
 	 * Xweather reports errors in the body with "success": false, and an empty response when there is no data.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array|WP_Error $json Decoded response.
 	 * @return array|WP_Error Observation, or an error.

@@ -408,7 +408,7 @@ class Simple_Location_Plugin {
 	/**
 	 * Generic Filter Set of HTML paramaters for KSES
 	 *
-	 * @since 5.0.26 Allows the markup the plugin's own location and map output uses: `target` on links, `style`
+	 * @since 6.0.0 Allows the markup the plugin's own location and map output uses: `target` on links, `style`
 	 *               on spans (filtered by safecss_filter_attr()), `loading` on images, and `data` elements.
 	 *
 	 * @return array Array of HTML elements.

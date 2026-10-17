@@ -47,7 +47,7 @@ class Location_Provider_Compass extends Location_Provider {
 	 * location history, so another user's account is only used when the current user can edit that user,
 	 * which is normally only administrators.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return int|WP_Error User ID, 0 if there is no user, or an error if the current user may not use that account.
 	 */
@@ -72,7 +72,7 @@ class Location_Provider_Compass extends Location_Provider {
 	/**
 	 * Converts a time to UTC.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param DateTimeInterface|int|string $time A date and time, a Unix timestamp, or a string DateTime can parse.
 	 * @return DateTimeImmutable|WP_Error The time in UTC, or an error if it can't be parsed.

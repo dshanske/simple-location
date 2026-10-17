@@ -147,7 +147,7 @@ abstract class Location_Provider extends Sloc_Provider {
 	/**
 	 * Get Coordinates.
 	 *
-	 * @since 5.0.26 Values of 0 are kept.
+	 * @since 6.0.0 Values of 0 are kept.
 	 *
 	 * @return array|boolean Array with all properties, false if null.
 	 */
@@ -218,7 +218,7 @@ abstract class Location_Provider extends Sloc_Provider {
 	/**
 	 * Get Coordinates in Geo URI.
 	 *
-	 * @since 5.0.26 Coordinates and altitude of 0 are kept.
+	 * @since 6.0.0 Coordinates and altitude of 0 are kept.
 	 *
 	 * @return string|boolean GEOURI false if null.
 	 */
@@ -240,7 +240,7 @@ abstract class Location_Provider extends Sloc_Provider {
 	/**
 	 * Get Coordinates in GeoJSON.
 	 *
-	 * @since 5.0.26 Coordinates and altitude of 0 are kept.
+	 * @since 6.0.0 Coordinates and altitude of 0 are kept.
 	 *
 	 * @return array|boolean Array in GeoJSON format false if null.
 	 */
@@ -273,7 +273,7 @@ abstract class Location_Provider extends Sloc_Provider {
 	/**
 	 * Get Coordinates in H-Geo MF2 Format.
 	 *
-	 * @since 5.0.26 Values of 0 are kept.
+	 * @since 6.0.0 Values of 0 are kept.
 	 *
 	 * @return array|boolean Array with h-geo mf2 false if null.
 	 */
@@ -315,7 +315,7 @@ abstract class Location_Provider extends Sloc_Provider {
 	 * would return the previous lookup's location, possibly another user's.
 	 * Settings such as the user and the API key are kept.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 */
 	protected function reset() {
 		$this->latitude          = null;

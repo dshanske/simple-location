@@ -22,7 +22,7 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 	/**
 	 * Widget worker
 	 *
-	 * @since 5.0.26 The sun and moon list, location and map are passed through wp_kses().
+	 * @since 6.0.0 The sun and moon list, location and map are passed through wp_kses().
 	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data

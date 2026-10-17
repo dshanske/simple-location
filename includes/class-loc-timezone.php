@@ -28,7 +28,7 @@ class Loc_Timezone {
 	 *
 	 * Unlike `new DateTimeZone()` this doesn't throw, and unlike `timezone_open()` it doesn't warn.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param mixed $timezone Timezone identifier (e.g. Europe/Paris) or offset (e.g. +05:30).
 	 * @return DateTimeZone|false The timezone, or false if it isn't valid.
@@ -70,7 +70,7 @@ class Loc_Timezone {
 	 * Returns the timezone of the nearest listed city within 200 km.
 	 *
 	 * @since 4.0.0
-	 * @since 5.0.26 Results are cached per coordinate rounded to 2 decimal places (about 1 km), and the lookup uses
+	 * @since 6.0.0 Results are cached per coordinate rounded to 2 decimal places (about 1 km), and the lookup uses
 	 *               those rounded coordinates.
 	 *
 	 * @param float                    $lat  Latitude.
@@ -99,7 +99,7 @@ class Loc_Timezone {
 	/**
 	 * Returns the timezone name of the nearest listed city within 200 km.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param float $lat Latitude.
 	 * @param float $lng Longitude.
@@ -141,7 +141,7 @@ class Loc_Timezone {
 	 * Gives REST post dates in the post's timezone, and GMT dates with their offset.
 	 *
 	 * @since 4.0.0
-	 * @since 5.0.26 Without a usable post timezone, core's local dates are kept, and modified is no longer the
+	 * @since 6.0.0 Without a usable post timezone, core's local dates are kept, and modified is no longer the
 	 *               publish date. A missing or null date is left alone instead of becoming the current time.
 	 *
 	 * @param WP_REST_Response $response Response.
@@ -419,7 +419,7 @@ class Loc_Timezone {
 	 *
 	 * Hooked to the added, updated and deleted meta actions for posts, comments, terms and users.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param int|int[] $meta_ids  Meta ID, or IDs when deleted.
 	 * @param int       $object_id Object ID.
@@ -439,7 +439,7 @@ class Loc_Timezone {
 	 * Returns the timezone stored for an object, or the site timezone.
 	 *
 	 * @since 4.0.0
-	 * @since 5.0.26 A comment uses its own timezone when it has one, otherwise its post's.
+	 * @since 6.0.0 A comment uses its own timezone when it has one, otherwise its post's.
 	 *
 	 * @param WP_Post|WP_Comment|WP_Term|WP_User|int|null $object Object, or post ID. Default the current post.
 	 * @return DateTimeZone|null Timezone, or null to leave dates unchanged.
@@ -610,7 +610,7 @@ class Loc_Timezone {
 	 * Filters the comment time to show it in the comment's timezone.
 	 *
 	 * @since 4.0.0
-	 * @since 5.0.26 A GMT time is returned in GMT.
+	 * @since 6.0.0 A GMT time is returned in GMT.
 	 *
 	 * @param string|int $date      Formatted time.
 	 * @param string     $d         Format.

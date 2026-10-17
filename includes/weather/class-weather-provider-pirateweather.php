@@ -62,7 +62,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
-	 * @since 5.0.26 Times more than an hour ago are requested from the Time Machine API.
+	 * @since 6.0.0 Times more than an hour ago are requested from the Time Machine API.
 	 *
 	 * @param int $time Time to retrieve weather. Optional.
 	 * @return array Current Conditions in Array
@@ -134,7 +134,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	 * 10:1 ratio Pirate Weather uses for current conditions; sleet, ice and mixed precipitation
 	 * are stored as rain.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array $current Current conditions.
 	 * @return array Rain or snow in mm, or an empty array without a rate.

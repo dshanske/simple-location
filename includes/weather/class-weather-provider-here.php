@@ -46,8 +46,8 @@ class Weather_Provider_HERE extends Weather_Provider {
 	 * Return array of current conditions.
 	 *
 	 * @since 4.0.0
-	 * @since 5.0.26 Uses the HERE Destination Weather API v3; the legacy Weather API was retired.
-	 * @since 5.0.26 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
+	 * @since 6.0.0 Uses the HERE Destination Weather API v3; the legacy Weather API was retired.
+	 * @since 6.0.0 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
 	 *
 	 * @param int $time Time Optional.
 	 * @return array|WP_Error Current Conditions in Array, or an error from the API.
@@ -115,7 +115,7 @@ class Weather_Provider_HERE extends Weather_Provider {
 	/**
 	 * Maps a HERE icon ID to a weather condition code.
 	 *
-	 * @since 5.0.26 Maps the v3 icon IDs; the legacy API's icon names are gone.
+	 * @since 6.0.0 Maps the v3 icon IDs; the legacy API's icon names are gone.
 	 *
 	 * @param int $id HERE icon ID, 1 to 35.
 	 * @return int|string Weather condition code, or an empty string if unknown.

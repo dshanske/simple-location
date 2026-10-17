@@ -116,7 +116,7 @@ final class Location_Taxonomy {
 	 * A post without a stored visibility, or with an empty or unknown one, uses the site default
 	 * (see Geo_Data::get_geodata()), so when the default is public those posts match too.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return array Meta query clause.
 	 */
@@ -359,7 +359,7 @@ final class Location_Taxonomy {
 	 * Fills in the country name or code from the other, and the region code from the region name.
 	 *
 	 * @since 4.0.0
-	 * @since 5.0.26 A country code fills in the country name, and region codes are no longer lost.
+	 * @since 6.0.0 A country code fills in the country name, and region codes are no longer lost.
 	 *
 	 * @param array $address Address data.
 	 * @return array Normalized Address Data.
@@ -520,7 +520,7 @@ final class Location_Taxonomy {
 	 * Return an array of term_ids for localities in this region.
 	 *
 	 * @since 4.0.0
-	 * @since 5.0.26 Finds the region, and added the `$childless` parameter.
+	 * @since 6.0.0 Finds the region, and added the `$childless` parameter.
 	 *
 	 * @param string  $region_code  Region Code.
 	 * @param string  $country_code Country Code.
@@ -608,7 +608,7 @@ final class Location_Taxonomy {
 	 * Return an array of term_ids for regions in this country.
 	 *
 	 * @since 4.0.0
-	 * @since 5.0.26 Added the `$childless` parameter.
+	 * @since 6.0.0 Added the `$childless` parameter.
 	 *
 	 * @param int|string $country_code Term ID or Country Code.
 	 * @param boolean    $childless    Optional. Only return regions with no localities. Default false.
@@ -891,7 +891,7 @@ final class Location_Taxonomy {
 	 * Returns the name of a location term with its parents, such as "Philadelphia, Pennsylvania".
 	 *
 	 * @since 4.4.0
-	 * @since 5.0.26 Term names and links are escaped.
+	 * @since 6.0.0 Term names and links are escaped.
 	 *
 	 * @param int|WP_Term $term_id Term ID or object.
 	 * @param array       $args {
@@ -957,7 +957,7 @@ final class Location_Taxonomy {
 	 * Returns a link to a location term's archive, named with the term and its parents.
 	 *
 	 * @since 4.4.14
-	 * @since 5.0.26 Term names and the link are escaped.
+	 * @since 6.0.0 Term names and the link are escaped.
 	 *
 	 * @param int|WP_Term $term_id Term ID or object.
 	 * @return string|WP_Error HTML link, an empty string if there is no term, or an error.

@@ -95,7 +95,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * readings (0 °C, no wind, no rain). It removes null, '', false and empty arrays, since
 	 * ifset() returns false for a missing value. `day` is kept when it is false (night).
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array $values Weather data.
 	 * @return array Weather data without unset values.
@@ -116,7 +116,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Rounds a value if it is a number.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param mixed $value     Value.
 	 * @param int   $precision Optional. Number of decimal places. Default 0.
@@ -129,7 +129,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Extra Parameters for location.
 	 *
-	 * @since 5.0.26 Values of 0, and `day` when it is false, are kept.
+	 * @since 6.0.0 Values of 0, and `day` when it is false, are kept.
 	 *
 	 * @param array $return Weather data.
 	 * @param int   $timestamp Unix timestamp. Optional.
@@ -414,7 +414,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *
 	 * Providers with only current conditions call this for times more than an hour from now.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param string|int|DateTime $time ISO8601, timestamp, or DateTime.
 	 * @return WP_Error|array The fallback provider's conditions, or a `historic_unsupported` error when no fallback is set.

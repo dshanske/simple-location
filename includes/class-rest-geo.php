@@ -27,7 +27,7 @@ class REST_Geo {
 	 * @param string          $param   The parameter that is being sanitized.
 	 * @return float|WP_Error The coordinate, or an error if it is not a valid latitude or longitude.
 	 *
-	 * @since 5.0.26 Returns a WP_Error for invalid or out-of-range coordinates instead of false.
+	 * @since 6.0.0 Returns a WP_Error for invalid or out-of-range coordinates instead of false.
 	 */
 	public static function sanitize_coordinates( $value, $request, $param ) {
 		$coordinate = clean_coordinate( $value, $param );
@@ -50,7 +50,7 @@ class REST_Geo {
 	 * @param string          $param   The parameter that is being sanitized.
 	 * @return float|null The number, or null if it is not numeric.
 	 *
-	 * @since 5.0.26 Numeric strings are converted instead of always being discarded.
+	 * @since 6.0.0 Numeric strings are converted instead of always being discarded.
 	 */
 	public static function sanitize_float( $value, $request, $param ) {
 		// Remove whitespace.
@@ -80,7 +80,7 @@ class REST_Geo {
 	 * IATA codes are 3 characters, ICAO idents 3 to 8 letters, digits or dashes, and GPS codes 3 or 4. Municipality
 	 * names are limited to 100 characters.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param mixed           $value   The value passed.
 	 * @param WP_REST_Request $request Full details about the request.
@@ -116,19 +116,19 @@ class REST_Geo {
 	/**
 	 * Permission check for local lookup APIs
 	 *
-	 * @since 5.0.26 The sloc_local_api_protected filter is deprecated in favor of sloc_local_api_public.
+	 * @since 6.0.0 The sloc_local_api_protected filter is deprecated in favor of sloc_local_api_public.
 	 *
 	 * @return bool
 	 */
 	public static function local_permission_check() {
-		$granted = apply_filters_deprecated( 'sloc_local_api_protected', array( false ), '5.0.26', 'sloc_local_api_public' );
+		$granted = apply_filters_deprecated( 'sloc_local_api_protected', array( false ), '6.0.0', 'sloc_local_api_public' );
 
 		/**
 		 * Filters whether the local airport and timezone lookup endpoints are open to everyone.
 		 *
 		 * By default they require a logged-in user who can read.
 		 *
-		 * @since 5.0.26
+		 * @since 6.0.0
 		 *
 		 * @param bool $public Whether anyone, including logged-out visitors, can use the endpoints.
 		 */

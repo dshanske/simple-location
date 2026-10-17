@@ -34,7 +34,7 @@ class Location_Plugins {
 	 * location that is private by default, protected, or inherited would be federated with its coordinates.
 	 * A private location is removed; a protected location keeps its name but loses its coordinates.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array|null $place   ActivityStreams Place object.
 	 * @param WP_Post    $post    Post being federated.
@@ -62,7 +62,7 @@ class Location_Plugins {
 	 * The content is rendered as whoever triggered it, often the logged-in author saving the post, who would
 	 * otherwise see a hidden location marked as hidden and send it to every follower.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 */
 	public static function activitypub_before_get_content() {
 		add_filter( 'sloc_show_hidden_location', array( 'Location_Plugins', 'hide_hidden_location' ), 99 );
@@ -71,7 +71,7 @@ class Location_Plugins {
 	/**
 	 * Restores hidden location display once the ActivityPub plugin has rendered post content.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param string $content Content rendered for ActivityPub.
 	 * @return string Unchanged content.
@@ -84,7 +84,7 @@ class Location_Plugins {
 	/**
 	 * Filter callback that never shows a hidden location.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return bool False.
 	 */
@@ -98,7 +98,7 @@ class Location_Plugins {
 	 * The location-visibility property is experimental in Micropub. Only public, private and protected are accepted;
 	 * like the Micropub plugin, the last value wins.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array $properties Micropub properties.
 	 * @return string|false public, private or protected, or false if none or an unknown value was sent.
@@ -131,8 +131,8 @@ class Location_Plugins {
 	/**
 	 * Adds location properties to webmention returns.
 	 *
-	 * @since 5.0.26 A location that is a string, or a location or h-geo without properties, no longer causes errors.
-	 * @since 5.0.26 Coordinates are only kept if both are valid and in range, and altitude and accuracy only if numeric
+	 * @since 6.0.0 A location that is a string, or a location or h-geo without properties, no longer causes errors.
+	 * @since 6.0.0 Coordinates are only kept if both are valid and in range, and altitude and accuracy only if numeric
 	 *              (and accuracy only if not negative).
 	 *
 	 * @param array  $meta    Comment meta.

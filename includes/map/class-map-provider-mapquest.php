@@ -44,7 +44,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	/**
 	 * Returns the pixel densities the provider can draw the static map at.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return int[] Pixel densities.
 	 */

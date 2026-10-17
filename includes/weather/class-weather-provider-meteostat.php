@@ -186,7 +186,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	/**
 	 * Convert Data into common format
 	 *
-	 * @since 5.0.26 The summary is the condition's name, not its numeric code.
+	 * @since 6.0.0 The summary is the condition's name, not its numeric code.
 	 *
 	 * @param string $json Raw JSON.
 	 * @return array Current Conditions in Array

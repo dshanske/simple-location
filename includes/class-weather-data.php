@@ -165,7 +165,7 @@ class Sloc_Weather_Data {
 	/**
 	 * Sanitizes a stored weather summary.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param mixed $value Summary.
 	 * @return string Summary as plain text.
@@ -177,7 +177,7 @@ class Sloc_Weather_Data {
 	/**
 	 * Sanitizes a stored weather icon name.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param mixed $value Icon name, such as `wi-day-sunny`.
 	 * @return string Icon name usable as a class.
@@ -197,7 +197,7 @@ class Sloc_Weather_Data {
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
 	 * @since 5.0.0
-	 * @since 5.0.26 Values of 0 are saved instead of deleted.
+	 * @since 6.0.0 Values of 0 are saved instead of deleted.
 	 */
 	public static function set_object_weatherdata( $type, $id, $key, $weather ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
@@ -321,7 +321,7 @@ class Sloc_Weather_Data {
 	 * @return array $weather
 	 *
 	 * @since 5.0.0
-	 * @since 5.0.26 Values of 0 are returned.
+	 * @since 6.0.0 Values of 0 are returned.
 	 */
 	public static function get_object_weatherdata( $type, $id, $key = '' ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
@@ -382,7 +382,7 @@ class Sloc_Weather_Data {
 	 *
 	 * Unlike empty(), this treats 0 and '0' as set, since they are real readings (0 °C, no wind, no rain).
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param mixed $value Value.
 	 * @return bool True unless the value is null, '', false or an empty array.
@@ -581,7 +581,7 @@ class Sloc_Weather_Data {
 	/**
 	 * Returns the error for a lookup with no weather provider set.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return WP_Error
 	 */

@@ -322,7 +322,7 @@ abstract class Sloc_Provider {
 	 * @param float       $alt Altitude. Optional.
 	 * @return boolean Return False if Validation Failed
 	 *
-	 * @since 5.0.26 Invalid or out-of-range coordinates return false and leave the coordinates unchanged.
+	 * @since 6.0.0 Invalid or out-of-range coordinates return false and leave the coordinates unchanged.
 	 */
 	public function set( $lat, $lng = null, $alt = null ) {
 		if ( null === $lng && is_array( $lat ) ) {
@@ -351,7 +351,7 @@ abstract class Sloc_Provider {
 	 * Get Coordinates.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Values of 0 are kept.
+	 * @since 6.0.0 Values of 0 are kept.
 	 *
 	 * @return array|boolean Array with Latitude and Longitude false if null
 	 */
@@ -373,7 +373,7 @@ abstract class Sloc_Provider {
 	 * Unlike array_filter() without a callback, this keeps 0, 0.0 and '0', which are
 	 * real values for coordinates, altitude, heading and speed.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array $values Values to filter.
 	 * @return array Values that are not null, an empty string or an empty array.
@@ -388,7 +388,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts millimeters to inches.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $mm Millimeters.
 	 * @return float|null Inches, or null if the value isn't a number.
@@ -403,7 +403,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts inches to millimeters.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $inch Inches.
 	 * @return float|null Millimeters, or null if the value isn't a number.
@@ -419,7 +419,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts feet to meters.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $feet Feet.
 	 * @return float|null Meters, or null if the value isn't a number.
@@ -435,7 +435,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts meters to feet.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $meters Meters.
 	 * @return float|null Feet, or null if the value isn't a number.
@@ -450,7 +450,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts meters to miles.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $meters Meters.
 	 * @return float|null Miles, or null if the value isn't a number.
@@ -465,7 +465,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts miles to meters.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $miles Miles.
 	 * @return float|null Meters, or null if the value isn't a number.
@@ -480,7 +480,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts kilometers to meters.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $km Kilometers.
 	 * @return float|null Meters, or null if the value isn't a number.
@@ -495,7 +495,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts km/h to m/s
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $kmh km/h.
 	 * @return float|null m/s, or null if the value isn't a number.
@@ -510,7 +510,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts m to mm.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $m meters.
 	 * @return float|null millmeters, or null if the value isn't a number.
@@ -525,7 +525,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts cm to mm.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of the value itself.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of the value itself.
 	 *
 	 * @param float $cm centimeters.
 	 * @return float|null millmeters, or null if the value isn't a number.
@@ -540,7 +540,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts miles per hour to meters per second.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $miles Miles per hour.
 	 * @return float|null Meters per second, or null if the value isn't a number.
@@ -555,7 +555,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts meters per second to miles per hour
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $mps Meters per second.
 	 * @return float|null Miles per hour, or null if the value isn't a number.
@@ -572,7 +572,7 @@ abstract class Sloc_Provider {
 	/**
 	 * Converts meters per hour to meters per second.
 	 *
-	 * @since 5.0.26 Returns null for a value that isn't a number, instead of 0.
+	 * @since 6.0.0 Returns null for a value that isn't a number, instead of 0.
 	 *
 	 * @param float $mph Meters per hour.
 	 * @return float|null Meters per second, or null if the value isn't a number.
