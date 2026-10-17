@@ -119,7 +119,8 @@ class Simple_Location_Plugin {
 			if ( file_exists( $path . $file ) ) {
 				require_once $path . $file;
 			} else {
-				error_log( $path . $file );
+				/* translators: %s: File path. */
+				wp_trigger_error( __METHOD__, sprintf( __( 'Cannot find %s.', 'simple-location' ), $path . $file ) );
 			}
 		}
 	}
@@ -167,11 +168,13 @@ class Simple_Location_Plugin {
 					if ( $class ) {
 						register_sloc_provider( new $class() );
 					} else {
-						error_log( 'Cannot register ' . $class );
+						/* translators: %s: File path. */
+						wp_trigger_error( __METHOD__, sprintf( __( 'Cannot register a provider from %s: no class matches the file name.', 'simple-location' ), $path . $file ) );
 					}
 				}
 			} else {
-				error_log( $path . $file );
+				/* translators: %s: File path. */
+				wp_trigger_error( __METHOD__, sprintf( __( 'Cannot find %s.', 'simple-location' ), $path . $file ) );
 			}
 		}
 	}
@@ -210,6 +213,7 @@ class Simple_Location_Plugin {
 
 		// Core Load Files.
 		$core = array(
+			'compat-functions.php', // Polyfills; loaded first so every other file can use them.
 			'functions.php', // Global Functions.
 			'class-geo-base.php', // Register Geo Base Functions that Modify Core Functionality
 			'class-geo-data.php', // Register Geo Metadata Functions.
@@ -234,7 +238,6 @@ class Simple_Location_Plugin {
 			'class-location-plugins.php',
 			'class-loc-timezone.php',
 			'class-airport-location.php',
-			'compat-functions.php',
 		);
 
 		// Load Core Files.

@@ -70,3 +70,59 @@ if ( ! function_exists( 'str_contains' ) ) {
 			return '' === $needle || false !== strpos( $haystack, $needle );
 	}
 }
+
+if ( ! function_exists( 'wp_trigger_error' ) ) {
+	/**
+	 * Generates a user-level error/warning/notice/deprecation message.
+	 *
+	 * Generates the message when `WP_DEBUG` is true.
+	 *
+	 * Polyfill for WordPress 6.4 (ClassicPress has it since 2.2). Remove when minimum WordPress >= 6.4.
+	 * WordPress 6.2 and 6.3 have no `WP_Exception`, so an `E_USER_ERROR` throws an `Exception` there.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param string $function_name The function that triggered the error.
+	 * @param string $message       The message explaining the error.
+	 *                              The message can contain allowed HTML 'a' (with href), 'code',
+	 *                              'br', 'em', and 'strong' tags and http or https protocols.
+	 *                              If it contains other HTML tags or protocols, the message should be escaped
+	 *                              before passing to this function to avoid being stripped {@see wp_kses()}.
+	 * @param int    $error_level   Optional. The designated error type for this error.
+	 *                              Only works with E_USER family of constants. Default E_USER_NOTICE.
+	 * @throws Exception For an `E_USER_ERROR`.
+	 */
+	function wp_trigger_error( $function_name, $message, $error_level = E_USER_NOTICE ) {
+
+		// Bail out if WP_DEBUG is not turned on.
+		if ( ! WP_DEBUG ) {
+			return;
+		}
+
+		/** This action is documented in wp-includes/functions.php */
+		do_action( 'wp_trigger_error_run', $function_name, $message, $error_level );
+
+		if ( ! empty( $function_name ) ) {
+			$message = sprintf( '%s(): %s', $function_name, $message );
+		}
+
+		$message = wp_kses(
+			$message,
+			array(
+				'a'      => array( 'href' => true ),
+				'br'     => array(),
+				'code'   => array(),
+				'em'     => array(),
+				'strong' => array(),
+			),
+			array( 'http', 'https' )
+		);
+
+		if ( E_USER_ERROR === $error_level ) {
+			$exception = class_exists( 'WP_Exception' ) ? 'WP_Exception' : 'Exception';
+			throw new $exception( $message ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		trigger_error( $message, $error_level ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error, WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+}
