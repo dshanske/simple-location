@@ -306,6 +306,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( $components[0] . ' ' . $components[1], $addr['street-address'], 'Street number and route.' );
 		$this->assertSame( 'United States', $addr['country-name'] );
 		$this->assertSame( $fixture['plus_code']['global_code'], $addr['plus-code'] );
+		$this->assertSame( $fixture['results'][0]['formatted_address'], $addr['display-name'], "Google's formatted address." );
 	}
 
 	/**
@@ -354,6 +355,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array( 'maps.googleapis.com' => array( 'body' => $this->fixture( 'geo/google-denied.json' ) ) ) );
 		$error = $this->provider( 'Geo_Provider_Google', array( 'api' => 'g-key' ) )->reverse_lookup();
 		$this->assertSame( 'REQUEST_DENIED', $error->get_error_code() );
+		$this->assertSame( 'The provided API key is invalid.', $error->get_error_message() );
 	}
 
 	/**
