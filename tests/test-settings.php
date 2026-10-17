@@ -335,14 +335,15 @@ class SettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Opening the settings page removes visibility left on posts with no location.
+	 * The data cleanup removes the visibility setting from posts without a location, and the settings page no longer does.
 	 */
-	public function test_options_page_cleans_orphan_visibility() {
+	public function test_data_cleanup_removes_orphan_visibility() {
 		// Posts need an author because of #305 (saving a post updates its author's last location).
 		$author = self::factory()->user->create( array( 'role' => 'author' ) );
 		$orphan = self::factory()->post->create(
 			array(
 				'post_author' => $author,
+				'post_status' => 'draft',
 				'meta_input'  => array( 'geo_public' => 1 ),
 			)
 		);
@@ -357,11 +358,60 @@ class SettingsTest extends WP_UnitTestCase {
 		);
 		update_option( 'sloc_aspect', '1' );
 		$this->capture( array( 'Loc_Config', 'simloc_options' ) );
-		$this->assertSame( '', get_post_meta( $orphan, 'geo_public', true ) );
+		$this->assertSame( '1', get_post_meta( $orphan, 'geo_public', true ), 'Viewing the settings page changes nothing.' );
+
+		Loc_Config::run_data_cleanup();
+		$this->assertSame( '', get_post_meta( $orphan, 'geo_public', true ), 'Drafts are cleaned up too.' );
 		$this->assertSame( '1', get_post_meta( $kept, 'geo_public', true ) );
+		$this->assertEquals( 1, get_option( Loc_Config::DATA_CLEANUP_OPTION ) );
+		$this->assertFalse( wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ) );
 	}
 
 	/**
+	 * The cleanup is scheduled once, and not after it has finished.
+	 */
+	public function test_schedule_data_cleanup() {
+		wp_clear_scheduled_hook( Loc_Config::DATA_CLEANUP_HOOK );
+		delete_option( Loc_Config::DATA_CLEANUP_OPTION );
+
+		Loc_Config::schedule_data_cleanup();
+		$scheduled = wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK );
+		$this->assertNotFalse( $scheduled );
+		Loc_Config::schedule_data_cleanup();
+		$this->assertSame( $scheduled, wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ), 'Not scheduled twice.' );
+
+		wp_clear_scheduled_hook( Loc_Config::DATA_CLEANUP_HOOK );
+		update_option( Loc_Config::DATA_CLEANUP_OPTION, 1 );
+		Loc_Config::schedule_data_cleanup();
+		$this->assertFalse( wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ), 'Not scheduled once finished.' );
+	}
+
+	/**
+	 * A full batch schedules the next run instead of finishing.
+	 */
+	public function test_data_cleanup_batches() {
+		wp_clear_scheduled_hook( Loc_Config::DATA_CLEANUP_HOOK );
+		delete_option( Loc_Config::DATA_CLEANUP_OPTION );
+		$author = self::factory()->user->create( array( 'role' => 'author' ) );
+		self::factory()->post->create_many(
+			Loc_Config::DATA_CLEANUP_BATCH + 1,
+			array(
+				'post_author' => $author,
+				'meta_input'  => array( 'geo_public' => 1 ),
+			)
+		);
+
+		Loc_Config::run_data_cleanup();
+		$this->assertFalse( get_option( Loc_Config::DATA_CLEANUP_OPTION ) );
+		$this->assertNotFalse( wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ), 'The next batch is scheduled.' );
+
+		wp_clear_scheduled_hook( Loc_Config::DATA_CLEANUP_HOOK );
+		Loc_Config::run_data_cleanup();
+		$this->assertEquals( 1, get_option( Loc_Config::DATA_CLEANUP_OPTION ) );
+		$this->assertFalse( wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ) );
+	}
+
+		/**
 	 * Tab links point at the settings page and mark the active tab.
 	 */
 	public function test_tab_link() {

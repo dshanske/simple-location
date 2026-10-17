@@ -270,6 +270,43 @@ class WeatherDataTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Bulk migration covers every post status and type, honors a limit and reports what it did.
+	 */
+	public function test_bulk_migrate_weather_all_posts() {
+		$draft      = self::factory()->post->create( array( 'post_status' => 'draft' ) );
+		$private    = self::factory()->post->create( array( 'post_status' => 'private' ) );
+		$attachment = self::factory()->attachment->create();
+		foreach ( array( $draft, $private, $attachment ) as $post_id ) {
+			add_post_meta( $post_id, 'geo_weather', static::$oldweather );
+		}
+
+		$this->assertSame(
+			array(
+				'found'    => 2,
+				'migrated' => 2,
+			),
+			Sloc_Weather_Data::bulk_migrate_weather( 2 )
+		);
+		$this->assertSame(
+			array(
+				'found'    => 1,
+				'migrated' => 1,
+			),
+			Sloc_Weather_Data::bulk_migrate_weather( 2 )
+		);
+		foreach ( array( $draft, $private, $attachment ) as $post_id ) {
+			$this->assertEquals( '140', get_post_meta( $post_id, 'weather_winddegree', true ) );
+		}
+		$this->assertSame(
+			array(
+				'found'    => 0,
+				'migrated' => 0,
+			),
+			Sloc_Weather_Data::bulk_migrate_weather( 2 )
+		);
+	}
+
+	/**
 	 * Objects with weather report it, and objects without it don't.
 	 */
 	public function test_has_weather() {

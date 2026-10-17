@@ -10,6 +10,8 @@ defined( 'ABSPATH' ) || exit;
 add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10 );
 add_filter( 'plugins_loaded', array( 'Loc_Config', 'init' ), 11 );
 add_action( 'admin_menu', array( 'Loc_Config', 'admin_menu' ), 10 );
+add_action( 'admin_init', array( 'Loc_Config', 'schedule_data_cleanup' ) );
+add_action( 'sloc_data_cleanup', array( 'Loc_Config', 'run_data_cleanup' ) );
 
 /**
  * Plugin Configuration Class.
@@ -19,6 +21,30 @@ add_action( 'admin_menu', array( 'Loc_Config', 'admin_menu' ), 10 );
  * @since 1.0.0
  */
 class Loc_Config {
+
+	/**
+	 * Cron hook for the one-time data cleanup.
+	 *
+	 * @since 6.0.0
+	 * @var string
+	 */
+	const DATA_CLEANUP_HOOK = 'sloc_data_cleanup';
+
+	/**
+	 * Option set once the data cleanup has finished.
+	 *
+	 * @since 6.0.0
+	 * @var string
+	 */
+	const DATA_CLEANUP_OPTION = 'sloc_data_cleanup_done';
+
+	/**
+	 * Posts, and comments, processed per data cleanup run.
+	 *
+	 * @since 6.0.0
+	 * @var int
+	 */
+	const DATA_CLEANUP_BATCH = 100;
 
 	/**
 	 * Store Map Providers.
@@ -393,16 +419,55 @@ class Loc_Config {
 	}
 
 	/**
-	 * Generate Options Page.
+	 * Schedules the one-time data cleanup, unless it has finished or is already scheduled.
 	 *
-	 * @since 1.0.0
+	 * @since 6.0.0
 	 */
-	public static function simloc_options() {
-		Sloc_Weather_Data::bulk_migrate_weather();
+	public static function schedule_data_cleanup() {
+		if ( get_option( self::DATA_CLEANUP_OPTION ) || wp_next_scheduled( self::DATA_CLEANUP_HOOK ) ) {
+			return;
+		}
+		wp_schedule_single_event( time(), self::DATA_CLEANUP_HOOK );
+	}
+
+	/**
+	 * Runs one batch of the data cleanup, and schedules the next until nothing is left.
+	 *
+	 * Migrates weather stored in the old single-array format, and removes the visibility
+	 * setting from posts that have no location. Both used to run, five posts at a time, on
+	 * every visit to the settings page.
+	 *
+	 * @since 6.0.0
+	 */
+	public static function run_data_cleanup() {
+		$weather = Sloc_Weather_Data::bulk_migrate_weather( self::DATA_CLEANUP_BATCH );
+		$stray   = self::remove_stray_visibility( self::DATA_CLEANUP_BATCH );
+
+		// A full batch means there may be more. Stop if none of the weather could be migrated, so it can't repeat forever.
+		$more = ( self::DATA_CLEANUP_BATCH <= $stray ) || ( 0 < $weather['migrated'] && self::DATA_CLEANUP_BATCH <= $weather['found'] );
+		if ( $more ) {
+			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, self::DATA_CLEANUP_HOOK );
+			return;
+		}
+		update_option( self::DATA_CLEANUP_OPTION, 1 );
+	}
+
+	/**
+	 * Removes the visibility setting from posts that have no location.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param int $limit Optional. Most posts to process. Default -1, all.
+	 * @return int Number of posts cleaned up.
+	 */
+	public static function remove_stray_visibility( $limit = -1 ) {
 		$posts = get_posts(
 			array(
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Counts posts with a location for the settings page.
-				'meta_query' => array(
+				'post_type'      => 'any',
+				'post_status'    => 'any',
+				'posts_per_page' => (int) $limit,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Finds posts with a visibility setting but no location.
+				'meta_query'     => array(
 					array(
 						'key'     => 'geo_latitude',
 						'compare' => 'NOT EXISTS',
@@ -416,12 +481,21 @@ class Loc_Config {
 						'compare' => 'EXISTS',
 					),
 				),
-				'fields'     => 'ids',
+				'fields'         => 'ids',
 			)
 		);
 		foreach ( $posts as $post_id ) {
 			delete_post_meta( $post_id, 'geo_public' );
 		}
+		return count( $posts );
+	}
+
+	/**
+	 * Generate Options Page.
+	 *
+	 * @since 1.0.0
+	 */
+	public static function simloc_options() {
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'general';
 
 		?>
