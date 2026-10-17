@@ -30,7 +30,7 @@ class Location_Provider_Dummy extends Location_Provider {
 		}
 		$properties = array( 'longitude', 'latitude', 'altitude', 'heading', 'speed' );
 		foreach ( $properties as $property ) {
-			$this->$property = ifset( $location[ $property ] );
+			$this->$property = $location[ $property ] ?? null;
 		}
 	}
 }

@@ -134,7 +134,7 @@ class Geo_Provider_Pelias extends Geo_Provider {
 				continue;
 			}
 			// At equal confidence and priority, prefer the closer result.
-			if ( ( 'venue' === $feature['properties']['layer'] ) === ( 'venue' === $address['layer'] ) && ifset( $feature['properties']['distance'], INF ) < ifset( $address['distance'], INF ) ) {
+			if ( ( 'venue' === $feature['properties']['layer'] ) === ( 'venue' === $address['layer'] ) && ( $feature['properties']['distance'] ?? INF ) < ( $address['distance'] ?? INF ) ) {
 				$address = $feature['properties'];
 			}
 		}
@@ -153,7 +153,7 @@ class Geo_Provider_Pelias extends Geo_Provider {
 			)
 		);
 
-		$country_code = ifset( $address['country_a'] );
+		$country_code = $address['country_a'] ?? '';
 		$country_code = self::country_code_iso3( $country_code );
 
 		// Adjust position of house number/name based on country practice.
@@ -167,7 +167,7 @@ class Geo_Provider_Pelias extends Geo_Provider {
 		// A street address's name is the address itself.
 		$name = null;
 		if ( 'address' !== $address['layer'] ) {
-			$name = ifset( $address['name'] );
+			$name = $address['name'] ?? null;
 		}
 
 		$addr = array(
