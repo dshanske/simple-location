@@ -416,6 +416,48 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A street-address result has no name of its own, so the display name is the address.
+	 */
+	public function test_pelias_reverse_address() {
+		update_option( 'sloc_pelias_url', 'https://203.0.113.10/v1' );
+		$fixture = $this->fixture( 'geo/pelias-reverse.json' );
+		$feature = $fixture['features'][0];
+
+		$feature['properties']['layer'] = 'address';
+		$feature['properties']['name']  = '1400 John F. Kennedy Boulevard';
+		$fixture['features']            = array( $feature );
+		$this->mock_http( array( '203.0.113.10/v1/reverse/' => array( 'body' => $fixture ) ) );
+		$addr = $this->provider( 'Geo_Provider_Pelias', array( 'api' => 'p-key' ) )->reverse_lookup();
+
+		$this->assertArrayNotHasKey( 'name', $addr );
+		$this->assertSame( '1400 John F. Kennedy Boulevard', $addr['street-address'] );
+		$this->assertStringStartsWith( '1400 John F. Kennedy Boulevard', $addr['display-name'] );
+	}
+
+	/**
+	 * Of results with equal confidence, a venue wins over an address, then the closer result wins.
+	 */
+	public function test_pelias_reverse_closer_result() {
+		update_option( 'sloc_pelias_url', 'https://203.0.113.10/v1' );
+		$fixture = $this->fixture( 'geo/pelias-reverse.json' );
+		$far     = $fixture['features'][0];
+		$near    = $far;
+		$address = $far;
+
+		$far['properties']['name']         = 'Far Venue';
+		$far['properties']['distance']     = 0.5;
+		$near['properties']['name']        = 'Near Venue';
+		$near['properties']['distance']    = 0.1;
+		$address['properties']['layer']    = 'address';
+		$address['properties']['distance'] = 0.01;
+
+		$fixture['features'] = array( $far, $address, $near );
+		$this->mock_http( array( '203.0.113.10/v1/reverse/' => array( 'body' => $fixture ) ) );
+		$addr = $this->provider( 'Geo_Provider_Pelias', array( 'api' => 'p-key' ) )->reverse_lookup();
+		$this->assertSame( 'Near Venue', $addr['name'] );
+	}
+
+	/**
 	 * Pelias forward geocoding takes the coordinates from the first feature.
 	 */
 	public function test_pelias_geocode() {
