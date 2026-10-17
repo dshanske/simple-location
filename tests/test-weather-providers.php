@@ -724,6 +724,82 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * NWS: outside the US there is no grid point, so the fallback provider is used, or an error when none is set.
+	 */
+	public function test_nws_outside_us_fallback() {
+		Weather_Provider_Sloc_Test::reset();
+		$this->mock_http(
+			array(
+				'api.weather.gov/points/' => array(
+					'code' => 404,
+					'body' => array(
+						'title'  => 'Data Unavailable For Requested Point',
+						'status' => 404,
+					),
+				),
+			)
+		);
+		$london = new Weather_Provider_NWSUS();
+		$london->set( 51.5, -0.12 );
+		$this->assertWPError( $london->get_conditions() );
+
+		update_option( 'sloc_fallback_weather_provider', 'sloc_test_fallback' );
+		$this->assertSame( Weather_Provider_Sloc_Test::$conditions, $london->get_conditions() );
+		$this->assertCount( 2, $this->http_requests, 'Only the grid point is requested from NWS.' );
+	}
+
+	/**
+	 * NWS: a failed request or empty answer anywhere in a location lookup uses the fallback provider, and isn't cached.
+	 */
+	public function test_nws_lookup_failures_fallback() {
+		Weather_Provider_Sloc_Test::reset();
+		update_option( 'sloc_fallback_weather_provider', 'sloc_test_fallback' );
+		$points   = array( 'body' => array( 'properties' => array( 'observationStations' => 'https://api.weather.gov/gridpoints/PHI/49,75/stations' ) ) );
+		$stations = array(
+			'body' => array(
+				'features' => array(
+					array(
+						'geometry'   => array( 'coordinates' => array( -75.17, 39.96 ) ),
+						'properties' => array( 'stationIdentifier' => 'KPHL' ),
+					),
+				),
+			),
+		);
+		$down     = new WP_Error( 'http_request_failed', 'Down' );
+		$cases    = array(
+			'grid point request fails'   => array( 'api.weather.gov/points/' => $down ),
+			'station list request fails' => array(
+				'api.weather.gov/points/' => $points,
+				'stations'                => $down,
+			),
+			'station list is empty'      => array(
+				'api.weather.gov/points/' => $points,
+				'stations'                => array( 'body' => array( 'features' => array() ) ),
+			),
+			'observation request fails'  => array(
+				'api.weather.gov/points/' => $points,
+				'gridpoints'              => $stations,
+				'observations/latest'     => $down,
+			),
+			'observation is empty'       => array(
+				'api.weather.gov/points/' => $points,
+				'gridpoints'              => $stations,
+				'observations/latest'     => array( 'body' => array() ),
+				'stations/KPHL'           => array( 'body' => array() ),
+			),
+		);
+		foreach ( $cases as $case => $responses ) {
+			$this->mock_http( $responses );
+			$provider = $this->provider( 'Weather_Provider_NWSUS' );
+			$this->assertSame( Weather_Provider_Sloc_Test::$conditions, $provider->get_conditions(), $case );
+
+			update_option( 'sloc_fallback_weather_provider', 'none' );
+			$this->assertWPError( $this->provider( 'Weather_Provider_NWSUS' )->get_conditions(), "$case: nothing was cached." );
+			update_option( 'sloc_fallback_weather_provider', 'sloc_test_fallback' );
+		}
+	}
+
+	/**
 	 * Meteostat: a station's hourly data for the requested hour, through RapidAPI.
 	 */
 	public function test_meteostat_station() {

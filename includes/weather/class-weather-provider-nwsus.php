@@ -40,8 +40,11 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Uses the fallback weather provider when a location lookup finds no observation.
+	 *
 	 * @param int $time Time. Optional.
-	 * @return array Current Conditions in Array
+	 * @return array|WP_Error|false Current conditions, the fallback provider's conditions when NWS has none for the location, or false without a location.
 	 */
 	public function get_conditions( $time = null ) {
 		$return   = array();
@@ -75,22 +78,23 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 
 			$response = wp_remote_get( $url, $args );
 			if ( is_wp_error( $response ) ) {
-				return $response;
+				return self::get_fallback_conditions( $time );
 			}
 			$response = wp_remote_retrieve_body( $response );
 			$response = json_decode( $response, true );
-			if ( ! isset( $response['properties'] ) ) {
-				return false;
+			// NWS has no grid point outside the US.
+			if ( ! isset( $response['properties']['observationStations'] ) ) {
+				return self::get_fallback_conditions( $time );
 			}
 			$url      = $response['properties']['observationStations'];
 			$response = wp_remote_get( $url, $args );
 			if ( is_wp_error( $response ) ) {
-				return false;
+				return self::get_fallback_conditions( $time );
 			}
 			$response = wp_remote_retrieve_body( $response );
 			$response = json_decode( $response, true );
-			if ( ! isset( $response['features'] ) ) {
-				return false;
+			if ( empty( $response['features'] ) || ! is_array( $response['features'] ) ) {
+				return self::get_fallback_conditions( $time );
 			}
 			$sitelist = $response['features'];
 			foreach ( $sitelist as $key => $value ) {
@@ -105,12 +109,13 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 
 			$this->station_id = $sitelist[0]['properties']['stationIdentifier'];
 			$return           = self::get_station_data();
-			if ( $return ) {
-				// Set the Caching Based on the Latitude and Longitude as that is what Was Called.
-				$this->station_id = null;
+			// Set the Caching Based on the Latitude and Longitude as that is what Was Called.
+			$this->station_id = null;
+			if ( ! is_wp_error( $return ) && ! empty( $return ) ) {
 				$this->set_cache( $return );
 				return $return;
 			}
+			return self::get_fallback_conditions( $time );
 		}
 		return false;
 	}
