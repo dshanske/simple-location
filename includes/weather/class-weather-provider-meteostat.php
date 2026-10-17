@@ -78,7 +78,6 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		if ( empty( $this->api ) ) {
 			return array();
 		}
-		$datetime = $this->datetime( $time );
 
 		if ( $this->station_id && ! $this->latitude ) {
 			return $this->get_station_data( $time );

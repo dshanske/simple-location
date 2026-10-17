@@ -281,9 +281,8 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		if ( 3 !== count( $id ) ) {
 			return '';
 		}
-		$coverage  = $id[0];
-		$intensity = $id[1];
-		$weather   = $id[2];
+		// The code is coverage:intensity:weather; only the weather part maps to a condition.
+		$weather = $id[2];
 		switch ( $weather ) {
 			case 'A': // Hail.
 				return 624;

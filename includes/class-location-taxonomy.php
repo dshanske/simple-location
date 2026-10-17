@@ -272,7 +272,6 @@ final class Location_Taxonomy {
 	 * Register the custom taxonomy for location.
 	 */
 	public static function register() {
-		global $wp_rewrite;
 		$labels = array(
 			'name'                       => _x( 'Locations', 'taxonomy general name', 'simple-location' ),
 			'singular_name'              => _x( 'Location', 'taxonomy singular name', 'simple-location' ),
