@@ -112,7 +112,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		if ( ! is_array( $weather ) ) {
 			return array();
 		}
-		$calc     = new Astronomical_Calculator( $weather['latitude'], $weather['longitude'], ifset( $weather['altitude'], 0 ) );
+		$calc     = new Astronomical_Calculator( $weather['latitude'], $weather['longitude'], $weather['altitude'] ?? 0 );
 		$return   = array();
 		$return[] = sprintf(
 			'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
@@ -163,7 +163,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		$return[] = '<h2>';
 
 		if ( ! empty( $weather['icon'] ) ) {
-			$return[] = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
+			$return[] = Weather_Provider::get_icon( $weather['icon'], $weather['summary'] ?? null );
 		}
 
 		if ( ! empty( $weather['summary'] ) ) {
@@ -241,7 +241,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	public function form( $instance ) {
 		?>
 		<p><label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title: ', 'simple-location' ); ?></label>
-		<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['title'] ) ); ?>" />
+		<input type="text" size="30" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" value="<?php echo esc_attr( $instance['title'] ?? '' ); ?>" />
 		<p>
 		<?php esc_html_e( 'Displays current weather based on user location set in user profile. If set for none will use latitude and longitude set', 'simple-location' ); ?>
 		</p>
@@ -252,27 +252,27 @@ class Sloc_Weather_Widget extends WP_Widget {
 				'id'               => $this->get_field_id( 'user' ),
 				'name'             => $this->get_field_name( 'user' ),
 				'show_option_none' => __( 'None', 'simple-location' ),
-				'selected'         => ifset( $instance['user'], 0 ),
+				'selected'         => $instance['user'] ?? 0,
 			)
 		);
 		?>
 		</p>
 			<p><label for="<?php echo esc_attr( $this->get_field_id( 'latitude' ) ); ?>"><?php esc_html_e( 'Latitude: ', 'simple-location' ); ?></label>
-			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'latitude' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'latitude' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['latitude'] ) ); ?>" />
+			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'latitude' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'latitude' ) ); ?>" value="<?php echo esc_attr( $instance['latitude'] ?? '' ); ?>" />
 			<label for="<?php echo esc_attr( $this->get_field_id( 'longitude' ) ); ?>"><?php esc_html_e( 'Longitude: ', 'simple-location' ); ?></label>
-			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'longitude' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'longitude' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['longitude'] ) ); ?>" />
+			<input type="text" size="7" name="<?php echo esc_attr( $this->get_field_name( 'longitude' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'longitude' ) ); ?>" value="<?php echo esc_attr( $instance['longitude'] ?? '' ); ?>" />
 			</p>
 		<p><label for="<?php echo esc_attr( $this->get_field_id( 'showastro' ) ); ?>"><?php esc_html_e( 'Show Astronomical Info: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" type="hidden" value="0" />
-			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showastro'] ) ); ?> />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showastro' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showastro' ) ); ?>" type="checkbox" value="1" <?php checked( 1, $instance['showastro'] ?? 0 ); ?> />
 		</p>
 		<p><label for="<?php echo esc_attr( $this->get_field_id( 'showprivate' ) ); ?>"><?php esc_html_e( 'Show weather when the user\'s location is private: ', 'simple-location' ); ?></label>
 		<input name="<?php echo esc_attr( $this->get_field_name( 'showprivate' ) ); ?>" type="hidden" value="0" />
-			<input name="<?php echo esc_attr( $this->get_field_name( 'showprivate' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showprivate' ) ); ?>" type="checkbox" value="1" <?php checked( 1, ifset( $instance['showprivate'] ) ); ?> />
+			<input name="<?php echo esc_attr( $this->get_field_name( 'showprivate' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'showprivate' ) ); ?>" type="checkbox" value="1" <?php checked( 1, $instance['showprivate'] ?? 0 ); ?> />
 			<br /><small><?php esc_html_e( 'The station name and astronomical information are left out, so only the conditions are shown.', 'simple-location' ); ?></small>
 		</p>
 		<p><label for="<?php echo esc_attr( $this->get_field_id( 'cache_time' ) ); ?>"><?php esc_html_e( 'Cache Time: ', 'simple-location' ); ?></label>
-			<input type="number" name="<?php echo esc_attr( $this->get_field_name( 'cache_time' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'cache_time' ) ); ?>" value="<?php echo esc_attr( ifset( $instance['cache_time'] ) ); ?>" />
+			<input type="number" name="<?php echo esc_attr( $this->get_field_name( 'cache_time' ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( 'cache_time' ) ); ?>" value="<?php echo esc_attr( $instance['cache_time'] ?? '' ); ?>" />
 		</p>
 		<?php
 	}
