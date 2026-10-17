@@ -84,7 +84,7 @@ class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 
 		$number       = self::ifnot( $address, array( 'housenumber' ) );
 		$street       = self::ifnot( $address, array( 'street' ) );
-		$country_code = strtoupper( (string) ifset( $address['country_code'] ) );
+		$country_code = strtoupper( (string) ( $address['country_code'] ?? '' ) );
 
 		// Adjust position of house number/name based on country practice.
 		if ( self::house_number( $country_code ) ) {
@@ -94,7 +94,7 @@ class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 		}
 
 		$addr = array(
-			'name'             => ifset( $address['name'] ),
+			'name'             => $address['name'] ?? null,
 			'street-address'   => trim( $street_address ),
 			'street'           => $street,
 			'street-number'    => $number,
@@ -129,9 +129,9 @@ class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 					'county_code',
 				)
 			),
-			'country-name'     => ifset( $address['country'] ),
+			'country-name'     => $address['country'] ?? null,
 			'country-code'     => $country_code,
-			'postal-code'      => ifset( $address['postcode'] ),
+			'postal-code'      => $address['postcode'] ?? null,
 			'latitude'         => $this->latitude,
 			'longitude'        => $this->longitude,
 		);

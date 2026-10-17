@@ -69,11 +69,11 @@ class Venue_Provider_Google extends Venue_Provider {
 
 		// ZERO_RESULTS means there are no establishments within the radius.
 		if ( array_key_exists( 'status', $json ) && ! in_array( $json['status'], array( 'OK', 'ZERO_RESULTS' ), true ) ) {
-			return new WP_Error( $json['status'], ifset( $json['error_message'], __( 'Error Returning Results from Google', 'simple-location' ) ), array( $json ) );
+			return new WP_Error( $json['status'], $json['error_message'] ?? __( 'Error Returning Results from Google', 'simple-location' ), array( $json ) );
 		}
 
 		$items = array();
-		foreach ( ifset( $json['results'], array() ) as $result ) {
+		foreach ( $json['results'] ?? array() as $result ) {
 			$items[] = $this->address_to_hcard( $result );
 		}
 
@@ -94,14 +94,14 @@ class Venue_Provider_Google extends Venue_Provider {
 			$card['raw'] = $data;
 		}
 
-		$card['name']      = ifset( $data['name'] );
-		$card['plus-code'] = ifset( $data['plus_code']['global_code'] );
+		$card['name']      = $data['name'] ?? null;
+		$card['plus-code'] = $data['plus_code']['global_code'] ?? null;
 		if ( isset( $data['geometry'] ) ) {
-			$card['latitude']    = ifset( $data['geometry']['location']['lat'] );
-			$card['longitude']   = ifset( $data['geometry']['location']['lng'] );
-			$card['boundingbox'] = ifset( $data['geometry']['viewport'] );
+			$card['latitude']    = $data['geometry']['location']['lat'] ?? null;
+			$card['longitude']   = $data['geometry']['location']['lng'] ?? null;
+			$card['boundingbox'] = $data['geometry']['viewport'] ?? null;
 		}
-		$card['category'] = ifset( $data['types'] );
+		$card['category'] = $data['types'] ?? null;
 
 		$tz = $this->timezone();
 		if ( $tz ) {

@@ -91,12 +91,12 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 		}
 
 		$return = array(
-			'street-address'   => ifset( $location['street'] ),
-			'extended-address' => ifset( $location['adminArea6'] ),
-			'locality'         => ifset( $location['adminArea5'] ),
-			'postal-code'      => ifset( $location['postalCode'] ),
-			'country-name'     => self::country_name( ifset( $location['adminArea1'] ) ),
-			'country-code'     => ifset( $location['adminArea1'] ),
+			'street-address'   => $location['street'] ?? null,
+			'extended-address' => $location['adminArea6'] ?? null,
+			'locality'         => $location['adminArea5'] ?? null,
+			'postal-code'      => $location['postalCode'] ?? null,
+			'country-name'     => self::country_name( $location['adminArea1'] ?? '' ),
+			'country-code'     => $location['adminArea1'] ?? null,
 		);
 
 		if ( 'US' === $return['country-code'] || 'CA' === $return['country-code'] ) {
@@ -120,8 +120,8 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 		}
 
 		if ( array_key_exists( 'latLng', $location ) && ! array_key_exists( 'latitude', $return ) ) {
-			$return['latitude']  = ifset( $location['latLng']['lat'] );
-			$return['longitude'] = ifset( $location['latLng']['lng'] );
+			$return['latitude']  = $location['latLng']['lat'] ?? null;
+			$return['longitude'] = $location['latLng']['lng'] ?? null;
 		}
 
 		if ( WP_DEBUG ) {
@@ -158,8 +158,8 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 
 		$return = $this->address_to_mf( $json );
 		if ( array_key_exists( 'latLng', $json ) ) {
-			$return['latitude']  = ifset( $json['latLng']['lat'] );
-			$return['longitude'] = ifset( $json['latLng']['lng'] );
+			$return['latitude']  = $json['latLng']['lat'] ?? null;
+			$return['longitude'] = $json['latLng']['lng'] ?? null;
 		}
 
 		return array_filter( $return );

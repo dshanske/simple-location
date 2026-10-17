@@ -64,7 +64,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		}
 
 		if ( array_key_exists( 'status', $json ) && 'OK' !== $json['status'] ) {
-			return new WP_Error( $json['status'], ifset( $json['error_message'], __( 'Error Returning Results from Google', 'simple-location' ) ) );
+			return new WP_Error( $json['status'], $json['error_message'] ?? __( 'Error Returning Results from Google', 'simple-location' ) );
 		}
 
 		$addr              = $this->address_to_mf2( $json );
@@ -91,10 +91,10 @@ class Geo_Provider_Google extends Geo_Provider {
 			$addr['raw'] = $data;
 		}
 
-		$result = array_key_exists( 'results', $data ) ? ifset( $data['results'][0], array() ) : $data;
+		$result = array_key_exists( 'results', $data ) ? ( $data['results'][0] ?? array() ) : $data;
 		// Each result has its own address and plus code; a reverse lookup's response also has a plus code for the point itself.
-		$addr['display-name'] = ifset( $result['formatted_address'] );
-		$addr['plus-code']    = ifset( $data['plus_code']['global_code'], ifset( $result['plus_code']['global_code'] ) );
+		$addr['display-name'] = $result['formatted_address'] ?? null;
+		$addr['plus-code']    = $data['plus_code']['global_code'] ?? $result['plus_code']['global_code'] ?? null;
 		if ( isset( $result['address_components'] ) ) {
 			foreach ( $result['address_components'] as $component ) {
 				if ( in_array( 'administrative_area_level_1', $component['types'], true ) ) {
@@ -126,7 +126,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		}
 
 		// Adjust position of house number/name based on country practice.
-		if ( self::house_number( ifset( $addr['country-code'] ) ) ) {
+		if ( self::house_number( $addr['country-code'] ?? '' ) ) {
 			$street_address = $number . ' ' . $street;
 		} else {
 			$street_address = $street . ' ' . $number;
@@ -141,7 +141,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		}
 		$addr = array_filter( $addr );
 		if ( ! array_key_exists( 'region-code', $addr ) && array_key_exists( 'region', $addr ) ) {
-			$addr['region-code'] = self::region_code( $addr['region'], ifset( $addr['country-code'] ) );
+			$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] ?? '' );
 		}
 		if ( ! array_key_exists( 'display-name', $addr ) ) {
 			$addr['display-name'] = $this->display_name( $addr );
@@ -173,7 +173,7 @@ class Geo_Provider_Google extends Geo_Provider {
 			return $json;
 		}
 		if ( isset( $json['status'] ) && ! in_array( $json['status'], array( 'OK', 'ZERO_RESULTS' ), true ) ) {
-			return new WP_Error( $json['status'], ifset( $json['error_message'], __( 'Error Returning Results from Google', 'simple-location' ) ) );
+			return new WP_Error( $json['status'], $json['error_message'] ?? __( 'Error Returning Results from Google', 'simple-location' ) );
 		}
 		if ( empty( $json['results'][0] ) || ! is_array( $json['results'][0] ) ) {
 			return new WP_Error( 'no_results', __( 'No results found', 'simple-location' ), array( 'status' => 404 ) );
@@ -182,7 +182,7 @@ class Geo_Provider_Google extends Geo_Provider {
 
 		// Parse on a copy set to the result's location, so the address gets its timezone.
 		$result = clone $this;
-		$result->set( ifset( $json['geometry']['location']['lat'] ), ifset( $json['geometry']['location']['lng'] ) );
+		$result->set( $json['geometry']['location']['lat'] ?? '', $json['geometry']['location']['lng'] ?? '' );
 		$return = $result->address_to_mf2( $json );
 		if ( isset( $json['geometry'] ) ) {
 			$return['latitude']  = $json['geometry']['location']['lat'];
