@@ -18,6 +18,8 @@ class Map_Provider_Geoapify extends Map_Provider {
 		$this->slug        = 'geoapify';
 		$this->url         = 'https://www.geoapify.com/';
 		$this->description = __( 'GeoApify offers Maps and Geocoding APIs with a free tier of 3000 credits for requests per day. API Key required.', 'simple-location' );
+		$this->max_width   = 4096;
+		$this->max_height  = 4096;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_geoapify_api' );
 		}
@@ -52,24 +54,36 @@ class Map_Provider_Geoapify extends Map_Provider {
 		);
 	}
 
+	/**
+	 * Returns the pixel densities the provider can draw the static map at.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return int[] Pixel densities.
+	 */
+	public function get_scales() {
+		return array( 1, 2 );
+	}
+
 	// Return code for map
 	public function get_the_static_map() {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for GeoApify', 'simple-location' ) );
 		}
-		$map = add_query_arg(
-			array(
-				'apiKey' => $this->api,
-				'center' => sprintf( 'lonlat:%1$s,%2$s', $this->longitude, $this->latitude ),
-				'format' => 'jpeg',
-				'width'  => $this->width,
-				'height' => $this->height,
-				'zoom'   => $this->map_zoom,
-				'style'  => $this->style,
-				'marker' => sprintf( 'lonlat:%1$s,%2$s;size:small;color:red', $this->longitude, $this->latitude ),
-			),
-			'https://maps.geoapify.com/v1/staticmap'
+		$args = array(
+			'apiKey' => $this->api,
+			'center' => sprintf( 'lonlat:%1$s,%2$s', $this->longitude, $this->latitude ),
+			'format' => 'jpeg',
+			'width'  => $this->width,
+			'height' => $this->height,
+			'zoom'   => $this->map_zoom,
+			'style'  => $this->style,
+			'marker' => sprintf( 'lonlat:%1$s,%2$s;size:small;color:red', $this->longitude, $this->latitude ),
 		);
+		if ( 1 < $this->scale ) {
+			$args['scaleFactor'] = $this->scale;
+		}
+		$map = add_query_arg( $args, 'https://maps.geoapify.com/v1/staticmap' );
 		return $map;
 	}
 
@@ -105,6 +119,6 @@ class Map_Provider_Geoapify extends Map_Provider {
 
 	// Return code for map
 	public function get_the_map( $static = true ) {
-		return $this->get_the_static_map_html();
+		return $this->get_the_static_map_html( true );
 	}
 }

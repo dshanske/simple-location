@@ -149,6 +149,9 @@ The custom map provider is an endpoint you provide yourself. You can install and
 The custom provider was designed around the parameters in this code. All the commercial static map APIs used assemble the pieces of a map from public tile servers, which
 is what this code does. While the code allows for multiple tile sources, please ensure compliance with their licenses. At the least, most of them require attribution.
 
+The server fetches every tile a map covers, so its work grows with the image size. The plugin asks it for maps no larger than 1280 by 1280 pixels, shrinking larger maps to fit.
+To change this, define `SLOC_STATICMAP_MAX_WIDTH` and `SLOC_STATICMAP_MAX_HEIGHT` in wp-config.php, or use the `sloc_staticmap_max_size` filter.
+
 = What is the custom weather provider? =
 
 This allows you to use a custom endpoint that returns current weather conditions in json, using the property names used by this plugin, which can be found outlined in the class-weather-provider.php file. The configuration for this

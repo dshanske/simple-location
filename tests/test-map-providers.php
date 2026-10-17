@@ -74,6 +74,25 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Returns the URLs in a static map's srcset, keyed by pixel density.
+	 *
+	 * @param Map_Provider $map Provider.
+	 * @return array URLs keyed by density, or an empty array without a srcset.
+	 */
+	protected function srcset( $map ) {
+		$html = $map->get_the_static_map_html( true );
+		if ( ! preg_match( '/srcset="([^"]*)"/', $html, $match ) ) {
+			return array();
+		}
+		preg_match_all( '/(\S+) (\d)x/', html_entity_decode( $match[1] ), $images, PREG_SET_ORDER );
+		$urls = array();
+		foreach ( $images as $image ) {
+			$urls[ (int) $image[2] ] = $image[1];
+		}
+		return $urls;
+	}
+
+	/**
 	 * Every bundled map provider is registered with its slug and name.
 	 */
 	public function test_providers_registered() {
@@ -144,8 +163,153 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( '<a target="_blank" href="https://maps.example.com/?c=39.9524,-75.1636"><img class="sloc-map" src="https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400" width="600" height="400" loading="lazy" /></a>', $html );
 
 		$html = $map->get_the_static_map_html( true );
-		$this->assertStringContainsString( 'srcset="https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=300x200 0.5x,https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400 1x,https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=1200x800 2x,https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=1800x1200 3x"', $html );
+		$this->assertStringContainsString( 'srcset="https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400 1x,https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400@2x 2x"', $html );
 		$this->assertStringContainsString( 'width="600" height="400"', $html );
+	}
+
+	/**
+	 * A srcset doesn't change the size or density of the provider's later maps.
+	 */
+	public function test_static_map_html_keeps_size() {
+		$map = $this->provider( 'Map_Provider_Sloc_Test' );
+		$map->get_the_static_map_html( true );
+		$this->assertSame( 'https://maps.example.com/static?c=39.9524,-75.1636&z=15&s=600x400', $map->get_the_static_map() );
+	}
+
+	/**
+	 * Providers without high-density maps get no srcset, rather than larger maps of a wider area.
+	 */
+	public function test_static_map_html_without_scales() {
+		$map  = $this->provider( 'Map_Provider_TomTom', array( 'style' => 'main' ) );
+		$html = $map->get_the_static_map_html( true );
+		$this->assertStringContainsString( 'width="600" height="400"', $html );
+		$this->assertStringNotContainsString( 'srcset', $html );
+	}
+
+	/**
+	 * Maps larger than the provider's limit shrink to fit, keeping their shape.
+	 */
+	public function test_fit_size() {
+		update_option( 'sloc_width', 1024 );
+		update_option( 'sloc_aspect', 16 / 9 );
+		$map = $this->provider( 'Map_Provider_Google', array( 'style' => 'roadmap' ) );
+		$this->assertSame( '640x360', $this->parse( $map->get_the_static_map() )['query']['size'] );
+
+		$map->set(
+			array(
+				'width'  => 2000,
+				'height' => 500,
+			)
+		);
+		$this->assertSame( '640x160', $this->parse( $map->get_the_static_map() )['query']['size'] );
+
+		// A tall map is limited by its height.
+		$map = $this->provider(
+			'Map_Provider_Mapbox',
+			array(
+				'style'  => 'streets-v11',
+				'width'  => 1000,
+				'height' => 3000,
+			)
+		);
+		$this->assertStringContainsString( '/427x1280?', $map->get_the_static_map() );
+
+		// A map within the limit is unchanged.
+		$map = $this->provider(
+			'Map_Provider_Mapbox',
+			array(
+				'style'  => 'streets-v11',
+				'width'  => 1280,
+				'height' => 720,
+			)
+		);
+		$this->assertStringContainsString( '/1280x720?', $map->get_the_static_map() );
+	}
+
+	/**
+	 * Each provider's high-density map shows the same area at twice the pixel density.
+	 */
+	public function test_high_density_maps() {
+		$urls = $this->srcset( $this->provider( 'Map_Provider_Google', array( 'style' => 'roadmap' ) ) );
+		$this->assertSame( array( 1, 2 ), array_keys( $urls ) );
+		$this->assertSame( '1', $this->parse( $urls[1] )['query']['scale'] );
+		$this->assertSame( '2', $this->parse( $urls[2] )['query']['scale'] );
+		$this->assertSame( '600x400', $this->parse( $urls[2] )['query']['size'] );
+
+		$urls = $this->srcset( $this->provider( 'Map_Provider_Mapbox', array( 'style' => 'streets-v11' ) ) );
+		$this->assertStringContainsString( '/600x400?', $urls[1] );
+		$this->assertStringContainsString( '/600x400@2x?', $urls[2] );
+
+		$urls = $this->srcset( $this->provider( 'Map_Provider_Mapquest', array( 'style' => 'dark' ) ) );
+		$this->assertSame( '600,400', $this->parse( $urls[1] )['query']['size'] );
+		$this->assertSame( '600,400@2x', $this->parse( $urls[2] )['query']['size'] );
+
+		$urls = $this->srcset( $this->provider( 'Map_Provider_Geoapify', array( 'style' => 'osm-bright' ) ) );
+		$this->assertArrayNotHasKey( 'scaleFactor', $this->parse( $urls[1] )['query'] );
+		$this->assertSame( '2', $this->parse( $urls[2] )['query']['scaleFactor'] );
+		$this->assertSame( '600', $this->parse( $urls[2] )['query']['width'] );
+
+		// HERE asks for twice the pixels at scale 2.
+		$urls = $this->srcset( $this->provider( 'Map_Provider_Here', array( 'style' => 'explore.day' ) ) );
+		$this->assertStringContainsString( '/600x400/png8', $urls[1] );
+		$this->assertArrayNotHasKey( 'scale', $this->parse( $urls[1] )['query'] );
+		$this->assertStringContainsString( '/1200x800/png8', $urls[2] );
+		$this->assertSame( '2', $this->parse( $urls[2] )['query']['scale'] );
+	}
+
+	/**
+	 * HERE's limit counts image pixels, so there is no high-density map when twice the size won't fit.
+	 */
+	public function test_here_high_density_limit() {
+		$map = $this->provider(
+			'Map_Provider_Here',
+			array(
+				'style'  => 'explore.day',
+				'width'  => 1100,
+				'height' => 600,
+			)
+		);
+		$this->assertSame( array( 1 ), $map->get_scales() );
+		$this->assertSame( array(), $this->srcset( $map ) );
+	}
+
+	/**
+	 * The custom static map server has a default size limit that a filter can change or remove.
+	 */
+	public function test_staticmap_max_size() {
+		update_option( 'sloc_staticmap_url', 'https://maps.example.org/' );
+		$args = array(
+			'api'    => null,
+			'width'  => 2000,
+			'height' => 1000,
+		);
+		$url  = $this->parse( $this->provider( 'Map_Provider_StaticMap', $args )->get_the_static_map() );
+		$this->assertSame( array( '1280', '640' ), array( $url['query']['width'], $url['query']['height'] ) );
+
+		$filter = function () {
+			return array(
+				'width'  => 800,
+				'height' => 800,
+			);
+		};
+		add_filter( 'sloc_staticmap_max_size', $filter );
+		$url = $this->parse( $this->provider( 'Map_Provider_StaticMap', $args )->get_the_static_map() );
+		$this->assertSame( array( '800', '400' ), array( $url['query']['width'], $url['query']['height'] ) );
+		remove_filter( 'sloc_staticmap_max_size', $filter );
+
+		$filter = function () {
+			return array(
+				'width'  => 0,
+				'height' => 0,
+			);
+		};
+		add_filter( 'sloc_staticmap_max_size', $filter );
+		$url = $this->parse( $this->provider( 'Map_Provider_StaticMap', $args )->get_the_static_map() );
+		$this->assertSame( array( '2000', '1000' ), array( $url['query']['width'], $url['query']['height'] ) );
+		remove_filter( 'sloc_staticmap_max_size', $filter );
+
+		// The server's maps get wider, not sharper, so there is no srcset.
+		$this->assertSame( array(), $this->srcset( $this->provider( 'Map_Provider_StaticMap', $args ) ) );
 	}
 
 	/**
@@ -235,7 +399,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Google builds Static Maps API URLs at double scale.
+	 * Google builds Static Maps API URLs.
 	 */
 	public function test_google() {
 		$map = $this->provider( 'Map_Provider_Google', array( 'style' => 'roadmap' ) );
@@ -248,7 +412,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'roadmap', $url['query']['maptype'] );
 		$this->assertSame( get_bloginfo( 'language' ), $url['query']['language'] );
 		$this->assertSame( '15', $url['query']['zoom'] );
-		$this->assertSame( '2', $url['query']['scale'] );
+		$this->assertSame( '1', $url['query']['scale'] );
 		$this->assertSame( 'KEY', $url['query']['key'] );
 
 		$url = $this->parse( $map->get_archive_map( $this->locations ) );

@@ -41,6 +41,17 @@ class Map_Provider_Mapquest extends Map_Provider {
 		);
 	}
 
+	/**
+	 * Returns the pixel densities the provider can draw the static map at.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return int[] Pixel densities.
+	 */
+	public function get_scales() {
+		return array( 1, 2 );
+	}
+
 	// Return code for map
 	public function get_the_static_map() {
 		if ( empty( $this->api ) ) {
@@ -51,7 +62,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 			array(
 				'key'       => $this->api,
 				'center'    => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-				'size'      => sprintf( '%1$s,%2$s', $this->width, $this->height ),
+				'size'      => sprintf( '%1$s,%2$s%3$s', $this->width, $this->height, ( 2 === $this->scale ) ? '@2x' : '' ),
 				'type'      => $this->style,
 				'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
 			),
@@ -93,6 +104,6 @@ class Map_Provider_Mapquest extends Map_Provider {
 
 	// Return code for map
 	public function get_the_map( $static = true ) {
-		return $this->get_the_static_map_html();
+		return $this->get_the_static_map_html( true );
 	}
 }

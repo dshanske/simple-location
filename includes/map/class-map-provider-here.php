@@ -80,6 +80,7 @@ class Map_Provider_Here extends Map_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 5.0.26 Uses Map Image API v3.
+	 * @since 5.0.26 Draws a high-density map when the scale is 2.
 	 *
 	 * @return string URL, or an empty string without an API key.
 	 */
@@ -93,17 +94,36 @@ class Map_Provider_Here extends Map_Provider {
 			$this->latitude,
 			$this->longitude,
 			$this->map_zoom,
-			$this->width,
-			$this->height
+			$this->width * $this->scale,
+			$this->height * $this->scale
 		);
-		return add_query_arg(
-			array(
-				'apiKey'  => $this->api,
-				'style'   => $this->style,
-				'overlay' => sprintf( 'point:%1$s,%2$s', $this->latitude, $this->longitude ),
-			),
-			$url
+
+		$args = array(
+			'apiKey'  => $this->api,
+			'style'   => $this->style,
+			'overlay' => sprintf( 'point:%1$s,%2$s', $this->latitude, $this->longitude ),
 		);
+		// A high-density map is twice the size at scale 2, showing the same area.
+		if ( 1 < $this->scale ) {
+			$args['scale'] = $this->scale;
+		}
+		return add_query_arg( $args, $url );
+	}
+
+	/**
+	 * Returns the pixel densities the provider can draw the static map at.
+	 *
+	 * HERE's size limit counts image pixels, so a high-density map is only offered when the doubled size fits.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return int[] Pixel densities.
+	 */
+	public function get_scales() {
+		if ( $this->width * 2 > $this->max_width || $this->height * 2 > $this->max_height ) {
+			return array( 1 );
+		}
+		return array( 1, 2 );
 	}
 
 	/**
@@ -156,6 +176,6 @@ class Map_Provider_Here extends Map_Provider {
 	 * @return string HTML.
 	 */
 	public function get_the_map( $static = true ) {
-		return $this->get_the_static_map_html();
+		return $this->get_the_static_map_html( true );
 	}
 }

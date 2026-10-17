@@ -92,7 +92,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	}
 
 	public function get_the_map( $static = true ) {
-		return $this->get_the_static_map_html( false );
+		return $this->get_the_static_map_html( true );
 	}
 
 	public function get_archive_map( $locations ) {
@@ -122,6 +122,17 @@ class Map_Provider_Mapbox extends Map_Provider {
 		return $map;
 	}
 
+	/**
+	 * Returns the pixel densities the provider can draw the static map at.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return int[] Pixel densities.
+	 */
+	public function get_scales() {
+		return array( 1, 2 );
+	}
+
 	public function get_the_static_map() {
 		if ( empty( $this->api ) || empty( $this->style ) ) {
 			return '';
@@ -132,7 +143,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$user = 'mapbox';
 		}
 		$map = sprintf(
-			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s,%5$s,0,0/%6$sx%7$s?access_token=%8$s',
+			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s,%5$s,0,0/%6$sx%7$s%9$s?access_token=%8$s',
 			$user,
 			$this->style,
 			$this->longitude,
@@ -140,7 +151,8 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$this->map_zoom,
 			$this->width,
 			$this->height,
-			$this->api
+			$this->api,
+			( 2 === $this->scale ) ? '@2x' : ''
 		);
 		return $map;
 	}
