@@ -61,6 +61,14 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $max_width;
 
 	/**
+	 * Pixel density of the static map, 1 for normal screens and 2 for high-density screens.
+	 *
+	 * @since 5.0.26
+	 * @var int
+	 */
+	protected $scale = 1;
+
+	/**
 	 * Map Style.
 	 *
 	 * @since 1.0.0
@@ -144,6 +152,7 @@ abstract class Map_Provider extends Sloc_Provider {
 		$this->style    = $r['style'];
 		$this->api      = $r['api'];
 		$this->set( $r['latitude'], $r['longitude'], $r['altitude'] );
+		$this->fit_size();
 
 		if ( $this->is_active() && method_exists( $this, 'admin_init' ) ) {
 			add_action( 'init', array( $this, 'init' ) );
@@ -181,8 +190,44 @@ abstract class Map_Provider extends Sloc_Provider {
 			if ( isset( $args['location'] ) ) {
 				$this->location = $args['location'];
 			}
+			$this->fit_size();
 		}
 		return parent::set( $args, $lng, $alt );
+	}
+
+	/**
+	 * Shrinks the map size to fit the provider's maximum, keeping its shape.
+	 *
+	 * @since 5.0.26
+	 */
+	protected function fit_size() {
+		if ( ! is_numeric( $this->width ) || ! is_numeric( $this->height ) ) {
+			return;
+		}
+		$ratio = 1;
+		if ( $this->max_width && $this->width > $this->max_width ) {
+			$ratio = $this->max_width / $this->width;
+		}
+		if ( $this->max_height && $this->height * $ratio > $this->max_height ) {
+			$ratio = $this->max_height / $this->height;
+		}
+		if ( $ratio < 1 ) {
+			$this->width  = (int) round( $this->width * $ratio );
+			$this->height = (int) round( $this->height * $ratio );
+		}
+	}
+
+	/**
+	 * Returns the pixel densities the provider can draw the static map at.
+	 *
+	 * Every density shows the same area as the normal map. Providers without a high-density option return only 1.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return int[] Pixel densities.
+	 */
+	public function get_scales() {
+		return array( 1 );
 	}
 
 
@@ -230,8 +275,9 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * @since 4.1.10
 	 * @since 5.0.26 The URLs and sizes are escaped.
+	 * @since 5.0.26 The srcset uses the provider's high-density maps of the same area, and is left out when the provider has none.
 	 *
-	 * @param bool $srcset Optional. Add a srcset with 0.5x to 3x images. Default false.
+	 * @param bool $srcset Optional. Add a srcset with the provider's high-density maps. Default false.
 	 * @return string HTML.
 	 */
 	public function get_the_static_map_html( $srcset = false ) {
@@ -243,18 +289,21 @@ abstract class Map_Provider extends Sloc_Provider {
 		$height = $this->height;
 		$width  = $this->width;
 
-		if ( $srcset ) {
+		$scales = $this->get_scales();
+		if ( $srcset && count( $scales ) > 1 ) {
 			$srcset = array();
-			foreach ( array( '0.5', '1', '2', '3' ) as $mult ) {
-				$this->height = round( $height * floatval( $mult ) );
-				$this->width  = round( $width * floatval( $mult ) );
-				$image        = $this->get_the_static_map();
+			$scale  = $this->scale;
+			foreach ( $scales as $density ) {
+				$this->scale = $density;
+				$image       = $this->get_the_static_map();
 				if ( is_wp_error( $image ) ) {
+					$this->scale = $scale;
 					return $this->static_map_error( $image );
 				}
-				$srcset[] = sprintf( '%1$s %2$sx', esc_url( $image ), $mult );
-
+				$srcset[] = sprintf( '%1$s %2$sx', esc_url( $image ), $density );
 			}
+			$this->scale = $scale;
+
 			$srcset = implode( ',', $srcset );
 			return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" srcset="%3$s" width="%4$s" height="%5$s" loading="lazy" /></a>', esc_url( $link ), esc_url( $orig ), esc_attr( $srcset ), esc_attr( $width ), esc_attr( $height ) );
 		}

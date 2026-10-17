@@ -79,6 +79,6 @@ class Map_Provider_LocationIQ extends Map_Provider {
 
 	// Return code for map
 	public function get_the_map( $static = true ) {
-		return $this->get_the_static_map_html();
+		return $this->get_the_static_map_html( true );
 	}
 }

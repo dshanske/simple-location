@@ -31,12 +31,25 @@ class Map_Provider_Sloc_Test extends Map_Provider {
 	}
 
 	/**
+	 * Pixel densities.
+	 *
+	 * @return int[]
+	 */
+	public function get_scales() {
+		return array( 1, 2 );
+	}
+
+	/**
 	 * Static map URL built from the current settings.
 	 *
 	 * @return string
 	 */
 	public function get_the_static_map() {
-		return sprintf( 'https://maps.example.com/static?c=%s,%s&z=%s&s=%sx%s', $this->latitude, $this->longitude, $this->map_zoom, $this->width, $this->height );
+		$url = sprintf( 'https://maps.example.com/static?c=%s,%s&z=%s&s=%sx%s', $this->latitude, $this->longitude, $this->map_zoom, $this->width, $this->height );
+		if ( 1 < $this->scale ) {
+			$url .= '@' . $this->scale . 'x';
+		}
+		return $url;
 	}
 
 	/**

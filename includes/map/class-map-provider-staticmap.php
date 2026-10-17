@@ -11,6 +11,24 @@
  * @since 1.0.0
  */
 class Map_Provider_StaticMap extends Map_Provider {
+	/**
+	 * Largest map width and height requested by default.
+	 *
+	 * The map server has no published limit. Its work grows with the image size, as it fetches every tile the map covers.
+	 *
+	 * @since 5.0.26
+	 * @var int
+	 */
+	const DEFAULT_MAX_SIZE = 1280;
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 The map size is limited to 1280 by 1280, or to SLOC_STATICMAP_MAX_WIDTH and SLOC_STATICMAP_MAX_HEIGHT when they are defined.
+	 *
+	 * @param array $args Arguments. See Map_Provider::__construct().
+	 */
 	public function __construct( $args = array() ) {
 		$this->name        = __( 'Custom Static Map Provider', 'simple-location' );
 		$this->slug        = 'staticmap';
@@ -23,6 +41,30 @@ class Map_Provider_StaticMap extends Map_Provider {
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_staticmap_style' );
 		}
+
+		$max_size = array(
+			'width'  => defined( 'SLOC_STATICMAP_MAX_WIDTH' ) ? (int) SLOC_STATICMAP_MAX_WIDTH : self::DEFAULT_MAX_SIZE,
+			'height' => defined( 'SLOC_STATICMAP_MAX_HEIGHT' ) ? (int) SLOC_STATICMAP_MAX_HEIGHT : self::DEFAULT_MAX_SIZE,
+		);
+
+		/**
+		 * Filters the largest map size requested from the custom static map server.
+		 *
+		 * Maps larger than this are shrunk to fit, keeping their shape. A value of 0 removes that limit.
+		 *
+		 * @since 5.0.26
+		 *
+		 * @param array $max_size {
+		 *     Largest map size, in pixels.
+		 *
+		 *     @type int $width  Width. Default 1280, or SLOC_STATICMAP_MAX_WIDTH if defined.
+		 *     @type int $height Height. Default 1280, or SLOC_STATICMAP_MAX_HEIGHT if defined.
+		 * }
+		 */
+		$max_size = apply_filters( 'sloc_staticmap_max_size', $max_size );
+
+		$this->max_width  = isset( $max_size['width'] ) ? absint( $max_size['width'] ) : self::DEFAULT_MAX_SIZE;
+		$this->max_height = isset( $max_size['height'] ) ? absint( $max_size['height'] ) : self::DEFAULT_MAX_SIZE;
 
 		parent::__construct( $args );
 	}
@@ -147,6 +189,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 
 	// Return code for map
 	public function get_the_map( $static = true ) {
-		return $this->get_the_static_map_html();
+		return $this->get_the_static_map_html( true );
 	}
 }

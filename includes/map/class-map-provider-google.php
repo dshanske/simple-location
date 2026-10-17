@@ -41,6 +41,17 @@ class Map_Provider_Google extends Map_Provider {
 		);
 	}
 
+	/**
+	 * Returns the pixel densities the provider can draw the static map at.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @return int[] Pixel densities.
+	 */
+	public function get_scales() {
+		return array( 1, 2 );
+	}
+
 	// Return code for map
 	public function get_the_static_map() {
 		if ( empty( $this->api ) ) {
@@ -55,7 +66,7 @@ class Map_Provider_Google extends Map_Provider {
 				'language' => get_bloginfo( 'language' ),
 				'key'      => $this->api,
 				'zoom'     => $this->map_zoom,
-				'scale'    => 2,
+				'scale'    => $this->scale,
 			),
 			$url
 		);
@@ -95,6 +106,6 @@ class Map_Provider_Google extends Map_Provider {
 
 	// Return code for map
 	public function get_the_map( $static = true ) {
-		return $this->get_the_static_map_html();
+		return $this->get_the_static_map_html( true );
 	}
 }
