@@ -624,6 +624,18 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A map server URL passed to the custom static map provider is used instead of the setting.
+	 */
+	public function test_staticmap_url_argument() {
+		update_option( 'sloc_staticmap_url', 'https://opt.example/' );
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://arg.example/' ) );
+		$this->assertSame( 'https://arg.example/', $this->parse( $map->get_the_static_map() )['base'] );
+
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
+		$this->assertSame( 'https://opt.example/', $this->parse( $map->get_the_static_map() )['base'] );
+	}
+
+	/**
 	 * HERE builds Map Image API v3 URLs: centered with a marker, or fitted to a route.
 	 */
 	public function test_here() {
