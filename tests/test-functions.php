@@ -240,6 +240,22 @@ class FunctionsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The rounding helper rounds numbers, including numeric strings, and returns anything else unchanged.
+	 */
+	public function test_sloc_round_value() {
+		$this->assertSame( 1.57, sloc_round_value( 1.567, 2 ) );
+		$this->assertSame( 2.0, sloc_round_value( 1.6 ) );
+		$this->assertSame( 21.5, sloc_round_value( '21.54', 1 ) );
+		$this->assertSame( 0.0, sloc_round_value( 0, 2 ) );
+		$this->assertSame( '', sloc_round_value( '' ) );
+		$this->assertNull( sloc_round_value( null ) );
+		$this->assertSame( 'n/a', sloc_round_value( 'n/a' ) );
+		$data = array();
+		$this->assertSame( '', sloc_round_value( $data['speed'] ?? '', 2 ) );
+		$this->assertArrayNotHasKey( 'speed', $data );
+	}
+
+	/**
 	 * Reading a missing key with ifset() must not add that key to the array.
 	 */
 	public function test_ifset_does_not_modify_array() {

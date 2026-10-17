@@ -155,7 +155,7 @@ class Location_Plugins {
 			return $meta;
 		}
 
-		$location = ifset( $mf_array['properties']['location'] );
+		$location = $mf_array['properties']['location'] ?? null;
 		if ( ! wp_is_numeric_array( $location ) ) {
 			return $meta;
 		}

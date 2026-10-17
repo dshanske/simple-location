@@ -202,11 +202,11 @@ class Sloc_Media_Metadata {
 	public static function attachment_fields_to_edit( $form_fields, $post ) {
 		$geodata                    = get_post_geodata( $post->ID );
 		$form_fields['geo_address'] = array(
-			'value'        => ifset( $geodata['address'] ),
+			'value'        => $geodata['address'] ?? '',
 			'label'        => __( 'Location', 'simple-location' ),
 			'input'        => 'html',
 			'show_in_edit' => false,
-			'html'         => sprintf( '<span>%1$s</span>', esc_html( ifset( $geodata['address'], '' ) ) ),
+			'html'         => sprintf( '<span>%1$s</span>', esc_html( $geodata['address'] ?? '' ) ),
 		);
 		if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			$form_fields['location'] = array(

@@ -453,7 +453,7 @@ class REST_Geo {
 	 */
 	public static function lookup( $request ) {
 		$params      = $request->get_params();
-		$time        = ifset( $params['time'], null );
+		$time        = $params['time'] ?? null;
 		$geolocation = Loc_Config::geolocation_provider();
 		if ( is_object( $geolocation ) ) {
 			if ( 'HTML5' === $geolocation->get_slug() ) {
@@ -615,8 +615,8 @@ class REST_Geo {
 				$map_args = array(
 					'latitude'  => $params['latitude'],
 					'longitude' => $params['longitude'],
-					'height'    => ifset( $params['height'] ),
-					'width'     => ifset( $params['width'] ),
+					'height'    => $params['height'] ?? null,
+					'width'     => $params['width'] ?? null,
 				);
 				$map->set( array_filter( $map_args ) );
 			}
@@ -690,7 +690,7 @@ class REST_Geo {
 				$weather = Loc_Config::weather_provider();
 				if ( $weather ) {
 					$weather->set( $params );
-					$time                   = ifset( $params['time'], null );
+					$time                   = $params['time'] ?? null;
 					$reverse_adr['weather'] = $weather->get_conditions( $time );
 					if ( array_key_exists( 'units', $params ) && 'imperial' === $params['units'] ) {
 						$reverse_adr['weather'] = $weather->metric_to_imperial( $reverse_adr['weather'] );
@@ -807,9 +807,9 @@ class REST_Geo {
 			}
 			$params['latitude']  = $return['latitude'];
 			$params['longitude'] = $return['longitude'];
-			$params['altitude']  = ifset( $return['elevation'], null );
+			$params['altitude']  = $return['elevation'] ?? null;
 		}
-		$params['altitude'] = ifset( $params['altitude'], null );
+		$params['altitude'] = $params['altitude'] ?? null;
 		if ( ! array_key_exists( 'latitude', $params ) || ! array_key_exists( 'longitude', $params ) ) {
 			return new WP_Error( 'location_not_provided', __( 'No location data was provided', 'simple-location' ) );
 		}
