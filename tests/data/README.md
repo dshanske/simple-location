@@ -67,6 +67,7 @@ Current conditions are for Philadelphia (`39.9524,-75.1636`); station requests u
 |---|---|---|
 | `openweathermap-onecall.json` | `GET https://api.openweathermap.org/data/3.0/onecall?appid=…&units=metric&lat=39.9524&lon=-75.1636` | Hand-built from docs |
 | `pirateweather-forecast.json` | `GET https://api.pirateweather.net/forecast/{key}/39.9524,-75.1636?units=si&exclude=minutely,hourly,daily,alerts,flags` | Hand-built from docs |
+| `here-observation.json` | `GET https://weather.hereapi.com/v3/report?apiKey=…&products=observation&location=39.9524,-75.1636&units=metric&oneObservation=true` | Hand-built from docs |
 | `weatherbit-current.json` | `GET https://api.weatherbit.io/v2.0/current?key=…&lat=39.9524&lon=-75.1636&units=M` | Hand-built from docs |
 | `weatherstack-current.json` | `GET https://api.weatherstack.com/current?access_key=…&query=39.9524,-75.1636&units=m` (free plans: `http://`) | Hand-built from docs |
 | `visualcrossing-current.json` | `GET https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/39.9524,-75.1636?key=…&unitGroup=metric&lang=id` | Hand-built from docs |

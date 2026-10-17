@@ -294,6 +294,62 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * HERE: Destination Weather API v3 observations, with units converted and the icon ID mapped to a code.
+	 */
+	public function test_here() {
+		$fixture = $this->fixture( 'weather/here-observation.json' );
+		$this->mock_http( array( 'weather.hereapi.com/v3/report' => array( 'body' => $fixture ) ) );
+		$conditions = $this->provider( 'Weather_Provider_HERE', array( 'api' => 'here-key' ) )->get_conditions();
+		$request    = $this->last_request();
+		$this->assertSame( 'https://weather.hereapi.com/v3/report', $request['base'] );
+		$this->assertSame( 'here-key', $request['query']['apiKey'] );
+		$this->assertSame( 'observation', $request['query']['products'] );
+		$this->assertSame( self::LAT . ',' . self::LNG, $request['query']['location'] );
+		$this->assertSame( 'metric', $request['query']['units'] );
+
+		$current = $fixture['places'][0]['observations'][0];
+		$this->assertConditions(
+			array(
+				'temperature' => $current['temperature'],
+				'dewpoint'    => $current['dewPoint'],
+				'humidity'    => (float) $current['humidity'],
+				'pressure'    => $current['barometerPressure'],
+				'windspeed'   => $current['windSpeed'] / 3.6,
+				'winddegree'  => $current['windDirection'],
+				'rain'        => $current['precipitation1H'] * 10,
+				'snow'        => 0,
+				'visibility'  => $current['visibility'] * 1000,
+				'uv'          => $current['uvIndex'],
+				'summary'     => $current['description'],
+				'code'        => 802,
+			),
+			$conditions
+		);
+		$this->assertIsFloat( $conditions['humidity'] );
+	}
+
+	/**
+	 * HERE: an error response is returned, and a report without observations gives no conditions.
+	 */
+	public function test_here_errors() {
+		$this->mock_http(
+			array(
+				'weather.hereapi.com' => array(
+					'code' => 401,
+					'body' => array(
+						'error'             => 'Unauthorized',
+						'error_description' => 'apiKey invalid. apiKey not found.',
+					),
+				),
+			)
+		);
+		$this->assertWPError( $this->provider( 'Weather_Provider_HERE', array( 'api' => 'bad' ) )->get_conditions() );
+
+		$this->mock_http( array( 'weather.hereapi.com' => array( 'body' => array( 'places' => array() ) ) ) );
+		$this->assertSame( array(), $this->provider( 'Weather_Provider_HERE', array( 'api' => 'here-key' ) )->get_conditions() );
+	}
+
+	/**
 	 * Visual Crossing: current conditions, with condition IDs mapped to summaries and codes.
 	 */
 	public function test_visualcrossing_current() {

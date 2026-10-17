@@ -1,0 +1,53 @@
+{
+  "places": [
+    {
+      "observations": [
+        {
+          "place": {
+            "address": {
+              "countryCode": "US",
+              "countryName": "United States",
+              "state": "Pennsylvania",
+              "city": "Philadelphia"
+            },
+            "location": {
+              "lat": 39.9524,
+              "lng": -75.1636
+            },
+            "distance": 1.2
+          },
+          "daylight": "day",
+          "description": "Partly cloudy. Pleasant.",
+          "skyInfo": 10,
+          "skyDesc": "Partly cloudy",
+          "temperature": 21.5,
+          "temperatureDesc": "Pleasant",
+          "comfort": "21.5",
+          "highTemperature": "24.0",
+          "lowTemperature": "15.0",
+          "humidity": "60",
+          "dewPoint": 13.4,
+          "precipitation1H": 0.1,
+          "precipitationProbability": 10,
+          "rainFall": 0.1,
+          "snowFall": 0,
+          "barometerPressure": 1014.2,
+          "barometerTrend": "Steady",
+          "visibility": 16.09,
+          "windSpeed": 13.0,
+          "windDirection": 230,
+          "windDesc": "Southwest",
+          "windDescShort": "SW",
+          "uvIndex": 4,
+          "uvDesc": "Moderate",
+          "iconId": 4,
+          "iconName": "partly_cloudy",
+          "iconLink": "https://weather.hereapi.com/static/weather/icon/4.png",
+          "ageMinutes": 20,
+          "activeAlerts": 0,
+          "time": "2026-10-11T10:00:00-04:00"
+        }
+      ]
+    }
+  ]
+}

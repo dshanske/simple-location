@@ -440,6 +440,57 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * HERE builds Map Image API v3 URLs: centered with a marker, or fitted to a route.
+	 */
+	public function test_here() {
+		$map = $this->provider( 'Map_Provider_Here', array( 'style' => 'topo.day' ) );
+		$this->assertArrayHasKey( 'explore.day', $map->get_styles() );
+
+		$url = $this->parse( $map->get_the_static_map() );
+		$this->assertSame( 'https://image.maps.hereapi.com/mia/v3/base/mc/center:39.9524,-75.1636;zoom=15/600x400/png8', $url['base'] );
+		$this->assertSame(
+			array(
+				'apiKey'  => 'KEY',
+				'style'   => 'topo.day',
+				'overlay' => 'point:39.9524,-75.1636',
+			),
+			$url['query']
+		);
+
+		$archive = $map->get_archive_map( $this->locations );
+		$this->assertStringStartsWith( 'https://image.maps.hereapi.com/mia/v3/base/mc/overlay:padding=32/600x400/png8?', $archive );
+		$this->assertStringContainsString( 'overlay=point:39.9524,-75.1636|39.9489,-75.15', $archive );
+		$this->assertStringContainsString( '&overlay=line:39.9524,-75.1636,39.9489,-75.15;width=4', $archive );
+
+		// One location is a marker without a line.
+		$single = $map->get_archive_map( array( $this->locations[0] ) );
+		$this->assertStringNotContainsString( 'line:', $single );
+
+		$this->assertSame( 'https://wego.here.com/?map=39.9524,-75.1636,15', $map->get_the_map_url() );
+
+		$map = $this->provider( 'Map_Provider_Here', array( 'api' => '' ) );
+		$this->assertSame( '', $map->get_the_static_map() );
+		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
+	}
+
+	/**
+	 * HERE styles from the retired API, and a missing style, fall back to the default v3 style.
+	 */
+	public function test_here_style_fallback() {
+		update_option( 'sloc_here_style', 'alps' );
+		$url = $this->parse( $this->provider( 'Map_Provider_Here' )->get_the_static_map() );
+		$this->assertSame( 'explore.day', $url['query']['style'] );
+
+		update_option( 'sloc_here_style', 'lite.night' );
+		$url = $this->parse( $this->provider( 'Map_Provider_Here' )->get_the_static_map() );
+		$this->assertSame( 'lite.night', $url['query']['style'] );
+
+		delete_option( 'sloc_here_style' );
+		$url = $this->parse( $this->provider( 'Map_Provider_Here' )->get_the_static_map() );
+		$this->assertSame( 'explore.day', $url['query']['style'] );
+	}
+
+	/**
 	 * TomTom builds static image URLs with longitude first and has no archive map.
 	 */
 	public function test_tomtom() {

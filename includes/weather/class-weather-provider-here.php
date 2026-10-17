@@ -45,8 +45,11 @@ class Weather_Provider_HERE extends Weather_Provider {
 	/**
 	 * Return array of current conditions.
 	 *
+	 * @since 4.0.0
+	 * @since 5.0.26 Uses the HERE Destination Weather API v3; the legacy Weather API was retired.
+	 *
 	 * @param int $time Time Optional.
-	 * @return array Current Conditions in Array
+	 * @return array|WP_Error Current Conditions in Array, or an error from the API.
 	 */
 	public function get_conditions( $time = null ) {
 		if ( empty( $this->api ) ) {
@@ -68,53 +71,37 @@ class Weather_Provider_HERE extends Weather_Provider {
 				return $conditions;
 			}
 
-			$data = array(
-				'apiKey'         => $this->api,
-				'product'        => 'observation',
-				'latitude'       => $this->latitude,
-				'longitude'      => $this->longitude,
-				'oneobservation' => 'true',
+			$response = $this->fetch_json(
+				'https://weather.hereapi.com/v3/report',
+				array(
+					'apiKey'         => $this->api,
+					'products'       => 'observation',
+					'location'       => $this->latitude . ',' . $this->longitude,
+					'units'          => 'metric',
+					'oneObservation' => 'true',
+				)
 			);
-			$url  = 'https://weather.ls.hereapi.com/weather/1.0/report.json';
-			$url  = add_query_arg( $data, $url );
-			$args = array(
-				'headers'             => array(
-					'Accept' => 'application/json',
-				),
-				'timeout'             => 10,
-				'limit_response_size' => 1048576,
-				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location.
-				'user-agent'          => 'Simple Location for WordPress',
-			);
-
-			$response = wp_remote_get( $url, $args );
 			if ( is_wp_error( $response ) ) {
 				return $response;
 			}
-			$response = wp_remote_retrieve_body( $response );
-			$response = json_decode( $response, true );
-			if ( ! isset( $response['observations'] ) ) {
+			if ( ! isset( $response['places'][0]['observations'][0] ) || ! is_array( $response['places'][0]['observations'][0] ) ) {
 				return $return;
 			}
-			$current = ifset( $response['observations']['location'][0]['observation'][0] );
-			if ( ! $current ) {
-				return $return;
-			}
+			$current = $response['places'][0]['observations'][0];
+
 			$return['temperature'] = ifset_round( $current['temperature'], 1 );
 			$return['dewpoint']    = ifset_round( $current['dewPoint'], 1 );
-
-			$return['humidity'] = ifset_round( $current['humidity'], 1 );
-
+			// Humidity is a string in v3.
+			$return['humidity']   = isset( $current['humidity'] ) && is_numeric( $current['humidity'] ) ? round( (float) $current['humidity'], 1 ) : null;
 			$return['pressure']   = ifset_round( $current['barometerPressure'], 1 );
 			$return['uv']         = ifset_round( $current['uvIndex'], 1 );
-			$return['windspeed']  = self::kmh_to_ms( ifset_round( $current['windSpeed'] ) );
+			$return['windspeed']  = self::kmh_to_ms( ifset_round( $current['windSpeed'], 2 ) );
 			$return['winddegree'] = ifset_round( $current['windDirection'], 1 );
 			$return['rain']       = self::cm_to_mm( ifset_round( $current['precipitation1H'], 2 ) );
-			$return['snow']       = ifset_round( $current['snowFall'], 2 );
+			$return['snow']       = self::cm_to_mm( ifset_round( $current['snowFall'], 2 ) );
 			$return['summary']    = ifset( $current['description'] );
-			$return['code']       = $this->code_map( $current['iconName'] );
-			$return['visibility'] = self::km_to_meters( ifset_round( $current['visibility'], 1 ) );
+			$return['code']       = $this->code_map( ifset( $current['iconId'] ) );
+			$return['visibility'] = self::km_to_meters( ifset( $current['visibility'] ) );
 			$return               = self::filter_weather( $this->extra_data( $return, $time ) );
 
 			$this->set_cache( $return );
@@ -127,210 +114,53 @@ class Weather_Provider_HERE extends Weather_Provider {
 		return false;
 	}
 
-
 	/**
-	 * Return array of station data.
+	 * Maps a HERE icon ID to a weather condition code.
 	 *
-	 * @param string $id Weather type ID.
-	 * @return string Icon ID.
+	 * @since 5.0.26 Maps the v3 icon IDs; the legacy API's icon names are gone.
+	 *
+	 * @param int $id HERE icon ID, 1 to 35.
+	 * @return int|string Weather condition code, or an empty string if unknown.
 	 */
 	private function code_map( $id ) {
-		switch ( $id ) {
-			case 'widely_scattered_tstorms':
-			case 'isolated_tstorms':
-			case 'a_few_tstorms':
-			case 'scattered_tstorms':
-			case 'night_widely_scattered_tstorms':
-			case 'night_isolated_tstorms':
-			case 'night_a_few_tstorms':
-			case 'night_scattered_tstorms':
-				return 210;
-			case 'strong_thunderstorms':
-				return 212;
-			case 'severe_thunderstorms':
-				return 221;
-			case 'thundershowers':
-				return 231;
-			case 'thunderstorms':
-				return 211;
-			case 'tstorms_early':
-			case 'tstorms_late':
-			case 'tstorms':
-			case 'night_tstorms':
-				return 211;
-			case 'isolated_tstorms_late':
-			case 'scattered_tstorms_late':
-				return 210;
-			case 'drizzle':
-			case 'sprinkles_early':
-			case 'sprinkles':
-			case 'sprinkles_late':
-			case 'night_sprinkles':
-				return 300;
-			case 'rain_early':
-				return 503;
-			case 'heavy_rain_early':
-				return 522;
-			case 'scattered_showers':
-			case 'night_scattered_showers':
-				return 503;
-			case 'a_few_showers':
-			case 'night_a_few_showers':
-				return 503;
-			case 'light_rain':
-			case 'light_rain_late':
-			case 'light_rain_early':
-				return 500;
-			case 'light_showers':
-			case 'night_light_showers':
-				return 500;
-			case 'passing_showers':
-			case 'rain_showers':
-			case 'night_passing_showers':
-			case 'night_rain_showers':
-			case 'night_showers':
-			case 'showers':
-				return 521;
-			case 'light_freezing_rain':
-			case 'freezing_rain':
-				return 511;
-			case 'heavy_rain':
-			case 'lots_of_rain':
-			case 'tons_of_rain':
-			case 'heavy_rain_early':
-			case 'heavy_rain_late':
-				return 522;
-			case 'rain':
-			case 'numerous_showers':
-			case 'showery':
-			case 'showers_early':
-			case 'rain_early':
-			case 'showers_late':
-			case 'rain_late':
-				return 503;
-			case 'flash_floods':
-				return 541;
-			case 'flood':
-				return 540;
-			case 'hail':
-				return 624;
-			case 'sleet':
-				return 613;
-			case 'light_mixture_of_precip':
-			case 'icy_mix':
-			case 'mixture_of_precip':
-			case 'heavy_mixture_of_precip':
-			case 'snow_changing_to_rain':
-			case 'snow_changing_to_an_icy_mix':
-			case 'an_icy_mix_changing_to_snow':
-			case 'an_icy_mix_changing_to_rain':
-			case 'rain_changing_to_snow':
-			case 'rain_changing_to_an_icy_mix':
-			case 'light_icy_mix_early':
-			case 'icy_mix_early':
-			case 'light_icy_mix_late':
-			case 'icy_mix_late':
-			case 'snow_rain_mix':
-				return 610;
-			case 'scattered_flurries':
-			case 'snow_flurries':
-			case 'flurries_early':
-			case 'flurries_late':
-				return 623;
-			case 'light_snow_showers':
-			case 'snow_showers':
-			case 'snow_showers_early':
-			case 'snow_showers_late':
-				return 621;
-			case 'light_snow':
-			case 'light_snow_late':
-			case 'light_snow_early':
-				return 600;
-			case 'snow':
-			case 'moderate_snow':
-			case 'snow_early':
-			case 'snow_late':
-				return 601;
-			case 'heavy_snow':
-			case 'heavy_snow_early':
-			case 'heavy_snow_late':
-				return 602;
-			case 'snowstorm':
-			case 'blizzard':
-				return 622;
-			case 'hazy_sunshine':
-			case 'low_level_haze':
-			case 'night_low_level_haze':
-			case 'haze':
-			case 'night_haze':
-				return 721;
-			case 'smoke':
-			case 'night_smoke':
-				return 711;
-			case 'early_fog_followed_by_sunny_skies':
-			case 'early_fog':
-			case 'light_fog':
-			case 'fog':
-			case 'dense_fog':
-				return 741;
-			case 'ice_fog':
-				return 741;
-			case 'tornado':
-				return 781;
-			case 'tropical_storm':
-			case 'hurricane':
-			case 'sandstorm':
-				return 751;
-			case 'duststorm':
-				return 761;
-			case 'sunny':
-			case 'clear':
-			case 'night_clear':
-				return 800;
-			case 'mostly_sunny':
-			case 'mostly_clear':
-			case 'night_mostly_clear':
-				return 801;
-			case 'passing_clouds':
-			case 'more_sun_than_clouds':
-			case 'scattered_clouds':
-			case 'night_passing_clouds':
-			case 'night_scattered_clouds':
-				return 802;
-			case 'partly_cloudy':
-			case 'a_mixture_of_sun_and_clouds':
-			case 'increasing_cloudiness':
-			case 'breaks_of_sun_late':
-			case 'afternoon_clouds':
-			case 'morning_clouds':
-			case 'low_clouds':
-			case 'night_partly_cloudy':
-			case 'increasing_cloudiness':
-			case 'night_afternoon_clouds':
-			case 'night_morning_clouds':
-				return 803;
-			case 'night_mostly_cloudy':
-			case 'mostly_cloudy':
-			case 'cloudy':
-			case 'partly_sunny':
-				return 802;
-			case 'overcast':
-			case 'high_level_clouds':
-			case 'decreasing_cloudiness':
-			case 'clearing_skies':
-			case 'high_clouds':
-			case 'night_decreasing_cloudiness':
-			case 'night_clearing_skies':
-			case 'night_high_level_clouds':
-			case 'night_high_clouds':
-				return 804;
-			case 'more_clouds_than_sun':
-				return 804;
-			case 'night_broken_clouds':
-			case 'broken_clouds':
-				return 803;
-			default:
-				return '';
-		}
+		$codes = array(
+			1  => 800, // Sunny.
+			2  => 801, // Mostly Sunny.
+			3  => 721, // Haze.
+			4  => 802, // Partly Cloudy.
+			5  => 802, // High Clouds.
+			6  => 803, // Mostly Cloudy.
+			7  => 804, // Cloudy.
+			8  => 701, // Light Fog.
+			9  => 741, // Dense Fog.
+			10 => 741, // Ice Fog.
+			11 => 751, // Sand Storm.
+			12 => 741, // Early Fog.
+			13 => 800, // Night Clear.
+			14 => 801, // Night Mostly Clear.
+			15 => 802, // Night Partly Cloudy.
+			16 => 802, // Night High Clouds.
+			17 => 803, // Night Mostly Cloudy.
+			18 => 300, // Sprinkles.
+			19 => 503, // Rain.
+			20 => 522, // Heavy Rain.
+			21 => 210, // Scattered Thunderstorms.
+			22 => 211, // Thunderstorms.
+			23 => 212, // Severe Thunderstorms.
+			24 => 624, // Hail.
+			25 => 781, // Tornado.
+			26 => 782, // Hurricane.
+			27 => 611, // Sleet.
+			28 => 610, // Snow and Rain Mix.
+			29 => 600, // Light Snow.
+			30 => 601, // Snow.
+			31 => 602, // Heavy Snow.
+			32 => 540, // Flood.
+			33 => 521, // Showers.
+			34 => 300, // Night Sprinkles.
+			35 => 211, // Night Thunderstorms.
+		);
+		$id    = (int) $id;
+		return isset( $codes[ $id ] ) ? $codes[ $id ] : '';
 	}
 }
