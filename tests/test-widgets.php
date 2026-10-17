@@ -349,7 +349,16 @@ class WidgetsTest extends WP_UnitTestCase {
 		);
 		$this->assertStringStartsWith( '<section class="widget"><h2 class="widget-title">Backyard</h2>', $html );
 		$this->assertStringContainsString( 'Clear', $html );
+		$this->assertStringEndsWith( '</section>', $html, 'The widget wrapper is closed.' );
 		$this->assertSame( 'backyard', Loc_Config::weather_provider( 'sloc_test' )->get_station_id() );
+	}
+
+	/**
+	 * Without a station the widget is empty, without warnings, and still closed.
+	 */
+	public function test_station_without_station() {
+		$html = $this->render( new Sloc_Station_Widget(), array( 'title' => '' ) );
+		$this->assertSame( '<section class="widget"></section>', $html );
 	}
 
 	/**
