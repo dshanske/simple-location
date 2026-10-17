@@ -43,6 +43,7 @@ final class Location_Taxonomy {
 	// Passes Tax Queries through for get_pages
 	public static function get_pages_query_args( $query_args, $parsed_args ) {
 		if ( array_key_exists( 'tax_query', $parsed_args ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Passes through a query the caller made.
 			$query_args['tax_query'] = $parsed_args['tax_query'];
 		}
 		return $query_args;
@@ -579,6 +580,7 @@ final class Location_Taxonomy {
 			array(
 				'taxonomy'   => 'location',
 				'hide_empty' => 0,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Locations are matched on their codes in term meta.
 				'meta_query' => $args,
 				'fields'     => 'ids',
 			)
@@ -665,6 +667,7 @@ final class Location_Taxonomy {
 				array(
 					'taxonomy'   => 'location',
 					'hide_empty' => 0,
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Locations are matched on their codes in term meta.
 					'meta_query' => $args,
 					'fields'     => 'ids',
 				)
@@ -700,6 +703,7 @@ final class Location_Taxonomy {
 			array(
 				'taxonomy'   => 'location',
 				'hide_empty' => 0,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Locations are matched on their codes in term meta.
 				'meta_query' => $args,
 				'fields'     => 'ids',
 				'childless'  => $childless,

@@ -27,6 +27,22 @@
 	</properties>
 	</rule>
 
+	<!-- Meta capabilities mapped in Geo_Base::map_meta_cap(). -->
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="read_posts_location"/>
+				<element value="read_comments_location"/>
+				<element value="read_terms_location"/>
+				<element value="read_users_location"/>
+				<element value="edit_posts_location"/>
+				<element value="edit_comments_location"/>
+				<element value="edit_terms_location"/>
+				<element value="edit_users_location"/>
+			</property>
+		</properties>
+	</rule>
+
 	<rule ref="WordPress-Extra" />
 	<rule ref="WordPress.WP.I18n"/>
 	<!-- Hook callbacks and overridden methods must accept parameters they don't use, as with Generic.CodeAnalysis.UnusedFunctionParameter above. -->

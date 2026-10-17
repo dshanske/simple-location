@@ -110,6 +110,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 				'selected'          => ifset( $geodata['venue_id'] ),
 			);
 			if ( $location ) {
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Venues are listed by location.
 				$venue_args['tax_query'] = array(
 					array(
 						'taxonomy' => 'location',

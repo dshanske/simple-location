@@ -436,6 +436,7 @@ class Sloc_Weather_Data {
 		$posts = get_posts(
 			array(
 				'fields'       => 'ids',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Finds weather in the old format to migrate.
 				'meta_key'     => 'geo_weather',
 				'meta_compare' => 'EXISTS',
 			)
@@ -447,6 +448,7 @@ class Sloc_Weather_Data {
 		$comments = get_comments(
 			array(
 				'fields'       => 'ids',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Finds weather in the old format to migrate.
 				'meta_key'     => 'geo_weather',
 				'meta_compare' => 'EXISTS',
 			)

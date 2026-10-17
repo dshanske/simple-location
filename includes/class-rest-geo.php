@@ -548,6 +548,7 @@ class REST_Geo {
 				'echo'              => false,
 			);
 			if ( is_numeric( $location ) && $location > 0 ) {
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Venues are listed by location.
 				$venue_args['tax_query'] = array(
 					array(
 						'taxonomy' => 'location',
