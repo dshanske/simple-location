@@ -1021,6 +1021,34 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Providers with only current weather use the fallback provider for other times, or return an error, without a request.
+	 */
+	public function test_unsupported_times() {
+		Weather_Provider_Sloc_Test::reset();
+		$this->mock_http( array() );
+		$past   = strtotime( '-2 days' );
+		$future = strtotime( '+2 days' );
+		foreach ( array( 'Weather_Provider_OpenWeatherMap', 'Weather_Provider_Weatherbit', 'Weather_Provider_Weatherstack', 'Weather_Provider_HERE', 'Weather_Provider_NWSUS', 'Weather_Provider_MetOffice' ) as $class ) {
+			update_option( 'sloc_fallback_weather_provider', 'none' );
+			$provider = $this->provider( $class, array( 'api' => 'key' ) );
+			foreach ( array( $past, $future ) as $time ) {
+				$error = $provider->get_conditions( $time );
+				$this->assertWPError( $error, $class );
+				$this->assertSame( 'historic_unsupported', $error->get_error_code(), $class );
+				$this->assertStringContainsString( $provider->get_name(), $error->get_error_message(), $class );
+			}
+
+			update_option( 'sloc_fallback_weather_provider', 'sloc_test_fallback' );
+			$this->assertSame( Weather_Provider_Sloc_Test::$conditions, $provider->get_conditions( $past ), $class );
+			$this->assertSame( $past, Weather_Provider_Sloc_Test::$time, "$class passes the time to the fallback." );
+
+			update_option( 'sloc_fallback_weather_provider', $provider->get_slug() );
+			$this->assertSame( 'historic_unsupported', $provider->get_conditions( $past )->get_error_code(), "$class is never its own fallback." );
+		}
+		$this->assertSame( array(), $this->http_requests );
+	}
+
+	/**
 	 * Custom station: stale data falls back to the fallback provider, which is an error when none is set.
 	 */
 	public function test_custom_station_stale() {

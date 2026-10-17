@@ -42,6 +42,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 5.0.26 Uses the fallback weather provider when a location lookup finds no observation.
+	 * @since 5.0.26 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
 	 *
 	 * @param int $time Time. Optional.
 	 * @return array|WP_Error|false Current conditions, the fallback provider's conditions when NWS has none for the location, or false without a location.
@@ -51,10 +52,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$datetime = $this->datetime( $time );
 
 		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
-			return array(
-				'time'     => $time,
-				'datetime' => $datetime,
-			);
+			return $this->get_unsupported_time_conditions( $time );
 		}
 		if ( $this->station_id && ! $this->latitude ) {
 			return $this->get_station_data();
