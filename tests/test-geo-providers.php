@@ -74,7 +74,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::geo_providers();
-		foreach ( array( 'nominatim', 'locationiq', 'google', 'bing', 'mapquest', 'pelias', 'openroute', 'geoapify', 'here', 'geonames' ) as $slug ) {
+		foreach ( array( 'nominatim', 'locationiq', 'google', 'mapquest', 'pelias', 'openroute', 'geoapify', 'here', 'geonames' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['url'], $slug );
@@ -357,52 +357,6 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Bing reverse geocoding needs a valid key and parses the address.
-	 */
-	public function test_bing_reverse() {
-		$this->assertSame( 'missing_api_key', $this->provider( 'Geo_Provider_Bing', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
-
-		$fixture = $this->fixture( 'geo/bing-locations.json' );
-		$this->mock_http( array( 'dev.virtualearth.net/REST/v1/Locations/' => array( 'body' => $fixture ) ) );
-		$addr    = $this->provider( 'Geo_Provider_Bing', array( 'api' => 'b-key' ) )->reverse_lookup();
-		$request = $this->last_request();
-		$this->assertSame( 'https://dev.virtualearth.net/REST/v1/Locations/' . self::LAT . ',' . self::LNG, $request['base'] );
-		$this->assertSame( 'b-key', $request['query']['key'] );
-
-		$this->assertCityHall( $addr );
-		$address = $fixture['resourceSets'][0]['resources'][0]['address'];
-		$this->assertSame( $address['addressLine'], $addr['street-address'] );
-		$this->assertSame( ifset( $address['neighborhood'] ), ifset( $addr['extended-address'] ) );
-	}
-
-	/**
-	 * Bing errors: rejected key and an unexpected body.
-	 */
-	public function test_bing_reverse_errors() {
-		$this->mock_http( array( 'virtualearth' => array( 'body' => $this->fixture( 'geo/bing-invalid-key.json' ) ) ) );
-		$this->assertSame( 'invalid_api_key', $this->provider( 'Geo_Provider_Bing', array( 'api' => 'b-key' ) )->reverse_lookup()->get_error_code() );
-
-		$this->mock_http( array( 'virtualearth' => array( 'body' => $this->fixture( 'geo/bing-empty.json' ) ) ) );
-		$this->assertSame( 'unknown_error', $this->provider( 'Geo_Provider_Bing', array( 'api' => 'b-key' ) )->reverse_lookup()->get_error_code() );
-	}
-
-	/**
-	 * Bing forward geocoding returns the point of the first result.
-	 */
-	public function test_bing_geocode() {
-		$this->assertNull( ( new Geo_Provider_Bing( array( 'api' => '' ) ) )->geocode( 'City Hall' ) );
-
-		$fixture = $this->fixture( 'geo/bing-locations.json' );
-		$this->mock_http( array( 'virtualearth.net/REST/v1/Locations' => array( 'body' => $fixture ) ) );
-		$result = ( new Geo_Provider_Bing( array( 'api' => 'b-key' ) ) )->geocode( 'City Hall, Philadelphia' );
-		$this->assertSame( 'City Hall, Philadelphia', $this->last_request()['query']['q'] );
-		$point = $fixture['resourceSets'][0]['resources'][0]['point']['coordinates'];
-		$this->assertSame( $point[0], $result['latitude'] );
-		$this->assertSame( $point[1], $result['longitude'] );
-		$this->assertSame( 'Philadelphia', $result['locality'] );
-	}
-
-	/**
 	 * MapQuest reverse and forward geocoding parse the first location.
 	 */
 	public function test_mapquest() {
@@ -655,7 +609,6 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	public function test_api_key_options() {
 		$options = array(
 			'Geo_Provider_Google'     => 'sloc_google_api',
-			'Geo_Provider_Bing'       => 'sloc_bing_api',
 			'Geo_Provider_Here'       => 'sloc_here_api',
 			'Geo_Provider_LocationIQ' => 'sloc_locationiq_api',
 			'Geo_Provider_Mapquest'   => 'sloc_mapquest_api',
@@ -730,8 +683,8 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	 * A provider is active when it is the chosen geo provider.
 	 */
 	public function test_is_active() {
-		update_option( 'sloc_geo_provider', 'bing' );
-		$this->assertTrue( ( new Geo_Provider_Bing( array( 'api' => '' ) ) )->is_active() );
+		update_option( 'sloc_geo_provider', 'google' );
+		$this->assertTrue( ( new Geo_Provider_Google( array( 'api' => '' ) ) )->is_active() );
 		$this->assertFalse( ( new Geo_Provider_Nominatim() )->is_active() );
 	}
 }

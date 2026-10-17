@@ -39,9 +39,6 @@ Philadelphia City Hall: latitude `39.9524`, longitude `-75.1636`; forward-geocod
 | `locationiq-reverse.json` | `GET https://us1.locationiq.com/v1/reverse.php?key=…&format=json&lat=39.9524&lon=-75.1636&statecode=1&extratags=1&addressdetails=1` | Hand-built from docs |
 | `google-reverse.json` | `GET https://maps.googleapis.com/maps/api/geocode/json?latlng=39.9524,-75.1636&location_type=ROOFTOP\|RANGE_INTERPOLATED&key=…` | Hand-built from docs |
 | `google-denied.json` | The same request with an invalid key | Hand-built from docs |
-| `bing-locations.json` | `GET https://dev.virtualearth.net/REST/v1/Locations/39.9524,-75.1636?incl=ciso2&inclnb=1&key=…` (also used for `?q=City Hall, Philadelphia`) | Hand-built from docs |
-| `bing-invalid-key.json` | The same request with an invalid key | Hand-built from docs |
-| `bing-empty.json` | A valid key with no `resourceSets` in the body | Hand-built |
 | `mapquest-reverse.json` | `GET https://www.mapquestapi.com/geocoding/v1/reverse?location=39.9524,-75.1636&includeRoadMetadata=true&key=…` (also used for `/address?location=City Hall`) | Hand-built from docs |
 | `mapquest-no-results.json` | A key that isn't authorized for geocoding | Hand-built |
 | `mapquest-no-locations.json` | A result with no `locations` | Hand-built |
@@ -86,7 +83,6 @@ Each test checks that the elevation the plugin returns is the one in the fixture
 
 | File | Request | Status |
 |---|---|---|
-| `bing-elevation.json` | `GET http://dev.virtualearth.net/REST/v1/Elevation/List?points=39.9524,-75.1636&key=…` | Hand-built from docs |
 | `geonames-srtm1.json` | `GET https://secure.geonames.org/srtm1?username=…&lat=39.9524&lng=-75.1636` (errors reuse `geo/geonames-error.json`) | Hand-built from docs |
 | `google-elevation.json` | `GET https://maps.googleapis.com/maps/api/elevation/json?locations=39.9524,-75.1636&key=…` (errors reuse `geo/google-denied.json`) | Hand-built from docs |
 | `openroute-point.json` | `GET https://api.openrouteservice.org/elevation/point?api_key=…&format_out=point&geometry=-75.1636,39.9524` | Hand-built from docs |

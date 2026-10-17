@@ -86,8 +86,8 @@ In order to access private location information, the following custom capabiliti
 
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
-* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, TomTom, and Bing.
-* Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, Bing, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses
+* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, and TomTom.
+* Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, HERE, the Mapquest hosted version of Nominatim, Google, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses
 * Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues.
 * Elevation Providers optionally derive the elevation from an API when not available. Elevation is used to estimate altitude and adjust estimated sunrise/sunset levels accordingly.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
@@ -104,7 +104,6 @@ location of a three letter airport code, and [Compass](https://github.com/aaronp
 API Keys are required to use certain services.
 * [Google](https://developers.google.com/maps/documentation/javascript/get-api-key)
 * [Mapbox](https://www.mapbox.com/help/create-api-access-token/) - To retrieve style list inside the UI, you need a token with the styles:list scope
-* [Bing](https://www.bingmapsportal.com/)
 * [OpenWeatherMap](http://openweathermap.com/api)
 * [MapQuest](https://developer.mapquest.com/)
 * [HERE](https://developer.here.com/)
