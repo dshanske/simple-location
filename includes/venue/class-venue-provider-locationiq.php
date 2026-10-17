@@ -102,7 +102,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 
 		$address      = $json['address'];
 		$region_code  = null;
-		$country_code = strtoupper( ifset( $address['country_code'] ) );
+		$country_code = strtoupper( $address['country_code'] ?? '' );
 
 		if ( in_array( $country_code, array( 'US', 'FR' ), true ) ) {
 			$region = self::ifnot(
@@ -256,12 +256,12 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 			$addr['country-name'] = self::country_name( $addr['country-code'] );
 		}
 		if ( isset( $json['extratags'] ) ) {
-			$addr['url'] = ifset( $json['extratags']['website'] );
+			$addr['url'] = $json['extratags']['website'] ?? null;
 			if ( empty( $addr['url'] ) && isset( $json['extratags']['wikipedia'] ) ) {
 				$addr['url'] = self::wikipedia_url( $json['extratags']['wikipedia'] );
 			}
-			$addr['photo'] = ifset( $json['extratags']['image'] );
-			$addr['tel']   = ifset( $json['extratags']['phone'] );
+			$addr['photo'] = $json['extratags']['image'] ?? null;
+			$addr['tel']   = $json['extratags']['phone'] ?? null;
 		}
 		if ( isset( $json['boundingbox'] ) ) {
 			$addr['boundingbox'] = $json['boundingbox'];

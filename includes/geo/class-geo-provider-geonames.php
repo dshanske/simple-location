@@ -96,7 +96,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( ! is_array( $json ) ) {
 			$json = array();
 		}
-		$addr['country-code'] = ifset( $json['countryCode'] );
+		$addr['country-code'] = $json['countryCode'] ?? null;
 		$addr['country-name'] = isset( $json['countryName'] ) ? $json['countryName'] : self::country_name( $addr['country-code'] );
 
 		$addr['locality'] = self::ifnot(
@@ -107,18 +107,18 @@ class Geo_Provider_Geonames extends Geo_Provider {
 				'toponymName',
 			)
 		);
-		$addr['region']   = ifset( $json['adminName1'] );
+		$addr['region']   = $json['adminName1'] ?? null;
 		if ( array_key_exists( 'adminCodes1', $json ) ) {
-			$addr['region-code'] = ifset( $json['adminCodes1']['ISO3166_2'] );
+			$addr['region-code'] = $json['adminCodes1']['ISO3166_2'] ?? null;
 		} elseif ( array_key_exists( 'adminCode1', $json ) ) {
 			$addr['region-code'] = $json['adminCode1'];
 		} else {
 			$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] );
 		}
-		$addr['postal-code'] = ifset( $json['postalcode'] );
+		$addr['postal-code'] = $json['postalcode'] ?? null;
 
-		$number = ifset( $json['streetNumber'] );
-		$street = ifset( $json['street'] );
+		$number = $json['streetNumber'] ?? '';
+		$street = $json['street'] ?? '';
 
 		// Adjust position of house number/name based on country practice.
 		if ( self::house_number( $addr['country-code'] ) ) {
@@ -169,9 +169,9 @@ class Geo_Provider_Geonames extends Geo_Provider {
 
 		$json                = $json['geonames'][0];
 		$return              = $this->address_to_mf2( $json );
-		$return['latitude']  = ifset( $json['lat'] );
-		$return['longitude'] = ifset( $json['lng'] );
-		$return['altitude']  = ifset( $json['elevation'] );
+		$return['latitude']  = $json['lat'] ?? null;
+		$return['longitude'] = $json['lng'] ?? null;
+		$return['altitude']  = $json['elevation'] ?? null;
 		return array_filter( $return );
 	}
 }

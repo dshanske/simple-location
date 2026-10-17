@@ -98,7 +98,7 @@ class Geo_Provider_Here extends Geo_Provider {
 			$addr['street']        = $street;
 			$addr['street_number'] = $number;
 
-			$addr['name']             = ifset( $json['title'] );
+			$addr['name']             = $json['title'] ?? null;
 			$addr['street-address']   = $street;
 			$addr['extended-address'] = self::ifnot(
 				$location,
@@ -106,9 +106,9 @@ class Geo_Provider_Here extends Geo_Provider {
 					'district',
 				)
 			);
-			$addr['country-name']     = ifset( $location['countryName'] );
-			$addr['country-code']     = self::country_code_iso3( ifset( $location['countryCode'] ) );
-			$addr['locality']         = ifset( $location['city'] );
+			$addr['country-name']     = $location['countryName'] ?? null;
+			$addr['country-code']     = self::country_code_iso3( $location['countryCode'] ?? '' );
+			$addr['locality']         = $location['city'] ?? null;
 			$addr['region']           = self::ifnot(
 				$location,
 				array(
@@ -126,7 +126,7 @@ class Geo_Provider_Here extends Geo_Provider {
 			if ( empty( $addr['region-code'] ) ) {
 				$addr['region-code'] = self::region_code( $addr['region'], $addr['country-code'] );
 			}
-			$addr['postal-code'] = ifset( $location['postalCode'] );
+			$addr['postal-code'] = $location['postalCode'] ?? null;
 
 			// Adjust position of house number/name based on country practice.
 			if ( self::house_number( $addr['country-code'] ) ) {

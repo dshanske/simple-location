@@ -75,7 +75,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 		}
 
 		$address      = $json['address'];
-		$country_code = strtoupper( ifset( $address['country_code'] ) );
+		$country_code = strtoupper( $address['country_code'] ?? '' );
 
 		if ( in_array( $country_code, array( 'US', 'FR' ), true ) ) {
 			$region = self::ifnot(
@@ -217,8 +217,8 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			$addr['country-name'] = self::country_name( $addr['country-code'] );
 		}
 		if ( isset( $json['extratags'] ) ) {
-			$addr['url']   = ifset( $json['extratags']['website'] );
-			$addr['photo'] = ifset( $json['extratags']['image'] );
+			$addr['url']   = $json['extratags']['website'] ?? null;
+			$addr['photo'] = $json['extratags']['image'] ?? null;
 		}
 		$addr = array_filter( $addr );
 		if ( ! array_key_exists( 'display-name', $addr ) ) {
@@ -278,13 +278,13 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 
 		// Parse on a copy set to the result's location, so the address gets its coordinates and timezone.
 		$result = clone $this;
-		$result->set( ifset( $json['lat'] ), ifset( $json['lon'] ) );
+		$result->set( $json['lat'] ?? '', $json['lon'] ?? '' );
 		$return              = $result->address_to_mf( $json );
-		$return['latitude']  = ifset( $json['lat'] );
-		$return['longitude'] = ifset( $json['lon'] );
+		$return['latitude']  = $json['lat'] ?? null;
+		$return['longitude'] = $json['lon'] ?? null;
 		if ( isset( $json['extratags'] ) ) {
-			$return['url']   = ifset( $json['extratags']['website'] );
-			$return['photo'] = ifset( $json['extratags']['image'] );
+			$return['url']   = $json['extratags']['website'] ?? null;
+			$return['photo'] = $json['extratags']['image'] ?? null;
 		}
 
 		return array_filter( $return );
