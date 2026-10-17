@@ -6,7 +6,7 @@
  * Version: 5.0.25
  * Requires at least: 6.2
  * Requires PHP: 7.4
- * Requires CP: 2.1
+ * Requires CP: 2.7
  * Author: David Shanske
  * Author URI: https://david.shanske.com
  * License: GPLv2 or later

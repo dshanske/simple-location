@@ -3,7 +3,7 @@
 **Contributors:** dshanske \
 **Tags:** geolocation, timezones, geo, maps, location, weather, indieweb \
 **Requires at least:** 6.2 \
-**Tested up to:** 7.0 \
+**Tested up to:** 7.1 \
 **Stable tag:** 5.0.25 \
 **Requires PHP:** 7.4 \
 **License:** GPLv2 or later \
