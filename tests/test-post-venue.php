@@ -395,6 +395,97 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Setting a venue gives a post without a location the venue's location, and keeps a post's own location.
+	 */
+	public function test_set_post_venue_location() {
+		$venue_id = $this->venue();
+		$term     = Location_Taxonomy::get_location( $this->address(), true );
+		Location_Taxonomy::set_location( $venue_id, $term );
+
+		$post_id = self::factory()->post->create();
+		Post_Venue::set_post_venue( $post_id, $venue_id );
+		$this->assertSame( $term, Location_Taxonomy::get_post_location( $post_id ) );
+
+		$own   = Location_Taxonomy::get_location(
+			array(
+				'country-name' => 'Canada',
+				'country-code' => 'CA',
+				'region'       => 'Ontario',
+				'region-code'  => 'ON',
+				'locality'     => 'Toronto',
+			),
+			true
+		);
+		$other = self::factory()->post->create();
+		Location_Taxonomy::set_location( $other, $own );
+		Post_Venue::set_post_venue( $other, $venue_id );
+		$this->assertSame( $own, Location_Taxonomy::get_post_location( $other ) );
+	}
+
+	/**
+	 * Showing a post's location never changes its location term.
+	 */
+	public function test_location_display_does_not_set_location() {
+		$term    = Location_Taxonomy::get_location( $this->address(), true );
+		$post_id = self::factory()->post->create();
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'   => 40.7128,
+				'longitude'  => -74.006,
+				'visibility' => 'public',
+			)
+		);
+		Location_Taxonomy::set_location( $post_id, $term );
+
+		// The global post has a different location.
+		$own       = Location_Taxonomy::get_location(
+			array(
+				'country-name' => 'Canada',
+				'country-code' => 'CA',
+				'region'       => 'Ontario',
+				'region-code'  => 'ON',
+				'locality'     => 'Toronto',
+			),
+			true
+		);
+		$global_id = self::factory()->post->create();
+		Location_Taxonomy::set_location( $global_id, $own );
+		$GLOBALS['post'] = get_post( $global_id );
+
+		get_post_location( $post_id );
+		$GLOBALS['post'] = null;
+		$this->assertSame( $term, Location_Taxonomy::get_post_location( $post_id ) );
+	}
+
+	/**
+	 * A post with a venue but no location term shows the venue's location without saving it.
+	 */
+	public function test_location_display_uses_venue_location() {
+		$venue_id = $this->venue();
+		$term     = Location_Taxonomy::get_location( $this->address(), true );
+		Location_Taxonomy::set_location( $venue_id, $term );
+
+		$post_id = self::factory()->post->create();
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'   => 40.7128,
+				'longitude'  => -74.006,
+				'visibility' => 'public',
+			)
+		);
+		update_post_meta( $post_id, 'venue_id', $venue_id );
+
+		$html = get_post_location( $post_id );
+		$this->assertStringContainsString( 'Corner Cafe', $html );
+		$this->assertStringContainsString( 'New York', $html );
+		$this->assertFalse( Location_Taxonomy::get_post_location( $post_id ) );
+	}
+
+	/**
 	 * A new venue is created from address data with its location, term, URL and public visibility.
 	 */
 	public function test_add_new_venue() {
