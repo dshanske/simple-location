@@ -494,6 +494,7 @@ class Geo_Base {
 	 *                          'top' or 'bottom' for WP_Posts_List_Table,
 	 *                          'bar' for WP_Media_List_Table.
 	 * @since 1.0.0
+	 * @since 6.0.0 Marks the active filter without printing stray text.
 	 */
 	public static function geo_posts_dropdown( $post_type, $which ) {
 		if ( ! post_type_supports( $post_type, 'geo-location' ) ) {
@@ -513,7 +514,7 @@ class Geo_Base {
 		);
 		echo '<select id="geo" name="geo">';
 		foreach ( $list as $key => $value ) {
-			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value ), self::kses_option() );
+			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key, false ), $value ), self::kses_option() );
 		}
 		echo '</select>';
 	}
@@ -525,6 +526,7 @@ class Geo_Base {
 	 * Allows visibility to be filtered on comment edit screen.
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 Marks the active filter without printing stray text.
 	 */
 	public static function geo_comments_dropdown() {
 		$selected = 'none';
@@ -540,7 +542,7 @@ class Geo_Base {
 		);
 		echo '<select id="geo" name="geo">';
 		foreach ( $list as $key => $value ) {
-			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key ), $value ), self::kses_option() );
+			echo wp_kses( sprintf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $key ), selected( $selected, $key, false ), $value ), self::kses_option() );
 		}
 		echo '</select>';
 	}

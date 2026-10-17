@@ -560,6 +560,19 @@ class GeoBaseTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The active filter is selected in its option, without stray text before it.
+	 */
+	public function test_geo_dropdowns_selected() {
+		$_REQUEST['geo'] = 'public';
+		foreach ( array( $this->capture( array( 'Geo_Base', 'geo_posts_dropdown' ), 'post', 'top' ), $this->capture( array( 'Geo_Base', 'geo_comments_dropdown' ) ) ) as $output ) {
+			$this->assertMatchesRegularExpression( "/<option value=\"public\"\s+selected(=['\"]selected['\"])?>/", $output );
+			$this->assertStringNotContainsString( '</option> selected', $output );
+			$this->assertSame( 1, substr_count( $output, ' selected' ), 'Only one option is selected.' );
+		}
+		unset( $_REQUEST['geo'] );
+	}
+
+	/**
 	 * Feeds declare the GeoRSS and W3C geo namespaces.
 	 */
 	public function test_georss_namespace() {
