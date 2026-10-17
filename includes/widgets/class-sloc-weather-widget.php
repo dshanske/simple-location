@@ -24,6 +24,8 @@ class Sloc_Weather_Widget extends WP_Widget {
 	/**
 	 * Widget worker
 	 *
+	 * @since 6.0.0 Closes the widget wrapper when there is no provider or input.
+	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
 	 *
@@ -49,6 +51,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		$w = Loc_Config::weather_provider();
 		if ( ! $w ) {
 			esc_html_e( 'No Weather Provider Set!', 'simple-location' );
+			echo $args['after_widget']; // phpcs:ignore
 			return;
 		}
 		if ( isset( $instance['cache_time'] ) ) {
@@ -61,6 +64,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			$weather = $w->get_conditions();
 		} else {
 			esc_html_e( 'No Input Provided', 'simple-location' );
+			echo $args['after_widget']; // phpcs:ignore
 			return;
 		}
 
@@ -198,7 +202,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		}
 
 		if ( isset( $weather['_expires_at'] ) ) {
-			$return[] = printf( '<!-- %1$s: %2$s -->', esc_html__( 'Current Conditions Cache Expires At', 'simple-location' ), esc_html( $weather['_expires_at'] ) );
+			$return[] = sprintf( '<!-- %1$s: %2$s -->', esc_html__( 'Current Conditions Cache Expires At', 'simple-location' ), esc_html( $weather['_expires_at'] ) );
 		}
 
 		if ( isset( $instance['showastro'] ) && 1 === (int) $instance['showastro'] && array_key_exists( 'latitude', $weather ) && array_key_exists( 'longitude', $weather ) ) {
