@@ -128,10 +128,29 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 * @return mixed Value.
 	 */
 	private function get_value( $properties, $key ) {
-		if ( isset( $properties[ $key ] ) ) {
+		if ( isset( $properties[ $key ]['value'] ) ) {
 			return $properties[ $key ]['value'];
 		}
 		return null;
+	}
+
+	/**
+	 * Return a value property converted from the unit NWS reports it in.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array $properties  Properties.
+	 * @param string $key        Key.
+	 * @param array  $conversions Callbacks to convert the value, keyed by the WMO unit code they convert from.
+	 * @return mixed Value, converted when its unit has a conversion.
+	 */
+	private function get_quantity( $properties, $key, $conversions ) {
+		$value = self::get_value( $properties, $key );
+		$unit  = isset( $properties[ $key ]['unitCode'] ) ? $properties[ $key ]['unitCode'] : '';
+		if ( isset( $conversions[ $unit ] ) ) {
+			return call_user_func( $conversions[ $unit ], $value );
+		}
+		return $value;
 	}
 
 	/**
@@ -177,11 +196,11 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$return['dewpoint']    = self::get_value( $properties, 'dewpoint' );
 		$return['heatindex']   = self::get_value( $properties, 'heatIndex' );
 		$return['humidity']    = self::get_value( $properties, 'relativeHumidity' );
-		$return['rain']        = self::m_to_mm( self::get_value( $properties, 'precipitationLastHour' ) );
+		$return['rain']        = self::get_quantity( $properties, 'precipitationLastHour', array( 'wmoUnit:m' => array( $this, 'm_to_mm' ) ) );
 		$return['visibility']  = self::get_value( $properties, 'visibility' );
 		$return['winddegree']  = self::get_value( $properties, 'windDirection' );
-		$return['windspeed']   = self::kmh_to_ms( self::get_value( $properties, 'windSpeed' ) );
-		$return['windgust']    = self::get_value( $properties, 'windGust' );
+		$return['windspeed']   = self::get_quantity( $properties, 'windSpeed', array( 'wmoUnit:km_h-1' => array( $this, 'kmh_to_ms' ) ) );
+		$return['windgust']    = self::get_quantity( $properties, 'windGust', array( 'wmoUnit:km_h-1' => array( $this, 'kmh_to_ms' ) ) );
 		$pressure              = self::get_value( $properties, 'barometricPressure' );
 		$return['pressure']    = is_numeric( $pressure ) ? round( $pressure / 100, 2 ) : null;
 
@@ -191,7 +210,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			$return['code'] = self::phenomenon_code_map( $properties['presentWeather'] );
 		}
 		if ( ! isset( $return['code'] ) ) {
-			$return['code'] = self::cloud_code_map( $properties['cloudLayers'] );
+			$return['code'] = self::cloud_code_map( ifset( $properties['cloudLayers'] ) );
 		}
 
 		$url      = sprintf( 'https://api.weather.gov/stations/%1$s', $this->station_id );
@@ -218,11 +237,17 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	/**
 	 * Return the condition code based on cloudlayer.
 	 *
-	 * @param array $layers Cloud
-	 * @return string Weather Code.
+	 * @since 5.0.26 Returns null when there are no cloud layers.
+	 *
+	 * @param array $layers Cloud layers.
+	 * @return int|null Weather Code.
 	 */
 	private function cloud_code_map( $layers ) {
-		$code = end( $layers )['amount'];
+		if ( empty( $layers ) || ! is_array( $layers ) ) {
+			return null;
+		}
+		$layer = end( $layers );
+		$code  = ifset( $layer['amount'] );
 		/* cloudLayers use MetarSkyCoverage codes: OVC, BKN, SCT, FEW, SKC, CLR, VV */
 		switch ( $code ) {
 			case 'OVC':

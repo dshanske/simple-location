@@ -630,6 +630,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 				'humidity'    => $properties['relativeHumidity']['value'],
 				'winddegree'  => $properties['windDirection']['value'],
 				'windspeed'   => $properties['windSpeed']['value'] / 3.6,
+				'windgust'    => $properties['windGust']['value'] / 3.6,
 				'pressure'    => $properties['barometricPressure']['value'] / 100,
 				'visibility'  => $properties['visibility']['value'],
 				'summary'     => $properties['textDescription'],
@@ -692,7 +693,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $conditions['temperature'] );
 		$this->assertSame( 0.0, $conditions['windspeed'] );
 		$this->assertSame( 0, $conditions['winddegree'] );
-		$this->assertSame( 0.0, $conditions['rain'] );
+		$this->assertSame( 0, $conditions['rain'] );
 		// Null in the fixture: no reading, not 0.
 		$this->assertArrayNotHasKey( 'pressure', $conditions );
 		$this->assertArrayNotHasKey( 'windchill', $conditions );
@@ -721,6 +722,68 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$provider = new Weather_Provider_NWSUS();
 		$provider->set( array( 'station_id' => 'KPHL' ) );
 		$this->assertSame( 212, $provider->get_conditions()['code'] );
+	}
+
+	/**
+	 * NWS: wind and rainfall are converted from the unit each reading is reported in.
+	 */
+	public function test_nws_units() {
+		$observation = $this->fixture( 'weather/nws-observation.json' );
+		$observation['properties']['precipitationLastHour']['value'] = 2.5;
+		$this->mock_http(
+			array(
+				'observations/latest' => array( 'body' => $observation ),
+				'stations/KPHL'       => array( 'body' => $this->fixture( 'weather/nws-station.json' ) ),
+			)
+		);
+		$provider = new Weather_Provider_NWSUS();
+		$provider->set( array( 'station_id' => 'KPHL' ) );
+		$conditions = $provider->get_conditions();
+		$this->assertEqualsWithDelta( 22.3 / 3.6, $conditions['windgust'], 0.01, 'Gusts in km/h are converted to m/s.' );
+		$this->assertEqualsWithDelta( 13 / 3.6, $conditions['windspeed'], 0.01 );
+		$this->assertEqualsWithDelta( 2.5, $conditions['rain'], 0.01, 'Rainfall in mm is kept.' );
+
+		// Readings in other units.
+		$observation['properties']['precipitationLastHour'] = array(
+			'unitCode' => 'wmoUnit:m',
+			'value'    => 0.0025,
+		);
+		$observation['properties']['windGust']              = array(
+			'unitCode' => 'wmoUnit:m_s-1',
+			'value'    => 6.2,
+		);
+		$this->mock_http(
+			array(
+				'observations/latest' => array( 'body' => $observation ),
+				'stations/KPHL'       => array( 'body' => $this->fixture( 'weather/nws-station.json' ) ),
+			)
+		);
+		wp_cache_flush();
+		$conditions = $provider->get_conditions();
+		$this->assertEqualsWithDelta( 2.5, $conditions['rain'], 0.01, 'Rainfall in m is converted to mm.' );
+		$this->assertEqualsWithDelta( 6.2, $conditions['windgust'], 0.01, 'Gusts in m/s are kept.' );
+	}
+
+	/**
+	 * NWS: an observation without cloud layers or present weather has no condition code.
+	 */
+	public function test_nws_no_cloud_layers() {
+		$observation = $this->fixture( 'weather/nws-observation.json' );
+		foreach ( array( array(), null ) as $layers ) {
+			$observation['properties']['cloudLayers'] = $layers;
+			$this->mock_http(
+				array(
+					'observations/latest' => array( 'body' => $observation ),
+					'stations/KPHL'       => array( 'body' => $this->fixture( 'weather/nws-station.json' ) ),
+				)
+			);
+			wp_cache_flush();
+			$provider = new Weather_Provider_NWSUS();
+			$provider->set( array( 'station_id' => 'KPHL' ) );
+			$conditions = $provider->get_conditions();
+			$this->assertArrayNotHasKey( 'code', $conditions );
+			$this->assertSame( $observation['properties']['temperature']['value'], $conditions['temperature'] );
+		}
 	}
 
 	/**
