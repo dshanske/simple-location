@@ -26,6 +26,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 5.0.26 The map size is limited to 1280 by 1280, or to SLOC_STATICMAP_MAX_WIDTH and SLOC_STATICMAP_MAX_HEIGHT when they are defined.
+	 * @since 5.0.26 A map server URL passed as the `api` argument is used instead of the setting.
 	 *
 	 * @param array $args Arguments. See Map_Provider::__construct().
 	 */
@@ -34,7 +35,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 		$this->slug        = 'staticmap';
 		$this->url         = 'https://github.com/dshanske/Static-Maps-API-PHP';
 		$this->description = __( 'A hosted instance of a Static Map generator that uses tiles', 'simple-location' );
-		if ( ! isset( $args['url'] ) ) {
+		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_staticmap_url' );
 		}
 
