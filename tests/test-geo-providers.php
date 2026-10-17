@@ -637,6 +637,51 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * GeoNames reverse geocoding parses a US address, with the place name as the locality.
+	 */
+	public function test_geonames_reverse() {
+		$this->assertSame( 'no_username_set', $this->provider( 'Geo_Provider_Geonames', array( 'user' => '' ) )->reverse_lookup()->get_error_code() );
+
+		$fixture = $this->fixture( 'geo/geonames-reverse.json' );
+		$this->mock_http( array( 'api.geonames.org/extendedFindNearbyJSON' => array( 'body' => $fixture ) ) );
+		$addr    = $this->provider( 'Geo_Provider_Geonames', array( 'user' => 'demo' ) )->reverse_lookup();
+		$request = $this->last_request();
+		$this->assertSame( 'demo', $request['query']['username'] );
+		$this->assertEquals( self::LAT, $request['query']['lat'] );
+
+		$this->assertCityHall( $addr );
+		$this->assertSame( '1400 John F Kennedy Blvd', $addr['street-address'] );
+		$this->assertSame( 'United States', $addr['country-name'] );
+
+		// The place name is the locality, not the county.
+		$fixture['address']['placename']  = 'Menlo Park';
+		$fixture['address']['adminName2'] = 'San Mateo';
+		$this->mock_http( array( 'api.geonames.org/extendedFindNearbyJSON' => array( 'body' => $fixture ) ) );
+		$addr = $this->provider( 'Geo_Provider_Geonames', array( 'user' => 'demo' ) )->reverse_lookup();
+		$this->assertSame( 'Menlo Park', $addr['locality'] );
+	}
+
+	/**
+	 * GeoNames account errors in a reverse lookup become WP_Errors.
+	 */
+	public function test_geonames_reverse_status_error() {
+		$this->mock_http( array( 'api.geonames.org/extendedFindNearbyJSON' => array( 'body' => $this->fixture( 'geo/geonames-error.json' ) ) ) );
+		$error = $this->provider( 'Geo_Provider_Geonames', array( 'user' => 'demo' ) )->reverse_lookup();
+		$this->assertWPError( $error );
+		$this->assertSame( 'unknown_error', $error->get_error_code() );
+		$this->assertStringContainsString( 'not enabled', $error->get_error_message() );
+	}
+
+	/**
+	 * The GeoNames provider links to GeoNames and describes itself in the description.
+	 */
+	public function test_geonames_details() {
+		$provider = new Geo_Provider_Geonames( array( 'user' => 'demo' ) );
+		$this->assertSame( 'https://www.geonames.org/', $provider->get_url() );
+		$this->assertStringContainsString( 'creative commons', $provider->get_description() );
+	}
+
+	/**
 	 * GeoNames account errors become WP_Errors.
 	 */
 	public function test_geonames_status_error() {
