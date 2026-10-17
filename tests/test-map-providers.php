@@ -535,6 +535,47 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A user without styles of their own gets the built-in styles.
+	 */
+	public function test_mapbox_styles_empty() {
+		$this->mock_http( array( 'api.mapbox.com/styles/v1/someone' => array( 'body' => '[]' ) ) );
+		$map = $this->provider( 'Map_Provider_Mapbox', array( 'user' => 'someone' ) );
+		$this->assertSame( $map->default_styles(), $map->get_styles() );
+	}
+
+	/**
+	 * Mapbox errors carry the HTTP status and Mapbox's message, and a non-JSON error page doesn't warn.
+	 */
+	public function test_mapbox_styles_errors() {
+		$this->mock_http(
+			array(
+				'api.mapbox.com/styles/v1/someone' => array(
+					'code' => 401,
+					'body' => array( 'message' => 'Not Authorized - Invalid Token' ),
+				),
+			)
+		);
+		$styles = $this->provider( 'Map_Provider_Mapbox', array( 'user' => 'someone' ) )->get_styles();
+		$this->assertWPError( $styles );
+		$this->assertSame( 'Not Authorized - Invalid Token', $styles->get_error_message() );
+		$this->assertSame( array( 'status' => 401 ), $styles->get_error_data() );
+
+		$this->mock_http(
+			array(
+				'api.mapbox.com/styles/v1/someone' => array(
+					'code'    => 502,
+					'body'    => '<html><body>Bad Gateway</body></html>',
+					'headers' => array( 'content-type' => 'text/html' ),
+				),
+			)
+		);
+		$styles = $this->provider( 'Map_Provider_Mapbox', array( 'user' => 'someone' ) )->get_styles();
+		$this->assertWPError( $styles );
+		$this->assertSame( 'Mapbox styles could not be loaded (HTTP status 502).', $styles->get_error_message() );
+		$this->assertSame( array( 'status' => 502 ), $styles->get_error_data() );
+	}
+
+	/**
 	 * MapQuest builds static map v5 URLs for a location and for a route.
 	 */
 	public function test_mapquest() {
