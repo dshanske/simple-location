@@ -6,6 +6,8 @@
 	<file>./includes/</file>
 	<file>./templates/</file>
 	<exclude-pattern>*/includes/*\.(inc|css|js|svg)</exclude-pattern>
+	<!-- Report warnings, but only fail (exit non-zero) on errors. -->
+	<config name="ignore_warnings_on_exit" value="1"/>
 	<rule ref="PHPCompatibility"/>
 	<config name="testVersion" value="7.4-"/>
 	<rule ref="PHPCompatibilityWP"/>

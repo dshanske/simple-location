@@ -1,8 +1,12 @@
 name: Plugin asset/readme update
+# Only for readme and asset changes: the action refuses to deploy when code has changed since the last release.
 on:
   push:
     branches:
     - trunk
+    paths:
+    - 'readme.txt'
+    - '.wordpress-org/**'
 jobs:
   master:
     name: Push to trunk
