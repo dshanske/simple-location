@@ -132,13 +132,9 @@ class Astronomical_Calculator {
 		switch ( $type ) {
 			case 'sunset':
 				return $times['sunset'];
-				/* $function = 'date_sunset';
-				break; */
 			default:
 				return $times['sunrise'];
-				/* $function = 'date_sunrise'; */
 		}
-		// return call_user_func( $function, $timestamp, SUNFUNCS_RET_TIMESTAMP, $this->latitude, $this->longitude, self::get_zenith( $this->elevation ) );
 	}
 
 

@@ -41,7 +41,8 @@ trait GeoLocation_Trait {
 				'PL',
 				'SE',
 				'SK',
-			)
+			),
+			true
 		);
 	}
 

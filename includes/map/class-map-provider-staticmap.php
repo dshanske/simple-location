@@ -131,7 +131,8 @@ class Map_Provider_StaticMap extends Map_Provider {
 	private function get_attribution() {
 		if ( in_array(
 			$this->style,
-			array( 'streets', 'satellite', 'hybrid', 'topo', 'gray', 'gray-background', 'oceans', 'national-geographic' )
+			array( 'streets', 'satellite', 'hybrid', 'topo', 'gray', 'gray-background', 'oceans', 'national-geographic' ),
+			true
 		) ) {
 			return 'esri';
 		} elseif ( 'osm' === $this->style ) {
