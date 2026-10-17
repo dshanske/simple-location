@@ -154,6 +154,48 @@ class AstronomicalTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The principal phases are named at their exact times, and the waxing gibbous range has its own name.
+	 *
+	 * @dataProvider data_moon_phases
+	 *
+	 * @param string $time UTC time.
+	 * @param string $name Phase name.
+	 */
+	public function test_moon_phase_names( $time, $name ) {
+		$this->assertSame( $name, $this->philadelphia()->get_moon_data( strtotime( $time ) )['name'] );
+	}
+
+	/**
+	 * Times of the principal phases in July and August 2025, and one moment in between.
+	 *
+	 * @return array
+	 */
+	public function data_moon_phases() {
+		return array(
+			'first quarter'  => array( '2025-07-02T19:30:00Z', 'first-quarter-moon' ),
+			'waxing gibbous' => array( '2025-07-06T12:00:00Z', 'waxing-gibbous-moon' ),
+			'full'           => array( '2025-07-10T20:36:00Z', 'full-moon' ),
+			'third quarter'  => array( '2025-07-18T00:38:00Z', 'third-quarter-moon' ),
+			'new'            => array( '2025-07-24T19:11:00Z', 'new-moon' ),
+			'next full'      => array( '2025-08-09T07:55:00Z', 'full-moon' ),
+			'next new'       => array( '2025-08-23T06:06:00Z', 'new-moon' ),
+		);
+	}
+
+	/**
+	 * Solar radiation is calculated for the given time: positive around solar noon, zero at night.
+	 */
+	public function test_sun_radiation() {
+		$calc = $this->philadelphia();
+		// Solar noon in Philadelphia (75° W) is about 17:00 UTC.
+		$noon = $calc->sun_radiation( 1, strtotime( '2025-06-21T17:30:00Z' ) );
+		$this->assertGreaterThan( 2.5, $noon );
+		$this->assertLessThan( 4.92, $noon );
+		$this->assertSame( 0, $calc->sun_radiation( 1, strtotime( '2025-06-21T05:00:00Z' ) ) );
+		$this->assertNotEquals( $noon, $calc->sun_radiation( 1, strtotime( '2025-06-21T20:30:00Z' ) ), 'The minutes and hours are read.' );
+	}
+
+	/**
 	 * Moonrise and moonset fall within the local day, at times when the moon is on the horizon.
 	 */
 	public function test_moon_times() {

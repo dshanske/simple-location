@@ -19,6 +19,14 @@ define( 'E', RAD * 23.4397 ); // obliquity of the Earth.
  */
 class Astronomical_Calculator {
 
+	/**
+	 * Half a day, as a fraction of the lunar cycle (29.53 days).
+	 *
+	 * @since 6.0.0
+	 * @var float
+	 */
+	const MOON_PHASE_TOLERANCE = 0.5 / 29.530588;
+
 
 	/**
 	 * Zenith. Adjusted based on elevation.
@@ -420,49 +428,60 @@ class Astronomical_Calculator {
 	 * @return array Moon Data.
 	 *
 	 * @since 4.1.6
+	 * @since 6.0.0 Names each phase by range, so new, first quarter, full and third quarter match within half a day.
 	 */
 	public function get_moon_data( $timestamp = null ) {
 		if ( is_null( $timestamp ) ) {
 			$timestamp = time();
 		}
-		$moon = $this->get_moon_illumination( $timestamp );
-		if ( 0 === $moon['phase'] ) {
+		$moon  = $this->get_moon_illumination( $timestamp );
+		$phase = $moon['phase'];
+		// The principal phases are moments; name them for half a day either side.
+		$tolerance = self::MOON_PHASE_TOLERANCE;
+
+		if ( $phase < $tolerance || $phase > 1 - $tolerance ) {
 			$return = array(
 				'name' => 'new-moon',
 				'text' => __( 'New', 'simple-location' ),
 				'icon' => 'wi-moon-alt-new',
 			);
-		} elseif ( 0 < $moon['phase'] && 0.25 > $moon['phase'] ) {
-			$return = array(
-				'name' => 'waxing-crescent-moon',
-				'text' => __( 'Waxing Crescent', 'simple-location' ),
-				'icon' => 'wi-moon-alt-waxing-crescent-6',
-			);
-		} elseif ( 0.25 < $moon['phase'] && 0.5 > $moon['phase'] ) {
+		} elseif ( abs( $phase - 0.25 ) <= $tolerance ) {
 			$return = array(
 				'name' => 'first-quarter-moon',
 				'text' => __( 'First Quarter', 'simple-location' ),
 				'icon' => 'wi-moon-alt-first-quarter',
 			);
-		} elseif ( 0.5 === $moon['phase'] ) {
+		} elseif ( abs( $phase - 0.5 ) <= $tolerance ) {
 			$return = array(
 				'name' => 'full-moon',
 				'text' => __( 'Full Moon', 'simple-location' ),
 				'icon' => 'wi-moon-alt-full',
 			);
-		} elseif ( 0.5 < $moon['phase'] && 0.75 > $moon['phase'] ) {
-			$return = array(
-				'name' => 'waning-gibbous-moon',
-				'text' => __( 'Waning Gibbous', 'simple-location' ),
-				'icon' => 'wi-moon-alt-waning-gibbous-1',
-			);
-		} elseif ( 0.75 === $moon['phase'] ) {
+		} elseif ( abs( $phase - 0.75 ) <= $tolerance ) {
 			$return = array(
 				'name' => 'third-quarter-moon',
 				'text' => __( 'Third Quarter', 'simple-location' ),
 				'icon' => 'wi-moon-alt-third-quarter',
 			);
-		} elseif ( 0.75 < $moon['phase'] && 1 > $moon['phase'] ) {
+		} elseif ( $phase < 0.25 ) {
+			$return = array(
+				'name' => 'waxing-crescent-moon',
+				'text' => __( 'Waxing Crescent', 'simple-location' ),
+				'icon' => 'wi-moon-alt-waxing-crescent-6',
+			);
+		} elseif ( $phase < 0.5 ) {
+			$return = array(
+				'name' => 'waxing-gibbous-moon',
+				'text' => __( 'Waxing Gibbous', 'simple-location' ),
+				'icon' => 'wi-moon-alt-waxing-gibbous-3',
+			);
+		} elseif ( $phase < 0.75 ) {
+			$return = array(
+				'name' => 'waning-gibbous-moon',
+				'text' => __( 'Waning Gibbous', 'simple-location' ),
+				'icon' => 'wi-moon-alt-waning-gibbous-1',
+			);
+		} else {
 			$return = array(
 				'name' => 'waning-crescent-moon',
 				'text' => __( 'Waning Crescent', 'simple-location' ),
@@ -654,22 +673,30 @@ class Astronomical_Calculator {
 	/**
 	 *  Calculates Sun Radiation.
 	 *
-	 * @param float $interval The time interval over which the radiation is to be calculated in hours.
+	 * @since 6.0.0 Takes the time, and reads its minutes and seconds correctly.
+	 *
+	 * @param float    $interval  The time interval over which the radiation is to be calculated in hours.
+	 * @param int|null $timestamp Optional. Unix timestamp at the end of the interval. Default now.
 	 * @return float The Average Solar Radiation over the time interval in MJ/m^2/hr.
 	 */
-	public function sun_radiation( $interval ) {
+	public function sun_radiation( $interval, $timestamp = null ) {
+		if ( is_null( $timestamp ) ) {
+			$timestamp = time();
+		}
 		// Solar constant in MJ/m^2/hr.
 		$gsc = 4.92;
 
-		$delta = 0.409 * sin( 2.0 * pi() * ( gmdate( 'z' ) + 1 ) / 365 - 1.39 );
+		$day = (int) gmdate( 'z', $timestamp ) + 1;
 
-		$earth_distance = 1.0 + 0.033 * cos( 2.0 * pi() * ( gmdate( 'z' ) + 1 ) / 365.0 );
+		$delta = 0.409 * sin( 2.0 * pi() * $day / 365 - 1.39 );
 
-		$tod_utc     = (int) gmdate( 'H' ) + (int) gmdate( 'M' ) / 60.0 + (int) gmdate( 'S' ) / 3600.0;
+		$earth_distance = 1.0 + 0.033 * cos( 2.0 * pi() * $day / 365.0 );
+
+		$tod_utc     = (int) gmdate( 'G', $timestamp ) + (int) gmdate( 'i', $timestamp ) / 60.0 + (int) gmdate( 's', $timestamp ) / 3600.0;
 		$start_utc   = $tod_utc - $interval;
 		$stop_utc    = $tod_utc;
-		$start_omega = self::hour_angle( $start_utc );
-		$stop_omega  = self::hour_angle( $stop_utc );
+		$start_omega = self::hour_angle( $start_utc, $timestamp );
+		$stop_omega  = self::hour_angle( $stop_utc, $timestamp );
 
 		$latitude_radians = deg2rad( $this->latitude );
 
@@ -688,14 +715,24 @@ class Astronomical_Calculator {
 	/**
 	 *  Solar Hour Angle at a Given Time in Radians.
 	 *
-	 * @param int $t_utc The Time in UTC.
+	 * @since 6.0.0 Takes the date, for the equation of time, and returns an angle between -π and π.
+	 *
+	 * @param float    $t_utc     The time of day in UTC, in hours.
+	 * @param int|null $timestamp Optional. Unix timestamp on the day. Default now.
 	 * @return float Hour Angle in Radians.
 	 */
-	public function hour_angle( $t_utc ) {
-		$b     = 2 * pi() * ( ( gmdate( 'z' ) + 1 ) - 81 ) / 364.0;
+	public function hour_angle( $t_utc, $timestamp = null ) {
+		if ( is_null( $timestamp ) ) {
+			$timestamp = time();
+		}
+		$b     = 2 * pi() * ( ( (int) gmdate( 'z', $timestamp ) + 1 ) - 81 ) / 364.0;
 		$sc    = 0.1645 * sin( 2 * $b ) - 0.1255 * cos( $b ) - 0.025 * sin( $b );
 		$omega = ( pi() / 12.0 ) * ( $t_utc + $this->longitude / 15.0 + $sc - 12 );
-		if ( $omega < 0 ) {
+		// Keep the angle between -π and π, zero at solar noon, so an interval spanning noon isn't negative.
+		while ( $omega > pi() ) {
+			$omega -= 2.0 * pi();
+		}
+		while ( $omega <= -pi() ) {
 			$omega += 2.0 * pi();
 		}
 		return $omega;
