@@ -109,6 +109,8 @@ class Geo_Provider_Pelias extends Geo_Provider {
 	/**
 	 * Convert address properties to mf2
 	 *
+	 * @since 6.0.0 Street-address results have no name instead of an undefined one, and the closer of two equal results is used.
+	 *
 	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
@@ -129,8 +131,9 @@ class Geo_Provider_Pelias extends Geo_Provider {
 				$address = $feature['properties'];
 				continue;
 			}
-			if ( $feature['properties']['distance'] === $address['distance'] && $feature['properties']['distance'] < $address['distance'] ) {
-				$address = $features['properties'];
+			// At equal confidence and priority, prefer the closer result.
+			if ( ( 'venue' === $feature['properties']['layer'] ) === ( 'venue' === $address['layer'] ) && ifset( $feature['properties']['distance'], INF ) < ifset( $address['distance'], INF ) ) {
+				$address = $feature['properties'];
 			}
 		}
 
@@ -159,6 +162,8 @@ class Geo_Provider_Pelias extends Geo_Provider {
 		}
 		$street_address = trim( $street_address );
 
+		// A street address's name is the address itself.
+		$name = null;
 		if ( 'address' !== $address['layer'] ) {
 			$name = ifset( $address['name'] );
 		}
