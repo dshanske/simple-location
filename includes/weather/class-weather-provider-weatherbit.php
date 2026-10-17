@@ -120,22 +120,22 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 				return $return;
 			}
 			$response              = $response['data'][0];
-			$return['temperature'] = ifset_round( $response['temp'], 1 );
-			$return['humidity']    = ifset_round( $response['rh'], 1 );
-			$return['dewpoint']    = ifset_round( $response['dewpt'], 1 );
-			$return['pressure']    = ifset_round( $response['pres'], 2 );
-			$return['cloudiness']  = ifset_round( $response['clouds'] );
+			$return['temperature'] = self::round_value( $response['temp'] ?? null, 1 );
+			$return['humidity']    = self::round_value( $response['rh'] ?? null, 1 );
+			$return['dewpoint']    = self::round_value( $response['dewpt'] ?? null, 1 );
+			$return['pressure']    = self::round_value( $response['pres'] ?? null, 2 );
+			$return['cloudiness']  = self::round_value( $response['clouds'] ?? null );
 
-			$return['windspeed']  = ifset_round( $response['wind_spd'], 2 );
-			$return['winddegree'] = ifset_round( $response['wind_dir'], 1 );
-			$return['rain']       = ifset_round( $response['precip'], 2 );
-			$return['visibility'] = self::km_to_meters( ifset_round( $response['vis'], 2 ) );
-			$return['aqi']        = ifset_round( $response['aqi'], 2 );
-			$return['uv']         = ifset_round( $response['uv'] );
-			$return['radiation']  = ifset_round( $response['solar_rad'], 2 );
-			$return['snow']       = ifset_round( $response['snow'], 2 );
-			$return['summary']    = ifset( $response['weather']['description'] );
-			$return['code']       = ifset( $response['weather']['code'] );
+			$return['windspeed']  = self::round_value( $response['wind_spd'] ?? null, 2 );
+			$return['winddegree'] = self::round_value( $response['wind_dir'] ?? null, 1 );
+			$return['rain']       = self::round_value( $response['precip'] ?? null, 2 );
+			$return['visibility'] = self::km_to_meters( self::round_value( $response['vis'] ?? null, 2 ) );
+			$return['aqi']        = self::round_value( $response['aqi'] ?? null, 2 );
+			$return['uv']         = self::round_value( $response['uv'] ?? null );
+			$return['radiation']  = self::round_value( $response['solar_rad'] ?? null, 2 );
+			$return['snow']       = self::round_value( $response['snow'] ?? null, 2 );
+			$return['summary']    = $response['weather']['description'] ?? null;
+			$return['code']       = $response['weather']['code'] ?? null;
 
 			$return = self::filter_weather( $this->extra_data( $return, $time ) );
 

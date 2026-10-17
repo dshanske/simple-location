@@ -118,22 +118,22 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 				return $return;
 			}
 			$response              = $response['current'];
-			$return['temperature'] = ifset_round( $response['temperature'], 2 );
+			$return['temperature'] = self::round_value( $response['temperature'] ?? null, 2 );
 			if ( isset( $response['humidity'] ) ) {
 				$return['humidity'] = round( $response['humidity'], 2 );
 			}
-			$return['pressure'] = ifset( $response['pressure'] );
+			$return['pressure'] = $response['pressure'] ?? null;
 
-			$return['windspeed']  = self::kmh_to_ms( ifset_round( $response['wind_speed'] ) );
-			$return['winddegree'] = ifset_round( $response['wind_degree'] );
-			$return['rain']       = ifset_round( $response['precip'], 2 );
-			$return['cloudiness'] = ifset( $response['cloudcover'] );
-			$return['visibility'] = self::km_to_meters( ifset_round( $response['visibility'], 2 ) );
-			$summary              = ifset( $response['weather_descriptions'] );
+			$return['windspeed']  = self::kmh_to_ms( self::round_value( $response['wind_speed'] ?? null ) );
+			$return['winddegree'] = self::round_value( $response['wind_degree'] ?? null );
+			$return['rain']       = self::round_value( $response['precip'] ?? null, 2 );
+			$return['cloudiness'] = $response['cloudcover'] ?? null;
+			$return['visibility'] = self::km_to_meters( self::round_value( $response['visibility'] ?? null, 2 ) );
+			$summary              = $response['weather_descriptions'] ?? null;
 			$summary              = is_array( $summary ) ? implode( ' ', $summary ) : '';
 			$return['summary']    = $summary;
-			$return['uv']         = ifset( $response['uv_index'] );
-			$return['code']       = $this->code_map( ifset( $response['weather_code'] ) );
+			$return['uv']         = $response['uv_index'] ?? null;
+			$return['code']       = $this->code_map( $response['weather_code'] ?? '' );
 
 			$return = self::filter_weather( $this->extra_data( $return, $time ) );
 			$this->set_cache( $return );

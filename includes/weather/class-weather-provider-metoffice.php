@@ -306,15 +306,15 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 			$properties = $response['Rep'];
 		}
 
-		$return['temperature'] = ifset( $properties['T'] );
-		$return['dewpoint']    = ifset( $properties['Dp'] );
-		$return['humidity']    = ifset( $properties['H'] );
-		$return['visibility']  = ifset( $properties['V'] );
-		$return['pressure']    = ifset( $properties['P'] );
-		$return['windspeed']   = self::mph_to_mps( ifset( $properties['S'] ) );
-		$return['windgust']    = self::mph_to_mps( ifset( $properties['G'] ) );
-		$return['summary']     = $this->weather_type( ifset( $properties['W'] ) );
-		$return['code']        = $this->code_map( ifset( $properties['W'] ) );
+		$return['temperature'] = $properties['T'] ?? null;
+		$return['dewpoint']    = $properties['Dp'] ?? null;
+		$return['humidity']    = $properties['H'] ?? null;
+		$return['visibility']  = $properties['V'] ?? null;
+		$return['pressure']    = $properties['P'] ?? null;
+		$return['windspeed']   = self::mph_to_mps( $properties['S'] ?? null );
+		$return['windgust']    = self::mph_to_mps( $properties['G'] ?? null );
+		$return['summary']     = $this->weather_type( $properties['W'] ?? '' );
+		$return['code']        = $this->code_map( $properties['W'] ?? '' );
 		$return                = self::filter_weather( $this->extra_data( $return ) );
 
 		$this->set_cache( $return );
