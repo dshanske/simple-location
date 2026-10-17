@@ -113,19 +113,41 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			$return['winddegree'] = ifset_round( $current['windBearing'], 1 );
 			$return['windgust']   = ifset_round( $current['windGust'], 1 );
 			$return['uv']         = ifset_round( $current['uvIndex'], 1 );
-			$return['rain']       = ifset_round( $current['precipIntensity'], 2 );
-			$return['snow']       = ifset_round( $current['precipAccumulation'], 2 );
 			$return['summary']    = ifset( $current['summary'] );
 			$return['code']       = $this->code_map( ifset( $current['icon'] ) );
 			if ( isset( $current['visibility'] ) ) {
 				$return['visibility'] = round( $current['visibility'] * 1000, 1 );
 			}
+			$return = array_merge( $return, $this->precipitation( $current ) );
 
 			$return = $this->extra_data( $return, $time );
 
 			return self::filter_weather( $return );
 		}
 		return false;
+	}
+
+	/**
+	 * Return rain or snow from the precipitation rate.
+	 *
+	 * The rate is always the liquid water equivalent in mm/h. Snow is stored as depth, using the
+	 * 10:1 ratio Pirate Weather uses for current conditions; sleet, ice and mixed precipitation
+	 * are stored as rain.
+	 *
+	 * @since 5.0.26
+	 *
+	 * @param array $current Current conditions.
+	 * @return array Rain or snow in mm, or an empty array without a rate.
+	 */
+	private function precipitation( $current ) {
+		if ( ! isset( $current['precipIntensity'] ) || ! is_numeric( $current['precipIntensity'] ) ) {
+			return array();
+		}
+		$intensity = round( (float) $current['precipIntensity'], 2 );
+		if ( 'snow' === ifset( $current['precipType'] ) ) {
+			return array( 'snow' => round( $intensity * 10, 2 ) );
+		}
+		return array( 'rain' => $intensity );
 	}
 
 	/**

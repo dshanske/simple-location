@@ -193,6 +193,33 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Pirate Weather: the precipitation rate is stored as rain or snow by its type.
+	 */
+	public function test_pirateweather_precipitation() {
+		$cases = array(
+			'rain'    => array( 'rain', 1.2, array( 'rain' => 1.2 ) ),
+			'snow'    => array( 'snow', 0.5321, array( 'snow' => 5.3 ) ),
+			'sleet'   => array( 'sleet', 0.8, array( 'rain' => 0.8 ) ),
+			'none'    => array( 'none', 0, array( 'rain' => 0.0 ) ),
+			'no rate' => array( 'snow', null, array() ),
+		);
+		foreach ( $cases as $case => list( $type, $intensity, $expected ) ) {
+			$fixture                                 = $this->fixture( 'weather/pirateweather-forecast.json' );
+			$fixture['currently']['precipType']      = $type;
+			$fixture['currently']['precipIntensity'] = $intensity;
+			$this->mock_http( array( 'api.pirateweather.net/forecast/' => array( 'body' => $fixture ) ) );
+			$conditions = $this->provider( 'Weather_Provider_PirateWeather', array( 'api' => 'pw-key' ) )->get_conditions();
+			foreach ( array( 'rain', 'snow' ) as $key ) {
+				if ( isset( $expected[ $key ] ) ) {
+					$this->assertEqualsWithDelta( $expected[ $key ], $conditions[ $key ], 0.01, "$case: $key" );
+				} else {
+					$this->assertArrayNotHasKey( $key, $conditions, "$case: $key" );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Pirate Weather: a request writes nothing to the PHP error log.
 	 */
 	public function test_pirateweather_no_logging() {
