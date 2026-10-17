@@ -1,0 +1,18 @@
+{
+  "address": {
+    "adminCode2": "101",
+    "street": "John F Kennedy Blvd",
+    "adminCode3": "",
+    "adminCode1": "PA",
+    "lng": "-75.16357",
+    "streetNumber": "1400",
+    "adminName2": "Philadelphia",
+    "distance": "0.01",
+    "countryCode": "US",
+    "lat": "39.95237",
+    "postalcode": "19107",
+    "placename": "Philadelphia",
+    "mtfcc": "S1400",
+    "adminName1": "Pennsylvania"
+  }
+}

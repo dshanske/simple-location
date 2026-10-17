@@ -29,9 +29,10 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$this->name = __( 'Geonames', 'simple-location' );
-		$this->slug = 'geonames';
-		$this->url  = 'The Geonames database is available under a creative commons license. A free user account is required.';
+		$this->name        = __( 'Geonames', 'simple-location' );
+		$this->slug        = 'geonames';
+		$this->url         = 'https://www.geonames.org/';
+		$this->description = __( 'The Geonames database is available under a creative commons license. A free user account is required.', 'simple-location' );
 		if ( ! isset( $args['user'] ) ) {
 			$args['user'] = get_option( 'sloc_geonames_user' );
 		}
@@ -42,11 +43,13 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	/**
 	 * Return an address.
 	 *
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @since 6.0.0 Returns an error without a username, or when GeoNames reports one.
+	 *
+	 * @return array|WP_Error $reverse microformats2 address elements in an array, or an error.
 	 */
 	public function reverse_lookup() {
 		if ( ! $this->user ) {
-			return null;
+			return new WP_Error( 'no_username_set', __( 'No GeoNames Username Set', 'simple-location' ) );
 		}
 		$args = array(
 			'username' => $this->user,
@@ -59,6 +62,11 @@ class Geo_Provider_Geonames extends Geo_Provider {
 			return $json;
 		}
 
+		// Account errors, such as an exceeded limit, come back as a status with HTTP 200.
+		if ( isset( $json['status']['message'] ) ) {
+			return new WP_Error( 'unknown_error', $json['status']['message'] );
+		}
+
 		$addr              = $this->address_to_mf2( $json );
 		$addr['latitude']  = $this->latitude;
 		$addr['longitude'] = $this->longitude;
@@ -67,6 +75,8 @@ class Geo_Provider_Geonames extends Geo_Provider {
 
 	/**
 	 * Convert address properties to mf2
+	 *
+	 * @since 6.0.0 Uses the country code for the street address order, and a US address's place name as the locality.
 	 *
 	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.
@@ -79,8 +89,10 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( array_key_exists( 'address', $json ) ) {
 			$json = $json['address'];
 		} elseif ( array_key_exists( 'geonames', $json ) ) {
-			$json = $json['geonames'];
-			$json = end( $json );
+			$json = is_array( $json['geonames'] ) ? end( $json['geonames'] ) : array();
+		}
+		if ( ! is_array( $json ) ) {
+			$json = array();
 		}
 		$addr['country-code'] = ifset( $json['countryCode'] );
 		$addr['country-name'] = isset( $json['countryName'] ) ? $json['countryName'] : self::country_name( $addr['country-code'] );
@@ -88,13 +100,14 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		$addr['locality'] = self::ifnot(
 			$json,
 			array(
+				'placename',
 				'adminName2',
 				'toponymName',
 			)
 		);
 		$addr['region']   = ifset( $json['adminName1'] );
 		if ( array_key_exists( 'adminCodes1', $json ) ) {
-			$addr['region-code'] = $json['adminCodes1']['ISO3166_2'];
+			$addr['region-code'] = ifset( $json['adminCodes1']['ISO3166_2'] );
 		} elseif ( array_key_exists( 'adminCode1', $json ) ) {
 			$addr['region-code'] = $json['adminCode1'];
 		} else {
@@ -106,7 +119,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		$street = ifset( $json['street'] );
 
 		// Adjust position of house number/name based on country practice.
-		if ( self::house_number( $country_code ) ) {
+		if ( self::house_number( $addr['country-code'] ) ) {
 			$street_address = $number . ' ' . $street;
 		} else {
 			$street_address = $street . ' ' . $number;
