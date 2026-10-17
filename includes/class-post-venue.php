@@ -407,6 +407,7 @@ class Post_Venue {
 			array(
 				'post_type'  => 'venue',
 				'fields'     => 'ids',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are found by their coordinates.
 				'meta_query' => array(
 					array(
 						'key'     => 'geo_latitude',
@@ -543,6 +544,7 @@ class Post_Venue {
 				array(
 					'post_type'  => 'venue',
 					'fields'     => 'ids',
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are matched by their URL.
 					'meta_query' => array(
 						array(
 							'key'   => 'venue_url',
@@ -559,6 +561,7 @@ class Post_Venue {
 				array(
 					'post_type'  => 'venue',
 					'fields'     => 'ids',
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are matched by their URL.
 					'meta_query' => array(
 						array(
 							'compare' => 'LIKE',
@@ -702,6 +705,7 @@ class Post_Venue {
 				'post_type'  => 'post',
 				'fields'     => 'ids',
 				'nopaging'   => true,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Posts at a venue are found by their venue ID.
 				'meta_query' => array(
 					array(
 						'key'   => 'venue_id',

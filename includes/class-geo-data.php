@@ -222,6 +222,7 @@ class Geo_Data {
 		$geo  = sanitize_text_field( $_REQUEST['geo'] );
 		$args = self::filter_geo_query( $geo );
 		if ( ! empty( $args ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Filters comments by location on request.
 			$query->query_vars['meta_query'] = array( $args );
 			$query->meta_query->parse_query_vars( $query->query_vars );
 		}

@@ -401,6 +401,7 @@ class Loc_Config {
 		Sloc_Weather_Data::bulk_migrate_weather();
 		$posts = get_posts(
 			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Counts posts with a location for the settings page.
 				'meta_query' => array(
 					array(
 						'key'     => 'geo_latitude',
