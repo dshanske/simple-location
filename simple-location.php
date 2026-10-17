@@ -77,9 +77,11 @@ class Simple_Location_Plugin {
 	 * Triggered on Plugin Deactivation to flush rewrite rules.
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 Also unschedules the data cleanup; it is scheduled again if it hasn't finished.
 	 */
 	public static function deactivate() {
 		flush_rewrite_rules();
+		wp_clear_scheduled_hook( 'sloc_data_cleanup' );
 	}
 
 	/**

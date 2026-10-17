@@ -398,14 +398,15 @@ class Sloc_Weather_Data {
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id Object ID.
-	 * @return array $weather
+	 * @return bool True if old weather was migrated.
 	 *
 	 * @since 5.0.0
+	 * @since 6.0.0 Returns whether the weather was migrated.
 	 */
 	public static function migrate_weather( $type, $id ) {
 		$weather = get_metadata( $type, $id, 'geo_weather', true );
-		if ( ! $weather ) {
-			return;
+		if ( ! $weather || ! is_array( $weather ) ) {
+			return false;
 		}
 
 		if ( array_key_exists( 'wind', $weather ) ) {
@@ -421,41 +422,67 @@ class Sloc_Weather_Data {
 
 		if ( self::set_object_weatherdata( $type, $id, '', $weather ) ) {
 			delete_metadata( $type, $id, 'geo_weather' );
+			return true;
 		}
+		return false;
 	}
 
 
 	/**
 	 * Migrate Meta Data from Array to Individual Keys
 	 *
-	 * @return array $weather
+	 * Covers posts of every type and status, and comments.
 	 *
 	 * @since 5.0.0
+	 * @since 6.0.0 Covers every post type and status, takes a limit, and returns counts.
+	 *
+	 * @param int $limit Optional. Most posts, and most comments, to process. Default -1, all.
+	 * @return array {
+	 *     @type int $found    Posts and comments with old weather that were processed.
+	 *     @type int $migrated How many of them were migrated.
+	 * }
 	 */
-	public static function bulk_migrate_weather() {
-		$posts = get_posts(
+	public static function bulk_migrate_weather( $limit = -1 ) {
+		$limit  = (int) $limit;
+		$return = array(
+			'found'    => 0,
+			'migrated' => 0,
+		);
+		$posts  = get_posts(
 			array(
-				'fields'       => 'ids',
+				'fields'         => 'ids',
+				'post_type'      => 'any',
+				'post_status'    => 'any',
+				'posts_per_page' => $limit,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Finds weather in the old format to migrate.
-				'meta_key'     => 'geo_weather',
-				'meta_compare' => 'EXISTS',
+				'meta_key'       => 'geo_weather',
+				'meta_compare'   => 'EXISTS',
 			)
 		);
 		foreach ( $posts as $post ) {
-			self::migrate_weather( 'post', $post );
+			++$return['found'];
+			if ( self::migrate_weather( 'post', $post ) ) {
+				++$return['migrated'];
+			}
 		}
 
 		$comments = get_comments(
 			array(
 				'fields'       => 'ids',
+				'status'       => 'any',
+				'number'       => max( 0, $limit ),
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Finds weather in the old format to migrate.
 				'meta_key'     => 'geo_weather',
 				'meta_compare' => 'EXISTS',
 			)
 		);
 		foreach ( $comments as $comment ) {
-			self::migrate_weather( 'comment', $comment );
+			++$return['found'];
+			if ( self::migrate_weather( 'comment', $comment ) ) {
+				++$return['migrated'];
+			}
 		}
+		return $return;
 	}
 
 	/**
