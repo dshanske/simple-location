@@ -211,7 +211,9 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	public function test_google() {
 		$fixture = $this->fixture( 'venue/google-nearbysearch.json' );
 		$this->mock_http( array( 'maps.googleapis.com/maps/api/place/nearbysearch/json' => array( 'body' => $fixture ) ) );
-		$items = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup();
+		$result = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup();
+		$this->assertSame( array( 'items' ), array_keys( $result ), 'The same shape as the other venue providers.' );
+		$items = $result['items'];
 
 		$request = $this->last_request();
 		$this->assertSame( '39.9524,-75.1636', $request['query']['location'] );
@@ -245,6 +247,38 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		$result = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup();
 		$this->assertWPError( $result );
 		$this->assertSame( 'REQUEST_DENIED', $result->get_error_code() );
+		$this->assertSame( 'The provided API key is invalid.', $result->get_error_message() );
+	}
+
+	/**
+	 * No establishments nearby is an empty list, and a result without types has no category.
+	 */
+	public function test_google_empty_results() {
+		$this->mock_http(
+			array(
+				'maps.googleapis.com' => array(
+					'body' => array(
+						'results' => array(),
+						'status'  => 'ZERO_RESULTS',
+					),
+				),
+			)
+		);
+		$this->assertSame( array( 'items' => array() ), $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup() );
+
+		$this->mock_http(
+			array(
+				'maps.googleapis.com' => array(
+					'body' => array(
+						'results' => array( array( 'name' => 'X' ) ),
+						'status'  => 'OK',
+					),
+				),
+			)
+		);
+		$result = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup();
+		$this->assertSame( 'X', $result['items'][0]['name'] );
+		$this->assertArrayNotHasKey( 'category', $result['items'][0] );
 	}
 
 	/**

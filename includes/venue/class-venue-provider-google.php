@@ -41,9 +41,12 @@ class Venue_Provider_Google extends Venue_Provider {
 	}
 
 	/**
-	 * Return an address.
+	 * Returns the establishments near the location.
 	 *
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @since 1.0.0
+	 * @since 6.0.0 Returns the venues under 'items', like the other venue providers, and an empty list when there are none.
+	 *
+	 * @return array|WP_Error h-cards under 'items', or an error.
 	 */
 	public function reverse_lookup() {
 		if ( empty( $this->api ) ) {
@@ -62,18 +65,17 @@ class Venue_Provider_Google extends Venue_Provider {
 			return $json;
 		}
 
-		if ( array_key_exists( 'status', $json ) && 'OK' !== $json['status'] ) {
-			return new WP_Error( $json['status'], ifset( $json['errormessage'], __( 'Error Returning Results from Google', 'simple-location' ) ), array( $json ) );
+		// ZERO_RESULTS means there are no establishments within the radius.
+		if ( array_key_exists( 'status', $json ) && ! in_array( $json['status'], array( 'OK', 'ZERO_RESULTS' ), true ) ) {
+			return new WP_Error( $json['status'], ifset( $json['error_message'], __( 'Error Returning Results from Google', 'simple-location' ) ), array( $json ) );
 		}
 
-		$json  = $json['results'];
 		$items = array();
-
-		foreach ( $json as $result ) {
+		foreach ( ifset( $json['results'], array() ) as $result ) {
 			$items[] = $this->address_to_hcard( $result );
 		}
 
-		return $items;
+		return array( 'items' => $items );
 	}
 
 	/**
@@ -97,7 +99,7 @@ class Venue_Provider_Google extends Venue_Provider {
 			$card['longitude']   = ifset( $data['geometry']['location']['lng'] );
 			$card['boundingbox'] = ifset( $data['geometry']['viewport'] );
 		}
-		$card['category'] = $data['types'];
+		$card['category'] = ifset( $data['types'] );
 
 		$tz = $this->timezone();
 		if ( $tz ) {

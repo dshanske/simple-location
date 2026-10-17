@@ -28,9 +28,13 @@ class Venue_Provider_Sloc_Test extends Venue_Provider {
 	 */
 	public function reverse_lookup() {
 		return array(
-			'name'      => 'Test Cafe',
-			'latitude'  => $this->latitude,
-			'longitude' => $this->longitude,
+			'items' => array(
+				array(
+					'name'      => 'Test Cafe',
+					'latitude'  => $this->latitude,
+					'longitude' => $this->longitude,
+				),
+			),
 		);
 	}
 }
