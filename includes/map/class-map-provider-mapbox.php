@@ -53,7 +53,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 * Returns the built-in styles, plus the user's own styles for a user other than mapbox.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Errors carry the HTTP status, and Mapbox's message when there is one.
+	 * @since 6.0.0 Errors carry the HTTP status, and Mapbox's message when there is one.
 	 *
 	 * @return array|WP_Error Style names keyed by ID, or an error if the user's styles can't be fetched.
 	 */
