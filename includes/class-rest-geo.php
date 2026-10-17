@@ -732,10 +732,6 @@ class REST_Geo {
 	public static function weather( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
 		$params = $request->get_params();
-		$args   = array(
-			'cache_key'  => 'slocw',
-			'cache_time' => 600,
-		);
 		$time   = null;
 		if ( array_key_exists( 'time', $params ) ) {
 			$time = (int) $params['time'];

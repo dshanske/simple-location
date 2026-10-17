@@ -165,7 +165,6 @@ abstract class Location_Provider extends Sloc_Provider {
 		$return['time']              = $this->time;
 		$return['zoom']              = self::derive_zoom();
 		$return['activity']          = $this->activity;
-		$iconlist                    = Geo_Data::get_iconlist();
 		if ( ! empty( $this->activity ) ) {
 			switch ( $this->activity ) {
 				case 'plane':

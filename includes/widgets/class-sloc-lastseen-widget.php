@@ -40,12 +40,6 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 			echo wp_kses( $args['before_title'] . $title . $args['after_title'], Simple_Location_Plugin::kses_clean() );
 		}
 
-		if ( isset( $instance['cache_time'] ) ) {
-			$cache_time = $instance['cache_time'];
-		} else {
-			$cache_time = null;
-		}
-
 		if ( isset( $instance['user'] ) && 0 !== $instance['user'] ) {
 			echo '<ul class="sloc-lastseen-data">';
 			$user    = new WP_User( $instance['user'] );

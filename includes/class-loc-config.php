@@ -373,7 +373,7 @@ class Loc_Config {
 	public static function admin_menu() {
 		// If the IndieWeb Plugin is installed use its menu.
 		if ( class_exists( 'IndieWeb_Plugin' ) ) {
-			$hook = add_submenu_page(
+			add_submenu_page(
 				'indieweb',
 				__( 'Simple Location', 'simple-location' ), // page title.
 				__( 'Location', 'simple-location' ), // menu title.
@@ -382,7 +382,7 @@ class Loc_Config {
 				array( 'Loc_Config', 'simloc_options' )
 			);
 		} else {
-			$hook = add_options_page(
+			add_options_page(
 				'',
 				'Simple Location',
 				'manage_options',
@@ -502,11 +502,6 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function admin_init() {
-		$map_provider      = get_option( 'sloc_map_provider' );
-		$weather_provider  = get_option( 'sloc_weather_provider' );
-		$geo_provider      = get_option( 'sloc_geo_provider' );
-		$location_provider = get_option( 'sloc_geolocation_provider' );
-
 		add_settings_section(
 			'sloc_general',
 			__( 'General Settings', 'simple-location' ),
