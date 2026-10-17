@@ -29,6 +29,11 @@
 
 	<rule ref="WordPress-Extra" />
 	<rule ref="WordPress.WP.I18n"/>
-	<rule ref="VariableAnalysis"/>
+	<!-- Hook callbacks and overridden methods must accept parameters they don't use, as with Generic.CodeAnalysis.UnusedFunctionParameter above. -->
+	<rule ref="VariableAnalysis">
+		<properties>
+			<property name="allowUnusedFunctionParameters" value="true"/>
+		</properties>
+	</rule>
 	<config name="text_domain" value="simple-location,default"/>
 </ruleset>
