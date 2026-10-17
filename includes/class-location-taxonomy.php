@@ -230,6 +230,13 @@ final class Location_Taxonomy {
 		wp_nonce_field( 'edit', 'location_taxonomy_meta' );
 	}
 
+	/**
+	 * Saves the country, region or locality code of a location term from the term form.
+	 *
+	 * @since 6.0.0 Stops for terms nested too deep to have a type.
+	 *
+	 * @param int $term_id Term ID.
+	 */
 	public static function save_data( $term_id ) {
 		// This option only exists when using one of the two forms.
 		if ( ! array_key_exists( 'location_taxonomy_meta', $_POST ) ) {
@@ -247,18 +254,19 @@ final class Location_Taxonomy {
 		// phpcs:disable
 		$term = get_term( $term_id );
 
-		if ( 'location' !== $term->taxonomy ) {
+		if ( ! $term instanceof WP_Term || 'location' !== $term->taxonomy ) {
 			return;
 		}
 
+		// Only countries, regions and localities have a code; a deeper term has no type.
 		$type = self::get_location_type( $term_id );
+		if ( ! $type ) {
+			return;
+		}
 
 		if ( array_key_exists( 'location-code', $_POST ) ) {
-			if ( $type ) {
-				update_term_meta( $term_id, $type, sanitize_text_field( $_POST['location-code'] ) );
-			}
+			update_term_meta( $term_id, $type, sanitize_text_field( $_POST['location-code'] ) );
 			return;
-
 		}
 
 		if ( array_key_exists( $type, $_POST ) ) {
