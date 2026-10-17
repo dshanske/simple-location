@@ -215,6 +215,85 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Weatherstack: current conditions from the Weatherstack API, with wind converted from km/h.
+	 */
+	public function test_weatherstack() {
+		$fixture = $this->fixture( 'weather/weatherstack-current.json' );
+		$this->mock_http( array( 'api.weatherstack.com/current' => array( 'body' => $fixture ) ) );
+		$conditions = $this->provider( 'Weather_Provider_Weatherstack', array( 'api' => 'ws-key' ) )->get_conditions();
+		$request    = $this->last_request();
+		$this->assertCount( 1, $this->http_requests );
+		$this->assertSame( 'https://api.weatherstack.com/current', $request['base'] );
+		$this->assertSame( 'ws-key', $request['query']['access_key'] );
+		$this->assertSame( self::LAT . ',' . self::LNG, $request['query']['query'] );
+		$this->assertSame( 'm', $request['query']['units'] );
+
+		$current = $fixture['current'];
+		$this->assertConditions(
+			array(
+				'temperature' => $current['temperature'],
+				'humidity'    => $current['humidity'],
+				'pressure'    => $current['pressure'],
+				'cloudiness'  => $current['cloudcover'],
+				'windspeed'   => $current['wind_speed'] / 3.6,
+				'winddegree'  => $current['wind_degree'],
+				'rain'        => $current['precip'],
+				'visibility'  => $current['visibility'] * 1000,
+				'uv'          => $current['uv_index'],
+				'summary'     => implode( ' ', $current['weather_descriptions'] ),
+				'code'        => 801,
+			),
+			$conditions
+		);
+	}
+
+	/**
+	 * Weatherstack: a plan without HTTPS is retried over HTTP, and API errors are returned as errors.
+	 */
+	public function test_weatherstack_errors() {
+		$fixture = $this->fixture( 'weather/weatherstack-current.json' );
+		$this->mock_http(
+			array(
+				'https://api.weatherstack.com/' => array(
+					'body' => array(
+						'success' => false,
+						'error'   => array(
+							'code' => 105,
+							'type' => 'https_access_restricted',
+							'info' => 'Access Restricted - Your current Subscription Plan does not support HTTPS Encryption.',
+						),
+					),
+				),
+				'http://api.weatherstack.com/'  => array( 'body' => $fixture ),
+			)
+		);
+		$conditions = $this->provider( 'Weather_Provider_Weatherstack', array( 'api' => 'ws-key' ) )->get_conditions();
+		$this->assertCount( 2, $this->http_requests );
+		$this->assertSame( 'http://api.weatherstack.com/current', $this->last_request()['base'] );
+		$this->assertEqualsWithDelta( $fixture['current']['temperature'], $conditions['temperature'], 0.01 );
+
+		$this->mock_http(
+			array(
+				'api.weatherstack.com' => array(
+					'body' => array(
+						'success' => false,
+						'error'   => array(
+							'code' => 101,
+							'type' => 'invalid_access_key',
+							'info' => 'You have not supplied a valid API Access Key.',
+						),
+					),
+				),
+			)
+		);
+		$error = $this->provider( 'Weather_Provider_Weatherstack', array( 'api' => 'bad-key' ) )->get_conditions();
+		$this->assertWPError( $error );
+		$this->assertSame( 'weatherstack_error', $error->get_error_code() );
+		$this->assertSame( 101, $error->get_error_data()['code'] );
+		$this->assertCount( 1, $this->http_requests );
+	}
+
+	/**
 	 * Visual Crossing: current conditions, with condition IDs mapped to summaries and codes.
 	 */
 	public function test_visualcrossing_current() {

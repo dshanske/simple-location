@@ -68,6 +68,7 @@ Current conditions are for Philadelphia (`39.9524,-75.1636`); station requests u
 | `openweathermap-onecall.json` | `GET https://api.openweathermap.org/data/3.0/onecall?appid=…&units=metric&lat=39.9524&lon=-75.1636` | Hand-built from docs |
 | `pirateweather-forecast.json` | `GET https://api.pirateweather.net/forecast/{key}/39.9524,-75.1636?units=si&exclude=minutely,hourly,daily,alerts,flags` | Hand-built from docs |
 | `weatherbit-current.json` | `GET https://api.weatherbit.io/v2.0/current?key=…&lat=39.9524&lon=-75.1636&units=M` | Hand-built from docs |
+| `weatherstack-current.json` | `GET https://api.weatherstack.com/current?access_key=…&query=39.9524,-75.1636&units=m` (free plans: `http://`) | Hand-built from docs |
 | `visualcrossing-current.json` | `GET https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/39.9524,-75.1636?key=…&unitGroup=metric&lang=id` | Hand-built from docs |
 | `visualcrossing-timeline.json` | The same with `/{timestamp}` for 2025-07-01 14:00 America/New_York | Hand-built from docs |
 | `aeris-observations.json` | `GET https://data.api.xweather.com/observations/closest?client_id=…&client_secret=…&p=39.9524,-75.1636&filter=allstations` (also used for `…&p=KPHL`) | Hand-built from docs |

@@ -1,0 +1,41 @@
+{
+  "request": {
+    "type": "LatLon",
+    "query": "Lat 39.95 and Lon -75.16",
+    "language": "en",
+    "unit": "m"
+  },
+  "location": {
+    "name": "Philadelphia",
+    "country": "United States of America",
+    "region": "Pennsylvania",
+    "lat": "39.952",
+    "lon": "-75.164",
+    "timezone_id": "America/New_York",
+    "localtime": "2026-10-11 10:00",
+    "localtime_epoch": 1760176800,
+    "utc_offset": "-4.0"
+  },
+  "current": {
+    "observation_time": "02:00 PM",
+    "temperature": 22,
+    "weather_code": 116,
+    "weather_icons": [
+      "https://cdn.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0002_sunny_intervals.png"
+    ],
+    "weather_descriptions": [
+      "Partly cloudy"
+    ],
+    "wind_speed": 13,
+    "wind_degree": 230,
+    "wind_dir": "SW",
+    "pressure": 1014,
+    "precip": 0,
+    "humidity": 60,
+    "cloudcover": 25,
+    "feelslike": 22,
+    "uv_index": 4,
+    "visibility": 16,
+    "is_day": "yes"
+  }
+}

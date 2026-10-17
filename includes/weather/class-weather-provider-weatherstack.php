@@ -63,8 +63,11 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @since 4.0.0
+	 * @since 5.0.26 Calls the Weatherstack API (it called Weatherbit's), over HTTP if the plan doesn't allow HTTPS.
+	 *
 	 * @param int $time Time. Optional.
-	 * @return array Current Conditions in Array
+	 * @return array|WP_Error Current Conditions in Array, or an error from the API.
 	 */
 	public function get_conditions( $time = null ) {
 		if ( empty( $this->api ) ) {
@@ -87,34 +90,31 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 				return $conditions;
 			}
 
-			$data = array(
-				'key'   => $this->api,
-				'query' => $this->latitude . ',' . $this->longitude,
-				'units' => 'm',
+			$query    = array(
+				'access_key' => $this->api,
+				'query'      => $this->latitude . ',' . $this->longitude,
+				'units'      => 'm',
 			);
-			$url  = ' https://api.weatherbit.io/v2.0/current';
-			$url  = add_query_arg( $data, $url );
-			$args = array(
-				'headers'             => array(
-					'Accept' => 'application/json',
-				),
-				'timeout'             => 10,
-				'limit_response_size' => 1048576,
-				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location.
-				'user-agent'          => 'Simple Location for WordPress',
-			);
-
-			$response = wp_remote_get( $url, $args );
+			$response = $this->fetch_json( 'https://api.weatherstack.com/current', $query );
+			// The free plan doesn't allow HTTPS.
+			if ( is_array( $response ) && isset( $response['error']['code'] ) && 105 === (int) $response['error']['code'] ) {
+				$response = $this->fetch_json( 'http://api.weatherstack.com/current', $query );
+			}
 			if ( is_wp_error( $response ) ) {
 				return $response;
 			}
-			$response = wp_remote_retrieve_body( $response );
-			$response = json_decode( $response, true );
+			if ( isset( $response['error'] ) ) {
+				$error = is_array( $response['error'] ) ? $response['error'] : array();
+				return new WP_Error(
+					'weatherstack_error',
+					isset( $error['info'] ) ? $error['info'] : __( 'Weatherstack returned an error', 'simple-location' ),
+					array( 'code' => isset( $error['code'] ) ? $error['code'] : null )
+				);
+			}
 			if ( WP_DEBUG ) {
 				$return['raw'] = $response;
 			}
-			if ( ! isset( $response['current'] ) ) {
+			if ( ! isset( $response['current'] ) || ! is_array( $response['current'] ) ) {
 				return $return;
 			}
 			$response              = $response['current'];
@@ -133,7 +133,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			$summary              = is_array( $summary ) ? implode( ' ', $summary ) : '';
 			$return['summary']    = $summary;
 			$return['uv']         = ifset( $response['uv_index'] );
-			$return['code']       = $this->code_map( $response['weather_code'] );
+			$return['code']       = $this->code_map( ifset( $response['weather_code'] ) );
 
 			$return = self::filter_weather( $this->extra_data( $return, $time ) );
 			$this->set_cache( $return );
