@@ -62,7 +62,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		}
 
 		if ( array_key_exists( 'status', $json ) && 'OK' !== $json['status'] ) {
-			return new WP_Error( $json['status'], ifset( $json['errormessage'], __( 'Error Returning Results from Google', 'simple-location' ) ) );
+			return new WP_Error( $json['status'], ifset( $json['error_message'], __( 'Error Returning Results from Google', 'simple-location' ) ) );
 		}
 
 		$addr              = $this->address_to_mf2( $json );
@@ -76,6 +76,7 @@ class Geo_Provider_Google extends Geo_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Accepts a single result as well as a whole response, and works without a country.
+	 * @since 6.0.0 Uses Google's formatted address from the result for reverse lookups too.
 	 *
 	 * @param  array $data Raw JSON: a whole response, or one of its results.
 	 * @return array $reverse microformats2 address elements in an array.
@@ -88,9 +89,10 @@ class Geo_Provider_Google extends Geo_Provider {
 			$addr['raw'] = $data;
 		}
 
-		$addr['display-name'] = ifset( $data['formatted_address'] );
-		$addr['plus-code']    = ifset( $data['plus_code']['global_code'] );
-		$result               = array_key_exists( 'results', $data ) ? ifset( $data['results'][0] ) : $data;
+		$result = array_key_exists( 'results', $data ) ? ifset( $data['results'][0], array() ) : $data;
+		// Each result has its own address and plus code; a reverse lookup's response also has a plus code for the point itself.
+		$addr['display-name'] = ifset( $result['formatted_address'] );
+		$addr['plus-code']    = ifset( $data['plus_code']['global_code'], ifset( $result['plus_code']['global_code'] ) );
 		if ( isset( $result['address_components'] ) ) {
 			foreach ( $result['address_components'] as $component ) {
 				if ( in_array( 'administrative_area_level_1', $component['types'], true ) ) {
