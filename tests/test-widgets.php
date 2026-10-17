@@ -219,13 +219,34 @@ class WidgetsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Without a provider or a location, the weather widget says so.
+	 * Without a provider or a location, the weather widget says so and still closes its wrapper.
 	 */
 	public function test_weather_without_input() {
-		$this->assertStringContainsString( 'No Input Provided', $this->render( new Sloc_Weather_Widget(), array( 'title' => '' ) ) );
+		$html = $this->render( new Sloc_Weather_Widget(), array( 'title' => '' ) );
+		$this->assertStringContainsString( 'No Input Provided', $html );
+		$this->assertStringEndsWith( '</section>', $html );
 
 		update_option( 'sloc_weather_provider', 'none' );
-		$this->assertStringContainsString( 'No Weather Provider Set!', $this->render( new Sloc_Weather_Widget(), array( 'title' => '' ) ) );
+		$html = $this->render( new Sloc_Weather_Widget(), array( 'title' => '' ) );
+		$this->assertStringContainsString( 'No Weather Provider Set!', $html );
+		$this->assertStringEndsWith( '</section>', $html );
+	}
+
+	/**
+	 * The cache expiry note is part of the conditions list, not printed ahead of it.
+	 */
+	public function test_weather_cache_comment() {
+		Weather_Provider_Sloc_Test::$conditions['_expires_at'] = '2026-10-17T12:00:00+00:00';
+		$html = $this->render(
+			new Sloc_Weather_Widget(),
+			array(
+				'title'     => '',
+				'latitude'  => self::LAT,
+				'longitude' => self::LNG,
+			)
+		);
+		$this->assertSame( 1, substr_count( $html, 'Cache Expires At' ) );
+		$this->assertGreaterThan( strpos( $html, 'Clear' ), strpos( $html, 'Cache Expires At' ), 'The note comes with the conditions, not before them.' );
 	}
 
 	/**
@@ -415,6 +436,32 @@ class WidgetsTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Clear', $html );
 		$this->assertStringContainsString( 'Philadelphia', $html );
 		$this->assertStringEndsWith( '</section>', $html );
+	}
+
+	/**
+	 * Without an airport, or with a code of the wrong length, the widget doesn't warn and closes its wrapper.
+	 */
+	public function test_airport_invalid() {
+		$this->assertSame( '<section class="widget"></section>', $this->render( new Sloc_Airport_Widget(), array( 'title' => '' ) ) );
+
+		$html = $this->render(
+			new Sloc_Airport_Widget(),
+			array(
+				'title'   => '',
+				'airport' => 'PH',
+			)
+		);
+		$this->assertStringContainsString( 'Airport codes have 3 (IATA) or 4 (ICAO) characters.', $html );
+		$this->assertStringEndsWith( '</section>', $html );
+
+		$html = $this->render(
+			new Sloc_Airport_Widget(),
+			array(
+				'title'   => '',
+				'airport' => 'ZZZ',
+			)
+		);
+		$this->assertStringEndsWith( '</section>', $html, 'An unknown airport closes the wrapper.' );
 	}
 
 	/**
