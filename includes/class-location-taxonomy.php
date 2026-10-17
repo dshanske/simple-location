@@ -7,6 +7,8 @@
  * @package Post Kinds
  */
 
+defined( 'ABSPATH' ) || exit;
+
 add_action( 'init', array( 'Location_Taxonomy', 'init' ) );
 
 /**

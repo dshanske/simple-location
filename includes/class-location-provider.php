@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Returns location from an external location provider.
  *

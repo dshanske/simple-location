@@ -7,6 +7,8 @@
  * @package Simple Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 add_action( 'init', array( 'Sloc_Media_Metadata', 'init' ), 1 );
 
 /**

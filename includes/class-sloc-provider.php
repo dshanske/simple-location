@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Abstract Class to Provide Basic Functionality for Providers.
  *

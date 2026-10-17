@@ -3,6 +3,7 @@
  * Timezone Sidebar Metabox.
  */
 
+defined( 'ABSPATH' ) || exit;
 
 if ( 'comment' === get_current_screen()->id ) {
 	$timezone = get_comment_geodata( $comment->comment_ID, 'timezone' );

@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Reverse Geolocation using HERE API.
  *

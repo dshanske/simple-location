@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 get_header();
 if ( is_day() ) {
 	$date_format = get_option( 'time_format' );

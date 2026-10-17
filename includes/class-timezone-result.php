@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 
 class Timezone_Result {
 	public $timezone = null;

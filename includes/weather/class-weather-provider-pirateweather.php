@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Weather Provider using Pirate Weather API.
  *

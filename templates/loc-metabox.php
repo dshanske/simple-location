@@ -5,14 +5,16 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
-	$geodata = get_comment_geodata( $comment->comment_ID );
-	$type    = '';
+	$geodata   = get_comment_geodata( $comment->comment_ID );
+	$sloc_type = '';
 } else {
-	$type    = get_post_type();
-	$geodata = get_post_geodata();
-	if ( 'venue' === $type ) {
+	$sloc_type = get_post_type();
+	$geodata   = get_post_geodata();
+	if ( 'venue' === $sloc_type ) {
 		$geodata['venue_radius'] = get_post_meta( get_the_ID(), 'venue_radius', true );
 		$geodata['venue_url']    = get_post_meta( get_the_ID(), 'venue_url', true );
 	} else {
@@ -32,7 +34,7 @@ if ( is_array( $geodata ) && array_key_exists( 'venue_id', $geodata ) && $geodat
 $public     = array_key_exists( 'visibility', $geodata ) ? $geodata['visibility'] : get_option( 'geo_public' );
 $choices    = Geo_Base::geo_public();
 $map_return = '';
-if ( 'attachment' === $type ) {
+if ( 'attachment' === $sloc_type ) {
 	$choices = Geo_Base::visibility_choices( get_the_ID() );
 	// An attachment without a visibility of its own inherits one.
 	if ( '' === get_post_meta( get_the_ID(), 'geo_public', true ) ) {
@@ -83,7 +85,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 	);
 	?>
 
-	<?php if ( 'venue' === $type ) { ?>
+	<?php if ( 'venue' === $sloc_type ) { ?>
 		<label for="venue_radius" class="quarter">
 			<?php esc_html_e( 'Radius Around Venue:', 'simple-location' ); ?>
 			<input class="widefat" type="number" name="venue_radius" id="venue_radius" step="1" min="1" value="<?php echo esc_attr( ifset( $geodata['venue_radius'], '' ) ); ?>" />

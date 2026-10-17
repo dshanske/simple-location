@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 $providers = Loc_Config::venue_providers();
 ?>
 <h2><?php esc_html_e( 'Venue Lookup', 'simple-location' ); ?></h2>

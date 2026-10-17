@@ -10,6 +10,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Retrieves Airport Location Data.
  *

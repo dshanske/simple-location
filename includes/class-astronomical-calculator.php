@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 define( 'PI', M_PI );
 define( 'RAD', PI / 180 );
 define( 'E', RAD * 23.4397 ); // obliquity of the Earth.

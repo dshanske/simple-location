@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 
 /**
  * Adds widget to display Last Seen
@@ -85,7 +87,7 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 	}
 
 	/**
-	 * widget data updater
+	 * Widget data updater
 	 *
 	 * @param mixed $new_instance new widget data
 	 * @param mixed $old_instance current widget data
@@ -102,7 +104,7 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 	}
 
 	/**
-	 * widget form
+	 * Widget form
 	 *
 	 * @param mixed $instance
 	 *

@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10 );
 add_filter( 'plugins_loaded', array( 'Loc_Config', 'init' ), 11 );
 add_action( 'admin_menu', array( 'Loc_Config', 'admin_menu' ), 10 );

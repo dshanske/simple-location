@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 $providers = Loc_Config::geo_providers();
 ?>
 <h2><?php esc_html_e( 'Location Lookup', 'simple-location' ); ?></h2>

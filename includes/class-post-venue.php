@@ -5,6 +5,8 @@
  * Registers a custom post type and sets its behavior.
  */
 
+defined( 'ABSPATH' ) || exit;
+
 // Register Vanue Taxonomy.
 add_action( 'init', array( 'Post_Venue', 'register' ), 1 );
 
@@ -357,9 +359,17 @@ class Post_Venue {
 		if ( isset( $_REQUEST['venue_type'] ) ) {
 			$selected = sanitize_text_field( $_REQUEST['venue_type'] );
 		}
-		$list = array( '' => __( 'All Types', 'simple-location' ) );
-		foreach ( get_terms( 'venue_type', array( 'hide_empty' => false ) ) as $type ) {
-			$list[ $type->slug ] = $type->name;
+		$list  = array( '' => __( 'All Types', 'simple-location' ) );
+		$types = get_terms(
+			array(
+				'taxonomy'   => 'venue_type',
+				'hide_empty' => false,
+			)
+		);
+		if ( is_array( $types ) ) {
+			foreach ( $types as $type ) {
+				$list[ $type->slug ] = $type->name;
+			}
 		}
 		echo '<select id="venue_type" name="venue_type">';
 		foreach ( $list as $key => $value ) {

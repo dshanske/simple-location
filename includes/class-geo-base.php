@@ -5,6 +5,8 @@
  * Sets up basic support for location.
  */
 
+defined( 'ABSPATH' ) || exit;
+
 add_action( 'init', array( 'Geo_Base', 'init' ), 1 );
 add_action( 'admin_init', array( 'Geo_Base', 'admin_init' ) );
 
