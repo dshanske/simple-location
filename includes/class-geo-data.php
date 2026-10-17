@@ -1014,6 +1014,8 @@ class Geo_Data {
 		 * @param string $icon Name of Icon.
 		 * @param string $summary Description of Icon. Optional.
 		 * @return string marked up icon
+		 *
+		 * @since 6.0.0 Returns an empty string, not the file path, when the icon doesn't exist.
 		 */
 	public static function get_icon( $icon = null, $summary = null ) {
 		if ( is_null( $icon ) ) {
@@ -1026,10 +1028,9 @@ class Geo_Data {
 			$list    = self::get_iconlist();
 			$summary = array_key_exists( $icon, $list ) ? $list[ $icon ] : $icon;
 		}
-		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), $icon );
-		if ( sloc_file_exists( $svg ) ) {
-			$svg = sloc_get_contents( $svg );
-		}
+		// Only a file name, so the icon can't point outside svgs/.
+		$file = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), basename( (string) $icon ) );
+		$svg  = sloc_file_exists( $file ) ? sloc_get_contents( $file ) : '';
 		if ( $svg ) {
 			return PHP_EOL . sprintf( '<span class="sloc-location-icon sloc-icon-%1$s" style="display: inline-block; max-height: 1em; margin-right: 0.1em;" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), $svg );
 		}

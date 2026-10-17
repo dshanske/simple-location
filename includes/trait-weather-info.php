@@ -71,6 +71,8 @@ trait Weather_Info_Trait {
 	 * @param string $icon Name of Icon.
 	 * @param string $summary Description of Icon. Optional.
 	 * @return string marked up icon
+	 *
+	 * @since 6.0.0 Only loads icons from svgs/.
 	 */
 	public static function get_icon( $icon, $summary = null ) {
 		if ( 'none' === $icon ) {
@@ -79,7 +81,8 @@ trait Weather_Info_Trait {
 		if ( ! $summary ) {
 			$summary = $icon;
 		}
-		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), $icon );
+		// Only a file name, so the icon can't point outside svgs/.
+		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), basename( (string) $icon ) );
 		if ( sloc_file_exists( $svg ) ) {
 			return PHP_EOL . sprintf( '<span class="sloc-weather-icon sloc-icon-%1$s" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), sloc_get_contents( $svg ) );
 		}
