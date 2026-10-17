@@ -75,7 +75,7 @@ class Geo_Provider_Google extends Geo_Provider {
 	 * Convert address properties to mf2
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Accepts a single result as well as a whole response, and works without a country.
+	 * @since 6.0.0 Accepts a single result as well as a whole response, and works without a country.
 	 *
 	 * @param  array $data Raw JSON: a whole response, or one of its results.
 	 * @return array $reverse microformats2 address elements in an array.
@@ -149,7 +149,7 @@ class Geo_Provider_Google extends Geo_Provider {
 	 * Geocode address.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 The address is parsed, and errors and searches with no results return an error.
+	 * @since 6.0.0 The address is parsed, and errors and searches with no results return an error.
 	 *
 	 * @param  string $address String representation of location.
 	 * @return array|WP_Error $reverse microformats2 address elements in an array.

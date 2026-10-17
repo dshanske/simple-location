@@ -528,7 +528,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 
 	/**
 	 * Creates an attachment of a published post with GPS coordinates left in its image metadata,
-	 * as photos uploaded before 5.0.26 have.
+	 * as photos uploaded before 6.0.0 have.
 	 *
 	 * @param string $visibility Visibility of the post.
 	 * @return int Attachment ID.

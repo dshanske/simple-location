@@ -49,10 +49,10 @@ class Airport_Location {
 	 *   @type array $keywords Extra keywords/phrases to assist with search, comma-separated. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc.
 	 * }
 	 * @since 4.0.0
-	 * @since 5.0.26 Searches that find nothing are cached too, and cache keys are hashed.
-	 * @since 5.0.26 Elevation is converted from feet to meters correctly, the first airport in the file can be found, and
+	 * @since 6.0.0 Searches that find nothing are cached too, and cache keys are hashed.
+	 * @since 6.0.0 Elevation is converted from feet to meters correctly, the first airport in the file can be found, and
 	 *              searches that return a list are cached as a list.
-	 * @since 5.0.26 An elevation of 0 is kept.
+	 * @since 6.0.0 An elevation of 0 is kept.
 	 */
 	public static function get( $search, $field = 'iata_code' ) {
 		$search    = trim( (string) $search );
@@ -136,7 +136,7 @@ class Airport_Location {
 	/**
 	 * Returns the error for an airport that wasn't found.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return WP_Error Error.
 	 */
@@ -164,7 +164,7 @@ class Airport_Location {
 	 *  @type string $active Y or N, however information is dated.
 	 * }
 	 * @since 4.0.0
-	 * @since 5.0.26 The first airline in the file can be found, a WP_Error is returned when nothing is found,
+	 * @since 6.0.0 The first airline in the file can be found, a WP_Error is returned when nothing is found,
 	 *              searches that find nothing are cached too, cache keys are hashed, and `\N` (no value) is dropped.
 	 */
 	public static function get_airline( $search, $field = 'iata_code' ) {
@@ -228,7 +228,7 @@ class Airport_Location {
 	/**
 	 * Returns the error for an airline that wasn't found.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return WP_Error Error.
 	 */

@@ -80,7 +80,7 @@ if ( ! function_exists( 'wp_trigger_error' ) ) {
 	 * Polyfill for WordPress 6.4 (ClassicPress has it since 2.2). Remove when minimum WordPress >= 6.4.
 	 * WordPress 6.2 and 6.3 have no `WP_Exception`, so an `E_USER_ERROR` throws an `Exception` there.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param string $function_name The function that triggered the error.
 	 * @param string $message       The message explaining the error.

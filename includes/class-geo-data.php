@@ -92,7 +92,7 @@ class Geo_Data {
 	 * If it was taken at a private venue, a public result becomes protected, so the venue name
 	 * shows but not the coordinates; a private result stays private.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param int $attachment_id Attachment ID.
 	 * @return string private, public, or protected.
@@ -121,7 +121,7 @@ class Geo_Data {
 	 * Accepts the stored numbers and the visibility names, which earlier versions of the settings page saved.
 	 * Anything else is treated as private.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param mixed $value 0, 1 or 2, or private, public or protected.
 	 * @return int 0 for private, 1 for public, 2 for protected.
@@ -1023,7 +1023,7 @@ class Geo_Data {
 	 * Returns the location of an object marked up for display.
 	 *
 	 * @since 5.0.0
-	 * @since 5.0.26 The address, link, description and wrapper are escaped.
+	 * @since 6.0.0 The address, link, description and wrapper are escaped.
 	 *
 	 * @param string $type Object type: post, comment, term or user.
 	 * @param int    $id   Object ID.
@@ -1041,7 +1041,7 @@ class Geo_Data {
 		 * Users who can read an object's location see a private or protected location, marked as hidden. Return false
 		 * when the output is generated for others to see, such as content sent to a federated service.
 		 *
-		 * @since 5.0.26
+		 * @since 6.0.0
 		 *
 		 * @param bool   $show Whether to show a hidden location. Defaults to whether the current user can read it.
 		 * @param string $type Object type: post, comment, term or user.

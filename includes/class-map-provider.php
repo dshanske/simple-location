@@ -63,7 +63,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	/**
 	 * Pixel density of the static map, 1 for normal screens and 2 for high-density screens.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 * @var int
 	 */
 	protected $scale = 1;
@@ -198,7 +198,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	/**
 	 * Shrinks the map size to fit the provider's maximum, keeping its shape.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 */
 	protected function fit_size() {
 		if ( ! is_numeric( $this->width ) || ! is_numeric( $this->height ) ) {
@@ -222,7 +222,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * Every density shows the same area as the normal map. Providers without a high-density option return only 1.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return int[] Pixel densities.
 	 */
@@ -274,8 +274,8 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Returns the HTML for a static map image linked to the full map.
 	 *
 	 * @since 4.1.10
-	 * @since 5.0.26 The URLs and sizes are escaped.
-	 * @since 5.0.26 The srcset uses the provider's high-density maps of the same area, and is left out when the provider has none.
+	 * @since 6.0.0 The URLs and sizes are escaped.
+	 * @since 6.0.0 The srcset uses the provider's high-density maps of the same area, and is left out when the provider has none.
 	 *
 	 * @param bool $srcset Optional. Add a srcset with the provider's high-density maps. Default false.
 	 * @return string HTML.
@@ -315,7 +315,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * Site administrators see the reason, such as a missing API key; everyone else sees nothing.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param WP_Error $error Error from get_the_static_map().
 	 * @return string Escaped error message, or an empty string.

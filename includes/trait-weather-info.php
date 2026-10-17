@@ -33,7 +33,7 @@ trait Weather_Info_Trait {
 	/**
 	 * Converts hPa to inHg.
 	 *
-	 * @since 5.0.26 Uses 0.02953 inHg per hPa; it used 0.03, which was 1.6% high.
+	 * @since 6.0.0 Uses 0.02953 inHg per hPa; it used 0.03, which was 1.6% high.
 	 *
 	 * @param float $hpa HectoPascals.
 	 * @return float Inches of Mercury.
@@ -45,7 +45,7 @@ trait Weather_Info_Trait {
 	/**
 	 * Converts inHg to hPa
 	 *
-	 * @since 5.0.26 Uses 0.02953 inHg per hPa; it used 0.03.
+	 * @since 6.0.0 Uses 0.02953 inHg per hPa; it used 0.03.
 	 *
 	 * @param float $inhg Inches of Mercury.
 	 * @return float HectoPascals.

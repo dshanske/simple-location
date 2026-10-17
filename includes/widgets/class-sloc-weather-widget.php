@@ -79,7 +79,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	/**
 	 * Whether the widget shows a user's weather rather than a fixed location.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array $instance Saved widget settings.
 	 * @return bool True if a user is selected.
@@ -93,7 +93,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 *
 	 * Drops the station name and ID, and the coordinates that the astronomical information is calculated from.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array $weather Weather conditions.
 	 * @return array Weather conditions without location details.

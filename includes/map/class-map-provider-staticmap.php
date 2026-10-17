@@ -16,7 +16,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *
 	 * The map server has no published limit. Its work grows with the image size, as it fetches every tile the map covers.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 * @var int
 	 */
 	const DEFAULT_MAX_SIZE = 1280;
@@ -25,8 +25,8 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * Constructor.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 The map size is limited to 1280 by 1280, or to SLOC_STATICMAP_MAX_WIDTH and SLOC_STATICMAP_MAX_HEIGHT when they are defined.
-	 * @since 5.0.26 A map server URL passed as the `api` argument is used instead of the setting.
+	 * @since 6.0.0 The map size is limited to 1280 by 1280, or to SLOC_STATICMAP_MAX_WIDTH and SLOC_STATICMAP_MAX_HEIGHT when they are defined.
+	 * @since 6.0.0 A map server URL passed as the `api` argument is used instead of the setting.
 	 *
 	 * @param array $args Arguments. See Map_Provider::__construct().
 	 */
@@ -53,7 +53,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 		 *
 		 * Maps larger than this are shrunk to fit, keeping their shape. A value of 0 removes that limit.
 		 *
-		 * @since 5.0.26
+		 * @since 6.0.0
 		 *
 		 * @param array $max_size {
 		 *     Largest map size, in pixels.

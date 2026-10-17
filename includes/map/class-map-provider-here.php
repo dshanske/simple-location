@@ -9,7 +9,7 @@
  * Map Provider using the HERE Map Image API v3.
  *
  * @since 1.0.0
- * @since 5.0.26 Uses Map Image API v3. Map scheme types were replaced by styles, so the type setting is gone.
+ * @since 6.0.0 Uses Map Image API v3. Map scheme types were replaced by styles, so the type setting is gone.
  */
 class Map_Provider_Here extends Map_Provider {
 	use Sloc_API_Here;
@@ -17,7 +17,7 @@ class Map_Provider_Here extends Map_Provider {
 	/**
 	 * Base URL of the Map Image API v3.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 * @var string
 	 */
 	const BASE_URL = 'https://image.maps.hereapi.com/mia/v3/base/mc/';
@@ -54,7 +54,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * Returns the Map Image API v3 styles.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Map Image API v3 styles.
+	 * @since 6.0.0 Map Image API v3 styles.
 	 *
 	 * @return array Styles keyed by ID.
 	 */
@@ -79,8 +79,8 @@ class Map_Provider_Here extends Map_Provider {
 	 * Returns the static map image URL, centered on the location with a marker.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Uses Map Image API v3.
-	 * @since 5.0.26 Draws a high-density map when the scale is 2.
+	 * @since 6.0.0 Uses Map Image API v3.
+	 * @since 6.0.0 Draws a high-density map when the scale is 2.
 	 *
 	 * @return string URL, or an empty string without an API key.
 	 */
@@ -115,7 +115,7 @@ class Map_Provider_Here extends Map_Provider {
 	 *
 	 * HERE's size limit counts image pixels, so a high-density map is only offered when the doubled size fits.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return int[] Pixel densities.
 	 */
@@ -130,7 +130,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * Returns a map image URL showing the route through a list of locations, sized to fit them.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Uses Map Image API v3.
+	 * @since 6.0.0 Uses Map Image API v3.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.

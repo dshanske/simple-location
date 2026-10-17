@@ -48,7 +48,7 @@ class Map_Provider_Google extends Map_Provider {
 	/**
 	 * Returns the pixel densities the provider can draw the static map at.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @return int[] Pixel densities.
 	 */
@@ -82,7 +82,7 @@ class Map_Provider_Google extends Map_Provider {
 	 * Returns the URL of a static map with a marker at each location and a path joining them.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Uses the roadmap style when none is set, and has no empty marker location.
+	 * @since 6.0.0 Uses the roadmap style when none is set, and has no empty marker location.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -117,7 +117,7 @@ class Map_Provider_Google extends Map_Provider {
 	 * Returns a link to the location on Google Maps.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Uses the documented Maps URLs search link over HTTPS.
+	 * @since 6.0.0 Uses the documented Maps URLs search link over HTTPS.
 	 *
 	 * @return string URL.
 	 */

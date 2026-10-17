@@ -36,7 +36,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 * Returns the URL of a static map centered on the location, with a marker.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Centered at the map zoom setting, with a marker icon from the v3 API.
+	 * @since 6.0.0 Centered at the map zoom setting, with a marker icon from the v3 API.
 	 *
 	 * @return string|WP_Error URL, or an error without an API key.
 	 */
@@ -61,7 +61,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 * Returns the URL of a static map with a marker at each location and a path joining them.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Uses the v3 API, with one marker parameter per location and a valid path.
+	 * @since 6.0.0 Uses the v3 API, with one marker parameter per location and a valid path.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -99,7 +99,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 * Returns a link to the location on OpenStreetMap, which LocationIQ's maps are drawn from.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Links to OpenStreetMap instead of returning an empty string.
+	 * @since 6.0.0 Links to OpenStreetMap instead of returning an empty string.
 	 *
 	 * @return string URL.
 	 */

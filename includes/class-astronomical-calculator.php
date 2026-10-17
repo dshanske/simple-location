@@ -95,7 +95,7 @@ class Astronomical_Calculator {
 	 * @return int $timestamp Unix timestamp reflecting sunrise or sunset as requested.
 	 *
 	 * @since 4.0.0
-	 * @since 5.0.26 Uses the date at the location rather than the UTC date.
+	 * @since 6.0.0 Uses the date at the location rather than the UTC date.
 	 */
 	public function get_timestamp( $timestamp, $type = 'sunrise' ) {
 		if ( ! is_numeric( $this->latitude ) && ! is_numeric( $this->longitude ) ) {
@@ -147,7 +147,7 @@ class Astronomical_Calculator {
 	 * evening west of UTC, or the morning east of it, that is a different day from the one at the location. Noon on
 	 * the local date, in the default timezone, gives date_sun_info() the local date.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param int $timestamp Unix timestamp.
 	 * @return int Unix timestamp.
@@ -561,7 +561,7 @@ class Astronomical_Calculator {
 	 * @return array Moon times.
 	 *
 	 * @since 4.1.6
-	 * @since 5.0.26 Uses the date at the location rather than the UTC date. No timestamp means now.
+	 * @since 6.0.0 Uses the date at the location rather than the UTC date. No timestamp means now.
 	 */
 	public function get_moon_times( $timestamp = null ) {
 		if ( ! $timestamp ) {

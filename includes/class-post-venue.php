@@ -193,8 +193,8 @@ class Post_Venue {
 	/**
 	 * Adds posts__in support to edit post screen.
 	 *
-	 * @since 5.0.26 Accepts a single ID or a comma-separated list.
-	 * @since 5.0.26 Only changes the main query on a post list screen, not every query on the page.
+	 * @since 6.0.0 Accepts a single ID or a comma-separated list.
+	 * @since 6.0.0 Only changes the main query on a post list screen, not every query on the page.
 	 *
 	 * @param WP_Query $query Query Object.
 	 */
@@ -485,7 +485,7 @@ class Post_Venue {
 	 * Sets the venue of a post.
 	 *
 	 * @since 5.0.0
-	 * @since 5.0.26 A post without a location is given the venue's location.
+	 * @since 6.0.0 A post without a location is given the venue's location.
 	 *
 	 * @param int $post_id  Post ID.
 	 * @param int $venue_id Venue ID.
@@ -626,7 +626,7 @@ class Post_Venue {
 	/**
 	 * Returns the IDs of a venue's published child venues.
 	 *
-	 * @since 5.0.26 Searches venues instead of posts and returns every child.
+	 * @since 6.0.0 Searches venues instead of posts and returns every child.
 	 *
 	 * @param int|WP_Post|null $venue_id Venue. Defaults to the current post.
 	 * @return int[]|false Child venue IDs, or false if the venue doesn't exist.

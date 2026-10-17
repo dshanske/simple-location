@@ -1109,7 +1109,7 @@ class Loc_Config {
 	 *
 	 * The option is stored as a number: 0 for private, 1 for public, 2 for protected.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array $args {
 	 *  Arguments for the select box.
@@ -1209,7 +1209,7 @@ class Loc_Config {
 	 * Asking for a provider that isn't registered returns null and leaves the site's setting alone.
 	 * If the site's chosen provider is no longer registered, the setting is cleared.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array       $providers Registered providers of one type, keyed by slug.
 	 * @param string      $option    Option holding the site's chosen provider.

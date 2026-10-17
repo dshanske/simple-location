@@ -41,10 +41,10 @@ class Sloc_Media_Metadata {
 	/**
 	 * Removes a photo's coordinates from its REST image metadata unless its location is public.
 	 *
-	 * Photos uploaded before 5.0.26 still have the GPS location in their stored image metadata,
+	 * Photos uploaded before 6.0.0 still have the GPS location in their stored image metadata,
 	 * which core returns as media_details.image_meta to anyone who can view the attachment.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param WP_REST_Response $response The response.
 	 * @param WP_Post          $post     The attachment.
@@ -82,7 +82,7 @@ class Sloc_Media_Metadata {
 	 * @return array $meta Updated metadata.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Uses the offset stored in the photo whatever the EXIF version, and reads it under the tag
+	 * @since 6.0.0 Uses the offset stored in the photo whatever the EXIF version, and reads it under the tag
 	 *               names current PHP gives it. Otherwise uses the timezone at the location, then the site's.
 	 */
 	public static function exif_data( $meta, $file, $image_type, $iptc = null, $exif = null ) {
@@ -191,7 +191,7 @@ class Sloc_Media_Metadata {
 	 * @return array $form_fields Updated with extra fields.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Values are escaped.
+	 * @since 6.0.0 Values are escaped.
 	 */
 	public static function attachment_fields_to_edit( $form_fields, $post ) {
 		$geodata                    = get_post_geodata( $post->ID );
@@ -236,7 +236,7 @@ class Sloc_Media_Metadata {
 	 * @return array $meta The updated metadata.
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 The location is removed from the image metadata, and no visibility is stored. The creation date is
+	 * @since 6.0.0 The location is removed from the image metadata, and no visibility is stored. The creation date is
 	 *               saved for photos without a location.
 	 */
 	public static function attachment( $meta, $post_id ) {

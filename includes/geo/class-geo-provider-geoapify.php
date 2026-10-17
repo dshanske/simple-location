@@ -72,7 +72,7 @@ class Geo_Provider_GeoApify extends Geo_Provider_Pelias {
 	 *
 	 * Geoapify returns GeoJSON like Pelias, but with its own property names, and sorts results by relevance.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param  array $json Raw JSON, a GeoJSON feature collection.
 	 * @return array $reverse microformats2 address elements in an array.

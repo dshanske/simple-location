@@ -41,8 +41,8 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 * Return array of current conditions
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Uses the fallback weather provider when a location lookup finds no observation.
-	 * @since 5.0.26 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
+	 * @since 6.0.0 Uses the fallback weather provider when a location lookup finds no observation.
+	 * @since 6.0.0 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
 	 *
 	 * @param int $time Time. Optional.
 	 * @return array|WP_Error|false Current conditions, the fallback provider's conditions when NWS has none for the location, or false without a location.
@@ -135,7 +135,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	/**
 	 * Return a value property converted from the unit NWS reports it in.
 	 *
-	 * @since 5.0.26
+	 * @since 6.0.0
 	 *
 	 * @param array $properties  Properties.
 	 * @param string $key        Key.
@@ -235,7 +235,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	/**
 	 * Return the condition code based on cloudlayer.
 	 *
-	 * @since 5.0.26 Returns null when there are no cloud layers.
+	 * @since 6.0.0 Returns null when there are no cloud layers.
 	 *
 	 * @param array $layers Cloud layers.
 	 * @return int|null Weather Code.

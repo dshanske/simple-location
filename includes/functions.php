@@ -508,7 +508,7 @@ if ( ! function_exists( 'clean_coordinate' ) ) {
 	 * @return float|false $coordinate Sanitized, rounded and converted coordinate. False if not valid coordinate
 	 *
 	 * @since 1.0.0
-	 * @since 5.0.26 Accepts whole numbers, checks the range, and added the `$type` parameter.
+	 * @since 6.0.0 Accepts whole numbers, checks the range, and added the `$type` parameter.
 	 */
 	function clean_coordinate( $coordinate, $type = '' ) {
 		if ( is_int( $coordinate ) || is_float( $coordinate ) ) {

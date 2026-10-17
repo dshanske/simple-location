@@ -42,7 +42,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 	/**
 	 * Return an address.
 	 *
-	 * @since 5.0.26 Returns an error without an API key or for an error response.
+	 * @since 6.0.0 Returns an error without an API key or for an error response.
 	 *
 	 * @return array|WP_Error $reverse microformats2 address elements in an array.
 	 */
@@ -87,7 +87,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 	/**
 	 * Convert address properties to hcard
 	 *
-	 * @since 5.0.26 Uses the venue's own coordinates and name; no longer sets the search point's altitude.
+	 * @since 6.0.0 Uses the venue's own coordinates and name; no longer sets the search point's altitude.
 	 *
 	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.

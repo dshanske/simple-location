@@ -94,7 +94,7 @@ class Sloc_Polyline
     /**
      * Reverse Google Polyline algorithm on encoded string.
      *
-     * @since 5.0.26 No deprecation on PHP 8.5, and a value cut off at the end of the string is dropped.
+     * @since 6.0.0 No deprecation on PHP 8.5, and a value cut off at the end of the string is dropped.
      *
      * @param string $string Encoded string to extract points from.
      *
