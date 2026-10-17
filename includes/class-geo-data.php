@@ -593,11 +593,10 @@ class Geo_Data {
 
 		$geodata = array();
 
-		$properties = static::$properties;
-		unset( $properties['visibility'] );
-		unset( $properties['map_zoom'] );
+		// Visibility and zoom are stored under other keys and read below.
+		$properties = array_diff( static::$properties, array( 'visibility', 'map_zoom' ) );
 
-		foreach ( static::$properties as $prop ) {
+		foreach ( $properties as $prop ) {
 			$geodata[ $prop ] = get_metadata( $type, $id, 'geo_' . $prop, true );
 		}
 
@@ -715,7 +714,15 @@ class Geo_Data {
 		 * @since 1.0.0
 		 */
 	public static function register_meta() {
-		$taxonomies = apply_filters( 'sloc_geo_taxonomies', array( 'venue' ) );
+		/**
+		 * Filters the taxonomies whose terms get geo meta registered.
+		 *
+		 * @since 1.0.0
+		 * @since 6.0.0 Empty by default; venues are a post type, not a taxonomy.
+		 *
+		 * @param string[] $taxonomies Taxonomy names. Default empty.
+		 */
+		$taxonomies = apply_filters( 'sloc_geo_taxonomies', array() );
 		$args       = array(
 			'sanitize_callback' => 'clean_coordinate',
 			'type'              => 'number',

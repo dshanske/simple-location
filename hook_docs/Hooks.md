@@ -11,7 +11,7 @@
 ## class-geo-data.php
 
 - [`simple_location_display_defaults`](simple_location_display_defaults) HTML type to wrap the entire location in
-- [`sloc_geo_taxonomies`](sloc_geo_taxonomies)
+- [`sloc_geo_taxonomies`](sloc_geo_taxonomies) Filters the taxonomies whose terms get geo meta registered.
 - [`sloc_show_hidden_location`](sloc_show_hidden_location) Filters whether a hidden location is shown to the current user.
 
 ## class-geo-provider.php

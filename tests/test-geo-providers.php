@@ -176,6 +176,24 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Every 2xx status is a success, not only 200.
+	 */
+	public function test_fetch_json_success_statuses() {
+		$provider = new Geo_Provider_Nominatim();
+		foreach ( array( 200, 201, 203 ) as $code ) {
+			$this->mock_http(
+				array(
+					'example.com/ok' => array(
+						'code' => $code,
+						'body' => array( 'ok' => true ),
+					),
+				)
+			);
+			$this->assertSame( array( 'ok' => true ), $provider->fetch_json( 'https://example.com/ok', array() ), (string) $code );
+		}
+	}
+
+	/**
 	 * Nominatim reverse geocoding sends the documented parameters and parses the address.
 	 */
 	public function test_nominatim_reverse() {

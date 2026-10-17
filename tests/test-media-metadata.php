@@ -152,10 +152,29 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The altitude reference marks below sea level whether it is a byte string or a number.
+	 */
+	public function test_exif_altitude_reference_forms() {
+		foreach ( array( "\x01" => -430, "\x00" => 430, '1' => -430, '0' => 430 ) as $ref => $expected ) {
+			$meta = Sloc_Media_Metadata::exif_data(
+				array(),
+				'',
+				IMAGETYPE_JPEG,
+				array(),
+				array(
+					'ExifVersion'    => '0230',
+					'GPSAltitude'    => '430/1',
+					'GPSAltitudeRef' => (string) $ref,
+				)
+			);
+			$this->assertEquals( $expected, $meta['location']['altitude'], bin2hex( (string) $ref ) );
+		}
+	}
+
+	/**
 	 * GPS altitude below sea level is negative.
 	 */
 	public function test_exif_data_altitude_below_sea_level() {
-		$this->markTestSkipped( 'Known bug, see #308' );
 		$meta = $this->read(
 			array(
 				'version'   => '0300',
@@ -714,7 +733,6 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * The creation time is valid markup with a datetime attribute.
 	 */
 	public function test_attachment_fields_to_edit_time_markup() {
-		$this->markTestSkipped( 'Known bug, see #308' );
 		$attachment = self::factory()->attachment->create_and_get();
 		update_post_meta( $attachment->ID, 'mf2_published', '2024-07-01T12:00:00-04:00' );
 		$fields = Sloc_Media_Metadata::attachment_fields_to_edit( array(), $attachment );

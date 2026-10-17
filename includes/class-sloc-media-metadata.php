@@ -152,7 +152,10 @@ class Sloc_Media_Metadata {
 
 		if ( ! empty( $exif['GPSAltitude'] ) ) {
 			// Photos may also store an altitude.
-			$meta['location']['altitude'] = wp_exif_frac2dec( $exif['GPSAltitude'] ) * ( 1 === $exif['GPSAltitudeRef'] ? -1 : 1 );
+			// GPSAltitudeRef is 1 below sea level; exif_read_data() returns it as a byte string ("\x01"), some tools as a number.
+			$ref                          = $exif['GPSAltitudeRef'] ?? 0;
+			$below                        = is_string( $ref ) && 1 === strlen( $ref ) && ! is_numeric( $ref ) ? 1 === ord( $ref ) : 1 === (int) $ref;
+			$meta['location']['altitude'] = wp_exif_frac2dec( $exif['GPSAltitude'] ) * ( $below ? -1 : 1 );
 		}
 		return $meta;
 	}
@@ -222,7 +225,7 @@ class Sloc_Media_Metadata {
 				'label'        => __( 'Creation Time', 'simple-location' ),
 				'input'        => 'html',
 				'show_in_edit' => false,
-				'html'         => sprintf( '<time dateime="%1$s" />%2$s</time><br />', esc_attr( $time ), esc_html( $time ) ),
+				'html'         => sprintf( '<time datetime="%1$s">%2$s</time><br />', esc_attr( $time ), esc_html( $time ) ),
 			);
 		}
 		return $form_fields;

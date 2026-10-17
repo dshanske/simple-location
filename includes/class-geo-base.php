@@ -584,11 +584,11 @@ class Geo_Base {
 		$geo = array_map( 'esc_html', $geo );
 		$geo = array_map( 'ent2ncr', $geo );
 
-		printf( '\t<georss:point>%1$s %2$s</georss:point>\n', floatval( $geo['latitude'] ), floatval( $geo['longitude'] ) );
-		printf( '\t\t<geo:lat>%1$s</geo:lat>\n', floatval( $geo['latitude'] ) );
-		printf( '\t\t<geo:long>%1$s</geo:long>', floatval( $geo['longitude'] ) );
+		printf( "\t\t<georss:point>%1\$s %2\$s</georss:point>\n", floatval( $geo['latitude'] ), floatval( $geo['longitude'] ) );
+		printf( "\t\t<geo:lat>%1\$s</geo:lat>\n", floatval( $geo['latitude'] ) );
+		printf( "\t\t<geo:long>%1\$s</geo:long>\n", floatval( $geo['longitude'] ) );
 		if ( isset( $geo['address'] ) ) {
-			printf( '\t\t<geo:featureName>%1$s</geo:featureName>', wp_kses_post( $geo['address'] ) );
+			printf( "\t\t<geo:featureName>%1\$s</geo:featureName>\n", wp_kses_post( $geo['address'] ) );
 		}
 	}
 
@@ -1214,9 +1214,6 @@ class Geo_Base {
 			}
 		} elseif ( ! current_user_can( 'edit_post', $post_id ) ) {
 				return;
-		}
-		if ( has_term( '', 'venue' ) ) {
-			return;
 		}
 		if ( 'venue' !== get_post_type( $post_id ) ) {
 			is_day_post( $post_id );

@@ -1,26 +1,28 @@
+Filters the taxonomies whose terms get geo meta registered.
+
 ## Auto-generated Example
 
 ```php
 add_filter(
-    'sloc_geo_taxonomies',
-    function ( array $string_list ) {
-        // Your code here
-        return $string_list;
+   'sloc_geo_taxonomies',
+    function( array $taxonomies ) {
+        // Your code here.
+        return $taxonomies;
     }
 );
 ```
 
 ## Parameters
 
-- *`array`* `$string_list`
+- *`string[]`* `$taxonomies` Taxonomy names. Default empty.
 
 ## Files
 
-- [includes/class-geo-data.php:634](https://github.com/dshanske/simple-location/blob/main/includes/class-geo-data.php#L634)
+- [includes/class-geo-data.php:](https://github.com/dshanske/simple-location/blob/main/includes/class-geo-data.php#L)
 ```php
-apply_filters( 'sloc_geo_taxonomies', array( 'venue' ) )
+apply_filters( 'sloc_geo_taxonomies', array() )
 ```
 
 
 
-[Hooks](Hooks)
+[← All Hooks](Hooks)
