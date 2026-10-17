@@ -6,14 +6,27 @@
  */
 
 /**
- * Map Provider using HERE Map API.
+ * Map Provider using the HERE Map Image API v3.
  *
  * @since 1.0.0
+ * @since 5.0.26 Uses Map Image API v3. Map scheme types were replaced by styles, so the type setting is gone.
  */
 class Map_Provider_Here extends Map_Provider {
 	use Sloc_API_Here;
 
-	protected $type;
+	/**
+	 * Base URL of the Map Image API v3.
+	 *
+	 * @since 5.0.26
+	 * @var string
+	 */
+	const BASE_URL = 'https://image.maps.hereapi.com/mia/v3/base/mc/';
+
+	/**
+	 * Constructor.
+	 *
+	 * @param array $args Arguments. See Map_Provider::__construct().
+	 */
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'HERE Maps', 'simple-location' );
 		$this->slug         = 'here';
@@ -29,104 +42,120 @@ class Map_Provider_Here extends Map_Provider {
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_here_style' );
 		}
-		if ( ! isset( $args['type'] ) ) {
-			$this->type = get_option( 'sloc_here_type' );
+		// Styles from the retired API, such as alps, aren't valid in v3.
+		if ( ! is_string( $args['style'] ) || ! array_key_exists( $args['style'], $this->get_styles() ) ) {
+			$args['style'] = 'explore.day';
 		}
 
 		parent::__construct( $args );
 	}
 
-	public static function type_callback( array $args ) {
-		$name  = $args['label_for'];
-		$types = self::get_types();
-		if ( is_wp_error( $types ) ) {
-			echo esc_html( $types->get_error_message() );
-			return;
-		}
-		$text = get_option( $name );
-		Loc_Config::select_callback( $name, $text, $types );
-	}
-
+	/**
+	 * Returns the Map Image API v3 styles.
+	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Map Image API v3 styles.
+	 *
+	 * @return array Styles keyed by ID.
+	 */
 	public function get_styles() {
 		return array(
-			'alps'       => __( 'Alps', 'simple-location' ),
-			'daisy'      => __( 'Daisy', 'simple-location' ),
-			'dreamworks' => __( 'Dreamworks', 'simple-location' ),
-			'flame'      => __( 'Flame', 'simple-location' ),
-			'fleet'      => __( 'Fleet', 'simple-location' ),
-			'mini'       => __( 'Mini', 'simple-location' ),
+			'explore.day'             => __( 'Explore (Day)', 'simple-location' ),
+			'explore.night'           => __( 'Explore (Night)', 'simple-location' ),
+			'explore.satellite.day'   => __( 'Explore Satellite (Day)', 'simple-location' ),
+			'lite.day'                => __( 'Lite (Day)', 'simple-location' ),
+			'lite.night'              => __( 'Lite (Night)', 'simple-location' ),
+			'lite.satellite.day'      => __( 'Lite Satellite (Day)', 'simple-location' ),
+			'logistics.day'           => __( 'Logistics (Day)', 'simple-location' ),
+			'logistics.night'         => __( 'Logistics (Night)', 'simple-location' ),
+			'logistics.satellite.day' => __( 'Logistics Satellite (Day)', 'simple-location' ),
+			'satellite.day'           => __( 'Satellite (Day)', 'simple-location' ),
+			'topo.day'                => __( 'Topographic (Day)', 'simple-location' ),
+			'topo.night'              => __( 'Topographic (Night)', 'simple-location' ),
 		);
 	}
 
-	public static function get_types() {
-		return array(
-			0 => __( 'Normal map view in day light mode', 'simple-location' ),
-			1 => __( 'Satellite map view in day light mode', 'simple-location' ),
-			2 => __( 'Terrain map view in day light mode', 'simple-location' ),
-			3 => __( 'Satellite map view with streets in day light mode', 'simple-location' ),
-			4 => __( 'Normal grey map view with public transit in day light mode', 'simple-location' ),
-			5 => __( 'Normal grey map view in day light mode (used for background maps)', 'simple-location' ),
-		);
-	}
-
-	// Return code for map
+	/**
+	 * Returns the static map image URL, centered on the location with a marker.
+	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Uses Map Image API v3.
+	 *
+	 * @return string URL, or an empty string without an API key.
+	 */
 	public function get_the_static_map() {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$url = 'https://image.maps.ls.hereapi.com/mia/1.6/';
-		$map = add_query_arg(
+		$url = sprintf(
+			'%1$scenter:%2$s,%3$s;zoom=%4$s/%5$sx%6$s/png8',
+			self::BASE_URL,
+			$this->latitude,
+			$this->longitude,
+			$this->map_zoom,
+			$this->width,
+			$this->height
+		);
+		return add_query_arg(
 			array(
-				'apiKey' => $this->api,
-				'f'      => 0,
-				'c'      => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-				'w'      => $this->width,
-				'h'      => $this->height,
-				'style'  => $this->style,
-				't'      => $this->type,
-				'z'      => $this->map_zoom,
+				'apiKey'  => $this->api,
+				'style'   => $this->style,
+				'overlay' => sprintf( 'point:%1$s,%2$s', $this->latitude, $this->longitude ),
 			),
 			$url
 		);
-		return $map;
 	}
 
+	/**
+	 * Returns a map image URL showing the route through a list of locations, sized to fit them.
+	 *
+	 * @since 1.0.0
+	 * @since 5.0.26 Uses Map Image API v3.
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string URL, or an empty string without an API key or locations.
+	 */
 	public function get_archive_map( $locations ) {
 		if ( empty( $this->api ) || empty( $locations ) ) {
 			return '';
 		}
 
-		$markers = array();
+		$points = array();
 		foreach ( $locations as $location ) {
-			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
+			$points[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
-		$polyline = Sloc_Polyline::encode( $locations );
 
-		$url = 'https://image.maps.ls.hereapi.com/mia/1.6/route';
-		$map = add_query_arg(
+		$url = add_query_arg(
 			array(
-				'apiKey' => $this->api,
-				'style'  => $this->style,
-				't'      => $this->type,
-				'w'      => $this->width,
-				'h'      => $this->height,
-				'r0'     => implode( ',', $markers ),
-				'm0'     => implode( ',', $markers ),
+				'apiKey'  => $this->api,
+				'style'   => $this->style,
+				'overlay' => 'point:' . implode( '|', $points ),
 			),
-			$url
+			sprintf( '%1$soverlay:padding=32/%2$sx%3$s/png8', self::BASE_URL, $this->width, $this->height )
 		);
-
-		return $map;
+		// Lines and points are separate overlays, and a line needs at least two points.
+		if ( count( $points ) > 1 ) {
+			$url .= '&overlay=line:' . implode( ',', $points ) . ';width=4';
+		}
+		return $url;
 	}
 
+	/**
+	 * Returns a link to the location on HERE WeGo.
+	 *
+	 * @return string URL.
+	 */
 	public function get_the_map_url() {
 		return sprintf( 'https://wego.here.com/?map=%1$s,%2$s,%3$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the map HTML.
+	 *
+	 * @param boolean $static Unused; the map is always static.
+	 * @return string HTML.
+	 */
 	public function get_the_map( $static = true ) {
 		return $this->get_the_static_map_html();
 	}
 }
-
-register_sloc_provider( new Map_Provider_Here() );
