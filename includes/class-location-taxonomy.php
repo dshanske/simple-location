@@ -767,7 +767,7 @@ final class Location_Taxonomy {
 			$region_code = self::region_return( $addr );
 			if ( $region_code ) {
 				$return = wp_insert_term(
-					ifset( $addr['region'], $region_code ),
+					$addr['region'] ?? $region_code,
 					'location',
 					array(
 						'slug'   => $region_code,

@@ -948,7 +948,7 @@ class Loc_Config {
 	 */
 	public static function provider_callback( $args ) {
 		$name        = $args['label_for'];
-		$description = ifset( $args['description'], '' );
+		$description = $args['description'] ?? '';
 		$text        = get_option( $name );
 		$providers   = $args['providers'];
 		ksort( $providers );

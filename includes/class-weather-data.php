@@ -411,9 +411,9 @@ class Sloc_Weather_Data {
 
 		if ( array_key_exists( 'wind', $weather ) ) {
 			$w = array(
-				'windgust'   => ifset( $weather['wind']['gust'] ),
-				'winddegree' => ifset( $weather['wind']['degree'] ),
-				'windspeed'  => ifset( $weather['wind']['speed'] ),
+				'windgust'   => $weather['wind']['gust'] ?? null,
+				'winddegree' => $weather['wind']['degree'] ?? null,
+				'windspeed'  => $weather['wind']['speed'] ?? null,
 			);
 			$w = array_filter( $w, array( __CLASS__, 'has_value' ) );
 			unset( $weather['wind'] );
@@ -521,7 +521,7 @@ class Sloc_Weather_Data {
 
 		$class    = implode( ' ', $args['wrapper-class'] );
 		$return   = array( PHP_EOL );
-		$return[] = Weather_Provider::get_icon( $weather['icon'], ifset( $weather['summary'] ) );
+		$return[] = Weather_Provider::get_icon( $weather['icon'], $weather['summary'] ?? null );
 		if ( 'graphic' !== $args['style'] ) {
 			$return[] = self::get_the_temperature( $weather ) . PHP_EOL;
 			if ( ! empty( $weather['summary'] ) ) {
@@ -543,7 +543,7 @@ class Sloc_Weather_Data {
 		if ( ! isset( $weather['temperature'] ) ) {
 			return null;
 		}
-		$units = ifset( $weather['units'] );
+		$units = $weather['units'] ?? null;
 		if ( ! $units ) {
 			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		}
@@ -563,7 +563,7 @@ class Sloc_Weather_Data {
 	}
 
 	private static function get_weather_extras( $weather ) {
-		$units = ifset( $weather['units'] );
+		$units = $weather['units'] ?? null;
 		if ( ! $units ) {
 			$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		}

@@ -1163,7 +1163,7 @@ class Geo_Data {
 				if ( ! array_key_exists( 'latitude', $loc ) ) {
 					$loc['address'] = '';
 				} else {
-					$loc['address'] = dec_to_dms( $loc['latitude'], $loc['longitude'], ifset( $loc['altitude'] ) );
+					$loc['address'] = dec_to_dms( $loc['latitude'], $loc['longitude'], $loc['altitude'] ?? '' );
 				}
 			}
 

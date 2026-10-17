@@ -24,14 +24,14 @@ $geodata = is_array( $geodata ) ? $geodata : array();
 <table class="form-table">
 <tr><th><label for="latitude"><?php esc_html_e( 'Latitude', 'simple-location' ); ?></label></th>
 <td>
-<input type="text" name="latitude" id="latitude" value="<?php echo esc_attr( ifset( $geodata['latitude'], '' ) ); ?>" class="regular-text" />
+<input type="text" name="latitude" id="latitude" value="<?php echo esc_attr( $geodata['latitude'] ?? '' ); ?>" class="regular-text" />
 <br />
 <span class="description"><?php esc_html_e( 'Latitude', 'simple-location' ); ?></span>
 </td>
 </tr>
 <tr><th><label for="longitude"><?php esc_html_e( 'Longitude', 'simple-location' ); ?></label></th>
 <td>
-<input type="text" name="longitude" id="longitude" value="<?php echo esc_attr( ifset( $geodata['longitude'], '' ) ); ?>" class="regular-text" />
+<input type="text" name="longitude" id="longitude" value="<?php echo esc_attr( $geodata['longitude'] ?? '' ); ?>" class="regular-text" />
 <br />
 <span class="description"><?php esc_html_e( 'Longitude', 'simple-location' ); ?></span>
 </td>
@@ -39,7 +39,7 @@ $geodata = is_array( $geodata ) ? $geodata : array();
 <tr><th><label for="timezone"><?php esc_html_e( 'Time Zone', 'simple-location' ); ?></label></th>
 <td>
 <select name="timezone" id="user-timezone" width="90%">
-<?php echo Loc_Timezone::wp_timezone_choice( ifset( $geodata['timezone'] ) ); // phpcs:ignore ?>
+<?php echo Loc_Timezone::wp_timezone_choice( $geodata['timezone'] ?? '' ); // phpcs:ignore ?>
 </select>
 <br />
 <span class="description"><?php esc_html_e( 'Time Zone', 'simple-location' ); ?></span>
@@ -47,19 +47,19 @@ $geodata = is_array( $geodata ) ? $geodata : array();
 </tr>
 <tr><th><label for="altitude"><?php esc_html_e( 'Altitude', 'simple-location' ); ?></label></th>
 <td>
-<input type="text" name="altitude" id="altitude" value="<?php echo esc_attr( ifset( $geodata['altitude'], '' ) ); ?>" class="regular-text" />
+<input type="text" name="altitude" id="altitude" value="<?php echo esc_attr( $geodata['altitude'] ?? '' ); ?>" class="regular-text" />
 <br />
 <span class="description"><?php esc_html_e( 'Altitude', 'simple-location' ); ?></span>
 </td>
 </tr>
 <tr><th><label for="address"><?php esc_html_e( 'Address', 'simple-location' ); ?></label></th>
 <td>
-<input type="text" name="address" id="address" value="<?php echo esc_attr( ifset( $geodata['address'], '' ) ); ?>" class="regular-text" />
+<input type="text" name="address" id="address" value="<?php echo esc_attr( $geodata['address'] ?? '' ); ?>" class="regular-text" />
 <br />
 <span class="description"><?php esc_attr_e( 'Address', 'simple-location' ); ?></span>
 </td>
 </tr>
-<?php Geo_Base::geo_public_user( ifset( $geodata['visibility'] ) ); // phpcs:ignore ?>
+<?php Geo_Base::geo_public_user( $geodata['visibility'] ?? '' ); // phpcs:ignore ?>
 </table>
 <?php wp_nonce_field( 'location_user', 'location_user_nonce' ); ?>
 </div>

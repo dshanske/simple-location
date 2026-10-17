@@ -94,8 +94,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * Removes unset values from weather data.
 	 *
 	 * Unlike array_filter() without a callback, this keeps 0, 0.0 and '0', which are real
-	 * readings (0 °C, no wind, no rain). It removes null, '', false and empty arrays, since
-	 * ifset() returns false for a missing value. `day` is kept when it is false (night).
+	 * readings (0 °C, no wind, no rain). It removes null, '', false and empty arrays, which
+	 * stand for a missing value. `day` is kept when it is false (night).
 	 *
 	 * @since 6.0.0
 	 *
@@ -445,7 +445,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 			$conditions = array();
 		}
 		$return  = '<div class="sloc-weather">';
-		$return .= $this->get_icon( ifset( $conditions['icon'] ), ifset( $conditions['summary'] ) );
+		$return .= $this->get_icon( $conditions['icon'] ?? null, $conditions['summary'] ?? null );
 		if ( isset( $conditions['temperature'] ) ) {
 			$return .= $this->get_temp( $conditions['temperature'] );
 		}
