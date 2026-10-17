@@ -393,7 +393,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertCityHall( $addr );
 		$this->assertSame( $location['street'], $addr['street-address'] );
 		$this->assertSame( 'United States', $addr['country-name'] );
-		$this->assertSame( ifset( $location['adminArea6'] ), ifset( $addr['extended-address'] ) );
+		$this->assertSame( $location['adminArea6'] ?? null, $addr['extended-address'] ?? null );
 
 		$result = ( new Geo_Provider_Mapquest( array( 'api' => 'mq-key' ) ) )->geocode( 'City Hall' );
 		$this->assertSame( 'https://www.mapquestapi.com/geocoding/v1/address', $this->last_request()['base'] );
