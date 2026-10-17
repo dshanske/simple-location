@@ -108,8 +108,16 @@ class Loc_Config {
 	}
 
 
+	/**
+	 * Loads the admin stylesheet and script on the settings page.
+	 *
+	 * @since 6.0.0 Also when the page is under Settings, without the IndieWeb plugin.
+	 *
+	 * @param string $hook_suffix Admin page hook.
+	 */
 	public static function admin_enqueue( $hook_suffix ) {
-		$hooks = array( 'indieweb_page_simloc' );
+		// Under the IndieWeb menu when that plugin is active, otherwise under Settings.
+		$hooks = array( 'indieweb_page_simloc', 'settings_page_simloc' );
 		if ( in_array( $hook_suffix, $hooks, true ) ) {
 			wp_enqueue_style(
 				'sloc_admin',
@@ -325,7 +333,8 @@ class Loc_Config {
 				'type'         => 'number',
 				'description'  => 'Simple Location Map Aspect Ratio',
 				'show_in_rest' => true,
-				'default'      => self::get_default_aspect_ratio(),
+				// The first ratio in the list (widescreen), not the whole list.
+				'default'      => array_key_first( self::get_default_aspect_ratio() ) ?? '1.77777777778',
 			)
 		);
 		register_setting(
