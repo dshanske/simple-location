@@ -194,17 +194,17 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	 */
 	public function convert_data( $json ) {
 		$return                = array();
-		$return['temperature'] = ifset_round( $json['temp'], 1 );
-		$return['dewpoint']    = ifset_round( $json['dwpt'], 1 );
-		$return['humidity']    = ifset_round( $json['rhum'], 1 );
-		$return['pressure']    = ifset_round( $json['pres'], 1 );
+		$return['temperature'] = self::round_value( $json['temp'] ?? null, 1 );
+		$return['dewpoint']    = self::round_value( $json['dwpt'] ?? null, 1 );
+		$return['humidity']    = self::round_value( $json['rhum'] ?? null, 1 );
+		$return['pressure']    = self::round_value( $json['pres'] ?? null, 1 );
 
-		$return['windspeed']  = self::round_value( self::kmh_to_ms( ifset( $json['wspd'] ) ), 1 );
-		$return['windgust']   = self::round_value( self::kmh_to_ms( ifset( $json['wpgt'] ) ), 1 );
-		$return['winddegree'] = ifset_round( $json['wdir'], 1 );
-		$return['rain']       = ifset_round( $json['prcp'], 2 );
-		$return['snow']       = self::cm_to_mm( ifset_round( $json['snow'], 2 ) );
-		$coco                 = ifset( $json['coco'] );
+		$return['windspeed']  = self::round_value( self::kmh_to_ms( $json['wspd'] ?? null ), 1 );
+		$return['windgust']   = self::round_value( self::kmh_to_ms( $json['wpgt'] ?? null ), 1 );
+		$return['winddegree'] = self::round_value( $json['wdir'] ?? null, 1 );
+		$return['rain']       = self::round_value( $json['prcp'] ?? null, 2 );
+		$return['snow']       = self::cm_to_mm( self::round_value( $json['snow'] ?? null, 2 ) );
+		$coco                 = $json['coco'] ?? null;
 		if ( is_numeric( $coco ) ) {
 			$return['summary'] = self::get_status( (int) $coco );
 			$return['code']    = self::code_map( (int) $coco );
