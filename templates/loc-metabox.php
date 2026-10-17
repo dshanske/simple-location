@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
-	$geodata   = get_comment_geodata( $comment->comment_ID );
+	$geodata   = get_comment_geodata( get_comment_ID() );
 	$sloc_type = '';
 } else {
 	$sloc_type = get_post_type();

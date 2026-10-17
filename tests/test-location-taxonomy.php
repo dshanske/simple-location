@@ -322,7 +322,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * A location can be set by passing the post object.
 	 */
 	public function test_set_location_with_post_object() {
-		$this->markTestSkipped( 'Known bug, see #321' );
 		$terms = $this->hierarchy();
 		$post  = self::factory()->post->create_and_get();
 		Location_Taxonomy::set_location( $post, $terms['locality'] );
@@ -412,18 +411,21 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 		$terms   = $this->hierarchy();
 		$post_id = self::factory()->post->create();
 		$this->assertSame( '', Location_Taxonomy::get_post_location_link( $post_id ) );
-		$this->markTestSkipped( 'Known bug, see #321' );
 		Location_Taxonomy::set_location( $post_id, $terms['locality'] );
 		$this->assertSame( Location_Taxonomy::get_location_link( $terms['locality'] ), Location_Taxonomy::get_post_location_link( $post_id ) );
 	}
 
 	/**
-	 * The location list wraps wp_list_categories().
+	 * The location list wraps wp_list_categories(), and passes arguments to it.
 	 */
 	public function test_list_locations() {
-		$this->markTestSkipped( 'Known bug, see #321' );
-		$this->hierarchy();
-		$this->assertStringContainsString( 'Philadelphia', Location_Taxonomy::list_locations() );
+		$terms = $this->hierarchy();
+		Location_Taxonomy::set_location( self::factory()->post->create(), $terms['locality'] );
+		$this->assertStringContainsString( 'Philadelphia', Location_Taxonomy::list_locations( array( 'echo' => 0 ) ) );
+
+		ob_start();
+		Location_Taxonomy::list_locations();
+		$this->assertStringContainsString( 'Philadelphia', ob_get_clean(), 'Echoed by default.' );
 	}
 
 	/**
