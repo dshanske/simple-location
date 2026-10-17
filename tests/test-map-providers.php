@@ -338,7 +338,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * MapQuest builds static map v5 URLs.
+	 * MapQuest builds static map v5 URLs for a location and for a route.
 	 */
 	public function test_mapquest() {
 		$map = $this->provider( 'Map_Provider_Mapquest', array( 'style' => 'dark' ) );
@@ -358,8 +358,22 @@ class MapProvidersTest extends WP_UnitTestCase {
 		);
 		$this->assertSame( 'https://www.mapquest.com/?center=39.9524,-75.1636&zoom=15', $map->get_the_map_url() );
 
+		$archive = $this->parse( $map->get_archive_map( $this->locations ) );
+		$this->assertSame( 'https://www.mapquestapi.com/staticmap/v5/map', $archive['base'] );
+		$this->assertSame(
+			array(
+				'key'       => 'KEY',
+				'size'      => '600,400',
+				'type'      => 'dark',
+				'locations' => '39.9524,-75.1636||39.9489,-75.15',
+				'shape'     => 'cmp|enc:' . Sloc_Polyline::encode( $this->locations ),
+			),
+			$archive['query']
+		);
+
 		$map = $this->provider( 'Map_Provider_Mapquest', array( 'api' => '' ) );
 		$this->assertSame( '', $map->get_the_static_map() );
+		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
 	}
 
 	/**

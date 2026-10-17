@@ -638,6 +638,20 @@ class SettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Sites that chose a MapQuest elevation provider, which were removed, have the choice cleared.
+	 */
+	public function test_removed_mapquest_elevation_providers() {
+		foreach ( array( 'mapquest', 'openmapquest' ) as $slug ) {
+			update_option( 'sloc_elevation_provider', $slug );
+			$this->assertNull( Loc_Config::elevation_provider(), $slug );
+			$this->assertNotSame( $slug, get_option( 'sloc_elevation_provider' ), $slug );
+		}
+		// MapQuest is still a map and geocoding provider.
+		$this->assertArrayHasKey( 'mapquest', Loc_Config::map_providers() );
+		$this->assertInstanceOf( 'Geo_Provider_Mapquest', Loc_Config::geo_provider( 'mapquest' ) );
+	}
+
+	/**
 	 * Sites that chose Bing, which was removed, have the choice cleared and show no map.
 	 */
 	public function test_removed_bing_provider() {

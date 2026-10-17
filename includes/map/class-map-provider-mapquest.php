@@ -72,7 +72,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 		}
 		$polyline = Sloc_Polyline::encode( $locations );
 
-		$url = 'https://open.mapquestapi.com/staticmap/v5/map';
+		$url = 'https://www.mapquestapi.com/staticmap/v5/map';
 		$map = add_query_arg(
 			array(
 				'key'       => $this->api,

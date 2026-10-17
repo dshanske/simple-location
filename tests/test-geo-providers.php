@@ -368,7 +368,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array( 'mapquestapi.com/geocoding/v1/' => array( 'body' => $fixture ) ) );
 		$addr    = $this->provider( 'Geo_Provider_Mapquest', array( 'api' => 'mq-key' ) )->reverse_lookup();
 		$request = $this->last_request();
-		$this->assertStringEndsWith( 'mapquestapi.com/geocoding/v1/reverse', $request['base'] );
+		$this->assertSame( 'https://www.mapquestapi.com/geocoding/v1/reverse', $request['base'] );
 		$this->assertSame( 'mq-key', $request['query']['key'] );
 		$this->assertCityHall( $addr );
 		$this->assertSame( $location['street'], $addr['street-address'] );
@@ -376,7 +376,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( ifset( $location['adminArea6'] ), ifset( $addr['extended-address'] ) );
 
 		$result = ( new Geo_Provider_Mapquest( array( 'api' => 'mq-key' ) ) )->geocode( 'City Hall' );
-		$this->assertStringEndsWith( 'mapquestapi.com/geocoding/v1/address', $this->last_request()['base'] );
+		$this->assertSame( 'https://www.mapquestapi.com/geocoding/v1/address', $this->last_request()['base'] );
 		$this->assertSame( $location['latLng']['lat'], $result['latitude'] );
 	}
 
