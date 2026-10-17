@@ -3,9 +3,6 @@
  * Tests for the elevation providers in includes/elevation/, using recorded vendor responses
  * (tests/data/elevation).
  *
- * The MapQuest and OpenMapQuest providers use a shut-down API (see tests/data/README.md) and
- * have no tests.
- *
  * @package Simple_Location
  */
 
@@ -67,7 +64,7 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::elevation_providers();
-		foreach ( array( 'geonames', 'google', 'mapquest', 'openmapquest', 'openroute' ) as $slug ) {
+		foreach ( array( 'geonames', 'google', 'openroute' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}

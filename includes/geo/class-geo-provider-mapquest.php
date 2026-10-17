@@ -55,7 +55,7 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			'zoom'                => $this->reverse_zoom,
 			'key'                 => $this->api,
 		);
-		$url  = 'http://www.mapquestapi.com/geocoding/v1/reverse';
+		$url  = 'https://www.mapquestapi.com/geocoding/v1/reverse';
 
 		$json = $this->fetch_json( $url, $args );
 		if ( is_wp_error( $json ) ) {
@@ -147,7 +147,7 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			'location' => $address,
 			'key'      => $this->api,
 		);
-		$url  = 'http://www.mapquestapi.com/geocoding/v1/address';
+		$url  = 'https://www.mapquestapi.com/geocoding/v1/address';
 
 		$json = $this->fetch_json( $url, $args );
 		if ( is_wp_error( $json ) ) {

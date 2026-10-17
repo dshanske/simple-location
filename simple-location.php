@@ -332,8 +332,6 @@ class Simple_Location_Plugin {
 		$providers = array(
 			'class-elevation-provider-geonames.php', // Geonames.
 			'class-elevation-provider-google.php', // Google.
-			'class-elevation-provider-mapquest.php', // MapQuest.
-			'class-elevation-provider-openmapquest.php', // MapQuest Nominatim.
 			'class-elevation-provider-openroute.php', // OpenRoute.
 		);
 		self::register_providers( $providers, 'includes/elevation/' );

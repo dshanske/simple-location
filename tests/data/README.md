@@ -88,8 +88,6 @@ Each test checks that the elevation the plugin returns is the one in the fixture
 | `google-elevation.json` | `GET https://maps.googleapis.com/maps/api/elevation/json?locations=39.9524,-75.1636&key=…` (errors reuse `geo/google-denied.json`) | Hand-built from docs |
 | `openroute-point.json` | `GET https://api.openrouteservice.org/elevation/point?api_key=…&format_out=point&geometry=-75.1636,39.9524` | Hand-built from docs |
 
-The MapQuest and OpenMapQuest elevation providers call shut-down APIs (API-2) and have no fixtures.
-
 ## Venue providers (`venue/`)
 
 The venue tests check the same stable address facts as the geo tests for every venue, plus the
