@@ -100,11 +100,17 @@ if ( ! function_exists( 'ifset' ) ) {
 	 *
 	 * Returns $var if set otherwise $default.
 	 *
+	 * Because $var is passed by reference, reading a missing array key with this
+	 * function adds that key to the array with a null value.
+	 *
+	 * @deprecated 6.0.0 Use the null coalescing operator, `$var ?? $default`.
+	 *
 	 * @param mixed $var A variable.
 	 * @param mixed $default Return if $var is not set. Defaults to false.
 	 * @return mixed $return The returned value.
 	 */
 	function ifset( &$var, $default = false ) {
+		_deprecated_function( __FUNCTION__, '6.0.0', 'the ?? operator' );
 		return isset( $var ) ? $var : $default;
 	}
 }
@@ -115,13 +121,20 @@ if ( ! function_exists( 'ifset_round' ) ) {
 	 *
 	 * Returns $var, rounding it if it is a float if set otherwise $default.
 	 *
+	 * Because $var is passed by reference, reading a missing array key with this
+	 * function adds that key to the array with a null value.
+	 *
+	 * @deprecated 6.0.0 Use sloc_round_value() with the null coalescing operator,
+	 *                   `sloc_round_value( $var ?? $default, $precision )`.
+	 *
 	 * @param mixed $var A variable.
 	 * @param mixed $precision Rounds floats to a precision. Defaults to 0.
 	 * @param mixed $default Returned if var is not set. Defaults to false.
 	 * @return mixed $return The returned value.
 	 */
 	function ifset_round( &$var, $precision = 0, $default = false ) {
-		$return = ifset( $var, $default );
+		_deprecated_function( __FUNCTION__, '6.0.0', 'sloc_round_value()' );
+		$return = isset( $var ) ? $var : $default;
 		if ( is_float( $return ) ) {
 			return round( $return, $precision );
 		}

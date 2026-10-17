@@ -227,10 +227,6 @@ class FunctionsTest extends WP_UnitTestCase {
 	 * Array and variable fallback helpers.
 	 */
 	public function test_fallback_helpers() {
-		$array = array( 'a' => 1.567 );
-		$this->assertSame( 1.567, ifset( $array['a'] ) );
-		$this->assertSame( 'x', ifset( $array['b'], 'x' ) );
-		$this->assertSame( 1.6, ifset_round( $array['a'], 1 ) );
 		$other = array( 'a' => 1.567 );
 		$this->assertSame( 1.567, array_key_return( 'a', $other ) );
 		$this->assertFalse( array_key_return( 'b', $other ) );
@@ -256,13 +252,47 @@ class FunctionsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Reading a missing key with ifset() must not add that key to the array.
+	 * The deprecated ifset() and ifset_round() still return the value or the default.
 	 */
-	public function test_ifset_does_not_modify_array() {
-		$this->markTestSkipped( 'Known bug, see #311' );
-		$array = array( 'a' => 1 );
-		ifset( $array['b'] );
-		$this->assertArrayNotHasKey( 'b', $array );
+	public function test_ifset_deprecated() {
+		$this->setExpectedDeprecated( 'ifset' );
+		$this->setExpectedDeprecated( 'ifset_round' );
+		$array = array( 'a' => 1.567 );
+		$this->assertSame( 1.567, ifset( $array['a'] ) );
+		$this->assertSame( 'x', ifset( $array['b'], 'x' ) );
+		$this->assertSame( 1.6, ifset_round( $array['a'], 1 ) );
+		$this->assertSame( '', ifset_round( $array['c'], 1, '' ) );
+	}
+
+	/**
+	 * The plugin no longer calls ifset() or ifset_round(), which add missing keys to arrays.
+	 */
+	public function test_ifset_not_used() {
+		$root  = dirname( __DIR__ );
+		$files = array_merge(
+			array( $root . '/simple-location.php' ),
+			glob( $root . '/templates/*.php' ),
+			glob( $root . '/includes/*.php' ),
+			glob( $root . '/includes/*/*.php' )
+		);
+		$calls = array();
+		foreach ( $files as $file ) {
+			// Tokens, so comments and the function definitions don't count.
+			$tokens = array_values(
+				array_filter(
+					token_get_all( file_get_contents( $file ) ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file.
+					fn( $token ) => ! is_array( $token ) || ! in_array( $token[0], array( T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ), true )
+				)
+			);
+			foreach ( $tokens as $i => $token ) {
+				if ( is_array( $token ) && T_STRING === $token[0] && in_array( $token[1], array( 'ifset', 'ifset_round' ), true )
+					&& '(' === ( $tokens[ $i + 1 ] ?? '' )
+					&& ! ( is_array( $tokens[ $i - 1 ] ) && T_FUNCTION === $tokens[ $i - 1 ][0] ) ) {
+					$calls[] = basename( $file ) . ':' . $token[2];
+				}
+			}
+		}
+		$this->assertSame( array(), $calls );
 	}
 
 	/**
