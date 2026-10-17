@@ -26,7 +26,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 5.0.26 The map size is limited to 1280 by 1280, or to SLOC_STATICMAP_MAX_WIDTH and SLOC_STATICMAP_MAX_HEIGHT when they are defined.
-	 * @since 5.0.26 A map server URL passed as the `api` argument is used instead of the setting.
+	 * @since 6.0.0 A map server URL passed as the `api` argument is used instead of the setting.
 	 *
 	 * @param array $args Arguments. See Map_Provider::__construct().
 	 */
