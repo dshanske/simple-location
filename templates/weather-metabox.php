@@ -7,7 +7,7 @@ defined( 'ABSPATH' ) || exit;
 
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
-	$weather = get_comment_weatherdata( $comment->comment_ID );
+	$weather = get_comment_weatherdata( get_comment_ID() );
 } else {
 	$weather = get_post_weatherdata();
 }

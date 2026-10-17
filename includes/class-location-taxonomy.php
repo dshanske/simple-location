@@ -793,9 +793,18 @@ final class Location_Taxonomy {
 		return false;
 	}
 
+	/**
+	 * Sets the location term of a post.
+	 *
+	 * @since 6.0.0 Works when passed a WP_Post.
+	 *
+	 * @param int|WP_Post $post_id Post ID or post.
+	 * @param int|array   $term_id Location term ID, or IDs.
+	 * @return array|false|WP_Error See wp_set_post_terms().
+	 */
 	public static function set_location( $post_id, $term_id ) {
 		if ( $post_id instanceof WP_Post ) {
-			$post_id = $post->ID;
+			$post_id = $post_id->ID;
 		}
 		return wp_set_post_terms( $post_id, $term_id, 'location' );
 	}
@@ -1011,19 +1020,32 @@ final class Location_Taxonomy {
 		return $terms[0];
 	}
 
+	/**
+	 * Returns a link to the location archive for a post's location.
+	 *
+	 * @since 6.0.0 Returns the link; it used an undefined variable and never did.
+	 *
+	 * @param int|WP_Post|null $post_id Optional. Post ID or post. Default the current post.
+	 * @return string Link HTML, or an empty string if the post has no location.
+	 */
 	public static function get_post_location_link( $post_id = null ) {
 		$term = self::get_post_location( $post_id );
 		if ( ! $term ) {
 			return '';
 		}
-		return self::get_location_link( $terms[0] );
+		return self::get_location_link( $term );
 	}
 
 	/**
 	 * Wrapper around wp_list_categories for now that outputs a list of the locations.
 	 * May be customized further in future.
+	 *
+	 * @since 6.0.0 Accepts arguments for wp_list_categories(), which it already tried to use.
+	 *
+	 * @param array $args Optional. Arguments for wp_list_categories(). Default lists every location by name.
+	 * @return void|string|false See wp_list_categories().
 	 */
-	public static function list_locations() {
+	public static function list_locations( $args = array() ) {
 		$defaults = array(
 			'taxonomy' => 'location',
 			'title_li' => null,

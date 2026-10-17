@@ -6,14 +6,14 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( 'comment' === get_current_screen()->id ) {
-	$timezone = get_comment_geodata( $comment->comment_ID, 'timezone' );
+	$timezone = get_comment_geodata( get_comment_ID(), 'timezone' );
 } else {
-	$timezone = get_post_geodata( $post->ID, 'timezone' );
+	$timezone = get_post_geodata( get_the_ID(), 'timezone' );
 	if ( ! $timezone ) {
-		$timezone = get_post_meta( $post->ID, '_timezone', true );
+		$timezone = get_post_meta( get_the_ID(), '_timezone', true );
 		if ( $timezone ) {
-			set_post_geodata( $post->ID, 'timezone', $timezone );
-			delete_post_meta( $post->ID, '_timezone' );
+			set_post_geodata( get_the_ID(), 'timezone', $timezone );
+			delete_post_meta( get_the_ID(), '_timezone' );
 		}
 	}
 }

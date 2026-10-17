@@ -109,6 +109,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			return array();
 		}
 		$calc     = new Astronomical_Calculator( $weather['latitude'], $weather['longitude'], ifset( $weather['altitude'], 0 ) );
+		$return   = array();
 		$return[] = sprintf(
 			'<li>%1$s%2$s: <time datetime="%3$s">%4$s</time></li>',
 			Weather_Provider::get_icon( 'wi-sunrise', __( 'Sunrise', 'simple-location' ) ),
