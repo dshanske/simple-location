@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Location Provider using Compass.
  * https://github.com/aaronpk/compass

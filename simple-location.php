@@ -17,6 +17,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 add_action( 'plugins_loaded', array( 'Simple_Location_Plugin', 'init' ) );
 add_action( 'init', array( 'Simple_Location_Plugin', 'load_textdomain' ) );
 
@@ -120,11 +122,28 @@ class Simple_Location_Plugin {
 				require_once $path . $file;
 			} else {
 				/* translators: %s: File path. */
-				wp_trigger_error( __METHOD__, sprintf( __( 'Cannot find %s.', 'simple-location' ), $path . $file ) );
+				self::loader_error( __METHOD__, sprintf( __( 'Cannot find %s.', 'simple-location' ), $path . $file ) );
 			}
 		}
 	}
 
+
+	/**
+	 * Reports a file the loader can't use, with wp_trigger_error().
+	 *
+	 * On WordPress before 6.4, wp_trigger_error() comes from the polyfill in compat-functions.php,
+	 * which is the file being reported if it is missing; in that case nothing is reported.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param string $function_name The function that found the problem.
+	 * @param string $message       The message.
+	 */
+	private static function loader_error( $function_name, $message ) {
+		if ( function_exists( 'wp_trigger_error' ) ) {
+			wp_trigger_error( $function_name, $message );
+		}
+	}
 
 	/**
 	 * Filename to Classname Function.
@@ -169,12 +188,12 @@ class Simple_Location_Plugin {
 						register_sloc_provider( new $class() );
 					} else {
 						/* translators: %s: File path. */
-						wp_trigger_error( __METHOD__, sprintf( __( 'Cannot register a provider from %s: no class matches the file name.', 'simple-location' ), $path . $file ) );
+						self::loader_error( __METHOD__, sprintf( __( 'Cannot register a provider from %s: no class matches the file name.', 'simple-location' ), $path . $file ) );
 					}
 				}
 			} else {
 				/* translators: %s: File path. */
-				wp_trigger_error( __METHOD__, sprintf( __( 'Cannot find %s.', 'simple-location' ), $path . $file ) );
+				self::loader_error( __METHOD__, sprintf( __( 'Cannot find %s.', 'simple-location' ), $path . $file ) );
 			}
 		}
 	}

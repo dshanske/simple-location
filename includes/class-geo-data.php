@@ -7,6 +7,8 @@
  * @package Simple Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 add_action( 'init', array( 'Geo_Data', 'init' ), 1 );
 
 /**

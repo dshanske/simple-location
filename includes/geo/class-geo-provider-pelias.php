@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Reverse Geolocation using Pelias API. https://github.com/pelias/documentation/blob/master/reverse.md#reverse-geocoding
  *

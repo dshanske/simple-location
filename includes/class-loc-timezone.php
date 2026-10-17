@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 
 add_action( 'init', array( 'Loc_Timezone', 'init' ) );
 

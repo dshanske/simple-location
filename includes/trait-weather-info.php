@@ -3,8 +3,10 @@
  * Weather Info Helper Trait.
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
- *
+ * Unit conversions, labels and condition codes for weather data.
  *
  * @since 5.0.0
  */

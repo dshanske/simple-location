@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 ?>
 <hr />
 <?php $providers = Loc_Config::weather_providers(); ?>

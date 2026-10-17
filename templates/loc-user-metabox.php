@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 // The user being edited is passed by Geo_Base::user_profile().
 $user_id = ( isset( $args['user'] ) && $args['user'] instanceof WP_User ) ? $args['user']->ID : get_current_user_id(); // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable -- Set by load_template().
 

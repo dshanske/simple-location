@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
 	/**
 	 * Convert the EXIF geographical longitude and latitude from degrees, minutes

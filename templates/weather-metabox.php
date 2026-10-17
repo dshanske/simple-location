@@ -3,6 +3,8 @@
  * Weather Sidebar Metabox.
  */
 
+defined( 'ABSPATH' ) || exit;
+
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
 	$weather = get_comment_weatherdata( $comment->comment_ID );

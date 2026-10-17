@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 if ( ! function_exists( 'get_comment_datetime' ) ) {
 	/**
 	 * Retrieve comment published time as a `DateTimeImmutable` object instance.

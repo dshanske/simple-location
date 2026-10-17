@@ -5,6 +5,8 @@
  * @package Simple_Location
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Retrieves Elevation information and uses it when no altitude info is provided.
  *
