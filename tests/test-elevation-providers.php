@@ -88,7 +88,7 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array() );
 		$this->assertSame( 'missing_username', $this->provider( 'Elevation_Provider_Geonames', array( 'user' => '' ) )->elevation()->get_error_code() );
 		$this->assertSame( 'missing_api_key', $this->provider( 'Elevation_Provider_OpenRoute', array( 'api' => '' ) )->elevation()->get_error_code() );
-		$this->assertNull( $this->provider( 'Elevation_Provider_Google', array( 'api' => '' ) )->elevation() );
+		$this->assertSame( 'missing_api_key', $this->provider( 'Elevation_Provider_Google', array( 'api' => '' ) )->elevation()->get_error_code() );
 		$this->assertEmpty( $this->http_requests );
 	}
 
@@ -135,6 +135,24 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 		$result = $this->provider( 'Elevation_Provider_Google', array( 'api' => 'KEY' ) )->elevation();
 		$this->assertWPError( $result );
 		$this->assertSame( 'REQUEST_DENIED', $result->get_error_code() );
+		$this->assertSame( 'The provided API key is invalid.', $result->get_error_message() );
+	}
+
+	/**
+	 * An empty result list is an error, without a warning.
+	 */
+	public function test_google_no_results() {
+		$this->mock_http(
+			array(
+				'maps.googleapis.com' => array(
+					'body' => array(
+						'results' => array(),
+						'status'  => 'OK',
+					),
+				),
+			)
+		);
+		$this->assertSame( 'no_results', $this->provider( 'Elevation_Provider_Google', array( 'api' => 'KEY' ) )->elevation()->get_error_code() );
 	}
 
 	/**
@@ -149,7 +167,20 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'KEY', $request['query']['api_key'] );
 		$this->assertSame( 'point', $request['query']['format_out'] );
 		$this->assertSame( '-75.1636,39.9524', $request['query']['geometry'] );
-		$this->assertEquals( $fixture['geometry'][2], $elevation );
+		$this->assertSame( round( $fixture['geometry'][2], 2 ), $elevation );
+	}
+
+	/**
+	 * A response without a point is an error, not sea level, and elevations are rounded.
+	 */
+	public function test_openroute_results() {
+		$this->mock_http( array( 'api.openrouteservice.org/elevation/point' => array( 'body' => array( 'version' => '0.2.1' ) ) ) );
+		$result = $this->provider( 'Elevation_Provider_OpenRoute', array( 'api' => 'KEY' ) )->elevation();
+		$this->assertWPError( $result );
+		$this->assertSame( 'no_results', $result->get_error_code() );
+
+		$this->mock_http( array( 'api.openrouteservice.org/elevation/point' => array( 'body' => array( 'geometry' => array( -75.1636, 39.9524, 14.256 ) ) ) ) );
+		$this->assertSame( 14.26, $this->provider( 'Elevation_Provider_OpenRoute', array( 'api' => 'KEY' ) )->elevation() );
 	}
 
 	/**
@@ -172,6 +203,7 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( round( $fixture['results'][0]['elevation'], 2 ), $venue->elevation() );
 
 		delete_option( 'sloc_elevation_provider' );
-		$this->assertSame( 0, $venue->elevation() );
+		$this->assertSame( 'no_elevation_provider', $venue->elevation()->get_error_code() );
+		$this->assertSame( 'no_elevation_provider', $geo->elevation()->get_error_code() );
 	}
 }

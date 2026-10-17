@@ -336,6 +336,28 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * When the elevation lookup fails, no altitude is saved for the photo.
+	 */
+	public function test_attachment_location_without_elevation() {
+		$this->full_address();
+		Geo_Provider_Sloc_Test::$elevation = new WP_Error( 'no_results', 'No elevation found' );
+		$attachment_id                     = self::factory()->attachment->create();
+		Sloc_Media_Metadata::attachment(
+			array(
+				'image_meta' => array(
+					'location' => array(
+						'latitude'  => 40.7128,
+						'longitude' => -74.006,
+					),
+				),
+			),
+			$attachment_id
+		);
+		$this->assertSame( '', get_post_meta( $attachment_id, 'geo_altitude', true ) );
+		$this->assertEquals( 40.7128, get_post_meta( $attachment_id, 'geo_latitude', true ) );
+	}
+
+	/**
 	 * An altitude from the photo is kept, and a failed reverse lookup leaves the address empty.
 	 */
 	public function test_attachment_location_lookup_error() {

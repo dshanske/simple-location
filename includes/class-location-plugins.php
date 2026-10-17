@@ -397,7 +397,11 @@ class Location_Plugins {
 				unset( $meta['geo_altitude'] );
 			}
 			if ( ! isset( $meta['geo_altitude'] ) && isset( $meta['geo_latitude'] ) && isset( $meta['geo_longitude'] ) ) {
-				update_post_meta( $args['ID'], 'geo_altitude', $reverse->elevation() );
+				$elevation = $reverse->elevation();
+				// Store only a number, never an error from the elevation lookup.
+				if ( is_numeric( $elevation ) ) {
+					update_post_meta( $args['ID'], 'geo_altitude', $elevation );
+				}
 			}
 			if ( ! $term && ! empty( $reverse_adr ) ) {
 				$term = Location_Taxonomy::get_location( $reverse_adr, true );

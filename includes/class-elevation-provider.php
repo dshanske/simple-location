@@ -57,9 +57,10 @@ abstract class Elevation_Provider extends Sloc_Provider {
 	/**
 	 * Returns elevation.
 	 *
-	 * @return float $elevation Elevation.
+	 * @return float|WP_Error $elevation Elevation in meters, rounded to two places, or an error when it can't be looked up.
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 Bundled providers return an error, never null or 0, for missing credentials and empty results.
 	 */
 	abstract public function elevation();
 }

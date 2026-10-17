@@ -11,6 +11,13 @@
 class Elevation_Provider_Sloc_Test extends Elevation_Provider {
 
 	/**
+	 * Elevation to return: a number or a WP_Error.
+	 *
+	 * @var float|WP_Error
+	 */
+	public static $elevation = 123.0;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array $args Arguments.
@@ -22,11 +29,11 @@ class Elevation_Provider_Sloc_Test extends Elevation_Provider {
 	}
 
 	/**
-	 * Returns a fixed elevation.
+	 * Returns the canned elevation.
 	 *
-	 * @return float
+	 * @return float|WP_Error
 	 */
 	public function elevation() {
-		return 123.0;
+		return static::$elevation;
 	}
 }
