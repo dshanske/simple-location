@@ -682,9 +682,6 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	 * Saving a term that is too deep to have a type doesn't store anything.
 	 */
 	public function test_save_data_without_type() {
-		if ( PHP_VERSION_ID < 80000 ) {
-			$this->markTestSkipped( 'Known bug, see #328' );
-		}
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$terms    = $this->hierarchy();
 		$too_deep = self::factory()->term->create(
