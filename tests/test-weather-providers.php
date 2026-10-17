@@ -939,10 +939,38 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 				'windspeed'   => $hour['wspd'] / 3.6,
 				'windgust'    => $hour['wpgt'] / 3.6,
 				'winddegree'  => $hour['wdir'],
+				'summary'     => Weather_Provider_Meteostat::get_status( $hour['coco'] ),
 				'code'        => 800,
 			),
 			$conditions
 		);
+		$this->assertSame( 'Fair', $conditions['summary'], 'The summary is the condition name, not its code.' );
+	}
+
+	/**
+	 * Meteostat: a location lookup uses the nearest station from the bundled list, with its distance, and clears the station ID afterwards.
+	 */
+	public function test_meteostat_location() {
+		$this->mock_http( array( 'meteostat.p.rapidapi.com/stations/hourly' => array( 'body' => $this->fixture( 'weather/meteostat-hourly.json' ) ) ) );
+		$provider   = $this->provider(
+			'Weather_Provider_Meteostat',
+			array(
+				'api'        => 'ms-key',
+				'cache_time' => HOUR_IN_SECONDS,
+			)
+		);
+		$time       = strtotime( '2025-07-01T14:00:00Z' );
+		$conditions = $provider->get_conditions( $time );
+
+		$this->assertSame( '72408', $this->last_request()['query']['station'], 'Philadelphia International is the nearest station.' );
+		$this->assertSame( '72408', $conditions['station_id'] );
+		$this->assertEqualsWithDelta( 11700, $conditions['distance'], 500 );
+		$this->assertNull( $provider->get_station(), 'The station ID is cleared after a lookup.' );
+
+		$cached = $provider->get_conditions( $time );
+		$this->assertCount( 1, $this->http_requests, 'The second lookup comes from the cache.' );
+		$this->assertSame( $conditions['temperature'], $cached['temperature'] );
+		$this->assertNull( $provider->get_station() );
 	}
 
 	/**
@@ -955,6 +983,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$fixture['data'][14]['wspd'] = 0;
 		$fixture['data'][14]['wpgt'] = null;
 		$fixture['data'][14]['snow'] = null;
+		$fixture['data'][14]['coco'] = null;
 		$this->mock_http( array( 'meteostat.p.rapidapi.com/stations/hourly' => array( 'body' => $fixture ) ) );
 		$provider = new Weather_Provider_Meteostat( array( 'api' => 'ms-key' ) );
 		$provider->set( array( 'station_id' => '72408' ) );
@@ -966,6 +995,8 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 0.0, $conditions['windspeed'] );
 		$this->assertArrayNotHasKey( 'windgust', $conditions );
 		$this->assertArrayNotHasKey( 'snow', $conditions );
+		$this->assertArrayNotHasKey( 'summary', $conditions );
+		$this->assertArrayNotHasKey( 'code', $conditions );
 	}
 
 	/**
