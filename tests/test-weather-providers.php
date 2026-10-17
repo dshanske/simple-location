@@ -148,15 +148,18 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	 * Pirate Weather: current conditions from the forecast endpoint, with SI units converted.
 	 */
 	public function test_pirateweather() {
-		// The provider logs the site language on every call; keep it out of the test output.
-		$log = ini_set( 'error_log', wp_tempnam( 'sloc-log' ) ); // phpcs:ignore WordPress.PHP.IniSet.Risky
-
 		$fixture = $this->fixture( 'weather/pirateweather-forecast.json' );
 		$this->mock_http( array( 'api.pirateweather.net/forecast/' => array( 'body' => $fixture ) ) );
 		$conditions = $this->provider( 'Weather_Provider_PirateWeather', array( 'api' => 'pw-key' ) )->get_conditions();
 		$request    = $this->last_request();
 		$this->assertSame( 'https://api.pirateweather.net/forecast/pw-key/' . self::LAT . ',' . self::LNG, $request['base'] );
 		$this->assertSame( 'si', $request['query']['units'] );
+		$this->assertSame(
+			array( 'units', 'exclude', 'lang' ),
+			array_keys( $request['query'] ),
+			'Request options are not sent as query parameters.'
+		);
+		$this->assertSame( 'Simple Location for WordPress', $this->http_requests[0]['args']['user-agent'] );
 
 		$current = $fixture['currently'];
 		$this->assertConditions(
@@ -166,7 +169,9 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 				'pressure'    => $current['pressure'],
 				'cloudiness'  => $current['cloudCover'] * 100,
 				'windspeed'   => $current['windSpeed'],
+				'windgust'    => $current['windGust'],
 				'winddegree'  => $current['windBearing'],
+				'uv'          => $current['uvIndex'],
 				'visibility'  => $current['visibility'] * 1000,
 				'summary'     => $current['summary'],
 				'code'        => 803,
@@ -174,12 +179,30 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 			$conditions
 		);
 
-		// A time requests that moment.
+		$this->assertArrayNotHasKey( 'uvi', $conditions );
+
+		// A past time requests that moment from the Time Machine host.
 		$time = strtotime( '-2 days' );
 		$this->provider( 'Weather_Provider_PirateWeather', array( 'api' => 'pw-key' ) )->get_conditions( $time );
-		$this->assertStringEndsWith( ',' . $time, $this->last_request()['base'] );
+		$this->assertSame( 'https://timemachine.pirateweather.net/forecast/pw-key/' . self::LAT . ',' . self::LNG . ',' . $time, $this->last_request()['base'] );
 
-		ini_set( 'error_log', $log ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		// A time within the hour stays on the forecast host.
+		$time = time() - 10 * MINUTE_IN_SECONDS;
+		$this->provider( 'Weather_Provider_PirateWeather', array( 'api' => 'pw-key' ) )->get_conditions( $time );
+		$this->assertSame( 'https://api.pirateweather.net/forecast/pw-key/' . self::LAT . ',' . self::LNG . ',' . $time, $this->last_request()['base'] );
+	}
+
+	/**
+	 * Pirate Weather: a request writes nothing to the PHP error log.
+	 */
+	public function test_pirateweather_no_logging() {
+		$log  = wp_tempnam( 'sloc-log' );
+		$prev = ini_set( 'error_log', $log ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		$this->mock_http( array( 'api.pirateweather.net/forecast/' => array( 'body' => $this->fixture( 'weather/pirateweather-forecast.json' ) ) ) );
+		$this->provider( 'Weather_Provider_PirateWeather', array( 'api' => 'pw-key' ) )->get_conditions();
+		ini_set( 'error_log', $prev ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		$this->assertSame( '', file_get_contents( $log ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		unlink( $log ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
 	}
 
 	/**

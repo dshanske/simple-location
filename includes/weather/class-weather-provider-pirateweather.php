@@ -62,6 +62,8 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	/**
 	 * Return array of current conditions
 	 *
+	 * @since 5.0.26 Times more than an hour ago are requested from the Time Machine API.
+	 *
 	 * @param int $time Time to retrieve weather. Optional.
 	 * @return array Current Conditions in Array
 	 */
@@ -70,7 +72,6 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			return array();
 		}
 		$return = array();
-		error_log( get_bloginfo( 'language' ) );
 		if ( $this->latitude && $this->longitude ) {
 			$data = array(
 				'units'   => 'si',
@@ -81,24 +82,14 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			$datetime = $this->datetime( $time );
 
 			if ( $time ) {
-				$url = sprintf( 'https://api.pirateweather.net/forecast/%1$s/%2$s,%3$s,%4$s', $this->api, $this->latitude, $this->longitude, $datetime->getTimestamp() );
+				// Past weather comes from the Time Machine host; the forecast host serves current and future times.
+				$host = ( HOUR_IN_SECONDS < time() - $datetime->getTimestamp() ) ? 'timemachine' : 'api';
+				$url  = sprintf( 'https://%1$s.pirateweather.net/forecast/%2$s/%3$s,%4$s,%5$s', $host, $this->api, $this->latitude, $this->longitude, $datetime->getTimestamp() );
 			} else {
 				$url = sprintf( 'https://api.pirateweather.net/forecast/%1$s/%2$s,%3$s', $this->api, $this->latitude, $this->longitude );
 			}
-			$url = add_query_arg( $data, $url );
 
-			$args = array(
-				'headers'             => array(
-					'Accept' => 'application/json',
-				),
-				'timeout'             => 10,
-				'limit_response_size' => 1048576,
-				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location.
-				'user-agent'          => 'Simple Location for WordPress',
-			);
-
-			$response = $this->fetch_json( $url, $args );
+			$response = $this->fetch_json( $url, $data );
 			if ( is_wp_error( $response ) ) {
 				return $response;
 			}
@@ -120,8 +111,8 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			}
 			$return['windspeed']  = ifset_round( $current['windSpeed'] );
 			$return['winddegree'] = ifset_round( $current['windBearing'], 1 );
-			$return['windgust']   = ifset_round( $current['windGuest'], 1 );
-			$return['uvi']        = ifset( $current['uvIndex'] );
+			$return['windgust']   = ifset_round( $current['windGust'], 1 );
+			$return['uv']         = ifset_round( $current['uvIndex'], 1 );
 			$return['rain']       = ifset_round( $current['precipIntensity'], 2 );
 			$return['snow']       = ifset_round( $current['precipAccumulation'], 2 );
 			$return['summary']    = ifset( $current['summary'] );
