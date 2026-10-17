@@ -158,6 +158,20 @@ class DataFunctionsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A location icon is the SVG markup, and a missing icon is nothing rather than the server path.
+	 */
+	public function test_get_icon() {
+		$icon = Geo_Data::get_icon( 'fa-compass' );
+		$this->assertStringContainsString( 'sloc-icon-fa-compass', $icon );
+		$this->assertStringContainsString( '<svg', $icon );
+		$this->assertStringContainsString( 'title="Compass"', $icon );
+
+		$this->assertSame( '', Geo_Data::get_icon( 'not-an-icon' ) );
+		$this->assertSame( '', Geo_Data::get_icon( 'none' ) );
+		$this->assertStringNotContainsString( plugin_dir_path( __DIR__ ), Geo_Data::get_icon( '../not-an-icon' ) );
+	}
+
+	/**
 	 * The default icon is filled in when none is stored.
 	 */
 	public function test_default_icon() {
