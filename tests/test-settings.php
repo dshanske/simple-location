@@ -62,7 +62,7 @@ class SettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Providers are loaded and registered from their files; missing files are logged.
+	 * Providers are loaded and registered from their files; problems are reported with wp_trigger_error().
 	 */
 	public function test_register_providers() {
 		$this->assertNull( Simple_Location_Plugin::register_providers( array() ) );
@@ -70,15 +70,33 @@ class SettingsTest extends WP_UnitTestCase {
 		Simple_Location_Plugin::register_providers( array( 'class-weather-provider-sloc-test-fallback.php' ), 'tests/includes' );
 		$this->assertInstanceOf( 'Weather_Provider_Sloc_Test_Fallback', Loc_Config::weather_provider( 'sloc_test_fallback' ) );
 
-		$log = wp_tempnam( 'sloc-error-log' );
-		$old = ini_set( 'error_log', $log ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		$log     = wp_tempnam( 'sloc-error-log' );
+		$old     = ini_set( 'error_log', $log ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		$notices = array();
+		set_error_handler( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
+			function ( $level, $message ) use ( &$notices ) {
+				$notices[] = $message;
+				return true;
+			},
+			E_USER_NOTICE
+		);
 		Simple_Location_Plugin::register_providers( array( 'class-missing-provider.php' ), 'tests/includes/' );
+		// A provider file whose class doesn't match its name; it's already loaded, so requiring it again does nothing.
+		Simple_Location_Plugin::register_providers( array( 'load-test-providers.php' ), 'tests/includes/' );
 		Simple_Location_Plugin::load( array( 'missing-file.php' ) );
+		restore_error_handler();
 		ini_set( 'error_log', $old ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 		$logged = file_get_contents( $log ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		unlink( $log ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
-		$this->assertStringContainsString( 'tests/includes/class-missing-provider.php', $logged );
-		$this->assertStringContainsString( 'includes/missing-file.php', $logged );
+
+		$this->assertCount( 3, $notices );
+		$this->assertStringStartsWith( 'Simple_Location_Plugin::register_providers(): Cannot find ', $notices[0] );
+		$this->assertStringContainsString( 'tests/includes/class-missing-provider.php', $notices[0] );
+		$this->assertStringStartsWith( 'Simple_Location_Plugin::register_providers(): Cannot register a provider from ', $notices[1] );
+		$this->assertStringContainsString( 'tests/includes/load-test-providers.php', $notices[1] );
+		$this->assertStringStartsWith( 'Simple_Location_Plugin::load(): Cannot find ', $notices[2] );
+		$this->assertStringContainsString( 'includes/missing-file.php', $notices[2] );
+		$this->assertSame( '', $logged, 'Nothing is written to the error log directly.' );
 
 		$this->assertNull( Simple_Location_Plugin::load( array() ) );
 	}
