@@ -71,6 +71,16 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $scale = 1;
 
 	/**
+	 * Whether the provider's terms allow the site to store its map images and serve them itself.
+	 *
+	 * Images of such providers are served from the site by Sloc_Map_Cache, so the API key never reaches the browser.
+	 *
+	 * @since 6.0.0
+	 * @var bool
+	 */
+	protected $cacheable = false;
+
+	/**
 	 * Map Style.
 	 *
 	 * @since 1.0.0
@@ -232,6 +242,74 @@ abstract class Map_Provider extends Sloc_Provider {
 		return array( 1 );
 	}
 
+	/**
+	 * Sets the pixel density of the static map.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param int $scale Pixel density. Ignored if the provider can't draw it.
+	 */
+	public function set_scale( $scale ) {
+		if ( in_array( (int) $scale, $this->get_scales(), true ) ) {
+			$this->scale = (int) $scale;
+		}
+	}
+
+	/**
+	 * Whether the provider's terms allow the site to store its map images and serve them itself.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_cacheable() {
+		return $this->cacheable;
+	}
+
+	/**
+	 * Returns the parameters that describe the current map, for a map image served from the site.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
+	 * @return string[] Map parameters.
+	 */
+	public function get_cache_args( $locations = null ) {
+		$args = array(
+			'provider' => (string) $this->slug,
+			'width'    => (string) $this->width,
+			'height'   => (string) $this->height,
+			'zoom'     => (string) $this->map_zoom,
+			'style'    => (string) $this->style,
+			'scale'    => (string) $this->scale,
+		);
+		if ( null === $locations ) {
+			$args['lat'] = (string) $this->latitude;
+			$args['lng'] = (string) $this->longitude;
+		} else {
+			$args['points'] = Sloc_Polyline::encode( $locations );
+		}
+		return $args;
+	}
+
+	/**
+	 * Returns the image URL for an archive map with a marker at each location.
+	 *
+	 * Providers whose terms allow it are served from the site, so the API key isn't in the page.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string URL, or an empty string if there is no map.
+	 */
+	public function get_archive_map_src( $locations ) {
+		$map = $this->get_archive_map( $locations );
+		if ( empty( $map ) || is_wp_error( $map ) ) {
+			return '';
+		}
+		return $this->cacheable ? Sloc_Map_Cache::get_url( $this, $locations ) : $map;
+	}
+
 
 	/**
 	 * Return an array of styles with key being id and value being display name.
@@ -278,6 +356,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 4.1.10
 	 * @since 6.0.0 The URLs and sizes are escaped.
 	 * @since 6.0.0 The srcset uses the provider's high-density maps of the same area, and is left out when the provider has none.
+	 * @since 6.0.0 Providers whose terms allow it are served from the site, so the API key isn't in the page.
 	 *
 	 * @param bool $srcset Optional. Add a srcset with the provider's high-density maps. Default false.
 	 * @return string HTML.
@@ -286,6 +365,9 @@ abstract class Map_Provider extends Sloc_Provider {
 		$orig = $this->get_the_static_map();
 		if ( is_wp_error( $orig ) ) {
 			return $this->static_map_error( $orig );
+		}
+		if ( $this->cacheable ) {
+			$orig = Sloc_Map_Cache::get_url( $this );
 		}
 		$link   = $this->get_the_map_url();
 		$height = $this->height;
@@ -301,6 +383,9 @@ abstract class Map_Provider extends Sloc_Provider {
 				if ( is_wp_error( $image ) ) {
 					$this->scale = $scale;
 					return $this->static_map_error( $image );
+				}
+				if ( $this->cacheable ) {
+					$image = Sloc_Map_Cache::get_url( $this );
 				}
 				$srcset[] = sprintf( '%1$s %2$sx', esc_url( $image ), $density );
 			}

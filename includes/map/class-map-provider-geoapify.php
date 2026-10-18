@@ -15,6 +15,15 @@ defined( 'ABSPATH' ) || exit;
 class Map_Provider_Geoapify extends Map_Provider {
 	use Sloc_API_Geoapify;
 
+	/**
+	 * Geoapify's terms allow storing and caching its static maps, so they are served from the site.
+	 *
+	 * @since 6.0.0
+	 * @var bool
+	 */
+	protected $cacheable = true;
+
+
 	public function __construct( $args = array() ) {
 		$this->name        = __( 'GeoApify', 'simple-location' );
 		$this->slug        = 'geoapify';

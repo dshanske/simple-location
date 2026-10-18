@@ -1315,12 +1315,14 @@ class Loc_Config {
 	/**
 	 * Returns the current map provider.
 	 *
+	 * @param string $provider Name of Provider to Be Returned. Optional.
 	 * @return Map_Provider $return Map Provider.
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 Takes an optional provider name, like the other provider getters.
 	 */
-	public static function map_provider() {
-		return self::get_provider( static::$maps, 'sloc_map_provider' );
+	public static function map_provider( $provider = null ) {
+		return self::get_provider( static::$maps, 'sloc_map_provider', $provider );
 	}
 
 	/**
