@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Loaded with load_template() inside a function, so these variables are local.
+
 $providers = Loc_Config::geo_providers();
 ?>
 <h2><?php esc_html_e( 'Location Lookup', 'simple-location' ); ?></h2>

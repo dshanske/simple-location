@@ -304,7 +304,7 @@ class Loc_Timezone {
 		$structure = array();
 
 		if ( empty( $selected_zone ) ) {
-			$structure[] = '<option selected="selected" value="">' . __( 'Select a city', 'default' ) . '</option>';
+			$structure[] = '<option selected="selected" value="">' . __( 'Select a city', 'default' ) . '</option>'; // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- The same string as core's wp_timezone_choice(), so it uses core's translation.
 		}
 
 		foreach ( $zonen as $key => $zone ) {
@@ -349,16 +349,16 @@ class Loc_Timezone {
 		// Older versions of PHP didn't handle offsets as timezones well so hide this feature
 		if ( version_compare( PHP_VERSION, '5.4', '>' ) ) {
 			// Do UTC
-			$structure[] = '<optgroup label="' . esc_attr__( 'UTC', 'default' ) . '">';
+			$structure[] = '<optgroup label="' . esc_attr__( 'UTC', 'default' ) . '">'; // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- The same string as core's wp_timezone_choice(), so it uses core's translation.
 			$selected    = '';
 			if ( 'UTC' === $selected_zone ) {
 				$selected = 'selected="selected" ';
 			}
-			$structure[] = '<option ' . $selected . 'value="' . esc_attr( 'UTC' ) . '">' . __( 'UTC', 'default' ) . '</option>';
+			$structure[] = '<option ' . $selected . 'value="' . esc_attr( 'UTC' ) . '">' . __( 'UTC', 'default' ) . '</option>'; // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- The same string as core's wp_timezone_choice(), so it uses core's translation.
 			$structure[] = '</optgroup>';
 
 			// Do manual UTC offsets
-			$structure[]  = '<optgroup label="' . esc_attr__( 'Manual Offsets', 'default' ) . '">';
+			$structure[]  = '<optgroup label="' . esc_attr__( 'Manual Offsets', 'default' ) . '">'; // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- The same string as core's wp_timezone_choice(), so it uses core's translation.
 			$offset_range = array(
 				-12,
 				-11.5,
@@ -724,9 +724,9 @@ class Loc_Timezone {
 		}
 		return sprintf(
 				/* translators: 1: Post date, 2: Post time. */
-			__( '%1$s at %2$s', 'default' ),
+			__( '%1$s at %2$s', 'default' ), // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- The same string as core's posts list date column, so it uses core's translation.
 			/* translators: Post date format. See https://www.php.net/manual/datetime.format.php */
-				get_the_time( __( 'Y/m/d', 'default' ), $post ),
+				get_the_time( __( 'Y/m/d', 'default' ), $post ), // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch -- The same string as core's posts list date column, so it uses core's translation.
 			/* translators: Post time format. See https://www.php.net/manual/datetime.format.php */
 				get_the_time( __( 'g:i a T', 'simple-location' ), $post )
 		);

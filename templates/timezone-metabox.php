@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Loaded with load_template() inside a function, so these variables are local.
+
 if ( 'comment' === get_current_screen()->id ) {
 	$timezone = get_comment_geodata( get_comment_ID(), 'timezone' );
 } else {

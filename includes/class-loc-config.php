@@ -975,7 +975,7 @@ class Loc_Config {
 		$providers   = $args['providers'];
 		ksort( $providers );
 		$providers         = array_reverse( $providers );
-		$providers['none'] = __( 'None', 'default' );
+		$providers['none'] = __( 'None', 'simple-location' );
 		$providers         = array_reverse( $providers );
 
 		if ( count( $providers ) > 1 ) {

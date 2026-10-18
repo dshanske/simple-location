@@ -88,7 +88,9 @@ class Sloc_Media_Metadata {
 	 *               names current PHP gives it. Otherwise uses the timezone at the location, then the site's.
 	 */
 	public static function exif_data( $meta, $file, $image_type, $iptc = null, $exif = null ) {
-		if ( ! is_array( $exif ) && is_callable( 'exif_read_data' ) && in_array( $image_type, apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ), true ) ) {
+		/** This filter is documented in wp-admin/includes/image.php */
+		$exif_types = apply_filters( 'wp_read_image_metadata_types', array( IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core's filter, applied as wp_read_image_metadata() does.
+		if ( ! is_array( $exif ) && is_callable( 'exif_read_data' ) && in_array( $image_type, $exif_types, true ) ) {
 			// As in wp_read_image_metadata(), corrupt EXIF data raises warnings that aren't useful here.
 			$exif = @exif_read_data( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		}

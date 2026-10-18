@@ -9,9 +9,9 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 if ( is_day() ) {
-	$date_format = get_option( 'time_format' );
+	$sloc_date_format = get_option( 'time_format' );
 } else {
-	$date_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+	$sloc_date_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 }
 ?>
 
@@ -24,8 +24,8 @@ if ( is_day() ) {
 					the_archive_description( '<div class="taxonomy-description">', '</div>' );
 				?>
 			</header><!-- .page-header -->
-			<?php $map_provider = Loc_Config::map_provider(); ?>
-		<img class="archive-map sloc-map" src="<?php echo esc_url( $map_provider->get_archive_map_src( get_geo_archive_location_list() ) ); ?>" alt="<?php esc_attr_e( 'Map of the locations listed on this page', 'simple-location' ); ?>" />
+			<?php $sloc_map_provider = Loc_Config::map_provider(); ?>
+		<img class="archive-map sloc-map" src="<?php echo esc_url( $sloc_map_provider->get_archive_map_src( get_geo_archive_location_list() ) ); ?>" alt="<?php esc_attr_e( 'Map of the locations listed on this page', 'simple-location' ); ?>" />
 		<ul>
 			<?php
 		}
@@ -46,7 +46,7 @@ if ( is_day() ) {
 								'object_link'   => true,
 								'altitude'      => false,
 								'text'          => true,
-								'description'   => get_the_time( $date_format, get_the_ID() ),
+								'description'   => get_the_time( $sloc_date_format, get_the_ID() ),
 							)
 						),
 						Simple_Location_Plugin::kses_clean()
