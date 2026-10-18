@@ -1,3 +1,4 @@
+
 Filters the taxonomies whose terms get geo meta registered.
 
 ## Auto-generated Example
@@ -5,7 +6,7 @@ Filters the taxonomies whose terms get geo meta registered.
 ```php
 add_filter(
    'sloc_geo_taxonomies',
-    function( array $taxonomies ) {
+    function( string[] $taxonomies ) {
         // Your code here.
         return $taxonomies;
     }
@@ -18,7 +19,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-geo-data.php:](https://github.com/dshanske/simple-location/blob/main/includes/class-geo-data.php#L)
+- [includes/class-geo-data.php:725](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-data.php#L725)
 ```php
 apply_filters( 'sloc_geo_taxonomies', array() )
 ```

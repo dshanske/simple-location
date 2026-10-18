@@ -1,13 +1,15 @@
 
-HTML type to wrap the entire location in
+Filters the default arguments for displaying a location.
+
+Arguments passed to the display function override these defaults.
 
 ## Auto-generated Example
 
 ```php
 add_filter(
-    'simple_location_display_defaults',
-    function ( $defaults ) {
-        // Your code here
+   'simple_location_display_defaults',
+    function( array $defaults ) {
+        // Your code here.
         return $defaults;
     }
 );
@@ -15,15 +17,15 @@ add_filter(
 
 ## Parameters
 
-- `$defaults`
+- *`array`* `$defaults` Default display arguments, such as weather, altitude, taxonomy, link, icon, markup and wrapper-type.
 
 ## Files
 
-- [includes/class-geo-data.php:989](https://github.com/dshanske/simple-location/blob/main/includes/class-geo-data.php#L989)
+- [includes/class-geo-data.php:1113](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-data.php#L1113)
 ```php
 apply_filters( 'simple_location_display_defaults', $defaults )
 ```
 
 
 
-[Hooks](Hooks)
+[← All Hooks](Hooks)

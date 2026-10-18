@@ -2,9 +2,9 @@
 
 ```php
 add_filter(
-    'sloc_venue_provider_defaults',
-    function ( $defaults ) {
-        // Your code here
+   'sloc_venue_provider_defaults',
+    function( $defaults ) {
+        // Your code here.
         return $defaults;
     }
 );
@@ -16,11 +16,11 @@ add_filter(
 
 ## Files
 
-- [includes/class-venue-provider.php:63](https://github.com/dshanske/simple-location/blob/main/includes/class-venue-provider.php#L63)
+- [includes/class-venue-provider.php:65](https://github.com/dshanske/simple-location/blob/trunk/includes/class-venue-provider.php#L65)
 ```php
 apply_filters( 'sloc_venue_provider_defaults', $defaults )
 ```
 
 
 
-[Hooks](Hooks)
+[← All Hooks](Hooks)

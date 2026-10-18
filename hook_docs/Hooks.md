@@ -10,7 +10,7 @@
 
 ## class-geo-data.php
 
-- [`simple_location_display_defaults`](simple_location_display_defaults) HTML type to wrap the entire location in
+- [`simple_location_display_defaults`](simple_location_display_defaults) Filters the default arguments for displaying a location.
 - [`sloc_geo_taxonomies`](sloc_geo_taxonomies) Filters the taxonomies whose terms get geo meta registered.
 - [`sloc_show_hidden_location`](sloc_show_hidden_location) Filters whether a hidden location is shown to the current user.
 
@@ -38,6 +38,7 @@
 
 ## class-rest-geo.php
 
+- [~~`sloc_local_api_protected`~~](sloc_local_api_protected) **DEPRECATED** Use `sloc_local_api_public` instead
 - [`sloc_local_api_public`](sloc_local_api_public) Filters whether the local airport and timezone lookup endpoints are open to everyone.
 
 ## class-sloc-map-cache.php

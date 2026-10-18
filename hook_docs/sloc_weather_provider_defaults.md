@@ -2,9 +2,9 @@
 
 ```php
 add_filter(
-    'sloc_weather_provider_defaults',
-    function ( $defaults ) {
-        // Your code here
+   'sloc_weather_provider_defaults',
+    function( $defaults ) {
+        // Your code here.
         return $defaults;
     }
 );
@@ -16,11 +16,11 @@ add_filter(
 
 ## Files
 
-- [includes/class-weather-provider.php:68](https://github.com/dshanske/simple-location/blob/main/includes/class-weather-provider.php#L68)
+- [includes/class-weather-provider.php:70](https://github.com/dshanske/simple-location/blob/trunk/includes/class-weather-provider.php#L70)
 ```php
 apply_filters( 'sloc_weather_provider_defaults', $defaults )
 ```
 
 
 
-[Hooks](Hooks)
+[← All Hooks](Hooks)

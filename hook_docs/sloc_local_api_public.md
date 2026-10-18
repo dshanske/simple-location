@@ -21,7 +21,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-rest-geo.php:135](https://github.com/dshanske/simple-location/blob/main/includes/class-rest-geo.php#L135)
+- [includes/class-rest-geo.php:137](https://github.com/dshanske/simple-location/blob/trunk/includes/class-rest-geo.php#L137)
 ```php
 apply_filters( 'sloc_local_api_public', $granted )
 ```

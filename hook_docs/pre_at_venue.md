@@ -7,13 +7,13 @@ Default null.
 
 ```php
 add_filter(
-    'pre_at_venue',
-    function (
-        Simple_Location\mixed $value,
-        Simple_Location\float $lat,
-        Simple_Location\float $lnt
+   'pre_at_venue',
+    function(
+        mixed $value,
+        float $lat,
+        float $lnt
     ) {
-        // Your code here
+        // Your code here.
         return $value;
     },
     10,
@@ -23,17 +23,17 @@ add_filter(
 
 ## Parameters
 
-- *`Simple_Location\mixed`* `$value` The boolean value as to whether someone is at a venue.
-- *`Simple_Location\float`* `$lat` Latitude.
-- *`Simple_Location\float`* `$lnt` Longitude.
+- *`mixed`* `$value` The boolean value as to whether someone is at a venue.
+- *`float`* `$lat` Latitude.
+- *`float`* `$lnt` Longitude.
 
 ## Files
 
-- [includes/class-post-venue.php:446](https://github.com/dshanske/simple-location/blob/main/includes/class-post-venue.php#L446)
+- [includes/class-post-venue.php:470](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L470)
 ```php
 apply_filters( 'pre_at_venue', null, $lat, $lng )
 ```
 
 
 
-[Hooks](Hooks)
+[← All Hooks](Hooks)
