@@ -84,7 +84,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		if ( ! preg_match( '/srcset="([^"]*)"/', $html, $match ) ) {
 			return array();
 		}
-		preg_match_all( '/(\S+) (\d)x/', html_entity_decode( $match[1] ), $images, PREG_SET_ORDER );
+		preg_match_all( '/([^\s,]\S*) (\d)x/', html_entity_decode( $match[1] ), $images, PREG_SET_ORDER );
 		$urls = array();
 		foreach ( $images as $image ) {
 			$urls[ (int) $image[2] ] = $image[1];
@@ -424,6 +424,73 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$map = $this->provider( 'Map_Provider_Google', array( 'api' => '' ) );
 		$this->assertSame( '', $map->get_the_static_map() );
 		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
+	}
+
+	/**
+	 * Google URL signing matches the example in Google's documentation.
+	 */
+	public function test_google_sign_url() {
+		$this->assertSame(
+			'https://maps.googleapis.com/maps/api/geocode/json?address=New+York&client=clientID&signature=chaRF2hTJKOScPr-RQCEhZbSzIE=',
+			Map_Provider_Google::sign_url( 'https://maps.googleapis.com/maps/api/geocode/json?address=New+York&client=clientID', 'vNIXE0xscrmjlyV-12Nj_BvUPaw=' )
+		);
+		$this->assertFalse( Map_Provider_Google::sign_url( 'https://maps.googleapis.com/maps/api/staticmap?key=KEY', 'not base64!' ) );
+		$this->assertFalse( Map_Provider_Google::sign_url( 'https://maps.googleapis.com/maps/api/staticmap?key=KEY', '' ) );
+	}
+
+	/**
+	 * With a signing secret, every Google map URL is signed: single maps, each srcset density and archive maps.
+	 */
+	public function test_google_signed_maps() {
+		$secret = 'vNIXE0xscrmjlyV-12Nj_BvUPaw=';
+		update_option( 'sloc_google_map_secret', $secret );
+		$map = $this->provider( 'Map_Provider_Google' );
+
+		$urls = array_merge( array( $map->get_the_static_map(), $map->get_archive_map( $this->locations ) ), array_values( $this->srcset( $map ) ) );
+		$this->assertCount( 4, $urls );
+		foreach ( $urls as $url ) {
+			$this->assertMatchesRegularExpression( '/&signature=[A-Za-z0-9_-]+=*$/', $url );
+			$unsigned = preg_replace( '/&signature=.*$/', '', $url );
+			$this->assertSame( $url, Map_Provider_Google::sign_url( $unsigned, $secret ) );
+		}
+
+		// The query is encoded as it is signed, so the URL Google receives matches the signature.
+		$this->assertStringContainsString( '?markers=color%3Ared%7Clabel%3AX%7C39.9524%2C-75.1636&', $urls[0] );
+
+		// A secret passed in wins over the setting, and an empty one turns signing off.
+		$map = $this->provider( 'Map_Provider_Google', array( 'secret' => '' ) );
+		$this->assertStringNotContainsString( 'signature=', $map->get_the_static_map() );
+	}
+
+	/**
+	 * A signing secret that isn't valid gives no map, and tells administrators why.
+	 */
+	public function test_google_invalid_signing_secret() {
+		$map = $this->provider( 'Map_Provider_Google', array( 'secret' => 'not base64!' ) );
+		$this->assertSame( 'invalid_signing_secret', $map->get_the_static_map()->get_error_code() );
+		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
+		$this->assertSame( '', $map->get_the_map() );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( 'The Google URL signing secret is not valid. Copy it again from the Google Cloud console.', $map->get_the_map() );
+	}
+
+	/**
+	 * The Google map provider registers the signing secret setting and adds its field to the API settings.
+	 */
+	public function test_google_signing_setting() {
+		global $wp_settings_fields;
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		Map_Provider_Google::init();
+		$settings = get_registered_settings();
+		$this->assertArrayHasKey( 'sloc_google_map_secret', $settings );
+		$this->assertSame( 'sloc_api', $settings['sloc_google_map_secret']['group'] );
+
+		Map_Provider_Google::admin_init();
+		$field = $wp_settings_fields['sloc_api']['sloc_api']['sloc_google_map_secret'];
+		$this->assertSame( 'password', $field['args']['type'] );
+		$this->assertStringContainsString( 'Unsigned requests per day', $field['args']['description'] );
 	}
 
 	/**
