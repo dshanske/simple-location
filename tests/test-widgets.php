@@ -103,6 +103,59 @@ class WidgetsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The weather and Last Seen widgets show the same sun and moon times for the same place, in the place's own
+	 * timezone (#201).
+	 */
+	public function test_astro_times_match_location() {
+		Weather_Provider_Sloc_Test::$conditions = array(
+			'temperature' => 20,
+			'latitude'    => self::LAT,
+			'longitude'   => self::LNG,
+		);
+		$weather                                = $this->render(
+			new Sloc_Weather_Widget(),
+			array(
+				'title'     => '',
+				'latitude'  => self::LAT,
+				'longitude' => self::LNG,
+				'showastro' => 1,
+			)
+		);
+		$lastseen                               = $this->render(
+			new Sloc_Lastseen_Widget(),
+			array(
+				'title'     => '',
+				'user'      => $this->user_with_location(),
+				'showtime'  => '0',
+				'showastro' => '1',
+			)
+		);
+
+		$times = array();
+		foreach ( array(
+			'weather'  => $weather,
+			'lastseen' => $lastseen,
+		) as $widget => $html ) {
+			preg_match_all( '/(Sunrise|Sunset|Moonrise|Moonset): <time datetime="([^"]+)">/', $html, $matches, PREG_SET_ORDER );
+			foreach ( $matches as $match ) {
+				$times[ $widget ][ $match[1] ] = $match[2];
+			}
+		}
+		$this->assertCount( 4, $times['weather'] );
+		$this->assertSame( $times['weather'], $times['lastseen'], 'Both widgets give the same times.' );
+
+		// Philadelphia's sunrise is between 5 and 8 am and its sunset between 4 and 9 pm all year, in its own timezone.
+		$offset  = ( new DateTime( 'now', new DateTimeZone( 'America/New_York' ) ) )->format( 'P' );
+		$sunrise = new DateTime( $times['weather']['Sunrise'] );
+		$sunset  = new DateTime( $times['weather']['Sunset'] );
+		$this->assertSame( $offset, $sunrise->format( 'P' ) );
+		$this->assertGreaterThanOrEqual( 5, (int) $sunrise->format( 'G' ) );
+		$this->assertLessThan( 8, (int) $sunrise->format( 'G' ) );
+		$this->assertGreaterThanOrEqual( 16, (int) $sunset->format( 'G' ) );
+		$this->assertLessThan( 21, (int) $sunset->format( 'G' ) );
+	}
+
+	/**
 	 * Saved settings are trimmed.
 	 */
 	public function test_update_trims() {
