@@ -458,11 +458,14 @@ class Loc_Timezone {
 	 *
 	 * @since 4.0.0
 	 * @since 6.0.0 A comment uses its own timezone when it has one, otherwise its post's.
+	 * @since 6.0.0 Without a post, or for anything else, returns the site timezone instead of a warning.
 	 *
 	 * @param WP_Post|WP_Comment|WP_Term|WP_User|int|null $object Object, or post ID. Default the current post.
 	 * @return DateTimeZone|null Timezone, or null to leave dates unchanged.
 	 */
 	public static function get_timezone( $object = null ) {
+		$id   = 0;
+		$type = '';
 		if ( ! $object ) {
 			$object = get_post();
 		}
@@ -490,6 +493,10 @@ class Loc_Timezone {
 		if ( $object instanceof WP_User ) {
 			$id   = $object->ID;
 			$type = 'user';
+		}
+		// No current post, a missing post, or something else: there is no stored timezone to use.
+		if ( empty( $id ) ) {
+			return wp_timezone();
 		}
 
 		$timezone = wp_cache_get( $id, $type . '_timezone' );
