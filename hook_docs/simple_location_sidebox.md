@@ -26,7 +26,7 @@ add_action(
 
 ## Files
 
-- [includes/class-geo-base.php:137](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-base.php#L137)
+- [includes/class-geo-base.php:163](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-base.php#L163)
 ```php
 do_action( 'simple_location_sidebox', get_current_screen(), $object, $args )
 ```

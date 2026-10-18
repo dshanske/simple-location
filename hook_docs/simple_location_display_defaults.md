@@ -21,7 +21,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-geo-data.php:1113](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-data.php#L1113)
+- [includes/class-geo-data.php:1197](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-data.php#L1197)
 ```php
 apply_filters( 'simple_location_display_defaults', $defaults )
 ```

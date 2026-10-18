@@ -53,6 +53,15 @@ if ( ! function_exists( 'get_comment_timestamp' ) ) {
 }
 
 if ( ! function_exists( 'array_key_last_index' ) ) {
+	/**
+	 * Returns the key at a position counted from the end of an array.
+	 *
+	 * @since 4.1.12
+	 *
+	 * @param array $array The array.
+	 * @param int   $index Position from the end. Default -1, the last key.
+	 * @return int|string|null The key, or null for an empty array.
+	 */
 	function array_key_last_index( array $array, $index = -1 ) {
 		if ( ! empty( $array ) ) {
 			return key( array_slice( $array, $index, 1, true ) );
@@ -61,13 +70,18 @@ if ( ! function_exists( 'array_key_last_index' ) ) {
 }
 
 if ( ! function_exists( 'str_contains' ) ) {
-	/*
-	 * Returns whether haystick contains needle.
-	 * Polyfill for PHP8.0 function
+	/**
+	 * Returns whether haystack contains needle.
+	 *
+	 * Polyfill for PHP 8.0. WordPress 5.9 and later have their own; remove with this one when the
+	 * minimum PHP is 8.0.
+	 *
+	 * @since 4.4.2
+	 *
 	 * @param string $haystack String.
-	 * @param string $needle String to find within haystack.
-	 * @return boolean whether it was found.
-	*/
+	 * @param string $needle   String to find within haystack.
+	 * @return boolean Whether it was found.
+	 */
 	function str_contains( $haystack, $needle ) {
 			return '' === $needle || false !== strpos( $haystack, $needle );
 	}
