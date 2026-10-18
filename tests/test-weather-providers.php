@@ -145,6 +145,21 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Cloudiness from any provider is a whole percentage.
+	 */
+	public function test_cloudiness_whole_percentage() {
+		$fixture                            = $this->fixture( 'weather/pirateweather-forecast.json' );
+		$fixture['currently']['cloudCover'] = 0.756;
+		$this->mock_http( array( 'api.pirateweather.net/forecast/' => array( 'body' => $fixture ) ) );
+		$this->assertSame( 76, $this->provider( 'Weather_Provider_PirateWeather', array( 'api' => 'pw-key' ) )->get_conditions()['cloudiness'] );
+
+		$fixture                                    = $this->fixture( 'weather/visualcrossing-current.json' );
+		$fixture['currentConditions']['cloudcover'] = 12.4;
+		$this->mock_http( array( 'weather.visualcrossing.com' => array( 'body' => $fixture ) ) );
+		$this->assertSame( 12, $this->provider( 'Weather_Provider_VisualCrossing', array( 'api' => 'vc-key' ) )->get_conditions()['cloudiness'] );
+	}
+
+	/**
 	 * Pirate Weather: current conditions from the forecast endpoint, with SI units converted.
 	 */
 	public function test_pirateweather() {

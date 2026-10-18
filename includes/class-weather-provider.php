@@ -139,6 +139,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * Extra Parameters for location.
 	 *
 	 * @since 6.0.0 Values of 0, and `day` when it is false, are kept.
+	 * @since 6.0.0 Rounds cloudiness to a whole percentage.
 	 *
 	 * @param array $return Weather data.
 	 * @param int   $timestamp Unix timestamp. Optional.
@@ -155,6 +156,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 	public function extra_data( $return, $timestamp = null ) {
 		if ( is_null( $timestamp ) ) {
 			$timestamp = time();
+		}
+		if ( isset( $return['cloudiness'] ) && is_numeric( $return['cloudiness'] ) ) {
+			$return['cloudiness'] = (int) round( (float) $return['cloudiness'] );
 		}
 		$latitude           = array_key_return( 'latitude', $return, $this->latitude );
 		$longitude          = array_key_return( 'longitude', $return, $this->longitude );
@@ -285,6 +289,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Marks up a measurement.
 	 *
+	 * @since 6.0.0 Cloudiness is shown as a whole percentage unless a precision is given.
+	 *
 	 * @param string  $property Property.
 	 * @param mixed   $value Value of the Property.
 	 * @param boolean $markup Add Microformats Markup.
@@ -303,6 +309,10 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$params        = self::get_names( $property, $args['units'] );
 		if ( ! $params ) {
 			return '';
+		}
+		// Cloudiness is a whole percentage; values saved before 6.0.0 can have decimals.
+		if ( 'cloudiness' === $property && false === $args['round'] ) {
+			$args['round'] = true;
 		}
 		if ( is_numeric( $value ) ) {
 			if ( is_numeric( $args['round'] ) ) {
