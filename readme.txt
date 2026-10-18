@@ -270,6 +270,16 @@ The plugin offers providers for:
 * Weather - Retrieves weather based on location or station ID
 * Map - Provides maps for display
 
+= Where does the bundled data come from? =
+
+The plugin includes data files in its `data` folder, so these lookups don't need an online service:
+* Weather stations for the Meteostat provider: [Meteostat](https://meteostat.net), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Only each station's location, name and the dates it has hourly data for are included.
+* Airports: [OurAirports](https://ourairports.com/data/), public domain.
+* Airlines: [OpenFlights](https://openflights.org/data), licensed under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/).
+* Countries and regions: ISO 3166 data from [php-isocodes](https://github.com/sokil/php-isocodes).
+
+Developers can refresh the station, airport and airline files with `composer update-data`.
+
 = What icons are used here? =
 
 * [Weather Icons](https://erikflowers.github.io/weather-icons/) are used for most of the weather options.

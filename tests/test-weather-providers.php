@@ -1026,6 +1026,62 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Meteostat: the nearest station within 100 km is preferred when it has hourly data for the date; otherwise
+	 * the nearest station with data is used, and without one, the nearest station.
+	 */
+	public function test_meteostat_nearest_station() {
+		$file = dirname( __DIR__ ) . '/tests/data/weather/meteostat-stations.csv';
+
+		$station = Weather_Provider_Meteostat::nearest_station( self::LAT, self::LNG, '2012-06-01', $file );
+		$this->assertSame( 'NEAR1', $station['id'], 'The nearest station has data for 2012.' );
+		$this->assertSame(
+			array(
+				'id'        => 'NEAR1',
+				'name'      => array( 'en' => 'Near, Closed Station' ),
+				'country'   => 'US',
+				'region'    => 'PA',
+				'location'  => array(
+					'latitude'  => 39.98,
+					'longitude' => -75.16,
+					'elevation' => 20,
+				),
+				'timezone'  => 'America/New_York',
+				'inventory' => array(
+					'hourly' => array(
+						'start' => '2010-01-01',
+						'end'   => '2015-12-31',
+					),
+				),
+			),
+			$station
+		);
+
+		$this->assertSame( 'FAR01', Weather_Provider_Meteostat::nearest_station( self::LAT, self::LNG, '2020-06-01', $file )['id'], 'The nearest station closed in 2015.' );
+		$this->assertSame( 'FAR01', Weather_Provider_Meteostat::nearest_station( self::LAT, self::LNG, '2026-10-18', $file )['id'], 'A station reporting when the list was built covers later dates.' );
+		$this->assertSame( 'FAR01', Weather_Provider_Meteostat::nearest_station( self::LAT, self::LNG, null, $file )['id'] );
+		$this->assertSame( 'NODAT', Weather_Provider_Meteostat::nearest_station( self::LAT, self::LNG, '1980-06-01', $file )['id'], 'Without a station with data, the nearest station is used.' );
+		$this->assertNull( Weather_Provider_Meteostat::nearest_station( 0, -140, null, $file ) );
+		$this->assertSame( 'filesystem_error', Weather_Provider_Meteostat::nearest_station( self::LAT, self::LNG, null, $file . '.missing' )->get_error_code() );
+	}
+
+	/**
+	 * Meteostat: the station found for a location and day is cached, including when there is none in range.
+	 */
+	public function test_meteostat_station_cached() {
+		$this->mock_http( array( 'meteostat.p.rapidapi.com/stations/hourly' => array( 'body' => $this->fixture( 'weather/meteostat-hourly.json' ) ) ) );
+		$time = strtotime( '2025-07-01T14:00:00Z' );
+		$this->provider( 'Weather_Provider_Meteostat', array( 'api' => 'ms-key' ) )->get_conditions( $time );
+		$key = 'sloc_meteostat_station_' . md5( implode( ',', array( round( self::LAT, 2 ), round( self::LNG, 2 ), '2025-07-01' ) ) );
+		$this->assertSame( '72408', get_transient( $key )['id'] );
+
+		// No station within 100 km: the empty result is cached, and the provider has no conditions to give.
+		$provider = new Weather_Provider_Meteostat( array( 'api' => 'ms-key' ) );
+		$provider->set( 0, -140 );
+		$this->assertWPError( $provider->get_conditions( $time ) );
+		$this->assertSame( '', get_transient( 'sloc_meteostat_station_' . md5( implode( ',', array( 0.0, -140.0, '2025-07-01' ) ) ) ) );
+	}
+
+	/**
 	 * Meteostat: readings of 0 are kept, and missing readings are left out instead of becoming 0.
 	 */
 	public function test_meteostat_zero_and_missing_values() {
