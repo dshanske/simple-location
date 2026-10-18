@@ -104,7 +104,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			$return           = self::get_station_data( $time );
 			// Cache by the location that was asked for, not the station.
 			$this->station_id = null;
-			$this->set_cache( $return );
+			$this->set_cache( $return, $time );
 			return $return;
 		}
 		return self::get_fallback_conditions( $time );
@@ -117,7 +117,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	 * @return array Current Conditions.
 	 */
 	public function get_station_data( $time = null ) {
-		$conditions = $this->get_cache();
+		$conditions = $this->get_cache( $time );
 		if ( $conditions ) {
 			return $conditions;
 		}
@@ -179,7 +179,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		$return = array_merge( $return, $this->convert_data( $json ) );
 		$return = $this->extra_data( $return, $time );
 
-		$this->set_cache( $return );
+		$this->set_cache( $return, $time );
 
 		return $return;
 	}

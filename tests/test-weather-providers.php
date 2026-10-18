@@ -974,6 +974,58 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Cached conditions are kept per requested hour, so a later lookup for another past time isn't answered
+	 * from the cache of an earlier one.
+	 */
+	public function test_cache_by_requested_time() {
+		$this->mock_http( array( 'meteostat.p.rapidapi.com/stations/hourly' => array( 'body' => $this->fixture( 'weather/meteostat-hourly.json' ) ) ) );
+		$provider = new Weather_Provider_Meteostat(
+			array(
+				'api'        => 'ms-key',
+				'cache_time' => HOUR_IN_SECONDS,
+			)
+		);
+		$provider->set( array( 'station_id' => '72408' ) );
+
+		$provider->get_conditions( strtotime( '2025-07-01T14:00:00Z' ) );
+		$provider->get_conditions( strtotime( '2024-01-15T09:00:00Z' ) );
+		$this->assertCount( 2, $this->http_requests, 'Another past time is fetched, not answered from the first lookup.' );
+		$this->assertSame( '2024-01-15', $this->last_request()['query']['start'] );
+
+		$provider->get_conditions( strtotime( '2025-07-01T14:00:00Z' ) );
+		$provider->get_conditions( strtotime( '2025-07-01T14:40:00Z' ) );
+		$this->assertCount( 2, $this->http_requests, 'Each past hour is cached.' );
+	}
+
+	/**
+	 * Current conditions keep their cache key, and a past time is cached under its own key.
+	 */
+	public function test_cache_key_for_current_and_past() {
+		$fixture = $this->fixture( 'weather/visualcrossing-current.json' );
+		$this->mock_http( array( 'weather.visualcrossing.com' => array( 'body' => $fixture ) ) );
+		$provider = $this->provider(
+			'Weather_Provider_VisualCrossing',
+			array(
+				'api'        => 'vc-key',
+				'cache_time' => 600,
+			)
+		);
+		$key      = 'Weather_Provider_VisualCrossing_' . md5( self::LAT . ',' . self::LNG );
+
+		$provider->get_conditions();
+		$provider->get_conditions( time() - 10 * MINUTE_IN_SECONDS );
+		$this->assertCount( 1, $this->http_requests, 'A time within the hour is current.' );
+		$this->assertIsArray( get_transient( $key ) );
+
+		$past = strtotime( '2025-07-01T14:20:00Z' );
+		$provider->get_conditions( $past );
+		$this->assertCount( 2, $this->http_requests );
+		$this->assertIsArray( get_transient( $key . '_2025070114' ) );
+		$provider->get_conditions( $past );
+		$this->assertCount( 2, $this->http_requests );
+	}
+
+	/**
 	 * Meteostat: readings of 0 are kept, and missing readings are left out instead of becoming 0.
 	 */
 	public function test_meteostat_zero_and_missing_values() {
