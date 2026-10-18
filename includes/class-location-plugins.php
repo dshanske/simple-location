@@ -119,6 +119,17 @@ class Location_Plugins {
 		return false;
 	}
 
+	/**
+	 * Returns a value from an array, or the first item of a list value.
+	 *
+	 * @since 5.0.11
+	 *
+	 * @param array   $array   The array.
+	 * @param string  $key     Key.
+	 * @param mixed   $default Value without the key. Default empty array.
+	 * @param boolean $index   Whether to return the first item of a list. Default true.
+	 * @return mixed The value.
+	 */
 	public static function array_get( $array, $key, $default = array(), $index = true ) {
 		$return = $default;
 		if ( is_array( $array ) && isset( $array[ $key ] ) ) {

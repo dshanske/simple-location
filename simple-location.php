@@ -150,7 +150,8 @@ class Simple_Location_Plugin {
 	/**
 	 * Filename to Classname Function.
 	 *
-	 * @param string $filename.
+	 * @param string $filename File name, such as class-weather-provider-foo.php.
+	 * @return string|false Class name, such as Weather_Provider_Foo, or false if there is no such class.
 	 *
 	 * @since 4.6.0
 	 */

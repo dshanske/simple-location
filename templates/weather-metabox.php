@@ -1,6 +1,8 @@
 <?php
 /**
  * Weather Sidebar Metabox.
+ *
+ * @package Simple_Location
  */
 
 defined( 'ABSPATH' ) || exit;
