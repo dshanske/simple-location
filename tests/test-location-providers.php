@@ -570,6 +570,18 @@ class LocationProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * An operator that isn't a 2-letter IATA or 3-letter ICAO airline code, such as a name, is kept as it is.
+	 */
+	public function test_compass_operator_name() {
+		$fixture                       = $this->fixture( 'location/compass-last.json' );
+		$fixture['data']['properties'] = array( 'operator' => 'SEPTA Regional Rail' );
+		$this->mock_http( array( 'compass.example.com' => array( 'body' => $fixture ) ) );
+		$provider = new Location_Provider_Compass();
+		$this->assertNull( $provider->retrieve() );
+		$this->assertSame( 'SEPTA Regional Rail', $provider->get()['other']['operator'] );
+	}
+
+	/**
 	 * Flights reported by a flight source are planes, annotated with the flight number.
 	 */
 	public function test_compass_flight() {

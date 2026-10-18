@@ -121,6 +121,8 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 			);
 		}
 
+		// Some places, such as Singapore, have no region.
+		$region_code = null;
 		if ( ! empty( $region ) ) {
 			$region_code = self::region_code( $region, $country_code );
 		}

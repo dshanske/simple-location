@@ -482,7 +482,7 @@ class Geo_Base {
 	 * @param string  $public The value to set the select field to.
 	 * @param boolean $echo True to echo, false to return.
 	 * @param array   $choices Optional. Choices keyed by value. Default geo_public(). Since 6.0.0.
-	 * @return string $return Optional. Returns the created string.
+	 * @return string|void The options, or nothing when they are echoed.
 	 * @since 1.0.0
 	 */
 	public static function geo_public_select( $public, $echo = false, $choices = null ) {

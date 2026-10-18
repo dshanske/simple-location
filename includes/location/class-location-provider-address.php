@@ -35,7 +35,7 @@ class Location_Provider_Address extends Location_Provider {
 	 *
 	 * @param string|int|DateTime $time An ISO8601 time string, unix timestamp, or DateTime.
 	 * @param array               $args Optional arguments to be passed.
-	 * @return array|boolean Array with h-geo mf2 false if null
+	 * @return WP_Error|false|null An error, or false, if no location was found; null when the location is set. Read it with get().
 	 */
 	public function retrieve( $time = null, $args = array() ) {
 		$this->reset();
@@ -51,12 +51,13 @@ class Location_Provider_Address extends Location_Provider {
 		$address = $geocode->geocode( $address );
 		if ( is_wp_error( $address ) ) {
 			$this->annotation = __( 'No Item Found', 'simple-location' );
-			return;
+			return null;
 		}
 
 		$this->latitude   = $address['latitude'];
 		$this->longitude  = $address['longitude'];
 		$this->altitude   = $address['altitude'] ?? null;
 		$this->annotation = $address['display-name'] ?? null;
+		return null;
 	}
 }

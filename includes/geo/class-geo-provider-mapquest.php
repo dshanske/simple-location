@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 class Geo_Provider_Mapquest extends Geo_Provider {
-	use Sloc_API_Mapquest;
+	use Sloc_API_MapQuest;
 
 	/**
 	 * Constructor for the Abstract Class.

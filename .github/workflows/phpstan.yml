@@ -1,0 +1,18 @@
+name: PHPStan
+on: push
+jobs:
+  phpstan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "latest"
+          coverage: none
+          tools: composer:v2
+      - name: Install Composer dependencies for PHP
+        uses: "ramsey/composer-install@v3"
+      - name: Analyse PHP code
+        run: composer phpstan -- --no-progress --error-format=github

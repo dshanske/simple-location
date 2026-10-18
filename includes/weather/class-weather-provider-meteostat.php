@@ -17,7 +17,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	/**
 	 * Station Data.
 	 *
-	 * @var string
+	 * @var array
 	 */
 	protected $station;
 

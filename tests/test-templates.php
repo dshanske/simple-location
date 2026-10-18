@@ -108,6 +108,24 @@ class TemplatesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Without an address, the location metabox's label says None.
+	 */
+	public function test_location_metabox_without_address() {
+		$post_id = self::factory()->post->create();
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'   => 39.9524,
+				'longitude'  => -75.1636,
+				'visibility' => 'public',
+			)
+		);
+		$this->edit_post( $post_id );
+		$this->assertStringContainsString( '<span id="location-label">None</span>', $this->render( 'loc-metabox.php' ) );
+	}
+
+	/**
 	 * The weather metabox shows the comment's weather on the comment screen.
 	 */
 	public function test_weather_metabox_comment() {

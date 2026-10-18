@@ -598,8 +598,8 @@ class Astronomical_Calculator {
 
 		// go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set).
 		for ( $i = 1; $i <= 24; $i += 2 ) {
-			$h1 = $this->get_moon_position( $this->hours_later( $timestamp, $i ), $this->latitude, $this->longitude )['altitude'] - $hc;
-			$h2 = $this->get_moon_position( $this->hours_later( $timestamp, $i + 1 ), $this->latitude, $this->longitude )['altitude'] - $hc;
+			$h1 = $this->get_moon_position( $this->hours_later( $timestamp, $i ) )['altitude'] - $hc;
+			$h2 = $this->get_moon_position( $this->hours_later( $timestamp, $i + 1 ) )['altitude'] - $hc;
 
 			$a     = ( $h0 + $h2 ) / 2 - $h1;
 			$b     = ( $h2 - $h0 ) / 2;

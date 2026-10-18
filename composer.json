@@ -44,7 +44,9 @@
       "scssphp/scssphp": "^1.13.0",
       "simple-icons/simple-icons": "^14.0",
       "wpreadme2markdown/wp2md": "^4.1",
-      "akirk/extract-wp-hooks": "^1.0"
+      "akirk/extract-wp-hooks": "^1.0",
+      "phpstan/phpstan": "^2.1",
+      "szepeviktor/phpstan-wordpress": "^2.0"
     },
     "prefer-stable" : true,
     "scripts": {
@@ -70,6 +72,7 @@
 	],
 	"update-docs": "./vendor/bin/extract-wp-hooks.php",
 	"update-data": "@php bin/update-data.php",
+	"phpstan": "./vendor/bin/phpstan analyse --memory-limit=1G",
       "build-css": [
       "vendor/bin/pscss --style=expanded sass/main.scss css/location.css",
       "vendor/bin/pscss --style=compressed sass/main.scss css/location.min.css",

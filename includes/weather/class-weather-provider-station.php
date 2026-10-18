@@ -188,11 +188,8 @@ class Weather_Provider_Station extends Weather_Provider {
 	public function get_conditions( $time = null ) {
 		$return   = array();
 		$datetime = $this->datetime( $time );
-		if ( ! empty( $datetime ) ) {
-			$abs = abs( $datetime->getTimestamp() - time() );
-			if ( 3600 < $abs ) {
-				return self::get_fallback_conditions( $time );
-			}
+		if ( 3600 < abs( $datetime->getTimestamp() - time() ) ) {
+			return self::get_fallback_conditions( $time );
 		}
 
 		if ( ! empty( $this->station_id ) ) {
@@ -221,7 +218,7 @@ class Weather_Provider_Station extends Weather_Provider {
 				$return           = self::get_station_data();
 				if ( ! is_wp_error( $return ) ) {
 					$return['distance'] = $sitelist[0]['distance'];
-					unset( $this->station_id );
+					$this->station_id   = null;
 					$this->set_cache( $return );
 					return $return;
 				}

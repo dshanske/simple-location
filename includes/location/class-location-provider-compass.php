@@ -184,11 +184,11 @@ class Location_Provider_Compass extends Location_Provider {
 		}
 		$compass = get_user_meta( $user_id, 'compass_url', true );
 		if ( ! $compass ) {
-			return;
+			return null;
 		}
 		$api = get_user_meta( $user_id, 'compass_api', true );
 		if ( ! $api ) {
-			return;
+			return null;
 		}
 		$url  = sprintf( '%1$s/api/last/?token=%2$s', $compass, $api );
 		$args = array(
@@ -274,6 +274,8 @@ class Location_Provider_Compass extends Location_Provider {
 		}
 
 		if ( array_key_exists( 'operator', $properties ) ) {
+			// Operators that aren't a 2-letter IATA or 3-letter ICAO code, such as a name, are kept as they are.
+			$airline = null;
 			if ( 2 === strlen( $properties['operator'] ) ) {
 				$airline = Airport_Location::get_airline( $properties['operator'] );
 			} elseif ( 3 === strlen( $properties['operator'] ) ) {
@@ -308,6 +310,7 @@ class Location_Provider_Compass extends Location_Provider {
 		// Above handles standard properties the remaining code handles non-standard properties if present.
 
 		$this->other( $properties );
+		return null;
 	}
 
 	/**

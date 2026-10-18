@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 class Map_Provider_Geoapify extends Map_Provider {
-	use Sloc_API_Geoapify;
+	use Sloc_API_GeoApify;
 
 	/**
 	 * Geoapify's terms allow storing and caching its static maps, with no time limit, so they are served from the site.

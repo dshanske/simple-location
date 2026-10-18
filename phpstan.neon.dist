@@ -1,0 +1,25 @@
+# PHPStan configuration. Run with `composer phpstan`.
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+parameters:
+	level: 1
+	paths:
+		- simple-location.php
+		- includes
+		- templates
+		- lib
+	bootstrapFiles:
+		- tests/phpstan-bootstrap.php
+	ignoreErrors:
+		# The vendor traits add map settings only when the class using them is a map provider; PHPStan analyses the
+		# traits in every class that uses them and can't follow that check.
+		-
+			identifier: staticMethod.notFound
+			message: '#::(add|register)_map_api_setting\(\)#'
+			path: includes/apis/*
+		# GeoLocation_Trait::timezone() is for providers, which have coordinates. Location_Taxonomy uses the trait
+		# for its country and region helpers and never calls timezone().
+		-
+			identifier: property.notFound
+			message: '#^Access to an undefined property Location_Taxonomy::\$(latitude|longitude)\.$#'
+			path: includes/trait-geolocation-trait.php

@@ -32,5 +32,6 @@ class Location_Provider_Dummy extends Location_Provider {
 		foreach ( $properties as $property ) {
 			$this->$property = $location[ $property ] ?? null;
 		}
+		return null;
 	}
 }

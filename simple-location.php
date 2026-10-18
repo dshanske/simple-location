@@ -227,7 +227,7 @@ class Simple_Location_Plugin {
 		add_action( 'wp_enqueue_scripts', array( static::class, 'style_load' ) );
 
 		// Settings Link.
-		add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( static::class, 'settings_link' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( static::class, 'settings_link' ) );
 
 		// Add Privacy Policy.
 		add_action( 'admin_init', array( static::class, 'privacy_declaration' ) );

@@ -337,7 +337,7 @@ class Geo_Data {
 		 * @param string $type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
 		 *                          or any other object type with an associated meta table.
 		 * @param string $key  Geo data key.
-		 * @param string $geodata Value.
+		 * @param array|string $geodata Value, or all values as an array when `$key` is empty.
 		 */
 		$check = apply_filters( "set_{$type}_geodata", null, $id, $key, $type, $geodata );
 
@@ -990,7 +990,7 @@ class Geo_Data {
 		 *
 		 * @param string  $icon Icon to be Selected.
 		 * @param boolean $echo Echo or Return.
-		 * @return string Select Option. Optional.
+		 * @return string|void The options, or nothing when they are echoed.
 		 */
 	public static function icon_select( $icon, $echo = false ) {
 		$choices = self::get_iconlist();
