@@ -249,22 +249,30 @@ class GeoProvidersTest extends WP_UnitTestCase {
 			'type'     => 'FeatureCollection',
 			'features' => array(),
 		);
+		$error = array_merge( $empty, array( 'geocoding' => array( 'errors' => array( "'text' parameter is required" ) ) ) );
 		foreach ( array( 'Geo_Provider_Pelias', 'Geo_Provider_OpenRoute' ) as $class ) {
-			$this->mock_http( array( '' => array( 'body' => $empty ) ) );
+			$this->mock_http( $this->pelias_responses( $empty ) );
 			$this->assertSame( 'no_results', $this->provider( $class, array( 'api' => 'KEY' ) )->reverse_lookup()->get_error_code(), $class );
 			$this->assertSame( 'no_results', ( new $class( array( 'api' => 'KEY' ) ) )->geocode( 'nowhere' )->get_error_code(), $class );
 
-			$this->mock_http(
-				array(
-					'' => array(
-						'body' => array_merge( $empty, array( 'geocoding' => array( 'errors' => array( "'text' parameter is required" ) ) ) ),
-					),
-				)
-			);
-			$error = ( new $class( array( 'api' => 'KEY' ) ) )->geocode( '' );
-			$this->assertSame( 'pelias_error', $error->get_error_code(), $class );
-			$this->assertSame( "'text' parameter is required", $error->get_error_message() );
+			$this->mock_http( $this->pelias_responses( $error ) );
+			$result = ( new $class( array( 'api' => 'KEY' ) ) )->geocode( '' );
+			$this->assertSame( 'pelias_error', $result->get_error_code(), $class );
+			$this->assertSame( "'text' parameter is required", $result->get_error_message() );
 		}
+	}
+
+	/**
+	 * Returns the same mocked response for the test Pelias server and OpenRoute.
+	 *
+	 * @param array $body Response body.
+	 * @return array Responses keyed by URL pattern.
+	 */
+	protected function pelias_responses( $body ) {
+		return array(
+			'203.0.113.10/v1'          => array( 'body' => $body ),
+			'api.openrouteservice.org' => array( 'body' => $body ),
+		);
 	}
 
 	/**
