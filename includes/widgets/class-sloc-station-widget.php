@@ -52,6 +52,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	 * Widget worker
 	 *
 	 * @since 6.0.0 Always closes the widget wrapper, and shows nothing without a station.
+	 * @since 6.0.0 Only administrators see error details; visitors see a general message.
 	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
@@ -82,7 +83,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 				if ( 'http_request_failed' === $weather->get_error_code() ) {
 					echo esc_html__( 'Unable to Connect to Station', 'simple-location' );
 				} else {
-					echo esc_html( $weather->get_error_message() );
+					echo esc_html( self::error_message( $weather ) );
 				}
 
 				echo $args['after_widget']; // phpcs:ignore

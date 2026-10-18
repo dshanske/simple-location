@@ -206,16 +206,21 @@ class WidgetsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Provider errors and plain-text results are shown as text.
+	 * Provider errors are shown in full to administrators, and as a general message to everyone else.
 	 */
 	public function test_weather_errors() {
-		Weather_Provider_Sloc_Test::$conditions = new WP_Error( 'down', 'Weather is unavailable' );
+		Weather_Provider_Sloc_Test::$conditions = new WP_Error( 'down', 'The service returned HTTP status 500: internal.example.com' );
 		$instance                               = array(
 			'title'     => '',
 			'latitude'  => self::LAT,
 			'longitude' => self::LNG,
 		);
-		$this->assertStringContainsString( 'Weather is unavailable', $this->render( new Sloc_Weather_Widget(), $instance ) );
+		$html                                   = $this->render( new Sloc_Weather_Widget(), $instance );
+		$this->assertStringContainsString( 'Weather is not available right now.', $html );
+		$this->assertStringNotContainsString( 'internal.example.com', $html );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertStringContainsString( 'internal.example.com', $this->render( new Sloc_Weather_Widget(), $instance ) );
 	}
 
 	/**
@@ -383,7 +388,7 @@ class WidgetsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Station errors are shown, with a friendlier message when the station can't be reached.
+	 * Station errors say when the station can't be reached, and otherwise show details only to administrators.
 	 */
 	public function test_station_errors() {
 		$instance = array(
@@ -399,6 +404,11 @@ class WidgetsTest extends WP_UnitTestCase {
 		$this->assertStringEndsWith( '</section>', $html );
 
 		Weather_Provider_Sloc_Test::$conditions = new WP_Error( 'not_found', 'Station not found' );
+		$html                                   = $this->render( new Sloc_Station_Widget(), $instance );
+		$this->assertStringContainsString( 'Weather is not available right now.', $html );
+		$this->assertStringNotContainsString( 'Station not found', $html );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->assertStringContainsString( 'Station not found', $this->render( new Sloc_Station_Widget(), $instance ) );
 	}
 
@@ -439,7 +449,7 @@ class WidgetsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Without an airport, or with a code of the wrong length, the widget doesn't warn and closes its wrapper.
+	 * Without an airport, or with a code of the wrong length, the widget closes its wrapper; only administrators see why.
 	 */
 	public function test_airport_invalid() {
 		$this->assertSame( '<section class="widget"></section>', $this->render( new Sloc_Airport_Widget(), array( 'title' => '' ) ) );
@@ -451,8 +461,19 @@ class WidgetsTest extends WP_UnitTestCase {
 				'airport' => 'PH',
 			)
 		);
-		$this->assertStringContainsString( 'Airport codes have 3 (IATA) or 4 (ICAO) characters.', $html );
+		$this->assertStringContainsString( 'Weather is not available right now.', $html );
 		$this->assertStringEndsWith( '</section>', $html );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$html = $this->render(
+			new Sloc_Airport_Widget(),
+			array(
+				'title'   => '',
+				'airport' => 'PH',
+			)
+		);
+		$this->assertStringContainsString( 'Airport codes have 3 (IATA) or 4 (ICAO) characters.', $html );
+		wp_set_current_user( 0 );
 
 		$html = $this->render(
 			new Sloc_Airport_Widget(),

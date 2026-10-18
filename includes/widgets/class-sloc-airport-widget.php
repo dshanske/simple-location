@@ -35,6 +35,7 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 	 * Widget worker
 	 *
 	 * @since 6.0.0 Closes the widget wrapper on errors, and shows nothing without an airport.
+	 * @since 6.0.0 Only administrators see error details; visitors see a general message.
 	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
@@ -68,14 +69,14 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 				$location = new WP_Error( 'invalid_airport_code', __( 'Airport codes have 3 (IATA) or 4 (ICAO) characters.', 'simple-location' ) );
 			}
 			if ( is_wp_error( $location ) ) {
-				echo esc_html( $location->get_error_message() );
+				echo esc_html( self::error_message( $location ) );
 				echo wp_kses( $args['after_widget'], Simple_Location_Plugin::kses_clean() );
 				return;
 			}
 
 			$weather = Sloc_Weather_Data::get_weather_by_location( $location['latitude'], $location['longitude'], $cache_time ); // phpcs:ignore
 			if ( is_wp_error( $weather ) ) {
-				echo esc_html( $weather->get_error_message() );
+				echo esc_html( self::error_message( $weather ) );
 				echo wp_kses( $args['after_widget'], Simple_Location_Plugin::kses_clean() );
 				return;
 			}

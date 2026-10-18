@@ -126,12 +126,17 @@ abstract class Sloc_Provider {
 	/**
 	 * Fetches JSON from a remote endpoint.
 	 *
+	 * Errors for a failed or non-JSON response have a short message, with the HTTP status and the start of the
+	 * response as plain text, and keep the full response in their data as 'body'. API keys and other credentials
+	 * sent with the request are removed from both, because some services echo the request back.
+	 *
 	 * @param string $url URL to fetch.
 	 * @param array  $query Query parameters.
 	 * @param array  $headers Headers.
 	 * @return WP_Error|array Either the associated array response or error.
 	 *
 	 * @since 4.0.6
+	 * @since 6.0.0 Error messages are short and plain text, without credentials; the response is in the error data.
 	 */
 	public function fetch_json( $url, $query, $headers = null ) {
 		$fetch = add_query_arg( $query, $url );
@@ -158,13 +163,88 @@ abstract class Sloc_Provider {
 		$code = wp_remote_retrieve_response_code( $response );
 		$body = wp_remote_retrieve_body( $response );
 		if ( $code < 200 || $code >= 300 ) {
-			return new WP_Error( 'invalid_response', $body, array( 'status' => $code ) );
+			$body    = $this->redact( $body, $query );
+			$excerpt = self::excerpt( $body );
+			return new WP_Error(
+				'invalid_response',
+				'' === $excerpt
+					/* translators: %d: HTTP status code. */
+					? sprintf( __( 'The service returned HTTP status %d.', 'simple-location' ), $code )
+					/* translators: 1: HTTP status code 2: Start of the response. */
+					: sprintf( __( 'The service returned HTTP status %1$d: %2$s', 'simple-location' ), $code, $excerpt ),
+				array(
+					'status' => $code,
+					'body'   => $body,
+				)
+			);
 		}
 		$json = json_decode( $body, true );
 		if ( empty( $json ) ) {
-			return new WP_Error( 'not_json_response', $body, array( 'type' => wp_remote_retrieve_header( $response, 'Content-Type' ) ) );
+			$body    = $this->redact( $body, $query );
+			$excerpt = self::excerpt( $body );
+			return new WP_Error(
+				'not_json_response',
+				'' === $excerpt
+					? __( 'The service did not return JSON.', 'simple-location' )
+					/* translators: %s: Start of the response. */
+					: sprintf( __( 'The service did not return JSON: %s', 'simple-location' ), $excerpt ),
+				array(
+					'type' => wp_remote_retrieve_header( $response, 'Content-Type' ),
+					'body' => $body,
+				)
+			);
 		}
 		return $json;
+	}
+
+	/**
+	 * Removes credentials from text returned by a service.
+	 *
+	 * Removes the provider's API key, and the values of request parameters that hold credentials, such as key,
+	 * token, secret, client_id or appid, in plain and URL-encoded form.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param string $text  Text.
+	 * @param array  $query Request query parameters.
+	 * @return string Text without credentials.
+	 */
+	protected function redact( $text, $query = array() ) {
+		$secrets = array();
+		if ( is_string( $this->api ) && '' !== $this->api ) {
+			$secrets[] = $this->api;
+		}
+		if ( is_array( $query ) ) {
+			foreach ( $query as $name => $value ) {
+				if ( is_scalar( $value ) && '' !== (string) $value && preg_match( '/key|token|secret|client_id|appid|password|signature/i', (string) $name ) ) {
+					$secrets[] = (string) $value;
+				}
+			}
+		}
+		foreach ( array_unique( $secrets ) as $secret ) {
+			$text = str_replace( array( $secret, rawurlencode( $secret ), urlencode( $secret ) ), '[redacted]', $text ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode -- Both encodings may appear in echoed URLs.
+		}
+		return $text;
+	}
+
+	/**
+	 * Returns the start of a service's response as one line of plain text.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param string $text Response body.
+	 * @return string Up to 200 characters.
+	 */
+	protected static function excerpt( $text ) {
+		// Tags become spaces, so words on either side of them stay apart.
+		$text = preg_replace( '#<(script|style)\b[^>]*>.*?</\1>#is', ' ', (string) $text );
+		$text = preg_replace( '/<[^>]*>/', ' ', (string) $text );
+		$text = html_entity_decode( (string) $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$text = trim( (string) preg_replace( '/\s+/u', ' ', $text ) );
+		if ( mb_strlen( $text ) > 200 ) {
+			$text = rtrim( mb_substr( $text, 0, 199 ) ) . '…';
+		}
+		return $text;
 	}
 
 	/**

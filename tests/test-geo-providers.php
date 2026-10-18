@@ -166,13 +166,68 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$error = $provider->fetch_json( 'https://example.com/missing', array() );
 		$this->assertWPError( $error );
 		$this->assertSame( 'invalid_response', $error->get_error_code() );
-		$this->assertSame( array( 'status' => 404 ), $error->get_error_data() );
+		$this->assertSame( 'The service returned HTTP status 404: Not Found', $error->get_error_message() );
+		$this->assertSame(
+			array(
+				'status' => 404,
+				'body'   => 'Not Found',
+			),
+			$error->get_error_data()
+		);
 
 		$this->mock_http( array( 'example.com/html' => array( 'body' => '<html></html>' ) ) );
-		$this->assertSame( 'not_json_response', $provider->fetch_json( 'https://example.com/html', array() )->get_error_code() );
+		$error = $provider->fetch_json( 'https://example.com/html', array() );
+		$this->assertSame( 'not_json_response', $error->get_error_code() );
+		$this->assertSame( 'The service did not return JSON.', $error->get_error_message() );
+		$this->assertSame( '<html></html>', $error->get_error_data()['body'] );
 
 		$this->mock_http( array( 'example.com/down' => new WP_Error( 'http_request_failed', 'Timed out' ) ) );
 		$this->assertSame( 'http_request_failed', $provider->fetch_json( 'https://example.com/down', array() )->get_error_code() );
+	}
+
+	/**
+	 * Error messages are a short line of plain text, and neither they nor the stored response contain credentials
+	 * sent with the request, even when the service echoes the request back.
+	 */
+	public function test_fetch_json_error_redacts_credentials() {
+		$provider = new Geo_Provider_LocationIQ( array( 'api' => 'pk.SECRET123' ) );
+		$echo     = '<html><body><h1>Unauthorized</h1><p>Request https://example.com/x?key=pk.SECRET123&amp;token=tok%2Fen&amp;q=Philadelphia was refused for pk.SECRET123</p>' . str_repeat( ' padding', 100 ) . '</body></html>';
+		$this->mock_http(
+			array(
+				'example.com/x' => array(
+					'code' => 401,
+					'body' => $echo,
+				),
+			)
+		);
+		$error   = $provider->fetch_json(
+			'https://example.com/x',
+			array(
+				'key'   => 'pk.SECRET123',
+				'token' => 'tok/en',
+				'q'     => 'Philadelphia',
+			)
+		);
+		$message = $error->get_error_message();
+		$this->assertStringStartsWith( 'The service returned HTTP status 401: Unauthorized Request https://example.com/x?key=[redacted]', $message );
+		$this->assertStringNotContainsString( 'SECRET123', $message );
+		$this->assertStringNotContainsString( '<', $message );
+		$this->assertLessThanOrEqual( 250, strlen( $message ) );
+		$body = $error->get_error_data()['body'];
+		$this->assertStringNotContainsString( 'SECRET123', $body );
+		$this->assertStringNotContainsString( 'tok%2Fen', $body );
+		$this->assertStringContainsString( 'q=Philadelphia', $body, 'Values that aren\'t credentials are kept.' );
+
+		// An empty error response gives just the status.
+		$this->mock_http(
+			array(
+				'example.com/x' => array(
+					'code' => 503,
+					'body' => '',
+				),
+			)
+		);
+		$this->assertSame( 'The service returned HTTP status 503.', $provider->fetch_json( 'https://example.com/x', array() )->get_error_message() );
 	}
 
 	/**

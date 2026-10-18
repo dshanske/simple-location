@@ -25,6 +25,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * Widget worker
 	 *
 	 * @since 6.0.0 Closes the widget wrapper when there is no provider or input.
+	 * @since 6.0.0 Only administrators see error details; visitors see a general message.
 	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
@@ -73,13 +74,31 @@ class Sloc_Weather_Widget extends WP_Widget {
 		}
 
 		if ( is_wp_error( $weather ) ) {
-			echo esc_html( $weather->get_error_message() );
+			echo esc_html( self::error_message( $weather ) );
 		} elseif ( is_array( $weather ) ) {
 			echo wp_kses( self::weather_list( $weather, 'fa-map', $instance ), Simple_Location_Plugin::kses_clean() );
 		} elseif ( is_string( $weather ) ) {
 			echo esc_html( $weather );
 		}
 		echo $args['after_widget']; // phpcs:ignore
+	}
+
+	/**
+	 * Returns the text a widget shows when the weather can't be retrieved.
+	 *
+	 * Error messages can contain details from the weather service, so only administrators see them. Everyone
+	 * else sees a general message.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param WP_Error $error Error.
+	 * @return string Message, not escaped.
+	 */
+	protected static function error_message( $error ) {
+		if ( current_user_can( 'manage_options' ) ) {
+			return $error->get_error_message();
+		}
+		return __( 'Weather is not available right now.', 'simple-location' );
 	}
 
 	/**
