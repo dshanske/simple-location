@@ -189,7 +189,8 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	/**
 	 * Return array of station data.
 	 *
-	 * @return array Current Conditions in Array
+	 * @param int|null $time Timestamp for past conditions. Optional; defaults to now.
+	 * @return array|WP_Error Current Conditions in Array.
 	 */
 	public function get_station_data( $time = null ) {
 		$client_id     = get_option( 'sloc_aeris_client_id' );

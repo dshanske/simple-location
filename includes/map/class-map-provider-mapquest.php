@@ -46,6 +46,13 @@ class Map_Provider_Mapquest extends Map_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Returns the map styles the provider offers.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return array Style names keyed by ID.
+	 */
 	public function get_styles() {
 		return array(
 			'map'   => __( 'Basic Map', 'simple-location' ),
@@ -67,7 +74,13 @@ class Map_Provider_Mapquest extends Map_Provider {
 		return array( 1, 2 );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the URL of a static map of the location.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return string URL, or an empty string without the settings it needs.
+	 */
 	public function get_the_static_map() {
 		if ( empty( $this->api ) ) {
 			return '';
@@ -87,6 +100,14 @@ class Map_Provider_Mapquest extends Map_Provider {
 	}
 
 
+	/**
+	 * Returns the URL of a static map with multiple locations.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string URL, or an empty string without the settings it needs or without locations.
+	 */
 	public function get_archive_map( $locations ) {
 		if ( empty( $this->api ) || empty( $this->style ) || empty( $locations ) ) {
 			return '';
@@ -112,11 +133,25 @@ class Map_Provider_Mapquest extends Map_Provider {
 		return $map;
 	}
 
+	/**
+	 * Returns the URL of a link to the location on a map.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return string URL.
+	 */
 	public function get_the_map_url() {
 		return sprintf( 'https://www.mapquest.com/?center=%1$s,%2$s&zoom=%3$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the HTML for the map, which is always the static map.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param boolean $static Unused; the map is always static.
+	 * @return string HTML marked up map.
+	 */
 	public function get_the_map( $static = true ) {
 		return $this->get_the_static_map_html( true );
 	}

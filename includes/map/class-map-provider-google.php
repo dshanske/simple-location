@@ -38,7 +38,7 @@ class Map_Provider_Google extends Map_Provider {
 	 * @since 6.0.0 Uses the Google map API key when one is set, and the URL signing secret.
 	 *
 	 * @param array $args {
-	 *  Arguments. See Map_Provider::__construct(), plus:
+	 *  Arguments. See Map_Provider::__construct(), and also the following.
 	 *  @type string $secret URL signing secret. Defaults to the sloc_google_map_secret setting.
 	 * }
 	 */
@@ -69,6 +69,13 @@ class Map_Provider_Google extends Map_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Returns the map styles the provider offers.
+	 *
+	 * @since 3.2.1
+	 *
+	 * @return array Style names keyed by ID.
+	 */
 	public function get_styles() {
 		return array(
 			'roadmap'   => __( 'Roadmap', 'simple-location' ),
@@ -207,7 +214,14 @@ class Map_Provider_Google extends Map_Provider {
 		return sprintf( 'https://www.google.com/maps/search/?api=1&query=%1$s%%2C%2$s', $this->latitude, $this->longitude );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the HTML for the map, which is always the static map.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @param boolean $static Unused; the map is always static.
+	 * @return string HTML marked up map.
+	 */
 	public function get_the_map( $static = true ) {
 		return $this->get_the_static_map_html( true );
 	}

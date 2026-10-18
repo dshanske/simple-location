@@ -72,6 +72,11 @@ class Map_Provider_StaticMap extends Map_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Registers the map server URL and style settings.
+	 *
+	 * @since 4.1.6
+	 */
 	public static function init() {
 		self::register_settings_api( __( 'Custom Static Map URL', 'simple-location' ), 'sloc_staticmap_url' );
 
@@ -87,6 +92,11 @@ class Map_Provider_StaticMap extends Map_Provider {
 		);
 	}
 
+	/**
+	 * Adds the map server URL and style fields to the settings page.
+	 *
+	 * @since 4.1.6
+	 */
 	public static function admin_init() {
 		self::add_settings_url_parameter( __( 'Custom Static Map', 'simple-location' ), 'sloc_staticmap_url' );
 
@@ -104,6 +114,13 @@ class Map_Provider_StaticMap extends Map_Provider {
 	}
 
 
+	/**
+	 * Returns the map styles the provider offers.
+	 *
+	 * @since 4.1.6
+	 *
+	 * @return array Style names keyed by ID.
+	 */
 	public function get_styles() {
 		return array(
 			'osm'                       => __( 'OpenStreetMap', 'simple-location' ),
@@ -128,6 +145,13 @@ class Map_Provider_StaticMap extends Map_Provider {
 		);
 	}
 
+	/**
+	 * Returns which attribution the style needs.
+	 *
+	 * @since 4.1.6
+	 *
+	 * @return string|null 'esri' for Esri styles, 'osm' for OpenStreetMap, or null for the others.
+	 */
 	private function get_attribution() {
 		if ( in_array(
 			$this->style,
@@ -140,7 +164,13 @@ class Map_Provider_StaticMap extends Map_Provider {
 		}
 	}
 
-	// Return code for map
+	/**
+	 * Returns the URL of a static map of the location.
+	 *
+	 * @since 4.1.6
+	 *
+	 * @return string URL, or an empty string without the settings it needs.
+	 */
 	public function get_the_static_map() {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_url', __( 'You have not set a URL for your custom map endpoint', 'simple-location' ) );
@@ -161,6 +191,14 @@ class Map_Provider_StaticMap extends Map_Provider {
 		return $map;
 	}
 
+	/**
+	 * Returns the URL of a static map with multiple locations.
+	 *
+	 * @since 4.1.6
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string URL, or an empty string without the settings it needs or without locations.
+	 */
 	public function get_archive_map( $locations ) {
 		if ( empty( $this->api ) || empty( $locations ) ) {
 			return '';
@@ -187,11 +225,25 @@ class Map_Provider_StaticMap extends Map_Provider {
 		return $map;
 	}
 
+	/**
+	 * Returns the URL of a link to the location on a map.
+	 *
+	 * @since 4.1.6
+	 *
+	 * @return string URL.
+	 */
 	public function get_the_map_url() {
 		return sprintf( 'https://www.openstreetmap.org/?mlat=%1$s&mlon=%2$s#map=%3$s/%1$s/%2$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the HTML for the map, which is always the static map.
+	 *
+	 * @since 4.1.6
+	 *
+	 * @param boolean $static Unused; the map is always static.
+	 * @return string HTML marked up map.
+	 */
 	public function get_the_map( $static = true ) {
 		return $this->get_the_static_map_html( true );
 	}

@@ -139,8 +139,8 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 *
 	 * @since 6.0.0
 	 *
-	 * @param array $properties  Properties.
-	 * @param string $key        Key.
+	 * @param array  $properties  Properties.
+	 * @param string $key         Key.
 	 * @param array  $conversions Callbacks to convert the value, keyed by the WMO unit code they convert from.
 	 * @return mixed Value, converted when its unit has a conversion.
 	 */
@@ -271,8 +271,8 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	/**
 	 * Return the condition code based on presentWeather.
 	 *
-	 * @param string $id Weather type ID.
-	 * @return string Icon ID.
+	 * @param array $weather Decoded METAR phenomena.
+	 * @return int|null Condition code, or null if there is no matching phenomenon.
 	 */
 	private function phenomenon_code_map( $weather ) {
 		if ( ! is_array( $weather ) ) {

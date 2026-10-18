@@ -265,6 +265,13 @@ trait GeoLocation_Trait {
 		return false;
 	}
 
+	/**
+	 * Prints a select element of the ISO 3166-1 countries.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @param string $country Selected country code.
+	 */
 	public static function country_select( $country ) {
 		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
 		$codes = json_decode( sloc_get_contents( $file ), true );
@@ -277,6 +284,17 @@ trait GeoLocation_Trait {
 		echo '</select>';
 	}
 
+	/**
+	 * Prints a select element of a country's ISO 3166-2 regions.
+	 *
+	 * A region that isn't on the list is shown in a text field instead.
+	 *
+	 * @since 4.4.4
+	 *
+	 * @param string $region  Selected region code, without the country prefix.
+	 * @param string $country Country code.
+	 * @return false|void False if the country code isn't valid or has no list of regions.
+	 */
 	public static function region_select( $region, $country ) {
 		$country = strtoupper( trim( $country ) );
 		if ( 2 !== strlen( $country ) ) {

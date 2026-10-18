@@ -24,6 +24,13 @@ class Map_Provider_Geoapify extends Map_Provider {
 	protected $cacheable = true;
 
 
+	/**
+	 * Constructor.
+	 *
+	 * @since 4.1.5
+	 *
+	 * @param array $args Arguments. See Map_Provider::__construct().
+	 */
 	public function __construct( $args = array() ) {
 		$this->name        = __( 'GeoApify', 'simple-location' );
 		$this->slug        = 'geoapify';
@@ -42,6 +49,13 @@ class Map_Provider_Geoapify extends Map_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Returns the map styles the provider offers.
+	 *
+	 * @since 4.1.5
+	 *
+	 * @return array Style names keyed by ID.
+	 */
 	public function get_styles() {
 		return array(
 			'osm-carto'                => __( 'OSM Carto', 'simple-location' ),
@@ -76,7 +90,13 @@ class Map_Provider_Geoapify extends Map_Provider {
 		return array( 1, 2 );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the URL of a static map of the location.
+	 *
+	 * @since 4.1.5
+	 *
+	 * @return string URL, or an empty string without the settings it needs.
+	 */
 	public function get_the_static_map() {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for GeoApify', 'simple-location' ) );
@@ -98,6 +118,14 @@ class Map_Provider_Geoapify extends Map_Provider {
 		return $map;
 	}
 
+	/**
+	 * Returns the URL of a static map with multiple locations.
+	 *
+	 * @since 4.1.5
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string URL, or an empty string without the settings it needs or without locations.
+	 */
 	public function get_archive_map( $locations ) {
 		if ( empty( $this->api ) || empty( $locations ) ) {
 			return '';
@@ -124,11 +152,25 @@ class Map_Provider_Geoapify extends Map_Provider {
 		return $map;
 	}
 
+	/**
+	 * Returns the URL of a link to the location on a map.
+	 *
+	 * @since 4.1.5
+	 *
+	 * @return string URL.
+	 */
 	public function get_the_map_url() {
 		return sprintf( 'https://www.openstreetmap.org/?mlat=%1$s&mlon=%2$s#map=%3$s/%1$s/%2$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the HTML for the map, which is always the static map.
+	 *
+	 * @since 4.1.5
+	 *
+	 * @param boolean $static Unused; the map is always static.
+	 * @return string HTML marked up map.
+	 */
 	public function get_the_map( $static = true ) {
 		return $this->get_the_static_map_html( true );
 	}
