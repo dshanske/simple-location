@@ -11,6 +11,9 @@
  * - airports: OurAirports (https://ourairports.com/data/, public domain), copied to data/airports.csv.
  * - airlines: OpenFlights (https://openflights.org/data, ODbL), copied to data/airlines.csv.
  *
+ * Updating airports or airlines also rebuilds their indexes in data/index/. `php bin/update-data.php indexes`
+ * rebuilds the indexes from the current files without downloading anything.
+ *
  * @package Simple_Location
  */
 
@@ -20,12 +23,28 @@ if ( 'cli' !== PHP_SAPI ) {
 	exit( 1 );
 }
 
+// The index class is shared with the plugin, whose files only load when ABSPATH is defined.
+define( 'ABSPATH', dirname( __DIR__ ) . '/' );
+require dirname( __DIR__ ) . '/includes/class-sloc-data-index.php';
+
 $sloc_data_dir = dirname( __DIR__ ) . '/data';
 
 $sloc_sources = array(
 	'meteostat' => 'https://data.meteostat.net/stations.db',
 	'airports'  => 'https://davidmegginson.github.io/ourairports-data/airports.csv',
 	'airlines'  => 'https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat',
+);
+
+/**
+ * Indexes of the airport and airline files: index name => CSV file, column, whether it has a header row.
+ */
+const SLOC_INDEXES = array(
+	'airports-iata_code'    => array( 'airports.csv', 'iata_code', true ),
+	'airports-ident'        => array( 'airports.csv', 'ident', true ),
+	'airports-gps_code'     => array( 'airports.csv', 'gps_code', true ),
+	'airports-municipality' => array( 'airports.csv', 'municipality', true ),
+	'airlines-iata_code'    => array( 'airlines.csv', 3, false ),
+	'airlines-icao_code'    => array( 'airlines.csv', 4, false ),
 );
 
 /**
@@ -123,7 +142,38 @@ function sloc_url_path( $url ) {
 	return (string) parse_url( $url, PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
 }
 
+/**
+ * Builds the indexes of a CSV file in data/index/.
+ *
+ * @param string $data_dir Data directory.
+ * @param string $csv      CSV file name, such as airports.csv.
+ */
+function sloc_build_indexes( $data_dir, $csv ) {
+	if ( ! is_dir( $data_dir . '/index' ) ) {
+		mkdir( $data_dir . '/index' );
+	}
+	foreach ( SLOC_INDEXES as $name => $index ) {
+		if ( $csv !== $index[0] ) {
+			continue;
+		}
+		$column = $index[1];
+		if ( ! is_int( $column ) ) {
+			$handle = fopen( $data_dir . '/' . $csv, 'r' );
+			$column = array_search( $column, fgetcsv( $handle, 0, ',', '"', '' ), true );
+			fclose( $handle );
+		}
+		$count = Sloc_Data_Index::build( $data_dir . '/' . $csv, $data_dir . '/index/' . $name . '.idx', $column, $index[2] );
+		fwrite( STDOUT, "Indexed $count rows in $data_dir/index/$name.idx\n" );
+	}
+}
+
 $sloc_selected = array_slice( $argv, 1 );
+// "indexes" rebuilds the airport and airline indexes from the current files, without downloading.
+if ( array( 'indexes' ) === $sloc_selected ) {
+	sloc_build_indexes( $sloc_data_dir, 'airports.csv' );
+	sloc_build_indexes( $sloc_data_dir, 'airlines.csv' );
+	exit( 0 );
+}
 if ( empty( $sloc_selected ) ) {
 	$sloc_selected = array_keys( $sloc_sources );
 }
@@ -149,10 +199,12 @@ foreach ( $sloc_selected as $sloc_source ) {
 		case 'airports':
 			copy( $sloc_download, $sloc_data_dir . '/airports.csv' );
 			fwrite( STDOUT, "Updated $sloc_data_dir/airports.csv\n" );
+			sloc_build_indexes( $sloc_data_dir, 'airports.csv' );
 			break;
 		case 'airlines':
 			copy( $sloc_download, $sloc_data_dir . '/airlines.csv' );
 			fwrite( STDOUT, "Updated $sloc_data_dir/airlines.csv\n" );
+			sloc_build_indexes( $sloc_data_dir, 'airlines.csv' );
 			break;
 	}
 	unlink( $sloc_download );
