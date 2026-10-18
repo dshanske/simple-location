@@ -142,6 +142,18 @@ class TimezoneTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Without a post, or for something that has no timezone, the site timezone is used without a warning.
+	 */
+	public function test_get_timezone_without_object() {
+		update_option( 'timezone_string', 'America/Chicago' );
+		$GLOBALS['post'] = null;
+		$this->assertSame( 'America/Chicago', Loc_Timezone::get_timezone()->getName() );
+		$this->assertSame( 'America/Chicago', Loc_Timezone::get_timezone( 999999 )->getName(), 'A post that does not exist.' );
+		$this->assertSame( 'America/Chicago', Loc_Timezone::get_timezone( 'not an object' )->getName() );
+		$this->assertSame( 'America/Chicago', Loc_Timezone::get_timezone( get_user_by( 'id', self::factory()->user->create() ) )->getName(), 'A user without a timezone.' );
+	}
+
+	/**
 	 * Without an override, objects use the site timezone; with one, they use it.
 	 */
 	public function test_get_timezone() {
