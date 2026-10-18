@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 abstract class Geo_Provider extends Sloc_Provider {
-	use Geolocation_Trait;
+	use GeoLocation_Trait;
 
 	/**
 	 * Reverse Zoom Level.

@@ -61,7 +61,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 <div class="location-section location-section-main">
 	<?php wp_nonce_field( 'location_metabox', 'location_metabox_nonce' ); ?>
 	<button class="dashicons-before dashicons-location-alt location-ajax" id="location-title" title="<?php esc_html_e( 'Location', 'simple-location' ); ?>"> <?php esc_html_e( 'Location:', 'simple-location' ); ?></button>
-	<span id="location-label"><?php echo esc_html( $display_name ?? __( 'None', 'simple-location' ) ); ?></span>
+	<span id="location-label"><?php echo esc_html( '' !== (string) $display_name ? $display_name : __( 'None', 'simple-location' ) ); ?></span>
 	<a href="#location" class="edit-location hide-if-no-js" role="button"><span aria-hidden="true">Edit</a><span class="screen-reader-text">Location</span>
 	<div id="location-fields" class="field-row hide-if-js">
 		<label for="address"><?php esc_html_e( 'Textual Description:', 'simple-location' ); ?></label>

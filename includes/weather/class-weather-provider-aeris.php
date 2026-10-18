@@ -134,6 +134,8 @@ class Weather_Provider_Aeris extends Weather_Provider {
 
 			return $return;
 		}
+		// Without a location or a station there are no conditions.
+		return array();
 	}
 
 	/**

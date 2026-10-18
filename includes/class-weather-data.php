@@ -234,7 +234,7 @@ class Sloc_Weather_Data {
 		 * @param string $type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
 		 *                          or any other object type.
 		 * @param string $key  Weather data key.
-		 * @param mixed $value Weather data value.
+		 * @param mixed  $weather Weather data value, or all values as an array when `$key` is empty.
 		 */
 		$check = apply_filters( "set_{$type}_weatherdata", null, $id, $type, $key, $weather );
 
@@ -666,7 +666,7 @@ class Sloc_Weather_Data {
 	 *
 	 * @param string  $icon Icon to be Selected.
 	 * @param boolean $echo Echo or Return.
-	 * @return string Select Option. Optional.
+	 * @return string|void The options, or nothing when they are echoed.
 	 */
 	public static function code_select( $code, $echo = false ) {
 		$choices = self::weather_condition_codes( null );

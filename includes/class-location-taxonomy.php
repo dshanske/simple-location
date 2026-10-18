@@ -15,7 +15,7 @@ add_action( 'init', array( 'Location_Taxonomy', 'init' ) );
  * Class that handles the Location taxonomy functions.
  */
 final class Location_Taxonomy {
-	use Geolocation_Trait;
+	use GeoLocation_Trait;
 
 	public static function init() {
 		self::register();

@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 class Map_Provider_Mapquest extends Map_Provider {
-	use Sloc_API_Mapquest;
+	use Sloc_API_MapQuest;
 
 	/**
 	 * Constructor.

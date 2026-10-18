@@ -364,6 +364,26 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Nominatim: a place with no region, such as Singapore, has no region code, without a warning.
+	 */
+	public function test_nominatim_no_region() {
+		$fixture            = $this->fixture( 'geo/nominatim-reverse.json' );
+		$fixture['address'] = array(
+			'road'         => 'Orchard Road',
+			'city'         => 'Singapore',
+			'country'      => 'Singapore',
+			'country_code' => 'sg',
+		);
+		$this->mock_http( array( 'nominatim.openstreetmap.org/reverse' => array( 'body' => $fixture ) ) );
+		$addr = $this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup();
+		$this->assertSame( 'Singapore', $addr['locality'] );
+		$this->assertArrayNotHasKey( 'region-code', $addr );
+
+		$this->mock_http( array( 'nominatim.openstreetmap.org/reverse' => array( 'body' => $fixture ) ) );
+		$this->assertIsArray( $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup() );
+	}
+
+	/**
 	 * Nominatim forward geocoding returns the address and coordinates of the first result.
 	 */
 	public function test_nominatim_geocode() {

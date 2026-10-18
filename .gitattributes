@@ -19,3 +19,4 @@
 /phpunit.xml export-ignore
 /Gruntfile.js export-ignore
 /gruntlint.js export-ignore
+/phpstan.neon.dist export-ignore

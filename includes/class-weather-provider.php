@@ -695,7 +695,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *
 	 * @param string  $icon Icon to be Selected.
 	 * @param boolean $echo Echo or Return.
-	 * @return string Select Option. Optional.
+	 * @return string|void The options, or nothing when they are echoed.
 	 */
 	public static function icon_select( $icon, $echo = false ) {
 		$choices = self::get_iconlist();

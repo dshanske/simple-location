@@ -134,7 +134,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 				$this->station_id = $sitelist[0]['id'];
 				$return           = self::get_station_data();
 
-				unset( $this->station_id );
+				$this->station_id = null;
 				$this->set_cache( $return );
 				return $return;
 			}
@@ -243,11 +243,15 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	 */
 	public function station() {
 		$list = $this->get_sitelist();
+		if ( ! is_array( $list ) ) {
+			return array();
+		}
 		foreach ( $list as $site ) {
 			if ( $site['id'] === $this->station_id ) {
 				return $site;
 			}
 		}
+		return array();
 	}
 
 	/**
