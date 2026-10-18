@@ -563,6 +563,7 @@ class WidgetsTest extends WP_UnitTestCase {
 		);
 		$this->assertStringContainsString( 'datetime="' . wp_date( 'Y-m-d', null, new DateTimeZone( 'Asia/Tokyo' ) ), $html );
 		$this->assertStringContainsString( '+09:00"', $html, 'The time is in the user\'s timezone.' );
+		$this->assertStringContainsString( 'sloc-icon-wi-time-1', $html );
 		$this->assertStringNotContainsString( 'Sunrise:', $html );
 
 		$html = $this->render(
@@ -574,7 +575,8 @@ class WidgetsTest extends WP_UnitTestCase {
 				'showastro' => '1',
 			)
 		);
-		$this->assertStringNotContainsString( '<time datetime="' . wp_date( 'Y-m-d', null, new DateTimeZone( 'Asia/Tokyo' ) ), $html );
+		// The sunrise and sunset are <time> elements too, so look for the local time's own icon.
+		$this->assertStringNotContainsString( 'sloc-icon-wi-time-1', $html );
 		$this->assertStringContainsString( 'Sunrise:', $html );
 	}
 
