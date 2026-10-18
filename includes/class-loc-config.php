@@ -305,17 +305,27 @@ class Loc_Config {
 	}
 
 	/**
+	 * Returns the default map width: the theme's content width, or 1024 pixels without one.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @return int Width in pixels.
+	 */
+	public static function get_default_map_width() {
+		global $content_width;
+		if ( is_numeric( $content_width ) && $content_width > 1 ) {
+			return (int) $content_width;
+		}
+		return 1024;
+	}
+
+	/**
 	 * Register Map Settings.
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 The default width comes from get_default_map_width().
 	 */
 	public static function register_map_settings() {
-		global $content_width;
-		if ( $content_width && $content_width > 1 ) {
-			$width = $content_width;
-		} else {
-			$width = 1024;
-		}
 		register_setting(
 			'simloc', // option group.
 			'sloc_width', // option name.
@@ -323,7 +333,7 @@ class Loc_Config {
 				'type'         => 'number',
 				'description'  => 'Simple Location Map Width',
 				'show_in_rest' => true,
-				'default'      => $width,
+				'default'      => self::get_default_map_width(),
 			)
 		);
 		register_setting(
