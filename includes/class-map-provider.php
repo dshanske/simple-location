@@ -115,9 +115,10 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $static;
 
 	/**
-	 * Location Information.
+	 * Location Information: the address of the location, used to describe the map.
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 Used as the alternative text of the map image.
 	 * @var string
 	 */
 	protected $location;
@@ -250,6 +251,8 @@ abstract class Map_Provider extends Sloc_Provider {
 	/**
 	 * Set and Validate Coordinates.
 	 *
+	 * @since 6.0.0 An array sets the map's description from 'location' or 'address', and clears it otherwise.
+	 *
 	 * @param array|float $args Latitude or array of all three properties.
 	 * @param float       $lng Longitude. Optional if first property is an array.
 	 * @param float       $alt Altitude. Optional.
@@ -266,9 +269,9 @@ abstract class Map_Provider extends Sloc_Provider {
 			if ( isset( $args['map_zoom'] ) ) {
 				$this->map_zoom = $args['map_zoom'];
 			}
-			if ( isset( $args['location'] ) ) {
-				$this->location = $args['location'];
-			}
+			// One provider draws many maps, so each map's description replaces the last one.
+			$location       = $args['location'] ?? $args['address'] ?? '';
+			$this->location = is_scalar( $location ) ? (string) $location : '';
 			$this->fit_size();
 		}
 		return parent::set( $args, $lng, $alt );
@@ -429,12 +432,40 @@ abstract class Map_Provider extends Sloc_Provider {
 
 
 	/**
+	 * Returns the alternative text of the static map image.
+	 *
+	 * The map is the only content of its link, so this text is also the link's accessible name.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @return string Alternative text, not escaped.
+	 */
+	public function get_alt_text() {
+		$location = trim( wp_strip_all_tags( (string) $this->location ) );
+		$alt      = '' === $location
+			? __( 'Map showing this location', 'simple-location' )
+			/* translators: %s: Address of the location. */
+			: sprintf( __( 'Map showing %s', 'simple-location' ), $location );
+
+		/**
+		 * Filters the alternative text of a static map image.
+		 *
+		 * @since 6.0.0
+		 *
+		 * @param string       $alt Alternative text.
+		 * @param Map_Provider $map Map provider, set to the map's location.
+		 */
+		return (string) apply_filters( 'sloc_map_alt', $alt, $this );
+	}
+
+	/**
 	 * Returns the HTML for a static map image linked to the full map.
 	 *
 	 * @since 4.1.10
 	 * @since 6.0.0 The URLs and sizes are escaped.
 	 * @since 6.0.0 The srcset uses the provider's high-density maps of the same area, and is left out when the provider has none.
 	 * @since 6.0.0 Providers whose terms allow it are served from the site, so the API key isn't in the page.
+	 * @since 6.0.0 The image has alternative text.
 	 *
 	 * @param bool $srcset Optional. Add a srcset with the provider's high-density maps. Default false.
 	 * @return string HTML.
@@ -470,9 +501,9 @@ abstract class Map_Provider extends Sloc_Provider {
 			$this->scale = $scale;
 
 			$srcset = implode( ',', $srcset );
-			return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" srcset="%3$s" width="%4$s" height="%5$s" loading="lazy" /></a>', esc_url( $link ), esc_url( $orig ), esc_attr( $srcset ), esc_attr( $width ), esc_attr( $height ) );
+			return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" srcset="%3$s" width="%4$s" height="%5$s" alt="%6$s" loading="lazy" /></a>', esc_url( $link ), esc_url( $orig ), esc_attr( $srcset ), esc_attr( $width ), esc_attr( $height ), esc_attr( $this->get_alt_text() ) );
 		}
-		return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" width="%3$s" height="%4$s" loading="lazy" /></a>', esc_url( $link ), esc_url( $orig ), esc_attr( $width ), esc_attr( $height ) );
+		return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" width="%3$s" height="%4$s" alt="%5$s" loading="lazy" /></a>', esc_url( $link ), esc_url( $orig ), esc_attr( $width ), esc_attr( $height ), esc_attr( $this->get_alt_text() ) );
 	}
 
 	/**

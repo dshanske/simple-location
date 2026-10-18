@@ -31,6 +31,10 @@
 
 - [`sloc_staticmap_max_size`](sloc_staticmap_max_size) Filters the largest map size requested from the custom static map server.
 
+## class-map-provider.php
+
+- [`sloc_map_alt`](sloc_map_alt) Filters the alternative text of a static map image.
+
 ## class-post-venue.php
 
 - [`pre_at_venue`](pre_at_venue) Short-circuits the checking for a venue if it is not stored as normal.
