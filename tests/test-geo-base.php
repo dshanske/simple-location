@@ -280,6 +280,7 @@ class GeoBaseTest extends WP_UnitTestCase {
 	 * Map requests on archives use the plugin's map template.
 	 */
 	public function test_map_archive_template() {
+		update_option( 'sloc_map_provider', 'geoapify' );
 		$this->assertSame( 'index.php', Geo_Base::map_archive_template( 'index.php' ) );
 
 		$category = self::factory()->category->create();
@@ -288,6 +289,17 @@ class GeoBaseTest extends WP_UnitTestCase {
 		$this->assertStringEndsWith( 'templates/map-archive.php', Geo_Base::map_archive_template( 'index.php' ) );
 
 		$this->go_to( add_query_arg( 'map', '1', get_permalink( self::factory()->post->create() ) ) );
+		$this->assertSame( 'index.php', Geo_Base::map_archive_template( 'index.php' ) );
+	}
+
+	/**
+	 * Without a map provider, a map archive request gets the normal archive template instead of a fatal error.
+	 */
+	public function test_map_archive_template_without_map_provider() {
+		$category = self::factory()->category->create();
+		self::factory()->post->create( array( 'post_category' => array( $category ) ) );
+		update_option( 'sloc_map_provider', 'none' );
+		$this->go_to( add_query_arg( 'map', '1', get_category_link( $category ) ) );
 		$this->assertSame( 'index.php', Geo_Base::map_archive_template( 'index.php' ) );
 	}
 

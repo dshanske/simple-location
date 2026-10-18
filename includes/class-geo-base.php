@@ -326,17 +326,21 @@ class Geo_Base {
 	/**
 	 * Routes Requests for the Query Variable Map to a Special Template.
 	 *
-	 * Routes Requests for the Query Varible Map to a Special Template.
+	 * Routes Requests for the Query Variable Map to a Special Template.
 	 *
 	 * @param string $original_template The template that would normally be returned.
 	 * @return string $return The original template or the map archive
 	 * @since 4.0.0
+	 * @since 6.0.0 Without a map provider there is no map to show, so the original template is used.
 	 */
 	public static function map_archive_template( $original_template ) {
 		if ( false === get_query_var( 'map', false ) ) {
 			return $original_template;
 		}
 		if ( ! is_archive() ) {
+			return $original_template;
+		}
+		if ( ! Loc_Config::map_provider() ) {
 			return $original_template;
 		}
 		$template_name = 'map-archive.php';
