@@ -141,7 +141,37 @@ The software uses two custom features to declare that the post type supports the
 = Why are my maps served from the provider instead of saved as images to my site? =
 
 The terms of service of most map providers expressly forbid this. While the likelihood of one of these providers coming after an individual is slim, this would be a violation of WordPress plugin guidelines.
-This is why the plugin does not save maps to the media library. The only self-serve option being offered at this time is to self-host a caching static map API endpoint.
+This is why the plugin does not save maps to the media library.
+
+Geoapify's terms allow storing its static maps, so Geoapify maps are served from your site. The first time a map is shown, your site fetches it from Geoapify, stores it in `wp-content/uploads/sloc-maps`, and serves it from there. Your API key stays on your server, and visitors' browsers never contact Geoapify.
+The image links are signed with a secret only your site knows, so nobody else can use your site to request other maps with your key.
+
+The other self-serve option is to self-host a caching static map API endpoint (see the custom map provider below).
+
+= How do I protect my map API keys? =
+
+For most map providers, the map image is loaded directly from the provider, so the API key is part of the image link and anyone viewing the page can read it.
+The same key is often used for geocoding, elevation, venues or weather, which your server requests itself.
+
+To limit what someone can do with a visible key, Google, HERE, LocationIQ and MapQuest have an optional Map API Key setting. Use a separate key there that only allows static maps and is restricted to your site.
+If it is empty, the provider's main key is used for maps too.
+
+Don't restrict your main key to your site's domain. Requests your server makes don't come from a web page, so a domain restriction would block geocoding and the other lookups.
+
+**Google:** Use a separate key restricted to the Maps Static API. Then set up URL signing:
+* Copy the URL signing secret from the Secret Generator on the Credentials page of the Google Cloud console, in the same project as the map key, into the Google Maps URL Signing Secret setting.
+* On the Quotas page for the Maps Static API, set "Unsigned requests per day" to 0, so Google refuses map links that weren't signed by your site.
+* A signed link can't be changed to request a different map. Unlike a website restriction, signing still works where no referring page is sent, such as in feed readers and email.
+
+**HERE:** HERE restricts keys by app, not by key, so create a second app for maps:
+* In the HERE platform, open Access Manager, create a new app, and create an API key for it. Enter that key as the HERE Map API Key.
+* Open the new app's Trusted domains tab, turn on "Enable Trusted domains", and enter your site's domain without a path, for example `example.com`. Changes can take up to 30 minutes to take effect.
+* Leave trusted domains off for the app that holds your main HERE key, which your server uses for geocoding and weather.
+* Maps may not load where no referring page is sent, such as some feed readers and email.
+
+**Geoapify:** Geoapify maps are served from your site, so the key is never shown to visitors and doesn't need a separate map key. Every Geoapify request comes from your server, so you can restrict the key to your server's IP address:
+* In Geoapify's MyProjects, open your project's API Keys section and add your server's outgoing IP address to the key's allowed IP addresses.
+* Your host can tell you the outgoing IP address. If your server connects over both IPv4 and IPv6, add both. If the address changes, for example on some shared hosting, update the setting, or leave the key unrestricted.
 
 = What is the custom map provider? =
 
