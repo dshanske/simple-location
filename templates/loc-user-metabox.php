@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Loaded with load_template() inside a function, so these variables are local.
+
 // The user being edited is passed by Geo_Base::user_profile().
 $user_id = ( isset( $args['user'] ) && $args['user'] instanceof WP_User ) ? $args['user']->ID : get_current_user_id(); // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable -- Set by load_template().
 

@@ -20,7 +20,6 @@
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'plugins_loaded', array( 'Simple_Location_Plugin', 'init' ) );
-add_action( 'init', array( 'Simple_Location_Plugin', 'load_textdomain' ) );
 
 // Activation and Deactivation Hooks.
 register_activation_hook( __FILE__, array( 'Simple_Location_Plugin', 'activate' ) );
@@ -207,10 +206,14 @@ class Simple_Location_Plugin {
 	/**
 	 * Load text domain for translations.
 	 *
+	 * WordPress 4.6 and later, and ClassicPress, load the plugin's translations when they're
+	 * first needed, and the plugin bundles none of its own, so this is no longer needed.
+	 *
 	 * @since 5.0.24
+	 * @deprecated 6.0.0 Translations load automatically.
 	 */
 	public static function load_textdomain() {
-		load_plugin_textdomain( 'simple-location', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+		_deprecated_function( __METHOD__, '6.0.0' );
 	}
 
 	/**

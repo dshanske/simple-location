@@ -116,7 +116,7 @@ if ( ! function_exists( 'wp_trigger_error' ) ) {
 		}
 
 		/** This action is documented in wp-includes/functions.php */
-		do_action( 'wp_trigger_error_run', $function_name, $message, $error_level );
+		do_action( 'wp_trigger_error_run', $function_name, $message, $error_level ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core's action, fired as the core function does.
 
 		if ( ! empty( $function_name ) ) {
 			$message = sprintf( '%s(): %s', $function_name, $message );

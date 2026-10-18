@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Loaded with load_template() inside a function, so these variables are local.
+
 $screen = get_current_screen();
 if ( 'comment' === $screen->id ) {
 	$geodata   = get_comment_geodata( get_comment_ID() );

@@ -77,7 +77,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 		if ( $this->latitude && $this->longitude ) {
 			$data = array(
 				'units'   => 'si',
-				'exclude' => 'minutely,hourly,daily,alerts,flags',
+				'exclude' => 'minutely,hourly,daily,alerts,flags', // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- A Pirate Weather API parameter, not a query argument.
 				'lang'    => substr( get_bloginfo( 'language' ), 0, 2 ),
 			);
 
