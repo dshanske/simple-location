@@ -67,6 +67,11 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 			return $json;
 		}
 
+		// A place that can't be found comes back as an error message with HTTP 200.
+		if ( isset( $json['error'] ) ) {
+			$message = is_string( $json['error'] ) ? $json['error'] : ( $json['error']['message'] ?? '' );
+			return new WP_Error( 'no_results', '' !== $message ? $message : __( 'No Results Found', 'simple-location' ), array( 'status' => 404 ) );
+		}
 		return $this->address_to_mf( $json );
 	}
 

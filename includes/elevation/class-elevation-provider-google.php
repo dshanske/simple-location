@@ -64,7 +64,7 @@ class Elevation_Provider_Google extends Elevation_Provider {
 			return $json;
 		}
 
-		if ( array_key_exists( 'status', $json ) && 'OK' !== $json['status'] ) {
+		if ( isset( $json['status'] ) && is_string( $json['status'] ) && 'OK' !== $json['status'] ) {
 			return new WP_Error( $json['status'], $json['error_message'] ?? __( 'Error Returning Results from Google', 'simple-location' ) );
 		}
 

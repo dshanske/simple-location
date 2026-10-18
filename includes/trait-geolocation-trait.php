@@ -51,10 +51,14 @@ trait GeoLocation_Trait {
 	 *
 	 * @param string $iso ISO2 or ISO3 Country Code.
 	 * @return array|boolean Country Data or false is failed.
+	 *
+	 * @since 6.0.0 Returns false without a code, instead of a deprecation notice.
 	 */
 	public static function country_data( $iso ) {
-		$iso = trim( $iso );
-		$iso = strtoupper( trim( $iso ) );
+		$iso = strtoupper( trim( (string) $iso ) );
+		if ( '' === $iso ) {
+			return false;
+		}
 
 		$file  = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json';
 		$codes = json_decode( sloc_get_contents( $file ), true );

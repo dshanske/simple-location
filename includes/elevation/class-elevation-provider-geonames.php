@@ -72,7 +72,7 @@ class Elevation_Provider_Geonames extends Elevation_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		if ( 1 === count( $json ) && array_key_exists( 'status', $json ) ) {
+		if ( isset( $json['status']['message'] ) ) {
 			return new WP_Error( 'unknown_error', $json['status']['message'] );
 		}
 

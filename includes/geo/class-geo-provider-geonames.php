@@ -68,6 +68,9 @@ class Geo_Provider_Geonames extends Geo_Provider {
 		if ( isset( $json['status']['message'] ) ) {
 			return new WP_Error( 'unknown_error', $json['status']['message'] );
 		}
+		if ( empty( $json['address'] ) && empty( $json['geonames'] ) ) {
+			return new WP_Error( 'no_results', __( 'No Results Found', 'simple-location' ), array( 'status' => 404 ) );
+		}
 
 		$addr              = $this->address_to_mf2( $json );
 		$addr['latitude']  = $this->latitude;
@@ -163,8 +166,12 @@ class Geo_Provider_Geonames extends Geo_Provider {
 			return $json;
 		}
 
-		if ( 1 === count( $json ) && array_key_exists( 'status', $json ) ) {
+		if ( isset( $json['status']['message'] ) ) {
 			return new WP_Error( 'unknown_error', $json['status']['message'] );
+		}
+		// A search that finds nothing has an empty list.
+		if ( ! isset( $json['geonames'][0] ) || ! is_array( $json['geonames'][0] ) ) {
+			return new WP_Error( 'no_results', __( 'No Results Found', 'simple-location' ), array( 'status' => 404 ) );
 		}
 
 		$json                = $json['geonames'][0];

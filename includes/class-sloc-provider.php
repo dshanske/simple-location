@@ -137,6 +137,7 @@ abstract class Sloc_Provider {
 	 *
 	 * @since 4.0.6
 	 * @since 6.0.0 Error messages are short and plain text, without credentials; the response is in the error data.
+	 * @since 6.0.0 JSON that isn't an object or array, such as `true`, is an error.
 	 */
 	public function fetch_json( $url, $query, $headers = null ) {
 		$fetch = add_query_arg( $query, $url );
@@ -191,6 +192,16 @@ abstract class Sloc_Provider {
 				array(
 					'type' => wp_remote_retrieve_header( $response, 'Content-Type' ),
 					'body' => $body,
+				)
+			);
+		}
+		if ( ! is_array( $json ) ) {
+			return new WP_Error(
+				'unexpected_response',
+				__( 'The service returned a response the plugin could not use.', 'simple-location' ),
+				array(
+					'type' => wp_remote_retrieve_header( $response, 'Content-Type' ),
+					'body' => $this->redact( $body, $query ),
 				)
 			);
 		}
