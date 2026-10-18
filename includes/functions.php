@@ -588,6 +588,7 @@ function sloc_query_id_list() {
  * Wrapper around get_post_datetime().
  *
  * @since 5.0.0
+ * @since 6.0.0 Ignores a stored timezone that isn't valid, instead of throwing.
  *
  * @param int|WP_Post|null $post   Post ID or object. Defaults to the current post.
  * @param string           $field  Published or modified time: 'date' or 'modified'. Default 'date'.
@@ -596,12 +597,15 @@ function sloc_query_id_list() {
  */
 function sloc_get_post_datetime( $post = null, $field = 'date', $source = 'local' ) {
 	$datetime = get_post_datetime( $post, $field, $source );
-	$timezone = get_post_geodata( $post, 'timezone' );
+	if ( ! $datetime ) {
+		return $datetime;
+	}
+	$timezone = Loc_Timezone::timezone_from_string( get_post_geodata( $post, 'timezone' ) );
 	if ( ! $timezone ) {
 		return $datetime;
 	}
 
-	return $datetime->setTimezone( new DateTimeZone( $timezone ) );
+	return $datetime->setTimezone( $timezone );
 }
 
 
