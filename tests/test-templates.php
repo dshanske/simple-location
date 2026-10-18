@@ -135,4 +135,23 @@ class TemplatesTest extends WP_UnitTestCase {
 		$this->edit_comment( $comment_id );
 		$this->assertStringContainsString( '21.5', $this->render( 'weather-metabox.php' ) );
 	}
+
+	/**
+	 * Without a stored visibility, the location metabox selects the site's default visibility.
+	 */
+	public function test_location_metabox_default_visibility() {
+		foreach ( array(
+			0 => 'private',
+			1 => 'public',
+			2 => 'protected',
+		) as $option => $visibility ) {
+			update_option( 'geo_public', $option );
+			$this->edit_post( self::factory()->post->create() );
+			$output = $this->render( 'loc-metabox.php' );
+			// ClassicPress writes a bare selected attribute, WordPress selected='selected'.
+			$this->assertMatchesRegularExpression( '/<option value="' . $visibility . '"\s+selected[=>\s]/', $output, $visibility );
+			$this->assertStringContainsString( '<span id="location-visibility-label">' . Geo_Base::geo_public()[ $visibility ] . '</span>', $output );
+			$this->assertStringContainsString( 'id="hidden_location_visibility" value="' . $visibility . '"', $output );
+		}
+	}
 }
