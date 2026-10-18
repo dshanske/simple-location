@@ -31,7 +31,8 @@ if ( is_array( $geodata ) && array_key_exists( 'venue_id', $geodata ) && $geodat
 	$display_name = $geodata['address'] ?? '';
 }
 
-$public     = array_key_exists( 'visibility', $geodata ) ? $geodata['visibility'] : get_option( 'geo_public' );
+// Without a stored visibility, use the site default, as private, public or protected rather than the option's number.
+$public     = $geodata['visibility'] ?? Geo_Data::get_default_visibility();
 $choices    = Geo_Base::geo_public();
 $map_return = '';
 if ( 'attachment' === $sloc_type ) {
