@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Polyfills keep core's function names, and array_key_last_index() is public API that predates the prefix rule. To be revisited with namespacing.
+
 if ( ! function_exists( 'get_comment_datetime' ) ) {
 	/**
 	 * Retrieve comment published time as a `DateTimeImmutable` object instance.

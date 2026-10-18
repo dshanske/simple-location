@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- These functions are public API that predates the prefix rule; renaming them would break sites that use them. To be revisited with namespacing.
+
 /**
  * Sets geo data on a post.
  *

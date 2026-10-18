@@ -861,6 +861,7 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function get_default_aspect_ratio() {
+		// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		/**
 		 * Filters the aspect ratios offered for maps.
 		 *
@@ -878,6 +879,7 @@ class Loc_Config {
 				'12'            => __( 'Circle-Vision 360', 'simple-location' ),
 			)
 		);
+		// phpcs:enable
 	}
 
 	/**
