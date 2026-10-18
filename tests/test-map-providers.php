@@ -786,4 +786,96 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( $message, $map->get_the_map() );
 		$this->assertSame( $message, $map->get_the_static_map_html( true ) );
 	}
+
+	/**
+	 * Vendors whose map key is shared with server-side providers, with the URL parameter that carries the key.
+	 *
+	 * @return array
+	 */
+	public function data_map_api_key() {
+		return array(
+			'Google'     => array( 'Map_Provider_Google', 'google', 'key' ),
+			'HERE'       => array( 'Map_Provider_Here', 'here', 'apiKey' ),
+			'LocationIQ' => array( 'Map_Provider_LocationIQ', 'locationiq', 'key' ),
+			'MapQuest'   => array( 'Map_Provider_Mapquest', 'mapquest', 'key' ),
+		);
+	}
+
+	/**
+	 * Maps use the vendor's map key when one is set, and the vendor's main key otherwise.
+	 *
+	 * @dataProvider data_map_api_key
+	 *
+	 * @param string $class  Provider class.
+	 * @param string $vendor Vendor slug.
+	 * @param string $param  URL parameter holding the key.
+	 */
+	public function test_map_api_key( $class, $vendor, $param ) {
+		$location = array(
+			'latitude'  => self::LAT,
+			'longitude' => self::LNG,
+			// MapQuest has no archive map without a style.
+			'style'     => 'mapquest' === $vendor ? 'map' : '',
+		);
+		update_option( 'sloc_' . $vendor . '_api', 'MAIN' );
+		$map = new $class( $location );
+		$this->assertSame( 'MAIN', $this->parse( $map->get_the_static_map() )['query'][ $param ] );
+
+		update_option( 'sloc_' . $vendor . '_map_api', 'MAPONLY' );
+		$map = new $class( $location );
+		$this->assertSame( 'MAPONLY', $this->parse( $map->get_the_static_map() )['query'][ $param ] );
+		$this->assertStringContainsString( 'MAPONLY', $map->get_archive_map( $this->locations ) );
+
+		// An API key passed in still wins.
+		$map = new $class( array_merge( $location, array( 'api' => 'PASSED' ) ) );
+		$this->assertSame( 'PASSED', $this->parse( $map->get_the_static_map() )['query'][ $param ] );
+	}
+
+	/**
+	 * The map key is only for maps: Google geocoding, elevation and venues keep using the main key.
+	 */
+	public function test_map_api_key_not_used_by_lookups() {
+		update_option( 'sloc_google_api', 'MAIN' );
+		update_option( 'sloc_google_map_api', 'MAPONLY' );
+		$api = new ReflectionProperty( 'Sloc_Provider', 'api' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$api->setAccessible( true );
+		}
+		foreach ( array( 'Geo_Provider_Google', 'Elevation_Provider_Google', 'Venue_Provider_Google' ) as $class ) {
+			$this->assertSame( 'MAIN', $api->getValue( new $class() ), $class );
+		}
+	}
+
+	/**
+	 * A vendor's map provider registers the map key setting and adds its field, with a description, to the API settings.
+	 */
+	public function test_map_api_setting() {
+		global $wp_settings_fields;
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		Map_Provider_Here::init();
+		$settings = get_registered_settings();
+		$this->assertArrayHasKey( 'sloc_here_map_api', $settings );
+		$this->assertSame( 'sloc_api', $settings['sloc_here_map_api']['group'] );
+		$this->assertSame( 'MAPONLY', sanitize_option( 'sloc_here_map_api', ' MAPONLY ' ) );
+
+		Map_Provider_Here::admin_init();
+		$field = $wp_settings_fields['sloc_api']['sloc_api']['sloc_here_map_api'];
+		$this->assertSame( 'HERE Map API Key', $field['title'] );
+		$this->assertSame( 'password', $field['args']['type'] );
+
+		update_option( 'sloc_here_map_api', 'MAPONLY' );
+		ob_start();
+		call_user_func( $field['callback'], $field['args'] );
+		$html = ob_get_clean();
+		$this->assertStringContainsString( 'type="password"', $html );
+		$this->assertStringContainsString( '<p class="description">Optional. Map images show this key to every visitor', $html );
+		$this->assertStringContainsString( 'Leave empty to use the HERE API key.', $html );
+
+		// Geocoding providers using the same vendor don't add a map key.
+		Geo_Provider_Here::admin_init();
+		unset( $wp_settings_fields['sloc_api']['sloc_api']['sloc_here_map_api'] );
+		Geo_Provider_Here::admin_init();
+		$this->assertArrayNotHasKey( 'sloc_here_map_api', $wp_settings_fields['sloc_api']['sloc_api'] );
+	}
 }

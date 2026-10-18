@@ -17,10 +17,12 @@ trait Sloc_API_Here {
 	 * Admin Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.0.0 Adds the map API key field for the map provider.
 	 */
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
+			self::add_map_api_setting( __( 'HERE', 'simple-location' ), 'here' );
 
 			add_settings_field(
 				'herestyle', // id
@@ -40,10 +42,12 @@ trait Sloc_API_Here {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.0.0 Registers the map API key setting for the map provider.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
+			self::register_map_api_setting( __( 'HERE', 'simple-location' ), 'here' );
 
 			register_setting(
 				'simloc',

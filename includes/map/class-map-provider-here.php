@@ -27,6 +27,9 @@ class Map_Provider_Here extends Map_Provider {
 	/**
 	 * Constructor.
 	 *
+	 * @since 1.0.0
+	 * @since 6.0.0 Uses the HERE map API key when one is set.
+	 *
 	 * @param array $args Arguments. See Map_Provider::__construct().
 	 */
 	public function __construct( $args = array() ) {
@@ -39,7 +42,7 @@ class Map_Provider_Here extends Map_Provider {
 		$this->max_map_zoom = 20;
 
 		if ( ! isset( $args['api'] ) ) {
-			$args['api'] = get_option( 'sloc_here_api' );
+			$args['api'] = self::get_map_api_key( 'here' );
 		}
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_here_style' );

@@ -16,6 +16,14 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	use Sloc_API_LocationIQ;
 
 
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 * @since 6.0.0 Uses the LocationIQ map API key when one is set.
+	 *
+	 * @param array $args Arguments. See Map_Provider::__construct().
+	 */
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'LocationIQ', 'simple-location' );
 		$this->slug         = 'locationiq';
@@ -24,7 +32,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 		$this->max_map_zoom = 18;
 
 		if ( ! isset( $args['api'] ) ) {
-			$args['api'] = get_option( 'sloc_locationiq_api' );
+			$args['api'] = self::get_map_api_key( 'locationiq' );
 		}
 
 		parent::__construct( $args );

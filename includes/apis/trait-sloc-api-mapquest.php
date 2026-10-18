@@ -17,11 +17,13 @@ trait Sloc_API_MapQuest {
 	 * Admin Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.0.0 Adds the map API key field for the map provider.
 	 */
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'MapQuest', 'simple-location' ), 'sloc_mapquest_api' );
 
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
+			self::add_map_api_setting( __( 'MapQuest', 'simple-location' ), 'mapquest' );
 			add_settings_field(
 				'mapqueststyle', // id
 				__( 'MapQuest Style', 'simple-location' ),
@@ -40,10 +42,12 @@ trait Sloc_API_MapQuest {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.0.0 Registers the map API key setting for the map provider.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'MapQuest', 'simple-location' ), 'sloc_mapquest_api' );
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
+			self::register_map_api_setting( __( 'MapQuest', 'simple-location' ), 'mapquest' );
 			register_setting(
 				'simloc',
 				'sloc_mapquest_style',
