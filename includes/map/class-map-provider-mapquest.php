@@ -20,6 +20,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Uses the MapQuest map API key when one is set.
+	 * @since 6.0.0 Uses the basic map style when none is set.
 	 *
 	 * @param array $args Arguments. See Map_Provider::__construct().
 	 */
@@ -36,6 +37,10 @@ class Map_Provider_Mapquest extends Map_Provider {
 		}
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_mapquest_style' );
+		}
+		// The style setting is only registered, with its default, while MapQuest is the map provider.
+		if ( empty( $args['style'] ) ) {
+			$args['style'] = 'map';
 		}
 
 		parent::__construct( $args );
