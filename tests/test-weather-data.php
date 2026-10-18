@@ -567,6 +567,10 @@ class WeatherDataTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'value="21.5">21.5</data>', Weather_Provider::markup_value( 'temperature', 21.456, array( 'round' => 1 ) ) );
 		$this->assertStringContainsString( '&deg;F', Weather_Provider::markup_value( 'temperature', 70, array( 'units' => 'imperial' ) ) );
 
+		// Cloudiness is a whole percentage, including values saved with decimals, unless a precision is asked for.
+		$this->assertStringContainsString( 'value="56">56</data>', Weather_Provider::markup_value( 'cloudiness', 55.6 ) );
+		$this->assertStringContainsString( 'value="55.6">55.6</data>', Weather_Provider::markup_value( 'cloudiness', 55.6, array( 'round' => 1 ) ) );
+
 		$plain = Weather_Provider::markup_value(
 			'humidity',
 			50,
