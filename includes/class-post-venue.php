@@ -405,7 +405,7 @@ class Post_Venue {
 		 * @param float $lnt Longitude.
 		 * @param int $radius Radius.
 		 */
-		$check = apply_filters( 'pre_nearby_venue', null, $lat, $lng, $radius );
+		$check = apply_filters( 'pre_nearby_venue', null, $lat, $lng, $radius ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 
 		if ( ! is_null( $check ) ) {
 			return $check;
@@ -476,7 +476,7 @@ class Post_Venue {
 		 * @param float $lat Latitude.
 		 * @param float $lnt Longitude.
 		 */
-		$check = apply_filters( 'pre_at_venue', null, $lat, $lng );
+		$check = apply_filters( 'pre_at_venue', null, $lat, $lng ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 
 		if ( ! is_null( $check ) ) {
 			return $check;

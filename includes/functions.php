@@ -18,7 +18,7 @@ if ( ! function_exists( 'wp_exif_gps_convert' ) ) {
 	 * @param array|string $coordinate The coordinate to convert to degrees format.
 	 * @return float|false Coordinate in degrees format or false if failure
 	 */
-	function wp_exif_gps_convert( $coordinate ) {
+	function wp_exif_gps_convert( $coordinate ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		if ( is_array( $coordinate ) ) {
 			// Missing minutes or seconds count as zero.
 			list( $degree, $minute, $second ) = array_pad( array_values( $coordinate ), 3, 0 );
@@ -38,7 +38,7 @@ if ( ! function_exists( 'wp_exif_datetime' ) ) {
 	 * @param string|DateTimeZone $timezone A timezone or offset string. Default is the WordPress timezone.
 	 * @return DateTime
 	 */
-	function wp_exif_datetime( $str, $timezone = null ) {
+	function wp_exif_datetime( $str, $timezone = null ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		if ( is_string( $timezone ) ) {
 			$timezone = timezone_open( $timezone );
 		}
@@ -63,7 +63,7 @@ if ( ! function_exists( 'wp_exif_datetime' ) ) {
  * @param float|string $altitude Altitude. Optional.
  * @return string Textual Representation of Location.
  */
-function dec_to_dms( $latitude, $longitude, $altitude = '' ) {
+function dec_to_dms( $latitude, $longitude, $altitude = '' ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 	$latitudedirection  = $latitude < 0 ? 'S' : 'N';
 	$longitudedirection = $longitude < 0 ? 'W' : 'E';
 
@@ -169,7 +169,7 @@ if ( ! function_exists( 'array_key_return' ) ) {
 	 * @param mixed         $default Return if $var is not set. Defaults to false.
 	 * @return mixed $return The returned value.
 	 */
-	function array_key_return( $key, &$array, $default = false ) {
+	function array_key_return( $key, &$array, $default = false ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		if ( ! is_array( $array ) ) {
 			return $default;
 		}
@@ -186,7 +186,7 @@ if ( ! function_exists( 'sanitize_float' ) ) {
 	 *
 	 * @since 1.0.0
 	 */
-	function sanitize_float( $input ) {
+	function sanitize_float( $input ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		return filter_var( $input, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION );
 	}
 }
@@ -199,7 +199,7 @@ if ( ! function_exists( 'sanitize_float' ) ) {
  *
  * @since 1.0.0
  */
-function register_sloc_provider( $object ) {
+function register_sloc_provider( $object ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 	return Loc_Config::register_provider( $object );
 }
 
@@ -290,7 +290,7 @@ function sloc_get_type_from_object( $object ) {
  *
  * @since 1.0.0
  */
-function geo_distance( $lat1, $lng1, $lat2, $lng2 ) {
+function geo_distance( $lat1, $lng1, $lat2, $lng2 ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		$lat1 = floatval( $lat1 );
 		$lng1 = floatval( $lng1 );
 		$lat2 = floatval( $lat2 );
@@ -309,7 +309,7 @@ function geo_distance( $lat1, $lng1, $lat2, $lng2 ) {
  * @param float $radius Optional. Distance from the location to each side, in meters. Default 50.
  * @return float[] Minimum latitude, minimum longitude, maximum latitude, maximum longitude.
  */
-function geo_radius_box( $lat, $lng, $radius = 50 ) {
+function geo_radius_box( $lat, $lng, $radius = 50 ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 	$lat  = floatval( $lat );
 	$lng  = floatval( $lng );
 	$r    = $radius / 6378100;
@@ -339,7 +339,7 @@ function geo_radius_box( $lat, $lng, $radius = 50 ) {
  *
  * @since 1.0.0
  */
-function geo_in_radius( $lat1, $lng1, $lat2, $lng2, $meters = 50 ) {
+function geo_in_radius( $lat1, $lng1, $lat2, $lng2, $meters = 50 ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 	if ( ! is_numeric( $meters ) ) {
 		$meters = 50;
 	}
@@ -356,7 +356,7 @@ function geo_in_radius( $lat1, $lng1, $lat2, $lng2, $meters = 50 ) {
  *
  * @since 1.0.0
  */
-function geo_bounding_box( $locations, $flip = false ) {
+function geo_bounding_box( $locations, $flip = false ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 	$lats = array();
 	$lngs = array();
 	foreach ( $locations as $location ) {
@@ -390,7 +390,7 @@ function geo_bounding_box( $locations, $flip = false ) {
  *
  * @return float
  */
-function area_of_triangle( $a, $b, $c ) {
+function area_of_triangle( $a, $b, $c ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 	list( $ax, $ay ) = $a;
 	list( $bx, $by ) = $b;
 	list( $cx, $cy ) = $c;
@@ -544,7 +544,7 @@ if ( ! function_exists( 'clean_coordinate' ) ) {
 	 * @since 1.0.0
 	 * @since 6.0.0 Accepts whole numbers, checks the range, and added the `$type` parameter.
 	 */
-	function clean_coordinate( $coordinate, $type = '' ) {
+	function clean_coordinate( $coordinate, $type = '' ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		if ( is_int( $coordinate ) || is_float( $coordinate ) ) {
 			$value = (float) $coordinate;
 		} elseif ( is_string( $coordinate ) ) {
@@ -645,7 +645,7 @@ function sloc_get_comment_datetime( $comment = null ) {
  * @param int    $id   Object ID.
  * @return string|WP_Error|false The URL; false for an unknown type.
  */
-function get_object_permalink( $type, $id ) {
+function get_object_permalink( $type, $id ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 	switch ( $type ) {
 		case 'post':
 			return get_permalink( $id );

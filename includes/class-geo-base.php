@@ -160,7 +160,7 @@ class Geo_Base {
 			 * @param WP_Post|WP_Comment $object Post or comment being edited.
 			 * @param array               $args   Metabox arguments.
 			 */
-			do_action( 'simple_location_sidebox', get_current_screen(), $object, $args );
+			do_action( 'simple_location_sidebox', get_current_screen(), $object, $args ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		}
 	}
 

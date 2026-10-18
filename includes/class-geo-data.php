@@ -280,7 +280,7 @@ class Geo_Data {
 		 * @param int    $id ID of the object geodata data is for.
 		 * @param string $key  Geo data key.
 		 */
-		$check = apply_filters( "delete_{$type}_geodata", null, $type, $id, $key );
+		$check = apply_filters( "delete_{$type}_geodata", null, $type, $id, $key ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 
 		if ( ! is_null( $check ) ) {
 			return $check;
@@ -342,7 +342,7 @@ class Geo_Data {
 		 *                              or any other object type with an associated meta table.
 		 * @param array|string $geodata Value, or all values as an array when `$key` is empty.
 		 */
-		$check = apply_filters( "set_{$type}_geodata", null, $id, $key, $type, $geodata );
+		$check = apply_filters( "set_{$type}_geodata", null, $id, $key, $type, $geodata ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 
 		if ( null !== $check ) {
 			return $check;
@@ -565,7 +565,7 @@ class Geo_Data {
 		 * @param string $type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
 		 *                          or any other object type with an associated meta table.
 		 */
-		$check = apply_filters( "get_{$type}_geodata", null, $id, $key, $type );
+		$check = apply_filters( "get_{$type}_geodata", null, $id, $key, $type ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 
 		if ( null !== $check ) {
 			return $check;
@@ -1195,7 +1195,7 @@ class Geo_Data {
 		 *
 		 * @param array $defaults Default display arguments, such as weather, altitude, taxonomy, link, icon, markup and wrapper-type.
 		 */
-		$defaults = apply_filters( 'simple_location_display_defaults', $defaults );
+		$defaults = apply_filters( 'simple_location_display_defaults', $defaults ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		$args     = wp_parse_args( $args, $defaults );
 		$args     = array_merge( $loc, $args );
 		$map      = Loc_Config::map_provider();

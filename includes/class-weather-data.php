@@ -253,7 +253,7 @@ class Sloc_Weather_Data {
 		 * @param string $key  Weather data key.
 		 * @param mixed  $weather Weather data value, or all values as an array when `$key` is empty.
 		 */
-		$check = apply_filters( "set_{$type}_weatherdata", null, $id, $type, $key, $weather );
+		$check = apply_filters( "set_{$type}_weatherdata", null, $id, $type, $key, $weather ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 
 		if ( ! is_null( $check ) ) {
 			return $check;
@@ -321,7 +321,7 @@ class Sloc_Weather_Data {
 		 * @param int    $id ID of the object weatherdata data is for.
 		 * @param string $key  Geo data key.
 		 */
-		$check = apply_filters( "delete_{$type}_weatherdata", null, $type, $id, $key );
+		$check = apply_filters( "delete_{$type}_weatherdata", null, $type, $id, $key ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 
 		if ( ! is_null( $check ) ) {
 			return $check;
@@ -375,7 +375,7 @@ class Sloc_Weather_Data {
 		 * @param string $object_type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
 		 *                          or any other object type with an associated meta table.
 		 */
-		$check = apply_filters( "get_{$type}_weatherdata", null, $id, $key, $type );
+		$check = apply_filters( "get_{$type}_weatherdata", null, $id, $key, $type ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 
 		if ( null !== $check ) {
 			return $check;

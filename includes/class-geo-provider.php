@@ -152,7 +152,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 			 * @param string $display_name Display name.
 			 * @param array  $reverse      Address properties from the lookup.
 			 */
-			return apply_filters( 'location_display_name', $reverse['display_name'], $reverse );
+			return apply_filters( 'location_display_name', $reverse['display_name'], $reverse ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 		}
 		$text = array();
 		if ( array_key_exists( 'name', $reverse ) ) {
@@ -182,6 +182,6 @@ abstract class Geo_Provider extends Sloc_Provider {
 		$text   = array_filter( $text );
 		$return = join( ', ', $text );
 		/** This filter is documented in includes/class-geo-provider.php */
-		return apply_filters( 'location_display_name', $return, $reverse );
+		return apply_filters( 'location_display_name', $return, $reverse ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 	}
 }
