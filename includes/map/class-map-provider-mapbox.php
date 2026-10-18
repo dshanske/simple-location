@@ -76,15 +76,15 @@ class Map_Provider_Mapbox extends Map_Provider {
 		);
 		if ( is_wp_error( $json ) ) {
 			// A user without styles of their own gets an empty list.
-			if ( 'not_json_response' === $json->get_error_code() && '[]' === trim( $json->get_error_message() ) ) {
+			$data = $json->get_error_data();
+			if ( 'not_json_response' === $json->get_error_code() && '[]' === trim( $data['body'] ?? '' ) ) {
 				return $return;
 			}
 			if ( 'invalid_response' !== $json->get_error_code() ) {
 				return $json;
 			}
-			$data    = $json->get_error_data();
 			$status  = isset( $data['status'] ) ? (int) $data['status'] : 0;
-			$body    = json_decode( $json->get_error_message(), true );
+			$body    = json_decode( $data['body'] ?? '', true );
 			$message = ( is_array( $body ) && ! empty( $body['message'] ) && is_string( $body['message'] ) )
 				? $body['message']
 				/* translators: %d: HTTP status code. */
