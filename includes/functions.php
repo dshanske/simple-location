@@ -606,23 +606,30 @@ function sloc_get_post_datetime( $post = null, $field = 'date', $source = 'local
 
 
 /**
- * Retrieves a comment's date in the timezone stored with its location, if there is one.
+ * Retrieves a comment's date in the timezone of the post it is on, if the post has one.
  *
+ * Comments are shown in their post's timezone, so a thread reads in one timezone.
  * Wrapper around get_comment_datetime().
  *
  * @since 5.0.0
+ * @since 6.0.0 Uses the timezone of the comment's post; it looked up an unrelated post, or none. A timezone
+ *              that isn't valid is ignored.
  *
  * @param int|WP_Comment|null $comment Comment ID or object. Defaults to the current comment.
  * @return DateTimeImmutable|false Time object on success, false on failure.
  */
 function sloc_get_comment_datetime( $comment = null ) {
+	$comment  = get_comment( $comment );
 	$datetime = get_comment_datetime( $comment );
-	$timezone = get_post_geodata( $comment, 'timezone' );
+	if ( ! $datetime ) {
+		return $datetime;
+	}
+	$timezone = Loc_Timezone::timezone_from_string( get_post_geodata( $comment->comment_post_ID, 'timezone' ) );
 	if ( ! $timezone ) {
 		return $datetime;
 	}
 
-	return $datetime->setTimezone( new DateTimeZone( $timezone ) );
+	return $datetime->setTimezone( $timezone );
 }
 
 /**
