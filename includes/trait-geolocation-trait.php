@@ -290,6 +290,7 @@ trait GeoLocation_Trait {
 	 * A region that isn't on the list is shown in a text field instead.
 	 *
 	 * @since 4.4.4
+	 * @since 6.0.0 The text field has a valid type attribute and the region ID, for its label.
 	 *
 	 * @param string $region  Selected region code, without the country prefix.
 	 * @param string $country Country code.
@@ -308,7 +309,7 @@ trait GeoLocation_Trait {
 		$codes = json_decode( sloc_get_contents( $file ), true );
 		$codes = wp_list_pluck( $codes, 'name', 'code' );
 		if ( ! array_key_exists( $country . '-' . $region, $codes ) && ! empty( $region ) ) {
-			printf( '<input class="widefat" type=text" name="region" value="%s" required />', esc_attr( $region ) );
+			printf( '<input class="widefat" type="text" name="region" id="region" value="%s" required />', esc_attr( $region ) );
 			return;
 		}
 		echo '<select name="region" id="region">';

@@ -773,4 +773,22 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 		$this->assertMatchesRegularExpression( '/name=[\'"]tax_input\[location\]\[\][\'"]/', $output );
 		$this->assertMatchesRegularExpression( '/value="' . $terms['locality'] . '"\s+selected/', $output );
 	}
+
+	/**
+	 * A region's code is chosen from a select, or entered in a text field when it isn't on the list.
+	 */
+	public function test_region_select() {
+		ob_start();
+		Location_Taxonomy::region_select( 'PA', 'us' );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '<select name="region" id="region">', $output );
+		$this->assertMatchesRegularExpression( '/<option value="PA"\s+selected/', $output );
+
+		ob_start();
+		Location_Taxonomy::region_select( 'XX', 'US' );
+		$this->assertSame( '<input class="widefat" type="text" name="region" id="region" value="XX" required />', ob_get_clean() );
+
+		$this->assertFalse( Location_Taxonomy::region_select( 'PA', 'USA' ), 'A country code must have two letters.' );
+		$this->assertFalse( Location_Taxonomy::region_select( 'PA', 'QQ' ), 'A country needs a list of regions.' );
+	}
 }
