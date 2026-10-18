@@ -1,11 +1,14 @@
+
+This filter is documented in includes/class-geo-provider.php
+
 ## Auto-generated Example
 
 ```php
 add_filter(
    'location_display_name',
     function(
-        $display_name,
-        $reverse
+        string $display_name,
+        array $reverse
     ) {
         // Your code here.
         return $display_name;
@@ -17,17 +20,17 @@ add_filter(
 
 ## Parameters
 
-- `$display_name` Other variable names: `$return`
-- `$reverse`
+- *`string`* `$display_name` Display name.
+- *`array`* `$reverse` Address properties from the lookup.
 
 ## Files
 
-- [includes/class-geo-provider.php:140](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L140)
+- [includes/class-geo-provider.php:155](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L155)
 ```php
 apply_filters( 'location_display_name', $reverse['display_name'], $reverse )
 ```
 
-- [includes/class-geo-provider.php:169](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L169)
+- [includes/class-geo-provider.php:185](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L185)
 ```php
 apply_filters( 'location_display_name', $return, $reverse )
 ```

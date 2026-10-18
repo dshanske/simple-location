@@ -59,7 +59,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * }
 	 */
 	public function __construct( $args = array() ) {
-		$defaults         = array(
+		$defaults = array(
 			'api'        => null,
 			'latitude'   => null,
 			'longitude'  => null,
@@ -67,6 +67,13 @@ abstract class Weather_Provider extends Sloc_Provider {
 			'cache_time' => 0,
 			'units'      => get_option( 'sloc_measurements', Loc_Config::measurement_default() ),
 		);
+		/**
+		 * Filters the default arguments of weather providers.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param array $defaults Default arguments: api, latitude, longitude, station_id, cache_time and units.
+		 */
 		$defaults         = apply_filters( 'sloc_weather_provider_defaults', $defaults );
 		$r                = wp_parse_args( $args, $defaults );
 		$this->api        = $r['api'];

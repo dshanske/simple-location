@@ -63,7 +63,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$defaults           = array(
+		$defaults = array(
 			'api'          => null,
 			'latitude'     => null,
 			'longitude'    => null,
@@ -71,6 +71,13 @@ abstract class Geo_Provider extends Sloc_Provider {
 			'reverse_zoom' => 18,
 			'user'         => '',
 		);
+		/**
+		 * Filters the default arguments of geocoding providers. Map providers apply it too.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param array $defaults Default arguments: api, latitude, longitude, altitude, reverse_zoom and user, plus the map size, zoom, location and style for map providers.
+		 */
 		$defaults           = apply_filters( 'sloc_geo_provider_defaults', $defaults );
 		$r                  = wp_parse_args( $args, $defaults );
 		$this->reverse_zoom = $r['reverse_zoom'];
@@ -137,6 +144,14 @@ abstract class Geo_Provider extends Sloc_Provider {
 		}
 		$reverse = array_filter( $reverse );
 		if ( isset( $reverse['display_name'] ) ) {
+			/**
+			 * Filters the display name of a location from a reverse lookup.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param string $display_name Display name.
+			 * @param array  $reverse      Address properties from the lookup.
+			 */
 			return apply_filters( 'location_display_name', $reverse['display_name'], $reverse );
 		}
 		$text = array();
@@ -166,6 +181,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 		}
 		$text   = array_filter( $text );
 		$return = join( ', ', $text );
+		/** This filter is documented in includes/class-geo-provider.php */
 		return apply_filters( 'location_display_name', $return, $reverse );
 	}
 }

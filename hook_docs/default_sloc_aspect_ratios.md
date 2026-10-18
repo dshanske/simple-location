@@ -1,22 +1,25 @@
+
+Filters the aspect ratios offered for maps.
+
 ## Auto-generated Example
 
 ```php
 add_filter(
    'default_sloc_aspect_ratios',
-    function( array $string_list ) {
+    function( array string[] ) {
         // Your code here.
-        return $string_list;
+        return string[];
     }
 );
 ```
 
 ## Parameters
 
-- *`array`* `$string_list`
+- *`array`* `string[]` $ratios Labels keyed by ratio of width to height, such as '1.77777777778' for 16:9. Other variable names: `$string_list`
 
 ## Files
 
-- [includes/class-loc-config.php:864](https://github.com/dshanske/simple-location/blob/trunk/includes/class-loc-config.php#L864)
+- [includes/class-loc-config.php:871](https://github.com/dshanske/simple-location/blob/trunk/includes/class-loc-config.php#L871)
 ```php
 apply_filters(
 			'default_sloc_aspect_ratios',

@@ -1,12 +1,12 @@
 
 ## class-elevation-provider.php
 
-- [`sloc_elevation_provider_defaults`](sloc_elevation_provider_defaults)
+- [`sloc_elevation_provider_defaults`](sloc_elevation_provider_defaults) Filters the default arguments of elevation providers.
 
 ## class-geo-base.php
 
-- [`simple_location_sidebox`](simple_location_sidebox)
-- [`sloc_post_types`](sloc_post_types)
+- [`simple_location_sidebox`](simple_location_sidebox) Fires after the location metabox is shown, so other plugins can add to it.
+- [`sloc_post_types`](sloc_post_types) Filters the post types that get the location metabox and admin column.
 
 ## class-geo-data.php
 
@@ -16,16 +16,16 @@
 
 ## class-geo-provider.php
 
-- [`location_display_name`](location_display_name)
-- [`sloc_geo_provider_defaults`](sloc_geo_provider_defaults)
+- [`location_display_name`](location_display_name) This filter is documented in includes/class-geo-provider.php
+- [`sloc_geo_provider_defaults`](sloc_geo_provider_defaults) This filter is documented in includes/class-geo-provider.php
 
 ## class-loc-config.php
 
-- [`default_sloc_aspect_ratios`](default_sloc_aspect_ratios)
+- [`default_sloc_aspect_ratios`](default_sloc_aspect_ratios) Filters the aspect ratios offered for maps.
 
 ## class-location-provider.php
 
-- [`sloc_location_provider_defaults`](sloc_location_provider_defaults)
+- [`sloc_location_provider_defaults`](sloc_location_provider_defaults) Filters the default arguments of location providers.
 
 ## class-map-provider-staticmap.php
 
@@ -52,8 +52,8 @@
 
 ## class-venue-provider.php
 
-- [`sloc_venue_provider_defaults`](sloc_venue_provider_defaults)
+- [`sloc_venue_provider_defaults`](sloc_venue_provider_defaults) Filters the default arguments of venue providers.
 
 ## class-weather-provider.php
 
-- [`sloc_weather_provider_defaults`](sloc_weather_provider_defaults)
+- [`sloc_weather_provider_defaults`](sloc_weather_provider_defaults) Filters the default arguments of weather providers.

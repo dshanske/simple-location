@@ -128,10 +128,17 @@ abstract class Location_Provider extends Sloc_Provider {
 	 *  @type string $user Username.
 	 */
 	public function __construct( $args = array() ) {
-		$defaults   = array(
+		$defaults = array(
 			'api'  => null,
 			'user' => '',
 		);
+		/**
+		 * Filters the default arguments of location providers.
+		 *
+		 * @since 3.3.5
+		 *
+		 * @param array $defaults Default arguments: api and user.
+		 */
 		$defaults   = apply_filters( 'sloc_location_provider_defaults', $defaults );
 		$r          = wp_parse_args( $args, $defaults );
 		$this->user = $r['user'];

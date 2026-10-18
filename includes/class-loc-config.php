@@ -861,6 +861,13 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function get_default_aspect_ratio() {
+		/**
+		 * Filters the aspect ratios offered for maps.
+		 *
+		 * @since 4.0.0
+		 *
+		 * @param string[] $ratios Labels keyed by ratio of width to height, such as '1.77777777778' for 16:9.
+		 */
 		return apply_filters(
 			'default_sloc_aspect_ratios',
 			array(

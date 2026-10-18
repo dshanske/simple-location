@@ -88,6 +88,13 @@ class Geo_Base {
 	}
 
 	public static function screens() {
+		/**
+		 * Filters the post types that get the location metabox and admin column.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param string[] $post_types Post types that support geo-location.
+		 */
 		return apply_filters( 'sloc_post_types', get_post_types_by_support( 'geo-location' ) );
 	}
 
@@ -118,6 +125,15 @@ class Geo_Base {
 	public static function metabox( $object, $args ) {
 		if ( self::current_user_can_edit( $object ) ) {
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-metabox.php' );
+			/**
+			 * Fires after the location metabox is shown, so other plugins can add to it.
+			 *
+			 * @since 3.5.0
+			 *
+			 * @param WP_Screen|null      $screen Current admin screen.
+			 * @param WP_Post|WP_Comment $object Post or comment being edited.
+			 * @param array               $args   Metabox arguments.
+			 */
 			do_action( 'simple_location_sidebox', get_current_screen(), $object, $args );
 		}
 	}

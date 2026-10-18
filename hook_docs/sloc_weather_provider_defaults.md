@@ -1,9 +1,12 @@
+
+Filters the default arguments of weather providers.
+
 ## Auto-generated Example
 
 ```php
 add_filter(
    'sloc_weather_provider_defaults',
-    function( $defaults ) {
+    function( array $defaults ) {
         // Your code here.
         return $defaults;
     }
@@ -12,11 +15,11 @@ add_filter(
 
 ## Parameters
 
-- `$defaults`
+- *`array`* `$defaults` Default arguments: api, latitude, longitude, station_id, cache_time and units.
 
 ## Files
 
-- [includes/class-weather-provider.php:70](https://github.com/dshanske/simple-location/blob/trunk/includes/class-weather-provider.php#L70)
+- [includes/class-weather-provider.php:77](https://github.com/dshanske/simple-location/blob/trunk/includes/class-weather-provider.php#L77)
 ```php
 apply_filters( 'sloc_weather_provider_defaults', $defaults )
 ```

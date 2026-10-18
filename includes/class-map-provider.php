@@ -161,6 +161,7 @@ abstract class Map_Provider extends Sloc_Provider {
 			'user'      => '',
 			'style'     => '',
 		);
+		/** This filter is documented in includes/class-geo-provider.php */
 		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
 		$r        = wp_parse_args( $args, $defaults );
 

@@ -1,12 +1,15 @@
+
+Fires after the location metabox is shown, so other plugins can add to it.
+
 ## Auto-generated Example
 
 ```php
 add_action(
    'simple_location_sidebox',
     function(
-        $current_screen,
-        $object,
-        $args
+        WP_Screen $screen = null,
+        WP_Post|WP_Comment $object,
+        array $args
     ) {
         // Your code here.
     },
@@ -17,13 +20,13 @@ add_action(
 
 ## Parameters
 
-- `$current_screen`
-- `$object`
-- `$args`
+- *`WP_Screen|null`* `$screen` Current admin screen.
+- *`WP_Post|WP_Comment`* `$object` Post or comment being edited.
+- *`array`* `$args` Metabox arguments.
 
 ## Files
 
-- [includes/class-geo-base.php:121](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-base.php#L121)
+- [includes/class-geo-base.php:137](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-base.php#L137)
 ```php
 do_action( 'simple_location_sidebox', get_current_screen(), $object, $args )
 ```
