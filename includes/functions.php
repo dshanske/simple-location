@@ -207,8 +207,9 @@ function register_sloc_provider( $object ) {
 /**
  * Returns an object from an Object ID and object type.
  *
- * @param object $object Object.
  * @param string $object_type Post, comment, user, or term.
+ * @param int    $id          Object ID.
+ * @return WP_Post|WP_Comment|WP_User|WP_Term|WP_Error|false|null The object, or null for an unknown type.
  *
  * @since 4.5.0
  */
@@ -581,9 +582,18 @@ function sloc_query_id_list() {
 }
 
 
-/*
-Wrapper around get_post_datetime that adjusts if timezone property is available
-*/
+/**
+ * Retrieves a post's date in the timezone stored with its location, if there is one.
+ *
+ * Wrapper around get_post_datetime().
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_Post|null $post   Post ID or object. Defaults to the current post.
+ * @param string           $field  Published or modified time: 'date' or 'modified'. Default 'date'.
+ * @param string           $source Local or UTC time: 'local' or 'gmt'. Default 'local'.
+ * @return DateTimeImmutable|false Time object on success, false on failure.
+ */
 function sloc_get_post_datetime( $post = null, $field = 'date', $source = 'local' ) {
 	$datetime = get_post_datetime( $post, $field, $source );
 	$timezone = get_post_geodata( $post, 'timezone' );
@@ -595,9 +605,16 @@ function sloc_get_post_datetime( $post = null, $field = 'date', $source = 'local
 }
 
 
-/*
-Wrapper around get_comment_datetime that adjusts if timezone property is available
-*/
+/**
+ * Retrieves a comment's date in the timezone stored with its location, if there is one.
+ *
+ * Wrapper around get_comment_datetime().
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_Comment|null $comment Comment ID or object. Defaults to the current comment.
+ * @return DateTimeImmutable|false Time object on success, false on failure.
+ */
 function sloc_get_comment_datetime( $comment = null ) {
 	$datetime = get_comment_datetime( $comment );
 	$timezone = get_post_geodata( $comment, 'timezone' );
@@ -608,6 +625,15 @@ function sloc_get_comment_datetime( $comment = null ) {
 	return $datetime->setTimezone( new DateTimeZone( $timezone ) );
 }
 
+/**
+ * Returns the URL of a post, comment, user (their posts) or term.
+ *
+ * @since 5.0.3
+ *
+ * @param string $type Object type.
+ * @param int    $id   Object ID.
+ * @return string|WP_Error|false The URL; false for an unknown type.
+ */
 function get_object_permalink( $type, $id ) {
 	switch ( $type ) {
 		case 'post':
@@ -680,6 +706,14 @@ function sloc_get_attachment_datetime( $attachment, $field = 'created' ) {
 		return date_create_immutable_from_format( 'Y-m-d H:i:s', $time, wp_timezone() );
 }
 
+/**
+ * Whether a local file exists, using the direct filesystem class.
+ *
+ * @since 5.0.24
+ *
+ * @param string $file Path to the file.
+ * @return boolean Whether the file exists.
+ */
 function sloc_file_exists( $file ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
@@ -687,6 +721,14 @@ function sloc_file_exists( $file ) {
 		return $wpfile->exists( $file );
 }
 
+/**
+ * Reads a local file, using the direct filesystem class.
+ *
+ * @since 5.0.24
+ *
+ * @param string $file Path to the file.
+ * @return string|false The file's contents, or false on failure.
+ */
 function sloc_get_contents( $file ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
@@ -694,6 +736,14 @@ function sloc_get_contents( $file ) {
 		return $wpfile->get_contents( $file );
 }
 
+/**
+ * Reads a local file into an array of lines, using the direct filesystem class.
+ *
+ * @since 5.0.24
+ *
+ * @param string $file Path to the file.
+ * @return array|false The file's lines, or false on failure.
+ */
 function sloc_get_contents_array( $file ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
 		require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
@@ -701,6 +751,14 @@ function sloc_get_contents_array( $file ) {
 		return $wpfile->get_contents_array( $file );
 }
 
+/**
+ * Returns a user.
+ *
+ * @since 5.0.24
+ *
+ * @param mixed $user_id User ID. Anything that isn't a number gives the current user.
+ * @return WP_User|false The user, or false if there is none.
+ */
 function sloc_get_user( $user_id = null ) {
 	if ( ! is_numeric( $user_id ) ) {
 		$user_id = get_current_user_id();

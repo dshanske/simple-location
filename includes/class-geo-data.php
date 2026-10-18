@@ -18,7 +18,12 @@ add_action( 'init', array( 'Geo_Data', 'init' ), 1 );
  */
 class Geo_Data {
 
-
+	/**
+	 * Geo data properties that can be stored, each as `geo_{property}` meta.
+	 *
+	 * @since 1.0.0
+	 * @var string[]
+	 */
 	public static $properties = array(
 		'latitude',  // Decimal Latitude
 		'longitude', // Decimal Longitude
@@ -289,12 +294,10 @@ class Geo_Data {
 	/**
 	 * Set GeoData.
 	 *
-	 * @param string $type
-	 * @param int    $id
-	 * @param array  $geodata {
-	 *   An array of details about a location.
-	 *
-	 * }
+	 * @param string      $type    Object type.
+	 * @param int         $id      Object ID.
+	 * @param string      $key     Geo data key to set, or empty to set every property in `$geodata`.
+	 * @param mixed|array $geodata The value for `$key`, or an array of details about a location when `$key` is empty.
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
 	 * @since 1.0.0
@@ -331,12 +334,11 @@ class Geo_Data {
 		 *  - `set_term_geodata`
 		 *  - `set_user_geodata`
 		 *
-		 * @param mixed  $value     The value to return, either a single value or an array
-		 *                          of values depending on the value of `$single`. Default null.
-		 * @param int    $id ID of the object weather data is for.
-		 * @param string $type Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
-		 *                          or any other object type with an associated meta table.
-		 * @param string $key  Geo data key.
+		 * @param mixed        $value   The value to return instead of setting the geo data. Default null.
+		 * @param int          $id      ID of the object geo data is for.
+		 * @param string       $key     Geo data key.
+		 * @param string       $type    Type of object data is for. Accepts 'post', 'comment', 'term', 'user',
+		 *                              or any other object type with an associated meta table.
 		 * @param array|string $geodata Value, or all values as an array when `$key` is empty.
 		 */
 		$check = apply_filters( "set_{$type}_geodata", null, $id, $key, $type, $geodata );
@@ -373,7 +375,7 @@ class Geo_Data {
 			return update_metadata( $type, $id, 'geo_' . $key, $geodata );
 		}
 
-		if ( empty( $key ) && ( is_array( $geodata ) ) ) {
+		if ( is_array( $geodata ) ) {
 			if ( array_key_exists( 'map_zoom', $geodata ) ) {
 				$geodata['zoom'] = $geodata['map_zoom'];
 			}
@@ -398,9 +400,9 @@ class Geo_Data {
 	/**
 	 * Get Latitude and Longitude on an Object.
 	 *
-	 * @param string $type Object Type
-	 * @param int    $id Object ID
-	 * @return array The first index is the latitude, the second the longitude, the third the altitude(optional).
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @return array|false The latitude, the longitude and, if set, the altitude; false without coordinates.
 	 *
 	 * @since 5.0.0
 	 */
@@ -423,8 +425,9 @@ class Geo_Data {
 	/**
 	 * Does this object have location data.
 	 *
-	 * @param mixed $object Object type.
-	 * @return WP_Error|boolean Return success or WP_Error.
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @return boolean True if the object has coordinates.
 	 *
 	 * @since 1.0.0
 	 */
@@ -435,8 +438,8 @@ class Geo_Data {
 	/**
 	 * Get a GeoURI for an Object.
 	 *
-	 * @param string $type Object Type
-	 * @param int    $id Object ID
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
 	 * @return string|boolean Geo URI or false if no location.
 	 *
 	 * @since 5.0.0
@@ -506,8 +509,9 @@ class Geo_Data {
 	/**
 	 * Get GeoData on an Object.
 	 *
-	 * @param mixed  $object Can be WP_Comment, WP_User, WP_Post, WP_Term, or int which will be considered a post id.
-	 * @param string $key Key. Optional. If empty returns all GeoData.
+	 * @param string $type Object type: post, comment, user or term.
+	 * @param int    $id   Object ID.
+	 * @param string $key  Key. Optional. If empty returns all GeoData.
 	 * @return array $geodata {
 	 *  An array of details about a location.
 	 *
@@ -614,6 +618,15 @@ class Geo_Data {
 		return array_filter( $geodata );
 	}
 
+	/**
+	 * Registers a meta key for the terms of each taxonomy, or for all terms.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param string|string[] $taxonomies Taxonomy names. Empty registers the key for every taxonomy.
+	 * @param string          $meta_key   Meta key.
+	 * @param array           $args       Arguments for register_term_meta().
+	 */
 	private static function register_terms_meta( $taxonomies, $meta_key, $args ) {
 		if ( empty( $taxonomies ) ) {
 			register_term_meta( '', $meta_key, $args );
@@ -628,6 +641,19 @@ class Geo_Data {
 		}
 	}
 
+	/**
+	 * Fills in missing location and weather on a post, for the bulk edit lookup.
+	 *
+	 * Without stored coordinates, the location is looked up from the post author at the time
+	 * of the post, when the location provider supports background lookups, and is then
+	 * reverse geocoded into a location term and venue. A check-in becomes a venue, and
+	 * weather is looked up for posts with coordinates and no weather.
+	 *
+	 * @since 5.0.3
+	 *
+	 * @param int $post_id Post ID.
+	 * @return int|false The post ID if anything was updated, otherwise false.
+	 */
 	public static function bulk_edit_lookup_location( $post_id ) {
 		$update = false;
 		$post   = get_post( $post_id );
@@ -828,6 +854,14 @@ class Geo_Data {
 		}
 	}
 
+	/**
+	 * Formats an altitude with its unit, in feet when the measurement setting is imperial.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param float $altitude Altitude in meters.
+	 * @return string Altitude with its unit, such as `120m` or `394ft`.
+	 */
 	public static function display_altitude( $altitude ) {
 		$aunits = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
 		switch ( $aunits ) {
@@ -841,7 +875,15 @@ class Geo_Data {
 		return $altitude . $aunits;
 	}
 
-		// Return marked up coordinates
+	/**
+	 * Returns coordinates marked up with microformats.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param array   $loc     Location, with latitude, longitude and optional altitude.
+	 * @param boolean $display Whether to show the values in spans rather than hidden data elements. Default false.
+	 * @return string Marked up coordinates.
+	 */
 	public static function get_the_geo( $loc, $display = false ) {
 		$string = $display ? '<span class="p-%1$s">%2$f</span>' : '<data class="p-%1$s" value="%2$f"></data>';
 		$return = '';
@@ -853,6 +895,16 @@ class Geo_Data {
 		return $return;
 	}
 
+	/**
+	 * Returns the map for an object with public location.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @param array  $args Arguments passed to the map provider, overriding the stored geo data. Optional.
+	 * @return string Map markup, or an empty string if there is no public location or no map provider.
+	 */
 	public static function get_map( $type, $id, $args = array() ) {
 		$loc = self::get_geodata( $type, $id );
 		if ( is_array( $loc ) && ( 'public' === $loc['visibility'] ) ) {
@@ -869,6 +921,13 @@ class Geo_Data {
 		return '';
 	}
 
+	/**
+	 * Whether to add the map to post content.
+	 *
+	 * @since 3.7.2
+	 *
+	 * @return boolean True on single posts, or everywhere if the map display setting is on.
+	 */
 	public static function show_map() {
 		if ( get_option( 'sloc_map_display' ) ) {
 			return true;
@@ -877,6 +936,14 @@ class Geo_Data {
 		}
 	}
 
+	/**
+	 * Adds the map to post content. Hooked to `the_content`.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $content Post content.
+	 * @return string Post content with the map.
+	 */
 	public static function content_map( $content ) {
 		if ( self::show_map() ) {
 			$content .= self::get_map( 'post', get_the_ID() );
@@ -884,6 +951,14 @@ class Geo_Data {
 		return $content;
 	}
 
+	/**
+	 * Adds the location to post content. Hooked to `the_content`.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $content Post content.
+	 * @return string Post content with the location.
+	 */
 	public static function location_content( $content ) {
 		$loc = self::get_location( 'post', get_the_ID() );
 		if ( ! empty( $loc ) ) {
@@ -892,6 +967,15 @@ class Geo_Data {
 		return $content;
 	}
 
+	/**
+	 * Adds the location to comment text, without the text label or icon. Hooked to `get_comment_text`.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param string     $comment_text Comment text.
+	 * @param WP_Comment $comment      Comment.
+	 * @return string Comment text with the location.
+	 */
 	public static function location_comment( $comment_text, $comment ) {
 		$loc = self::get_location(
 			'comment',

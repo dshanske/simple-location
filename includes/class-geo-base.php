@@ -3,6 +3,8 @@
  * Location Data
  *
  * Sets up basic support for location.
+ *
+ * @package Simple_Location
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -82,11 +84,23 @@ class Geo_Base {
 		}
 	}
 
+	/**
+	 * Sets up the admin hooks.
+	 *
+	 * @since 3.2.0
+	 */
 	public static function admin_init() {
 		/* Add meta boxes on the 'add_meta_boxes' hook. */
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 	}
 
+	/**
+	 * Returns the post types that get the location metabox and admin column.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @return string[] Post types.
+	 */
 	public static function screens() {
 		/**
 		 * Filters the post types that get the location metabox and admin column.
@@ -98,7 +112,11 @@ class Geo_Base {
 		return apply_filters( 'sloc_post_types', get_post_types_by_support( 'geo-location' ) );
 	}
 
-	/* Create location meta boxes to be displayed on the post editor screen. */
+	/**
+	 * Adds the location metabox to the post and comment editors.
+	 *
+	 * @since 3.3.0
+	 */
 	public static function add_meta_boxes() {
 		add_meta_box(
 			'locationsidebox',
@@ -122,6 +140,14 @@ class Geo_Base {
 		);
 	}
 
+	/**
+	 * Shows the location metabox to users who can edit the object's location.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param WP_Post|WP_Comment $object Post or comment being edited.
+	 * @param array              $args   Metabox arguments.
+	 */
 	public static function metabox( $object, $args ) {
 		if ( self::current_user_can_edit( $object ) ) {
 			load_template( plugin_dir_path( __DIR__ ) . 'templates/loc-metabox.php' );
@@ -151,6 +177,16 @@ class Geo_Base {
 		}
 	}
 
+	/**
+	 * Prints a text field for a user's geo meta on the profile screen.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param WP_User $user        User being edited.
+	 * @param string  $key         Geo data key; the value is read from `geo_{$key}`.
+	 * @param string  $title       Field label.
+	 * @param string  $description Field description.
+	 */
 	public static function profile_text_field( $user, $key, $title, $description ) {
 		?>
 	<tr>
@@ -164,6 +200,18 @@ class Geo_Base {
 	}
 
 
+	/**
+	 * Updates the author's last seen location from a newly published post. Hooked to `save_post`.
+	 *
+	 * Only applies when the last seen setting is on, to post types that support geo-location
+	 * (other than venues), on first publication within 10 minutes of the post date, and when
+	 * the post's location isn't private.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post.
+	 */
 	public static function last_seen( $post_id, $post ) {
 		if ( 'venue' === $post->post_type ) {
 			return;
@@ -198,6 +246,13 @@ class Geo_Base {
 		}
 	}
 
+	/**
+	 * Prints the location visibility field on the user profile screen.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param string $public Current visibility.
+	 */
 	public static function geo_public_user( $public ) {
 		?>
 		<tr>
@@ -209,6 +264,13 @@ class Geo_Base {
 		<?php
 	}
 
+	/**
+	 * Enqueues the location editing styles and scripts on the post, comment and profile screens.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @param string $hook_suffix The current admin page.
+	 */
 	public static function enqueue( $hook_suffix ) {
 		$screens   = self::screens();
 		$screens[] = 'comment';
@@ -919,6 +981,16 @@ class Geo_Base {
 		return $data;
 	}
 
+	/**
+	 * Removes empty location fields from a post REST response.
+	 *
+	 * @since 4.4.10
+	 *
+	 * @param WP_REST_Response $response The response.
+	 * @param WP_Post          $post     The post.
+	 * @param WP_REST_Request  $request  The request.
+	 * @return WP_REST_Response The response without empty latitude, longitude, geo_address or timezone fields.
+	 */
 	public static function rest_prepare_post( $response, $post, $request ) {
 		$data = $response->get_data();
 		foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
@@ -930,6 +1002,16 @@ class Geo_Base {
 		return $response;
 	}
 
+	/**
+	 * Removes empty location fields from a comment REST response.
+	 *
+	 * @since 4.4.10
+	 *
+	 * @param WP_REST_Response $response The response.
+	 * @param WP_Comment       $comment  The comment.
+	 * @param WP_REST_Request  $request  The request.
+	 * @return WP_REST_Response The response without empty latitude, longitude, geo_address or timezone fields.
+	 */
 	public static function rest_prepare_comment( $response, $comment, $request ) {
 		$data = $response->get_data();
 		foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
@@ -941,6 +1023,16 @@ class Geo_Base {
 		return $response;
 	}
 
+	/**
+	 * Removes empty location fields from a user REST response.
+	 *
+	 * @since 4.4.10
+	 *
+	 * @param WP_REST_Response $response The response.
+	 * @param WP_User          $user     The user.
+	 * @param WP_REST_Request  $request  The request.
+	 * @return WP_REST_Response The response without empty latitude, longitude, geo_address or timezone fields.
+	 */
 	public static function rest_prepare_user( $response, $user, $request ) {
 		$data = $response->get_data();
 		foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
@@ -952,13 +1044,16 @@ class Geo_Base {
 		return $response;
 	}
 
-	/*
-		Sets Location custom capabilities.
+	/**
+	 * Maps the location meta capabilities to primitive capabilities.
+	 *
+	 * @since 4.4.10
 	 *
 	 * @param string[] $caps    Array of the users capabilities.
 	 * @param string   $cap     Capability name.
 	 * @param int      $user_id The user ID.
 	 * @param array    $args    Adds the context to the cap. Typically the object ID.
+	 * @return string[] Primitive capabilities the user needs.
 	 */
 	public static function map_meta_cap( $caps, $cap, $user_id, $args ) {
 		$id = 0;
@@ -1033,10 +1128,12 @@ class Geo_Base {
 		return $caps;
 	}
 
-	/*
-	Current User Can Read with Object for Private Location.
+	/**
+	 * Whether the current user can read the object's location, even if it isn't public.
 	 *
-	 * @param mixed $object The object.
+	 * @since 4.4.10
+	 *
+	 * @param mixed $object The object. Defaults to the current post.
 	 * @return boolean True if current user can.
 	 */
 	public static function current_user_can_read( $object ) {
@@ -1061,10 +1158,12 @@ class Geo_Base {
 		return false;
 	}
 
-	/*
-	Current User Can Read with Object for Private Location.
+	/**
+	 * Whether the current user can edit the object's location.
 	 *
-	 * @param mixed $object The object.
+	 * @since 4.4.10
+	 *
+	 * @param mixed $object The object. Defaults to the current post.
 	 * @return boolean True if current user can.
 	 */
 	public static function current_user_can_edit( $object ) {
@@ -1205,7 +1304,13 @@ class Geo_Base {
 		// phpcs:enable
 	}
 
-	/* Save the meta box's post metadata. */
+	/**
+	 * Saves the location metabox fields for a post.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param int $post_id Post ID.
+	 */
 	public static function save_post_meta( $post_id ) {
 		/*
 		 * We need to verify this came from our screen and with proper authorization,
@@ -1254,7 +1359,13 @@ class Geo_Base {
 	}
 
 
-	/* Save the meta box's comment metadata. */
+	/**
+	 * Saves the location metabox fields for a comment.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param int $comment_id Comment ID.
+	 */
 	public static function save_comment_meta( $comment_id ) {
 		/*
 		 * We need to verify this came from our screen and with proper authorization,

@@ -19,7 +19,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-geo-base.php:98](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-base.php#L98)
+- [includes/class-geo-base.php:112](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-base.php#L112)
 ```php
 apply_filters( 'sloc_post_types', get_post_types_by_support( 'geo-location' ) )
 ```

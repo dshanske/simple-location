@@ -19,6 +19,12 @@ add_action( 'init', array( 'Sloc_Weather_Data', 'init' ) );
 class Sloc_Weather_Data {
 	use Weather_Info_Trait;
 
+	/**
+	 * Weather properties that can be stored, each as `weather_{property}` meta.
+	 *
+	 * @since 1.0.0
+	 * @var string[]
+	 */
 	public static $properties = array(
 		'temperature',
 		'humidity',
@@ -66,6 +72,17 @@ class Sloc_Weather_Data {
 		add_post_type_support( 'post', 'weather' );
 	}
 
+	/**
+	 * Adds the weather fields to the location metabox, when a weather provider is set.
+	 *
+	 * Hooked to `simple_location_sidebox`.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param WP_Screen|null     $screen Current admin screen.
+	 * @param WP_Post|WP_Comment $object Post or comment being edited.
+	 * @param array              $args   Metabox arguments.
+	 */
 	public static function submitbox( $screen, $object, $args ) {
 		// Check to see whether or not there is a configured provider. If there is not, hide the option.
 		$weather = Loc_Config::weather_provider();
@@ -192,10 +209,10 @@ class Sloc_Weather_Data {
 	/**
 	 * Set weather on an Object.
 	 *
-	 * @param string $type
-	 * @param int    $id
-	 * @param string $key
-	 * @param array  $weather  An array of details about the weather at a location...see registered properties.
+	 * @param string $type    Object type.
+	 * @param int    $id      Object ID.
+	 * @param string $key     Weather data key to set, or empty to set every property in `$weather`.
+	 * @param mixed  $weather The value for `$key`, or an array of details about the weather at a location (see the registered properties) when `$key` is empty.
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
 	 * @since 5.0.0
@@ -262,9 +279,9 @@ class Sloc_Weather_Data {
 	/**
 	 * Delete a Single Piece of Weather Data.
 	 *
-	 * @param string $type
-	 * @param int    $id
-	 * @param string $key
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @param string $key  Weather data key.
 	 *
 	 * @return WP_Error|boolean Return success or WP_Error.
 	 *
@@ -488,8 +505,9 @@ class Sloc_Weather_Data {
 	/**
 	 * Does this object have weather data.
 	 *
-	 * @param mixed $object Object type.
-	 * @return WP_Error|boolean Return success or WP_Error.
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @return boolean True if the object has weather data.
 	 *
 	 * @since 1.0.0
 	 */
@@ -497,6 +515,24 @@ class Sloc_Weather_Data {
 		return ! empty( self::get_object_weatherdata( $type, $id ) );
 	}
 
+	/**
+	 * Returns the weather markup for an object.
+	 *
+	 * @since 3.3.0
+	 *
+	 * @param string     $type Object type.
+	 * @param int        $id   Object ID.
+	 * @param array|null $args {
+	 *     Optional. Display arguments.
+	 *
+	 *     @type string   $style         'simple' (icon, temperature and summary), 'complete' (adds humidity,
+	 *                                   cloudiness and visibility) or 'graphic' (icon only). Default 'simple'.
+	 *     @type string   $description   Label. Default 'Weather: '.
+	 *     @type string[] $wrapper-class Classes for the wrapper. Default 'sloc-weather'.
+	 *     @type string   $wrapper-type  Wrapper element. Default 'p'.
+	 * }
+	 * @return string Weather markup, or an empty string without weather data.
+	 */
 	public static function get_the_weather( $type, $id, $args = null ) {
 		$weather  = self::get_object_weatherdata( $type, $id );
 		$defaults = array(
@@ -539,6 +575,14 @@ class Sloc_Weather_Data {
 		return sprintf( '<%1$s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], esc_attr( $class ), implode( PHP_EOL, array_filter( $return ) ) );
 	}
 
+	/**
+	 * Returns the temperature markup, in the weather's units or the site's measurement setting.
+	 *
+	 * @since 3.7.1
+	 *
+	 * @param array $weather Weather data, in metric units.
+	 * @return string|null Temperature markup, or null without a temperature.
+	 */
 	private static function get_the_temperature( $weather ) {
 		if ( ! isset( $weather['temperature'] ) ) {
 			return null;
@@ -562,6 +606,14 @@ class Sloc_Weather_Data {
 		);
 	}
 
+	/**
+	 * Returns a list of humidity, cloudiness and visibility, in the weather's units or the site's measurement setting.
+	 *
+	 * @since 3.7.1
+	 *
+	 * @param array $weather Weather data, in metric units.
+	 * @return string List markup, or an empty string if none of them are set.
+	 */
 	private static function get_weather_extras( $weather ) {
 		$units = $weather['units'] ?? null;
 		if ( ! $units ) {
@@ -590,6 +642,16 @@ class Sloc_Weather_Data {
 		return '<ul>' . implode( '', $return ) . '</ul>';
 	}
 
+	/**
+	 * Looks up the current weather at coordinates with the weather provider.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param float    $lat        Latitude.
+	 * @param float    $lng        Longitude.
+	 * @param int|null $cache_time Seconds to cache the result. Optional; defaults to the provider's setting.
+	 * @return array|WP_Error Weather conditions, with an icon and summary when the provider gives a condition code.
+	 */
 	public static function get_weather_data( $lat, $lng, $cache_time = null ) {
 		$provider = Loc_Config::weather_provider();
 		if ( ! $provider ) {
@@ -620,6 +682,15 @@ class Sloc_Weather_Data {
 		return new WP_Error( 'no_provider', __( 'No Weather Provider Set', 'simple-location' ) );
 	}
 
+	/**
+	 * Looks up the current weather at a user's location.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param int|WP_User $user       User ID or object.
+	 * @param int|null    $cache_time Seconds to cache the result. Optional; defaults to the provider's setting.
+	 * @return array|WP_Error|string Weather conditions, or an empty string if there is no user or user location.
+	 */
 	public static function get_weather_by_user( $user, $cache_time = null ) {
 		if ( is_numeric( $user ) && 0 !== $user ) {
 			$user = new WP_User( $user );
@@ -634,10 +705,30 @@ class Sloc_Weather_Data {
 		return self::get_weather_by_location( $loc['latitude'], $loc['longitude'], $cache_time );
 	}
 
+	/**
+	 * Looks up the current weather at coordinates. Alias of get_weather_data().
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param float    $lat        Latitude.
+	 * @param float    $lng        Longitude.
+	 * @param int|null $cache_time Seconds to cache the result. Optional; defaults to the provider's setting.
+	 * @return array|WP_Error Weather conditions, with an icon and summary when the provider gives a condition code.
+	 */
 	public static function get_weather_by_location( $lat, $lng, $cache_time = null ) {
 		return self::get_weather_data( $lat, $lng, $cache_time );
 	}
 
+	/**
+	 * Looks up the current weather at a weather station.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param string      $station    Station ID.
+	 * @param string|null $provider   Weather provider slug. Optional; defaults to the active provider.
+	 * @param int|null    $cache_time Seconds to cache the result. Optional; defaults to the provider's setting.
+	 * @return array|WP_Error Weather conditions, with an icon and summary when the provider gives a condition code.
+	 */
 	public static function get_weather_by_station( $station, $provider = null, $cache_time = null ) {
 		$provider = Loc_Config::weather_provider( $provider );
 		if ( ! $provider ) {
@@ -664,7 +755,9 @@ class Sloc_Weather_Data {
 	/**
 	 * Generates Pulldown list of Weather Statuses.
 	 *
-	 * @param string  $icon Icon to be Selected.
+	 * @since 5.0.0
+	 *
+	 * @param string  $code Condition code to be selected.
 	 * @param boolean $echo Echo or Return.
 	 * @return string|void The options, or nothing when they are echoed.
 	 */

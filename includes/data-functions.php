@@ -9,6 +9,16 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Sets geo data on a post.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_Post $post    Post ID or object.
+ * @param string      $key     Geo data key to set, or empty to set every property in `$geodata`.
+ * @param mixed       $geodata The value for `$key`, or an array of geo data when `$key` is empty.
+ * @return WP_Error|boolean Return success or WP_Error.
+ */
 function set_post_geodata( $post, $key, $geodata ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
@@ -17,6 +27,16 @@ function set_post_geodata( $post, $key, $geodata ) {
 	return Geo_Data::set_geodata( 'post', $post->ID, $key, $geodata );
 }
 
+/**
+ * Sets geo data on a comment.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_Comment $comment Comment ID or object.
+ * @param string         $key     Geo data key to set, or empty to set every property in `$geodata`.
+ * @param mixed          $geodata The value for `$key`, or an array of geo data when `$key` is empty.
+ * @return WP_Error|boolean Return success or WP_Error.
+ */
 function set_comment_geodata( $comment, $key, $geodata ) {
 	$comment = get_comment( $comment );
 	if ( ! $comment ) {
@@ -25,6 +45,16 @@ function set_comment_geodata( $comment, $key, $geodata ) {
 	return Geo_Data::set_geodata( 'comment', $comment->comment_ID, $key, $geodata );
 }
 
+/**
+ * Sets geo data on a user.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_User $id      User ID or object.
+ * @param string      $key     Geo data key to set, or empty to set every property in `$geodata`.
+ * @param mixed       $geodata The value for `$key`, or an array of geo data when `$key` is empty.
+ * @return WP_Error|boolean Return success or WP_Error.
+ */
 function set_user_geodata( $id, $key, $geodata ) {
 	$user = sloc_get_user( $id );
 	if ( ! $user ) {
@@ -33,14 +63,28 @@ function set_user_geodata( $id, $key, $geodata ) {
 	return Geo_Data::set_geodata( 'user', $user->ID, $key, $geodata );
 }
 
+/**
+ * Sets geo data on a term.
+ *
+ * @since 5.0.0
+ *
+ * @param int    $id      Term ID.
+ * @param string $key     Geo data key to set, or empty to set every property in `$geodata`.
+ * @param mixed  $geodata The value for `$key`, or an array of geo data when `$key` is empty.
+ * @return WP_Error|boolean Return success or WP_Error.
+ */
 function set_term_geodata( $id, $key, $geodata ) {
 	return Geo_Data::set_geodata( 'term', $id, $key, $geodata );
 }
 
 
-/*
- * Wrapper around has_geodata for post IDs or objects
+/**
+ * Whether a post has coordinates.
  *
+ * @since 5.0.5
+ *
+ * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
+ * @return boolean|array True if the post has coordinates; an empty array if there is no post.
  */
 function has_post_location( $post = null ) {
 	$post = get_post( $post );
@@ -50,9 +94,14 @@ function has_post_location( $post = null ) {
 	return Geo_Data::has_location( 'post', $post->ID );
 }
 
-/*
- * Wrapper around get_geodata for post IDs or objects
+/**
+ * Gets geo data for a post.
  *
+ * @since 5.0.0
+ *
+ * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
+ * @param string           $key  Geo data key, or empty for all geo data.
+ * @return mixed The value for `$key`, or an array of geo data; an empty array if there is no post.
  */
 function get_post_geodata( $post = null, $key = '' ) {
 	$post = get_post( $post );
@@ -62,6 +111,14 @@ function get_post_geodata( $post = null, $key = '' ) {
 	return Geo_Data::get_geodata( 'post', $post->ID, $key );
 }
 
+/**
+ * Gets geo data for several posts.
+ *
+ * @since 5.0.0
+ *
+ * @param int[] $posts Post IDs.
+ * @return array Geo data keyed by post ID.
+ */
 function get_array_post_geodata( $posts ) {
 	if ( ! wp_is_numeric_array( $posts ) ) {
 		return array();
@@ -73,9 +130,13 @@ function get_array_post_geodata( $posts ) {
 	return $return;
 }
 
-/*
- * Returns whether the post occurred in the daytime or not and stores value.
+/**
+ * Whether a post was made in the daytime, calculating and storing the answer if it is not stored.
  *
+ * @since 5.0.0
+ *
+ * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
+ * @return boolean|null Whether it was daytime; null without coordinates, false without a post.
  */
 function is_day_post( $post = null ) {
 	$post = get_post( $post );
@@ -98,9 +159,14 @@ function is_day_post( $post = null ) {
 	return $day;
 }
 
-/*
- * Wrapper around get_geodata for comment IDs or objects
+/**
+ * Gets geo data for a comment.
  *
+ * @since 5.0.0
+ *
+ * @param int|WP_Comment|null $comment Comment ID or object. Defaults to the current comment.
+ * @param string              $key     Geo data key, or empty for all geo data.
+ * @return mixed The value for `$key`, or an array of geo data.
  */
 function get_comment_geodata( $comment = null, $key = '' ) {
 	$comment = get_comment( $comment );
@@ -108,9 +174,13 @@ function get_comment_geodata( $comment = null, $key = '' ) {
 }
 
 
-/*
- * Returns whether the comment occurred in the daytime or not and stores value.
+/**
+ * Whether a comment was made in the daytime, calculating and storing the answer if it is not stored.
  *
+ * @since 5.0.0
+ *
+ * @param int|WP_Comment|null $comment Comment ID or object. Defaults to the current comment.
+ * @return boolean Whether it was daytime.
  */
 function is_day_comment( $comment = null ) {
 	$comment = get_comment( $comment );
@@ -127,9 +197,14 @@ function is_day_comment( $comment = null ) {
 	return $day;
 }
 
-/*
- * Wrapper around get_geodata for user IDs or objects
+/**
+ * Gets geo data for a user.
  *
+ * @since 5.0.0
+ *
+ * @param int|WP_User|null $user User ID or object. Defaults to the current user.
+ * @param string           $key  Geo data key, or empty for all geo data.
+ * @return mixed The value for `$key`, or an array of geo data; false if there is no user.
  */
 function get_user_geodata( $user = null, $key = '' ) {
 	$user = sloc_get_user( $user );
@@ -139,14 +214,29 @@ function get_user_geodata( $user = null, $key = '' ) {
 	return Geo_Data::get_geodata( 'user', $user->ID, $key );
 }
 
-/*
- * Wrapper around get_geodata for term IDs or objects
+/**
+ * Gets geo data for a term.
  *
+ * @since 5.0.0
+ *
+ * @param int    $term_id Term ID.
+ * @param string $key     Geo data key, or empty for all geo data.
+ * @return mixed The value for `$key`, or an array of geo data.
  */
 function get_term_geodata( $term_id, $key = '' ) {
 	return Geo_Data::get_geodata( 'term', $term_id, $key );
 }
 
+/**
+ * Sets weather data on a post.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_Post $post    Post ID or object.
+ * @param string      $key     Weather data key to set, or empty to set every property in `$weather`.
+ * @param mixed       $weather The value for `$key`, or an array of weather data when `$key` is empty.
+ * @return WP_Error|boolean Return success or WP_Error.
+ */
 function set_post_weatherdata( $post, $key, $weather ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
@@ -155,10 +245,30 @@ function set_post_weatherdata( $post, $key, $weather ) {
 	return Sloc_Weather_Data::set_object_weatherdata( 'post', $post->ID, $key, $weather );
 }
 
+/**
+ * Sets weather data on a comment.
+ *
+ * @since 5.0.0
+ *
+ * @param int    $comment_id Comment ID.
+ * @param string $key        Weather data key to set, or empty to set every property in `$weather`.
+ * @param mixed  $weather    The value for `$key`, or an array of weather data when `$key` is empty.
+ * @return WP_Error|boolean Return success or WP_Error.
+ */
 function set_comment_weatherdata( $comment_id, $key, $weather ) {
 	return Sloc_Weather_Data::set_object_weatherdata( 'comment', $comment_id, $key, $weather );
 }
 
+/**
+ * Sets weather data on a user.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_User $user    User ID or object.
+ * @param string      $key     Weather data key to set, or empty to set every property in `$weather`.
+ * @param mixed       $weather The value for `$key`, or an array of weather data when `$key` is empty.
+ * @return WP_Error|boolean Return success or WP_Error.
+ */
 function set_user_weatherdata( $user, $key, $weather ) {
 	$user = sloc_get_user( $user );
 	if ( ! $user ) {
@@ -167,10 +277,29 @@ function set_user_weatherdata( $user, $key, $weather ) {
 	return Sloc_Weather_Data::set_object_weatherdata( 'user', $user->ID, $key, $weather );
 }
 
+/**
+ * Sets weather data on a term.
+ *
+ * @since 5.0.0
+ *
+ * @param int    $term_id Term ID.
+ * @param string $key     Weather data key to set, or empty to set every property in `$weather`.
+ * @param mixed  $weather The value for `$key`, or an array of weather data when `$key` is empty.
+ * @return WP_Error|boolean Return success or WP_Error.
+ */
 function set_term_weatherdata( $term_id, $key, $weather ) {
 	return Sloc_Weather_Data::set_object_weatherdata( 'term', $term_id, $key, $weather );
 }
 
+/**
+ * Gets weather data for a post.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
+ * @param string           $key  Weather data key, or empty for all weather data.
+ * @return mixed The value for `$key`, or an array of weather data; false if there is no post.
+ */
 function get_post_weatherdata( $post = null, $key = '' ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
@@ -179,14 +308,41 @@ function get_post_weatherdata( $post = null, $key = '' ) {
 	return Sloc_Weather_Data::get_object_weatherdata( 'post', $post->ID, $key );
 }
 
+/**
+ * Gets weather data for a comment.
+ *
+ * @since 5.0.0
+ *
+ * @param int    $comment_id Comment ID.
+ * @param string $key        Weather data key, or empty for all weather data.
+ * @return mixed The value for `$key`, or an array of weather data.
+ */
 function get_comment_weatherdata( $comment_id, $key = '' ) {
 	return Sloc_Weather_Data::get_object_weatherdata( 'comment', $comment_id, $key );
 }
 
+/**
+ * Gets weather data for a term.
+ *
+ * @since 5.0.0
+ *
+ * @param int    $term_id Term ID.
+ * @param string $key     Weather data key, or empty for all weather data.
+ * @return mixed The value for `$key`, or an array of weather data.
+ */
 function get_term_weatherdata( $term_id, $key = '' ) {
 	return Sloc_Weather_Data::get_object_weatherdata( 'term', $term_id, $key );
 }
 
+/**
+ * Gets weather data for a user.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_User $user User ID or object.
+ * @param string      $key  Weather data key, or empty for all weather data.
+ * @return mixed The value for `$key`, or an array of weather data; false if there is no user.
+ */
 function get_user_weatherdata( $user, $key = '' ) {
 	$user = sloc_get_user( $user );
 	if ( ! $user ) {
@@ -195,6 +351,15 @@ function get_user_weatherdata( $user, $key = '' ) {
 	return Sloc_Weather_Data::get_object_weatherdata( 'user', $user->ID, $key );
 }
 
+/**
+ * Returns the map for a post with a public location.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
+ * @param array            $args Arguments passed to the map provider. Optional.
+ * @return string|false Map markup, or an empty string if there is no public location; false if there is no post.
+ */
 function get_post_map( $post = null, $args = array() ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
@@ -203,6 +368,15 @@ function get_post_map( $post = null, $args = array() ) {
 	return Geo_Data::get_map( 'post', $post->ID, $args );
 }
 
+/**
+ * Returns the map for a user with a public location.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_User $user User ID or object.
+ * @param array       $args Arguments passed to the map provider. Optional.
+ * @return string|false Map markup, or an empty string if there is no public location; false if there is no user.
+ */
 function get_user_map( $user, $args = array() ) {
 	$user = sloc_get_user( $user );
 	if ( ! $user ) {
@@ -211,22 +385,56 @@ function get_user_map( $user, $args = array() ) {
 	return Geo_Data::get_map( 'user', $user->ID, $args );
 }
 
+/**
+ * Returns the map for a comment with a public location.
+ *
+ * @since 5.0.0
+ *
+ * @param int   $comment_id Comment ID.
+ * @param array $args       Arguments passed to the map provider. Optional.
+ * @return string|false Map markup, or an empty string if there is no public location.
+ */
 function get_comment_map( $comment_id, $args = array() ) {
 	return Geo_Data::get_map( 'comment', $comment_id, $args );
 }
 
+/**
+ * Returns the map for a term with a public location.
+ *
+ * @since 5.0.0
+ *
+ * @param int   $term_id Term ID.
+ * @param array $args    Arguments passed to the map provider. Optional.
+ * @return string|false Map markup, or an empty string if there is no public location.
+ */
 function get_term_map( $term_id, $args = array() ) {
 	return Geo_Data::get_map( 'term', $term_id, $args );
 }
 
-/*
- * Legacy Function to be replaced.
+/**
+ * Returns the location for any object.
  *
+ * Legacy function; use get_post_location() and the other object functions instead.
+ *
+ * @since 3.2.0
+ *
+ * @param mixed $object Post, comment, user or term, as an object or ID. Defaults to the current post.
+ * @param array $args   Display arguments, as for Geo_Data::get_location(). Optional.
+ * @return string Location markup.
  */
 function get_simple_location( $object = null, $args = array() ) {
 	return Geo_Data::get_location( sloc_get_type_from_object( $object ), sloc_get_id_from_object( $object ), $args );
 }
 
+/**
+ * Returns the location markup for a post.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
+ * @param array            $args Display arguments, as for Geo_Data::get_location(). Optional.
+ * @return string|false Location markup, or an empty string if there is none to show; false if there is no post.
+ */
 function get_post_location( $post = null, $args = array() ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
@@ -235,10 +443,28 @@ function get_post_location( $post = null, $args = array() ) {
 	return Geo_Data::get_location( 'post', $post->ID, $args );
 }
 
+/**
+ * Returns the location markup for a comment.
+ *
+ * @since 5.0.0
+ *
+ * @param int   $id   Comment ID.
+ * @param array $args Display arguments, as for Geo_Data::get_location(). Optional.
+ * @return string|false Location markup, or an empty string if there is none to show.
+ */
 function get_comment_location( $id, $args = array() ) {
 	return Geo_Data::get_location( 'comment', $id, $args );
 }
 
+/**
+ * Returns the location markup for a user.
+ *
+ * @since 5.0.0
+ *
+ * @param int|WP_User $user User ID or object.
+ * @param array       $args Display arguments, as for Geo_Data::get_location(). Optional.
+ * @return string|false Location markup, or an empty string if there is none to show; false if there is no user.
+ */
 function get_user_location( $user, $args = array() ) {
 	$user = sloc_get_user( $user );
 	if ( ! $user ) {
@@ -247,6 +473,15 @@ function get_user_location( $user, $args = array() ) {
 	return Geo_Data::get_location( 'user', $user->ID, $args );
 }
 
+/**
+ * Returns the location markup for a term.
+ *
+ * @since 5.0.0
+ *
+ * @param int   $id   Term ID.
+ * @param array $args Display arguments, as for Geo_Data::get_location(). Optional.
+ * @return string|false Location markup, or an empty string if there is none to show.
+ */
 function get_term_location( $id, $args = array() ) {
 	return Geo_Data::get_location( 'term', $id, $args );
 }
