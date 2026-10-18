@@ -68,7 +68,7 @@ class Venue_Provider_Google extends Venue_Provider {
 		}
 
 		// ZERO_RESULTS means there are no establishments within the radius.
-		if ( array_key_exists( 'status', $json ) && ! in_array( $json['status'], array( 'OK', 'ZERO_RESULTS' ), true ) ) {
+		if ( isset( $json['status'] ) && is_string( $json['status'] ) && ! in_array( $json['status'], array( 'OK', 'ZERO_RESULTS' ), true ) ) {
 			return new WP_Error( $json['status'], $json['error_message'] ?? __( 'Error Returning Results from Google', 'simple-location' ), array( $json ) );
 		}
 

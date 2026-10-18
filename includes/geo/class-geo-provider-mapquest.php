@@ -64,30 +64,29 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 			return $json;
 		}
 
-		if ( ! array_key_exists( 'results', $json ) ) {
-			return new WP_Error( 'no_results', __( 'No Results Found', 'simple-location' ) );
-		}
-
 		return self::address_to_mf( $json );
 	}
 
 	/**
 	 * Convert address properties to mf2
 	 *
+	 * @since 6.0.0 MapQuest's error status, and a response without locations, return an error instead of warnings.
+	 *
 	 * @param  array $json Raw JSON.
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @return array|WP_Error $reverse microformats2 address elements in an array, or an error.
 	 */
 	protected function address_to_mf( $json ) {
-		$json = $json['results'][0];
-
-		if ( ! array_key_exists( 'locations', $json ) ) {
-			return new WP_Error( 'no_locations', __( 'No Locations Found', 'simple-location' ) );
+		// MapQuest reports errors, such as a bad key, with HTTP 200 and a status code other than 0.
+		$status = $json['info']['statuscode'] ?? 0;
+		if ( 0 !== (int) $status ) {
+			$messages = $json['info']['messages'] ?? array();
+			$message  = ( is_array( $messages ) && isset( $messages[0] ) && is_string( $messages[0] ) ) ? $messages[0] : __( 'MapQuest returned an error.', 'simple-location' );
+			return new WP_Error( 'mapquest_error', $message, array( 'status' => (int) $status ) );
 		}
 
-		$location = $json['locations'];
-
-		if ( ! empty( $location ) ) {
-			$location = $location[0];
+		$location = $json['results'][0]['locations'][0] ?? null;
+		if ( ! is_array( $location ) ) {
+			return new WP_Error( 'no_results', __( 'No Results Found', 'simple-location' ), array( 'status' => 404 ) );
 		}
 
 		$return = array(
@@ -157,6 +156,9 @@ class Geo_Provider_Mapquest extends Geo_Provider {
 		}
 
 		$return = $this->address_to_mf( $json );
+		if ( is_wp_error( $return ) ) {
+			return $return;
+		}
 		if ( array_key_exists( 'latLng', $json ) ) {
 			$return['latitude']  = $json['latLng']['lat'] ?? null;
 			$return['longitude'] = $json['latLng']['lng'] ?? null;

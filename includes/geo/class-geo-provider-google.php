@@ -63,7 +63,7 @@ class Geo_Provider_Google extends Geo_Provider {
 			return $json;
 		}
 
-		if ( array_key_exists( 'status', $json ) && 'OK' !== $json['status'] ) {
+		if ( isset( $json['status'] ) && is_string( $json['status'] ) && 'OK' !== $json['status'] ) {
 			return new WP_Error( $json['status'], $json['error_message'] ?? __( 'Error Returning Results from Google', 'simple-location' ) );
 		}
 
@@ -172,7 +172,7 @@ class Geo_Provider_Google extends Geo_Provider {
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
-		if ( isset( $json['status'] ) && ! in_array( $json['status'], array( 'OK', 'ZERO_RESULTS' ), true ) ) {
+		if ( isset( $json['status'] ) && is_string( $json['status'] ) && ! in_array( $json['status'], array( 'OK', 'ZERO_RESULTS' ), true ) ) {
 			return new WP_Error( $json['status'], $json['error_message'] ?? __( 'Error Returning Results from Google', 'simple-location' ) );
 		}
 		if ( empty( $json['results'][0] ) || ! is_array( $json['results'][0] ) ) {

@@ -109,14 +109,41 @@ class Geo_Provider_Pelias extends Geo_Provider {
 	}
 
 	/**
+	 * Returns the error in a Pelias response, if it has no results.
+	 *
+	 * Pelias lists problems, such as a bad request, in `geocoding.errors`, and a search that finds nothing has no
+	 * features.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param array $json Response.
+	 * @return WP_Error|null Error, or null if the response has results.
+	 */
+	protected static function response_error( $json ) {
+		$errors = $json['geocoding']['errors'] ?? array();
+		if ( is_array( $errors ) && ! empty( $errors ) ) {
+			return new WP_Error( 'pelias_error', implode( ' ', array_filter( $errors, 'is_string' ) ), array( 'status' => 400 ) );
+		}
+		if ( ! isset( $json['features'][0]['properties'] ) || ! is_array( $json['features'][0]['properties'] ) ) {
+			return new WP_Error( 'no_results', __( 'No Results Found', 'simple-location' ), array( 'status' => 404 ) );
+		}
+		return null;
+	}
+
+	/**
 	 * Convert address properties to mf2
 	 *
 	 * @since 6.0.0 Street-address results have no name instead of an undefined one, and the closer of two equal results is used.
+	 * @since 6.0.0 A response without results returns an error instead of warnings.
 	 *
 	 * @param  array $json Raw JSON.
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @return array|WP_Error $reverse microformats2 address elements in an array, or an error.
 	 */
 	protected function address_to_mf( $json ) {
+		$error = self::response_error( $json );
+		if ( $error ) {
+			return $error;
+		}
 		$json    = $json['features'];
 		$address = $json[0]['properties'];
 
@@ -272,8 +299,11 @@ class Geo_Provider_Pelias extends Geo_Provider {
 		if ( wp_is_numeric_array( $json ) ) {
 			$json = $json[0];
 		}
+		$return = $this->address_to_mf( $json );
+		if ( is_wp_error( $return ) ) {
+			return $return;
+		}
 		$address             = $json['features'][0];
-		$return              = $this->address_to_mf( $json );
 		$return['latitude']  = $address['geometry']['coordinates'][1];
 		$return['longitude'] = $address['geometry']['coordinates'][0];
 		return array_filter( $return );

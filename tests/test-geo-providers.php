@@ -231,6 +231,70 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * JSON that isn't an object or a list, such as `true`, is an error, so providers never parse it.
+	 */
+	public function test_fetch_json_unexpected_response() {
+		$this->mock_http( array( 'example.com/x' => array( 'body' => 'true' ) ) );
+		$error = ( new Geo_Provider_Nominatim() )->fetch_json( 'https://example.com/x', array() );
+		$this->assertSame( 'unexpected_response', $error->get_error_code() );
+		$this->assertSame( 'true', $error->get_error_data()['body'] );
+	}
+
+	/**
+	 * Pelias and OpenRoute: no results, and Pelias's own errors, are errors for reverse and forward lookups.
+	 */
+	public function test_pelias_no_results() {
+		update_option( 'sloc_pelias_url', 'https://203.0.113.10/v1' );
+		$empty = array(
+			'type'     => 'FeatureCollection',
+			'features' => array(),
+		);
+		foreach ( array( 'Geo_Provider_Pelias', 'Geo_Provider_OpenRoute' ) as $class ) {
+			$this->mock_http( array( '' => array( 'body' => $empty ) ) );
+			$this->assertSame( 'no_results', $this->provider( $class, array( 'api' => 'KEY' ) )->reverse_lookup()->get_error_code(), $class );
+			$this->assertSame( 'no_results', ( new $class( array( 'api' => 'KEY' ) ) )->geocode( 'nowhere' )->get_error_code(), $class );
+
+			$this->mock_http(
+				array(
+					'' => array(
+						'body' => array_merge( $empty, array( 'geocoding' => array( 'errors' => array( "'text' parameter is required" ) ) ) ),
+					),
+				)
+			);
+			$error = ( new $class( array( 'api' => 'KEY' ) ) )->geocode( '' );
+			$this->assertSame( 'pelias_error', $error->get_error_code(), $class );
+			$this->assertSame( "'text' parameter is required", $error->get_error_message() );
+		}
+	}
+
+	/**
+	 * GeoNames: a search that finds nothing, or a reverse lookup with no address, is an error.
+	 */
+	public function test_geonames_no_results() {
+		$this->mock_http(
+			array(
+				'geonames.org' => array(
+					'body' => array(
+						'totalResultsCount' => 0,
+						'geonames'          => array(),
+					),
+				),
+			)
+		);
+		$this->assertSame( 'no_results', ( new Geo_Provider_Geonames( array( 'user' => 'someone' ) ) )->geocode( 'nowhere' )->get_error_code() );
+		$this->assertSame( 'no_results', $this->provider( 'Geo_Provider_Geonames', array( 'user' => 'someone' ) )->reverse_lookup()->get_error_code() );
+	}
+
+	/**
+	 * Looking up a country without a code finds nothing, without a deprecation notice.
+	 */
+	public function test_country_data_without_code() {
+		$this->assertFalse( Geo_Provider::country_data( null ) );
+		$this->assertFalse( Geo_Provider::country_data( '' ) );
+		$this->assertSame( 'United States', Geo_Provider::country_data( 'us' )['name'] );
+	}
+
+	/**
 	 * Every 2xx status is a success, not only 200.
 	 */
 	public function test_fetch_json_success_statuses() {
@@ -278,8 +342,15 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	 * Nominatim reverse geocoding passes errors on, and returns nothing without an address.
 	 */
 	public function test_nominatim_reverse_errors() {
+		// A point with no address, such as open ocean, is an error with Nominatim's message.
 		$this->mock_http( array( 'nominatim' => array( 'body' => $this->fixture( 'geo/nominatim-error.json' ) ) ) );
-		$this->assertSame( array(), $this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup() );
+		$error = $this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup();
+		$this->assertSame( 'no_results', $error->get_error_code() );
+		$this->assertSame( 'Unable to geocode', $error->get_error_message() );
+		$this->assertSame( array( 'status' => 404 ), $error->get_error_data() );
+
+		$this->mock_http( array( 'locationiq.com' => array( 'body' => $this->fixture( 'geo/nominatim-error.json' ) ) ) );
+		$this->assertSame( 'Unable to geocode', $this->provider( 'Geo_Provider_LocationIQ', array( 'api' => 'KEY' ) )->reverse_lookup()->get_error_message() );
 
 		$this->mock_http(
 			array(
@@ -459,11 +530,17 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	 * MapQuest responses without results or locations are errors.
 	 */
 	public function test_mapquest_errors() {
+		// MapQuest's own error status, with HTTP 200, is reported with its message, for reverse and forward lookups.
 		$this->mock_http( array( 'mapquestapi.com' => array( 'body' => $this->fixture( 'geo/mapquest-no-results.json' ) ) ) );
-		$this->assertSame( 'no_results', $this->provider( 'Geo_Provider_Mapquest', array( 'api' => 'mq-key' ) )->reverse_lookup()->get_error_code() );
+		foreach ( array( $this->provider( 'Geo_Provider_Mapquest', array( 'api' => 'mq-key' ) )->reverse_lookup(), ( new Geo_Provider_Mapquest( array( 'api' => 'mq-key' ) ) )->geocode( 'City Hall' ) ) as $error ) {
+			$this->assertSame( 'mapquest_error', $error->get_error_code() );
+			$this->assertSame( 'This key is not authorized for this service.', $error->get_error_message() );
+			$this->assertSame( array( 'status' => 403 ), $error->get_error_data() );
+		}
 
 		$this->mock_http( array( 'mapquestapi.com' => array( 'body' => $this->fixture( 'geo/mapquest-no-locations.json' ) ) ) );
-		$this->assertSame( 'no_locations', $this->provider( 'Geo_Provider_Mapquest', array( 'api' => 'mq-key' ) )->reverse_lookup()->get_error_code() );
+		$this->assertSame( 'no_results', $this->provider( 'Geo_Provider_Mapquest', array( 'api' => 'mq-key' ) )->reverse_lookup()->get_error_code() );
+		$this->assertSame( 'no_results', ( new Geo_Provider_Mapquest( array( 'api' => 'mq-key' ) ) )->geocode( 'nowhere' )->get_error_code() );
 	}
 
 	/**

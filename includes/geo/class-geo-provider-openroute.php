@@ -87,8 +87,11 @@ class Geo_Provider_OpenRoute extends Geo_Provider_Pelias {
 		if ( wp_is_numeric_array( $json ) ) {
 			$json = $json[0];
 		}
+		$return = $this->address_to_mf( $json );
+		if ( is_wp_error( $return ) ) {
+			return $return;
+		}
 		$address             = $json['features'][0];
-		$return              = $this->address_to_mf( $json );
 		$return['latitude']  = $address['geometry']['coordinates'][1];
 		$return['longitude'] = $address['geometry']['coordinates'][0];
 		return array_filter( $return );
