@@ -1,8 +1,10 @@
 <?php
 /**
- * Venue Custiomer Post Type
+ * Venue Custom Post Type
  *
  * Registers a custom post type and sets its behavior.
+ *
+ * @package Simple_Location
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -10,6 +12,11 @@ defined( 'ABSPATH' ) || exit;
 // Register Vanue Taxonomy.
 add_action( 'init', array( 'Post_Venue', 'register' ), 1 );
 
+/**
+ * Registers the venue post type and venue type taxonomy, and handles venues.
+ *
+ * @since 5.0.0
+ */
 class Post_Venue {
 	/**
 	 * Register the meta for venues.
@@ -488,6 +495,14 @@ class Post_Venue {
 		return false;
 	}
 
+	/**
+	 * Returns the ID of a post's venue.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param int $post_id Post ID.
+	 * @return string The venue ID, or an empty string if the post has no venue.
+	 */
 	public static function get_post_venue( $post_id ) {
 		return get_post_meta( $post_id, 'venue_id', true );
 	}
@@ -516,6 +531,18 @@ class Post_Venue {
 		return $return;
 	}
 
+	/**
+	 * Returns the venue matching a check-in, creating one if there is none.
+	 *
+	 * A venue matches when the check-in URL is a local venue, or is the URL or an alternate URL of
+	 * a venue. A new venue is published with public visibility, and its location term is found
+	 * or created from the address.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param array $venue Check-in or address properties. Needs a name or label.
+	 * @return int|WP_Error|false The venue ID, or false without a name.
+	 */
 	public static function add_new_venue( $venue ) {
 		$venue = Location_Taxonomy::normalize_address( $venue );
 		if ( array_key_exists( 'name', $venue ) ) {
@@ -616,6 +643,14 @@ class Post_Venue {
 		return $id;
 	}
 
+	/**
+	 * Returns the venue type terms of a venue.
+	 *
+	 * @since 5.0.2
+	 *
+	 * @param int|WP_Post|null $venue_id Venue ID or object. Defaults to the current post.
+	 * @return int[]|false|string Term IDs; false if it has none, or an empty string if it isn't a venue.
+	 */
 	public static function get_venue_type( $venue_id = null ) {
 		$venue = get_post( $venue_id );
 		if ( ! $venue || 'venue' !== get_post_type( $venue ) ) {
@@ -628,10 +663,26 @@ class Post_Venue {
 		return $terms;
 	}
 
+	/**
+	 * Whether a venue is inside another venue.
+	 *
+	 * @since 5.0.6
+	 *
+	 * @param int|WP_Post|null $venue_id Venue ID or object. Defaults to the current post.
+	 * @return boolean Whether it has a parent.
+	 */
 	public static function has_parent_venue( $venue_id = null ) {
 		return has_post_parent( $venue_id );
 	}
 
+	/**
+	 * Returns the ID of the venue a venue is inside.
+	 *
+	 * @since 5.0.6
+	 *
+	 * @param int|WP_Post|null $venue_id Venue ID or object. Defaults to the current post.
+	 * @return int|false Parent venue ID, or false if it has none.
+	 */
 	public static function get_parent_venue( $venue_id = null ) {
 		return wp_get_post_parent_id( $venue_id );
 	}
@@ -639,6 +690,7 @@ class Post_Venue {
 	/**
 	 * Returns the IDs of a venue's published child venues.
 	 *
+	 * @since 5.0.7
 	 * @since 6.0.0 Searches venues instead of posts and returns every child.
 	 *
 	 * @param int|WP_Post|null $venue_id Venue. Defaults to the current post.
@@ -660,6 +712,14 @@ class Post_Venue {
 		);
 	}
 
+	/**
+	 * Returns the IDs of the venues a venue is inside, nearest first.
+	 *
+	 * @since 5.0.6
+	 *
+	 * @param int|WP_Post|null $venue_id Venue ID or object. Defaults to the current post.
+	 * @return int[]|false Ancestor IDs, or false if the venue doesn't exist.
+	 */
 	public static function get_venue_ancestors( $venue_id = null ) {
 		$venue = get_post( $venue_id );
 		if ( ! $venue ) {
@@ -668,8 +728,14 @@ class Post_Venue {
 		return get_ancestors( $venue->ID, 'venue', 'post_type' );
 	}
 
-	/* Gets attached photos from posts from a venue */
-
+	/**
+	 * Returns the images attached to the posts at a venue.
+	 *
+	 * @since 5.0.6
+	 *
+	 * @param int|WP_Post|null $venue_id Venue ID or object.
+	 * @return int[] Attachment IDs.
+	 */
 	public static function get_attached_photos( $venue_id ) {
 		$post_ids = self::get_venue_posts( $venue_id );
 		if ( empty( $post_ids ) ) {
@@ -683,6 +749,14 @@ class Post_Venue {
 		return $media_ids;
 	}
 
+	/**
+	 * Returns a gallery of the images attached to the posts at a venue.
+	 *
+	 * @since 5.0.6
+	 *
+	 * @param int|WP_Post|null $venue_id Venue ID or object. Defaults to the current post.
+	 * @return string Gallery markup.
+	 */
 	public static function get_venue_gallery( $venue_id = null ) {
 		$media_ids = self::get_attached_photos( $venue_id );
 		return gallery_shortcode(
@@ -694,6 +768,14 @@ class Post_Venue {
 		);
 	}
 
+	/**
+	 * Returns the IDs of the posts at a venue.
+	 *
+	 * @since 5.0.2
+	 *
+	 * @param int|WP_Post|null $venue_id Venue ID or object. Defaults to the current post.
+	 * @return int[]|false Post IDs, or false if it isn't a venue.
+	 */
 	public static function get_venue_posts( $venue_id = null ) {
 		$venue = get_post( $venue_id );
 		if ( 'venue' !== get_post_type( $venue ) ) {

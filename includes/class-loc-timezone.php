@@ -1,10 +1,28 @@
 <?php
+/**
+ * Timezones
+ *
+ * Shows dates in the timezone of their location.
+ *
+ * @package Simple_Location
+ */
+
 defined( 'ABSPATH' ) || exit;
 
 
 add_action( 'init', array( 'Loc_Timezone', 'init' ) );
 
+/**
+ * Finds the timezone of a location, and shows post and comment dates in it.
+ *
+ * @since 3.0.1
+ */
 class Loc_Timezone {
+	/**
+	 * Registers the timezone hooks.
+	 *
+	 * @since 3.0.1
+	 */
 	public static function init() {
 		add_filter( 'get_the_date', array( __CLASS__, 'get_the_date' ), 9, 3 );
 		add_filter( 'get_the_time', array( __CLASS__, 'get_the_time' ), 9, 3 );
@@ -49,10 +67,13 @@ class Loc_Timezone {
 	/**
 	 * Compare two DateTimeZone objects by offset
 	 *
-	 * @param DateTimeZone $tz1 First Timezone.
-	 * @param DateTimeZone $tz2 Second Timezone.
-	 * @return boolean
-	 **/
+	 * @since 4.1.10
+	 *
+	 * @param DateTimeZone                  $tz1      First Timezone.
+	 * @param DateTimeZone                  $tz2      Second Timezone.
+	 * @param DateTimeInterface|string|null $datetime Time to compare the offsets at. Optional; defaults to now.
+	 * @return boolean Whether the offsets are the same; false if either isn't a timezone.
+	 */
 	public static function compare_timezones( $tz1, $tz2, $datetime = null ) {
 		if ( ! $tz1 instanceof DateTimeZone || ! $tz2 instanceof DateTimeZone ) {
 			return false;
@@ -131,6 +152,13 @@ class Loc_Timezone {
 		return $nearest;
 	}
 
+	/**
+	 * Reads the bundled list of cities and their timezones.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @return array|WP_Error|false Lines of data/tz_cities.txt, or an error if the file is missing.
+	 */
 	private static function tz_data() {
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/tz_cities.txt';
 		if ( ! sloc_file_exists( $file ) ) {
@@ -195,6 +223,14 @@ class Loc_Timezone {
 		return $response;
 	}
 
+	/**
+	 * Sets the timezone of a post created with Micropub, from its coordinates or a timezone property.
+	 *
+	 * @since 4.1.0
+	 *
+	 * @param array      $input Micropub request.
+	 * @param array|null $args  Arguments the post was created with.
+	 */
 	public static function after_micropub( $input, $args ) {
 		if ( isset( $args['meta_input'] ) ) {
 			if ( isset( $args['meta_input']['geo_latitude'] ) ) {
@@ -210,6 +246,17 @@ class Loc_Timezone {
 		}
 	}
 
+	/**
+	 * Returns the timezone options for a select element.
+	 *
+	 * Based on core's wp_timezone_choice().
+	 *
+	 * @since 4.1.0
+	 *
+	 * @param string      $selected_zone Selected timezone.
+	 * @param string|null $locale        Locale for translating the names. Optional; defaults to the site locale.
+	 * @return string Option elements.
+	 */
 	public static function wp_timezone_choice( $selected_zone, $locale = null ) {
 		static $mo_loaded = false, $locale_loaded = null;
 
@@ -392,11 +439,26 @@ class Loc_Timezone {
 	}
 
 
+	/**
+	 * Adds the timezone field to the location metabox. Hooked to `simple_location_sidebox`.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param WP_Screen|null     $screen Current admin screen.
+	 * @param WP_Post|WP_Comment $object Post or comment being edited.
+	 * @param array              $args   Metabox arguments.
+	 */
 	public static function submitbox( $screen, $object, $args ) {
 		load_template( plugin_dir_path( __DIR__ ) . 'templates/timezone-metabox.php' );
 	}
 
-	/* Save the post timezone metadata. */
+	/**
+	 * Saves the timezone field of the location metabox for a post.
+	 *
+	 * @since 4.1.0
+	 *
+	 * @param int $post_id Post ID.
+	 */
 	public static function postbox_save_post_meta( $post_id ) {
 		/*
 		* We need to verify this came from our screen and with proper authorization,
@@ -535,6 +597,16 @@ class Loc_Timezone {
 	}
 
 
+	/**
+	 * Filters a post's date to show it in the timezone stored with the post's location.
+	 *
+	 * @since 4.1.0
+	 *
+	 * @param string           $the_date Formatted date.
+	 * @param string           $d        Format. Empty uses the site date format.
+	 * @param int|WP_Post|null $post     Post ID or object. Defaults to the current post.
+	 * @return string Formatted date.
+	 */
 	public static function get_the_date( $the_date, $d = '', $post = null ) {
 		$post = get_post( $post );
 		if ( ! $post ) {
@@ -552,6 +624,16 @@ class Loc_Timezone {
 		return wp_date( $d, get_post_timestamp( $post ), $timezone );
 	}
 
+	/**
+	 * Filters a post's time to show it in the timezone stored with the post's location.
+	 *
+	 * @since 4.1.0
+	 *
+	 * @param string           $the_time Formatted time.
+	 * @param string           $d        Format. Empty uses the site time format.
+	 * @param int|WP_Post|null $post     Post ID or object. Defaults to the current post.
+	 * @return string Formatted time.
+	 */
 	public static function get_the_time( $the_time, $d = '', $post = null ) {
 		$post = get_post( $post );
 		if ( ! $post ) {
@@ -569,6 +651,16 @@ class Loc_Timezone {
 
 
 
+	/**
+	 * Filters a post's modified date to show it in the timezone stored with the post's location.
+	 *
+	 * @since 4.1.0
+	 *
+	 * @param string           $the_date Formatted date.
+	 * @param string           $d        Format. Empty uses the site date format.
+	 * @param int|WP_Post|null $post     Post ID or object. Defaults to the current post.
+	 * @return string Formatted date.
+	 */
 	public static function get_the_modified_date( $the_date, $d = '', $post = null ) {
 		$post = get_post( $post );
 		if ( ! $post ) {
@@ -586,6 +678,16 @@ class Loc_Timezone {
 		return wp_date( $d, get_post_timestamp( $post, 'modified' ), $timezone );
 	}
 
+	/**
+	 * Filters a post's modified time to show it in the timezone stored with the post's location.
+	 *
+	 * @since 4.1.0
+	 *
+	 * @param string           $the_time Formatted time.
+	 * @param string           $d        Format. Empty uses the site time format.
+	 * @param int|WP_Post|null $post     Post ID or object. Defaults to the current post.
+	 * @return string Formatted time.
+	 */
 	public static function get_the_modified_time( $the_time, $d = '', $post = null ) {
 		$post = get_post( $post );
 		if ( ! $post ) {
@@ -604,6 +706,17 @@ class Loc_Timezone {
 
 
 
+	/**
+	 * Shows the date in the posts list in the post's timezone, when it differs from the site timezone.
+	 *
+	 * @since 4.5.0
+	 *
+	 * @param string      $t_time Date and time.
+	 * @param WP_Post     $post   Post.
+	 * @param string|null $date   Column name.
+	 * @param string|null $mode   List table view mode.
+	 * @return string Date and time.
+	 */
 	public static function post_date_column_time( $t_time, $post, $date = null, $mode = null ) {
 		$timezone = self::get_timezone( $post );
 		if ( self::compare_timezones( $timezone, wp_timezone() ) ) {
@@ -619,6 +732,16 @@ class Loc_Timezone {
 		);
 	}
 
+	/**
+	 * Filters the comment date to show it in the comment's timezone.
+	 *
+	 * @since 4.1.0
+	 *
+	 * @param string|int $date    Formatted date.
+	 * @param string     $d       Format. Empty uses the site date format.
+	 * @param WP_Comment $comment Comment.
+	 * @return string|int Formatted date.
+	 */
 	public static function get_comment_date( $date, $d, $comment ) {
 		if ( '' === $d ) {
 			$d = get_option( 'date_format' );

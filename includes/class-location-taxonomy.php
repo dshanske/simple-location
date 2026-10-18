@@ -4,7 +4,7 @@
  *
  * Registers the taxonomy and sets its behavior.
  *
- * @package Post Kinds
+ * @package Simple_Location
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -17,6 +17,11 @@ add_action( 'init', array( 'Location_Taxonomy', 'init' ) );
 final class Location_Taxonomy {
 	use GeoLocation_Trait;
 
+	/**
+	 * Registers the taxonomy and its hooks.
+	 *
+	 * @since 4.4.0
+	 */
 	public static function init() {
 		self::register();
 		add_action( 'location_add_form_fields', array( __CLASS__, 'create_screen_fields' ), 10 );
@@ -35,12 +40,25 @@ final class Location_Taxonomy {
 		add_filter( 'get_pages_query_args', array( __CLASS__, 'get_pages_query_args' ), 10, 2 );
 	}
 
+	/**
+	 * Removes the default location taxonomy metaboxes, which the location metabox replaces.
+	 *
+	 * @since 4.4.6
+	 */
 	public static function admin_menu() {
 		remove_meta_box( 'locationdiv', 'post', 'side' );
 		remove_meta_box( 'locationdiv', 'venue', 'side' );
 	}
 
-	// Passes Tax Queries through for get_pages
+	/**
+	 * Passes a tax query through to the query get_pages() makes, so venues can be listed by location.
+	 *
+	 * @since 5.0.20
+	 *
+	 * @param array $query_args  Query arguments for get_posts().
+	 * @param array $parsed_args Arguments passed to get_pages().
+	 * @return array Query arguments.
+	 */
 	public static function get_pages_query_args( $query_args, $parsed_args ) {
 		if ( array_key_exists( 'tax_query', $parsed_args ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Passes through a query the caller made.
@@ -49,6 +67,16 @@ final class Location_Taxonomy {
 		return $query_args;
 	}
 
+	/**
+	 * Limits the parent dropdown for locations to countries and regions.
+	 *
+	 * @since 4.4.6
+	 *
+	 * @param array  $dropdown_args Arguments for the parent dropdown.
+	 * @param string $taxonomy      Taxonomy name.
+	 * @param string $context       Screen: new or edit.
+	 * @return array Dropdown arguments.
+	 */
 	public static function taxonomy_parent_dropdown_args( $dropdown_args, $taxonomy, $context ) {
 		if ( 'location' === $taxonomy ) {
 			$dropdown_args['depth'] = 2;
@@ -56,6 +84,14 @@ final class Location_Taxonomy {
 		return $dropdown_args;
 	}
 
+	/**
+	 * Sets the archive title of a location to its type and full name, such as "Locality: Philadelphia, Pennsylvania".
+	 *
+	 * @since 4.4.0
+	 *
+	 * @param string $title Archive title.
+	 * @return string Archive title.
+	 */
 	public static function archive_title( $title ) {
 		if ( ! is_tax( 'location' ) ) {
 			return $title;
@@ -67,11 +103,29 @@ final class Location_Taxonomy {
 		return sprintf( __( '%1$1s: %2$2s', 'simple-location' ), $type, $display );
 	}
 
+	/**
+	 * Adds the location type column to the location terms list.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @param string[] $columns Column names keyed by ID.
+	 * @return string[] Columns.
+	 */
 	public static function manage_column( $columns ) {
 		$columns['location-type'] = __( 'Type', 'simple-location' );
 		return $columns;
 	}
 
+	/**
+	 * Returns the content of the location type column.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @param string $content     Column content.
+	 * @param string $column_name Column ID.
+	 * @param int    $term_id     Term ID.
+	 * @return string Column content.
+	 */
 	public static function manage_column_content( $content, $column_name, $term_id ) {
 		if ( 'location-type' === $column_name ) {
 			return self::location_type( self::get_location_type( $term_id ) );
@@ -178,10 +232,22 @@ final class Location_Taxonomy {
 		return $query;
 	}
 
+	/**
+	 * Explains the location hierarchy above the form for adding a location.
+	 *
+	 * @since 4.4.0
+	 */
 	public static function pre_add_form() {
 		printf( '<p>%1$s</p>', esc_html__( 'Locations allow for 3 levels of hierarchy: Country, region, and locality. Countries have no parent. Regions have a country as a parent. Localities have regions are their parent.', 'simple-location' ) );
 	}
 
+	/**
+	 * Prints the location code field on the form for adding a location.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @param string $taxonomy Taxonomy name.
+	 */
 	public static function create_screen_fields( $taxonomy ) {
 		echo '<div class="form-field form-required">';
 				printf( '<label for="location-code">%1$s</label>', esc_html__( 'Location Code:', 'simple-location' ) );
@@ -191,6 +257,14 @@ final class Location_Taxonomy {
 		wp_nonce_field( 'create', 'location_taxonomy_meta' );
 	}
 
+	/**
+	 * Prints the fields for the location's code, and its type's other data, on the form for editing a location.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @param WP_Term $term     Term being edited.
+	 * @param string  $taxonomy Taxonomy name.
+	 */
 	public static function edit_screen_fields( $term, $taxonomy ) {
 		$type = self::get_location_type( $term->term_id );
 		echo '<tr class="form-field">';
@@ -566,7 +640,7 @@ final class Location_Taxonomy {
 	/**
 	 * Return the term_id for the locality if it exists.
 	 *
-	 * @param array $addr Array of Address Properties
+	 * @param array $addr Array of Address Properties.
 	 * @return int|false Term ID or false if not found.
 	 */
 	public static function get_locality( $addr ) {
@@ -651,7 +725,7 @@ final class Location_Taxonomy {
 	/**
 	 * Return the term_id for the region if it exists.
 	 *
-	 * @param array   $addr Array of Address Properties
+	 * @param array   $addr Array of Address Properties.
 	 * @param boolean $childless Only look for regions that have no localities currently.
 	 * @return int|false Term ID or false if not found.
 	 */
@@ -725,11 +799,13 @@ final class Location_Taxonomy {
 		return false;
 	}
 
-	/*
-	 * Returns an existing term or creates a new one based on returned address data
+	/**
+	 * Returns an existing term or creates a new one based on returned address data.
 	 *
-	 * @param array $addr Address data.
-	 * @param boolean $term If Term is True Return a New Term if One Does Not Exist
+	 * @since 4.4.0
+	 *
+	 * @param array   $addr Address data.
+	 * @param boolean $term If Term is True Return a New Term if One Does Not Exist.
 	 * @return int|false Returns an existing term or creates a new one.
 	 */
 	public static function get_location( $addr, $term = false ) {
@@ -820,6 +896,14 @@ final class Location_Taxonomy {
 		return wp_set_post_terms( $post_id, $term_id, 'location' );
 	}
 
+	/**
+	 * Returns the type of a location term from its place in the hierarchy.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @param int $term_id Term ID.
+	 * @return string|false 'country', 'region' or 'locality', or false if the term is not a location or is nested too deeply.
+	 */
 	public static function get_location_type( $term_id ) {
 		$term = get_term( $term_id );
 		if ( ! $term instanceof WP_Term ) {
@@ -849,6 +933,14 @@ final class Location_Taxonomy {
 		return false;
 	}
 
+	/**
+	 * Returns the label for a location type.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @param string|false $type Location type: 'country', 'region' or 'locality'.
+	 * @return string Label, or 'None' for an unknown type.
+	 */
 	public static function location_type( $type ) {
 		$types = array(
 			'country'  => __( 'Country', 'simple-location' ),
@@ -861,6 +953,14 @@ final class Location_Taxonomy {
 		return __( 'None', 'simple-location' );
 	}
 
+	/**
+	 * Returns a location term and its parents, with their names and codes.
+	 *
+	 * @since 4.4.2
+	 *
+	 * @param int $term_id Term ID.
+	 * @return array|false Arrays with the term_id, name and code, keyed by location type; false if there is no term.
+	 */
 	public static function get_location_data( $term_id ) {
 		$term = get_term( $term_id, 'location' );
 		if ( ! $term instanceof WP_Term ) {
@@ -890,6 +990,14 @@ final class Location_Taxonomy {
 			return $return;
 	}
 
+	/**
+	 * Returns the country code of the country a location is in.
+	 *
+	 * @since 4.4.4
+	 *
+	 * @param int $term_id Term ID.
+	 * @return string|false Country code, or false if the term is not a location.
+	 */
 	public static function get_parent_country( $term_id ) {
 		$term = get_term( $term_id );
 		if ( ! $term instanceof WP_Term ) {
@@ -1019,6 +1127,14 @@ final class Location_Taxonomy {
 		return sprintf( '<a href="%1$s">%2$s</a>', esc_url( $link ), implode( ', ', $return ) );
 	}
 
+	/**
+	 * Returns the ID of a post's location term.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param int|WP_Post|null $post_id Post ID or object. Defaults to the current post.
+	 * @return int|false|string Term ID; false if the post has no location, or an empty string if there is no post.
+	 */
 	public static function get_post_location( $post_id = null ) {
 		$post = get_post( $post_id );
 		if ( ! $post ) {
@@ -1066,6 +1182,14 @@ final class Location_Taxonomy {
 		return wp_list_categories( $args );
 	}
 
+	/**
+	 * Converts location data to microformats2 address properties.
+	 *
+	 * @since 4.4.3
+	 *
+	 * @param array $data Location data, as returned by get_location_data().
+	 * @return array Locality, region, region code, country name and country code, where set.
+	 */
 	public static function location_data_to_hadr( $data ) {
 		if ( empty( $data ) ) {
 			return array();
