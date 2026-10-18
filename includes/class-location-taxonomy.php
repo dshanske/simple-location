@@ -150,8 +150,9 @@ final class Location_Taxonomy {
 		}
 		$type     = get_post_type_object( $post_type );
 		$selected = '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the list filter to show it as selected.
 		if ( isset( $_REQUEST['location'] ) ) {
-			$selected = sanitize_text_field( $_REQUEST['location'] );
+			$selected = sanitize_text_field( wp_unslash( $_REQUEST['location'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the list filter to show it as selected.
 		}
 		wp_dropdown_categories(
 			array(
@@ -316,7 +317,7 @@ final class Location_Taxonomy {
 		if ( ! array_key_exists( 'location_taxonomy_meta', $_POST ) ) {
 			return;
 		}
-		$nonce = sanitize_text_field( $_POST['location_taxonomy_meta'] );
+		$nonce = sanitize_text_field( wp_unslash( $_POST['location_taxonomy_meta'] ) );
 		if ( ! wp_verify_nonce( $nonce, 'edit' ) && ! wp_verify_nonce( $nonce, 'create' ) ) {
 			return;
 		}
