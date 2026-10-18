@@ -1,9 +1,12 @@
+
+This filter is documented in includes/class-geo-provider.php
+
 ## Auto-generated Example
 
 ```php
 add_filter(
    'sloc_geo_provider_defaults',
-    function( $defaults ) {
+    function( array $defaults ) {
         // Your code here.
         return $defaults;
     }
@@ -12,16 +15,16 @@ add_filter(
 
 ## Parameters
 
-- `$defaults`
+- *`array`* `$defaults` Default arguments: api, latitude, longitude, altitude, reverse_zoom and user, plus the map size, zoom, location and style for map providers.
 
 ## Files
 
-- [includes/class-geo-provider.php:74](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L74)
+- [includes/class-geo-provider.php:81](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L81)
 ```php
 apply_filters( 'sloc_geo_provider_defaults', $defaults )
 ```
 
-- [includes/class-map-provider.php:164](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L164)
+- [includes/class-map-provider.php:165](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L165)
 ```php
 apply_filters( 'sloc_geo_provider_defaults', $defaults )
 ```

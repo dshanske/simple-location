@@ -55,13 +55,20 @@ abstract class Venue_Provider extends Sloc_Provider {
 	 *  @type string $user User name.
 	 */
 	public function __construct( $args = array() ) {
-		$defaults   = array(
+		$defaults = array(
 			'api'       => null,
 			'latitude'  => null,
 			'longitude' => null,
 			'altitude'  => null,
 			'user'      => '',
 		);
+		/**
+		 * Filters the default arguments of venue providers.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @param array $defaults Default arguments: api, latitude, longitude, altitude and user.
+		 */
 		$defaults   = apply_filters( 'sloc_venue_provider_defaults', $defaults );
 		$r          = wp_parse_args( $args, $defaults );
 		$this->user = $r['user'];

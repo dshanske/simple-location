@@ -1,9 +1,12 @@
+
+Filters the default arguments of venue providers.
+
 ## Auto-generated Example
 
 ```php
 add_filter(
    'sloc_venue_provider_defaults',
-    function( $defaults ) {
+    function( array $defaults ) {
         // Your code here.
         return $defaults;
     }
@@ -12,11 +15,11 @@ add_filter(
 
 ## Parameters
 
-- `$defaults`
+- *`array`* `$defaults` Default arguments: api, latitude, longitude, altitude and user.
 
 ## Files
 
-- [includes/class-venue-provider.php:65](https://github.com/dshanske/simple-location/blob/trunk/includes/class-venue-provider.php#L65)
+- [includes/class-venue-provider.php:72](https://github.com/dshanske/simple-location/blob/trunk/includes/class-venue-provider.php#L72)
 ```php
 apply_filters( 'sloc_venue_provider_defaults', $defaults )
 ```

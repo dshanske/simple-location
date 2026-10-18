@@ -1,22 +1,25 @@
+
+Filters the post types that get the location metabox and admin column.
+
 ## Auto-generated Example
 
 ```php
 add_filter(
    'sloc_post_types',
-    function( $post_types_by_support ) {
+    function( string[] $post_types ) {
         // Your code here.
-        return $post_types_by_support;
+        return $post_types;
     }
 );
 ```
 
 ## Parameters
 
-- `$post_types_by_support`
+- *`string[]`* `$post_types` Post types that support geo-location.
 
 ## Files
 
-- [includes/class-geo-base.php:91](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-base.php#L91)
+- [includes/class-geo-base.php:98](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-base.php#L98)
 ```php
 apply_filters( 'sloc_post_types', get_post_types_by_support( 'geo-location' ) )
 ```

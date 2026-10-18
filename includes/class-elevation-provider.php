@@ -36,6 +36,13 @@ abstract class Elevation_Provider extends Sloc_Provider {
 			'user'      => null,
 
 		);
+		/**
+		 * Filters the default arguments of elevation providers.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @param array $defaults Default arguments: api, latitude, longitude, altitude and user.
+		 */
 		$defaults   = apply_filters( 'sloc_elevation_provider_defaults', $defaults );
 		$r          = wp_parse_args( $args, $defaults );
 		$this->user = $r['user'];
