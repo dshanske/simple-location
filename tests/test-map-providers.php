@@ -208,11 +208,72 @@ class MapProvidersTest extends WP_UnitTestCase {
 	public function test_static_map_html() {
 		$map  = $this->provider( 'Map_Provider_Sloc_Test' );
 		$html = $map->get_the_static_map_html();
-		$this->assertSame( '<a target="_blank" href="https://maps.example.com/?c=39.9524,-75.1636"><img class="sloc-map" src="https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400" width="600" height="400" loading="lazy" /></a>', $html );
+		$this->assertSame( '<a target="_blank" href="https://maps.example.com/?c=39.9524,-75.1636"><img class="sloc-map" src="https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400" width="600" height="400" alt="Map showing this location" loading="lazy" /></a>', $html );
 
 		$html = $map->get_the_static_map_html( true );
 		$this->assertStringContainsString( 'srcset="https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400 1x,https://maps.example.com/static?c=39.9524,-75.1636&#038;z=15&#038;s=600x400@2x 2x"', $html );
 		$this->assertStringContainsString( 'width="600" height="400"', $html );
+	}
+
+	/**
+	 * The map image describes the location by its address, which also names the link around it.
+	 */
+	public function test_alt_text() {
+		$map = $this->provider( 'Map_Provider_Sloc_Test' );
+		$map->set(
+			array(
+				'latitude'  => self::LAT,
+				'longitude' => self::LNG,
+				'address'   => 'City Hall, <b>Philadelphia</b> "PA"',
+			)
+		);
+		$this->assertSame( 'Map showing City Hall, Philadelphia "PA"', $map->get_alt_text() );
+		$this->assertStringContainsString( 'alt="Map showing City Hall, Philadelphia &quot;PA&quot;"', $map->get_the_static_map_html( true ) );
+
+		// A shared provider doesn't keep the last map's address for a map without one.
+		$map->set(
+			array(
+				'latitude'  => self::LAT,
+				'longitude' => self::LNG,
+			)
+		);
+		$this->assertSame( 'Map showing this location', $map->get_alt_text() );
+
+		$map->set( array( 'location' => 'Independence Hall' ) );
+		$this->assertSame( 'Map showing Independence Hall', $map->get_alt_text() );
+
+		$filter = function ( $alt, $provider ) use ( $map ) {
+			$this->assertSame( $map, $provider );
+			return 'Custom: ' . $alt;
+		};
+		add_filter( 'sloc_map_alt', $filter, 10, 2 );
+		$this->assertStringContainsString( 'alt="Custom: Map showing Independence Hall"', $map->get_the_static_map_html() );
+		remove_filter( 'sloc_map_alt', $filter, 10 );
+	}
+
+	/**
+	 * Post maps use the post's address as their alternative text.
+	 */
+	public function test_post_map_alt_text() {
+		update_option( 'sloc_map_provider', 'google' );
+		update_option( 'sloc_google_api', 'KEY' );
+		$first  = self::factory()->post->create();
+		$second = self::factory()->post->create();
+		foreach ( array( $first, $second ) as $post_id ) {
+			set_post_geodata(
+				$post_id,
+				'',
+				array(
+					'latitude'   => self::LAT,
+					'longitude'  => self::LNG,
+					'visibility' => 'public',
+				)
+			);
+		}
+		set_post_geodata( $first, 'address', 'Lancaster, PA' );
+
+		$this->assertStringContainsString( 'alt="Map showing Lancaster, PA"', Geo_Data::get_map( 'post', $first ) );
+		$this->assertStringContainsString( 'alt="Map showing this location"', Geo_Data::get_map( 'post', $second ) );
 	}
 
 	/**
