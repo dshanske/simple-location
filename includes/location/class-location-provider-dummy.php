@@ -14,6 +14,13 @@ defined( 'ABSPATH' ) || exit;
  */
 class Location_Provider_Dummy extends Location_Provider {
 
+	/**
+	 * Constructor.
+	 *
+	 * @since 3.5.2
+	 *
+	 * @param array $args Arguments. See Location_Provider::__construct().
+	 */
 	public function __construct( $args = array() ) {
 		$this->name        = __( 'Set Location from Author Profile', 'simple-location' );
 		$this->description = __( 'This will always set the location of posts to the location set in the profile of the author', 'simple-location' );
@@ -22,6 +29,15 @@ class Location_Provider_Dummy extends Location_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Sets the location to the one in the user's profile.
+	 *
+	 * @since 3.5.2
+	 *
+	 * @param string|int|DateTime $time Unused; the profile has only the current location.
+	 * @param array               $args Unused.
+	 * @return null Always null. Without a profile location, no location is set.
+	 */
 	public function retrieve( $time = null, $args = array() ) {
 		$this->reset();
 		$location = get_user_geodata( $this->user );

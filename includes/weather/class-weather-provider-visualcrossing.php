@@ -228,11 +228,11 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 		return '';
 	}
 
-	/*
-	Return array of station data.
+	/**
+	 * Converts a Visual Crossing condition type to a condition code.
 	 *
-	 * @param string $id Weather type ID.
-	 * @return string Icon ID.
+	 * @param string $id Visual Crossing condition type, such as type_1.
+	 * @return int|string Condition code, or an empty string for an unknown type.
 	 */
 	private function code_map( $id ) {
 		$conditions = array(

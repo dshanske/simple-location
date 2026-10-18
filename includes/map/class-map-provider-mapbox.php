@@ -15,6 +15,13 @@ defined( 'ABSPATH' ) || exit;
 class Map_Provider_Mapbox extends Map_Provider {
 	use Sloc_API_Mapbox;
 
+	/**
+	 * Constructor.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param array $args Arguments. See Map_Provider::__construct().
+	 */
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'Mapbox', 'simple-location' );
 		$this->slug         = 'mapbox';
@@ -38,6 +45,13 @@ class Map_Provider_Mapbox extends Map_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Returns Mapbox's own styles, which are requested from the mapbox account instead of the user's.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return array Style names keyed by ID.
+	 */
 	public function default_styles() {
 		return array(
 			'streets-v11'           => 'Mapbox Streets',
@@ -100,14 +114,37 @@ class Map_Provider_Mapbox extends Map_Provider {
 	}
 
 
+	/**
+	 * Returns the URL of a link to the location on a map.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return string URL.
+	 */
 	public function get_the_map_url() {
 		return sprintf( 'https://www.openstreetmap.org/?mlat=%1$s&mlon=%2$s#map=%3$s/%1$s/%2$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
+	/**
+	 * Returns the HTML for the map, which is always the static map.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @param boolean $static Unused; the map is always static.
+	 * @return string HTML marked up map.
+	 */
 	public function get_the_map( $static = true ) {
 		return $this->get_the_static_map_html( true );
 	}
 
+	/**
+	 * Returns the URL of a static map with multiple locations.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string URL, or an empty string without the settings it needs or without locations.
+	 */
 	public function get_archive_map( $locations ) {
 		if ( empty( $this->api ) || empty( $this->style ) || empty( $locations ) ) {
 			return '';
@@ -146,6 +183,13 @@ class Map_Provider_Mapbox extends Map_Provider {
 		return array( 1, 2 );
 	}
 
+	/**
+	 * Returns the URL of a static map of the location.
+	 *
+	 * @since 3.4.0
+	 *
+	 * @return string URL, or an empty string without the settings it needs.
+	 */
 	public function get_the_static_map() {
 		if ( empty( $this->api ) || empty( $this->style ) ) {
 			return '';

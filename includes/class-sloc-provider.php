@@ -327,7 +327,12 @@ abstract class Sloc_Provider {
 	}
 
 	/**
-	 * Sanitizes API Keys and Similar
+	 * Sanitizes API Keys and Similar.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param mixed $string Value.
+	 * @return string|false Trimmed value without slashes, or false if it isn't a string.
 	 */
 	public static function sanitize_api_key( $string ) {
 		if ( ! is_string( $string ) ) {
@@ -338,7 +343,13 @@ abstract class Sloc_Provider {
 	}
 
 	/**
-	 * Adds a Setting Field for a Parameter of Type String
+	 * Adds a password field for a credential setting to the API settings page.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param string      $name     Name of the service.
+	 * @param string      $property Option name.
+	 * @param string|null $type     Kind of setting, for the title. Default 'API Key'.
 	 */
 	public static function add_settings_parameter( $name, $property, $type = null ) {
 		if ( ! $type ) {
@@ -360,7 +371,13 @@ abstract class Sloc_Provider {
 	}
 
 	/**
-	 * Adds a Setting Field for a Parameter of Type URL
+	 * Adds a URL field for a setting to the API settings page.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param string      $name     Name of the service.
+	 * @param string      $property Option name.
+	 * @param string|null $type     Kind of setting, for the title. Default 'Service URL'.
 	 */
 	public static function add_settings_url_parameter( $name, $property, $type = null ) {
 		if ( ! $type ) {
@@ -384,7 +401,13 @@ abstract class Sloc_Provider {
 
 
 	/**
-	 * Registers a Setting Field for Credential Based Information
+	 * Registers a setting for credential based information, such as an API key.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param string      $name     Name of the service.
+	 * @param string      $property Option name.
+	 * @param string|null $type     Kind of setting, for the title. Default 'API Key'.
 	 */
 	public static function register_settings_api( $name, $property, $type = null ) {
 		if ( ! $type ) {

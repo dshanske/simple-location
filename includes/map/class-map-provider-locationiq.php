@@ -38,6 +38,13 @@ class Map_Provider_LocationIQ extends Map_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Returns the map styles the provider offers.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @return array Style names keyed by ID.
+	 */
 	public function get_styles() {
 		return array();
 	}
@@ -117,7 +124,14 @@ class Map_Provider_LocationIQ extends Map_Provider {
 		return sprintf( 'https://www.openstreetmap.org/?mlat=%1$s&mlon=%2$s#map=%3$s/%1$s/%2$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the HTML for the map, which is always the static map.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @param boolean $static Unused; the map is always static.
+	 * @return string HTML marked up map.
+	 */
 	public function get_the_map( $static = true ) {
 		return $this->get_the_static_map_html( true );
 	}

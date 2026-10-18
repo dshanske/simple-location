@@ -144,11 +144,10 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	}
 
 	/**
-	 * Return array of station data.
+	 * Converts a Weatherstack weather code to a condition code.
 	 *
-	 * @param string  $id Weather type ID.
-	 * @param boolean $is_day Is It Daytime.
-	 * @return string Icon ID.
+	 * @param string $id Weatherstack weather code.
+	 * @return string Condition code.
 	 */
 	private function code_map( $id ) {
 		switch ( $id ) {

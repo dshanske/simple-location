@@ -15,6 +15,13 @@ defined( 'ABSPATH' ) || exit;
  */
 class Location_Provider_Compass extends Location_Provider {
 
+	/**
+	 * Constructor.
+	 *
+	 * @since 3.6.4
+	 *
+	 * @param array $args Arguments. See Location_Provider::__construct().
+	 */
 	public function __construct( $args = array() ) {
 		$this->name        = __( 'Compass', 'simple-location' );
 		$this->slug        = 'compass';
@@ -25,6 +32,14 @@ class Location_Provider_Compass extends Location_Provider {
 		add_filter( 'user_contactmethods', array( get_called_class(), 'user_contactmethods' ), 12 );
 	}
 
+	/**
+	 * Adds the Compass API key and URL fields to user profiles.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @param string[] $profile_fields Contact methods, keyed by meta key.
+	 * @return string[] Contact methods.
+	 */
 	public static function user_contactmethods( $profile_fields ) {
 		$profile_fields['compass_api'] = __( 'Compass API Key', 'simple-location' );
 		$profile_fields['compass_url'] = __( 'Compass URL', 'simple-location' );
@@ -32,7 +47,15 @@ class Location_Provider_Compass extends Location_Provider {
 	}
 
 
-	// Opposite of array_slice_assoc as this removes only the keys in the $keys array
+	/**
+	 * Removes keys from an array; the opposite of wp_array_slice_assoc().
+	 *
+	 * @since 4.0.2
+	 *
+	 * @param array $array The array.
+	 * @param array $keys  Keys to remove.
+	 * @return array The array without the keys.
+	 */
 	public function array_strip_assoc( $array, $keys ) {
 		foreach ( $keys as $key ) {
 			if ( isset( $array[ $key ] ) ) {
@@ -97,6 +120,16 @@ class Location_Provider_Compass extends Location_Provider {
 		return $time->setTimezone( new DateTimeZone( 'UTC' ) );
 	}
 
+	/**
+	 * Returns the user's track from Compass between two times.
+	 *
+	 * @since 4.1.12
+	 *
+	 * @param DateTime|string $start Start time.
+	 * @param DateTime|string $end   End time.
+	 * @return array|WP_Error|false|null List of array( longitude, latitude ) points; an error or false if the
+	 *                                   request fails, or null without a Compass user, URL or API key.
+	 */
 	public function query( $start, $end ) {
 		if ( is_string( $start ) ) {
 			$start = new DateTime( $start );
@@ -169,6 +202,14 @@ class Location_Provider_Compass extends Location_Provider {
 		return $response;
 	}
 
+	/**
+	 * Removes the altitude from a point.
+	 *
+	 * @since 4.1.12
+	 *
+	 * @param array $array Point, as array( longitude, latitude, altitude ).
+	 * @return array Point without the altitude.
+	 */
 	private function drop_altitude( $array ) {
 		if ( 3 === count( $array ) ) {
 			unset( $array[2] );
@@ -176,6 +217,16 @@ class Location_Provider_Compass extends Location_Provider {
 		return $array;
 	}
 
+	/**
+	 * Retrieves the user's location from Compass, at a time or the latest.
+	 *
+	 * @since 3.6.4
+	 *
+	 * @param string|int|DateTime $time An ISO8601 time string, unix timestamp, or DateTime. Optional; defaults to the latest location.
+	 * @param array               $args Optional arguments to be passed.
+	 * @return WP_Error|false|null An error, or false, if no location was found; null when the location is set (read it
+	 *                             with get()), or without a Compass user, URL or API key.
+	 */
 	public function retrieve( $time = null, $args = array() ) {
 		$this->reset();
 		$user_id = $this->compass_user();
@@ -316,7 +367,7 @@ class Location_Provider_Compass extends Location_Provider {
 	/**
 	 * Set Speed Parameter
 	 *
-	 * @param array $properties Property Array
+	 * @param array $properties Property Array.
 	 *
 	 * @return null|float Speed.
 	 */
@@ -393,7 +444,7 @@ class Location_Provider_Compass extends Location_Provider {
 	/**
 	 * Convert extra properties for storage
 	 *
-	 * @param array $properties Property Array
+	 * @param array $properties Property Array.
 	 */
 	private function other( $properties ) {
 		// Store other properties in other

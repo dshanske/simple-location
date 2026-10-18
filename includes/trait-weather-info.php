@@ -1,6 +1,8 @@
 <?php
 /**
  * Weather Info Helper Trait.
+ *
+ * @package Simple_Location
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -56,6 +58,13 @@ trait Weather_Info_Trait {
 		return round( $inhg / 0.02953, 2 );
 	}
 
+	/**
+	 * Returns the temperature unit for the measurement setting.
+	 *
+	 * @since 3.3.1
+	 *
+	 * @return string 'F' for imperial, otherwise 'C'.
+	 */
 	public static function temp_unit() {
 		switch ( get_option( 'sloc_measurements' ) ) {
 			case 'imperial':
@@ -345,8 +354,15 @@ trait Weather_Info_Trait {
 			return false;
 	}
 
-	/*
+	/**
+	 * Returns the description of a weather condition code, or all of them.
+	 *
 	 * An adaptation of the OpenWeatherMap weather condition codes, replacing the use of icon mapping.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param string|int|null $code Condition code. Optional.
+	 * @return string|array The description, an empty string for an unknown code, or every description keyed by code when the code isn't a number.
 	 */
 	public static function weather_condition_codes( $code = null ) {
 		$map = array(
@@ -443,8 +459,14 @@ trait Weather_Info_Trait {
 	}
 
 
-	/*
-	 * Map Codes to Icons
+	/**
+	 * Returns the icon for a weather condition code.
+	 *
+	 * @since 5.0.0
+	 *
+	 * @param string|int $code   Condition code.
+	 * @param boolean    $is_day Whether it is daytime, for conditions with day and night icons. Default true.
+	 * @return string Icon name, or an empty string for an unknown code.
 	 */
 	public static function weather_condition_icons( $code, $is_day = true ) {
 		switch ( $code ) {

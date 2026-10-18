@@ -15,6 +15,13 @@ defined( 'ABSPATH' ) || exit;
 class Map_Provider_TomTom extends Map_Provider {
 	use Sloc_API_TomTom;
 
+	/**
+	 * Constructor.
+	 *
+	 * @since 4.4.9
+	 *
+	 * @param array $args Arguments. See Map_Provider::__construct().
+	 */
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'TomTom Maps', 'simple-location' );
 		$this->slug         = 'tomtom';
@@ -32,6 +39,13 @@ class Map_Provider_TomTom extends Map_Provider {
 		parent::__construct( $args );
 	}
 
+	/**
+	 * Returns the map styles the provider offers.
+	 *
+	 * @since 4.4.9
+	 *
+	 * @return array Style names keyed by ID.
+	 */
 	public function get_styles() {
 		return array(
 			'main'  => __( 'Default', 'simple-location' ),
@@ -39,7 +53,13 @@ class Map_Provider_TomTom extends Map_Provider {
 		);
 	}
 
-	// Return code for map
+	/**
+	 * Returns the URL of a static map of the location.
+	 *
+	 * @since 4.4.9
+	 *
+	 * @return string URL, or an empty string without the settings it needs.
+	 */
 	public function get_the_static_map() {
 		if ( empty( $this->api ) ) {
 			return '';
@@ -60,15 +80,37 @@ class Map_Provider_TomTom extends Map_Provider {
 		return $map;
 	}
 
+	/**
+	 * Returns the URL of a static map with multiple locations.
+	 *
+	 * @since 4.4.9
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string Always an empty string; TomTom has no map of multiple locations.
+	 */
 	public function get_archive_map( $locations ) {
 		return '';
 	}
 
+	/**
+	 * Returns the URL of a link to the location on a map.
+	 *
+	 * @since 4.4.9
+	 *
+	 * @return string URL.
+	 */
 	public function get_the_map_url() {
 		return sprintf( 'https://www.openstreetmap.org/?mlat=%1$s&mlon=%2$s#map=%3$s/%1$s/%2$s', $this->latitude, $this->longitude, $this->map_zoom );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the HTML for the map, which is always the static map.
+	 *
+	 * @since 4.4.9
+	 *
+	 * @param boolean $static Unused; the map is always static.
+	 * @return string HTML marked up map.
+	 */
 	public function get_the_map( $static = true ) {
 		return $this->get_the_static_map_html( true );
 	}

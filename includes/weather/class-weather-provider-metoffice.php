@@ -190,11 +190,11 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	}
 
 	/**
-	 * Convert Status Code to Text.
+	 * Converts a Met Office weather type to a condition code.
 	 *
-	 * @param int $code Code.
-	 * @return string Textual Summary of Status Code.
-	 **/
+	 * @param int $type Met Office weather type.
+	 * @return int|string Condition code.
+	 */
 	public static function code_map( $type ) {
 		$types = array(
 			0  => 800,

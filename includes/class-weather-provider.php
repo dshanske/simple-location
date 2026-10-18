@@ -289,12 +289,22 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Marks up a measurement.
 	 *
+	 * @since 4.4.9
 	 * @since 6.0.0 Cloudiness is shown as a whole percentage unless a precision is given.
 	 *
-	 * @param string  $property Property.
-	 * @param mixed   $value Value of the Property.
-	 * @param boolean $markup Add Microformats Markup.
-	 * @return string Marked up value.
+	 * @param string $property Property.
+	 * @param mixed  $value    Value of the Property.
+	 * @param array  $args {
+	 *     Optional. Arguments.
+	 *
+	 *     @type boolean     $markup    Mark the value up with microformats. Default true.
+	 *     @type string      $container Element to wrap the value in. Default 'li'.
+	 *     @type mixed       $label     Unused.
+	 *     @type string      $units     'imperial' or 'metric'. Defaults to the measurement setting.
+	 *     @type boolean|int $round     False rounds to 2 decimal places, true to a whole number,
+	 *                                  and a number to that precision. Default false.
+	 * }
+	 * @return string Marked up value, or an empty string for an unknown property.
 	 */
 	public static function markup_value( $property, $value, $args = array() ) {
 		$defaults      = array(
