@@ -324,8 +324,9 @@ class Post_Venue {
 	 * Add Notice when Bulk Action is run with results.
 	 */
 	public static function bulk_action_admin_notices() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the count that the bulk action redirect added, to show a notice.
 		if ( isset( $_REQUEST['bulk_venue_children'] ) ) {
-			$count = intval( $_REQUEST['bulk_venue_children'] );
+			$count = intval( $_REQUEST['bulk_venue_children'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the count that the bulk action redirect added, to show a notice.
 			if ( 0 === $count ) {
 				$string = __( 'None of the Venues Were Updated.', 'simple-location' );
 			} else {
@@ -363,8 +364,9 @@ class Post_Venue {
 			return;
 		}
 		$selected = 'all';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the list filter to show it as selected.
 		if ( isset( $_REQUEST['venue_type'] ) ) {
-			$selected = sanitize_text_field( $_REQUEST['venue_type'] );
+			$selected = sanitize_text_field( wp_unslash( $_REQUEST['venue_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the list filter to show it as selected.
 		}
 		$list  = array( '' => __( 'All Types', 'simple-location' ) );
 		$types = get_terms(

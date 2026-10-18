@@ -221,10 +221,11 @@ class Geo_Data {
 	 * @since 1.0.0
 	 */
 	public static function pre_get_comments( $query ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the comment list filter.
 		if ( ! isset( $_REQUEST['geo'] ) ) {
 			return;
 		}
-		$geo  = sanitize_text_field( $_REQUEST['geo'] );
+		$geo  = sanitize_text_field( wp_unslash( $_REQUEST['geo'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the comment list filter.
 		$args = self::filter_geo_query( $geo );
 		if ( ! empty( $args ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Filters comments by location on request.

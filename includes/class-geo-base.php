@@ -373,8 +373,9 @@ class Geo_Base {
 	 * Add Notice when Bulk Action is run with results.
 	 */
 	public static function bulk_action_admin_notices() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the count that the bulk action redirect added, to show a notice.
 		if ( isset( $_REQUEST['bulk_lookup_location_count'] ) ) {
-			$count = intval( $_REQUEST['bulk_lookup_location_count'] );
+			$count = intval( $_REQUEST['bulk_lookup_location_count'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the count that the bulk action redirect added, to show a notice.
 			if ( 0 === $count ) {
 				$string = __( 'None of the Posts Were Updated.', 'simple-location' );
 			} else {
@@ -580,8 +581,9 @@ class Geo_Base {
 		}
 		$type     = get_post_type_object( $post_type );
 		$selected = 'none';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the list filter to show it as selected.
 		if ( isset( $_REQUEST['geo'] ) ) {
-			$selected = sanitize_text_field( $_REQUEST['geo'] );
+			$selected = sanitize_text_field( wp_unslash( $_REQUEST['geo'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the list filter to show it as selected.
 		}
 		$list = array(
 			'none'      => $type->labels->all_items,
@@ -608,8 +610,9 @@ class Geo_Base {
 	 */
 	public static function geo_comments_dropdown() {
 		$selected = 'none';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the list filter to show it as selected.
 		if ( isset( $_REQUEST['geo'] ) ) {
-			$selected = sanitize_text_field( $_REQUEST['geo'] );
+			$selected = sanitize_text_field( wp_unslash( $_REQUEST['geo'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the list filter to show it as selected.
 		}
 		$list = array(
 			'none'      => esc_html__( 'All Comments', 'simple-location' ),
@@ -1321,7 +1324,7 @@ class Geo_Base {
 		}
 
 		// Verify that the nonce is valid.
-		if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['location_metabox_nonce'] ) ), 'location_metabox' ) ) {
 			return;
 		}
 		// If this is an autosave, our form has not been submitted, so we don't want to do anything.
@@ -1350,7 +1353,7 @@ class Geo_Base {
 				delete_post_meta( $post_id, 'venue_radius' );
 			}
 			if ( isset( $_POST['venue_url'] ) ) {
-				update_post_meta( $post_id, 'venue_url', sanitize_url( $_POST['venue_url'] ) );
+				update_post_meta( $post_id, 'venue_url', sanitize_url( wp_unslash( $_POST['venue_url'] ) ) );
 			} else {
 				delete_post_meta( $post_id, 'venue_url' );
 			}
@@ -1375,7 +1378,7 @@ class Geo_Base {
 			return;
 		}
 		// Verify that the nonce is valid.
-		if ( ! wp_verify_nonce( $_POST['location_metabox_nonce'], 'location_metabox' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['location_metabox_nonce'] ) ), 'location_metabox' ) ) {
 			return;
 		}
 		// If this is an autosave, our form has not been submitted, so we don't want to do anything.

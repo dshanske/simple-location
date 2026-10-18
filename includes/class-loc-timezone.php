@@ -468,7 +468,7 @@ class Loc_Timezone {
 			return;
 		}
 		// Verify that the nonce is valid.
-		if ( ! wp_verify_nonce( $_POST['timezone_override_nonce'], 'timezone_override_metabox' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['timezone_override_nonce'] ) ), 'timezone_override_metabox' ) ) {
 			return;
 		}
 		// If this is an autosave, our form has not been submitted, so we don't want to do anything.

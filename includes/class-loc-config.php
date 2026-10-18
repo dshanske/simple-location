@@ -515,7 +515,7 @@ class Loc_Config {
 	 * @since 1.0.0
 	 */
 	public static function simloc_options() {
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'general';
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'general'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads which settings tab to show.
 
 		?>
 		<div class="wrap">
