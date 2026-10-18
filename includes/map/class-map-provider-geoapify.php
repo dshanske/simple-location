@@ -16,7 +16,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	use Sloc_API_Geoapify;
 
 	/**
-	 * Geoapify's terms allow storing and caching its static maps, so they are served from the site.
+	 * Geoapify's terms allow storing and caching its static maps, with no time limit, so they are served from the site.
 	 *
 	 * @since 6.0.0
 	 * @var bool

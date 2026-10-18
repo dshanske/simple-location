@@ -81,6 +81,16 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $cacheable = false;
 
 	/**
+	 * Longest time, in days, the provider's terms allow storing a map image. 0 for no limit.
+	 *
+	 * Stored images are fetched again at least this often, whatever the Refresh Stored Maps After setting says.
+	 *
+	 * @since 6.0.0
+	 * @var int
+	 */
+	protected $max_cache_age = 0;
+
+	/**
 	 * Map Style.
 	 *
 	 * @since 1.0.0
@@ -267,6 +277,17 @@ abstract class Map_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns the longest time, in days, the provider's terms allow storing a map image.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @return int Days, or 0 for no limit.
+	 */
+	public function get_max_cache_age() {
+		return (int) $this->max_cache_age;
+	}
+
+	/**
 	 * Returns the parameters that describe the current map, for a map image served from the site.
 	 *
 	 * @since 6.0.0
@@ -295,7 +316,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	/**
 	 * Returns the image URL for an archive map with a marker at each location.
 	 *
-	 * Providers whose terms allow it are served from the site, so the API key isn't in the page.
+	 * Providers whose terms allow it are served from the site, unless that is turned off, so the API key isn't in the page.
 	 *
 	 * @since 6.0.0
 	 *
@@ -307,7 +328,7 @@ abstract class Map_Provider extends Sloc_Provider {
 		if ( empty( $map ) || is_wp_error( $map ) ) {
 			return '';
 		}
-		return $this->cacheable ? Sloc_Map_Cache::get_url( $this, $locations ) : $map;
+		return Sloc_Map_Cache::is_enabled( $this ) ? Sloc_Map_Cache::get_url( $this, $locations ) : $map;
 	}
 
 
@@ -366,7 +387,7 @@ abstract class Map_Provider extends Sloc_Provider {
 		if ( is_wp_error( $orig ) ) {
 			return $this->static_map_error( $orig );
 		}
-		if ( $this->cacheable ) {
+		if ( Sloc_Map_Cache::is_enabled( $this ) ) {
 			$orig = Sloc_Map_Cache::get_url( $this );
 		}
 		$link   = $this->get_the_map_url();
@@ -384,7 +405,7 @@ abstract class Map_Provider extends Sloc_Provider {
 					$this->scale = $scale;
 					return $this->static_map_error( $image );
 				}
-				if ( $this->cacheable ) {
+				if ( Sloc_Map_Cache::is_enabled( $this ) ) {
 					$image = Sloc_Map_Cache::get_url( $this );
 				}
 				$srcset[] = sprintf( '%1$s %2$sx', esc_url( $image ), $density );

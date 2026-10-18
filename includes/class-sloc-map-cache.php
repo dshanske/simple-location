@@ -12,9 +12,13 @@ defined( 'ABSPATH' ) || exit;
  *
  * Map image URLs point to this site instead of the provider, so the provider's API key never reaches the browser
  * and visitors never contact the provider. Each URL carries the map's parameters and a signature made with a
- * secret only the site knows, so the endpoint only fetches maps the site itself published. The first request
- * for a map fetches the image from the provider and stores it in the uploads directory; after that, pages link
- * to the stored file.
+ * secret only the site knows, so the endpoint only fetches maps the site itself published.
+ *
+ * The first request for a map fetches the image from the provider and stores it in uploads/sloc-maps. Pages then
+ * link to the stored file until it is older than the refresh age (30 days by default, never with 0). After that,
+ * pages link to the endpoint again, which fetches the image and overwrites the file in place, so pages cached
+ * with the old link keep working. If a refresh fails, the stored image is served until the next attempt. Stored
+ * images are never deleted automatically; the Clear stored maps button on the settings page deletes them all.
  *
  * @since 6.0.0
  */
@@ -43,6 +47,14 @@ class Sloc_Map_Cache {
 	 * @var string
 	 */
 	const DIRECTORY = 'sloc-maps';
+
+	/**
+	 * Default number of days a stored image is used before it is fetched again.
+	 *
+	 * @since 6.0.0
+	 * @var int
+	 */
+	const DEFAULT_MAX_AGE = 30;
 
 	/**
 	 * Largest image accepted from a provider, in bytes.
@@ -74,6 +86,195 @@ class Sloc_Map_Cache {
 	);
 
 	/**
+	 * Registers the settings.
+	 *
+	 * @since 6.0.0
+	 */
+	public static function init() {
+		register_setting(
+			'simloc',
+			'sloc_map_cache',
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Serve map images from this site, for map providers whose terms allow it',
+				'show_in_rest' => false,
+				'default'      => true,
+			)
+		);
+		register_setting(
+			'simloc',
+			'sloc_map_cache_days',
+			array(
+				'type'              => 'integer',
+				'description'       => 'Days a stored map image is used before it is fetched again. 0 never fetches it again.',
+				'show_in_rest'      => false,
+				'default'           => self::DEFAULT_MAX_AGE,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_days' ),
+			)
+		);
+	}
+
+	/**
+	 * Sanitizes the refresh age.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return int Days, at least 0.
+	 */
+	public static function sanitize_days( $value ) {
+		return is_numeric( $value ) ? max( 0, (int) $value ) : self::DEFAULT_MAX_AGE;
+	}
+
+	/**
+	 * Adds the settings fields to the map settings, when the map provider's terms allow storing its images.
+	 *
+	 * Runs after Loc_Config::admin_init(), which adds the map settings section.
+	 *
+	 * @since 6.0.0
+	 */
+	public static function admin_init() {
+		$map = Loc_Config::map_provider();
+		if ( ! $map instanceof Map_Provider || ! $map->is_cacheable() ) {
+			return;
+		}
+		add_settings_field(
+			'sloc_map_cache',
+			__( 'Serve Maps From This Site', 'simple-location' ),
+			array( __CLASS__, 'enabled_field' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_map_cache',
+				'provider'  => $map,
+			)
+		);
+		add_settings_field(
+			'sloc_map_cache_days',
+			__( 'Refresh Stored Maps After (Days)', 'simple-location' ),
+			array( __CLASS__, 'max_age_field' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_map_cache_days',
+				'provider'  => $map,
+			)
+		);
+	}
+
+	/**
+	 * Echos the field that turns serving maps from the site on or off.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param array $args {
+	 *  Field arguments.
+	 *  @type string       $label_for Option name.
+	 *  @type Map_Provider $provider  Current map provider.
+	 * }
+	 */
+	public static function enabled_field( $args ) {
+		Loc_Config::checkbox_callback( $args );
+		printf(
+			'<p class="description">%s</p>',
+			esc_html(
+				sprintf(
+					// translators: Name of the map provider.
+					__( '%s allows its map images to be stored, so this site can fetch them and serve them itself. Your API key stays on the server, and visitors never contact the provider. When off, map images load from the provider and the API key is part of the image link.', 'simple-location' ),
+					$args['provider']->get_name()
+				)
+			)
+		);
+	}
+
+	/**
+	 * Echos the refresh age field and the Clear stored maps button.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param array $args {
+	 *  Field arguments.
+	 *  @type string       $label_for Option name.
+	 *  @type Map_Provider $provider  Current map provider.
+	 * }
+	 */
+	public static function max_age_field( $args ) {
+		Loc_Config::number_callback( $args );
+		$description = __( 'A stored map is fetched again from the provider after this many days. 0 never fetches it again. Pages cached with the old image keep working.', 'simple-location' );
+		$limit       = $args['provider']->get_max_cache_age();
+		if ( $limit ) {
+			$description .= ' ' . sprintf(
+				// translators: 1. Name of the map provider 2. Number of days.
+				_n( '%1$s allows storing a map for at most %2$d day, so its maps are refreshed at least that often.', '%1$s allows storing a map for at most %2$d days, so its maps are refreshed at least that often.', $limit, 'simple-location' ),
+				$args['provider']->get_name(),
+				$limit
+			);
+		}
+		printf( '<p class="description">%s</p>', esc_html( $description ) );
+
+		$count = count( self::stored_files() );
+		printf(
+			'<p><a class="button" href="%1$s">%2$s</a> %3$s</p>',
+			esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sloc_clear_map_cache' ), 'sloc_clear_map_cache' ) ),
+			esc_html__( 'Clear Stored Maps', 'simple-location' ),
+			esc_html(
+				sprintf(
+					// translators: Number of stored map images.
+					_n( '%d map image is stored.', '%d map images are stored.', $count, 'simple-location' ),
+					$count
+				)
+			)
+		);
+		printf(
+			'<p class="description">%s</p>',
+			esc_html__( 'Clearing deletes every stored map image. Pages show their maps again once they are rebuilt, but pages kept by a page cache may show broken images until their cache expires.', 'simple-location' )
+		);
+	}
+
+	/**
+	 * Deletes every stored map image, from the Clear stored maps button, and returns to the settings page.
+	 *
+	 * @since 6.0.0
+	 */
+	public static function handle_clear() {
+		check_admin_referer( 'sloc_clear_map_cache' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to clear stored maps.', 'simple-location' ), '', array( 'response' => 403 ) );
+		}
+		$count    = self::clear();
+		$redirect = wp_get_referer();
+		if ( ! $redirect ) {
+			$redirect = admin_url( 'admin.php?page=simloc' );
+		}
+		wp_safe_redirect( add_query_arg( 'sloc_maps_cleared', $count, $redirect ) );
+		exit;
+	}
+
+	/**
+	 * Shows how many map images were cleared, after the Clear stored maps button.
+	 *
+	 * @since 6.0.0
+	 */
+	public static function cleared_notice() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only shows a count; the clearing itself checked a nonce.
+		if ( ! isset( $_GET['sloc_maps_cleared'] ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- See above.
+		$count = absint( $_GET['sloc_maps_cleared'] );
+		printf(
+			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+			esc_html(
+				sprintf(
+					// translators: Number of deleted map images.
+					_n( 'Deleted %d stored map image.', 'Deleted %d stored map images.', $count, 'simple-location' ),
+					$count
+				)
+			)
+		);
+	}
+
+	/**
 	 * Registers the map image route.
 	 *
 	 * The route is public, because visitors' browsers load the images. The permission check accepts only URLs
@@ -96,19 +297,74 @@ class Sloc_Map_Cache {
 	}
 
 	/**
+	 * Whether a map provider's images are served from the site.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param Map_Provider $map Map provider.
+	 * @return bool True if the provider's terms allow it and the setting is on.
+	 */
+	public static function is_enabled( $map ) {
+		return $map->is_cacheable() && (bool) get_option( 'sloc_map_cache', true );
+	}
+
+	/**
+	 * Returns how many days a provider's stored images are used before they are fetched again.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param Map_Provider $map Map provider.
+	 * @return int Days, or 0 to never fetch them again.
+	 */
+	public static function get_max_age( $map ) {
+		$days = self::sanitize_days( get_option( 'sloc_map_cache_days', self::DEFAULT_MAX_AGE ) );
+
+		/**
+		 * Filters how many days a stored map image is used before it is fetched again from the provider.
+		 *
+		 * The provider's own limit, from its terms, still applies to the filtered value.
+		 *
+		 * @since 6.0.0
+		 *
+		 * @param int          $days Days, from the Refresh Stored Maps After setting. 0 never fetches the image again.
+		 * @param Map_Provider $map  Map provider.
+		 */
+		$days  = self::sanitize_days( apply_filters( 'sloc_map_cache_max_age', $days, $map ) );
+		$limit = max( 0, (int) $map->get_max_cache_age() );
+		if ( $limit && ( 0 === $days || $days > $limit ) ) {
+			$days = $limit;
+		}
+		return $days;
+	}
+
+	/**
+	 * Whether a stored image is recent enough to use.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param array        $file Stored file, with 'path'.
+	 * @param Map_Provider $map  Map provider.
+	 * @return bool
+	 */
+	protected static function is_fresh( $file, $map ) {
+		$days = self::get_max_age( $map );
+		return 0 === $days || $file['modified'] > time() - $days * DAY_IN_SECONDS;
+	}
+
+	/**
 	 * Returns the URL a page should use for a map image.
 	 *
 	 * @since 6.0.0
 	 *
 	 * @param Map_Provider $map       Map provider, set to the map's location, size and pixel density.
 	 * @param array|null   $locations Optional. List of array( latitude, longitude ) points for an archive map.
-	 * @return string URL of the stored image, or a signed URL of the map image route when it isn't stored yet.
+	 * @return string URL of the stored image, or a signed URL of the map image route if it isn't stored or is due for a refresh.
 	 */
 	public static function get_url( $map, $locations = null ) {
 		$args = $map->get_cache_args( $locations );
 		$sig  = self::sign( $args );
 		$file = self::find( $sig );
-		if ( $file ) {
+		if ( $file && self::is_fresh( $file, $map ) ) {
 			return $file['url'];
 		}
 		$args['sig'] = $sig;
@@ -165,7 +421,9 @@ class Sloc_Map_Cache {
 	}
 
 	/**
-	 * Serves a map image: redirects to the stored file, fetching and storing it first if needed.
+	 * Serves a map image: redirects to the stored file, fetching it first if it isn't stored or is due for a refresh.
+	 *
+	 * If a refresh fails, the stored image is served, and the next request tries again.
 	 *
 	 * @since 6.0.0
 	 *
@@ -174,12 +432,18 @@ class Sloc_Map_Cache {
 	 */
 	public static function serve( $request ) {
 		$args = self::request_args( $request );
+		$map  = self::provider( $args );
+		if ( ! $map ) {
+			return new WP_Error( 'sloc_map_not_found', __( 'This map is not available.', 'simple-location' ), array( 'status' => 404 ) );
+		}
 		$sig  = self::sign( $args );
 		$file = self::find( $sig );
-		if ( ! $file ) {
-			$file = self::fetch( $args, $sig );
-			if ( is_wp_error( $file ) ) {
-				return $file;
+		if ( ! $file || ! self::is_fresh( $file, $map ) ) {
+			$fetched = self::fetch( $map, $args, $sig );
+			if ( ! is_wp_error( $fetched ) ) {
+				$file = $fetched;
+			} elseif ( ! $file ) {
+				return $fetched;
 			}
 		}
 		$response = new WP_REST_Response( null, 302 );
@@ -194,7 +458,7 @@ class Sloc_Map_Cache {
 	 * @since 6.0.0
 	 *
 	 * @param array $args Map parameters.
-	 * @return Map_Provider|null Map provider, or null if the provider doesn't exist or doesn't allow its images to be stored.
+	 * @return Map_Provider|null Map provider, or null if the provider doesn't exist or its terms don't allow storing its images.
 	 */
 	protected static function provider( $args ) {
 		if ( empty( $args['provider'] ) ) {
@@ -224,15 +488,12 @@ class Sloc_Map_Cache {
 	 *
 	 * @since 6.0.0
 	 *
-	 * @param array  $args Map parameters.
-	 * @param string $sig  Signature of the parameters, used as the file name.
-	 * @return array|WP_Error Stored file, with 'path' and 'url', or an error.
+	 * @param Map_Provider $map  Map provider, set from the parameters.
+	 * @param array        $args Map parameters.
+	 * @param string       $sig  Signature of the parameters, used as the file name.
+	 * @return array|WP_Error Stored file, or an error.
 	 */
-	protected static function fetch( $args, $sig ) {
-		$map = self::provider( $args );
-		if ( ! $map ) {
-			return new WP_Error( 'sloc_map_not_found', __( 'This map is not available.', 'simple-location' ), array( 'status' => 404 ) );
-		}
+	protected static function fetch( $map, $args, $sig ) {
 		if ( isset( $args['points'] ) ) {
 			$url = $map->get_archive_map( array_chunk( Sloc_Polyline::decode( $args['points'] ), 2 ) );
 		} else {
@@ -269,10 +530,47 @@ class Sloc_Map_Cache {
 		if ( ! empty( $uploads['error'] ) ) {
 			return false;
 		}
-		return array(
+		$directory = array(
 			'path' => trailingslashit( $uploads['basedir'] ) . self::DIRECTORY,
 			'url'  => trailingslashit( $uploads['baseurl'] ) . self::DIRECTORY,
 		);
+
+		/**
+		 * Filters where stored map images are kept.
+		 *
+		 * @since 6.0.0
+		 *
+		 * @param array $directory {
+		 *     Directory. Default uploads/sloc-maps.
+		 *
+		 *     @type string $path Absolute path of the directory.
+		 *     @type string $url  URL of the directory.
+		 * }
+		 */
+		$directory = apply_filters( 'sloc_map_cache_directory', $directory );
+		if ( ! is_array( $directory ) || empty( $directory['path'] ) || empty( $directory['url'] ) || ! is_string( $directory['path'] ) || ! is_string( $directory['url'] ) ) {
+			return false;
+		}
+		return array(
+			'path' => untrailingslashit( $directory['path'] ),
+			'url'  => untrailingslashit( $directory['url'] ),
+		);
+	}
+
+	/**
+	 * Returns the stored image files.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @return string[] File names.
+	 */
+	protected static function stored_files() {
+		$directory = self::directory();
+		if ( ! $directory || ! is_dir( $directory['path'] ) ) {
+			return array();
+		}
+		$pattern = '/^[0-9a-f]{32}\.(' . implode( '|', self::TYPES ) . ')$/';
+		return array_values( preg_grep( $pattern, (array) scandir( $directory['path'] ) ) );
 	}
 
 	/**
@@ -281,7 +579,8 @@ class Sloc_Map_Cache {
 	 * @since 6.0.0
 	 *
 	 * @param string $sig Signature of the map parameters.
-	 * @return array|false Stored file, with 'path' and 'url', or false if it isn't stored.
+	 * @return array|false Stored file, with 'path', 'url' (with the modification time, so a refreshed image gets a new
+	 *                     URL) and 'modified', or false if it isn't stored.
 	 */
 	protected static function find( $sig ) {
 		$directory = self::directory();
@@ -289,11 +588,13 @@ class Sloc_Map_Cache {
 			return false;
 		}
 		foreach ( self::TYPES as $extension ) {
-			$name = $sig . '.' . $extension;
-			if ( file_exists( $directory['path'] . '/' . $name ) ) {
+			$path = $directory['path'] . '/' . $sig . '.' . $extension;
+			if ( file_exists( $path ) ) {
+				$modified = (int) filemtime( $path );
 				return array(
-					'path' => $directory['path'] . '/' . $name,
-					'url'  => $directory['url'] . '/' . $name,
+					'path'     => $path,
+					'url'      => $directory['url'] . '/' . $sig . '.' . $extension . '?v=' . $modified,
+					'modified' => $modified,
 				);
 			}
 		}
@@ -301,7 +602,7 @@ class Sloc_Map_Cache {
 	}
 
 	/**
-	 * Stores an image.
+	 * Stores an image, replacing any stored image of the same map.
 	 *
 	 * The directory gets an empty index file, so a server that lists directories doesn't list the maps.
 	 *
@@ -310,7 +611,7 @@ class Sloc_Map_Cache {
 	 * @param string $sig       Signature of the map parameters, used as the file name.
 	 * @param string $extension File extension.
 	 * @param string $body      Image data.
-	 * @return array|WP_Error Stored file, with 'path' and 'url', or an error.
+	 * @return array|WP_Error Stored file, or an error.
 	 */
 	protected static function store( $sig, $extension, $body ) {
 		$directory = self::directory();
@@ -323,14 +624,40 @@ class Sloc_Map_Cache {
 		if ( ! $filesystem->exists( $directory['path'] . '/index.html' ) ) {
 			$filesystem->put_contents( $directory['path'] . '/index.html', '', $mode );
 		}
-		$name = $sig . '.' . $extension;
-		if ( ! $filesystem->put_contents( $directory['path'] . '/' . $name, $body, $mode ) ) {
+		// A refreshed image may come back in another format.
+		foreach ( self::TYPES as $other ) {
+			if ( $other !== $extension && $filesystem->exists( $directory['path'] . '/' . $sig . '.' . $other ) ) {
+				$filesystem->delete( $directory['path'] . '/' . $sig . '.' . $other );
+			}
+		}
+		if ( ! $filesystem->put_contents( $directory['path'] . '/' . $sig . '.' . $extension, $body, $mode ) ) {
 			return $error;
 		}
-		return array(
-			'path' => $directory['path'] . '/' . $name,
-			'url'  => $directory['url'] . '/' . $name,
-		);
+		clearstatcache();
+		$file = self::find( $sig );
+		return $file ? $file : $error;
+	}
+
+	/**
+	 * Deletes every stored map image.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @return int Number of images deleted.
+	 */
+	public static function clear() {
+		$directory = self::directory();
+		$count     = 0;
+		if ( ! $directory ) {
+			return $count;
+		}
+		$filesystem = self::filesystem();
+		foreach ( self::stored_files() as $name ) {
+			if ( $filesystem->delete( $directory['path'] . '/' . $name ) ) {
+				++$count;
+			}
+		}
+		return $count;
 	}
 
 	/**
@@ -349,4 +676,8 @@ class Sloc_Map_Cache {
 	}
 }
 
+add_action( 'init', array( 'Sloc_Map_Cache', 'init' ) );
+add_action( 'admin_init', array( 'Sloc_Map_Cache', 'admin_init' ), 11 );
+add_action( 'admin_post_sloc_clear_map_cache', array( 'Sloc_Map_Cache', 'handle_clear' ) );
+add_action( 'admin_notices', array( 'Sloc_Map_Cache', 'cleared_notice' ) );
 add_action( 'rest_api_init', array( 'Sloc_Map_Cache', 'register_routes' ) );
