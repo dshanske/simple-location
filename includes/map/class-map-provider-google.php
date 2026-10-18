@@ -16,12 +16,31 @@ class Map_Provider_Google extends Map_Provider {
 	use Sloc_API_Google;
 
 	/**
+	 * Base URL of the Maps Static API.
+	 *
+	 * @since 6.0.0
+	 * @var string
+	 */
+	const BASE_URL = 'https://maps.googleapis.com/maps/api/staticmap';
+
+	/**
+	 * URL signing secret from the Google Cloud console, in URL-safe base64.
+	 *
+	 * @since 6.0.0
+	 * @var string
+	 */
+	protected $secret = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
-	 * @since 6.0.0 Uses the Google map API key when one is set.
+	 * @since 6.0.0 Uses the Google map API key when one is set, and the URL signing secret.
 	 *
-	 * @param array $args Arguments. See Map_Provider::__construct().
+	 * @param array $args {
+	 *  Arguments. See Map_Provider::__construct(), plus:
+	 *  @type string $secret URL signing secret. Defaults to the sloc_google_map_secret setting.
+	 * }
 	 */
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'Google Maps', 'simple-location' );
@@ -42,6 +61,10 @@ class Map_Provider_Google extends Map_Provider {
 		if ( empty( $args['style'] ) ) {
 			$args['style'] = 'roadmap';
 		}
+		if ( ! isset( $args['secret'] ) ) {
+			$args['secret'] = get_option( 'sloc_google_map_secret' );
+		}
+		$this->secret = is_string( $args['secret'] ) ? trim( $args['secret'] ) : '';
 
 		parent::__construct( $args );
 	}
@@ -66,13 +89,19 @@ class Map_Provider_Google extends Map_Provider {
 		return array( 1, 2 );
 	}
 
-	// Return code for map
+	/**
+	 * Returns the URL of a static map centered on the location, with a marker.
+	 *
+	 * @since 1.0.0
+	 * @since 6.0.0 The query is URL-encoded, and the URL is signed when a signing secret is set.
+	 *
+	 * @return string|WP_Error URL, an empty string without an API key, or an error if the signing secret isn't valid.
+	 */
 	public function get_the_static_map() {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$url = 'https://maps.googleapis.com/maps/api/staticmap';
-		$map = add_query_arg(
+		return $this->build_url(
 			array(
 				'markers'  => sprintf( 'color:red|label:X|%1$s,%2$s', $this->latitude, $this->longitude ),
 				'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
@@ -81,27 +110,71 @@ class Map_Provider_Google extends Map_Provider {
 				'key'      => $this->api,
 				'zoom'     => $this->map_zoom,
 				'scale'    => $this->scale,
-			),
-			$url
+			)
 		);
-		return $map;
 	}
 
+	/**
+	 * Builds a Maps Static API URL, signed when a signing secret is set.
+	 *
+	 * The query is encoded before signing, because Google checks the signature against the URL exactly as sent.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param array $query Query parameters.
+	 * @return string|WP_Error URL, or an error if the signing secret isn't valid.
+	 */
+	protected function build_url( $query ) {
+		$url = self::BASE_URL . '?' . http_build_query( $query, '', '&', PHP_QUERY_RFC3986 );
+		if ( '' === $this->secret ) {
+			return $url;
+		}
+		$signed = self::sign_url( $url, $this->secret );
+		if ( false === $signed ) {
+			return new WP_Error( 'invalid_signing_secret', __( 'The Google URL signing secret is not valid. Copy it again from the Google Cloud console.', 'simple-location' ) );
+		}
+		return $signed;
+	}
+
+	/**
+	 * Signs a Google Maps Platform URL.
+	 *
+	 * The signature is an HMAC-SHA1 of the URL's path and query, keyed with the decoded secret, in URL-safe base64.
+	 * It is added as the last parameter. See https://developers.google.com/maps/documentation/maps-static/digital-signature
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param string $url    URL with an encoded query.
+	 * @param string $secret URL signing secret, in URL-safe base64.
+	 * @return string|false Signed URL, or false if the secret isn't valid base64.
+	 */
+	public static function sign_url( $url, $secret ) {
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Google issues the secret in base64.
+		$key = base64_decode( strtr( $secret, '-_', '+/' ), true );
+		if ( empty( $key ) ) {
+			return false;
+		}
+		$query    = wp_parse_url( $url, PHP_URL_QUERY );
+		$resource = wp_parse_url( $url, PHP_URL_PATH ) . ( $query ? '?' . $query : '' );
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Google expects the signature in base64.
+		$signature = strtr( base64_encode( hash_hmac( 'sha1', $resource, $key, true ) ), '+/', '-_' );
+		return $url . ( $query ? '&' : '?' ) . 'signature=' . $signature;
+	}
 
 	/**
 	 * Returns the URL of a static map with a marker at each location and a path joining them.
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Uses the roadmap style when none is set, and has no empty marker location.
+	 * @since 6.0.0 The query is URL-encoded, and the URL is signed when a signing secret is set.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
-	 * @return string URL, or an empty string without an API key or locations.
+	 * @return string URL, or an empty string without an API key or locations, or if the signing secret isn't valid.
 	 */
 	public function get_archive_map( $locations ) {
 		if ( empty( $this->api ) || empty( $locations ) ) {
 			return '';
 		}
-		$url = 'https://maps.googleapis.com/maps/api/staticmap';
 
 		$markers = array();
 		foreach ( $locations as $location ) {
@@ -109,7 +182,7 @@ class Map_Provider_Google extends Map_Provider {
 		}
 		$polyline = Sloc_Polyline::encode( $locations );
 
-		$map = add_query_arg(
+		$map = $this->build_url(
 			array(
 				'markers'  => 'size:tiny|color:red|label:P|' . implode( '|', $markers ),
 				'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
@@ -117,10 +190,9 @@ class Map_Provider_Google extends Map_Provider {
 				'language' => get_bloginfo( 'language' ),
 				'key'      => $this->api,
 				'path'     => 'color:0xff0000ff|weight:5|enc:' . $polyline,
-			),
-			$url
+			)
 		);
-		return $map;
+		return is_wp_error( $map ) ? '' : $map;
 	}
 
 	/**
