@@ -22,6 +22,78 @@ defined( 'ABSPATH' ) || exit;
 class Airport_Location {
 
 	/**
+	 * Airport fields with an index in data/index/.
+	 *
+	 * @since 6.0.0
+	 * @var string[]
+	 */
+	const AIRPORT_INDEXES = array( 'iata_code', 'ident', 'gps_code', 'municipality' );
+
+	/**
+	 * Airline fields with an index in data/index/.
+	 *
+	 * @since 6.0.0
+	 * @var string[]
+	 */
+	const AIRLINE_INDEXES = array( 'iata_code', 'icao_code' );
+
+	/**
+	 * Returns the path of an index file.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param string $name Index name, such as airports-iata_code.
+	 * @return string Path.
+	 */
+	protected static function index_file( $name ) {
+		return trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/index/' . $name . '.idx';
+	}
+
+	/**
+	 * Converts a row of airports.csv to an airport.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param array $keys Column numbers keyed by column name.
+	 * @param array $line Row.
+	 * @return array Airport. See get().
+	 */
+	protected static function airport_from_row( $keys, $line ) {
+		$airport = array();
+		foreach ( $keys as $key => $value ) {
+			if ( ! isset( $line[ $value ] ) ) {
+				continue;
+			}
+			if ( 'keywords' === $key ) {
+				$airport[ $key ] = explode( ',', $line[ $value ] );
+				$airport[ $key ] = array_map( 'trim', $airport[ $key ] );
+				$airport[ $key ] = array_filter( $airport[ $key ] );
+			} elseif ( 'iata_code' === $key ) {
+				$airport['code'] = $line[ $value ];
+			} elseif ( 'latitude_deg' === $key ) {
+				$airport['latitude'] = clean_coordinate( $line[ $value ], 'latitude' );
+			} elseif ( 'longitude_deg' === $key ) {
+				$airport['longitude'] = clean_coordinate( $line[ $value ], 'longitude' );
+			} elseif ( 'elevation_ft' === $key ) {
+				// Many airports have no elevation in the file. Don't mistake that for sea level.
+				if ( is_numeric( $line[ $value ] ) ) {
+					$airport['elevation']    = round( (int) $line[ $value ] * 0.3048 );
+					$airport['elevation_ft'] = (int) $line[ $value ];
+				}
+			} elseif ( 'scheduled_service' === $key ) {
+				$airport['scheduled_service'] = ( 'yes' === $line[ $value ] );
+			} else {
+				$airport[ $key ] = $line[ $value ];
+			}
+		}
+		// Keep 0, which is a real elevation for airports at sea level.
+		return array_filter(
+			$airport,
+			fn( $value ) => null !== $value && '' !== $value && false !== $value && array() !== $value
+		);
+	}
+
+	/**
 	 * Return an array of information based on passed data.
 	 *
 	 * @param string $search Value to Search For.
@@ -55,6 +127,7 @@ class Airport_Location {
 	 * @since 6.0.0 Elevation is converted from feet to meters correctly, the first airport in the file can be found, and
 	 *              searches that return a list are cached as a list.
 	 * @since 6.0.0 An elevation of 0 is kept.
+	 * @since 6.0.0 Searches by IATA code, ident, GPS code or municipality use an index instead of reading the whole file.
 	 */
 	public static function get( $search, $field = 'iata_code' ) {
 		$search    = trim( (string) $search );
@@ -71,56 +144,40 @@ class Airport_Location {
 			return new WP_Error( 'filesystem_error', "File doesn't exist" );
 		}
 		$fp   = fopen( $file, 'r' ); // phpcs:ignore
-		rewind( $fp );
 		$keys = array_flip( fgetcsv( $fp, 0, ',', '"', '' ) );
 		if ( '' === $search || ! isset( $keys[ $field ] ) ) {
 			fclose( $fp ); // phpcs:ignore
 			return self::not_found();
 		}
-		$return = array();
-		$line   = fgetcsv( $fp, 0, ',', '"', '' );
-		while ( $line ) {
-			if ( is_array( $line ) && isset( $line[ $keys[ $field ] ] ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
-				$airport = array();
-				foreach ( $keys as $key => $value ) {
-					if ( 'keywords' === $key ) {
-						$airport[ $key ] = explode( ',', $line[ $value ] );
-						$airport[ $key ] = array_map( 'trim', $airport[ $key ] );
-						$airport[ $key ] = array_filter( $airport[ $key ] );
-					} elseif ( 'iata_code' === $key ) {
-						$airport['code'] = $line[ $value ];
-					} elseif ( 'latitude_deg' === $key ) {
-						$airport['latitude'] = clean_coordinate( $line[ $value ], 'latitude' );
-					} elseif ( 'longitude_deg' === $key ) {
-						$airport['longitude'] = clean_coordinate( $line[ $value ], 'longitude' );
-					} elseif ( 'elevation_ft' === $key ) {
-						// Many airports have no elevation in the file. Don't mistake that for sea level.
-						if ( is_numeric( $line[ $value ] ) ) {
-							$airport['elevation']    = round( (int) $line[ $value ] * 0.3048 );
-							$airport['elevation_ft'] = (int) $line[ $value ];
-						}
-					} elseif ( 'scheduled_service' === $key ) {
-						$airport['scheduled_service'] = ( 'yes' === $line[ $value ] );
-					} else {
-						$airport[ $key ] = $line[ $value ];
-					}
+
+		$rows = null;
+		if ( in_array( $field, self::AIRPORT_INDEXES, true ) ) {
+			$rows = Sloc_Data_Index::find( self::index_file( 'airports-' . $field ), $file, $search );
+		}
+		if ( null === $rows ) {
+			// No index for this field, or it is out of date: read the whole file, keeping the matching rows.
+			$rows = array();
+			$line = fgetcsv( $fp, 0, ',', '"', '' );
+			while ( $line ) {
+				if ( isset( $line[ $keys[ $field ] ] ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
+					$rows[] = $line;
 				}
-				// Keep 0, which is a real elevation for airports at sea level.
-				$airport = array_filter(
-					$airport,
-					fn( $value ) => null !== $value && '' !== $value && false !== $value && array() !== $value
-				);
+				$line = fgetcsv( $fp, 0, ',', '"', '' );
+			}
+		}
+		fclose( $fp ); // phpcs:ignore
+
+		$return = array();
+		foreach ( $rows as $line ) {
+			if ( is_array( $line ) && isset( $line[ $keys[ $field ] ] ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
+				$airport = self::airport_from_row( $keys, $line );
 				if ( in_array( $field, array( 'iata_code', 'ident', 'gps_code' ), true ) ) {
 					$return = $airport;
-
 				} else {
 					$return[] = $airport;
 				}
 			}
-			$line = fgetcsv( $fp, 0, ',', '"', '' );
 		}
-
-		fclose( $fp ); // phpcs:ignore
 
 		if ( empty( $return ) ) {
 			// Remember the miss so repeating an unknown code doesn't search the file again.
@@ -168,6 +225,7 @@ class Airport_Location {
 	 * @since 4.0.0
 	 * @since 6.0.0 The first airline in the file can be found, a WP_Error is returned when nothing is found,
 	 *              searches that find nothing are cached too, cache keys are hashed, and `\N` (no value) is dropped.
+	 * @since 6.0.0 Searches by IATA or ICAO code use an index instead of reading the whole file.
 	 */
 	public static function get_airline( $search, $field = 'iata_code' ) {
 		$keys = array(
@@ -197,13 +255,28 @@ class Airport_Location {
 		if ( ! sloc_file_exists( $file ) ) {
 			return new WP_Error( 'filesystem_error', "File doesn't exist" );
 		}
-		$fp = fopen( $file, 'r' ); // phpcs:ignore
-		rewind( $fp );
-		// The file has no header row, so every line is an airline.
-		$line = fgetcsv( $fp, 0, ',', '"', '' );
-		while ( $line ) {
+		$rows = null;
+		if ( in_array( $field, self::AIRLINE_INDEXES, true ) ) {
+			$rows = Sloc_Data_Index::find( self::index_file( 'airlines-' . $field ), $file, $search );
+		}
+		if ( null === $rows ) {
+			// No index for this field, or it is out of date: read the file, which has no header row, up to the first match.
+			$rows = array();
+			$fp   = fopen( $file, 'r' ); // phpcs:ignore
+			$line = fgetcsv( $fp, 0, ',', '"', '' );
+			while ( $line ) {
+				if ( isset( $line[ $keys[ $field ] ] ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
+					$rows[] = $line;
+					break;
+				}
+				$line = fgetcsv( $fp, 0, ',', '"', '' );
+			}
+			fclose( $fp ); // phpcs:ignore
+		}
+
+		$airline = array();
+		foreach ( $rows as $line ) {
 			if ( is_array( $line ) && isset( $line[ $keys[ $field ] ] ) && 0 === strcasecmp( $line[ $keys[ $field ] ], $search ) ) {
-				$airline = array();
 				foreach ( $keys as $key => $value ) {
 					// OpenFlights writes \N for no value.
 					if ( isset( $line[ $value ] ) && '\N' !== $line[ $value ] ) {
@@ -213,10 +286,7 @@ class Airport_Location {
 				$airline = array_filter( $airline, 'strlen' );
 				break;
 			}
-			$line = fgetcsv( $fp, 0, ',', '"', '' );
 		}
-
-		fclose( $fp ); // phpcs:ignore
 
 		if ( empty( $airline ) ) {
 			// Remember the miss so repeating an unknown code doesn't search the file again.

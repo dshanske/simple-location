@@ -259,6 +259,7 @@ class Simple_Location_Plugin {
 			'class-astronomical-calculator.php', // Calculates sunrise sunset etc.
 			'class-location-plugins.php',
 			'class-loc-timezone.php',
+			'class-sloc-data-index.php', // Sorted indexes of the bundled data files.
 			'class-airport-location.php',
 		);
 

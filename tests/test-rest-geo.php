@@ -858,6 +858,22 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Municipality searches return every airport in the place, from the index; fields without an index still
+	 * work by reading the file.
+	 */
+	public function test_airport_lists() {
+		$airports = Airport_Location::get( 'philadelphia', 'municipality' );
+		$this->assertGreaterThan( 10, count( $airports ) );
+		$this->assertContains( 'KPHL', wp_list_pluck( $airports, 'ident' ) );
+		foreach ( $airports as $airport ) {
+			$this->assertSame( 'Philadelphia', $airport['municipality'] );
+		}
+
+		$airports = Airport_Location::get( 'Philadelphia International Airport', 'name' );
+		$this->assertSame( array( 'KPHL' ), wp_list_pluck( $airports, 'ident' ) );
+	}
+
+	/**
 	 * /airport reports elevation in meters.
 	 */
 	public function test_airport_elevation_in_meters() {
