@@ -127,6 +127,9 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * The default version of this just sets the parameters.
 	 *
+	 * @since 1.0.0
+	 * @since 6.0.0 Without a usable width setting, the default width is the theme's content width, as for the setting itself.
+	 *
 	 * @param array $args {
 	 *  Arguments.
 	 *  @type string $api API Key.
@@ -140,16 +143,10 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *  @type int $map_zoom Map Zoom Level.
 	 */
 	public function __construct( $args = array() ) {
-		global $content_width;
-		$width = 1024;
-		if ( $content_width ) {
-			$width = $content_width;
-		}
-		if ( ! $width || $width > 1 ) {
-			$width = get_option( 'sloc_width' );
-			if ( ! is_numeric( $width ) ) {
-				$width = 1024;
-			}
+		// The setting's registered default is the content width, but it isn't registered before init.
+		$width = get_option( 'sloc_width' );
+		if ( ! is_numeric( $width ) || $width < 1 ) {
+			$width = Loc_Config::get_default_map_width();
 		}
 		$defaults = array(
 			'width'     => $width,

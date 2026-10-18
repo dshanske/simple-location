@@ -127,6 +127,54 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Without a usable width setting, including before the setting is registered on init, maps use the theme's
+	 * content width, and 1024 pixels without one.
+	 */
+	public function test_default_width_without_setting() {
+		global $content_width;
+		$saved = $content_width;
+		unregister_setting( 'simloc', 'sloc_width' );
+		delete_option( 'sloc_width' );
+
+		$content_width = 700; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$this->assertStringEndsWith( '&s=700x467', $this->provider( 'Map_Provider_Sloc_Test' )->get_the_static_map() );
+
+		update_option( 'sloc_width', 0 );
+		$this->assertStringEndsWith( '&s=700x467', $this->provider( 'Map_Provider_Sloc_Test' )->get_the_static_map() );
+
+		$content_width = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$this->assertStringEndsWith( '&s=1024x683', $this->provider( 'Map_Provider_Sloc_Test' )->get_the_static_map() );
+
+		// A saved width wins over the content width.
+		$content_width = 700; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		update_option( 'sloc_width', 500 );
+		$this->assertStringEndsWith( '&s=500x333', $this->provider( 'Map_Provider_Sloc_Test' )->get_the_static_map() );
+
+		$content_width = $saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		Loc_Config::register_map_settings();
+	}
+
+	/**
+	 * The default map width is the content width, or 1024 without one.
+	 */
+	public function test_get_default_map_width() {
+		global $content_width;
+		$saved = $content_width;
+		foreach ( array(
+			array( 640, 640 ),
+			array( '800', 800 ),
+			array( 0, 1024 ),
+			array( 1, 1024 ),
+			array( null, 1024 ),
+			array( 'wide', 1024 ),
+		) as $case ) {
+			$content_width = $case[0]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$this->assertSame( $case[1], Loc_Config::get_default_map_width(), var_export( $case[0], true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+		}
+		$content_width = $saved; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	/**
 	 * Setting an array changes the size, zoom and coordinates together.
 	 */
 	public function test_set_array() {
