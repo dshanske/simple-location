@@ -535,6 +535,25 @@ class TimezoneTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * sloc_get_post_datetime() uses the timezone stored with the post, and ignores one that isn't valid.
+	 */
+	public function test_sloc_get_post_datetime() {
+		$post_id = self::factory()->post->create(
+			array(
+				'post_date'     => '2025-07-01 12:00:00',
+				'post_date_gmt' => '2025-07-01 16:00:00',
+			)
+		);
+		set_post_geodata( $post_id, 'timezone', 'Asia/Tokyo' );
+		$this->assertSame( '2025-07-02T01:00:00+09:00', sloc_get_post_datetime( $post_id )->format( DATE_W3C ) );
+
+		update_post_meta( $post_id, 'geo_timezone', 'Not/AZone' );
+		$this->assertSame( '2025-07-01T12:00:00-04:00', sloc_get_post_datetime( $post_id )->format( DATE_W3C ), 'A timezone that is not valid is ignored instead of throwing.' );
+
+		$this->assertFalse( sloc_get_post_datetime( PHP_INT_MAX ), 'A missing post gives false.' );
+	}
+
+	/**
 	 * REST post responses give the modified date in the post's timezone.
 	 */
 	public function test_rest_post_modified() {
