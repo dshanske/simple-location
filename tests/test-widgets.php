@@ -449,6 +449,29 @@ class WidgetsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A provider that returns no conditions (false, null, an empty array or an empty string) doesn't break any
+	 * weather widget; the airport widget still names the airport.
+	 */
+	public function test_widgets_without_conditions() {
+		$instance = array(
+			'title'     => '',
+			'latitude'  => self::LAT,
+			'longitude' => self::LNG,
+			'station'   => 'backyard',
+			'provider'  => 'sloc_test',
+			'airport'   => 'PHL',
+		);
+		foreach ( array( false, null, array(), '' ) as $conditions ) {
+			Weather_Provider_Sloc_Test::$conditions = $conditions;
+			foreach ( array( new Sloc_Weather_Widget(), new Sloc_Station_Widget(), new Sloc_Airport_Widget() ) as $widget ) {
+				$html = $this->render( $widget, $instance );
+				$this->assertStringEndsWith( '</section>', $html, get_class( $widget ) );
+			}
+			$this->assertStringContainsString( 'Philadelphia International Airport', $html );
+		}
+	}
+
+	/**
 	 * Without an airport, or with a code of the wrong length, the widget closes its wrapper; only administrators see why.
 	 */
 	public function test_airport_invalid() {

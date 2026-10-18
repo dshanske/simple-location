@@ -36,6 +36,7 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 	 *
 	 * @since 6.0.0 Closes the widget wrapper on errors, and shows nothing without an airport.
 	 * @since 6.0.0 Only administrators see error details; visitors see a general message.
+	 * @since 6.0.0 Shows the airport when the provider returns no conditions, instead of a deprecation notice.
 	 *
 	 * @param mixed $args widget parameters
 	 * @param mixed $instance saved widget data
@@ -81,6 +82,10 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 				return;
 			}
 
+			// A provider can return no conditions at all; the airport is still shown.
+			if ( ! is_array( $weather ) ) {
+				$weather = array();
+			}
 			if ( ! isset( $weather['icon'] ) ) {
 				$weather['icon'] = 'wi-thermometer';
 			}
