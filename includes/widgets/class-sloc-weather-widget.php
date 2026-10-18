@@ -1,4 +1,10 @@
 <?php
+/**
+ * Weather Widget
+ *
+ * @package Simple_Location
+ */
+
 defined( 'ABSPATH' ) || exit;
 
 
@@ -27,8 +33,8 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * @since 6.0.0 Closes the widget wrapper when there is no provider or input.
 	 * @since 6.0.0 Only administrators see error details; visitors see a general message.
 	 *
-	 * @param mixed $args widget parameters
-	 * @param mixed $instance saved widget data
+	 * @param array $args     Widget arguments.
+	 * @param array $instance Saved widget settings.
 	 *
 	 * @output echoes current weather
 	 */
@@ -127,6 +133,14 @@ class Sloc_Weather_Widget extends WP_Widget {
 		return array_diff_key( $weather, array_flip( array( 'name', 'station_id', 'latitude', 'longitude', 'altitude' ) ) );
 	}
 
+	/**
+	 * Returns list items for the sun and moon rise and set times and the moon phase at the weather's location.
+	 *
+	 * @since 5.0.24
+	 *
+	 * @param array $weather Weather conditions, with latitude and longitude.
+	 * @return string[] List items, or an empty array without weather.
+	 */
 	protected static function astro_list( $weather ) {
 		if ( ! is_array( $weather ) ) {
 			return array();
@@ -172,6 +186,16 @@ class Sloc_Weather_Widget extends WP_Widget {
 		return $return;
 	}
 
+	/**
+	 * Returns the weather conditions as a heading and list.
+	 *
+	 * @since 4.1.5
+	 *
+	 * @param array      $weather  Weather conditions.
+	 * @param string     $icon     Icon for the location or station name. Default 'fa-map'.
+	 * @param array|null $instance Saved widget settings; `showastro` adds the sun and moon times. Optional.
+	 * @return string HTML, or an empty string without weather.
+	 */
 	protected static function weather_list( $weather, $icon = 'fa-map', $instance = null ) {
 		if ( ! is_array( $weather ) ) {
 			return '';
@@ -236,8 +260,8 @@ class Sloc_Weather_Widget extends WP_Widget {
 	/**
 	 * Widget data updater
 	 *
-	 * @param mixed $new_instance new widget data
-	 * @param mixed $old_instance current widget data
+	 * @param array $new_instance New widget settings.
+	 * @param array $old_instance Previous widget settings.
 	 *
 	 * @return mixed widget data
 	 */
@@ -253,7 +277,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	/**
 	 * Widget form
 	 *
-	 * @param mixed $instance
+	 * @param array $instance Saved widget settings.
 	 *
 	 * @output displays the widget form
 	 */
