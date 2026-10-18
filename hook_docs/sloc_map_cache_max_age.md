@@ -10,7 +10,7 @@ add_filter(
    'sloc_map_cache_max_age',
     function(
         int $days,
-        Simple_Location\Map_Provider $map
+        Map_Provider $map
     ) {
         // Your code here.
         return $days;
@@ -23,11 +23,11 @@ add_filter(
 ## Parameters
 
 - *`int`* `$days` Days, from the Refresh Stored Maps After setting. 0 never fetches the image again.
-- *`Simple_Location\Map_Provider`* `$map` Map provider.
+- *`Map_Provider`* `$map` Map provider.
 
 ## Files
 
-- [includes/class-sloc-map-cache.php:332](https://github.com/dshanske/simple-location/blob/main/includes/class-sloc-map-cache.php#L332)
+- [includes/class-sloc-map-cache.php:332](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-map-cache.php#L332)
 ```php
 apply_filters( 'sloc_map_cache_max_age', $days, $map )
 ```

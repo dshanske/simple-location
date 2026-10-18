@@ -1101,6 +1101,15 @@ class Geo_Data {
 			'wrapper-class' => array( 'sloc-display' ), // Class or classes to wrap the entire location in
 			'wrapper-type'  => 'div', // HTML type to wrap the entire location in
 		);
+		/**
+		 * Filters the default arguments for displaying a location.
+		 *
+		 * Arguments passed to the display function override these defaults.
+		 *
+		 * @since 3.2.3
+		 *
+		 * @param array $defaults Default display arguments, such as weather, altitude, taxonomy, link, icon, markup and wrapper-type.
+		 */
 		$defaults = apply_filters( 'simple_location_display_defaults', $defaults );
 		$args     = wp_parse_args( $args, $defaults );
 		$args     = array_merge( $loc, $args );

@@ -30,7 +30,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-geo-data.php:1039](https://github.com/dshanske/simple-location/blob/main/includes/class-geo-data.php#L1039)
+- [includes/class-geo-data.php:1075](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-data.php#L1075)
 ```php
 apply_filters( 'sloc_show_hidden_location', Geo_Base::current_user_can_read( sloc_get_object_from_id( $type, $id ) ), $type, $id )
 ```

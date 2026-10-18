@@ -2,9 +2,9 @@
 
 ```php
 add_filter(
-    'sloc_post_types',
-    function ( $post_types_by_support ) {
-        // Your code here
+   'sloc_post_types',
+    function( $post_types_by_support ) {
+        // Your code here.
         return $post_types_by_support;
     }
 );
@@ -16,11 +16,11 @@ add_filter(
 
 ## Files
 
-- [includes/class-geo-base.php:89](https://github.com/dshanske/simple-location/blob/main/includes/class-geo-base.php#L89)
+- [includes/class-geo-base.php:91](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-base.php#L91)
 ```php
 apply_filters( 'sloc_post_types', get_post_types_by_support( 'geo-location' ) )
 ```
 
 
 
-[Hooks](Hooks)
+[← All Hooks](Hooks)

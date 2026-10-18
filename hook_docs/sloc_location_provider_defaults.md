@@ -2,9 +2,9 @@
 
 ```php
 add_filter(
-    'sloc_location_provider_defaults',
-    function ( $defaults ) {
-        // Your code here
+   'sloc_location_provider_defaults',
+    function( $defaults ) {
+        // Your code here.
         return $defaults;
     }
 );
@@ -16,11 +16,11 @@ add_filter(
 
 ## Files
 
-- [includes/class-location-provider.php:133](https://github.com/dshanske/simple-location/blob/main/includes/class-location-provider.php#L133)
+- [includes/class-location-provider.php:135](https://github.com/dshanske/simple-location/blob/trunk/includes/class-location-provider.php#L135)
 ```php
 apply_filters( 'sloc_location_provider_defaults', $defaults )
 ```
 
 
 
-[Hooks](Hooks)
+[← All Hooks](Hooks)

@@ -2,12 +2,12 @@
 
 ```php
 add_filter(
-    'location_display_name',
-    function (
+   'location_display_name',
+    function(
         $display_name,
         $reverse
     ) {
-        // Your code here
+        // Your code here.
         return $display_name;
     },
     10,
@@ -22,16 +22,16 @@ add_filter(
 
 ## Files
 
-- [includes/class-geo-provider.php:137](https://github.com/dshanske/simple-location/blob/main/includes/class-geo-provider.php#L137)
+- [includes/class-geo-provider.php:140](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L140)
 ```php
 apply_filters( 'location_display_name', $reverse['display_name'], $reverse )
 ```
 
-- [includes/class-geo-provider.php:166](https://github.com/dshanske/simple-location/blob/main/includes/class-geo-provider.php#L166)
+- [includes/class-geo-provider.php:169](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L169)
 ```php
 apply_filters( 'location_display_name', $return, $reverse )
 ```
 
 
 
-[Hooks](Hooks)
+[← All Hooks](Hooks)
