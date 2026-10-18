@@ -108,6 +108,17 @@ class TemplatesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The weather metabox shows the comment's weather on the comment screen.
+	 */
+	public function test_weather_metabox_comment() {
+		update_option( 'sloc_measurements', 'metric' );
+		$comment_id = self::factory()->comment->create( array( 'comment_post_ID' => self::factory()->post->create() ) );
+		set_comment_weatherdata( $comment_id, 'temperature', 21.5 );
+		$this->edit_comment( $comment_id );
+		$this->assertStringContainsString( '21.5', $this->render( 'weather-metabox.php' ) );
+	}
+
+	/**
 	 * Without a stored visibility, the location metabox selects the site's default visibility.
 	 */
 	public function test_location_metabox_default_visibility() {
@@ -124,16 +135,5 @@ class TemplatesTest extends WP_UnitTestCase {
 			$this->assertStringContainsString( '<span id="location-visibility-label">' . Geo_Base::geo_public()[ $visibility ] . '</span>', $output );
 			$this->assertStringContainsString( 'id="hidden_location_visibility" value="' . $visibility . '"', $output );
 		}
-	}
-
-	/**
-	 * The weather metabox shows the comment's weather on the comment screen.
-	 */
-	public function test_weather_metabox_comment() {
-		update_option( 'sloc_measurements', 'metric' );
-		$comment_id = self::factory()->comment->create( array( 'comment_post_ID' => self::factory()->post->create() ) );
-		set_comment_weatherdata( $comment_id, 'temperature', 21.5 );
-		$this->edit_comment( $comment_id );
-		$this->assertStringContainsString( '21.5', $this->render( 'weather-metabox.php' ) );
 	}
 }
