@@ -304,4 +304,13 @@ class FunctionsTest extends WP_UnitTestCase {
 		$this->assertEqualsWithDelta( 39.95, wp_exif_gps_convert( array( '39/1', '57/1' ) ), 0.0001 );
 		$this->assertFalse( wp_exif_gps_convert( '39.9524' ) );
 	}
+
+	/**
+	 * Translations load automatically, so load_textdomain() is deprecated and no longer hooked.
+	 */
+	public function test_load_textdomain_deprecated() {
+		$this->assertFalse( has_action( 'init', array( 'Simple_Location_Plugin', 'load_textdomain' ) ) );
+		$this->setExpectedDeprecated( 'Simple_Location_Plugin::load_textdomain' );
+		Simple_Location_Plugin::load_textdomain();
+	}
 }
