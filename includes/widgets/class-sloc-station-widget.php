@@ -1,4 +1,10 @@
 <?php
+/**
+ * Weather Station Widget
+ *
+ * @package Simple_Location
+ */
+
 defined( 'ABSPATH' ) || exit;
 
 
@@ -24,8 +30,8 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	/**
 	 * Widget data updater
 	 *
-	 * @param mixed $new_instance new widget data
-	 * @param mixed $old_instance current widget data
+	 * @param array $new_instance New widget settings.
+	 * @param array $old_instance Previous widget settings.
 	 *
 	 * @return mixed widget data
 	 */
@@ -38,6 +44,15 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 		return $new_instance;
 	}
 
+	/**
+	 * Prints a select element of the weather providers that support stations.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param string $option Selected provider.
+	 * @param string $name   Field name.
+	 * @param string $id     Field ID. Unused.
+	 */
 	public static function provider_list( $option, $name, $id ) {
 		$providers = Loc_Config::weather_providers( true );
 		printf( '<select name="%1$s">', esc_attr( $name ) );
@@ -54,8 +69,8 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	 * @since 6.0.0 Always closes the widget wrapper, and shows nothing without a station.
 	 * @since 6.0.0 Only administrators see error details; visitors see a general message.
 	 *
-	 * @param mixed $args widget parameters
-	 * @param mixed $instance saved widget data
+	 * @param array $args     Widget arguments.
+	 * @param array $instance Saved widget settings.
 	 *
 	 * @output echoes current weather
 	 */
@@ -97,7 +112,7 @@ class Sloc_Station_Widget extends Sloc_Weather_Widget {
 	/**
 	 * Widget form
 	 *
-	 * @param mixed $instance
+	 * @param array $instance Saved widget settings.
 	 *
 	 * @output displays the widget form
 	 */

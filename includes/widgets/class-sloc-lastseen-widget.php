@@ -1,4 +1,10 @@
 <?php
+/**
+ * Last Seen Widget
+ *
+ * @package Simple_Location
+ */
+
 defined( 'ABSPATH' ) || exit;
 
 
@@ -27,8 +33,8 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 	 * @since 6.0.0 The sun and moon list, location and map are passed through wp_kses().
 	 * @since 6.0.0 Respects Show Local Time and Show Astronomical Info; options missing from older widgets use their defaults.
 	 *
-	 * @param mixed $args widget parameters
-	 * @param mixed $instance saved widget data
+	 * @param array $args     Widget arguments.
+	 * @param array $instance Saved widget settings.
 	 *
 	 * @output echoes current weather
 	 */
@@ -109,8 +115,8 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 	/**
 	 * Widget data updater
 	 *
-	 * @param mixed $new_instance new widget data
-	 * @param mixed $old_instance current widget data
+	 * @param array $new_instance New widget settings.
+	 * @param array $old_instance Previous widget settings.
 	 *
 	 * @return mixed widget data
 	 */
@@ -126,7 +132,7 @@ class Sloc_Lastseen_Widget extends Sloc_Weather_Widget {
 	/**
 	 * Widget form
 	 *
-	 * @param mixed $instance
+	 * @param array $instance Saved widget settings.
 	 *
 	 * @output displays the widget form
 	 */

@@ -1,9 +1,15 @@
 <?php
+/**
+ * Airport Weather Widget
+ *
+ * @package Simple_Location
+ */
+
 defined( 'ABSPATH' ) || exit;
 
 
 /**
- * Adds widget to display weather station data with per-provider support
+ * Adds widget to display the current weather at an airport
  */
 class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 
@@ -21,6 +27,15 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 		);
 	}
 
+	/**
+	 * Prints a select element of the weather providers that support stations.
+	 *
+	 * @since 3.5.0
+	 *
+	 * @param string $option Selected provider.
+	 * @param string $name   Field name.
+	 * @param string $id     Field ID. Unused.
+	 */
 	public static function provider_list( $option, $name, $id ) {
 		$providers = Loc_Config::weather_providers( true );
 		printf( '<select name="%1$s">', esc_attr( $name ) );
@@ -38,8 +53,8 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 	 * @since 6.0.0 Only administrators see error details; visitors see a general message.
 	 * @since 6.0.0 Shows the airport when the provider returns no conditions, instead of a deprecation notice.
 	 *
-	 * @param mixed $args widget parameters
-	 * @param mixed $instance saved widget data
+	 * @param array $args     Widget arguments.
+	 * @param array $instance Saved widget settings.
 	 *
 	 * @output echoes current weather
 	 */
@@ -100,7 +115,7 @@ class Sloc_Airport_Widget extends Sloc_Weather_Widget {
 	/**
 	 * Widget form
 	 *
-	 * @param mixed $instance
+	 * @param array $instance Saved widget settings.
 	 *
 	 * @output displays the widget form
 	 */
