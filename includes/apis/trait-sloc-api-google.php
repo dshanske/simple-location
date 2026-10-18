@@ -17,6 +17,7 @@ trait Sloc_API_Google {
 	 * Admin Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.0.0 Adds the map API key field for the map provider.
 	 */
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'Google', 'simple-location' ), 'sloc_google_api' );
@@ -40,6 +41,7 @@ trait Sloc_API_Google {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.0.0 Registers the map API key setting for the map provider.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Google Maps', 'simple-location' ), 'sloc_google_api' );
