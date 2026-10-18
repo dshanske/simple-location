@@ -17,29 +17,11 @@
     	"allow-plugins": {
          "composer/installers": true,
          "dealerdirect/phpcodesniffer-composer-installer": true,
-         "civicrm/composer-downloads-plugin": true,
          "php-http/discovery": true
       }
     },
      "extra": {
-		"installer-name": "simple-location",
-		"downloads": {
-			"airports": {
-				"url": "https://davidmegginson.github.io/ourairports-data/airports.csv",
-				"path": "data/airports.csv",
-				"type": "file"
-			},
-			"airlines": {
-				"url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat",
-				"path": "data/airlines.csv",
-				"type": "file"
-			},
-			"meteostat": {
-				"url": "https://bulk.meteostat.net/v2/stations/lite.json.gz",
-				"path": "data/lite.json.gz",
-				"type": "gzip"
-			}
-		}
+		"installer-name": "simple-location"
      },
     "require": {
 	"php": ">=7.4"
@@ -60,7 +42,6 @@
       "dms/phpunit-arraysubset-asserts": "^0.4.0",
       "sirbrillig/phpcs-variable-analysis": "^2.11",
       "scssphp/scssphp": "^1.13.0",
-      "civicrm/composer-downloads-plugin": "^4.0",
       "simple-icons/simple-icons": "^14.0",
       "wpreadme2markdown/wp2md": "^4.1",
       "akirk/extract-wp-hooks": "^1.0"
@@ -88,6 +69,7 @@
 	                 "cp -u -r vendor/sokil/php-isocodes/databases/iso_3166-1.json data/"
 	],
 	"update-docs": "./vendor/bin/extract-wp-hooks.php",
+	"update-data": "@php bin/update-data.php",
       "build-css": [
       "vendor/bin/pscss --style=expanded sass/main.scss css/location.css",
       "vendor/bin/pscss --style=compressed sass/main.scss css/location.min.css",

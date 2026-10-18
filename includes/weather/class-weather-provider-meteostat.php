@@ -69,7 +69,26 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	}
 
 	/**
+	 * Bundled list of Meteostat stations, relative to the plugin directory. Built by bin/update-data.php.
+	 *
+	 * @since 6.0.0
+	 * @var string
+	 */
+	const STATIONS_FILE = 'data/meteostat-stations.csv';
+
+	/**
+	 * Farthest a station can be from the location, in meters.
+	 *
+	 * @since 6.0.0
+	 * @var int
+	 */
+	const MAX_DISTANCE = 100000;
+
+	/**
 	 * Return array of current conditions
+	 *
+	 * @since 1.0.0
+	 * @since 6.0.0 Finds the station in a slim station list, preferring one with hourly data for the requested time.
 	 *
 	 * @param int $time Time. Optional.
 	 * @return array Current Conditions in Array
@@ -83,24 +102,13 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			return $this->get_station_data( $time );
 		}
 
-		$file = trailingslashit( Simple_Location_Plugin::$path ) . 'data/meteostat.json';
-		if ( ! sloc_file_exists( $file ) ) {
-			return new WP_Error( 'filesystem_error', "File doesn't exist", wp_json_encode( $file ) );
+		$station = $this->find_station( $time );
+		if ( is_wp_error( $station ) ) {
+			return $station;
 		}
-		$data     = sloc_get_contents( $file );
-		$sitelist = json_decode( $data, true );
-		foreach ( $sitelist as $key => $value ) {
-				$sitelist[ $key ]['distance'] = round( geo_distance( $this->latitude, $this->longitude, $value['location']['latitude'], $value['location']['longitude'] ) );
-		}
-		usort(
-			$sitelist,
-			function ( $a, $b ) {
-				return $a['distance'] <=> $b['distance'];
-			}
-		);
-		if ( 100000 > $sitelist[0]['distance'] ) {
-			$this->station_id = $sitelist[0]['id'];
-			$this->station    = array_filter( $sitelist[0] );
+		if ( $station ) {
+			$this->station_id = $station['id'];
+			$this->station    = $station;
 			$return           = self::get_station_data( $time );
 			// Cache by the location that was asked for, not the station.
 			$this->station_id = null;
@@ -108,6 +116,124 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			return $return;
 		}
 		return self::get_fallback_conditions( $time );
+	}
+
+	/**
+	 * Finds the station for the current location and a time, cached for each location and day.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param int|null $time Optional. Requested time as a timestamp. Default now.
+	 * @return array|null|WP_Error Station, null if there is none in range, or an error if the station list is missing.
+	 */
+	protected function find_station( $time = null ) {
+		$date = $this->datetime( $time )->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d' );
+		$key  = 'sloc_meteostat_station_' . md5( implode( ',', array( round( (float) $this->latitude, 2 ), round( (float) $this->longitude, 2 ), $date ) ) );
+
+		$station = get_transient( $key );
+		if ( false !== $station ) {
+			return is_array( $station ) ? $station : null;
+		}
+		$station = self::nearest_station( $this->latitude, $this->longitude, $date );
+		if ( is_wp_error( $station ) ) {
+			return $station;
+		}
+		// An empty string records that there is no station in range.
+		set_transient( $key, $station ?? '', WEEK_IN_SECONDS );
+		return $station;
+	}
+
+	/**
+	 * Finds the nearest station within 100 km, preferring one with hourly data for a date.
+	 *
+	 * Reads the station list one line at a time, so memory use stays small. A station has data for a date when
+	 * the date is within its hourly data, or after it if the station was still reporting within 30 days of when
+	 * the list was built. Without such a station in range, the nearest station is used.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param float       $latitude  Latitude.
+	 * @param float       $longitude Longitude.
+	 * @param string|null $date      Optional. Date as Y-m-d (UTC). Default today.
+	 * @param string|null $file      Optional. Station list. Default the bundled list.
+	 * @return array|null|WP_Error Station in the shape of Meteostat's station data, null if none is in range, or an error if the list can't be read.
+	 */
+	public static function nearest_station( $latitude, $longitude, $date = null, $file = null ) {
+		if ( null === $file ) {
+			$file = trailingslashit( Simple_Location_Plugin::$path ) . self::STATIONS_FILE;
+		}
+		$handle = is_readable( $file ) ? fopen( $file, 'r' ) : false; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		if ( ! $handle ) {
+			return new WP_Error( 'filesystem_error', __( 'The Meteostat station list is missing.', 'simple-location' ), $file );
+		}
+		if ( null === $date ) {
+			$date = gmdate( 'Y-m-d' );
+		}
+		$latitude  = (float) $latitude;
+		$longitude = (float) $longitude;
+
+		// The first line says when the list was built; stations reporting close to then are still active.
+		$active = '';
+		if ( preg_match( '/built (\d{4}-\d{2}-\d{2})/', (string) fgets( $handle ), $match ) ) {
+			$active = gmdate( 'Y-m-d', strtotime( $match[1] . ' -30 days' ) );
+		}
+		$columns = fgetcsv( $handle, 0, ',', '"', '' );
+
+		$nearest  = null;
+		$covering = null;
+		// A degree of latitude is about 111 km, so rows farther than that in latitude can be skipped cheaply.
+		$range = self::MAX_DISTANCE / 111000;
+		while ( false !== ( $line = fgets( $handle ) ) ) { // phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+			// Only the name, the last column, can be quoted, so the coordinates can be read without parsing the row.
+			$start = explode( ',', $line, 4 );
+			if ( count( $start ) < 4 || abs( (float) $start[1] - $latitude ) > $range ) {
+				continue;
+			}
+			$row = str_getcsv( rtrim( $line, "\r\n" ), ',', '"', '' );
+			if ( count( $row ) !== count( $columns ) ) {
+				continue;
+			}
+			$distance = geo_distance( $latitude, $longitude, $row[1], $row[2] );
+			if ( $distance > self::MAX_DISTANCE ) {
+				continue;
+			}
+			$row       = array_combine( $columns, $row );
+			$candidate = array( $distance, $row );
+			if ( ! $nearest || $distance < $nearest[0] ) {
+				$nearest = $candidate;
+			}
+			$has_data = '' !== $row['hourly_start'] && $row['hourly_start'] <= $date && ( $date <= $row['hourly_end'] || ( '' !== $active && $row['hourly_end'] >= $active ) );
+			if ( $has_data && ( ! $covering || $distance < $covering[0] ) ) {
+				$covering = $candidate;
+			}
+		}
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+
+		$found = $covering ?? $nearest;
+		if ( ! $found ) {
+			return null;
+		}
+		$row = $found[1];
+		return array_filter(
+			array(
+				'id'        => $row['id'],
+				'name'      => array( 'en' => $row['name'] ),
+				'country'   => $row['country'],
+				'region'    => $row['region'],
+				'location'  => array(
+					'latitude'  => (float) $row['latitude'],
+					'longitude' => (float) $row['longitude'],
+					'elevation' => '' === $row['elevation'] ? null : (int) $row['elevation'],
+				),
+				'timezone'  => $row['timezone'],
+				'inventory' => array(
+					'hourly' => array(
+						'start' => $row['hourly_start'],
+						'end'   => $row['hourly_end'],
+					),
+				),
+			)
+		);
 	}
 
 	/**

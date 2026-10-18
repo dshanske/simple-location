@@ -73,6 +73,7 @@ Current conditions are for Philadelphia (`39.9524,-75.1636`); station requests u
 | `nws-observation.json` | `GET https://api.weather.gov/stations/KPHL/observations/latest` | Hand-built from docs |
 | `nws-station.json` | `GET https://api.weather.gov/stations/KPHL` | Hand-built from docs |
 | `meteostat-hourly.json` | `GET https://meteostat.p.rapidapi.com/stations/hourly?station=72408&start=2025-07-01&end=2025-07-02` with `x-rapidapi-key` | Hand-built from docs |
+| `meteostat-stations.csv` | Not a response: a hand-made station list in the format of `data/meteostat-stations.csv` (built by `bin/update-data.php`), with stations near City Hall that have hourly data for different years, one without hourly data, and one more than 100 km away | Hand-built |
 | `station-custom.json` | A custom station URL (the plugin's own format; `timestamp` is set by the test) | Hand-built from the plugin's parser |
 
 Weatherstack (API-5), HERE weather (API-4), Met Office (API-3) and the location lookups that sort

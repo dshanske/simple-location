@@ -1,0 +1,6 @@
+# Meteostat weather stations (https://meteostat.net, CC BY 4.0), built 2026-10-01
+id,latitude,longitude,elevation,country,region,timezone,hourly_start,hourly_end,name
+NEAR1,39.98,-75.16,20,US,PA,America/New_York,2010-01-01,2015-12-31,"Near, Closed Station"
+FAR01,40.2,-75.2,60,US,PA,America/New_York,1990-01-01,2026-09-25,"Farther Active Station"
+NODAT,39.96,-75.17,10,US,PA,America/New_York,,,"Station Without Hourly Data"
+OUT01,41.4,-75.1,300,US,PA,America/New_York,1950-01-01,2026-09-30,"Out Of Range"
