@@ -97,6 +97,8 @@ class Sloc_Data_Index {
 		if ( ! $index ) {
 			return null;
 		}
+		// PHP caches file sizes, so a file updated since it was last checked would look unchanged.
+		clearstatcache( true, $data_file );
 		if ( ! preg_match( '/^# size=(\d+)$/', rtrim( (string) fgets( $index ) ), $match ) || filesize( $data_file ) !== (int) $match[1] ) {
 			fclose( $index ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 			return null;

@@ -54,7 +54,8 @@ trait Sloc_Http_Mock {
 			'args' => $args,
 		);
 		foreach ( $this->http_responses as $pattern => $response ) {
-			if ( false === strpos( $url, $pattern ) ) {
+			// An empty pattern matches every URL; PHP 7.4's strpos() doesn't accept an empty needle.
+			if ( '' !== $pattern && false === strpos( $url, $pattern ) ) {
 				continue;
 			}
 			if ( is_wp_error( $response ) ) {
