@@ -902,9 +902,11 @@ class Loc_Config {
 	 *  Arguments for a text input.
 	 *  @type string $label_for Label for Text Input.
 	 *  @type string $type Allows for text or url or other inputs.
+	 *  @type string $description Optional. Help text shown below the input.
 	 * }
 	 *
 	 * @since 1.0.0
+	 * @since 6.0.0 Shows an optional description.
 	 */
 	public static function string_callback( array $args ) {
 		$name = $args['label_for'];
@@ -916,6 +918,9 @@ class Loc_Config {
 			printf( '<input name="%1$s" id="%1$s" size="50" autocomplete="off" class="regular-text" type="password" autocomplete="off" data-lpignore="true" autofill="off" value="%2$s"/>', esc_attr( $name ), esc_attr( $value ) );
 		} else {
 			printf( '<input name="%1$s" id="%1$s" size="50" autocomplete="off" class="regular-text" type="%2$s" value="%3$s" />', esc_attr( $name ), esc_attr( $args['type'] ), esc_attr( $value ) );
+		}
+		if ( ! empty( $args['description'] ) ) {
+			printf( '<p class="description">%s</p>', esc_html( $args['description'] ) );
 		}
 	}
 

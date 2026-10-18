@@ -15,6 +15,14 @@ defined( 'ABSPATH' ) || exit;
 class Map_Provider_Google extends Map_Provider {
 	use Sloc_API_Google;
 
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 * @since 6.0.0 Uses the Google map API key when one is set.
+	 *
+	 * @param array $args Arguments. See Map_Provider::__construct().
+	 */
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'Google Maps', 'simple-location' );
 		$this->url          = 'https://developers.google.com/maps/';
@@ -25,7 +33,7 @@ class Map_Provider_Google extends Map_Provider {
 		$this->max_map_zoom = 20;
 
 		if ( ! isset( $args['api'] ) ) {
-			$args['api'] = get_option( 'sloc_google_api' );
+			$args['api'] = self::get_map_api_key( 'google' );
 		}
 		if ( ! isset( $args['style'] ) ) {
 			$args['style'] = get_option( 'sloc_google_style' );

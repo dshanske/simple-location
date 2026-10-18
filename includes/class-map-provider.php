@@ -163,6 +163,66 @@ abstract class Map_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns a vendor's API key for maps.
+	 *
+	 * Static map image URLs show the key to visitors, so a vendor's maps can use their own key, which can be
+	 * restricted to maps and to this site without breaking the vendor's server-side lookups. Without one,
+	 * the vendor's main key is used.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param string $vendor Vendor slug, as in the option name sloc_{vendor}_api.
+	 * @return string API key, or an empty string.
+	 */
+	protected static function get_map_api_key( $vendor ) {
+		$key = get_option( 'sloc_' . $vendor . '_map_api' );
+		if ( empty( $key ) || ! is_string( $key ) ) {
+			$key = get_option( 'sloc_' . $vendor . '_api' );
+		}
+		return is_string( $key ) ? $key : '';
+	}
+
+	/**
+	 * Registers the setting for a vendor's map API key.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param string $name   Vendor name.
+	 * @param string $vendor Vendor slug, as in the option name sloc_{vendor}_map_api.
+	 */
+	protected static function register_map_api_setting( $name, $vendor ) {
+		self::register_settings_api( $name, 'sloc_' . $vendor . '_map_api', __( 'Map API Key', 'simple-location' ) );
+	}
+
+	/**
+	 * Adds the field for a vendor's map API key to the API settings.
+	 *
+	 * @since 6.0.0
+	 *
+	 * @param string $name   Vendor name.
+	 * @param string $vendor Vendor slug, as in the option name sloc_{vendor}_map_api.
+	 */
+	protected static function add_map_api_setting( $name, $vendor ) {
+		add_settings_field(
+			'sloc_' . $vendor . '_map_api',
+			// translators: Name of the map vendor.
+			sprintf( __( '%s Map API Key', 'simple-location' ), $name ),
+			array( 'Loc_Config', 'string_callback' ),
+			'sloc_api',
+			'sloc_api',
+			array(
+				'label_for'   => 'sloc_' . $vendor . '_map_api',
+				'type'        => 'password',
+				'description' => sprintf(
+					// translators: Name of the map vendor.
+					__( 'Optional. Map images show this key to every visitor, so use a key that only allows static maps and is restricted to this site. Leave empty to use the %s API key.', 'simple-location' ),
+					$name
+				),
+			)
+		);
+	}
+
+	/**
 	 * Is Provider Active
 	 */
 	public function is_active() {

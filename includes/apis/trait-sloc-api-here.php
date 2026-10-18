@@ -21,6 +21,7 @@ trait Sloc_API_Here {
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
+			self::add_map_api_setting( __( 'HERE', 'simple-location' ), 'here' );
 
 			add_settings_field(
 				'herestyle', // id
@@ -44,6 +45,7 @@ trait Sloc_API_Here {
 	public static function init() {
 		self::register_settings_api( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
+			self::register_map_api_setting( __( 'HERE', 'simple-location' ), 'here' );
 
 			register_setting(
 				'simloc',
