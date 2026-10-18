@@ -631,4 +631,42 @@ class TimezoneTest extends WP_UnitTestCase {
 		$this->assertSame( '2025-07-01T12:00:00+00:00', $data['date_gmt'] );
 		$this->assertSame( '2025-07-01T08:00:00-04:00', $data['date'] );
 	}
+
+	/**
+	 * sloc_get_comment_datetime() uses the timezone of the comment's post, so a thread reads in one timezone.
+	 */
+	public function test_sloc_get_comment_datetime() {
+		$post_id    = self::factory()->post->create();
+		$comment_id = self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_date'     => '2025-07-01 12:00:00',
+				'comment_date_gmt' => '2025-07-01 16:00:00',
+			)
+		);
+		set_post_geodata( $post_id, 'timezone', 'Asia/Tokyo' );
+		set_comment_geodata( $comment_id, 'timezone', 'Europe/Paris' );
+
+		$datetime = sloc_get_comment_datetime( $comment_id );
+		$this->assertSame( 'Asia/Tokyo', $datetime->getTimezone()->getName(), "The post's timezone, not the comment's." );
+		$this->assertSame( '2025-07-02T01:00:00+09:00', $datetime->format( DATE_W3C ) );
+		$this->assertSame( 'Asia/Tokyo', sloc_get_comment_datetime( get_comment( $comment_id ) )->getTimezone()->getName(), 'A comment object works too.' );
+
+		// A post whose ID matches the comment ID isn't used.
+		$other   = self::factory()->comment->create( array( 'comment_post_ID' => $post_id ) );
+		$same_id = self::factory()->post->create( array( 'import_id' => $other ) );
+		$this->assertSame( $other, $same_id );
+		set_post_geodata( $same_id, 'timezone', 'America/Los_Angeles' );
+		$this->assertSame( 'Asia/Tokyo', sloc_get_comment_datetime( $other )->getTimezone()->getName() );
+
+		// Without a timezone on the post, the site timezone applies.
+		delete_post_meta( $post_id, 'geo_timezone' );
+		$this->assertSame( wp_timezone_string(), sloc_get_comment_datetime( $comment_id )->getTimezone()->getName() );
+
+		// A stored timezone that isn't valid is ignored instead of throwing.
+		update_post_meta( $post_id, 'geo_timezone', 'Not/AZone' );
+		$this->assertSame( wp_timezone_string(), sloc_get_comment_datetime( $comment_id )->getTimezone()->getName() );
+
+		$this->assertFalse( sloc_get_comment_datetime( PHP_INT_MAX ), 'A missing comment gives false.' );
+	}
 }
