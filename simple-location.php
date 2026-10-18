@@ -247,6 +247,7 @@ class Simple_Location_Plugin {
 			'class-location-taxonomy.php', // Venue Taxonomy.
 			'class-sloc-provider.php', // Base Provider Class.
 			'class-map-provider.php', // Map Provider Class.
+			'class-sloc-map-cache.php', // Map images served from the site.
 			'class-geo-provider.php', // Geo Provider Class.
 			'class-elevation-provider.php', // Elevation Provider Class.
 			'class-venue-provider.php', // Venue Provider Class.

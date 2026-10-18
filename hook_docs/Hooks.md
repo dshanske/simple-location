@@ -40,6 +40,11 @@
 
 - [`sloc_local_api_public`](sloc_local_api_public) Filters whether the local airport and timezone lookup endpoints are open to everyone.
 
+## class-sloc-map-cache.php
+
+- [`sloc_map_cache_directory`](sloc_map_cache_directory) Filters where stored map images are kept.
+- [`sloc_map_cache_max_age`](sloc_map_cache_max_age) Filters how many days a stored map image is used before it is fetched again from the provider.
+
 ## class-venue-provider.php
 
 - [`sloc_venue_provider_defaults`](sloc_venue_provider_defaults)

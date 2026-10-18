@@ -25,7 +25,7 @@ if ( is_day() ) {
 				?>
 			</header><!-- .page-header -->
 			<?php $map_provider = Loc_Config::map_provider(); ?>
-		<img class="archive-map sloc-map" src="<?php echo esc_url( $map_provider->get_archive_map( get_geo_archive_location_list() ) ); ?>" />
+		<img class="archive-map sloc-map" src="<?php echo esc_url( $map_provider->get_archive_map_src( get_geo_archive_location_list() ) ); ?>" />
 		<ul>
 			<?php
 		}

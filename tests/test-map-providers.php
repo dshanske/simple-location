@@ -244,10 +244,12 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( '600,400', $this->parse( $urls[1] )['query']['size'] );
 		$this->assertSame( '600,400@2x', $this->parse( $urls[2] )['query']['size'] );
 
-		$urls = $this->srcset( $this->provider( 'Map_Provider_Geoapify', array( 'style' => 'osm-bright' ) ) );
-		$this->assertArrayNotHasKey( 'scaleFactor', $this->parse( $urls[1] )['query'] );
-		$this->assertSame( '2', $this->parse( $urls[2] )['query']['scaleFactor'] );
-		$this->assertSame( '600', $this->parse( $urls[2] )['query']['width'] );
+		// Geoapify's srcset is served from the site (see MapCacheTest), so check the provider's own URLs.
+		$map = $this->provider( 'Map_Provider_Geoapify', array( 'style' => 'osm-bright' ) );
+		$this->assertArrayNotHasKey( 'scaleFactor', $this->parse( $map->get_the_static_map() )['query'] );
+		$map->set_scale( 2 );
+		$this->assertSame( '2', $this->parse( $map->get_the_static_map() )['query']['scaleFactor'] );
+		$this->assertSame( '600', $this->parse( $map->get_the_static_map() )['query']['width'] );
 
 		// HERE asks for twice the pixels at scale 2.
 		$urls = $this->srcset( $this->provider( 'Map_Provider_Here', array( 'style' => 'explore.day' ) ) );
