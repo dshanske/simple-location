@@ -732,6 +732,19 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Without a style setting, both MapQuest maps use the basic map style.
+	 */
+	public function test_mapquest_default_style() {
+		delete_option( 'sloc_mapquest_style' );
+		$map = $this->provider( 'Map_Provider_Mapquest' );
+		$this->assertSame( 'map', $this->parse( $map->get_the_static_map() )['query']['type'] );
+		$this->assertSame( 'map', $this->parse( $map->get_archive_map( $this->locations ) )['query']['type'] );
+
+		$map = $this->provider( 'Map_Provider_Mapquest', array( 'style' => '' ) );
+		$this->assertSame( 'map', $this->parse( $map->get_archive_map( $this->locations ) )['query']['type'] );
+	}
+
+	/**
 	 * The custom static map provider sends its parameters to the configured URL.
 	 */
 	public function test_staticmap() {
@@ -931,8 +944,6 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$location = array(
 			'latitude'  => self::LAT,
 			'longitude' => self::LNG,
-			// MapQuest has no archive map without a style.
-			'style'     => 'mapquest' === $vendor ? 'map' : '',
 		);
 		update_option( 'sloc_' . $vendor . '_api', 'MAIN' );
 		$map = new $class( $location );
