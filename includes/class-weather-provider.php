@@ -190,24 +190,32 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Get cache.
 	 *
+	 * @since 1.0.0
+	 * @since 6.0.0 Takes the requested time, so conditions for a past time are cached separately.
+	 *
+	 * @param int|null $time Optional. Requested time as a timestamp. Default null, for current conditions.
 	 * @return false|array Return cached value or false.
 	 */
-	public function get_cache() {
+	public function get_cache( $time = null ) {
 		if ( 0 === $this->cache_time ) {
 			return false;
 		}
 
-		$cache = get_transient( $this->cache_key() );
+		$cache = get_transient( $this->cache_key( $time ) );
 		return $cache;
 	}
 
 	/**
 	 * Set cache.
 	 *
-	 * @param array $value Value to Be Cached.
+	 * @since 1.0.0
+	 * @since 6.0.0 Takes the requested time, so conditions for a past time are cached separately.
+	 *
+	 * @param array    $value Value to Be Cached.
+	 * @param int|null $time  Optional. Requested time as a timestamp. Default null, for current conditions.
 	 * @return boolean
 	 */
-	public function set_cache( $value ) {
+	public function set_cache( $value, $time = null ) {
 		if ( 0 === $this->cache_time ) {
 			return false;
 		}
@@ -218,23 +226,34 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$datetime->setTimezone( wp_timezone() );
 		$value['_expires_at'] = $datetime->format( DATE_W3C );
 
-		$cache = set_transient( $this->cache_key(), $value, $this->cache_time );
+		$cache = set_transient( $this->cache_key( $time ), $value, $this->cache_time );
 		return $cache;
 	}
 
 	/**
 	 * Generate cache key
 	 *
-	 * @return string Cache Key.
+	 * Conditions for a time more than an hour from now are keyed by that hour, so each past hour is cached
+	 * separately. Current conditions, with no time or a time within the hour, keep the key without a time.
+	 *
+	 * @since 1.0.0
+	 * @since 6.0.0 Includes the hour of a requested time that isn't current.
+	 *
+	 * @param int|null $time Optional. Requested time as a timestamp. Default null, for current conditions.
+	 * @return string|false Cache Key, or false without a station or location.
 	 **/
-	private function cache_key() {
+	private function cache_key( $time = null ) {
 		if ( ! empty( $this->station_id ) ) {
-			return implode( '_', array( get_called_class(), md5( $this->station_id ) ) );
+			$key = array( get_called_class(), md5( $this->station_id ) );
+		} elseif ( ! empty( $this->latitude ) && ! empty( $this->longitude ) ) {
+			$key = array( get_called_class(), md5( implode( ',', array( $this->latitude, $this->longitude ) ) ) );
+		} else {
+			return false;
 		}
-		if ( ! empty( $this->latitude ) && ! empty( $this->longitude ) ) {
-			return implode( '_', array( get_called_class(), md5( implode( ',', array( $this->latitude, $this->longitude ) ) ) ) );
+		if ( is_numeric( $time ) && 0 !== (int) $time && HOUR_IN_SECONDS < abs( time() - (int) $time ) ) {
+			$key[] = gmdate( 'YmdH', (int) $time );
 		}
-		return false;
+		return implode( '_', $key );
 	}
 
 	/**

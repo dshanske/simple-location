@@ -99,7 +99,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			return $this->get_station_data( $time );
 		}
 		if ( $this->latitude && $this->longitude ) {
-			$conditions = $this->get_cache();
+			$conditions = $this->get_cache( $time );
 			if ( $conditions ) {
 				return $conditions;
 			}
@@ -126,7 +126,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			$return = $this->convert_data( $observation );
 			$return = $this->extra_data( $return, $time );
 
-			$this->set_cache( $return );
+			$this->set_cache( $return, $time );
 
 			if ( WP_DEBUG ) {
 				$return['raw'] = $json;
@@ -202,7 +202,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			return new WP_Error( 'unable_to_retrieve', __( 'No Station ID Provided', 'simple-location' ) );
 		}
 
-		$conditions = $this->get_cache();
+		$conditions = $this->get_cache( $time );
 		if ( $conditions ) {
 			return $conditions;
 		}
@@ -234,7 +234,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			$return['raw'] = $json;
 		}
 
-		$this->set_cache( $return );
+		$this->set_cache( $return, $time );
 		return $return;
 	}
 
