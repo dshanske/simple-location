@@ -135,6 +135,7 @@ class Map_Provider_Google extends Map_Provider {
 	 * @since 6.0.0 The query is URL-encoded, and the URL is signed when a signing secret is set.
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Uses the marker settings.
+	 * @since 6.1.0 Uses the language from get_language().
 	 *
 	 * @return string|WP_Error URL, an empty string without an API key, or an error if the signing secret isn't valid.
 	 */
@@ -148,7 +149,7 @@ class Map_Provider_Google extends Map_Provider {
 					'markers'  => sprintf( '%1$s|%2$s,%3$s', $this->get_marker_style(), $this->latitude, $this->longitude ),
 					'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
 					'maptype'  => $this->style,
-					'language' => get_bloginfo( 'language' ),
+					'language' => $this->get_language(),
 					'key'      => $this->api,
 					'zoom'     => $this->map_zoom,
 					'scale'    => $this->scale,
@@ -205,6 +206,10 @@ class Map_Provider_Google extends Map_Provider {
 	 * @return string|WP_Error URL, or an error if the signing secret isn't valid.
 	 */
 	protected function build_url( $query ) {
+		// Without a language, Google shows each place's local names.
+		if ( isset( $query['language'] ) && '' === $query['language'] ) {
+			unset( $query['language'] );
+		}
 		$url = self::BASE_URL . '?' . http_build_query( $query, '', '&', PHP_QUERY_RFC3986 );
 		if ( '' === $this->secret ) {
 			return $url;
@@ -251,6 +256,7 @@ class Map_Provider_Google extends Map_Provider {
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the marker color.
+	 * @since 6.1.0 Uses the language from get_language().
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations, or if the signing secret isn't valid.
@@ -270,7 +276,7 @@ class Map_Provider_Google extends Map_Provider {
 			'markers'  => 'size:tiny|color:0x' . $this->get_marker_hex() . '|label:P|' . implode( '|', $markers ),
 			'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
 			'maptype'  => $this->style,
-			'language' => get_bloginfo( 'language' ),
+			'language' => $this->get_language(),
 			'key'      => $this->api,
 			'path'     => 'color:0xff0000ff|weight:5|enc:' . $polyline,
 		);

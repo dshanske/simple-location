@@ -34,6 +34,7 @@
 ## class-map-provider.php
 
 - [`sloc_map_alt`](sloc_map_alt) Filters the alternative text of a static map image.
+- [`sloc_map_language`](sloc_map_language) Filters the language of map labels, for map providers that can translate them.
 
 ## class-post-venue.php
 

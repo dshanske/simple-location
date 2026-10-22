@@ -130,6 +130,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 6.1.0 Uses the marker settings.
 	 * @since 6.1.0 Leaves the copyright notice off the image when it is printed under the map.
 	 * @since 6.1.0 Draws the scale bar setting.
+	 * @since 6.1.0 Labels are in the site's language.
 	 *
 	 * @return string URL, or an empty string without an API key.
 	 */
@@ -153,6 +154,7 @@ class Map_Provider_Here extends Map_Provider {
 			'style'   => $this->style,
 			'overlay' => sprintf( 'point:%1$s,%2$s;%3$s', $this->latitude, $this->longitude, $this->get_marker_style() ),
 		);
+		$args = $this->add_language_code( $args );
 		// A high-density map is twice the size at scale 2, showing the same area.
 		if ( 1 < $this->scale ) {
 			$args['scale'] = $this->scale;
@@ -248,6 +250,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the marker color.
 	 * @since 6.1.0 Draws the scale bar setting.
+	 * @since 6.1.0 Labels are in the site's language.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -268,6 +271,7 @@ class Map_Provider_Here extends Map_Provider {
 			// A style after the last point applies to all of them.
 			'overlay' => 'point:' . implode( '|', $points ) . '|color=%23' . $this->get_marker_hex(),
 		);
+		$args = $this->add_language_code( $args );
 		// A high-density map is twice the size at scale 2, showing the same area.
 		if ( 1 < $this->scale ) {
 			$args['scale'] = $this->scale;

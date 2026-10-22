@@ -121,6 +121,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 * @since 4.1.5
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Uses the marker settings.
+	 * @since 6.1.0 Labels are in the site's language.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -145,6 +146,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 				$this->get_marker_hex()
 			),
 		);
+		$args = $this->add_language_code( $args );
 		if ( 1 < $this->scale ) {
 			$args['scaleFactor'] = $this->scale;
 		}
@@ -158,11 +160,12 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 * @since 6.1.0
 	 *
 	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
-	 * @return array Setting values. Archive maps add 'view', so images stored before the plugin chose their view aren't
+	 * @return array Setting values, with the labels' language. Archive maps add 'view', so images stored before the plugin chose their view aren't
 	 *               served under links placed for the new view.
 	 */
 	protected function get_cache_options( $locations = null ) {
-		$options = parent::get_cache_options( $locations );
+		$options   = parent::get_cache_options( $locations );
+		$options[] = $this->get_language_code();
 		if ( null !== $locations ) {
 			$options[] = 'view';
 		}
@@ -177,6 +180,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the marker color.
+	 * @since 6.1.0 Labels are in the site's language.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -200,6 +204,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 			'style'  => $this->style,
 			'marker' => implode( '|', $markers ),
 		);
+		$args = $this->add_language_code( $args );
 		$view = $this->get_archive_view( $locations );
 		if ( null === $view ) {
 			$args['area'] = 'rect:' . implode( ',', geo_bounding_box( $locations, true ) );

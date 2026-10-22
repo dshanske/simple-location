@@ -579,6 +579,57 @@ abstract class Map_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns the language of the map's labels, for providers that can translate them.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Language tag, such as `en-US`, or an empty string to leave the labels in their local languages.
+	 */
+	public function get_language() {
+		/**
+		 * Filters the language of map labels, for map providers that can translate them.
+		 *
+		 * Google and TomTom take the whole tag; HERE and Geoapify take its two-letter language code.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param string       $language Language tag, such as `en-US`. Default the site's language. An empty string
+		 *                               leaves the labels in each place's local language.
+		 * @param Map_Provider $map      Map provider.
+		 */
+		$language = apply_filters( 'sloc_map_language', get_bloginfo( 'language' ), $this );
+		return is_string( $language ) ? trim( $language ) : '';
+	}
+
+	/**
+	 * Returns the two-letter code of the language of the map's labels.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string ISO 639-1 code, such as `en`, or an empty string if the language has none.
+	 */
+	protected function get_language_code() {
+		$code = strtolower( strtok( $this->get_language(), '-_' ) );
+		return preg_match( '/^[a-z]{2}$/', $code ) ? $code : '';
+	}
+
+	/**
+	 * Adds the two-letter code of the labels' language to a query, as `lang`, when there is one.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $args Query parameters.
+	 * @return array Query parameters.
+	 */
+	protected function add_language_code( $args ) {
+		$code = $this->get_language_code();
+		if ( '' !== $code ) {
+			$args['lang'] = $code;
+		}
+		return $args;
+	}
+
+	/**
 	 * Returns the marker color without its #, as most providers take it.
 	 *
 	 * @since 6.1.0

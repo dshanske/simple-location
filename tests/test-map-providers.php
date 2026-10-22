@@ -538,6 +538,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 				'zoom'   => '15',
 				'style'  => 'osm-bright',
 				'marker' => 'lonlat:-75.1636,39.9524;type:material;size:medium;color:#d32f2f',
+				'lang'   => 'en',
 			),
 			$url['query']
 		);
@@ -1901,6 +1902,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 				'apiKey'  => 'KEY',
 				'style'   => 'topo.day',
 				'overlay' => 'point:39.9524,-75.1636;icon=pin;size=medium;color=#d32f2f',
+				'lang'    => 'en',
 			),
 			$url['query']
 		);
@@ -2588,5 +2590,78 @@ class MapProvidersTest extends WP_UnitTestCase {
 			$map = $this->provider( $class, array( 'attribution' => 'below' ) );
 			$this->assertSame( '', $map->get_attribution_html(), $class );
 		}
+	}
+
+	/**
+	 * Map labels are in the site's language, as each provider takes it.
+	 */
+	public function test_map_language() {
+		$locale = function () {
+			return 'fr-CA';
+		};
+		add_filter( 'pre_option_WPLANG', $locale );
+		add_filter( 'locale', $locale );
+		$language = get_bloginfo( 'language' );
+		$this->assertSame( 'fr-CA', $language );
+
+		$google = $this->provider( 'Map_Provider_Google' );
+		$here   = $this->provider( 'Map_Provider_Here' );
+		$geo    = $this->provider( 'Map_Provider_Geoapify' );
+		$tomtom = $this->provider( 'Map_Provider_TomTom' );
+		foreach ( array( $google->get_the_static_map(), $google->get_archive_map( $this->locations ) ) as $url ) {
+			$this->assertSame( 'fr-CA', $this->parse( $url )['query']['language'] );
+		}
+		$this->assertSame( 'fr-CA', $this->parse( $tomtom->get_the_static_map() )['query']['language'] );
+		foreach ( array( $here, $geo ) as $map ) {
+			foreach ( array( $map->get_the_static_map(), $map->get_archive_map( $this->locations ) ) as $url ) {
+				$this->assertSame( 'fr', $this->parse( $url )['query']['lang'], get_class( $map ) );
+			}
+		}
+		remove_filter( 'pre_option_WPLANG', $locale );
+		remove_filter( 'locale', $locale );
+	}
+
+	/**
+	 * The sloc_map_language filter changes the labels' language, and an empty language leaves local names.
+	 */
+	public function test_map_language_filter() {
+		$filter = function ( $language, $map ) {
+			$this->assertInstanceOf( 'Map_Provider', $map );
+			return 'de';
+		};
+		add_filter( 'sloc_map_language', $filter, 10, 2 );
+		$this->assertSame( 'de', $this->parse( $this->provider( 'Map_Provider_Google' )->get_the_static_map() )['query']['language'] );
+		$this->assertSame( 'de', $this->parse( $this->provider( 'Map_Provider_Here' )->get_the_static_map() )['query']['lang'] );
+		remove_filter( 'sloc_map_language', $filter, 10 );
+
+		add_filter( 'sloc_map_language', '__return_empty_string' );
+		foreach ( array( 'Map_Provider_Google', 'Map_Provider_TomTom' ) as $class ) {
+			$this->assertArrayNotHasKey( 'language', $this->parse( $this->provider( $class )->get_the_static_map() )['query'], $class );
+		}
+		foreach ( array( 'Map_Provider_Here', 'Map_Provider_Geoapify' ) as $class ) {
+			$this->assertArrayNotHasKey( 'lang', $this->parse( $this->provider( $class )->get_the_static_map() )['query'], $class );
+		}
+		remove_filter( 'sloc_map_language', '__return_empty_string' );
+
+		// A language without a two-letter code isn't sent to HERE or Geoapify.
+		$filter = function () {
+			return 'fil';
+		};
+		add_filter( 'sloc_map_language', $filter );
+		$this->assertArrayNotHasKey( 'lang', $this->parse( $this->provider( 'Map_Provider_Here' )->get_the_static_map() )['query'] );
+		remove_filter( 'sloc_map_language', $filter );
+	}
+
+	/**
+	 * Stored Geoapify maps follow the labels' language.
+	 */
+	public function test_map_language_cache_options() {
+		$options = $this->provider( 'Map_Provider_Geoapify' )->get_cache_args()['options'];
+		$filter  = function () {
+			return 'es-MX';
+		};
+		add_filter( 'sloc_map_language', $filter );
+		$this->assertNotSame( $options, $this->provider( 'Map_Provider_Geoapify' )->get_cache_args()['options'] );
+		remove_filter( 'sloc_map_language', $filter );
 	}
 }
