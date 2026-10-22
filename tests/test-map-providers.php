@@ -537,7 +537,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 				'height' => '400',
 				'zoom'   => '15',
 				'style'  => 'osm-bright',
-				'marker' => 'lonlat:-75.1636,39.9524;size:small;color:red',
+				'marker' => 'lonlat:-75.1636,39.9524;type:material;size:medium;color:#d32f2f',
 			),
 			$url['query']
 		);
@@ -547,7 +547,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'area', $url['query'] );
 		$this->assertSame( 'lonlat:-75.1568,39.95065', $url['query']['center'] );
 		$this->assertSame( '15', $url['query']['zoom'] );
-		$this->assertSame( 'lonlat:-75.1636,39.9524;size:small;color:red|lonlat:-75.15,39.9489;size:small;color:red', $url['query']['marker'] );
+		$this->assertSame( 'lonlat:-75.1636,39.9524;size:small;color:#d32f2f|lonlat:-75.15,39.9489;size:small;color:#d32f2f', $url['query']['marker'] );
 
 		$this->assertSame( 'https://www.openstreetmap.org/?mlat=39.9524&mlon=-75.1636#map=15/39.9524/-75.1636', $map->get_the_map_url() );
 
@@ -565,7 +565,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 
 		$url = $this->parse( $map->get_the_static_map() );
 		$this->assertSame( 'https://maps.googleapis.com/maps/api/staticmap', $url['base'] );
-		$this->assertSame( 'color:red|label:X|39.9524,-75.1636', $url['query']['markers'] );
+		$this->assertSame( 'size:mid|color:0xd32f2f|label:X|39.9524,-75.1636', $url['query']['markers'] );
 		$this->assertSame( '600x400', $url['query']['size'] );
 		$this->assertSame( 'roadmap', $url['query']['maptype'] );
 		$this->assertSame( get_bloginfo( 'language' ), $url['query']['language'] );
@@ -574,7 +574,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'KEY', $url['query']['key'] );
 
 		$url = $this->parse( $map->get_archive_map( $this->locations ) );
-		$this->assertSame( 'size:tiny|color:red|label:P|39.9524,-75.1636|39.9489,-75.15', $url['query']['markers'] );
+		$this->assertSame( 'size:tiny|color:0xd32f2f|label:P|39.9524,-75.1636|39.9489,-75.15', $url['query']['markers'] );
 		$this->assertSame( 'color:0xff0000ff|weight:5|enc:' . Sloc_Polyline::encode( $this->locations ), $url['query']['path'] );
 
 		$this->assertSame( 'https://www.google.com/maps/search/?api=1&query=39.9524%2C-75.1636', $map->get_the_map_url() );
@@ -613,7 +613,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		}
 
 		// The query is encoded as it is signed, so the URL Google receives matches the signature.
-		$this->assertStringContainsString( '?markers=color%3Ared%7Clabel%3AX%7C39.9524%2C-75.1636&', $urls[0] );
+		$this->assertStringContainsString( '?markers=size%3Amid%7Ccolor%3A0xd32f2f%7Clabel%3AX%7C39.9524%2C-75.1636&', $urls[0] );
 
 		// A secret passed in wins over the setting, and an empty one turns signing off.
 		$map = $this->provider( 'Map_Provider_Google', array( 'secret' => '' ) );
@@ -713,12 +713,12 @@ class MapProvidersTest extends WP_UnitTestCase {
 				'style' => 'streets-v11',
 			)
 		);
-		$this->assertSame( 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s(-75.1636,39.9524)/-75.1636,39.9524,15,0,0/600x400?access_token=KEY', $map->get_the_static_map() );
+		$this->assertSame( 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+d32f2f(-75.1636,39.9524)/-75.1636,39.9524,15,0,0/600x400?access_token=KEY', $map->get_the_static_map() );
 
 		$archive = $map->get_archive_map( $this->locations );
 		$this->assertSame(
 			sprintf(
-				'https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s(-75.1636,39.9524),pin-s(-75.15,39.9489),path-5+f44-0.5(%s)/-75.1568,39.95065,14.75/600x400?access_token=KEY',
+				'https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s+d32f2f(-75.1636,39.9524),pin-s+d32f2f(-75.15,39.9489),path-5+f44-0.5(%s)/-75.1568,39.95065,14.75/600x400?access_token=KEY',
 				rawurlencode( Sloc_Polyline::encode( $this->locations ) )
 			),
 			$archive
@@ -816,7 +816,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 				'size'      => '600,400',
 				'zoom'      => '15',
 				'type'      => 'dark',
-				'locations' => '39.9524,-75.1636',
+				'locations' => '39.9524,-75.1636|marker-md-d32f2f',
 			),
 			$url['query']
 		);
@@ -841,8 +841,9 @@ class MapProvidersTest extends WP_UnitTestCase {
 				'size'      => '600,400',
 				'type'      => 'dark',
 				'locations' => '39.9524,-75.1636||39.9489,-75.15',
-				'shape'     => 'cmp|enc:' . Sloc_Polyline::encode( $this->locations ),
-				'center'    => '39.95065,-75.1568',
+				'shape'         => 'cmp|enc:' . Sloc_Polyline::encode( $this->locations ),
+				'defaultMarker' => 'marker-d32f2f',
+				'center'        => '39.95065,-75.1568',
 				'zoom'      => '15',
 			),
 			$archive['query']
@@ -1061,9 +1062,9 @@ class MapProvidersTest extends WP_UnitTestCase {
 	public function test_staticmap_display_settings() {
 		update_option( 'sloc_staticmap_url', 'https://maps.example.org/' );
 		update_option( 'sloc_staticmap_format', 'webp' );
-		update_option( 'sloc_staticmap_marker', 'dot' );
-		update_option( 'sloc_staticmap_marker_color', '#43A047' );
-		update_option( 'sloc_staticmap_marker_size', 'large' );
+		update_option( 'sloc_marker', 'dot' );
+		update_option( 'sloc_marker_color', '#43A047' );
+		update_option( 'sloc_marker_size', 'large' );
 		update_option( 'sloc_staticmap_scalebar', 'both' );
 		update_option( 'sloc_staticmap_scalebar_position', 'topright' );
 		update_option( 'sloc_staticmap_overlays', array( 'railways', 'seamarks' ) );
@@ -1212,12 +1213,14 @@ class MapProvidersTest extends WP_UnitTestCase {
 		Map_Provider_StaticMap::init();
 		Map_Provider_StaticMap::admin_init();
 		$settings = get_registered_settings();
-		foreach ( array( 'format', 'marker', 'marker_color', 'marker_size', 'scalebar', 'scalebar_position', 'overlays' ) as $name ) {
+		foreach ( array( 'format', 'scalebar', 'scalebar_position', 'overlays' ) as $name ) {
 			$this->assertArrayHasKey( 'sloc_staticmap_' . $name, $settings );
 			$this->assertArrayHasKey( 'sloc_staticmap_' . $name, $wp_settings_fields['simloc']['sloc_map'] );
 		}
-		$this->assertSame( 'color', $wp_settings_fields['simloc']['sloc_map']['sloc_staticmap_marker_color']['args']['type'] );
-		$this->assertSame( '#43a047', sanitize_option( 'sloc_staticmap_marker_color', '43A047' ) );
+		// The marker settings are every provider's.
+		foreach ( array( 'marker', 'marker_color', 'marker_size' ) as $name ) {
+			$this->assertArrayNotHasKey( 'sloc_staticmap_' . $name, $settings );
+		}
 		$this->assertSame( array( 'seamarks' ), sanitize_option( 'sloc_staticmap_overlays', array( '', 'seamarks' ) ) );
 	}
 
@@ -1682,9 +1685,10 @@ class MapProvidersTest extends WP_UnitTestCase {
 	 * Geoapify archive images stored before the plugin chose their view aren't reused.
 	 */
 	public function test_geoapify_archive_cache_args() {
-		$map = $this->provider( 'Map_Provider_Geoapify' );
-		$this->assertSame( 'view', $map->get_cache_args( $this->locations )['options'] );
-		$this->assertArrayNotHasKey( 'options', $map->get_cache_args() );
+		$map     = $this->provider( 'Map_Provider_Geoapify' );
+		$archive = $map->get_cache_args( $this->locations )['options'];
+		$this->assertMatchesRegularExpression( '/^[0-9a-f]{12}$/', $archive );
+		$this->assertNotSame( $archive, $map->get_cache_args()['options'] );
 	}
 
 	/**
@@ -1892,7 +1896,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			array(
 				'apiKey'  => 'KEY',
 				'style'   => 'topo.day',
-				'overlay' => 'point:39.9524,-75.1636',
+				'overlay' => 'point:39.9524,-75.1636;icon=pin;size=medium;color=#d32f2f',
 			),
 			$url['query']
 		);
@@ -2104,7 +2108,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 		if ( $archive ) {
 			$this->assertStringContainsString( $expected, $map->get_archive_map( $this->locations ) );
 		}
-		$this->assertSame( $format, $map->get_cache_args()['format'] );
+		// A chosen format gives new stored images.
+		$this->assertNotSame( $this->provider( $class, array( 'style' => 'streets-v11' ) )->get_cache_args()['options'], $map->get_cache_args()['options'] );
 	}
 
 	/**
@@ -2148,7 +2153,6 @@ class MapProvidersTest extends WP_UnitTestCase {
 			delete_option( 'sloc_' . strtolower( substr( $class, 13 ) ) . '_format' );
 			$map = $this->provider( $class, array( 'style' => 'streets-v11' ) );
 			$this->assertSame( $default[0], $map->get_format(), $class );
-			$this->assertArrayNotHasKey( 'format', $map->get_cache_args(), $class );
 			$url = $map->get_the_static_map();
 			if ( null === $default[1] ) {
 				$this->assertStringNotContainsString( 'format=', $url, $class );
@@ -2256,5 +2260,166 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'MapQuest'   => array( 'Map_Provider_Mapquest', 'mapquest', 'MapQuest' ),
 			'TomTom'     => array( 'Map_Provider_TomTom', 'tomtom', 'TomTom' ),
 		);
+	}
+
+	/**
+	 * Every provider draws the marker settings in its own terms, and its archive markers in the marker color.
+	 *
+	 * @dataProvider data_marker_providers
+	 *
+	 * @param string $class   Provider class.
+	 * @param array  $singles What the single map URL has, keyed by marker shape and size, such as 'dot large'.
+	 * @param string $archive What the archive map URL has.
+	 */
+	public function test_markers( $class, $singles, $archive ) {
+		foreach ( $singles as $setting => $expected ) {
+			list( $marker, $size ) = explode( ' ', $setting );
+			$map                   = $this->provider(
+				$class,
+				array(
+					'style'        => 'streets-v11',
+					'marker'       => $marker,
+					'marker_size'  => $size,
+					'marker_color' => '#43A047',
+				)
+			);
+			$this->assertStringContainsString( $expected, $map->get_the_static_map(), $setting );
+		}
+		$this->assertStringContainsString( $archive, $map->get_archive_map( $this->locations ) );
+	}
+
+	/**
+	 * Providers with markers, and the URL text for each marker setting.
+	 *
+	 * @return array
+	 */
+	public function data_marker_providers() {
+		return array(
+			'Google'     => array(
+				'Map_Provider_Google',
+				array(
+					'pin small'  => 'markers=size%3Asmall%7Ccolor%3A0x43a047%7Clabel%3AX%7C',
+					'pin medium' => 'markers=size%3Amid%7Ccolor%3A0x43a047%7C',
+					'pin large'  => 'markers=color%3A0x43a047%7C',
+					'dot large'  => 'markers=size%3Atiny%7Ccolor%3A0x43a047%7C',
+				),
+				'markers=size%3Atiny%7Ccolor%3A0x43a047%7Clabel%3AP%7C',
+			),
+			'Mapbox'     => array(
+				'Map_Provider_Mapbox',
+				array(
+					'pin small' => '/static/pin-s+43a047(',
+					'pin large' => '/static/pin-l+43a047(',
+					'dot large' => '/static/pin-s+43a047(',
+				),
+				'/static/pin-s+43a047(-75.1636,39.9524),pin-s+43a047(',
+			),
+			'HERE'       => array(
+				'Map_Provider_Here',
+				array(
+					'pin small' => 'overlay=point:39.9524,-75.1636;icon=pin;size=small;color=%2343a047',
+					'dot small' => ';style=circle;width=8;color=%2343a047',
+					'dot large' => ';style=circle;width=16;color=%2343a047',
+				),
+				'overlay=point:39.9524,-75.1636|39.9489,-75.15|color=%2343a047&',
+			),
+			'Geoapify'   => array(
+				'Map_Provider_Geoapify',
+				array(
+					'pin large' => ';type:material;size:large;color:%2343a047',
+					'dot small' => ';type:circle;size:small;color:%2343a047',
+				),
+				'lonlat:-75.15,39.9489;size:small;color:%2343a047',
+			),
+			'LocationIQ' => array(
+				'Map_Provider_LocationIQ',
+				array(
+					'pin small'  => 'markers=icon:small-green-cutout|',
+					'pin medium' => 'markers=icon:large-green-cutout|',
+					'dot large'  => 'markers=icon:tiny-green-cutout|',
+				),
+				'&markers=icon:large-green-cutout|39.9489,-75.15',
+			),
+			'MapQuest'   => array(
+				'Map_Provider_Mapquest',
+				array(
+					'pin small'  => 'locations=39.9524,-75.1636|marker-sm-43a047',
+					'pin large'  => '|marker-lg-43a047',
+					'dot medium' => '|circle-md-43a047',
+				),
+				'defaultMarker=marker-43a047',
+			),
+		);
+	}
+
+	/**
+	 * The marker settings come from the sloc_marker options, sanitized.
+	 */
+	public function test_marker_options() {
+		update_option( 'sloc_marker', 'dot' );
+		update_option( 'sloc_marker_color', '1976D2' );
+		update_option( 'sloc_marker_size', 'small' );
+		$url = $this->provider( 'Map_Provider_Mapquest' )->get_the_static_map();
+		$this->assertStringContainsString( '|circle-sm-1976d2', $url );
+
+		update_option( 'sloc_marker', 'star' );
+		update_option( 'sloc_marker_color', 'blue' );
+		update_option( 'sloc_marker_size', 'huge' );
+		$url = $this->provider( 'Map_Provider_Mapquest' )->get_the_static_map();
+		$this->assertStringContainsString( '|marker-md-d32f2f', $url );
+
+		$this->assertSame( 'dot', Map_Provider::sanitize_marker( ' DOT ' ) );
+		$this->assertSame( 'pin', Map_Provider::sanitize_marker( null ) );
+		$this->assertSame( '#43a047', Map_Provider::sanitize_marker_color( ' 43A047 ' ) );
+		$this->assertSame( '#d32f2f', Map_Provider::sanitize_marker_color( '#43a04' ) );
+		$this->assertSame( '#d32f2f', Map_Provider::sanitize_marker_color( array() ) );
+		$this->assertSame( 'large', Map_Provider::sanitize_marker_size( 'Large' ) );
+		$this->assertSame( 'medium', Map_Provider::sanitize_marker_size( 3 ) );
+	}
+
+	/**
+	 * LocationIQ markers take the closest of its icon colors to the marker color.
+	 */
+	public function test_locationiq_marker_palette() {
+		$expected = array(
+			'#d32f2f' => 'red',
+			'#ff0000' => 'red',
+			'#1976d2' => 'blue',
+			'#00ff00' => 'green',
+			'#ffeb3b' => 'yellow',
+			'#ff9800' => 'orange',
+			'#9c27b0' => 'purple',
+			'#9e9e9e' => 'gray',
+			'#000000' => 'black',
+		);
+		foreach ( $expected as $color => $name ) {
+			$map = $this->provider( 'Map_Provider_LocationIQ', array( 'marker_color' => $color ) );
+			$this->assertSame( $name, $map->get_marker_palette_color(), $color );
+		}
+	}
+
+	/**
+	 * Marker settings change a stored map's parameters, so a changed marker gives new images.
+	 */
+	public function test_marker_cache_options() {
+		$options = $this->provider( 'Map_Provider_Geoapify' )->get_cache_args()['options'];
+		foreach ( array( 'marker' => 'dot', 'marker_color' => '#43a047', 'marker_size' => 'large' ) as $name => $value ) {
+			$this->assertNotSame( $options, $this->provider( 'Map_Provider_Geoapify', array( $name => $value ) )->get_cache_args()['options'], $name );
+		}
+		$this->assertSame( $options, $this->provider( 'Map_Provider_Geoapify' )->get_cache_args()['options'] );
+	}
+
+	/**
+	 * TomTom has no markers, whatever the settings.
+	 */
+	public function test_tomtom_no_markers() {
+		$url = $this->provider(
+			'Map_Provider_TomTom',
+			array(
+				'marker'       => 'dot',
+				'marker_color' => '#43a047',
+			)
+		)->get_the_static_map();
+		$this->assertStringNotContainsString( '43a047', $url );
 	}
 }

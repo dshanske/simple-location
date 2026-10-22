@@ -226,7 +226,7 @@ class MapCacheTest extends WP_UnitTestCase {
 
 		$this->assertSame( 302, $this->request( $url )->get_status() );
 		$this->assertStringContainsString( 'center=lonlat:-75.1568,39.95065', $this->http_requests[0]['url'] );
-		$this->assertStringContainsString( 'marker=lonlat:-75.1636,39.9524;size:small;color:red|lonlat:-75.15,39.9489;size:small;color:red', $this->http_requests[0]['url'] );
+		$this->assertStringContainsString( 'marker=lonlat:-75.1636,39.9524;size:small;color:%23d32f2f|lonlat:-75.15,39.9489;size:small;color:%23d32f2f', $this->http_requests[0]['url'] );
 
 		// No locations, no map.
 		$this->assertSame( '', $this->geoapify()->get_archive_map_src( array() ) );
@@ -321,6 +321,15 @@ class MapCacheTest extends WP_UnitTestCase {
 		}
 		// Parameters that aren't map parameters aren't signed.
 		$this->assertSame( $sig, Sloc_Map_Cache::sign( array_merge( $args, array( 'other' => 'x' ) ) ) );
+	}
+
+	/**
+	 * A changed image format gives a new signature, so the image in the new format is fetched.
+	 */
+	public function test_sign_format() {
+		$sig = Sloc_Map_Cache::sign( $this->geoapify()->get_cache_args() );
+		update_option( 'sloc_geoapify_format', 'png' );
+		$this->assertNotSame( $sig, Sloc_Map_Cache::sign( $this->geoapify()->get_cache_args() ) );
 	}
 
 	/**

@@ -146,6 +146,56 @@ abstract class Map_Provider extends Sloc_Provider {
 	const DEFAULT_FORMAT = '';
 
 	/**
+	 * Marker shapes for a single location: a pin, or a dot.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const MARKERS = array( 'pin', 'dot' );
+
+	/**
+	 * Marker sizes for a single location.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const MARKER_SIZES = array( 'small', 'medium', 'large' );
+
+	/**
+	 * Default marker color.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_MARKER_COLOR = '#d32f2f';
+
+	/**
+	 * Marker shape for a single location, one of MARKERS.
+	 *
+	 * Providers without a dot draw their smallest pin instead.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $marker = 'pin';
+
+	/**
+	 * Marker color, as #rrggbb. Archive map markers use it too.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $marker_color = self::DEFAULT_MARKER_COLOR;
+
+	/**
+	 * Marker size for a single location, one of MARKER_SIZES.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $marker_size = 'medium';
+
+	/**
 	 * Chosen image format, one of FORMATS, or an empty string for the default.
 	 *
 	 * @since 6.1.0
@@ -194,6 +244,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 1.0.0
 	 * @since 6.0.0 Without a usable width setting, the default width is the theme's content width, as for the setting itself.
 	 * @since 6.1.0 Added the `format` argument.
+	 * @since 6.1.0 Added the `marker`, `marker_color` and `marker_size` arguments.
 	 *
 	 * @param array $args {
 	 *  Arguments.
@@ -207,6 +258,9 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *  @type string $style Style of Map.
 	 *  @type int $map_zoom Map Zoom Level.
 	 *  @type string $format Image format, one of FORMATS, or empty for the default. Default the sloc_{slug}_format setting.
+	 *  @type string $marker Marker shape, one of MARKERS. Default the sloc_marker setting.
+	 *  @type string $marker_color Marker color, #rrggbb. Default the sloc_marker_color setting.
+	 *  @type string $marker_size Marker size, one of MARKER_SIZES. Default the sloc_marker_size setting.
 	 */
 	public function __construct( $args = array() ) {
 		// The setting's registered default is the content width, but it isn't registered before init.
@@ -215,17 +269,20 @@ abstract class Map_Provider extends Sloc_Provider {
 			$width = Loc_Config::get_default_map_width();
 		}
 		$defaults = array(
-			'width'     => $width,
-			'height'    => round( $width / get_option( 'sloc_aspect', ( 16 / 9 ) ) ),
-			'map_zoom'  => get_option( 'sloc_zoom' ),
-			'api'       => '',
-			'latitude'  => null,
-			'longitude' => null,
-			'altitude'  => null,
-			'location'  => '',
-			'user'      => '',
-			'style'     => '',
-			'format'    => get_option( 'sloc_' . $this->slug . '_format', '' ),
+			'width'        => $width,
+			'height'       => round( $width / get_option( 'sloc_aspect', ( 16 / 9 ) ) ),
+			'map_zoom'     => get_option( 'sloc_zoom' ),
+			'api'          => '',
+			'latitude'     => null,
+			'longitude'    => null,
+			'altitude'     => null,
+			'location'     => '',
+			'user'         => '',
+			'style'        => '',
+			'format'       => get_option( 'sloc_' . $this->slug . '_format', '' ),
+			'marker'       => get_option( 'sloc_marker', 'pin' ),
+			'marker_color' => get_option( 'sloc_marker_color', self::DEFAULT_MARKER_COLOR ),
+			'marker_size'  => get_option( 'sloc_marker_size', 'medium' ),
 		);
 		/** This filter is documented in includes/class-geo-provider.php */
 		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
@@ -239,6 +296,10 @@ abstract class Map_Provider extends Sloc_Provider {
 		$this->style    = $r['style'];
 		$this->api      = $r['api'];
 		$this->format   = static::sanitize_format( $r['format'] );
+
+		$this->marker       = self::sanitize_marker( $r['marker'] );
+		$this->marker_color = self::sanitize_marker_color( $r['marker_color'] );
+		$this->marker_size  = self::sanitize_marker_size( $r['marker_size'] );
 		$this->set( $r['latitude'], $r['longitude'], $r['altitude'] );
 		$this->fit_size();
 
@@ -323,6 +384,58 @@ abstract class Map_Provider extends Sloc_Provider {
 			$value = 'jpg';
 		}
 		return ( static::DEFAULT_FORMAT !== $value && in_array( $value, static::FORMATS, true ) ) ? $value : '';
+	}
+
+	/**
+	 * Sanitizes the marker shape setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Marker shape.
+	 * @return string One of MARKERS. Default 'pin'.
+	 */
+	public static function sanitize_marker( $value ) {
+		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
+		return in_array( $value, self::MARKERS, true ) ? $value : 'pin';
+	}
+
+	/**
+	 * Sanitizes the marker color setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Color, #rrggbb or rrggbb.
+	 * @return string Color as #rrggbb, in lower case. Default DEFAULT_MARKER_COLOR.
+	 */
+	public static function sanitize_marker_color( $value ) {
+		if ( ! is_string( $value ) || ! preg_match( '/^#?([0-9a-f]{6})$/i', trim( $value ), $match ) ) {
+			return self::DEFAULT_MARKER_COLOR;
+		}
+		return '#' . strtolower( $match[1] );
+	}
+
+	/**
+	 * Sanitizes the marker size setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Marker size.
+	 * @return string One of MARKER_SIZES. Default 'medium'.
+	 */
+	public static function sanitize_marker_size( $value ) {
+		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
+		return in_array( $value, self::MARKER_SIZES, true ) ? $value : 'medium';
+	}
+
+	/**
+	 * Returns the marker color without its #, as most providers take it.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Color as rrggbb.
+	 */
+	protected function get_marker_hex() {
+		return ltrim( $this->marker_color, '#' );
 	}
 
 	/**
@@ -535,7 +648,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Returns the parameters that describe the current map, for a map image served from the site.
 	 *
 	 * @since 6.0.0
-	 * @since 6.1.0 Includes the image format, when one is chosen.
+	 * @since 6.1.0 Has 'options', a hash of the settings that change the image, from get_cache_options().
 	 *
 	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
 	 * @return string[] Map parameters.
@@ -549,17 +662,27 @@ abstract class Map_Provider extends Sloc_Provider {
 			'style'    => (string) $this->style,
 			'scale'    => (string) $this->scale,
 		);
-		// Only a chosen format is added, so images stored before the setting existed keep their keys.
-		if ( '' !== $this->format ) {
-			$args['format'] = $this->format;
-		}
 		if ( null === $locations ) {
 			$args['lat'] = (string) $this->latitude;
 			$args['lng'] = (string) $this->longitude;
 		} else {
 			$args['points'] = Sloc_Polyline::encode( $locations );
 		}
+		// The settings are signed as a hash, so a changed setting gives new images.
+		$args['options'] = substr( md5( (string) wp_json_encode( $this->get_cache_options( $locations ) ) ), 0, 12 );
 		return $args;
+	}
+
+	/**
+	 * Returns the settings, other than the map parameters, that change the map image.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
+	 * @return array Setting values.
+	 */
+	protected function get_cache_options( $locations = null ) {
+		return array( $this->format, $this->marker, $this->marker_color, $this->marker_size );
 	}
 
 	/**

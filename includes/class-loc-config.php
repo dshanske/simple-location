@@ -324,8 +324,11 @@ class Loc_Config {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 The default width comes from get_default_map_width().
+	 * @since 6.1.0 Registers the marker settings, used by every map provider.
 	 */
 	public static function register_map_settings() {
+		self::migrate_marker_settings();
+
 		register_setting(
 			'simloc', // option group.
 			'sloc_width', // option name.
@@ -357,6 +360,24 @@ class Loc_Config {
 				'default'      => 14,
 			)
 		);
+		$markers = array(
+			'sloc_marker'       => array( 'Simple Location Map Marker', 'pin', 'sanitize_marker' ),
+			'sloc_marker_color' => array( 'Simple Location Map Marker Color', Map_Provider::DEFAULT_MARKER_COLOR, 'sanitize_marker_color' ),
+			'sloc_marker_size'  => array( 'Simple Location Map Marker Size', 'medium', 'sanitize_marker_size' ),
+		);
+		foreach ( $markers as $option => $setting ) {
+			register_setting(
+				'simloc',
+				$option,
+				array(
+					'type'              => 'string',
+					'description'       => $setting[0],
+					'show_in_rest'      => false,
+					'default'           => $setting[1],
+					'sanitize_callback' => array( 'Map_Provider', $setting[2] ),
+				)
+			);
+		}
 		register_setting(
 			'simloc', // option group.
 			'sloc_altitude', // option name.
@@ -367,6 +388,29 @@ class Loc_Config {
 				'default'      => 500,
 			)
 		);
+	}
+
+	/**
+	 * Moves the custom static map's marker settings to the settings every map provider uses.
+	 *
+	 * The marker settings were the custom static map's own during 6.1.0 development, as sloc_staticmap_marker,
+	 * sloc_staticmap_marker_color and sloc_staticmap_marker_size. They are copied once, unless the new
+	 * setting is already saved, and the old options are deleted.
+	 *
+	 * @since 6.1.0
+	 */
+	public static function migrate_marker_settings() {
+		foreach ( array( 'marker', 'marker_color', 'marker_size' ) as $name ) {
+			// A passed default stops the registered default from being returned for a missing option.
+			$old = get_option( 'sloc_staticmap_' . $name, null );
+			if ( null === $old ) {
+				continue;
+			}
+			if ( null === get_option( 'sloc_' . $name, null ) ) {
+				update_option( 'sloc_' . $name, $old );
+			}
+			delete_option( 'sloc_staticmap_' . $name );
+		}
 	}
 
 	/**
@@ -594,6 +638,7 @@ class Loc_Config {
 	 * Initialize Settings Fields.
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.0 Adds the marker fields to the map settings.
 	 */
 	public static function admin_init() {
 		add_settings_section(
@@ -809,6 +854,50 @@ class Loc_Config {
 			array(
 				'label_for' => 'sloc_zoom',
 				'list'      => self::get_zoom_levels(),
+			)
+		);
+
+		add_settings_field(
+			'sloc_marker',
+			__( 'Map Marker', 'simple-location' ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for'   => 'sloc_marker',
+				'list'        => array(
+					'pin' => __( 'Pin', 'simple-location' ),
+					'dot' => __( 'Dot', 'simple-location' ),
+				),
+				'description' => __( 'Map providers draw the nearest marker they have: those without a dot draw a small pin, and some offer only a few colors. Archive maps use small markers in this color.', 'simple-location' ),
+			)
+		);
+
+		add_settings_field(
+			'sloc_marker_size',
+			__( 'Map Marker Size', 'simple-location' ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_marker_size',
+				'list'      => array(
+					'small'  => __( 'Small', 'simple-location' ),
+					'medium' => __( 'Medium', 'simple-location' ),
+					'large'  => __( 'Large', 'simple-location' ),
+				),
+			)
+		);
+
+		add_settings_field(
+			'sloc_marker_color',
+			__( 'Map Marker Color', 'simple-location' ),
+			array( 'Loc_Config', 'string_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_marker_color',
+				'type'      => 'color',
 			)
 		);
 

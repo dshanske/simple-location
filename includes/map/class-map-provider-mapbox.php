@@ -176,6 +176,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Markers are in the marker color.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -191,7 +192,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 		}
 		$markers = array();
 		foreach ( $locations as $location ) {
-			$markers[] = sprintf( 'pin-s(%1$s,%2$s)', $location[1], $location[0] );
+			$markers[] = sprintf( 'pin-s+%1$s(%2$s,%3$s)', $this->get_marker_hex(), $location[1], $location[0] );
 		}
 		$polyline = Sloc_Polyline::encode( $locations );
 		$view     = $this->get_archive_view( $locations );
@@ -227,6 +228,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 *
 	 * @since 3.4.0
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Uses the marker settings.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -240,7 +242,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$user = 'mapbox';
 		}
 		$map = sprintf(
-			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s,%5$s,0,0/%6$sx%7$s%9$s%10$s?access_token=%8$s',
+			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/%11$s(%3$s,%4$s)/%3$s,%4$s,%5$s,0,0/%6$sx%7$s%9$s%10$s?access_token=%8$s',
 			$user,
 			$this->style,
 			$this->longitude,
@@ -250,7 +252,9 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$this->height,
 			$this->api,
 			( 2 === $this->scale ) ? '@2x' : '',
-			$this->get_format_extension()
+			$this->get_format_extension(),
+			// Mapbox has small and large pins, and no dot.
+			sprintf( 'pin-%1$s+%2$s', ( 'large' === $this->marker_size && 'dot' !== $this->marker ) ? 'l' : 's', $this->get_marker_hex() )
 		);
 		return $map;
 	}

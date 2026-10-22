@@ -104,6 +104,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 * @since 3.4.0
 	 * @since 6.1.0 Drawn at the map's zoom level instead of MapQuest's default.
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Uses the marker settings.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -119,7 +120,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 				'size'      => sprintf( '%1$s,%2$s%3$s', $this->width, $this->height, ( 2 === $this->scale ) ? '@2x' : '' ),
 				'zoom'      => $this->map_zoom,
 				'type'      => $this->style,
-				'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+				'locations' => sprintf( '%1$s,%2$s|%3$s', $this->latitude, $this->longitude, $this->get_marker_style() ),
 			),
 			$url
 		);
@@ -131,12 +132,29 @@ class Map_Provider_Mapquest extends Map_Provider {
 
 
 	/**
+	 * Returns the marker of a single location, as MapQuest names it.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Marker, such as `marker-md-d32f2f`, or `circle-md-d32f2f` for a dot.
+	 */
+	protected function get_marker_style() {
+		$sizes = array(
+			'small'  => 'sm',
+			'medium' => 'md',
+			'large'  => 'lg',
+		);
+		return sprintf( '%1$s-%2$s-%3$s', 'dot' === $this->marker ? 'circle' : 'marker', $sizes[ $this->marker_size ], $this->get_marker_hex() );
+	}
+
+	/**
 	 * Returns the URL of a static map with multiple locations.
 	 *
 	 * @since 4.0.0
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Markers are in the marker color.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -154,11 +172,13 @@ class Map_Provider_Mapquest extends Map_Provider {
 
 		$url  = 'https://www.mapquestapi.com/staticmap/v5/map';
 		$args = array(
-			'key'       => $this->api,
-			'size'      => sprintf( '%1$s,%2$s%3$s', $this->width, $this->height, ( 2 === $this->scale ) ? '@2x' : '' ),
-			'type'      => $this->style,
-			'locations' => implode( '||', $markers ),
-			'shape'     => 'cmp|enc:' . $polyline,
+			'key'           => $this->api,
+			'size'          => sprintf( '%1$s,%2$s%3$s', $this->width, $this->height, ( 2 === $this->scale ) ? '@2x' : '' ),
+			'type'          => $this->style,
+			'locations'     => implode( '||', $markers ),
+			'shape'         => 'cmp|enc:' . $polyline,
+			// Archive markers keep MapQuest's default size, in the marker color.
+			'defaultMarker' => 'marker-' . $this->get_marker_hex(),
 		);
 		$view = $this->get_archive_view( $locations );
 		if ( null !== $view ) {

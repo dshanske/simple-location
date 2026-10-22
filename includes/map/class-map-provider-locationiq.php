@@ -87,6 +87,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 * @since 1.0.0
 	 * @since 6.0.0 Centered at the map zoom setting, with a marker icon from the v3 API.
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Uses the marker settings.
 	 *
 	 * @return string|WP_Error URL, or an error without an API key.
 	 */
@@ -100,7 +101,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 				'center'  => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
 				'zoom'    => $this->map_zoom,
 				'size'    => sprintf( '%1$sx%2$s', $this->width, $this->height ),
-				'markers' => sprintf( 'icon:large-red-cutout|%1$s,%2$s', $this->latitude, $this->longitude ),
+				'markers' => sprintf( 'icon:%1$s|%2$s,%3$s', $this->get_marker_icon(), $this->latitude, $this->longitude ),
 			),
 			'https://maps.locationiq.com/v3/staticmap'
 		);
@@ -117,6 +118,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 * @since 6.0.0 Uses the v3 API, with one marker parameter per location and a valid path.
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Markers are in the nearest color LocationIQ has to the marker color.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -151,7 +153,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 		}
 		// The v3 API takes one markers parameter per marker.
 		foreach ( $points as $point ) {
-			$map .= '&markers=icon:large-red-cutout|' . $point;
+			$map .= '&markers=icon:large-' . $this->get_marker_palette_color() . '-cutout|' . $point;
 		}
 		// A path needs at least two points.
 		if ( count( $points ) > 1 ) {
@@ -182,5 +184,55 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 */
 	public function get_the_map( $static = true ) {
 		return $this->get_the_static_map_html( true );
+	}
+
+	/**
+	 * Returns the name of LocationIQ's icon for a single location's marker.
+	 *
+	 * LocationIQ's icons are pins in tiny, small and large sizes; the tiny pin stands in for a dot.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Icon name, such as `large-red-cutout`.
+	 */
+	protected function get_marker_icon() {
+		$sizes = array(
+			'small'  => 'small',
+			'medium' => 'large',
+			'large'  => 'large',
+		);
+		$size  = 'dot' === $this->marker ? 'tiny' : $sizes[ $this->marker_size ];
+		return $size . '-' . $this->get_marker_palette_color() . '-cutout';
+	}
+
+	/**
+	 * Returns the color of LocationIQ's marker icons closest to the marker color.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Color name.
+	 */
+	public function get_marker_palette_color() {
+		$palette = array(
+			'red'    => array( 211, 47, 47 ),
+			'orange' => array( 245, 124, 0 ),
+			'yellow' => array( 251, 192, 45 ),
+			'green'  => array( 56, 142, 60 ),
+			'blue'   => array( 25, 118, 210 ),
+			'purple' => array( 123, 31, 162 ),
+			'gray'   => array( 117, 117, 117 ),
+			'black'  => array( 33, 33, 33 ),
+		);
+		$color   = array_map( 'hexdec', str_split( $this->get_marker_hex(), 2 ) );
+		$nearest = 'red';
+		$best    = PHP_INT_MAX;
+		foreach ( $palette as $name => $rgb ) {
+			$distance = ( $color[0] - $rgb[0] ) ** 2 + ( $color[1] - $rgb[1] ) ** 2 + ( $color[2] - $rgb[2] ) ** 2;
+			if ( $distance < $best ) {
+				$best    = $distance;
+				$nearest = $name;
+			}
+		}
+		return $nearest;
 	}
 }
