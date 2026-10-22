@@ -149,6 +149,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 *
 	 * @since 4.1.5
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
+	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -179,6 +180,9 @@ class Map_Provider_Geoapify extends Map_Provider {
 			// Geoapify ignores the centre and zoom when an area is given, so there is none.
 			$args['center'] = sprintf( 'lonlat:%1$s,%2$s', $view['longitude'], $view['latitude'] );
 			$args['zoom']   = $view['zoom'];
+		}
+		if ( 1 < $this->scale ) {
+			$args['scaleFactor'] = $this->scale;
 		}
 		return add_query_arg( $args, 'https://maps.geoapify.com/v1/staticmap' );
 	}
