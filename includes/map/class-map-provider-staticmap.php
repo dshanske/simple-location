@@ -1416,16 +1416,10 @@ class Map_Provider_StaticMap extends Map_Provider {
 			if ( $index < 0 || $index >= $count ) {
 				continue;
 			}
-			$box = array_map( 'floatval', array_values( $marker['box'] ) );
-			// Keep the part of the marker that is on the image.
-			$left   = max( 0, min( $width, $box[0] ) );
-			$top    = max( 0, min( $height, $box[1] ) );
-			$right  = max( 0, min( $width, $box[2] ) );
-			$bottom = max( 0, min( $height, $box[3] ) );
-			if ( $right <= $left || $bottom <= $top ) {
-				continue;
+			$box = self::marker_box_percent( array_map( 'floatval', array_values( $marker['box'] ) ), $width, $height );
+			if ( null !== $box ) {
+				$boxes[ $index ] = $box;
 			}
-			$boxes[ $index ] = array( 100 * $left / $width, 100 * $top / $height, 100 * $right / $width, 100 * $bottom / $height );
 		}
 		return $boxes;
 	}

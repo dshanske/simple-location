@@ -542,8 +542,11 @@ class MapProvidersTest extends WP_UnitTestCase {
 			$url['query']
 		);
 
+		// The plugin chooses the view, so there is no area, which would override it.
 		$url = $this->parse( $map->get_archive_map( $this->locations ) );
-		$this->assertSame( 'rect:-75.1636,39.9489,-75.15,39.9524', $url['query']['area'] );
+		$this->assertArrayNotHasKey( 'area', $url['query'] );
+		$this->assertSame( 'lonlat:-75.1568,39.95065', $url['query']['center'] );
+		$this->assertSame( '15', $url['query']['zoom'] );
 		$this->assertSame( 'lonlat:-75.1636,39.9524;size:small;color:red|lonlat:-75.15,39.9489;size:small;color:red', $url['query']['marker'] );
 
 		$this->assertSame( 'https://www.openstreetmap.org/?mlat=39.9524&mlon=-75.1636#map=15/39.9524/-75.1636', $map->get_the_map_url() );
@@ -682,13 +685,13 @@ class MapProvidersTest extends WP_UnitTestCase {
 		);
 
 		$this->assertSame(
-			'https://maps.locationiq.com/v3/staticmap?key=KEY&format=png&size=600x400&markers=icon:large-red-cutout|39.9524,-75.1636&markers=icon:large-red-cutout|39.9489,-75.15&path=weight:2|color:blue|39.9524,-75.1636|39.9489,-75.15',
+			'https://maps.locationiq.com/v3/staticmap?key=KEY&format=png&size=600x400&center=39.95065,-75.1568&zoom=15&markers=icon:large-red-cutout|39.9524,-75.1636&markers=icon:large-red-cutout|39.9489,-75.15&path=weight:2|color:blue|39.9524,-75.1636|39.9489,-75.15',
 			$map->get_archive_map( $this->locations )
 		);
 
 		// One location is a marker without a path.
 		$this->assertSame(
-			'https://maps.locationiq.com/v3/staticmap?key=KEY&format=png&size=600x400&markers=icon:large-red-cutout|39.9524,-75.1636',
+			'https://maps.locationiq.com/v3/staticmap?key=KEY&format=png&size=600x400&center=39.9524,-75.1636&zoom=15&markers=icon:large-red-cutout|39.9524,-75.1636',
 			$map->get_archive_map( array( $this->locations[0] ) )
 		);
 
@@ -715,7 +718,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$archive = $map->get_archive_map( $this->locations );
 		$this->assertSame(
 			sprintf(
-				'https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s(-75.1636,39.9524),pin-s(-75.15,39.9489),path-5+f44-0.5(%s)/auto/600x400?access_token=KEY',
+				'https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s(-75.1636,39.9524),pin-s(-75.15,39.9489),path-5+f44-0.5(%s)/-75.1568,39.95065,14.75/600x400?access_token=KEY',
 				rawurlencode( Sloc_Polyline::encode( $this->locations ) )
 			),
 			$archive
@@ -827,6 +830,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 				'type'      => 'dark',
 				'locations' => '39.9524,-75.1636||39.9489,-75.15',
 				'shape'     => 'cmp|enc:' . Sloc_Polyline::encode( $this->locations ),
+				'center'    => '39.95065,-75.1568',
+				'zoom'      => '15',
 			),
 			$archive['query']
 		);
@@ -1469,12 +1474,153 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Providers that don't say where markers are draw a plain archive map, as before.
+	 * Providers whose archive maps the plugin centres, with their marker box in pixels from the location.
+	 *
+	 * @return array
+	 */
+	public function data_centred_providers() {
+		return array(
+			'Google'     => array( 'Map_Provider_Google', array( -8, -22, 8, 1 ) ),
+			'Mapbox'     => array( 'Map_Provider_Mapbox', array( -12, -28, 12, 2 ) ),
+			'HERE'       => array( 'Map_Provider_Here', array( -10, -10, 10, 10 ) ),
+			'Geoapify'   => array( 'Map_Provider_Geoapify', array( -12, -28, 12, 2 ) ),
+			'LocationIQ' => array( 'Map_Provider_LocationIQ', array( -16, -48, 16, 2 ) ),
+			'MapQuest'   => array( 'Map_Provider_MapQuest', array( -12, -28, 12, 2 ) ),
+		);
+	}
+
+	/**
+	 * The plugin's view fits every location inside the padding, as closely as the provider's zoom levels allow, and
+	 * each marker's box is around its location.
+	 *
+	 * @dataProvider data_centred_providers
+	 *
+	 * @param string $class      Provider class.
+	 * @param int[]  $marker_box Marker box in pixels from the location.
+	 */
+	public function test_archive_view_fits_locations( $class, $marker_box ) {
+		// Philadelphia, New York and Baltimore: too far apart for the site's zoom.
+		$locations = array(
+			array( 39.9524, -75.1636 ),
+			array( 40.7128, -74.006 ),
+			array( 39.2904, -76.6122 ),
+		);
+		$map       = $this->provider( $class, array( 'style' => 'streets-v11' ) );
+		$view      = $map->get_archive_view( $locations );
+		$this->assertIsArray( $view );
+		$this->assertLessThan( 15, $view['zoom'] );
+
+		$boxes = $map->get_archive_marker_boxes( $locations );
+		$this->assertSame( array( 0, 1, 2 ), array_keys( $boxes ) );
+		$xs = array();
+		$ys = array();
+		foreach ( $boxes as $box ) {
+			$xs[] = $box[0] * 6 - $marker_box[0];
+			$ys[] = $box[1] * 4 - $marker_box[1];
+			$this->assertEqualsWithDelta( $marker_box[2] - $marker_box[0], ( $box[2] - $box[0] ) * 6, 0.001 );
+		}
+		foreach ( array_merge( $xs, $ys ) as $pixel ) {
+			$this->assertGreaterThanOrEqual( Map_Provider::ARCHIVE_PADDING - 0.01, $pixel );
+		}
+		$this->assertLessThanOrEqual( 600 - Map_Provider::ARCHIVE_PADDING + 0.01, max( $xs ) );
+		$this->assertLessThanOrEqual( 400 - Map_Provider::ARCHIVE_PADDING + 0.01, max( $ys ) );
+		// The view is centred on the locations.
+		$this->assertEqualsWithDelta( 300, ( max( $xs ) + min( $xs ) ) / 2, 0.01 );
+		$this->assertEqualsWithDelta( 200, ( max( $ys ) + min( $ys ) ) / 2, 0.01 );
+		// One zoom step closer (a whole level, or 0.01 for fractional zooms) wouldn't fit.
+		$step = is_int( $view['zoom'] ) ? 2 : pow( 2, 0.01 );
+		$this->assertTrue( ( max( $xs ) - min( $xs ) ) * $step > 536 || ( max( $ys ) - min( $ys ) ) * $step > 336 );
+	}
+
+	/**
+	 * Mapbox takes fractional zooms, rounded down to two decimals; the others take whole zooms.
+	 */
+	public function test_archive_view_zoom() {
+		$map = $this->provider( 'Map_Provider_Mapbox', array( 'style' => 'streets-v11' ) );
+		$this->assertSame(
+			array(
+				'latitude'  => 39.95065,
+				'longitude' => -75.1568,
+				'zoom'      => 14.75,
+			),
+			$map->get_archive_view( $this->locations )
+		);
+		$view = $this->provider( 'Map_Provider_Google' )->get_archive_view( $this->locations );
+		$this->assertSame( 15, $view['zoom'] );
+
+		// One location is shown at the site's zoom, no closer than the provider allows.
+		$this->assertSame(
+			array(
+				'latitude'  => 39.9524,
+				'longitude' => -75.1636,
+				'zoom'      => 15,
+			),
+			$this->provider( 'Map_Provider_Google' )->get_archive_view( array( $this->locations[0] ) )
+		);
+		$view = $this->provider( 'Map_Provider_LocationIQ', array( 'map_zoom' => 21 ) )->get_archive_view( array( $this->locations[0] ) );
+		$this->assertSame( 18, $view['zoom'] );
+	}
+
+	/**
+	 * Without a view the plugin can choose, the provider fits the archive map itself and its markers aren't clickable.
+	 */
+	public function test_archive_view_unavailable() {
+		$map = $this->provider( 'Map_Provider_Google' );
+		// Either side of the antimeridian.
+		$fiji = array( array( -17.7, 178.1 ), array( -13.8, -171.8 ) );
+		$this->assertNull( $map->get_archive_view( $fiji ) );
+		$this->assertSame( array(), $map->get_archive_marker_boxes( $fiji ) );
+		$this->assertArrayNotHasKey( 'center', $this->parse( $map->get_archive_map( $fiji ) )['query'] );
+
+		$this->assertNull( $map->get_archive_view( array() ) );
+		$this->assertNull( $map->get_archive_view( array( array( 'north', -75.1 ) ) ) );
+		$this->assertNull( $this->provider( 'Map_Provider_Google', array( 'width' => 0 ) )->get_archive_view( $this->locations ) );
+		$this->assertNull( $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) )->get_archive_view( $this->locations ) );
+	}
+
+	/**
+	 * Google archive maps link their markers to their posts, like the custom static map.
+	 */
+	public function test_archive_map_html_links_google() {
+		$map   = $this->provider( 'Map_Provider_Google' );
+		$posts = array(
+			self::factory()->post->create( array( 'post_title' => 'City Hall' ) ),
+			self::factory()->post->create( array( 'post_title' => 'Independence Hall' ) ),
+		);
+		$html  = $map->get_archive_map_html( $this->locations, $posts );
+		$this->assertMatchesRegularExpression( '#^<div class="sloc-archive-map"><img class="archive-map sloc-map" src="https://maps\.googleapis\.com/[^"]+" alt="[^"]+" /><a [^>]+></a><a [^>]+></a></div>$#', $html );
+		$this->assertStringContainsString( 'href="' . get_permalink( $posts[0] ) . '"', $html );
+		$this->assertStringContainsString( 'title="Independence Hall"', $html );
+	}
+
+	/**
+	 * Geoapify archive images stored before the plugin chose their view aren't reused.
+	 */
+	public function test_geoapify_archive_cache_args() {
+		$map = $this->provider( 'Map_Provider_Geoapify' );
+		$this->assertSame( 'view', $map->get_cache_args( $this->locations )['options'] );
+		$this->assertArrayNotHasKey( 'options', $map->get_cache_args() );
+	}
+
+	/**
+	 * Providers that fit their own archive maps, and don't say where markers are, draw a plain archive map, as before.
 	 */
 	public function test_archive_map_html_plain() {
-		$map  = $this->provider( 'Map_Provider_Mapbox', array( 'style' => 'streets-v11' ) );
+		$map  = new class( array(
+			'api'   => 'KEY',
+			'style' => 'streets-v11',
+		) ) extends Map_Provider_Mapbox {
+			/**
+			 * The provider fits its own archive maps.
+			 *
+			 * @var int
+			 */
+			protected $tile_size = 0;
+		};
 		$post = self::factory()->post->create();
+		$this->assertNull( $map->get_archive_view( $this->locations ) );
 		$this->assertSame( array(), $map->get_archive_marker_boxes( $this->locations ) );
+		$this->assertStringContainsString( '/auto/600x400', $map->get_archive_map( $this->locations ) );
 		$this->assertMatchesRegularExpression( '#^<img class="archive-map sloc-map" src="https://api\.mapbox\.com/[^"]+" alt="[^"]+" />$#', $map->get_archive_map_html( $this->locations, array( $post, $post ) ) );
 
 		// Without a map, the image is empty, as it was.
@@ -1667,7 +1813,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		);
 
 		$archive = $map->get_archive_map( $this->locations );
-		$this->assertStringStartsWith( 'https://image.maps.hereapi.com/mia/v3/base/mc/overlay:padding=32/600x400/png8?', $archive );
+		$this->assertStringStartsWith( 'https://image.maps.hereapi.com/mia/v3/base/mc/center:39.95065,-75.1568;zoom=15/600x400/png8?', $archive );
 		$this->assertStringContainsString( 'overlay=point:39.9524,-75.1636|39.9489,-75.15', $archive );
 		$this->assertStringContainsString( '&overlay=line:39.9524,-75.1636,39.9489,-75.15;width=4', $archive );
 

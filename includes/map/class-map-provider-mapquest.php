@@ -16,6 +16,14 @@ class Map_Provider_Mapquest extends Map_Provider {
 	use Sloc_API_MapQuest;
 
 	/**
+	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	protected $tile_size = 256;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
@@ -104,6 +112,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 * Returns the URL of a static map with multiple locations.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -119,17 +128,20 @@ class Map_Provider_Mapquest extends Map_Provider {
 		}
 		$polyline = Sloc_Polyline::encode( $locations );
 
-		$url = 'https://www.mapquestapi.com/staticmap/v5/map';
-		$map = add_query_arg(
-			array(
-				'key'       => $this->api,
-				'size'      => sprintf( '%1$s,%2$s', $this->width, $this->height ),
-				'type'      => $this->style,
-				'locations' => implode( '||', $markers ),
-				'shape'     => 'cmp|enc:' . $polyline,
-			),
-			$url
+		$url  = 'https://www.mapquestapi.com/staticmap/v5/map';
+		$args = array(
+			'key'       => $this->api,
+			'size'      => sprintf( '%1$s,%2$s', $this->width, $this->height ),
+			'type'      => $this->style,
+			'locations' => implode( '||', $markers ),
+			'shape'     => 'cmp|enc:' . $polyline,
 		);
+		$view = $this->get_archive_view( $locations );
+		if ( null !== $view ) {
+			$args['center'] = sprintf( '%1$s,%2$s', $view['latitude'], $view['longitude'] );
+			$args['zoom']   = $view['zoom'];
+		}
+		$map = add_query_arg( $args, $url );
 		return $map;
 	}
 

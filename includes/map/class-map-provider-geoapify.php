@@ -25,6 +25,14 @@ class Map_Provider_Geoapify extends Map_Provider {
 
 
 	/**
+	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	protected $tile_size = 256;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 4.1.5
@@ -32,12 +40,13 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 * @param array $args Arguments. See Map_Provider::__construct().
 	 */
 	public function __construct( $args = array() ) {
-		$this->name        = __( 'GeoApify', 'simple-location' );
-		$this->slug        = 'geoapify';
-		$this->url         = 'https://www.geoapify.com/';
-		$this->description = __( 'GeoApify offers Maps and Geocoding APIs with a free tier of 3000 credits for requests per day. API Key required.', 'simple-location' );
-		$this->max_width   = 4096;
-		$this->max_height  = 4096;
+		$this->name         = __( 'GeoApify', 'simple-location' );
+		$this->slug         = 'geoapify';
+		$this->url          = 'https://www.geoapify.com/';
+		$this->description  = __( 'GeoApify offers Maps and Geocoding APIs with a free tier of 3000 credits for requests per day. API Key required.', 'simple-location' );
+		$this->max_map_zoom = 20;
+		$this->max_width    = 4096;
+		$this->max_height   = 4096;
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_geoapify_api' );
 		}
@@ -119,9 +128,27 @@ class Map_Provider_Geoapify extends Map_Provider {
 	}
 
 	/**
+	 * Returns the parameters that describe the current map, for a map image served from the site.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
+	 * @return string[] Map parameters. Archive maps have 'options', so images stored before the plugin chose their view
+	 *                  aren't served under links placed for the new view.
+	 */
+	public function get_cache_args( $locations = null ) {
+		$args = parent::get_cache_args( $locations );
+		if ( null !== $locations ) {
+			$args['options'] = 'view';
+		}
+		return $args;
+	}
+
+	/**
 	 * Returns the URL of a static map with multiple locations.
 	 *
 	 * @since 4.1.5
+	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -136,20 +163,24 @@ class Map_Provider_Geoapify extends Map_Provider {
 			$markers[] = sprintf( 'lonlat:%1$s,%2$s;size:small;color:red', $location[1], $location[0] );
 		}
 
-		$map = add_query_arg(
-			array(
-				'apiKey' => $this->api,
-				'area'   => 'rect:' . implode( ',', geo_bounding_box( $locations, true ) ),
-				'format' => 'jpeg',
-				'width'  => $this->width,
-				'height' => $this->height,
-				'zoom'   => $this->map_zoom,
-				'style'  => $this->style,
-				'marker' => implode( '|', $markers ),
-			),
-			'https://maps.geoapify.com/v1/staticmap'
+		$args = array(
+			'apiKey' => $this->api,
+			'format' => 'jpeg',
+			'width'  => $this->width,
+			'height' => $this->height,
+			'zoom'   => $this->map_zoom,
+			'style'  => $this->style,
+			'marker' => implode( '|', $markers ),
 		);
-		return $map;
+		$view = $this->get_archive_view( $locations );
+		if ( null === $view ) {
+			$args['area'] = 'rect:' . implode( ',', geo_bounding_box( $locations, true ) );
+		} else {
+			// Geoapify ignores the centre and zoom when an area is given, so there is none.
+			$args['center'] = sprintf( 'lonlat:%1$s,%2$s', $view['longitude'], $view['latitude'] );
+			$args['zoom']   = $view['zoom'];
+		}
+		return add_query_arg( $args, 'https://maps.geoapify.com/v1/staticmap' );
 	}
 
 	/**

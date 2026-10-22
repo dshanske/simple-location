@@ -24,6 +24,22 @@ class Map_Provider_Google extends Map_Provider {
 	const BASE_URL = 'https://maps.googleapis.com/maps/api/staticmap';
 
 	/**
+	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	protected $tile_size = 256;
+
+	/**
+	 * Clickable area of an archive map marker, in pixels from the marker's location. Tiny markers are small pins.
+	 *
+	 * @since 6.1.0
+	 * @var int[]
+	 */
+	protected $marker_box = array( -8, -22, 8, 1 );
+
+	/**
 	 * URL signing secret from the Google Cloud console, in URL-safe base64.
 	 *
 	 * @since 6.0.0
@@ -174,6 +190,7 @@ class Map_Provider_Google extends Map_Provider {
 	 * @since 1.0.0
 	 * @since 6.0.0 Uses the roadmap style when none is set, and has no empty marker location.
 	 * @since 6.0.0 The query is URL-encoded, and the URL is signed when a signing secret is set.
+	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations, or if the signing secret isn't valid.
@@ -189,16 +206,20 @@ class Map_Provider_Google extends Map_Provider {
 		}
 		$polyline = Sloc_Polyline::encode( $locations );
 
-		$map = $this->build_url(
-			array(
-				'markers'  => 'size:tiny|color:red|label:P|' . implode( '|', $markers ),
-				'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
-				'maptype'  => $this->style,
-				'language' => get_bloginfo( 'language' ),
-				'key'      => $this->api,
-				'path'     => 'color:0xff0000ff|weight:5|enc:' . $polyline,
-			)
+		$args = array(
+			'markers'  => 'size:tiny|color:red|label:P|' . implode( '|', $markers ),
+			'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
+			'maptype'  => $this->style,
+			'language' => get_bloginfo( 'language' ),
+			'key'      => $this->api,
+			'path'     => 'color:0xff0000ff|weight:5|enc:' . $polyline,
 		);
+		$view = $this->get_archive_view( $locations );
+		if ( null !== $view ) {
+			$args['center'] = sprintf( '%1$s,%2$s', $view['latitude'], $view['longitude'] );
+			$args['zoom']   = $view['zoom'];
+		}
+		$map = $this->build_url( $args );
 		return is_wp_error( $map ) ? '' : $map;
 	}
 

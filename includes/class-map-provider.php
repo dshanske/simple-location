@@ -23,6 +23,43 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $map_zoom;
 
 	/**
+	 * Space, in pixels, kept between an archive map's edges and its outermost locations when the plugin chooses its view.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const ARCHIVE_PADDING = 32;
+
+	/**
+	 * Width, in pixels, of the whole world at zoom 0 on the provider's static maps, or 0 if the plugin doesn't choose the
+	 * view of the provider's archive maps.
+	 *
+	 * Most providers use 256-pixel tiles; Mapbox uses 512.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	protected $tile_size = 0;
+
+	/**
+	 * Whether the provider's static maps accept fractional zoom levels.
+	 *
+	 * @since 6.1.0
+	 * @var bool
+	 */
+	protected $fractional_zoom = false;
+
+	/**
+	 * Clickable area of an archive map marker, as array( left, top, right, bottom ) in pixels from the marker's location.
+	 *
+	 * The default suits a pin whose tip is on the location.
+	 *
+	 * @since 6.1.0
+	 * @var int[]
+	 */
+	protected $marker_box = array( -12, -28, 12, 2 );
+
+	/**
 	 * Map Zoom Level Maximum.
 	 *
 	 * @since 1.0.0
@@ -438,9 +475,112 @@ abstract class Map_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns the view of an archive map that fits all its locations, for providers whose archive maps the plugin centres.
+	 *
+	 * The locations' bounding box is fitted, in Web Mercator, into the image less ARCHIVE_PADDING on each side. The zoom is
+	 * no closer than the site's zoom setting or the provider's maximum, and is rounded down when the provider only takes
+	 * whole zoom levels.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return array|null Array with 'latitude', 'longitude' and 'zoom', or null if the provider fits its own archive maps,
+	 *                    there are no usable locations, or they cross the antimeridian.
+	 */
+	public function get_archive_view( $locations ) {
+		if ( ! $this->tile_size || empty( $locations ) || ! is_array( $locations ) ) {
+			return null;
+		}
+		$width  = (float) $this->width;
+		$height = (float) $this->height;
+		if ( $width <= 0 || $height <= 0 ) {
+			return null;
+		}
+		$points = array();
+		foreach ( $locations as $location ) {
+			if ( ! is_array( $location ) || ! isset( $location[0], $location[1] ) || ! is_numeric( $location[0] ) || ! is_numeric( $location[1] ) ) {
+				return null;
+			}
+			$points[] = self::mercator( (float) $location[0], (float) $location[1] );
+		}
+		$xs = array_column( $points, 0 );
+		$ys = array_column( $points, 1 );
+		$dx = max( $xs ) - min( $xs );
+		$dy = max( $ys ) - min( $ys );
+		// Locations more than half the world apart are probably either side of the antimeridian.
+		if ( $dx > 0.5 ) {
+			return null;
+		}
+
+		$zoom = is_numeric( $this->map_zoom ) ? (float) $this->map_zoom : 14;
+		if ( $this->max_map_zoom ) {
+			$zoom = min( $zoom, (float) $this->max_map_zoom );
+		}
+		$inner_width  = max( 1, $width - 2 * self::ARCHIVE_PADDING );
+		$inner_height = max( 1, $height - 2 * self::ARCHIVE_PADDING );
+		if ( $dx > 0 ) {
+			$zoom = min( $zoom, log( $inner_width / ( $dx * $this->tile_size ), 2 ) );
+		}
+		if ( $dy > 0 ) {
+			$zoom = min( $zoom, log( $inner_height / ( $dy * $this->tile_size ), 2 ) );
+		}
+		$zoom = $this->fractional_zoom ? floor( $zoom * 100 ) / 100 : floor( $zoom );
+		$zoom = max( 0, $zoom );
+
+		$x = ( max( $xs ) + min( $xs ) ) / 2;
+		$y = ( max( $ys ) + min( $ys ) ) / 2;
+		return array(
+			'latitude'  => round( rad2deg( atan( sinh( M_PI * ( 1 - 2 * $y ) ) ) ), 6 ),
+			'longitude' => round( $x * 360 - 180, 6 ),
+			'zoom'      => $this->fractional_zoom ? $zoom : (int) $zoom,
+		);
+	}
+
+	/**
+	 * Projects a location to Web Mercator, as a fraction of the world's width and height from its top-left corner.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param float $latitude  Latitude.
+	 * @param float $longitude Longitude.
+	 * @return float[] Array( x, y ), each from 0 to 1.
+	 */
+	protected static function mercator( $latitude, $longitude ) {
+		// Web Mercator ends at about 85.05 degrees north and south.
+		$sin = max( -0.9999, min( 0.9999, sin( deg2rad( $latitude ) ) ) );
+		return array(
+			( $longitude + 180 ) / 360,
+			0.5 - log( ( 1 + $sin ) / ( 1 - $sin ) ) / ( 4 * M_PI ),
+		);
+	}
+
+	/**
+	 * Converts a marker's box on the image to percent of the image's size, keeping only the part on the image.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param float[] $box    Array( left, top, right, bottom ) in pixels from the image's top-left corner.
+	 * @param float   $width  Image width in pixels.
+	 * @param float   $height Image height in pixels.
+	 * @return float[]|null Array( left, top, right, bottom ) in percent, or null if the marker is outside the image.
+	 */
+	protected static function marker_box_percent( $box, $width, $height ) {
+		$left   = max( 0, min( $width, $box[0] ) );
+		$top    = max( 0, min( $height, $box[1] ) );
+		$right  = max( 0, min( $width, $box[2] ) );
+		$bottom = max( 0, min( $height, $box[3] ) );
+		if ( $right <= $left || $bottom <= $top ) {
+			return null;
+		}
+		return array( 100 * $left / $width, 100 * $top / $height, 100 * $right / $width, 100 * $bottom / $height );
+	}
+
+	/**
 	 * Returns where each location's marker is on the archive map.
 	 *
-	 * Providers that can say where they draw markers override this; the default map has no clickable markers.
+	 * When the plugin chooses the archive map's view (see get_archive_view()), each location is projected onto the image
+	 * and given the provider's marker box. Providers that fit their own archive maps have no clickable markers, unless
+	 * they override this.
 	 *
 	 * @since 6.1.0
 	 *
@@ -449,7 +589,29 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *               the image's width and height. Markers outside the image are left out.
 	 */
 	public function get_archive_marker_boxes( $locations ) {
-		return array();
+		$view = $this->get_archive_view( $locations );
+		if ( null === $view ) {
+			return array();
+		}
+		$width  = (float) $this->width;
+		$height = (float) $this->height;
+		$world  = $this->tile_size * pow( 2, $view['zoom'] );
+		$center = self::mercator( $view['latitude'], $view['longitude'] );
+		$boxes  = array();
+		foreach ( array_values( $locations ) as $index => $location ) {
+			$point = self::mercator( (float) $location[0], (float) $location[1] );
+			$x     = ( $point[0] - $center[0] ) * $world + $width / 2;
+			$y     = ( $point[1] - $center[1] ) * $world + $height / 2;
+			$box   = self::marker_box_percent(
+				array( $x + $this->marker_box[0], $y + $this->marker_box[1], $x + $this->marker_box[2], $y + $this->marker_box[3] ),
+				$width,
+				$height
+			);
+			if ( null !== $box ) {
+				$boxes[ $index ] = $box;
+			}
+		}
+		return $boxes;
 	}
 
 	/**

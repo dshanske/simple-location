@@ -17,6 +17,22 @@ class Map_Provider_LocationIQ extends Map_Provider {
 
 
 	/**
+	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	protected $tile_size = 256;
+
+	/**
+	 * Clickable area of an archive map marker, in pixels from the marker's location. Large markers are tall pins.
+	 *
+	 * @since 6.1.0
+	 * @var int[]
+	 */
+	protected $marker_box = array( -16, -48, 16, 2 );
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
@@ -79,6 +95,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Uses the v3 API, with one marker parameter per location and a valid path.
+	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -93,7 +110,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 			$points[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
 
-		$map = add_query_arg(
+		$map  = add_query_arg(
 			array(
 				'key'    => $this->api,
 				'format' => 'png',
@@ -101,6 +118,16 @@ class Map_Provider_LocationIQ extends Map_Provider {
 			),
 			'https://maps.locationiq.com/v3/staticmap'
 		);
+		$view = $this->get_archive_view( $locations );
+		if ( null !== $view ) {
+			$map = add_query_arg(
+				array(
+					'center' => sprintf( '%1$s,%2$s', $view['latitude'], $view['longitude'] ),
+					'zoom'   => $view['zoom'],
+				),
+				$map
+			);
+		}
 		// The v3 API takes one markers parameter per marker.
 		foreach ( $points as $point ) {
 			$map .= '&markers=icon:large-red-cutout|' . $point;
