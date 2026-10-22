@@ -1,0 +1,13 @@
+{
+    "provider": "esri",
+    "style": "topo",
+    "overlays": [
+        "railways",
+        "seamarks"
+    ],
+    "fallback": null,
+    "attribution": "esri",
+    "text": "Esri, HERE, Garmin, USGS, \u00a9 OpenStreetMap contributors and others | Data \u00a9 OpenStreetMap contributors, Style: CC-BY-SA 2.0 OpenRailwayMap | Seamarks \u00a9 OpenSeaMap contributors",
+    "html": "Powered by <a href=\"https://www.esri.com\">Esri</a> | Sources: Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), \u00a9 <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, and the GIS User Community | Data \u00a9 <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, Style: <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA 2.0</a> <a href=\"https://www.openrailwaymap.org/\">OpenRailwayMap</a> | Seamarks \u00a9 <a href=\"https://www.openseamap.org/\">OpenSeaMap</a> contributors (<a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC BY-SA 2.0</a>)",
+    "plain": "Powered by Esri | Sources: Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), \u00a9 OpenStreetMap contributors, and the GIS User Community | Data \u00a9 OpenStreetMap contributors, Style: CC-BY-SA 2.0 OpenRailwayMap | Seamarks \u00a9 OpenSeaMap contributors (CC BY-SA 2.0)"
+}

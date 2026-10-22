@@ -460,6 +460,17 @@ abstract class Map_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns the map's credit to show next to the map, for providers that don't draw it on the image.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string HTML, or an empty string. Providers draw their credit on the map image by default.
+	 */
+	public function get_attribution_html() {
+		return '';
+	}
+
+	/**
 	 * Returns the HTML for a static map image linked to the full map.
 	 *
 	 * @since 4.1.10
