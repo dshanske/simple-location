@@ -490,22 +490,22 @@ function get_term_location( $id, $args = array() ) {
 
 
 /**
- * Get a list of all the posts with a public location
+ * Returns the public locations of the posts in the main query, keyed by post ID.
  *
- * In order to generate an archive map.
+ * @since 6.1.0
  *
- * @since 1.0.0
+ * @return array Array( latitude, longitude ) points keyed by post ID, in the query's order.
  */
-function get_geo_archive_location_list() {
+function sloc_get_geo_archive_locations() {
 	global $wp_query;
 	$locations = array();
 	if ( empty( $wp_query->posts ) ) {
-		return '';
+		return $locations;
 	}
 	foreach ( $wp_query->posts as $post ) {
 		$location = get_post_geodata( $post->ID, false );
 		if ( 'public' === $location['visibility'] && array_key_exists( 'latitude', $location ) ) {
-			$locations[] = array_values(
+			$locations[ $post->ID ] = array_values(
 				wp_array_slice_assoc(
 					$location,
 					array(
@@ -517,4 +517,35 @@ function get_geo_archive_location_list() {
 		}
 	}
 	return $locations;
+}
+
+/**
+ * Get a list of all the posts with a public location
+ *
+ * In order to generate an archive map.
+ *
+ * @since 1.0.0
+ * @since 6.1.0 Uses sloc_get_geo_archive_locations().
+ *
+ * @return array|string List of array( latitude, longitude ) points, or an empty string if the query has no posts.
+ */
+function get_geo_archive_location_list() {
+	global $wp_query;
+	if ( empty( $wp_query->posts ) ) {
+		return '';
+	}
+	return array_values( sloc_get_geo_archive_locations() );
+}
+
+/**
+ * Returns the IDs of the posts in get_geo_archive_location_list(), in the same order.
+ *
+ * Archive map markers are numbered in that order, so the IDs say which post each marker is.
+ *
+ * @since 6.1.0
+ *
+ * @return int[] Post IDs.
+ */
+function get_geo_archive_post_list() {
+	return array_keys( sloc_get_geo_archive_locations() );
 }

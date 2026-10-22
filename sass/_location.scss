@@ -22,6 +22,21 @@
 	margin-top: 0.25em;
 }
 
+.sloc-archive-map {
+	position: relative;
+	display: inline-block;
+	max-width: 100%;
+
+	.sloc-map {
+		display: block;
+		height: auto;
+	}
+}
+
+.sloc-archive-map-marker {
+	position: absolute;
+}
+
 
 ul.sloc-lastseen-data {
 	list-style-position: inside;

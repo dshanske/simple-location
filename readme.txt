@@ -195,6 +195,8 @@ Maps that need a key on your server (such as CARTO or Stadia, once the server ha
 and the signing secret it shows as the Custom Static Map Signing Secret, on the API settings page. Map URLs are then signed: they carry the client name and a signature, never the secret, so they are safe to publish.
 The plain client key also works (Custom Static Map Client Key), but it appears in every map image URL, so anyone who views a page can copy it.
 
+On map archive pages, each marker on the custom map links to its post. The plugin asks the server where it draws each marker and stores the answer, so this needs no scripts in the page.
+
 The server fetches every tile a map covers, so its work grows with the image size. The plugin asks it for maps no larger than the server's own limit (1280 by 1280 pixels unless the server changes it), shrinking larger maps to fit.
 To lower this, define `SLOC_STATICMAP_MAX_WIDTH` and `SLOC_STATICMAP_MAX_HEIGHT` in wp-config.php, or use the `sloc_staticmap_max_size` filter.
 

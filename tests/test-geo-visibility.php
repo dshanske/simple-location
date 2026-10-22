@@ -497,4 +497,29 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 		$this->assertCount( 1, $list, 'Only the public post should be listed' );
 		unset( $public, $protected );
 	}
+
+	/**
+	 * The archive post list has the posts of the archive location list, in the same order.
+	 */
+	public function test_get_geo_archive_post_list() {
+		$first     = $this->post_with_location( 'public' );
+		$protected = $this->post_with_location( 'protected' );
+		$second    = $this->post_with_location( 'public' );
+		update_post_meta( $second, 'geo_latitude', '46.5' );
+		$this->go_to( home_url( '/' ) );
+
+		$posts     = get_geo_archive_post_list();
+		$locations = get_geo_archive_location_list();
+		$this->assertCount( 2, $posts );
+		$this->assertCount( 2, $locations );
+		$this->assertSame( array( $second, $first ), $posts, 'Newest first, as the query lists them' );
+		$this->assertEquals( 46.5, $locations[0][0] );
+		$this->assertEquals( 45.01, $locations[1][0] );
+		unset( $protected );
+
+		// A query without posts has no list.
+		$this->go_to( home_url( '/?s=nothing-matches-this' ) );
+		$this->assertSame( array(), get_geo_archive_post_list() );
+		$this->assertSame( '', get_geo_archive_location_list() );
+	}
 }
