@@ -801,7 +801,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * MapQuest builds static map v5 URLs for a location and for a route.
+	 * MapQuest builds static map v5 URLs for a location and for a route, at the map's zoom.
 	 */
 	public function test_mapquest() {
 		$map = $this->provider( 'Map_Provider_Mapquest', array( 'style' => 'dark' ) );
@@ -814,12 +814,24 @@ class MapProvidersTest extends WP_UnitTestCase {
 				'key'       => 'KEY',
 				'center'    => '39.9524,-75.1636',
 				'size'      => '600,400',
+				'zoom'      => '15',
 				'type'      => 'dark',
 				'locations' => '39.9524,-75.1636',
 			),
 			$url['query']
 		);
 		$this->assertSame( 'https://www.mapquest.com/?center=39.9524,-75.1636&zoom=15', $map->get_the_map_url() );
+
+		// The image and the link use the same zoom.
+		$zoomed = $this->provider(
+			'Map_Provider_Mapquest',
+			array(
+				'style'    => 'dark',
+				'map_zoom' => 9,
+			)
+		);
+		$this->assertSame( '9', $this->parse( $zoomed->get_the_static_map() )['query']['zoom'] );
+		$this->assertSame( 'https://www.mapquest.com/?center=39.9524,-75.1636&zoom=9', $zoomed->get_the_map_url() );
 
 		$archive = $this->parse( $map->get_archive_map( $this->locations ) );
 		$this->assertSame( 'https://www.mapquestapi.com/staticmap/v5/map', $archive['base'] );
