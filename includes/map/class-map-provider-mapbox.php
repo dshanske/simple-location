@@ -16,6 +16,22 @@ class Map_Provider_Mapbox extends Map_Provider {
 	use Sloc_API_Mapbox;
 
 	/**
+	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps. Mapbox draws 512-pixel tiles.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	protected $tile_size = 512;
+
+	/**
+	 * Whether the provider's static maps accept fractional zoom levels.
+	 *
+	 * @since 6.1.0
+	 * @var bool
+	 */
+	protected $fractional_zoom = true;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.4.0
@@ -141,6 +157,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 * Returns the URL of a static map with multiple locations.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -159,15 +176,17 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$markers[] = sprintf( 'pin-s(%1$s,%2$s)', $location[1], $location[0] );
 		}
 		$polyline = Sloc_Polyline::encode( $locations );
+		$view     = $this->get_archive_view( $locations );
 		$map      = sprintf(
-			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/%3$s,path-5+f44-0.5(%4$s)/auto/%5$sx%6$s?access_token=%7$s',
+			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/%3$s,path-5+f44-0.5(%4$s)/%8$s/%5$sx%6$s?access_token=%7$s',
 			$user,
 			$this->style,
 			implode( ',', $markers ),
 			rawurlencode( $polyline ),
 			$this->width,
 			$this->height,
-			$this->api
+			$this->api,
+			null === $view ? 'auto' : sprintf( '%1$s,%2$s,%3$s', $view['longitude'], $view['latitude'], $view['zoom'] )
 		);
 		return $map;
 	}

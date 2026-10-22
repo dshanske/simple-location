@@ -25,6 +25,22 @@ class Map_Provider_Here extends Map_Provider {
 	const BASE_URL = 'https://image.maps.hereapi.com/mia/v3/base/mc/';
 
 	/**
+	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	protected $tile_size = 256;
+
+	/**
+	 * Clickable area of an archive map marker, in pixels from the marker's location. Points are circles centred on the location.
+	 *
+	 * @since 6.1.0
+	 * @var int[]
+	 */
+	protected $marker_box = array( -10, -10, 10, 10 );
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
@@ -132,10 +148,27 @@ class Map_Provider_Here extends Map_Provider {
 	}
 
 	/**
+	 * Returns the position part of an archive map's URL.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string `center:lat,lng;zoom=z` for the plugin's view, or `overlay:padding=32` for HERE to fit the locations.
+	 */
+	protected function get_archive_position( $locations ) {
+		$view = $this->get_archive_view( $locations );
+		if ( null === $view ) {
+			return 'overlay:padding=32';
+		}
+		return sprintf( 'center:%1$s,%2$s;zoom=%3$s', $view['latitude'], $view['longitude'], $view['zoom'] );
+	}
+
+	/**
 	 * Returns a map image URL showing the route through a list of locations, sized to fit them.
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Uses Map Image API v3.
+	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -156,7 +189,7 @@ class Map_Provider_Here extends Map_Provider {
 				'style'   => $this->style,
 				'overlay' => 'point:' . implode( '|', $points ),
 			),
-			sprintf( '%1$soverlay:padding=32/%2$sx%3$s/png8', self::BASE_URL, $this->width, $this->height )
+			sprintf( '%1$s%2$s/%3$sx%4$s/png8', self::BASE_URL, $this->get_archive_position( $locations ), $this->width, $this->height )
 		);
 		// Lines and points are separate overlays, and a line needs at least two points.
 		if ( count( $points ) > 1 ) {

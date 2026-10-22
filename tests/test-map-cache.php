@@ -225,7 +225,7 @@ class MapCacheTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'points=', $url );
 
 		$this->assertSame( 302, $this->request( $url )->get_status() );
-		$this->assertStringContainsString( 'area=rect:', $this->http_requests[0]['url'] );
+		$this->assertStringContainsString( 'center=lonlat:-75.1568,39.95065', $this->http_requests[0]['url'] );
 		$this->assertStringContainsString( 'marker=lonlat:-75.1636,39.9524;size:small;color:red|lonlat:-75.15,39.9489;size:small;color:red', $this->http_requests[0]['url'] );
 
 		// No locations, no map.
