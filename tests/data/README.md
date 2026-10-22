@@ -112,6 +112,7 @@ list is shortened to a few providers and styles.
 | `staticmap-api.json` | `GET {staticmap_url}/api/v1/` | Captured 2026-10-22 |
 | `staticmap-providers.json` | `GET {staticmap_url}/api/v1/providers` | Captured 2026-10-22, shortened |
 | `staticmap-overlays.json` | `GET {staticmap_url}/api/v1/overlays` | Captured 2026-10-22, shortened |
+| `staticmap-attribution.json` | `GET {staticmap_url}/api/v1/attribution?provider=esri&style=topo&overlay=railways,seamarks` | Captured 2026-10-22 |
 
 ## Location providers (`location/`)
 
