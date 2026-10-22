@@ -1,0 +1,67 @@
+{
+    "name": "Static Maps API",
+    "version": "1.0.0",
+    "api_version": 1,
+    "defaults": {
+        "provider": "osm",
+        "style": "streets",
+        "width": 300,
+        "height": 300,
+        "format": "png",
+        "attribution": "osm"
+    },
+    "limits": {
+        "max_width": 1280,
+        "max_height": 1280
+    },
+    "zoom": {
+        "min": 2,
+        "max": 18,
+        "max_limit": null
+    },
+    "formats": [
+        "png",
+        "png8",
+        "jpg",
+        "jpeg",
+        "webp"
+    ],
+    "scales": [
+        1,
+        2
+    ],
+    "attributions": [
+        "osm",
+        "esri",
+        "mapbox",
+        "mapbox-small",
+        "text",
+        "none"
+    ],
+    "attribution_positions": [
+        "bottomright",
+        "bottomleft",
+        "topright",
+        "topleft"
+    ],
+    "scalebars": [
+        "metric",
+        "imperial",
+        "both"
+    ],
+    "access": {
+        "mode": "open",
+        "credentials": "either",
+        "key_required": false,
+        "key_valid": false
+    },
+    "custom_tiles": false,
+    "links": {
+        "self": "/api/v1/",
+        "providers": "/api/v1/providers",
+        "icons": "/api/v1/icons",
+        "overlays": "/api/v1/overlays",
+        "attribution": "/api/v1/attribution",
+        "plan": "/api/v1/plan"
+    }
+}

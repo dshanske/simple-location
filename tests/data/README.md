@@ -102,11 +102,15 @@ timezone. Nominatim venues reuse `geo/nominatim-reverse.json`, since it is the s
 ## Map providers (`map/`)
 
 Map providers only build image and link URLs, so their tests need no fixtures except Mapbox's list of
-a user's styles.
+a user's styles and the custom static map server's query API. The custom server's fixtures were captured from
+a local Static Maps API 1.0.0 with its shipped configuration (`php -S 127.0.0.1:8765 -t public`); the provider
+list is shortened to a few providers and styles.
 
 | File | Request | Status |
 |---|---|---|
 | `mapbox-styles.json` | `GET https://api.mapbox.com/styles/v1/{user}?access_token=…&limit=50` | Hand-built from docs |
+| `staticmap-api.json` | `GET {staticmap_url}/api/v1/` | Captured 2026-10-22 |
+| `staticmap-providers.json` | `GET {staticmap_url}/api/v1/providers` | Captured 2026-10-22, shortened |
 
 ## Location providers (`location/`)
 

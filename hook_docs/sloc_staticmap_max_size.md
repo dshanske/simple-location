@@ -18,12 +18,12 @@ add_filter(
 ## Parameters
 
 - *`array`* `$max_size`
-  - *`int`* `$width` Width. Default 1280, or SLOC_STATICMAP_MAX_WIDTH if defined.
-  - *`int`* `$height` Height. Default 1280, or SLOC_STATICMAP_MAX_HEIGHT if defined.
+  - *`int`* `$width` Width. Default the map server's limit, or 1280 if it isn't known; SLOC_STATICMAP_MAX_WIDTH if defined.
+  - *`int`* `$height` Height. Default the map server's limit, or 1280 if it isn't known; SLOC_STATICMAP_MAX_HEIGHT if defined.
 
 ## Files
 
-- [includes/map/class-map-provider-staticmap.php:67](https://github.com/dshanske/simple-location/blob/trunk/includes/map/class-map-provider-staticmap.php#L67)
+- [includes/map/class-map-provider-staticmap.php:233](https://github.com/dshanske/simple-location/blob/trunk/includes/map/class-map-provider-staticmap.php#L233)
 ```php
 apply_filters( 'sloc_staticmap_max_size', $max_size )
 ```
