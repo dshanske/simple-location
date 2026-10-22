@@ -1,0 +1,133 @@
+{
+    "default": {
+        "provider": "osm",
+        "style": "streets"
+    },
+    "providers": [
+        {
+            "id": "osm",
+            "name": "OpenStreetMap",
+            "default_style": "streets",
+            "styles": [
+                {
+                    "id": "streets",
+                    "name": "OpenStreetMap",
+                    "minzoom": 2,
+                    "maxzoom": 19,
+                    "attribution": "text",
+                    "attribution_text": "\u00a9 OpenStreetMap contributors",
+                    "attribution_html": "\u00a9 <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
+                    "labels_layer": false,
+                    "requires_auth": false,
+                    "needs_key": false,
+                    "bounds": null
+                }
+            ]
+        },
+        {
+            "id": "esri",
+            "name": "Esri",
+            "default_style": "streets",
+            "styles": [
+                {
+                    "id": "streets",
+                    "name": "World Street Map",
+                    "minzoom": 2,
+                    "maxzoom": 19,
+                    "attribution": "esri",
+                    "attribution_text": "Esri, HERE, Garmin, USGS, \u00a9 OpenStreetMap contributors and others",
+                    "attribution_html": "Powered by <a href=\"https://www.esri.com\">Esri</a> | Sources: Esri, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, \u00a9 <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, and the GIS User Community",
+                    "labels_layer": false,
+                    "requires_auth": false,
+                    "needs_key": false,
+                    "bounds": null
+                },
+                {
+                    "id": "topo",
+                    "name": "World Topographic Map",
+                    "minzoom": 2,
+                    "maxzoom": 19,
+                    "attribution": "esri",
+                    "attribution_text": "Esri, HERE, Garmin, USGS, \u00a9 OpenStreetMap contributors and others",
+                    "attribution_html": "Powered by <a href=\"https://www.esri.com\">Esri</a> | Sources: Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), \u00a9 <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, and the GIS User Community",
+                    "labels_layer": false,
+                    "requires_auth": false,
+                    "needs_key": false,
+                    "bounds": null
+                }
+            ]
+        },
+        {
+            "id": "opentopomap",
+            "name": "OpenTopoMap",
+            "default_style": "topo",
+            "styles": [
+                {
+                    "id": "topo",
+                    "name": "OpenTopoMap",
+                    "minzoom": 2,
+                    "maxzoom": 17,
+                    "attribution": "text",
+                    "attribution_text": "Map data: \u00a9 OpenStreetMap contributors, SRTM | Map style: \u00a9 OpenTopoMap (CC-BY-SA)",
+                    "attribution_html": "Map data: \u00a9 <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, <a href=\"http://viewfinderpanoramas.org\">SRTM</a> | Map style: \u00a9 <a href=\"https://opentopomap.org\">OpenTopoMap</a> (<a href=\"https://creativecommons.org/licenses/by-sa/3.0/\">CC-BY-SA</a>)",
+                    "labels_layer": false,
+                    "requires_auth": false,
+                    "needs_key": false,
+                    "bounds": null
+                }
+            ]
+        }
+    ],
+    "deprecated_basemaps": {
+        "osm": {
+            "provider": "osm",
+            "style": "streets"
+        },
+        "streets": {
+            "provider": "esri",
+            "style": "streets"
+        },
+        "satellite": {
+            "provider": "esri",
+            "style": "satellite"
+        },
+        "hybrid": {
+            "provider": "esri",
+            "style": "hybrid"
+        },
+        "topo": {
+            "provider": "esri",
+            "style": "topo"
+        },
+        "gray": {
+            "provider": "esri",
+            "style": "light"
+        },
+        "gray-background": {
+            "provider": "esri",
+            "style": "light-nolabels"
+        },
+        "oceans": {
+            "provider": "esri",
+            "style": "oceans"
+        },
+        "national-geographic": {
+            "provider": "esri",
+            "style": "natgeo"
+        },
+        "otm": {
+            "provider": "opentopomap",
+            "style": "topo"
+        }
+    },
+    "removed": [
+        {
+            "id": "stamen",
+            "reason": "Stamen tile hosting shut down in 2023 (removed in 1.0.0)"
+        },
+        {
+            "id": "basemap:stamen-toner",
+            "reason": "Stamen tile hosting shut down in 2023 (removed in 1.0.0)"
+        }
+    ]
+}

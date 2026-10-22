@@ -424,6 +424,50 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The map server's own size limits, from its query API, replace the default, and the filter still applies.
+	 */
+	public function test_staticmap_server_limits() {
+		$info                         = $this->fixture( 'map/staticmap-api.json' );
+		$info['limits']['max_width']  = 1000;
+		$info['limits']['max_height'] = 900;
+		$this->mock_http( array( 'maps.example.org/api/v1/' => array( 'body' => $info ) ) );
+
+		$args = array(
+			'api'    => 'https://maps.example.org/',
+			'width'  => 2000,
+			'height' => 1000,
+		);
+		$map  = $this->provider( 'Map_Provider_StaticMap', $args );
+		$this->assertSame( array(), $this->http_requests, 'Creating the provider contacts the map server.' );
+
+		$url = $this->parse( $map->get_the_static_map() );
+		$this->assertSame( array( '1000', '500' ), array( $url['query']['width'], $url['query']['height'] ) );
+		$this->assertSame( 'https://maps.example.org/api/v1/', $this->last_request()['url'] );
+
+		// The limits are stored, so the next map doesn't ask again.
+		$this->provider( 'Map_Provider_StaticMap', $args )->get_the_static_map();
+		$this->assertCount( 1, $this->http_requests );
+
+		$filter = function ( $max_size ) {
+			$this->assertSame(
+				array(
+					'width'  => 1000,
+					'height' => 900,
+				),
+				$max_size
+			);
+			return array(
+				'width'  => 600,
+				'height' => 600,
+			);
+		};
+		add_filter( 'sloc_staticmap_max_size', $filter );
+		$url = $this->parse( $this->provider( 'Map_Provider_StaticMap', $args )->get_the_static_map() );
+		remove_filter( 'sloc_staticmap_max_size', $filter );
+		$this->assertSame( array( '600', '300' ), array( $url['query']['width'], $url['query']['height'] ) );
+	}
+
+	/**
 	 * The map URLs and sizes in the static map HTML are escaped.
 	 */
 	public function test_static_map_html_escaped() {
@@ -814,23 +858,22 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'Map_Provider_StaticMap',
 			array(
 				'api'   => null,
-				'style' => 'osm',
+				'style' => 'esri/topo',
 			)
 		);
-		$this->assertArrayHasKey( 'carto-dark', $map->get_styles() );
 
 		$url = $this->parse( $map->get_the_static_map() );
 		$this->assertSame( 'https://maps.example.org/', $url['base'] );
 		$this->assertSame(
 			array(
-				'width'       => '600',
-				'height'      => '400',
-				'zoom'        => '15',
-				'basemap'     => 'osm',
-				'latitude'    => '39.9524',
-				'longitude'   => '-75.1636',
-				'marker'      => 'lat:39.9524;lng:-75.1636;icon:small-red-cutout',
-				'attribution' => 'osm',
+				'width'     => '600',
+				'height'    => '400',
+				'zoom'      => '15',
+				'latitude'  => '39.9524',
+				'longitude' => '-75.1636',
+				'marker'    => 'lat:39.9524;lng:-75.1636;icon:pin',
+				'provider'  => 'esri',
+				'style'     => 'topo',
 			),
 			$url['query']
 		);
@@ -838,21 +881,27 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$archive = $map->get_archive_map( $this->locations );
 		$url     = $this->parse( $archive );
 		$this->assertSame( '[-75.1636,39.9524],[-75.15,39.9489]', $url['query']['path'][0] );
-		$this->assertStringEndsWith( '&marker[]=lat:39.9524;lng:-75.1636;icon:dot-small-red&marker[]=lat:39.9489;lng:-75.15;icon:dot-small-red', $archive );
+		$this->assertSame( array( 'esri', 'topo' ), array( $url['query']['provider'], $url['query']['style'] ) );
+		$this->assertArrayNotHasKey( 'basemap', $url['query'] );
+		$this->assertArrayNotHasKey( 'attribution', $url['query'] );
+		$this->assertStringEndsWith( '&marker[]=lat:39.9524;lng:-75.1636;icon:dot;size:small&marker[]=lat:39.9489;lng:-75.15;icon:dot;size:small', $archive );
 
-		// Esri basemaps get Esri attribution.
+		// Without a style, the map server draws its default map.
 		$map = $this->provider(
 			'Map_Provider_StaticMap',
 			array(
 				'api'   => null,
-				'style' => 'topo',
+				'style' => '',
 			)
 		);
-		$this->assertSame( 'esri', $this->parse( $map->get_the_static_map() )['query']['attribution'] );
+		$url = $this->parse( $map->get_the_static_map() );
+		$this->assertArrayNotHasKey( 'provider', $url['query'] );
+		$this->assertArrayNotHasKey( 'style', $url['query'] );
 
 		update_option( 'sloc_staticmap_url', '' );
 		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
 		$this->assertSame( 'missing_url', $map->get_the_static_map()->get_error_code() );
+		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
 	}
 
 	/**
@@ -865,6 +914,156 @@ class MapProvidersTest extends WP_UnitTestCase {
 
 		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
 		$this->assertSame( 'https://opt.example/', $this->parse( $map->get_the_static_map() )['base'] );
+	}
+
+	/**
+	 * Map server URLs from before 1.0.0, which drew maps at img.php, draw them at the server's root.
+	 */
+	public function test_staticmap_url_img_php() {
+		$this->mock_http( array( 'example.org/maps/api/v1/' => array( 'body' => $this->fixture( 'map/staticmap-api.json' ) ) ) );
+		foreach ( array( 'https://example.org/maps/img.php', 'https://example.org/maps/index.php', 'https://example.org/maps' ) as $api ) {
+			$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => $api ) );
+			$this->assertSame( 'https://example.org/maps/', $this->parse( $map->get_the_static_map() )['base'], $api );
+		}
+		$this->assertSame( 'https://example.org/maps/api/v1/', $this->http_requests[0]['url'] );
+	}
+
+	/**
+	 * Style settings from before 6.1.0 are converted to the provider and style the map server now calls them.
+	 */
+	public function test_staticmap_sanitize_style() {
+		$this->assertSame( 'osm/streets', Map_Provider_StaticMap::sanitize_style( 'osm' ) );
+		$this->assertSame( 'opentopomap/topo', Map_Provider_StaticMap::sanitize_style( 'otm' ) );
+		$this->assertSame( 'esri/light-nolabels', Map_Provider_StaticMap::sanitize_style( 'gray-background' ) );
+		$this->assertSame( 'esri/natgeo', Map_Provider_StaticMap::sanitize_style( 'national-geographic' ) );
+		$this->assertSame( 'carto/streets', Map_Provider_StaticMap::sanitize_style( 'carto-voyager' ) );
+
+		// Stamen's tiles are gone, so its basemaps get the server's default map.
+		$this->assertSame( '', Map_Provider_StaticMap::sanitize_style( 'stamen-watercolor' ) );
+
+		$this->assertSame( 'stadia/toner-lite', Map_Provider_StaticMap::sanitize_style( ' Stadia/toner-lite ' ) );
+		$this->assertSame( 'nasa-gibs/bluemarble', Map_Provider_StaticMap::sanitize_style( 'nasa-gibs/bluemarble' ) );
+		$this->assertSame( '', Map_Provider_StaticMap::sanitize_style( 'unknown' ) );
+		$this->assertSame( '', Map_Provider_StaticMap::sanitize_style( 'a/b/c' ) );
+		$this->assertSame( '', Map_Provider_StaticMap::sanitize_style( 'osm/<script>' ) );
+		$this->assertSame( '', Map_Provider_StaticMap::sanitize_style( array( 'osm' ) ) );
+		$this->assertSame( '', Map_Provider_StaticMap::sanitize_style( null ) );
+
+		// A stored basemap ID is converted when the provider reads it.
+		update_option( 'sloc_staticmap_url', 'https://maps.example.org/' );
+		update_option( 'sloc_staticmap_style', 'otm' );
+		$url = $this->parse( $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) )->get_the_static_map() );
+		$this->assertSame( array( 'opentopomap', 'topo' ), array( $url['query']['provider'], $url['query']['style'] ) );
+	}
+
+	/**
+	 * The style list comes from the map server's query API, and is stored.
+	 */
+	public function test_staticmap_styles_from_server() {
+		$this->mock_http( array( 'maps.example.org/api/v1/providers' => array( 'body' => $this->fixture( 'map/staticmap-providers.json' ) ) ) );
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) );
+
+		$this->assertSame(
+			array(
+				''                 => 'Default map of the map server',
+				'osm/streets'      => 'OpenStreetMap',
+				'esri/streets'     => 'Esri: World Street Map',
+				'esri/topo'        => 'Esri: World Topographic Map',
+				'opentopomap/topo' => 'OpenTopoMap',
+			),
+			$map->get_styles()
+		);
+		$map->get_styles();
+		$this->assertCount( 1, $this->http_requests );
+
+		// Asking for a fresh copy fetches it again.
+		$map->get_api( 'providers', true );
+		$this->assertCount( 2, $this->http_requests );
+	}
+
+	/**
+	 * Without an answer from the map server, the styles every 1.0.0 server ships without keys are offered,
+	 * and the failure is remembered so pages don't keep waiting on the server.
+	 */
+	public function test_staticmap_styles_fallback() {
+		$this->mock_http( array( 'maps.example.org' => new WP_Error( 'http_request_failed', 'Connection refused' ) ) );
+		$map    = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) );
+		$styles = $map->get_styles();
+
+		$this->assertSame( 'Default map of the map server', $styles[''] );
+		$this->assertSame( 'Esri: National Geographic World Map', $styles['esri/natgeo'] );
+		$this->assertSame( 'swisstopo: SWISSIMAGE', $styles['swisstopo/satellite'] );
+		$this->assertArrayNotHasKey( 'carto/light', $styles );
+		$this->assertArrayNotHasKey( 'osm', $styles );
+
+		$map->get_styles();
+		$this->assertCount( 1, $this->http_requests );
+		$this->assertSame( 'Connection refused', $map->get_api( 'providers' )->get_error_message() );
+
+		// Something other than a list of providers falls back too.
+		delete_transient( 'sloc_staticmap_' . md5( 'https://other.example.org/api/v1/providers' ) );
+		$this->mock_http( array( 'other.example.org' => array( 'body' => array( 'providers' => array( array( 'id' => 'x' ), 'y' ) ) ) ) );
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://other.example.org/' ) );
+		$this->assertArrayHasKey( 'osm/streets', $map->get_styles() );
+	}
+
+	/**
+	 * A server that answers, but not with the query API (one older than 1.0.0), counts as an error.
+	 */
+	public function test_staticmap_api_not_query_api() {
+		$this->mock_http(
+			array(
+				'maps.example.org' => array(
+					'body'    => '<html>Static Maps</html>',
+					'headers' => array( 'content-type' => 'text/html' ),
+				),
+			)
+		);
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) );
+		$this->assertSame( 'not_json_response', $map->get_api( '', true )->get_error_code() );
+
+		$this->mock_http( array( 'maps.example.org' => array( 'body' => array( 'name' => 'Something else' ) ) ) );
+		$this->assertSame( 'sloc_staticmap_api', $map->get_api( '', true )->get_error_code() );
+
+		$this->assertSame( 'missing_url', $this->provider( 'Map_Provider_StaticMap', array( 'api' => '' ) )->get_api( '' )->get_error_code() );
+	}
+
+	/**
+	 * The style field lists the server's styles, and warns when the server doesn't answer its query API.
+	 */
+	public function test_staticmap_style_field() {
+		update_option( 'sloc_staticmap_style', 'esri/topo' );
+		$this->mock_http(
+			array(
+				'maps.example.org/api/v1/providers' => array( 'body' => $this->fixture( 'map/staticmap-providers.json' ) ),
+				'maps.example.org/api/v1/'          => array( 'body' => $this->fixture( 'map/staticmap-api.json' ) ),
+			)
+		);
+		$args = array(
+			'label_for' => 'sloc_staticmap_style',
+			'provider'  => $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) ),
+		);
+		ob_start();
+		Map_Provider_StaticMap::style_field( $args );
+		$html = ob_get_clean();
+		// How the selected attribute is written depends on the WordPress or ClassicPress version.
+		$this->assertMatchesRegularExpression( '#<option value="esri/topo" selected(=["\']selected["\'])?>Esri: World Topographic Map</option>#', $html );
+		$this->assertStringNotContainsString( 'description', $html );
+		$this->assertCount( 2, $this->http_requests );
+
+		$this->mock_http( array( 'maps.example.org' => array( 'code' => 404 ) ) );
+		ob_start();
+		Map_Provider_StaticMap::style_field( $args );
+		$html = ob_get_clean();
+		$this->assertStringContainsString( 'needs version 1.0.0 or later', $html );
+		$this->assertStringContainsString( 'HTTP status 404', $html );
+		$this->assertStringContainsString( '<option value="esri/natgeo"', $html );
+
+		// Without a URL there is nothing to warn about.
+		$args['provider'] = $this->provider( 'Map_Provider_StaticMap', array( 'api' => '' ) );
+		ob_start();
+		Map_Provider_StaticMap::style_field( $args );
+		$this->assertStringNotContainsString( 'description', ob_get_clean() );
 	}
 
 	/**

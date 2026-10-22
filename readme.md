@@ -184,11 +184,14 @@ Don't restrict your main key to your site's domain. Requests your server makes d
 ### What is the custom map provider?
 
 The custom map provider is an endpoint you provide yourself. You can install and use the repository [here](https://github.com/dshanske/Static-Maps-API-PHP), which is a fork of a project by [Aaron Parecki](https://aaronparecki.com).
-The custom provider was designed around the parameters in this code. All the commercial static map APIs used assemble the pieces of a map from public tile servers, which
+It needs version 1.0.0 or later of the server. All the commercial static map APIs used assemble the pieces of a map from public tile servers, which
 is what this code does. While the code allows for multiple tile sources, please ensure compliance with their licenses. At the least, most of them require attribution.
 
-The server fetches every tile a map covers, so its work grows with the image size. The plugin asks it for maps no larger than 1280 by 1280 pixels, shrinking larger maps to fit.
-To change this, define `SLOC_STATICMAP_MAX_WIDTH` and `SLOC_STATICMAP_MAX_HEIGHT` in wp-config.php, or use the `sloc_staticmap_max_size` filter.
+The Static Map Style setting lists the providers and styles your server offers, read from its query API. If the server can't be reached, it lists the ones every server offers without keys,
+and the settings page says why. Styles chosen before version 6.1.0 of this plugin are converted to their new names. The Stamen styles no longer exist, so they use your server's default map.
+
+The server fetches every tile a map covers, so its work grows with the image size. The plugin asks it for maps no larger than the server's own limit (1280 by 1280 pixels unless the server changes it), shrinking larger maps to fit.
+To lower this, define `SLOC_STATICMAP_MAX_WIDTH` and `SLOC_STATICMAP_MAX_HEIGHT` in wp-config.php, or use the `sloc_staticmap_max_size` filter.
 
 ### What is the custom weather provider?
 
