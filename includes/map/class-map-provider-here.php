@@ -41,6 +41,14 @@ class Map_Provider_Here extends Map_Provider {
 	const BASE_URL = 'https://image.maps.hereapi.com/mia/v3/base/mc/';
 
 	/**
+	 * URL of the Map Image API's copyright list.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const COPYRIGHT_URL = 'https://image.maps.hereapi.com/mia/v3/copyright';
+
+	/**
 	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps.
 	 *
 	 * @since 6.1.0
@@ -120,6 +128,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 6.0.0 Draws a high-density map when the scale is 2.
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Uses the marker settings.
+	 * @since 6.1.0 Leaves the copyright notice off the image when it is printed under the map.
 	 * @since 6.1.0 Draws the scale bar setting.
 	 *
 	 * @return string URL, or an empty string without an API key.
@@ -147,6 +156,10 @@ class Map_Provider_Here extends Map_Provider {
 		// A high-density map is twice the size at scale 2, showing the same area.
 		if ( 1 < $this->scale ) {
 			$args['scale'] = $this->scale;
+		}
+		// The notice is only left off the image when it is printed under the map.
+		if ( '' !== $this->get_attribution_html() ) {
+			$args['copyright'] = 'false';
 		}
 		return add_query_arg( $this->add_scalebar( $args ), $url );
 	}
@@ -289,10 +302,115 @@ class Map_Provider_Here extends Map_Provider {
 	/**
 	 * Returns the map HTML.
 	 *
+	 * @since 6.1.0 Followed by the map's copyright notice when the attribution setting puts it under the map.
+	 *
 	 * @param boolean $static Unused; the map is always static.
 	 * @return string HTML.
 	 */
 	public function get_the_map( $static = true ) {
-		return $this->get_the_static_map_html( true );
+		$map = $this->get_the_static_map_html( true );
+		return '' === $map ? '' : $map . $this->get_attribution_html();
+	}
+
+	/**
+	 * Returns the map's copyright notice to show under the map, when the attribution setting puts it there.
+	 *
+	 * HERE requires `© year HERE` with the data suppliers for the map's area and zoom, from the Map Image API's
+	 * copyright list, which is stored for a day. Archive maps, which have no single location, keep the notice on the image.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string HTML of a paragraph with the notice, or an empty string if it is drawn on the image.
+	 */
+	public function get_attribution_html() {
+		if ( 'below' !== $this->attribution || null === $this->latitude || null === $this->longitude || empty( $this->api ) ) {
+			return '';
+		}
+		$copyrights = $this->get_copyrights();
+		if ( null === $copyrights ) {
+			return '';
+		}
+		$labels = array();
+		foreach ( $this->get_copyright_layers( $copyrights ) as $layer ) {
+			foreach ( (array) ( $copyrights['copyrights'][ $layer ] ?? array() ) as $copyright ) {
+				if ( is_array( $copyright ) && $this->copyright_applies( $copyright ) && ! empty( $copyright['label'] ) && is_string( $copyright['label'] ) ) {
+					$labels[ $copyright['label'] ] = true;
+				}
+			}
+		}
+		unset( $labels['HERE'] );
+		// translators: Year.
+		$notice = sprintf( __( '© %s HERE', 'simple-location' ), gmdate( 'Y' ) );
+		if ( $labels ) {
+			$notice .= ', ' . implode( ', ', array_keys( $labels ) );
+		}
+		return '<p class="sloc-map-attribution">' . esc_html( $notice ) . '</p>';
+	}
+
+	/**
+	 * Returns the Map Image API's copyright list, stored for a day.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array|null Copyright list, with 'copyrights' and 'resources', or null if it can't be fetched.
+	 */
+	protected function get_copyrights() {
+		$copyrights = get_transient( 'sloc_here_copyright' );
+		if ( is_array( $copyrights ) ) {
+			return $copyrights;
+		}
+		$json = $this->fetch_json( self::COPYRIGHT_URL, array( 'apiKey' => $this->api ) );
+		if ( is_wp_error( $json ) || ! is_array( $json ) || ! isset( $json['copyrights'] ) || ! is_array( $json['copyrights'] ) ) {
+			return null;
+		}
+		set_transient( 'sloc_here_copyright', $json, DAY_IN_SECONDS );
+		return $json;
+	}
+
+	/**
+	 * Returns the copyright layers of the map's style, or every layer if the list doesn't name the style.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $copyrights Copyright list.
+	 * @return string[] Layer keys of 'copyrights'.
+	 */
+	protected function get_copyright_layers( $copyrights ) {
+		$layers = $copyrights['resources']['base']['styles'][ $this->style ] ?? null;
+		if ( is_array( $layers ) && $layers ) {
+			return array_filter( $layers, 'is_string' );
+		}
+		return array_map( 'strval', array_keys( $copyrights['copyrights'] ) );
+	}
+
+	/**
+	 * Whether a copyright applies to the map's zoom and location.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $copyright Copyright, with optional 'minLevel', 'maxLevel' and 'boundingBoxes'.
+	 * @return bool
+	 */
+	protected function copyright_applies( $copyright ) {
+		$zoom = (int) $this->map_zoom;
+		if ( ( isset( $copyright['minLevel'] ) && $zoom < (int) $copyright['minLevel'] ) || ( isset( $copyright['maxLevel'] ) && $zoom > (int) $copyright['maxLevel'] ) ) {
+			return false;
+		}
+		if ( empty( $copyright['boundingBoxes'] ) || ! is_array( $copyright['boundingBoxes'] ) ) {
+			return true;
+		}
+		foreach ( $copyright['boundingBoxes'] as $box ) {
+			if ( ! is_array( $box ) || ! isset( $box['west'], $box['south'], $box['east'], $box['north'] ) ) {
+				continue;
+			}
+			$in_longitude = $box['west'] <= $box['east']
+				? ( $this->longitude >= $box['west'] && $this->longitude <= $box['east'] )
+				// A box across the antimeridian.
+				: ( $this->longitude >= $box['west'] || $this->longitude <= $box['east'] );
+			if ( $in_longitude && $this->latitude >= $box['south'] && $this->latitude <= $box['north'] ) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

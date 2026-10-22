@@ -818,7 +818,7 @@ class SettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The custom static map's marker and scale bar settings from 6.1.0 development move to the settings every provider uses.
+	 * The custom static map's marker, scale bar and attribution settings from 6.1.0 development move to the settings every provider uses.
 	 */
 	public function test_migrate_map_settings() {
 		// The settings are registered, with defaults, as on a real site.
@@ -828,6 +828,8 @@ class SettingsTest extends WP_UnitTestCase {
 		update_option( 'sloc_staticmap_marker_size', 'large' );
 		update_option( 'sloc_staticmap_scalebar', 'both' );
 		update_option( 'sloc_staticmap_scalebar_position', 'topright' );
+		update_option( 'sloc_staticmap_attribution', 'below' );
+		update_option( 'sloc_staticmap_attribution_position', 'topleft' );
 		// A setting already saved under the new name is kept.
 		update_option( 'sloc_marker_size', 'small' );
 
@@ -837,7 +839,9 @@ class SettingsTest extends WP_UnitTestCase {
 		$this->assertSame( 'small', get_option( 'sloc_marker_size' ) );
 		$this->assertSame( 'both', get_option( 'sloc_scalebar' ) );
 		$this->assertSame( 'topright', get_option( 'sloc_scalebar_position' ) );
-		foreach ( array( 'marker', 'marker_color', 'marker_size', 'scalebar', 'scalebar_position' ) as $name ) {
+		$this->assertSame( 'below', get_option( 'sloc_attribution' ) );
+		$this->assertSame( 'topleft', get_option( 'sloc_attribution_position' ) );
+		foreach ( array( 'marker', 'marker_color', 'marker_size', 'scalebar', 'scalebar_position', 'attribution', 'attribution_position' ) as $name ) {
 			$this->assertNull( get_option( 'sloc_staticmap_' . $name, null ), $name );
 		}
 

@@ -1,0 +1,52 @@
+{
+	"copyrights": {
+		"in": [
+			{
+				"label": "HERE",
+				"copyrightText": "Map data © HERE",
+				"minLevel": 0,
+				"maxLevel": 22
+			},
+			{
+				"label": "Example US Data",
+				"copyrightText": "Includes Example US Data",
+				"boundingBoxes": [
+					{ "west": -125, "south": 24, "east": -66, "north": 50 }
+				],
+				"minLevel": 5,
+				"maxLevel": 22
+			},
+			{
+				"label": "Example Pacific Data",
+				"copyrightText": "Includes Example Pacific Data",
+				"boundingBoxes": [
+					{ "west": 170, "south": -50, "east": -170, "north": 0 }
+				],
+				"minLevel": 0,
+				"maxLevel": 22
+			},
+			{
+				"label": "Example Low Zoom Data",
+				"copyrightText": "Includes Example Low Zoom Data",
+				"minLevel": 0,
+				"maxLevel": 4
+			}
+		],
+		"sat": [
+			{
+				"label": "Example Imagery",
+				"copyrightText": "Imagery © Example",
+				"minLevel": 0,
+				"maxLevel": 22
+			}
+		]
+	},
+	"resources": {
+		"base": {
+			"styles": {
+				"explore.day": [ "in" ],
+				"satellite.day": [ "in", "sat" ]
+			}
+		}
+	}
+}
