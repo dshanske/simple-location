@@ -120,6 +120,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 6.0.0 Draws a high-density map when the scale is 2.
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Uses the marker settings.
+	 * @since 6.1.0 Draws the scale bar setting.
 	 *
 	 * @return string URL, or an empty string without an API key.
 	 */
@@ -147,7 +148,30 @@ class Map_Provider_Here extends Map_Provider {
 		if ( 1 < $this->scale ) {
 			$args['scale'] = $this->scale;
 		}
-		return add_query_arg( $args, $url );
+		return add_query_arg( $this->add_scalebar( $args ), $url );
+	}
+
+	/**
+	 * Adds the scale bar to a Map Image API query.
+	 *
+	 * HERE places the scale bar itself. Both units put the site's units on top.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $args Query parameters.
+	 * @return array Query parameters.
+	 */
+	protected function add_scalebar( $args ) {
+		$units    = array(
+			'metric'   => 'km',
+			'imperial' => 'mi',
+			'both'     => $this->site_uses_imperial() ? 'miKm' : 'kmMi',
+		);
+		$scalebar = $this->get_scalebar_units();
+		if ( isset( $units[ $scalebar ] ) ) {
+			$args['scaleBar'] = $units[ $scalebar ];
+		}
+		return $args;
 	}
 
 	/**
@@ -210,6 +234,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the marker color.
+	 * @since 6.1.0 Draws the scale bar setting.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -235,7 +260,7 @@ class Map_Provider_Here extends Map_Provider {
 			$args['scale'] = $this->scale;
 		}
 		$url = add_query_arg(
-			$args,
+			$this->add_scalebar( $args ),
 			sprintf(
 				'%1$s%2$s/%3$sx%4$s/%5$s',
 				self::BASE_URL,

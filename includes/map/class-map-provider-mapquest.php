@@ -105,6 +105,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 * @since 6.1.0 Drawn at the map's zoom level instead of MapQuest's default.
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Uses the marker settings.
+	 * @since 6.1.0 Draws the scale bar setting.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -112,24 +113,38 @@ class Map_Provider_Mapquest extends Map_Provider {
 		if ( empty( $this->api ) ) {
 			return '';
 		}
-		$url = 'https://www.mapquestapi.com/staticmap/v5/map';
-		$map = add_query_arg(
-			array(
-				'key'       => $this->api,
-				'center'    => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
-				'size'      => sprintf( '%1$s,%2$s%3$s', $this->width, $this->height, ( 2 === $this->scale ) ? '@2x' : '' ),
-				'zoom'      => $this->map_zoom,
-				'type'      => $this->style,
-				'locations' => sprintf( '%1$s,%2$s|%3$s', $this->latitude, $this->longitude, $this->get_marker_style() ),
-			),
-			$url
+		$args = array(
+			'key'       => $this->api,
+			'center'    => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
+			'size'      => sprintf( '%1$s,%2$s%3$s', $this->width, $this->height, ( 2 === $this->scale ) ? '@2x' : '' ),
+			'zoom'      => $this->map_zoom,
+			'type'      => $this->style,
+			'locations' => sprintf( '%1$s,%2$s|%3$s', $this->latitude, $this->longitude, $this->get_marker_style() ),
 		);
 		if ( '' !== $this->format ) {
-			$map = add_query_arg( 'format', $this->get_vendor_format(), $map );
+			$args['format'] = $this->get_vendor_format();
 		}
-		return $map;
+		// One add_query_arg() call, since adding to a URL again encodes the query that is already there.
+		return add_query_arg( $this->add_scalebar( $args ), 'https://www.mapquestapi.com/staticmap/v5/map' );
 	}
 
+
+	/**
+	 * Adds the scale bar to a static map query.
+	 *
+	 * MapQuest chooses the scale bar's units, and draws it at the top unless asked for the bottom.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $args Query parameters.
+	 * @return array Query parameters.
+	 */
+	protected function add_scalebar( $args ) {
+		if ( '' !== $this->scalebar ) {
+			$args['scalebar'] = 0 === strpos( $this->scalebar_position, 'bottom' ) ? 'true|bottom' : 'true';
+		}
+		return $args;
+	}
 
 	/**
 	 * Returns the marker of a single location, as MapQuest names it.
@@ -155,6 +170,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the marker color.
+	 * @since 6.1.0 Draws the scale bar setting.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -188,7 +204,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 		if ( '' !== $this->format ) {
 			$args['format'] = $this->get_vendor_format();
 		}
-		$map = add_query_arg( $args, $url );
+		$map = add_query_arg( $this->add_scalebar( $args ), $url );
 		return $map;
 	}
 

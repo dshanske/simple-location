@@ -793,7 +793,9 @@ class SettingsTest extends WP_UnitTestCase {
 		$expected = array(
 			'sloc_marker'       => 'pin',
 			'sloc_marker_color' => '#d32f2f',
-			'sloc_marker_size'  => 'medium',
+			'sloc_marker_size'       => 'medium',
+			'sloc_scalebar'          => '',
+			'sloc_scalebar_position' => 'bottomleft',
 		);
 		foreach ( $expected as $name => $default ) {
 			$this->assertArrayHasKey( $name, $settings, $name );
@@ -809,31 +811,39 @@ class SettingsTest extends WP_UnitTestCase {
 		$this->assertSame( array( 'pin', 'dot' ), array_keys( $fields['sloc_marker']['args']['list'] ) );
 		$this->assertSame( array( 'small', 'medium', 'large' ), array_keys( $fields['sloc_marker_size']['args']['list'] ) );
 		$this->assertSame( 'color', $fields['sloc_marker_color']['args']['type'] );
+		$this->assertSame( array( '', 'site', 'metric', 'imperial', 'both' ), array_keys( $fields['sloc_scalebar']['args']['list'] ) );
+		$this->assertSame( array( 'bottomleft', 'bottomright', 'topleft', 'topright' ), array_keys( $fields['sloc_scalebar_position']['args']['list'] ) );
+		$this->assertSame( 'metric', sanitize_option( 'sloc_scalebar', 'Metric' ) );
+		$this->assertSame( 'bottomleft', sanitize_option( 'sloc_scalebar_position', 'middle' ) );
 	}
 
 	/**
-	 * The custom static map's marker settings from 6.1.0 development move to the settings every provider uses.
+	 * The custom static map's marker and scale bar settings from 6.1.0 development move to the settings every provider uses.
 	 */
-	public function test_migrate_marker_settings() {
+	public function test_migrate_map_settings() {
 		// The settings are registered, with defaults, as on a real site.
 		Loc_Config::register_map_settings();
 		update_option( 'sloc_staticmap_marker', 'dot' );
 		update_option( 'sloc_staticmap_marker_color', '#43a047' );
 		update_option( 'sloc_staticmap_marker_size', 'large' );
+		update_option( 'sloc_staticmap_scalebar', 'both' );
+		update_option( 'sloc_staticmap_scalebar_position', 'topright' );
 		// A setting already saved under the new name is kept.
 		update_option( 'sloc_marker_size', 'small' );
 
-		Loc_Config::migrate_marker_settings();
+		Loc_Config::migrate_map_settings();
 		$this->assertSame( 'dot', get_option( 'sloc_marker' ) );
 		$this->assertSame( '#43a047', get_option( 'sloc_marker_color' ) );
 		$this->assertSame( 'small', get_option( 'sloc_marker_size' ) );
-		foreach ( array( 'marker', 'marker_color', 'marker_size' ) as $name ) {
+		$this->assertSame( 'both', get_option( 'sloc_scalebar' ) );
+		$this->assertSame( 'topright', get_option( 'sloc_scalebar_position' ) );
+		foreach ( array( 'marker', 'marker_color', 'marker_size', 'scalebar', 'scalebar_position' ) as $name ) {
 			$this->assertNull( get_option( 'sloc_staticmap_' . $name, null ), $name );
 		}
 
 		// Without old settings, nothing is added.
 		delete_option( 'sloc_marker' );
-		Loc_Config::migrate_marker_settings();
+		Loc_Config::migrate_map_settings();
 		$this->assertNull( get_option( 'sloc_marker', null ) );
 	}
 }
