@@ -983,7 +983,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 		}
 		$this->assertSame( 'lat:39.9524;lng:-75.1636;icon:pin;size:medium;color:d32f2f', $this->parse( $map->get_the_static_map() )['query']['marker'] );
 
-		// The page shows the image URL exactly as signed.
+		// Without the map cache, the page shows the image URL exactly as signed.
+		update_option( 'sloc_map_cache', 0 );
 		preg_match( '/src="([^"]+)"/', $map->get_the_static_map_html(), $match );
 		$this->assertSame( $map->get_the_static_map(), html_entity_decode( $match[1] ) );
 	}
@@ -1128,6 +1129,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 	 * High-density maps are offered when the map server draws them and twice the map's size fits its limits.
 	 */
 	public function test_staticmap_scales() {
+		// The srcset shows the map server's URLs without the map cache.
+		update_option( 'sloc_map_cache', 0 );
 		$this->mock_http( array( 'maps.example.org/api/v1/' => array( 'body' => $this->fixture( 'map/staticmap-api.json' ) ) ) );
 		$args = array(
 			'api'    => 'https://maps.example.org/',

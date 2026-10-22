@@ -375,6 +375,51 @@ abstract class Map_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Fetches the current map's image from the provider, for the site to store it.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
+	 * @param array      $args      Optional. Request arguments for wp_safe_remote_get(). Default empty.
+	 * @return array|WP_Error Response, or an error if the map can't be built or fetched.
+	 */
+	public function fetch_static_map( $locations = null, $args = array() ) {
+		$url = $this->get_static_map_url( $locations );
+		if ( '' === $url ) {
+			return new WP_Error( 'sloc_map_not_found', __( 'This map is not available.', 'simple-location' ), array( 'status' => 404 ) );
+		}
+		return wp_safe_remote_get( $url, $args );
+	}
+
+	/**
+	 * Returns the provider's URL of the current map's image.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
+	 * @return string URL, or an empty string if the map can't be built.
+	 */
+	public function get_static_map_url( $locations = null ) {
+		$url = null === $locations ? $this->get_the_static_map() : $this->get_archive_map( $locations );
+		return ( empty( $url ) || ! is_string( $url ) ) ? '' : $url;
+	}
+
+	/**
+	 * Returns how long visitors are sent to the provider for a map image the site must not store.
+	 *
+	 * The site's map cache stores every image a cacheable provider sends, unless this says otherwise, for example
+	 * because the response is marked private.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $response Response with the image, from fetch_static_map().
+	 * @return int Seconds to send visitors to the provider's URL instead of storing the image, or 0 to store it.
+	 */
+	public function get_passthrough_time( $response ) {
+		return 0;
+	}
+
+	/**
 	 * Returns the image URL for an archive map with a marker at each location.
 	 *
 	 * Providers whose terms allow it are served from the site, unless that is turned off, so the API key isn't in the page.
