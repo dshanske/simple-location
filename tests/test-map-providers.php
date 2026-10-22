@@ -871,7 +871,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 				'zoom'      => '15',
 				'latitude'  => '39.9524',
 				'longitude' => '-75.1636',
-				'marker'    => 'lat:39.9524;lng:-75.1636;icon:pin',
+				'marker'    => 'lat:39.9524;lng:-75.1636;icon:pin;size:medium;color:d32f2f',
 				'provider'  => 'esri',
 				'style'     => 'topo',
 			),
@@ -880,11 +880,16 @@ class MapProvidersTest extends WP_UnitTestCase {
 
 		$archive = $map->get_archive_map( $this->locations );
 		$url     = $this->parse( $archive );
-		$this->assertSame( '[-75.1636,39.9524],[-75.15,39.9489]', $url['query']['path'][0] );
+		$this->assertSame( 'enc:' . Sloc_Polyline::encode( $this->locations ), $url['query']['polyline'] );
+		$this->assertSame( $this->locations, array_chunk( Sloc_Polyline::decode( substr( $url['query']['polyline'], 4 ) ), 2 ) );
+		$this->assertArrayNotHasKey( 'path', $url['query'] );
 		$this->assertSame( array( 'esri', 'topo' ), array( $url['query']['provider'], $url['query']['style'] ) );
 		$this->assertArrayNotHasKey( 'basemap', $url['query'] );
 		$this->assertArrayNotHasKey( 'attribution', $url['query'] );
-		$this->assertSame( array( 'lat:39.9524;lng:-75.1636;icon:dot;size:small', 'lat:39.9489;lng:-75.15;icon:dot;size:small' ), $url['query']['marker'] );
+		$this->assertSame( array( 'lat:39.9524;lng:-75.1636;icon:dot;size:small;color:d32f2f', 'lat:39.9489;lng:-75.15;icon:dot;size:small;color:d32f2f' ), $url['query']['marker'] );
+		foreach ( array( 'format', 'scale', 'overlay', 'scalebar', 'scalebar_position' ) as $name ) {
+			$this->assertArrayNotHasKey( $name, $url['query'], 'Default settings send no ' . $name . '.' );
+		}
 		$this->assertArrayNotHasKey( 'key', $url['query'] );
 
 		// Without a style, the map server draws its default map.
@@ -976,7 +981,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			$this->assertSame( 'blog', $url['query']['key'] );
 			$this->assertSame( array( 'carto', 'dark' ), array( $url['query']['provider'], $url['query']['style'] ) );
 		}
-		$this->assertSame( 'lat:39.9524;lng:-75.1636;icon:pin', $this->parse( $map->get_the_static_map() )['query']['marker'] );
+		$this->assertSame( 'lat:39.9524;lng:-75.1636;icon:pin;size:medium;color:d32f2f', $this->parse( $map->get_the_static_map() )['query']['marker'] );
 
 		// The page shows the image URL exactly as signed.
 		preg_match( '/src="([^"]+)"/', $map->get_the_static_map_html(), $match );
@@ -1030,6 +1035,170 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'password', $wp_settings_fields['sloc_api']['sloc_api']['sloc_staticmap_client_secret']['args']['type'] );
 		$this->assertSame( 'password', $wp_settings_fields['sloc_api']['sloc_api']['sloc_staticmap_client_key']['args']['type'] );
 		$this->assertSame( 'blog', sanitize_option( 'sloc_staticmap_client_id', ' blog ' ) );
+	}
+
+	/**
+	 * The marker, image format, overlay and scale bar settings are sent with every map.
+	 */
+	public function test_staticmap_display_settings() {
+		update_option( 'sloc_staticmap_url', 'https://maps.example.org/' );
+		update_option( 'sloc_staticmap_format', 'webp' );
+		update_option( 'sloc_staticmap_marker', 'dot' );
+		update_option( 'sloc_staticmap_marker_color', '#43A047' );
+		update_option( 'sloc_staticmap_marker_size', 'large' );
+		update_option( 'sloc_staticmap_scalebar', 'both' );
+		update_option( 'sloc_staticmap_scalebar_position', 'topright' );
+		update_option( 'sloc_staticmap_overlays', array( 'railways', 'seamarks' ) );
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
+
+		$url = $this->parse( $map->get_the_static_map() )['query'];
+		$this->assertSame( 'lat:39.9524;lng:-75.1636;icon:dot;size:large;color:43a047', $url['marker'] );
+		$this->assertSame( 'webp', $url['format'] );
+		$this->assertSame( 'railways,seamarks', $url['overlay'] );
+		$this->assertSame( array( 'both', 'topright' ), array( $url['scalebar'], $url['scalebar_position'] ) );
+
+		// Archive maps draw small dots in the marker color, with the same settings.
+		$url = $this->parse( $map->get_archive_map( $this->locations ) )['query'];
+		$this->assertSame( 'lat:39.9489;lng:-75.15;icon:dot;size:small;color:43a047', $url['marker'][1] );
+		$this->assertSame( array( 'webp', 'railways,seamarks', 'both' ), array( $url['format'], $url['overlay'], $url['scalebar'] ) );
+
+		// Arguments override the settings.
+		$map = $this->provider(
+			'Map_Provider_StaticMap',
+			array(
+				'api'      => null,
+				'format'   => 'jpeg',
+				'overlays' => 'seamarks',
+				'scalebar' => '',
+			)
+		);
+		$url = $this->parse( $map->get_the_static_map() )['query'];
+		$this->assertSame( array( 'jpg', 'seamarks' ), array( $url['format'], $url['overlay'] ) );
+		$this->assertArrayNotHasKey( 'scalebar', $url );
+	}
+
+	/**
+	 * A scale bar in the site's units follows the Units to Display setting.
+	 */
+	public function test_staticmap_scalebar_site_units() {
+		update_option( 'sloc_staticmap_url', 'https://maps.example.org/' );
+		update_option( 'sloc_staticmap_scalebar', 'site' );
+
+		update_option( 'sloc_measurements', 'imperial' );
+		$url = $this->parse( $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) )->get_the_static_map() )['query'];
+		$this->assertSame( array( 'imperial', 'bottomleft' ), array( $url['scalebar'], $url['scalebar_position'] ) );
+
+		update_option( 'sloc_measurements', 'si' );
+		$url = $this->parse( $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) )->get_the_static_map() )['query'];
+		$this->assertSame( 'metric', $url['scalebar'] );
+	}
+
+	/**
+	 * The display settings are sanitized to what the map server accepts.
+	 */
+	public function test_staticmap_sanitize_display_settings() {
+		$this->assertSame( 'png8', Map_Provider_StaticMap::sanitize_format( ' PNG8 ' ) );
+		$this->assertSame( 'jpg', Map_Provider_StaticMap::sanitize_format( 'jpeg' ) );
+		$this->assertSame( '', Map_Provider_StaticMap::sanitize_format( 'gif' ) );
+		$this->assertSame( '', Map_Provider_StaticMap::sanitize_format( null ) );
+
+		$this->assertSame( 'dot', Map_Provider_StaticMap::sanitize_marker( 'dot' ) );
+		$this->assertSame( 'pin', Map_Provider_StaticMap::sanitize_marker( 'small-red-cutout' ) );
+
+		$this->assertSame( '#43a047', Map_Provider_StaticMap::sanitize_marker_color( '43A047' ) );
+		$this->assertSame( '#43a047', Map_Provider_StaticMap::sanitize_marker_color( '#43a047' ) );
+		$this->assertSame( '#d32f2f', Map_Provider_StaticMap::sanitize_marker_color( 'red' ) );
+		$this->assertSame( '#d32f2f', Map_Provider_StaticMap::sanitize_marker_color( '#43a047;icon:http' ) );
+		$this->assertSame( '#d32f2f', Map_Provider_StaticMap::sanitize_marker_color( array() ) );
+
+		$this->assertSame( 'large', Map_Provider_StaticMap::sanitize_marker_size( 'LARGE' ) );
+		$this->assertSame( 'medium', Map_Provider_StaticMap::sanitize_marker_size( 'huge' ) );
+
+		$this->assertSame( 'site', Map_Provider_StaticMap::sanitize_scalebar( 'site' ) );
+		$this->assertSame( '', Map_Provider_StaticMap::sanitize_scalebar( 'nautical' ) );
+		$this->assertSame( 'topleft', Map_Provider_StaticMap::sanitize_scalebar_position( 'topleft' ) );
+		$this->assertSame( 'bottomleft', Map_Provider_StaticMap::sanitize_scalebar_position( 'middle' ) );
+
+		$this->assertSame( array( 'railways', 'seamarks' ), Map_Provider_StaticMap::sanitize_overlays( array( 'railways', '', 'Seamarks', 'railways', 'bad id', 3, array() ) ) );
+		$this->assertSame( array( 'railways', 'seamarks' ), Map_Provider_StaticMap::sanitize_overlays( 'railways, seamarks' ) );
+		$this->assertSame( array(), Map_Provider_StaticMap::sanitize_overlays( null ) );
+	}
+
+	/**
+	 * High-density maps are offered when the map server draws them and twice the map's size fits its limits.
+	 */
+	public function test_staticmap_scales() {
+		$this->mock_http( array( 'maps.example.org/api/v1/' => array( 'body' => $this->fixture( 'map/staticmap-api.json' ) ) ) );
+		$args = array(
+			'api'    => 'https://maps.example.org/',
+			'width'  => 600,
+			'height' => 400,
+		);
+		$map  = $this->provider( 'Map_Provider_StaticMap', $args );
+		$urls = $this->srcset( $map );
+		$this->assertSame( array( 1, 2 ), array_keys( $urls ) );
+		$this->assertArrayNotHasKey( 'scale', $this->parse( $urls[1] )['query'] );
+		$this->assertSame( '2', $this->parse( $urls[2] )['query']['scale'] );
+		$this->assertSame( array( '600', '400' ), array( $this->parse( $urls[2] )['query']['width'], $this->parse( $urls[2] )['query']['height'] ) );
+
+		// Twice 700 pixels is over the server's limit of 1280.
+		$args['width'] = 700;
+		$this->assertSame( array(), $this->srcset( $this->provider( 'Map_Provider_StaticMap', $args ) ) );
+
+		// A server that only draws normal maps.
+		$info           = $this->fixture( 'map/staticmap-api.json' );
+		$info['scales'] = array( 1 );
+		set_transient( 'sloc_staticmap_' . md5( 'https://maps.example.org/api/v1/|' ), $info );
+		$args['width'] = 600;
+		$this->assertSame( array(), $this->srcset( $this->provider( 'Map_Provider_StaticMap', $args ) ) );
+	}
+
+	/**
+	 * The overlays field lists the map server's overlays, and keeps chosen ones the server doesn't offer now.
+	 */
+	public function test_staticmap_overlays_field() {
+		update_option( 'sloc_staticmap_overlays', array( 'seamarks', 'gone' ) );
+		$this->mock_http( array( 'maps.example.org/api/v1/overlays' => array( 'body' => $this->fixture( 'map/staticmap-overlays.json' ) ) ) );
+		$args = array(
+			'label_for' => 'sloc_staticmap_overlays',
+			'provider'  => $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) ),
+		);
+		ob_start();
+		Map_Provider_StaticMap::overlays_field( $args );
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( '<input type="hidden" name="sloc_staticmap_overlays[]" value="" />', $html );
+		$this->assertMatchesRegularExpression( '#value="railways" /> OpenRailwayMap</label>#', $html );
+		$this->assertMatchesRegularExpression( '#value="seamarks" checked(=["\']checked["\'])? /> OpenSeaMap seamarks</label>#', $html );
+		$this->assertMatchesRegularExpression( '#value="gone" checked(=["\']checked["\'])? /> gone</label>#', $html );
+		$this->assertStringContainsString( 'draws at most 3 overlays', $html );
+
+		// The hidden empty value saves an empty list when every box is unchecked.
+		$this->assertSame( array(), Map_Provider_StaticMap::sanitize_overlays( array( '' ) ) );
+
+		$this->mock_http( array( 'other.example.org' => new WP_Error( 'http_request_failed', 'Connection refused' ) ) );
+		delete_option( 'sloc_staticmap_overlays' );
+		$args['provider'] = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://other.example.org/' ) );
+		ob_start();
+		Map_Provider_StaticMap::overlays_field( $args );
+		$this->assertStringContainsString( 'offers no overlays', ob_get_clean() );
+	}
+
+	/**
+	 * The display settings are registered, with fields on the map settings page.
+	 */
+	public function test_staticmap_display_settings_registered() {
+		global $wp_settings_fields;
+		Map_Provider_StaticMap::init();
+		Map_Provider_StaticMap::admin_init();
+		$settings = get_registered_settings();
+		foreach ( array( 'format', 'marker', 'marker_color', 'marker_size', 'scalebar', 'scalebar_position', 'overlays' ) as $name ) {
+			$this->assertArrayHasKey( 'sloc_staticmap_' . $name, $settings );
+			$this->assertArrayHasKey( 'sloc_staticmap_' . $name, $wp_settings_fields['simloc']['sloc_map'] );
+		}
+		$this->assertSame( 'color', $wp_settings_fields['simloc']['sloc_map']['sloc_staticmap_marker_color']['args']['type'] );
+		$this->assertSame( '#43a047', sanitize_option( 'sloc_staticmap_marker_color', '43A047' ) );
+		$this->assertSame( array( 'seamarks' ), sanitize_option( 'sloc_staticmap_overlays', array( '', 'seamarks' ) ) );
 	}
 
 	/**

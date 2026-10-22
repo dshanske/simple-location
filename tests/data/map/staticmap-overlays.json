@@ -1,0 +1,27 @@
+{
+    "overlays": [
+        {
+            "id": "railways",
+            "name": "OpenRailwayMap",
+            "minzoom": 2,
+            "maxzoom": 19,
+            "opacity": 1,
+            "bounds": null,
+            "attribution_text": "Data \u00a9 OpenStreetMap contributors, Style: CC-BY-SA 2.0 OpenRailwayMap",
+            "attribution_html": "Data \u00a9 <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors, Style: <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA 2.0</a> <a href=\"https://www.openrailwaymap.org/\">OpenRailwayMap</a>",
+            "needs_key": false
+        },
+        {
+            "id": "seamarks",
+            "name": "OpenSeaMap seamarks",
+            "minzoom": 2,
+            "maxzoom": 18,
+            "opacity": 1,
+            "bounds": null,
+            "attribution_text": "Seamarks \u00a9 OpenSeaMap contributors",
+            "attribution_html": "Seamarks \u00a9 <a href=\"https://www.openseamap.org/\">OpenSeaMap</a> contributors (<a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC BY-SA 2.0</a>)",
+            "needs_key": false
+        }
+    ],
+    "max_overlays": 3
+}
