@@ -541,6 +541,214 @@ class MapCacheTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Creates a custom static map provider at City Hall, signing its URLs.
+	 *
+	 * The map image route rebuilds the provider from the settings, so the server and client are settings.
+	 *
+	 * @param array $args Optional. Constructor arguments that override the settings.
+	 * @return Map_Provider_StaticMap
+	 */
+	protected function staticmap( $args = array() ) {
+		update_option( 'sloc_map_provider', 'staticmap' );
+		update_option( 'sloc_staticmap_url', 'https://maps.example.org/' );
+		update_option( 'sloc_staticmap_client_id', 'blog' );
+		update_option( 'sloc_staticmap_client_secret', 'the-secret' );
+		return new Map_Provider_StaticMap(
+			array_merge(
+				array(
+					'latitude'  => self::LAT,
+					'longitude' => self::LNG,
+					'style'     => 'esri/topo',
+				),
+				$args
+			)
+		);
+	}
+
+	/**
+	 * Mocks the custom static map server: its query API fails, and maps are a PNG image with the given headers.
+	 *
+	 * @param array $headers Optional. More response headers.
+	 */
+	protected function mock_staticmap( $headers = array() ) {
+		$this->mock_http(
+			array(
+				'/api/v1/'         => new WP_Error( 'http_request_failed', 'No query API in this test' ),
+				'maps.example.org' => array(
+					'body'    => base64_decode( self::PNG ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+					'headers' => array_merge( array( 'content-type' => 'image/png' ), $headers ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Returns the requests made to the custom static map server for map images.
+	 *
+	 * @return array[] Requests.
+	 */
+	protected function staticmap_image_requests() {
+		return array_values( array_filter( $this->http_requests, fn( $request ) => false === strpos( $request['url'], '/api/v1/' ) ) );
+	}
+
+	/**
+	 * Custom static maps are stored and served from the site, fetched with the signed URL.
+	 */
+	public function test_staticmap_served_from_site() {
+		$this->mock_staticmap( array( 'cache-control' => 'public, max-age=604800' ) );
+		$map = $this->staticmap();
+		$this->assertTrue( Sloc_Map_Cache::is_enabled( $map ) );
+
+		$route = $this->image_urls( $map->get_the_static_map_html() )[0];
+		$this->assertStringContainsString( 'map-image', $route );
+		$this->assertStringNotContainsString( 'maps.example.org', $route );
+		$this->assertStringContainsString( 'options=', $route );
+
+		$response = $this->request( $route );
+		$this->assertSame( 302, $response->get_status() );
+		$this->assertMatchesRegularExpression( '#/uploads/sloc-maps/[0-9a-f]{32}\.png\?v=\d+$#', $response->get_headers()['Location'] );
+
+		$requests = $this->staticmap_image_requests();
+		$this->assertCount( 1, $requests );
+		$this->assertSame( $map->get_the_static_map(), $requests[0]['url'] );
+		$this->assertStringContainsString( '&signature=', $requests[0]['url'] );
+
+		// Archive maps too.
+		$this->assertSame( 302, $this->request( $map->get_archive_map_src( $this->locations ) )->get_status() );
+		$this->assertCount( 2, $this->staticmap_image_requests() );
+	}
+
+	/**
+	 * A changed drawing setting gives the map a new image instead of the stored one.
+	 */
+	public function test_staticmap_options_change_url() {
+		$map   = $this->staticmap();
+		$route = Sloc_Map_Cache::get_url( $map );
+		$this->assertSame( $route, Sloc_Map_Cache::get_url( $this->staticmap() ) );
+		foreach ( array(
+			'marker_color' => '#43a047',
+			'format'       => 'webp',
+			'overlays'     => array( 'railways' ),
+			'attribution'  => 'text',
+		) as $setting => $value ) {
+			$this->assertNotSame( $route, Sloc_Map_Cache::get_url( $this->staticmap( array( $setting => $value ) ) ), $setting );
+		}
+		$this->assertNotSame( $route, Sloc_Map_Cache::get_url( $this->staticmap( array( 'client_id' => 'other' ) ) ) );
+	}
+
+	/**
+	 * With only a plain client key, the map server marks every image private, so maps aren't served from the site.
+	 */
+	public function test_staticmap_plain_key_not_cached() {
+		$map = $this->staticmap(
+			array(
+				'client_id'     => '',
+				'client_secret' => '',
+				'client_key'    => 'plain-key',
+			)
+		);
+		$this->assertFalse( Sloc_Map_Cache::is_enabled( $map ) );
+		$this->assertStringStartsWith( 'https://maps.example.org/?', $this->image_urls( $map->get_the_static_map_html() )[0] );
+
+		// Without credentials at all, maps are free and are stored.
+		$this->assertTrue( Sloc_Map_Cache::is_enabled( $this->staticmap( array( 'client_secret' => '' ) ) ) );
+	}
+
+	/**
+	 * Images the map server marks private aren't stored: visitors are sent to the signed URL, for a day.
+	 */
+	public function test_staticmap_private_passthrough() {
+		$this->mock_staticmap( array( 'cache-control' => 'private, max-age=604800' ) );
+		$map   = $this->staticmap();
+		$route = Sloc_Map_Cache::get_url( $map );
+
+		$response = $this->request( $route );
+		$this->assertSame( 302, $response->get_status() );
+		$this->assertSame( $map->get_the_static_map(), $response->get_headers()['Location'] );
+		$this->assertSame( 'private, max-age=300', $response->get_headers()['Cache-Control'] );
+		$this->assertSame( array(), (array) glob( wp_upload_dir()['basedir'] . '/sloc-maps/*.png' ) );
+
+		// Pages link to the map server directly now, and the route doesn't fetch the image again.
+		$this->assertSame( $map->get_the_static_map(), Sloc_Map_Cache::get_url( $map ) );
+		$this->assertSame( $map->get_the_static_map(), $this->request( $route )->get_headers()['Location'] );
+		$this->assertCount( 1, $this->staticmap_image_requests() );
+
+		$sig = Sloc_Map_Cache::sign( $map->get_cache_args() );
+		$this->assertEqualsWithDelta( time() + DAY_IN_SECONDS, (int) get_option( '_transient_timeout_' . Sloc_Map_Cache::PASSTHROUGH . $sig ), 5 );
+	}
+
+	/**
+	 * When the map server drew its default map instead, it isn't stored, and the map is asked for again after 5 minutes.
+	 */
+	public function test_staticmap_fallback_passthrough() {
+		$this->mock_staticmap(
+			array(
+				'cache-control'  => 'public, max-age=300',
+				'x-map-fallback' => 'unavailable; requested=carto/dark; drawn=osm/streets',
+			)
+		);
+		$map = $this->staticmap();
+		$this->assertSame( $map->get_the_static_map(), $this->request( Sloc_Map_Cache::get_url( $map ) )->get_headers()['Location'] );
+		$this->assertSame( array(), (array) glob( wp_upload_dir()['basedir'] . '/sloc-maps/*.png' ) );
+
+		$sig = Sloc_Map_Cache::sign( $map->get_cache_args() );
+		$this->assertEqualsWithDelta( time() + 5 * MINUTE_IN_SECONDS, (int) get_option( '_transient_timeout_' . Sloc_Map_Cache::PASSTHROUGH . $sig ), 5 );
+
+		// Other providers' images are stored whatever their headers say.
+		$response = array( 'headers' => array( 'cache-control' => 'private' ) );
+		$this->assertSame( 0, $this->geoapify()->get_passthrough_time( $response ) );
+	}
+
+	/**
+	 * Archive maps with a URL too long for the map server are sent as a POST request with a JSON body.
+	 */
+	public function test_staticmap_long_archive_map_posted() {
+		$this->mock_staticmap();
+		$locations = array();
+		for ( $i = 0; $i < 120; $i++ ) {
+			$locations[] = array( round( 39.9 + $i / 1000, 4 ), round( -75.2 + $i / 1000, 4 ) );
+		}
+		update_option( 'sloc_staticmap_client_key', 'plain-key' );
+		$map = $this->staticmap();
+		$this->assertGreaterThan( Map_Provider_StaticMap::MAX_GET_LENGTH, strlen( $map->get_archive_map( $locations ) ) );
+
+		$this->assertSame( 302, $this->request( $map->get_archive_map_src( $locations ) )->get_status() );
+		$request = $this->staticmap_image_requests()[0];
+		$this->assertSame( 'https://maps.example.org/', $request['url'] );
+		$this->assertSame( 'POST', $request['args']['method'] );
+		$this->assertSame( 'application/json', $request['args']['headers']['Content-Type'] );
+		$body = json_decode( $request['args']['body'], true );
+		$this->assertSame( 'plain-key', $body['key'] );
+		$this->assertArrayNotHasKey( 'signature', $body );
+		$this->assertCount( 120, $body['marker'] );
+		$this->assertSame( 'enc:' . Sloc_Polyline::encode( $locations ), $body['polyline'] );
+		$this->assertSame( array( 'esri', 'topo' ), array( $body['provider'], $body['style'] ) );
+
+		// The server marks images for a plain key private, and the signed URL is too long to redirect to, so the
+		// image is sent for this request, and nothing is stored.
+		Sloc_Map_Cache::clear();
+		$this->mock_staticmap( array( 'cache-control' => 'private, max-age=604800' ) );
+		$route = $map->get_archive_map_src( $locations );
+		$response            = $this->request( $route );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'image/png', $response->get_headers()['Content-Type'] );
+		$this->assertSame( 'private, max-age=300', $response->get_headers()['Cache-Control'] );
+		ob_start();
+		$served = apply_filters( 'rest_pre_serve_request', false, $response, new WP_REST_Request(), rest_get_server() );
+		$this->assertTrue( $served );
+		$this->assertSame( base64_decode( self::PNG ), ob_get_clean() ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+		$this->assertFalse( apply_filters( 'rest_pre_serve_request', false, new WP_REST_Response(), new WP_REST_Request(), rest_get_server() ), 'Other responses are left alone.' );
+		$this->assertSame( $route, $map->get_archive_map_src( $locations ), 'Pages keep linking to the route.' );
+		$this->assertSame( array(), (array) glob( wp_upload_dir()['basedir'] . '/sloc-maps/*.png' ) );
+
+		// A short archive map is fetched with its signed URL.
+		$this->mock_staticmap();
+		$this->assertSame( 302, $this->request( $map->get_archive_map_src( $this->locations ) )->get_status() );
+		$request = $this->staticmap_image_requests()[0];
+		$this->assertSame( $map->get_archive_map( $this->locations ), $request['url'] );
+	}
+
+	/**
 	 * The settings are registered, and their fields are shown only when the map provider allows storing its maps.
 	 */
 	public function test_settings() {

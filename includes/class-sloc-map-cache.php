@@ -68,9 +68,26 @@ class Sloc_Map_Cache {
 	 * Map parameters a signed URL can carry, which are the parameters that are signed.
 	 *
 	 * @since 6.0.0
+	 * @since 6.1.0 Added 'options', a hash of the provider's other settings that change the image.
 	 * @var string[]
 	 */
-	const PARAMETERS = array( 'provider', 'lat', 'lng', 'points', 'width', 'height', 'zoom', 'style', 'scale' );
+	const PARAMETERS = array( 'provider', 'lat', 'lng', 'points', 'width', 'height', 'zoom', 'style', 'scale', 'options' );
+
+	/**
+	 * Prefix of the transients that hold the provider's URL of a map image the site doesn't store.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const PASSTHROUGH = 'sloc_map_pass_';
+
+	/**
+	 * Longest provider URL, in bytes, visitors are redirected to. Longer ones may be refused, so the image is sent instead.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const MAX_REDIRECT_LENGTH = 6000;
 
 	/**
 	 * Image types accepted from providers, with the file extension each is stored with.
@@ -358,11 +375,16 @@ class Sloc_Map_Cache {
 	 *
 	 * @param Map_Provider $map       Map provider, set to the map's location, size and pixel density.
 	 * @param array|null   $locations Optional. List of array( latitude, longitude ) points for an archive map.
-	 * @return string URL of the stored image, or a signed URL of the map image route if it isn't stored or is due for a refresh.
+	 * @return string URL of the stored image; the provider's URL while the provider's image can't be stored; or a signed URL
+	 *                of the map image route if it isn't stored or is due for a refresh.
 	 */
 	public static function get_url( $map, $locations = null ) {
-		$args = $map->get_cache_args( $locations );
-		$sig  = self::sign( $args );
+		$args    = $map->get_cache_args( $locations );
+		$sig     = self::sign( $args );
+		$passing = get_transient( self::PASSTHROUGH . $sig );
+		if ( is_string( $passing ) && '' !== $passing ) {
+			return $passing;
+		}
 		$file = self::find( $sig );
 		if ( $file && self::is_fresh( $file, $map ) ) {
 			return $file['url'];
@@ -426,6 +448,8 @@ class Sloc_Map_Cache {
 	 * If a refresh fails, the stored image is served, and the next request tries again.
 	 *
 	 * @since 6.0.0
+	 * @since 6.1.0 An image the provider doesn't allow storing redirects to the provider's URL instead, for as long as the provider
+	 *              says, or is sent for this request when that URL is too long.
 	 *
 	 * @param WP_REST_Request $request Request with signed map parameters.
 	 * @return WP_REST_Response|WP_Error Redirect to the image, or an error.
@@ -436,10 +460,22 @@ class Sloc_Map_Cache {
 		if ( ! $map ) {
 			return new WP_Error( 'sloc_map_not_found', __( 'This map is not available.', 'simple-location' ), array( 'status' => 404 ) );
 		}
-		$sig  = self::sign( $args );
+		$sig     = self::sign( $args );
+		$passing = get_transient( self::PASSTHROUGH . $sig );
+		if ( is_string( $passing ) && '' !== $passing ) {
+			return self::passthrough( $passing );
+		}
 		$file = self::find( $sig );
 		if ( ! $file || ! self::is_fresh( $file, $map ) ) {
 			$fetched = self::fetch( $map, $args, $sig );
+			if ( is_wp_error( $fetched ) && 'sloc_map_passthrough' === $fetched->get_error_code() ) {
+				$data = $fetched->get_error_data();
+				if ( strlen( $data['url'] ) > self::MAX_REDIRECT_LENGTH ) {
+					return self::send_image( $data['body'], $data['type'] );
+				}
+				set_transient( self::PASSTHROUGH . $sig, $data['url'], $data['time'] );
+				return self::passthrough( $data['url'] );
+			}
 			if ( ! is_wp_error( $fetched ) ) {
 				$file = $fetched;
 			} elseif ( ! $file ) {
@@ -449,6 +485,49 @@ class Sloc_Map_Cache {
 		$response = new WP_REST_Response( null, 302 );
 		$response->header( 'Location', $file['url'] );
 		$response->header( 'Cache-Control', 'public, max-age=86400' );
+		return $response;
+	}
+
+	/**
+	 * Redirects to the provider's URL of a map image the site doesn't store.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $url Provider's URL of the image.
+	 * @return WP_REST_Response Redirect, which shared caches don't keep.
+	 */
+	protected static function passthrough( $url ) {
+		$response = new WP_REST_Response( null, 302 );
+		$response->header( 'Location', $url );
+		$response->header( 'Cache-Control', 'private, max-age=300' );
+		return $response;
+	}
+
+	/**
+	 * Sends a map image the site doesn't store, for one visitor.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $body Image.
+	 * @param string $type Media type of the image.
+	 * @return WP_REST_Response Response whose image is sent instead of JSON.
+	 */
+	protected static function send_image( $body, $type ) {
+		$response = new WP_REST_Response( null, 200 );
+		$response->header( 'Content-Type', $type );
+		$response->header( 'Cache-Control', 'private, max-age=300' );
+		add_filter(
+			'rest_pre_serve_request',
+			function ( $served, $result ) use ( $response, $body ) {
+				if ( $result !== $response ) {
+					return $served;
+				}
+				echo $body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- An image, sent as is.
+				return true;
+			},
+			10,
+			2
+		);
 		return $response;
 	}
 
@@ -487,6 +566,8 @@ class Sloc_Map_Cache {
 	 * Fetches a map image from its provider and stores it.
 	 *
 	 * @since 6.0.0
+	 * @since 6.1.0 The provider fetches the image, and can say not to store it: the error 'sloc_map_passthrough' then has the
+	 *              provider's 'url' of the image, the 'time', in seconds, to send visitors there, and the image's 'body' and 'type'.
 	 *
 	 * @param Map_Provider $map  Map provider, set from the parameters.
 	 * @param array        $args Map parameters.
@@ -494,26 +575,35 @@ class Sloc_Map_Cache {
 	 * @return array|WP_Error Stored file, or an error.
 	 */
 	protected static function fetch( $map, $args, $sig ) {
-		if ( isset( $args['points'] ) ) {
-			$url = $map->get_archive_map( array_chunk( Sloc_Polyline::decode( $args['points'] ), 2 ) );
-		} else {
-			$url = $map->get_the_static_map();
-		}
-		if ( empty( $url ) || is_wp_error( $url ) ) {
-			return new WP_Error( 'sloc_map_not_found', __( 'This map is not available.', 'simple-location' ), array( 'status' => 404 ) );
-		}
-
-		$response = wp_safe_remote_get(
-			$url,
+		$locations = isset( $args['points'] ) ? array_chunk( Sloc_Polyline::decode( $args['points'] ), 2 ) : null;
+		$response  = $map->fetch_static_map(
+			$locations,
 			array(
 				'timeout'             => 15,
 				'limit_response_size' => self::MAX_SIZE,
 			)
 		);
-		$body     = wp_remote_retrieve_body( $response );
-		$info     = ( '' === $body || strlen( $body ) >= self::MAX_SIZE ) ? false : getimagesizefromstring( $body );
+		if ( is_wp_error( $response ) && 'sloc_map_not_found' === $response->get_error_code() ) {
+			return $response;
+		}
+		$body = wp_remote_retrieve_body( $response );
+		$info = ( '' === $body || strlen( $body ) >= self::MAX_SIZE ) ? false : getimagesizefromstring( $body );
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) || ! $info || ! isset( self::TYPES[ $info['mime'] ] ) ) {
 			return new WP_Error( 'sloc_map_fetch_failed', __( 'The map could not be loaded.', 'simple-location' ), array( 'status' => 502 ) );
+		}
+		$passthrough = (int) $map->get_passthrough_time( $response );
+		$url         = $passthrough > 0 ? $map->get_static_map_url( $locations ) : '';
+		if ( '' !== $url ) {
+			return new WP_Error(
+				'sloc_map_passthrough',
+				__( 'The map provider does not allow storing this map.', 'simple-location' ),
+				array(
+					'url'  => $url,
+					'time' => $passthrough,
+					'body' => $body,
+					'type' => $info['mime'],
+				)
+			);
 		}
 		return self::store( $sig, self::TYPES[ $info['mime'] ], $body );
 	}

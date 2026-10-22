@@ -147,6 +147,8 @@ This is why the plugin does not save maps to the media library.
 Geoapify's terms allow storing its static maps, so Geoapify maps are served from your site. The first time a map is shown, your site fetches it from Geoapify, stores it in `wp-content/uploads/sloc-maps`, and serves it from there. Your API key stays on your server, and visitors' browsers never contact Geoapify.
 The image links are signed with a secret only your site knows, so nobody else can use your site to request other maps with your key.
 
+Maps from your own custom map server (see the custom map provider below) are stored the same way, when it signs its URLs or needs no key. Maps the server marks as private, such as Stadia Maps, whose terms forbid caching, are never stored: visitors are sent to the server's signed image link instead. So are maps where the server had to draw its default map, which are asked for again after 5 minutes. With only a plain client key, the server marks every map private, so those maps are loaded from the server.
+
 These settings appear under Map Settings when your map provider allows storing its maps:
 * Serve Maps From This Site: on by default. Turn it off to load maps from the provider, with the API key in the image link.
 * Refresh Stored Maps After (Days): 30 by default. After this many days, the next page that shows a map fetches it again and replaces the stored image in place. Pages cached with the old image keep working. If the provider can't be reached, the stored image is still shown. 0 never fetches stored maps again. A provider whose terms limit how long maps may be stored is refreshed at least that often.

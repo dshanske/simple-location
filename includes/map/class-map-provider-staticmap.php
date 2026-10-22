@@ -195,6 +195,43 @@ class Map_Provider_StaticMap extends Map_Provider {
 	const POSITIONS = array( 'bottomleft', 'bottomright', 'topleft', 'topright' );
 
 	/**
+	 * Longest map URL, in bytes, the site fetches with GET for its map cache. Longer maps are sent as a POST request.
+	 *
+	 * Web servers often refuse request lines over 8 KB, such as nginx with its default buffers.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const MAX_GET_LENGTH = 6000;
+
+	/**
+	 * How long, in seconds, visitors are sent to the map server for a map image it marks as private.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const PRIVATE_PASSTHROUGH_TIME = DAY_IN_SECONDS;
+
+	/**
+	 * How long, in seconds, visitors are sent to the map server when it drew its default map instead of the one asked for.
+	 *
+	 * The map server keeps such maps for 5 minutes, since the map asked for may work again soon.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const FALLBACK_PASSTHROUGH_TIME = 5 * MINUTE_IN_SECONDS;
+
+	/**
+	 * Whether the provider's terms allow the site to store its map images. The map server allows it, unless it marks
+	 * an image private.
+	 *
+	 * @since 6.1.0
+	 * @var bool
+	 */
+	protected $cacheable = true;
+
+	/**
 	 * Where the map's credit goes: drawn on the image with the provider's logo, drawn on the image as text only, or
 	 * printed under the map.
 	 *
@@ -1313,6 +1350,18 @@ class Map_Provider_StaticMap extends Map_Provider {
 		}
 		$this->load_server_limits();
 
+		return $this->build_url( $this->get_archive_params( $locations ) );
+	}
+
+	/**
+	 * Returns the request parameters of a static map with multiple locations, without the client's credentials.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return array List of array( name, value ) pairs.
+	 */
+	protected function get_archive_params( $locations ) {
 		$params = array(
 			array( 'width', $this->width ),
 			array( 'height', $this->height ),
@@ -1322,7 +1371,113 @@ class Map_Provider_StaticMap extends Map_Provider {
 		foreach ( $locations as $location ) {
 			$params[] = array( 'marker[]', sprintf( 'lat:%1$s;lng:%2$s;%3$s', $location[0], $location[1], $this->get_marker_options( 'dot', 'small' ) ) );
 		}
-		return $this->build_url( array_merge( $params, $this->get_display_params() ) );
+		return array_merge( $params, $this->get_display_params() );
+	}
+
+	/**
+	 * Whether the site may store this provider's map images and serve them itself.
+	 *
+	 * With only a plain client key, the map server marks every image private, so those maps aren't stored.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return bool
+	 */
+	public function is_cacheable() {
+		return parent::is_cacheable() && ( '' === $this->client_key || ( '' !== $this->client_id && '' !== $this->client_secret ) );
+	}
+
+	/**
+	 * Returns the parameters that describe the current map, for a map image served from the site.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
+	 * @return string[] Map parameters, with 'options', a hash of the settings that change the image, so a changed setting
+	 *                  gives new images.
+	 */
+	public function get_cache_args( $locations = null ) {
+		$args            = parent::get_cache_args( $locations );
+		$args['options'] = substr(
+			md5(
+				wp_json_encode(
+					array(
+						$this->format,
+						$this->marker,
+						$this->marker_color,
+						$this->marker_size,
+						$this->scalebar,
+						'site' === $this->scalebar ? get_option( 'sloc_measurements' ) : '',
+						$this->scalebar_position,
+						$this->overlays,
+						$this->attribution,
+						$this->attribution_position,
+						$this->get_credentials(),
+					)
+				)
+			),
+			0,
+			12
+		);
+		return $args;
+	}
+
+	/**
+	 * Fetches the current map's image for the site to store.
+	 *
+	 * Archive maps whose URL would be too long for the map server are sent as a POST request with a JSON body. The map
+	 * server only accepts signed URLs as GET requests, so a POST request carries the plain client key, if there is one.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
+	 * @param array      $args      Optional. Request arguments. Default empty.
+	 * @return array|WP_Error Response, or an error.
+	 */
+	public function fetch_static_map( $locations = null, $args = array() ) {
+		if ( null === $locations || '' === $this->get_server_url() || empty( $locations ) ) {
+			return parent::fetch_static_map( $locations, $args );
+		}
+		$this->load_server_limits();
+		$params = $this->get_archive_params( $locations );
+		if ( strlen( $this->build_url( $params ) ) <= self::MAX_GET_LENGTH ) {
+			return parent::fetch_static_map( $locations, $args );
+		}
+		if ( '' !== $this->client_key ) {
+			$params[] = array( 'key', $this->client_key );
+		}
+		$body = array();
+		foreach ( $params as $param ) {
+			if ( '[]' === substr( $param[0], -2 ) ) {
+				$body[ substr( $param[0], 0, -2 ) ][] = (string) $param[1];
+			} else {
+				$body[ $param[0] ] = (string) $param[1];
+			}
+		}
+		$args['headers'] = array( 'Content-Type' => 'application/json' );
+		$args['body']    = wp_json_encode( $body );
+		return wp_safe_remote_post( $this->get_server_url(), $args );
+	}
+
+	/**
+	 * Returns how long visitors are sent to the map server for a map image the site must not store.
+	 *
+	 * The map server marks images private when the provider's terms don't allow caching them (such as Stadia Maps) or
+	 * when they were drawn for a plain client key, and sends X-Map-Fallback when it drew its default map instead.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $response Response with the image.
+	 * @return int Seconds, or 0 to store the image.
+	 */
+	public function get_passthrough_time( $response ) {
+		if ( '' !== (string) wp_remote_retrieve_header( $response, 'x-map-fallback' ) ) {
+			return self::FALLBACK_PASSTHROUGH_TIME;
+		}
+		if ( preg_match( '/(^|[\s,])(private|no-store)([\s,=]|$)/i', (string) wp_remote_retrieve_header( $response, 'cache-control' ) ) ) {
+			return self::PRIVATE_PASSTHROUGH_TIME;
+		}
+		return 0;
 	}
 
 	/**
