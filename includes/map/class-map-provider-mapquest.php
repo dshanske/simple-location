@@ -86,6 +86,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 * Returns the URL of a static map of the location.
 	 *
 	 * @since 3.4.0
+	 * @since 6.1.0 Drawn at the map's zoom level instead of MapQuest's default.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -99,6 +100,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 				'key'       => $this->api,
 				'center'    => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
 				'size'      => sprintf( '%1$s,%2$s%3$s', $this->width, $this->height, ( 2 === $this->scale ) ? '@2x' : '' ),
+				'zoom'      => $this->map_zoom,
 				'type'      => $this->style,
 				'locations' => sprintf( '%1$s,%2$s', $this->latitude, $this->longitude ),
 			),
