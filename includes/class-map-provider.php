@@ -615,9 +615,40 @@ abstract class Map_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns the srcset of an archive map, with an image for each pixel density the provider can draw.
+	 *
+	 * Every density shows the same area, so the marker links fit them all.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return string Comma-separated image candidates, not escaped, or an empty string if there is only one density.
+	 */
+	public function get_archive_srcset( $locations ) {
+		$scales = $this->get_scales();
+		if ( count( $scales ) < 2 ) {
+			return '';
+		}
+		$scale  = $this->scale;
+		$srcset = array();
+		foreach ( $scales as $density ) {
+			$this->scale = $density;
+			$image       = $this->get_archive_map_src( $locations );
+			if ( '' === $image ) {
+				$this->scale = $scale;
+				return '';
+			}
+			$srcset[] = sprintf( '%1$s %2$sx', esc_url_raw( $image ), $density );
+		}
+		$this->scale = $scale;
+		return implode( ', ', $srcset );
+	}
+
+	/**
 	 * Returns the HTML for an archive map, with a link to each post over its marker when the provider says where they are.
 	 *
-	 * The links are positioned in percent, so they stay over their markers when the image is scaled.
+	 * The links are positioned in percent, so they stay over their markers when the image is scaled, and fit every
+	 * pixel density in its srcset.
 	 *
 	 * @since 6.1.0
 	 *
@@ -626,8 +657,14 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @return string HTML.
 	 */
 	public function get_archive_map_html( $locations, $post_ids = array() ) {
-		$src  = $this->get_archive_map_src( $locations );
-		$html = sprintf( '<img class="archive-map sloc-map" src="%1$s" alt="%2$s" />', esc_url( $src ), esc_attr__( 'Map of the locations listed on this page', 'simple-location' ) );
+		$src    = $this->get_archive_map_src( $locations );
+		$srcset = '' === $src ? '' : $this->get_archive_srcset( $locations );
+		$html   = sprintf(
+			'<img class="archive-map sloc-map" src="%1$s"%2$s alt="%3$s" />',
+			esc_url( $src ),
+			'' === $srcset ? '' : sprintf( ' srcset="%s"', esc_attr( $srcset ) ),
+			esc_attr__( 'Map of the locations listed on this page', 'simple-location' )
+		);
 		if ( '' === $src || empty( $post_ids ) || ! is_array( $locations ) || count( $post_ids ) !== count( $locations ) ) {
 			return $html;
 		}

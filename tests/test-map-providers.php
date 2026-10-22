@@ -1459,7 +1459,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			self::factory()->post->create( array( 'post_title' => 'Independence "Hall" & Park' ) ),
 		);
 		$html = $map->get_archive_map_html( $this->locations, $posts );
-		$this->assertMatchesRegularExpression( '#^<div class="sloc-archive-map"><img class="archive-map sloc-map" src="[^"]+" alt="Map of the locations listed on this page" /><a [^>]+></a><a [^>]+></a></div>$#', $html );
+		$this->assertMatchesRegularExpression( '#^<div class="sloc-archive-map"><img class="archive-map sloc-map" src="[^"]+" srcset="[^"]+ 1x, [^"]+ 2x" alt="Map of the locations listed on this page" /><a [^>]+></a><a [^>]+></a></div>$#', $html );
 		$this->assertStringContainsString(
 			sprintf( '<a class="sloc-archive-map-marker" href="%s" style="left:22.333%%;top:34.75%%;width:2.5%%;height:3.75%%" title="City Hall" aria-label="City Hall"></a>', get_permalink( $posts[0] ) ),
 			$html
@@ -1468,7 +1468,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'title="Independence &#8220;Hall&#8221; &amp; Park"', $html );
 
 		// Without the posts, or with a different number of them, the map isn't clickable.
-		$plain = '#^<img class="archive-map sloc-map" src="[^"]+" alt="[^"]+" />$#';
+		$plain = '#^<img class="archive-map sloc-map" src="[^"]+"( srcset="[^"]+")? alt="[^"]+" />$#';
 		$this->assertMatchesRegularExpression( $plain, $map->get_archive_map_html( $this->locations ) );
 		$this->assertMatchesRegularExpression( $plain, $map->get_archive_map_html( $this->locations, array( $posts[0] ) ) );
 	}
@@ -1588,9 +1588,82 @@ class MapProvidersTest extends WP_UnitTestCase {
 			self::factory()->post->create( array( 'post_title' => 'Independence Hall' ) ),
 		);
 		$html  = $map->get_archive_map_html( $this->locations, $posts );
-		$this->assertMatchesRegularExpression( '#^<div class="sloc-archive-map"><img class="archive-map sloc-map" src="https://maps\.googleapis\.com/[^"]+" alt="[^"]+" /><a [^>]+></a><a [^>]+></a></div>$#', $html );
+		$this->assertMatchesRegularExpression( '#^<div class="sloc-archive-map"><img class="archive-map sloc-map" src="https://maps\.googleapis\.com/[^"]+" srcset="[^"]+" alt="[^"]+" /><a [^>]+></a><a [^>]+></a></div>$#', $html );
 		$this->assertStringContainsString( 'href="' . get_permalink( $posts[0] ) . '"', $html );
 		$this->assertStringContainsString( 'title="Independence Hall"', $html );
+	}
+
+	/**
+	 * Archive maps have a 2x image in their srcset showing the same area, for each provider that draws one.
+	 *
+	 * @dataProvider data_hidpi_archive_providers
+	 *
+	 * @param string $class    Provider class.
+	 * @param string $expected What the 2x URL has that the 1x URL doesn't.
+	 */
+	public function test_archive_srcset( $class, $expected ) {
+		update_option( 'sloc_map_cache', 0 );
+		$map    = $this->provider( $class, array( 'style' => 'streets-v11' ) );
+		$srcset = $map->get_archive_srcset( $this->locations );
+		$this->assertMatchesRegularExpression( '#^(\S+) 1x, (\S+) 2x$#', $srcset );
+		preg_match( '#^(\S+) 1x, (\S+) 2x$#', $srcset, $urls );
+		$this->assertSame( $map->get_archive_map( $this->locations ), $urls[1] );
+		$this->assertStringNotContainsString( $expected, $urls[1] );
+		$this->assertStringContainsString( $expected, $urls[2] );
+		// The 2x image is fitted to the same view.
+		$view = $map->get_archive_view( $this->locations );
+		$map->set_scale( 2 );
+		$this->assertSame( $view, $map->get_archive_view( $this->locations ) );
+		$this->assertSame( $urls[2], $map->get_archive_map( $this->locations ) );
+		$map->set_scale( 1 );
+
+		// The srcset is in the archive map's HTML, and the provider is back at 1x afterwards.
+		$this->assertStringContainsString( ' srcset="' . esc_attr( $srcset ) . '"', $map->get_archive_map_html( $this->locations ) );
+		$this->assertSame( $urls[1], $map->get_archive_map( $this->locations ) );
+	}
+
+	/**
+	 * Providers with high-density archive maps, and what their 2x URL has.
+	 *
+	 * @return array
+	 */
+	public function data_hidpi_archive_providers() {
+		return array(
+			'Google'   => array( 'Map_Provider_Google', 'scale=2' ),
+			'Mapbox'   => array( 'Map_Provider_Mapbox', '/600x400@2x?' ),
+			'HERE'     => array( 'Map_Provider_Here', '/1200x800/png8?' ),
+			'Geoapify' => array( 'Map_Provider_Geoapify', 'scaleFactor=2' ),
+			'MapQuest' => array( 'Map_Provider_MapQuest', 'size=600,400@2x' ),
+		);
+	}
+
+	/**
+	 * Providers without a high-density image, and maps that can't be drawn, have no archive srcset.
+	 */
+	public function test_archive_srcset_unavailable() {
+		$map = $this->provider( 'Map_Provider_LocationIQ' );
+		$this->assertSame( '', $map->get_archive_srcset( $this->locations ) );
+		$this->assertStringNotContainsString( 'srcset', $map->get_archive_map_html( $this->locations ) );
+
+		$map = $this->provider( 'Map_Provider_Google', array( 'api' => '' ) );
+		$this->assertSame( '', $map->get_archive_srcset( $this->locations ) );
+		$this->assertStringNotContainsString( 'srcset', $map->get_archive_map_html( $this->locations ) );
+
+		// HERE can't draw twice the size past its limit.
+		$map = $this->provider( 'Map_Provider_Here', array( 'width' => 1500, 'height' => 1000 ) );
+		$this->assertSame( '', $map->get_archive_srcset( $this->locations ) );
+	}
+
+	/**
+	 * Cached archive maps have a srcset of the site's map image URLs, one per density.
+	 */
+	public function test_archive_srcset_cached() {
+		update_option( 'sloc_map_cache', 1 );
+		$map    = $this->provider( 'Map_Provider_Geoapify' );
+		$srcset = $map->get_archive_srcset( $this->locations );
+		$this->assertStringNotContainsString( 'geoapify.com', $srcset );
+		$this->assertStringContainsString( 'scale=1', $srcset );
+		$this->assertMatchesRegularExpression( '#scale=2&[^ ]+ 2x$#', $srcset );
 	}
 
 	/**
@@ -1621,7 +1694,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertNull( $map->get_archive_view( $this->locations ) );
 		$this->assertSame( array(), $map->get_archive_marker_boxes( $this->locations ) );
 		$this->assertStringContainsString( '/auto/600x400', $map->get_archive_map( $this->locations ) );
-		$this->assertMatchesRegularExpression( '#^<img class="archive-map sloc-map" src="https://api\.mapbox\.com/[^"]+" alt="[^"]+" />$#', $map->get_archive_map_html( $this->locations, array( $post, $post ) ) );
+		$this->assertMatchesRegularExpression( '#^<img class="archive-map sloc-map" src="https://api\.mapbox\.com/[^"]+" srcset="[^"]+" alt="[^"]+" />$#', $map->get_archive_map_html( $this->locations, array( $post, $post ) ) );
 
 		// Without a map, the image is empty, as it was.
 		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );

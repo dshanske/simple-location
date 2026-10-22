@@ -113,6 +113,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 *
 	 * @since 4.0.0
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
+	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -131,7 +132,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 		$url  = 'https://www.mapquestapi.com/staticmap/v5/map';
 		$args = array(
 			'key'       => $this->api,
-			'size'      => sprintf( '%1$s,%2$s', $this->width, $this->height ),
+			'size'      => sprintf( '%1$s,%2$s%3$s', $this->width, $this->height, ( 2 === $this->scale ) ? '@2x' : '' ),
 			'type'      => $this->style,
 			'locations' => implode( '||', $markers ),
 			'shape'     => 'cmp|enc:' . $polyline,

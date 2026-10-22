@@ -169,6 +169,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 1.0.0
 	 * @since 6.0.0 Uses Map Image API v3.
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
+	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -183,13 +184,18 @@ class Map_Provider_Here extends Map_Provider {
 			$points[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
 
+		$args = array(
+			'apiKey'  => $this->api,
+			'style'   => $this->style,
+			'overlay' => 'point:' . implode( '|', $points ),
+		);
+		// A high-density map is twice the size at scale 2, showing the same area.
+		if ( 1 < $this->scale ) {
+			$args['scale'] = $this->scale;
+		}
 		$url = add_query_arg(
-			array(
-				'apiKey'  => $this->api,
-				'style'   => $this->style,
-				'overlay' => 'point:' . implode( '|', $points ),
-			),
-			sprintf( '%1$s%2$s/%3$sx%4$s/png8', self::BASE_URL, $this->get_archive_position( $locations ), $this->width, $this->height )
+			$args,
+			sprintf( '%1$s%2$s/%3$sx%4$s/png8', self::BASE_URL, $this->get_archive_position( $locations ), $this->width * $this->scale, $this->height * $this->scale )
 		);
 		// Lines and points are separate overlays, and a line needs at least two points.
 		if ( count( $points ) > 1 ) {
