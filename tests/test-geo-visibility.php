@@ -499,6 +499,17 @@ class GeoVisibilityTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Posts without a location are left out of the archive lists without a warning.
+	 */
+	public function test_get_geo_archive_lists_post_without_location() {
+		$public = $this->post_with_location( 'public' );
+		self::factory()->post->create();
+		$this->go_to( home_url( '/' ) );
+		$this->assertSame( array( $public ), get_geo_archive_post_list() );
+		$this->assertCount( 1, get_geo_archive_location_list() );
+	}
+
+	/**
 	 * The archive post list has the posts of the archive location list, in the same order.
 	 */
 	public function test_get_geo_archive_post_list() {
