@@ -163,6 +163,30 @@ class Map_Provider_StaticMap extends Map_Provider {
 	);
 
 	/**
+	 * Client ID the map server knows this site by, sent as `key` in signed URLs.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $client_id = '';
+
+	/**
+	 * Secret the map server gave the client for signing URLs.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $client_secret = '';
+
+	/**
+	 * Plain client key, sent as `key` when URLs aren't signed.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $client_key = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
@@ -170,8 +194,15 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 6.0.0 A map server URL passed as the `api` argument is used instead of the setting.
 	 * @since 6.1.0 The map size is limited when the map is drawn, to the map server's own limits when they are known.
 	 * @since 6.1.0 The style is a provider and style ID, `provider/style`. Basemap IDs from before 6.1.0 are converted.
+	 * @since 6.1.0 Added the `client_id`, `client_secret` and `client_key` arguments.
 	 *
-	 * @param array $args Arguments. See Map_Provider::__construct().
+	 * @param array $args {
+	 *     Arguments. See Map_Provider::__construct(), and also the following.
+	 *
+	 *     @type string $client_id     Client ID for signed URLs. Default the sloc_staticmap_client_id setting.
+	 *     @type string $client_secret Signing secret. Default the sloc_staticmap_client_secret setting.
+	 *     @type string $client_key    Plain client key, used when URLs aren't signed. Default the sloc_staticmap_client_key setting.
+	 * }
 	 */
 	public function __construct( $args = array() ) {
 		$this->name        = __( 'Custom Static Map Provider', 'simple-location' );
@@ -186,6 +217,11 @@ class Map_Provider_StaticMap extends Map_Provider {
 			$args['style'] = get_option( 'sloc_staticmap_style' );
 		}
 		$args['style'] = self::sanitize_style( $args['style'] );
+
+		foreach ( array( 'client_id', 'client_secret', 'client_key' ) as $credential ) {
+			$value               = $args[ $credential ] ?? get_option( 'sloc_staticmap_' . $credential );
+			$this->{$credential} = is_string( $value ) ? trim( $value ) : '';
+		}
 
 		// Providers are created on every request, so the map server's limits are only looked up when a map is drawn.
 		$this->max_width  = 0;
@@ -241,9 +277,13 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *
 	 * @since 4.1.6
 	 * @since 6.1.0 The style setting is sanitized to a provider and style ID, and defaults to the map server's default map.
+	 * @since 6.1.0 Registers the client ID, signing secret and client key settings.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Custom Static Map URL', 'simple-location' ), 'sloc_staticmap_url' );
+		self::register_settings_api( __( 'Custom Static Map', 'simple-location' ), 'sloc_staticmap_client_id', __( 'Client ID', 'simple-location' ) );
+		self::register_settings_api( __( 'Custom Static Map', 'simple-location' ), 'sloc_staticmap_client_secret', __( 'Signing Secret', 'simple-location' ) );
+		self::register_settings_api( __( 'Custom Static Map', 'simple-location' ), 'sloc_staticmap_client_key', __( 'Client Key', 'simple-location' ) );
 
 		register_setting(
 			'simloc',
@@ -263,9 +303,42 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *
 	 * @since 4.1.6
 	 * @since 6.1.0 The style field warns when the map server doesn't answer its query API.
+	 * @since 6.1.0 Adds the client ID, signing secret and client key fields.
 	 */
 	public static function admin_init() {
 		self::add_settings_url_parameter( __( 'Custom Static Map', 'simple-location' ), 'sloc_staticmap_url' );
+
+		$fields = array(
+			'sloc_staticmap_client_id'     => array(
+				__( 'Custom Static Map Client ID', 'simple-location' ),
+				'text',
+				__( 'Optional. The client name given to bin/clients.php on the map server. With the signing secret, map URLs are signed, so they carry no secret and can be published.', 'simple-location' ),
+			),
+			'sloc_staticmap_client_secret' => array(
+				__( 'Custom Static Map Signing Secret', 'simple-location' ),
+				'password',
+				__( 'Optional. The signing secret bin/clients.php showed for the client. It never leaves this site.', 'simple-location' ),
+			),
+			'sloc_staticmap_client_key'    => array(
+				__( 'Custom Static Map Client Key', 'simple-location' ),
+				'password',
+				__( 'Optional, used only without a client ID and signing secret. The plain key appears in every map image URL, so anyone who views a page can copy it. Use a signing secret instead where you can.', 'simple-location' ),
+			),
+		);
+		foreach ( $fields as $option => $field ) {
+			add_settings_field(
+				$option,
+				$field[0],
+				array( 'Loc_Config', 'string_callback' ),
+				'sloc_api',
+				'sloc_api',
+				array(
+					'label_for'   => $option,
+					'type'        => $field[1],
+					'description' => $field[2],
+				)
+			);
+		}
 
 		add_settings_field(
 			'staticmapstyle', // id
@@ -281,7 +354,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	}
 
 	/**
-	 * Echoes the style field, with a warning if the map server's query API can't be reached.
+	 * Echoes the style field, with a warning if the map server's query API can't be reached or refuses the client.
 	 *
 	 * The settings page fetches the map server's list again, so changes to the server show up there right away.
 	 *
@@ -299,18 +372,18 @@ class Map_Provider_StaticMap extends Map_Provider {
 		$info     = $provider->get_api( '', true );
 		$provider->get_api( 'providers', true );
 		Loc_Config::style_callback( $args );
-		if ( is_wp_error( $info ) && 'missing_url' !== $info->get_error_code() ) {
-			printf(
-				'<p class="description">%s</p>',
-				esc_html(
-					sprintf(
-						/* translators: %s: Error message. */
-						__( 'The custom map server did not answer its query API, so the styles listed are the ones every server offers. This plugin needs version 1.0.0 or later of the server. %s', 'simple-location' ),
-						$info->get_error_message()
-					)
-				)
-			);
+		if ( ! is_wp_error( $info ) || 'missing_url' === $info->get_error_code() ) {
+			return;
 		}
+		$data = $info->get_error_data();
+		if ( is_array( $data ) && isset( $data['status'] ) && 403 === $data['status'] ) {
+			/* translators: %s: Error message. */
+			$message = __( 'The custom map server refused the client ID, signing secret or client key, so the styles listed are the ones every server offers. Check them on the API settings page. %s', 'simple-location' );
+		} else {
+			/* translators: %s: Error message. */
+			$message = __( 'The custom map server did not answer its query API, so the styles listed are the ones every server offers. This plugin needs version 1.0.0 or later of the server. %s', 'simple-location' );
+		}
+		printf( '<p class="description">%s</p>', esc_html( sprintf( $message, $info->get_error_message() ) ) );
 	}
 
 	/**
@@ -360,11 +433,10 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 6.1.0
 	 *
 	 * @param string $endpoint Endpoint under `/api/v1/`, such as 'providers', or an empty string for the service description.
-	 * @param string $server   Map server URL, from get_server_url().
-	 * @return string Transient name.
+	 * @return string Transient name. The answer depends on the client, so its credentials are part of the name.
 	 */
-	protected static function cache_key( $endpoint, $server ) {
-		return 'sloc_staticmap_' . md5( $server . 'api/v1/' . $endpoint );
+	protected function cache_key( $endpoint ) {
+		return 'sloc_staticmap_' . md5( $this->get_server_url() . 'api/v1/' . $endpoint . '|' . implode( '|', $this->get_credentials() ) );
 	}
 
 	/**
@@ -380,7 +452,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 		if ( '' === $server ) {
 			return null;
 		}
-		$cached = get_transient( self::cache_key( $endpoint, $server ) );
+		$cached = get_transient( $this->cache_key( $endpoint ) );
 		if ( ! is_array( $cached ) ) {
 			return null;
 		}
@@ -412,11 +484,12 @@ class Map_Provider_StaticMap extends Map_Provider {
 				return $cached;
 			}
 		}
-		$json = $this->fetch_json( $server . 'api/v1/' . $endpoint, array() );
+		// Answers for a client also list the maps that need a client key.
+		$json = $this->fetch_json( $this->build_url( array(), 'api/v1/' . $endpoint ), array() );
 		if ( ! is_wp_error( $json ) && ( ! is_array( $json ) || ( '' === $endpoint && ! isset( $json['api_version'] ) ) ) ) {
 			$json = new WP_Error( 'sloc_staticmap_api', __( 'The answer is not from a Static Maps API query API.', 'simple-location' ) );
 		}
-		$key = self::cache_key( $endpoint, $server );
+		$key = $this->cache_key( $endpoint );
 		if ( is_wp_error( $json ) ) {
 			set_transient( $key, array( 'error' => $json->get_error_message() ), self::ERROR_CACHE_TIME );
 			return $json;
@@ -502,6 +575,55 @@ class Map_Provider_StaticMap extends Map_Provider {
 	}
 
 	/**
+	 * Returns the request parameter that identifies this site to the map server.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] `key` with the client ID when URLs are signed, or with the plain client key; empty without either.
+	 */
+	protected function get_credentials() {
+		if ( '' !== $this->client_id && '' !== $this->client_secret ) {
+			return array( 'key' => $this->client_id );
+		}
+		if ( '' !== $this->client_key ) {
+			return array( 'key' => $this->client_key );
+		}
+		return array();
+	}
+
+	/**
+	 * Builds a URL on the map server, signed when there is a client ID and signing secret.
+	 *
+	 * Every name and value is percent-encoded, so browsers and HTML escaping leave the URL as it was signed. The signature
+	 * is a base64url HMAC-SHA256 of the path and query, made with the signing secret, and comes last, as the map server
+	 * requires. Signed URLs don't expire, since published posts keep their map URLs.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array  $params List of array( name, value ) pairs, in order. A name can repeat, such as `marker[]`.
+	 * @param string $path   Optional. Path under the map server's address, such as 'api/v1/providers'. Default ''.
+	 * @return string URL.
+	 */
+	protected function build_url( $params, $path = '' ) {
+		foreach ( $this->get_credentials() as $name => $value ) {
+			$params[] = array( $name, $value );
+		}
+		$url   = $this->get_server_url() . $path;
+		$query = array();
+		foreach ( $params as $param ) {
+			$query[] = rawurlencode( (string) $param[0] ) . '=' . rawurlencode( (string) $param[1] );
+		}
+		$query = implode( '&', $query );
+		if ( '' === $this->client_id || '' === $this->client_secret ) {
+			return '' === $query ? $url : $url . '?' . $query;
+		}
+		// The server signs the path and query exactly as requested, without the scheme and host.
+		$signed    = (string) wp_parse_url( $url, PHP_URL_PATH ) . '?' . $query;
+		$signature = rtrim( strtr( base64_encode( hash_hmac( 'sha256', $signed, $this->client_secret, true ) ), '+/', '-_' ), '=' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- base64url is the signature format the map server checks.
+		return $url . '?' . $query . '&signature=' . $signature;
+	}
+
+	/**
 	 * Applies the map server's size limits, fetching them if they aren't stored.
 	 *
 	 * @since 6.1.0
@@ -516,6 +638,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *
 	 * @since 4.1.6
 	 * @since 6.1.0 Chooses the map with `provider` and `style`, draws a generated pin, and leaves the attribution to the map server.
+	 * @since 6.1.0 Sends the client key, signing the URL when there is a signing secret. Every parameter is percent-encoded.
 	 *
 	 * @return string|WP_Error URL, or an error without a map server URL.
 	 */
@@ -525,20 +648,18 @@ class Map_Provider_StaticMap extends Map_Provider {
 			return new WP_Error( 'missing_url', __( 'You have not set a URL for your custom map endpoint', 'simple-location' ) );
 		}
 		$this->load_server_limits();
-		return add_query_arg(
-			array_merge(
-				array(
-					'width'     => $this->width,
-					'height'    => $this->height,
-					'zoom'      => $this->map_zoom,
-					'latitude'  => $this->latitude,
-					'longitude' => $this->longitude,
-					'marker'    => sprintf( 'lat:%1$s;lng:%2$s;icon:pin', $this->latitude, $this->longitude ),
-				),
-				$this->get_style_args()
-			),
-			$server
+		$params = array(
+			array( 'width', $this->width ),
+			array( 'height', $this->height ),
+			array( 'zoom', $this->map_zoom ),
+			array( 'latitude', $this->latitude ),
+			array( 'longitude', $this->longitude ),
+			array( 'marker', sprintf( 'lat:%1$s;lng:%2$s;icon:pin', $this->latitude, $this->longitude ) ),
 		);
+		foreach ( $this->get_style_args() as $name => $value ) {
+			$params[] = array( $name, $value );
+		}
+		return $this->build_url( $params );
 	}
 
 	/**
@@ -546,6 +667,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *
 	 * @since 4.1.6
 	 * @since 6.1.0 Chooses the map with `provider` and `style`, draws generated dots, and leaves the attribution to the map server.
+	 * @since 6.1.0 Sends the client key, signing the URL when there is a signing secret. Every parameter is percent-encoded.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without a map server URL or without locations.
@@ -560,22 +682,19 @@ class Map_Provider_StaticMap extends Map_Provider {
 		$markers = array();
 		$path    = array();
 		foreach ( $locations as $location ) {
-			$markers[] = sprintf( 'lat:%1$s;lng:%2$s;icon:dot;size:small', $location[0], $location[1] );
+			$markers[] = array( 'marker[]', sprintf( 'lat:%1$s;lng:%2$s;icon:dot;size:small', $location[0], $location[1] ) );
 			$path[]    = sprintf( '[%1$s,%2$s]', $location[1], $location[0] );
 		}
 
-		$map = add_query_arg(
-			array_merge(
-				array(
-					'width'  => $this->width,
-					'height' => $this->height,
-					'path[]' => implode( ',', $path ),
-				),
-				$this->get_style_args()
-			),
-			$server
+		$params = array(
+			array( 'width', $this->width ),
+			array( 'height', $this->height ),
+			array( 'path[]', implode( ',', $path ) ),
 		);
-		return $map . '&marker[]=' . implode( '&marker[]=', $markers );
+		foreach ( $this->get_style_args() as $name => $value ) {
+			$params[] = array( $name, $value );
+		}
+		return $this->build_url( array_merge( $params, $markers ) );
 	}
 
 	/**

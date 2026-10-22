@@ -189,6 +189,10 @@ is what this code does. While the code allows for multiple tile sources, please 
 The Static Map Style setting lists the providers and styles your server offers, read from its query API. If the server can't be reached, it lists the ones every server offers without keys,
 and the settings page says why. Styles chosen before version 6.1.0 of this plugin are converted to their new names. The Stamen styles no longer exist, so they use your server's default map.
 
+Maps that need a key on your server (such as CARTO or Stadia, once the server has their API keys) need a client. Run `php bin/clients.php add <name>` on the server, then enter the name as the Custom Static Map Client ID
+and the signing secret it shows as the Custom Static Map Signing Secret, on the API settings page. Map URLs are then signed: they carry the client name and a signature, never the secret, so they are safe to publish.
+The plain client key also works (Custom Static Map Client Key), but it appears in every map image URL, so anyone who views a page can copy it.
+
 The server fetches every tile a map covers, so its work grows with the image size. The plugin asks it for maps no larger than the server's own limit (1280 by 1280 pixels unless the server changes it), shrinking larger maps to fit.
 To lower this, define `SLOC_STATICMAP_MAX_WIDTH` and `SLOC_STATICMAP_MAX_HEIGHT` in wp-config.php, or use the `sloc_staticmap_max_size` filter.
 
