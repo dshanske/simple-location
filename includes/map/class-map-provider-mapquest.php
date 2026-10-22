@@ -16,6 +16,22 @@ class Map_Provider_Mapquest extends Map_Provider {
 	use Sloc_API_MapQuest;
 
 	/**
+	 * Image formats the provider can be asked for.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FORMATS = array( 'png', 'jpg', 'gif' );
+
+	/**
+	 * Image format the plugin asks for when none is chosen.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_FORMAT = 'jpg';
+
+	/**
 	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps.
 	 *
 	 * @since 6.1.0
@@ -87,6 +103,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 *
 	 * @since 3.4.0
 	 * @since 6.1.0 Drawn at the map's zoom level instead of MapQuest's default.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -106,6 +123,9 @@ class Map_Provider_Mapquest extends Map_Provider {
 			),
 			$url
 		);
+		if ( '' !== $this->format ) {
+			$map = add_query_arg( 'format', $this->get_vendor_format(), $map );
+		}
 		return $map;
 	}
 
@@ -116,6 +136,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 * @since 4.0.0
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -143,6 +164,9 @@ class Map_Provider_Mapquest extends Map_Provider {
 		if ( null !== $view ) {
 			$args['center'] = sprintf( '%1$s,%2$s', $view['latitude'], $view['longitude'] );
 			$args['zoom']   = $view['zoom'];
+		}
+		if ( '' !== $this->format ) {
+			$args['format'] = $this->get_vendor_format();
 		}
 		$map = add_query_arg( $args, $url );
 		return $map;

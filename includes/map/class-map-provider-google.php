@@ -16,6 +16,22 @@ class Map_Provider_Google extends Map_Provider {
 	use Sloc_API_Google;
 
 	/**
+	 * Image formats the provider can be asked for. Google draws 256-color PNGs unless asked otherwise.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FORMATS = array( 'png', 'png8', 'jpg', 'gif' );
+
+	/**
+	 * Image format the plugin asks for when none is chosen.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_FORMAT = 'png8';
+
+	/**
 	 * Base URL of the Maps Static API.
 	 *
 	 * @since 6.0.0
@@ -117,6 +133,7 @@ class Map_Provider_Google extends Map_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 The query is URL-encoded, and the URL is signed when a signing secret is set.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @return string|WP_Error URL, an empty string without an API key, or an error if the signing secret isn't valid.
 	 */
@@ -125,16 +142,36 @@ class Map_Provider_Google extends Map_Provider {
 			return '';
 		}
 		return $this->build_url(
-			array(
-				'markers'  => sprintf( 'color:red|label:X|%1$s,%2$s', $this->latitude, $this->longitude ),
-				'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
-				'maptype'  => $this->style,
-				'language' => get_bloginfo( 'language' ),
-				'key'      => $this->api,
-				'zoom'     => $this->map_zoom,
-				'scale'    => $this->scale,
+			$this->add_format(
+				array(
+					'markers'  => sprintf( 'color:red|label:X|%1$s,%2$s', $this->latitude, $this->longitude ),
+					'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
+					'maptype'  => $this->style,
+					'language' => get_bloginfo( 'language' ),
+					'key'      => $this->api,
+					'zoom'     => $this->map_zoom,
+					'scale'    => $this->scale,
+				)
 			)
 		);
+	}
+
+	/**
+	 * Adds the chosen image format to a Maps Static API query.
+	 *
+	 * Without a chosen format, none is sent and Google draws a 256-color PNG.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $query Query parameters.
+	 * @return array Query parameters.
+	 */
+	protected function add_format( $query ) {
+		if ( '' !== $this->format ) {
+			// Google's png is the 256-color png8; full color is png32.
+			$query['format'] = $this->get_vendor_format( array( 'png' => 'png32' ) );
+		}
+		return $query;
 	}
 
 	/**
@@ -192,6 +229,7 @@ class Map_Provider_Google extends Map_Provider {
 	 * @since 6.0.0 The query is URL-encoded, and the URL is signed when a signing secret is set.
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations, or if the signing secret isn't valid.
@@ -223,7 +261,7 @@ class Map_Provider_Google extends Map_Provider {
 		if ( 1 < $this->scale ) {
 			$args['scale'] = $this->scale;
 		}
-		$map = $this->build_url( $args );
+		$map = $this->build_url( $this->add_format( $args ) );
 		return is_wp_error( $map ) ? '' : $map;
 	}
 

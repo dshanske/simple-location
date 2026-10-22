@@ -17,6 +17,7 @@ trait Sloc_API_Mapbox {
 	 * Admin Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 Adds the image format field for the map provider.
 	 */
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'Mapbox', 'simple-location' ), 'sloc_mapbox_api' );
@@ -34,6 +35,8 @@ trait Sloc_API_Mapbox {
 
 				)
 			);
+
+			self::add_format_setting( __( 'Mapbox', 'simple-location' ), 'mapbox' );
 		}
 	}
 
@@ -41,6 +44,7 @@ trait Sloc_API_Mapbox {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 Registers the image format setting for the map provider.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Mapbox', 'simple-location' ), 'sloc_mapbox_api' );
@@ -57,6 +61,8 @@ trait Sloc_API_Mapbox {
 					'default'      => 'streets-v10',
 				)
 			);
+
+			self::register_format_setting( __( 'Mapbox', 'simple-location' ), 'mapbox' );
 		}
 	}
 }

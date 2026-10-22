@@ -128,6 +128,32 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $max_cache_age = 0;
 
 	/**
+	 * Image formats the provider can be asked for: 'png' (full color), 'png8' (256 colors), 'jpg', 'webp' or 'gif'.
+	 *
+	 * Providers without a choice of format leave this empty.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FORMATS = array();
+
+	/**
+	 * Image format the plugin asks for when none is chosen, one of FORMATS, or an empty string to leave it to the provider.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_FORMAT = '';
+
+	/**
+	 * Chosen image format, one of FORMATS, or an empty string for the default.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $format = '';
+
+	/**
 	 * Map Style.
 	 *
 	 * @since 1.0.0
@@ -167,6 +193,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Without a usable width setting, the default width is the theme's content width, as for the setting itself.
+	 * @since 6.1.0 Added the `format` argument.
 	 *
 	 * @param array $args {
 	 *  Arguments.
@@ -179,6 +206,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *  @type string $user Username.
 	 *  @type string $style Style of Map.
 	 *  @type int $map_zoom Map Zoom Level.
+	 *  @type string $format Image format, one of FORMATS, or empty for the default. Default the sloc_{slug}_format setting.
 	 */
 	public function __construct( $args = array() ) {
 		// The setting's registered default is the content width, but it isn't registered before init.
@@ -197,6 +225,7 @@ abstract class Map_Provider extends Sloc_Provider {
 			'location'  => '',
 			'user'      => '',
 			'style'     => '',
+			'format'    => get_option( 'sloc_' . $this->slug . '_format', '' ),
 		);
 		/** This filter is documented in includes/class-geo-provider.php */
 		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
@@ -209,6 +238,7 @@ abstract class Map_Provider extends Sloc_Provider {
 		$this->user     = $r['user'];
 		$this->style    = $r['style'];
 		$this->api      = $r['api'];
+		$this->format   = static::sanitize_format( $r['format'] );
 		$this->set( $r['latitude'], $r['longitude'], $r['altitude'] );
 		$this->fit_size();
 
@@ -274,6 +304,122 @@ abstract class Map_Provider extends Sloc_Provider {
 					__( 'Optional. Map images show this key to every visitor, so use a key that only allows static maps and is restricted to this site. Leave empty to use the %s API key.', 'simple-location' ),
 					$name
 				),
+			)
+		);
+	}
+
+	/**
+	 * Sanitizes an image format setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Image format.
+	 * @return string One of the provider's FORMATS, or an empty string for the default, which the default format also
+	 *                gives. 'jpeg' becomes 'jpg'.
+	 */
+	public static function sanitize_format( $value ) {
+		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
+		if ( 'jpeg' === $value ) {
+			$value = 'jpg';
+		}
+		return ( static::DEFAULT_FORMAT !== $value && in_array( $value, static::FORMATS, true ) ) ? $value : '';
+	}
+
+	/**
+	 * Returns the image format the map is drawn in.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string One of FORMATS, or an empty string when the provider decides.
+	 */
+	public function get_format() {
+		return '' === $this->format ? static::DEFAULT_FORMAT : $this->format;
+	}
+
+	/**
+	 * Returns the provider's own name for the image format the map is drawn in.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string[] $names Optional. The provider's names for formats, keyed by format, where they differ. Default empty.
+	 * @return string Format name, or an empty string when the provider decides.
+	 */
+	protected function get_vendor_format( $names = array() ) {
+		$format = $this->get_format();
+		return $names[ $format ] ?? $format;
+	}
+
+	/**
+	 * Returns the names of the provider's image formats, for the format setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Names keyed by format, starting with the default, keyed by an empty string.
+	 */
+	public static function get_format_names() {
+		$names = array(
+			'png'  => __( 'PNG', 'simple-location' ),
+			'png8' => __( 'PNG with 256 colors', 'simple-location' ),
+			'jpg'  => __( 'JPEG', 'simple-location' ),
+			'webp' => __( 'WebP', 'simple-location' ),
+			'gif'  => __( 'GIF', 'simple-location' ),
+		);
+		$list  = array(
+			'' => isset( $names[ static::DEFAULT_FORMAT ] )
+				// translators: Name of the image format used by default.
+				? sprintf( __( 'Default (%s)', 'simple-location' ), $names[ static::DEFAULT_FORMAT ] )
+				: __( 'Default of the provider', 'simple-location' ),
+		);
+		foreach ( static::FORMATS as $format ) {
+			if ( static::DEFAULT_FORMAT !== $format && isset( $names[ $format ] ) ) {
+				$list[ $format ] = $names[ $format ];
+			}
+		}
+		return $list;
+	}
+
+	/**
+	 * Registers the setting for the provider's image format.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $name   Provider name.
+	 * @param string $vendor Provider slug, as in the option name sloc_{vendor}_format.
+	 */
+	protected static function register_format_setting( $name, $vendor ) {
+		register_setting(
+			'simloc',
+			'sloc_' . $vendor . '_format',
+			array(
+				'type'              => 'string',
+				'description'       => $name . ' Image Format',
+				'show_in_rest'      => false,
+				'default'           => '',
+				'sanitize_callback' => array( static::class, 'sanitize_format' ),
+			)
+		);
+	}
+
+	/**
+	 * Adds the field for the provider's image format to the map settings.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $name   Provider name.
+	 * @param string $vendor Provider slug, as in the option name sloc_{vendor}_format.
+	 */
+	protected static function add_format_setting( $name, $vendor ) {
+		add_settings_field(
+			'sloc_' . $vendor . '_format',
+			// translators: Name of the map provider.
+			sprintf( __( '%s Image Format', 'simple-location' ), $name ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for'   => 'sloc_' . $vendor . '_format',
+				'list'        => static::get_format_names(),
+				'description' => __( 'JPEG suits satellite maps. PNG keeps lines and labels sharp.', 'simple-location' ),
 			)
 		);
 	}
@@ -389,6 +535,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Returns the parameters that describe the current map, for a map image served from the site.
 	 *
 	 * @since 6.0.0
+	 * @since 6.1.0 Includes the image format, when one is chosen.
 	 *
 	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
 	 * @return string[] Map parameters.
@@ -402,6 +549,10 @@ abstract class Map_Provider extends Sloc_Provider {
 			'style'    => (string) $this->style,
 			'scale'    => (string) $this->scale,
 		);
+		// Only a chosen format is added, so images stored before the setting existed keep their keys.
+		if ( '' !== $this->format ) {
+			$args['format'] = $this->format;
+		}
 		if ( null === $locations ) {
 			$args['lat'] = (string) $this->latitude;
 			$args['lng'] = (string) $this->longitude;

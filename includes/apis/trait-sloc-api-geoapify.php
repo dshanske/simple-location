@@ -17,6 +17,7 @@ trait Sloc_API_GeoApify {
 	 * Admin Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 Adds the image format field for the map provider.
 	 */
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'GeoApify', 'simple-location' ), 'sloc_geoapify_api' );
@@ -33,6 +34,8 @@ trait Sloc_API_GeoApify {
 					'provider'  => new Map_Provider_Geoapify(),
 				)
 			);
+
+			self::add_format_setting( __( 'Geoapify', 'simple-location' ), 'geoapify' );
 		}
 	}
 
@@ -41,6 +44,7 @@ trait Sloc_API_GeoApify {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 Registers the image format setting for the map provider.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'GeoApify', 'simple-location' ), 'sloc_geoapify_api' );
@@ -56,6 +60,8 @@ trait Sloc_API_GeoApify {
 					'default'      => 'osm-carto',
 				)
 			);
+
+			self::register_format_setting( __( 'Geoapify', 'simple-location' ), 'geoapify' );
 		}
 	}
 }

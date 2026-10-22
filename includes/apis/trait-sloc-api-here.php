@@ -18,6 +18,7 @@ trait Sloc_API_Here {
 	 *
 	 * @since 4.0.0
 	 * @since 6.0.0 Adds the map API key field for the map provider.
+	 * @since 6.1.0 Adds the image format field for the map provider.
 	 */
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
@@ -35,6 +36,8 @@ trait Sloc_API_Here {
 					'provider'  => new Map_Provider_Here(),
 				)
 			);
+
+			self::add_format_setting( __( 'HERE', 'simple-location' ), 'here' );
 		}
 	}
 
@@ -43,6 +46,7 @@ trait Sloc_API_Here {
 	 *
 	 * @since 4.0.0
 	 * @since 6.0.0 Registers the map API key setting for the map provider.
+	 * @since 6.1.0 Registers the image format setting for the map provider.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'HERE', 'simple-location' ), 'sloc_here_api' );
@@ -59,6 +63,8 @@ trait Sloc_API_Here {
 					'default'      => 'explore.day',
 				)
 			);
+
+			self::register_format_setting( __( 'HERE', 'simple-location' ), 'here' );
 		}
 	}
 }

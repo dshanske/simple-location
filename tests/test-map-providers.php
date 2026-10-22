@@ -2079,4 +2079,182 @@ class MapProvidersTest extends WP_UnitTestCase {
 		Geo_Provider_Here::admin_init();
 		$this->assertArrayNotHasKey( 'sloc_here_map_api', $wp_settings_fields['sloc_api']['sloc_api'] );
 	}
+
+	/**
+	 * A chosen image format is sent to each provider in its own terms, for single and archive maps.
+	 *
+	 * @dataProvider data_map_formats
+	 *
+	 * @param string $class    Provider class.
+	 * @param string $format   Chosen format.
+	 * @param string $expected What the URLs have for that format.
+	 * @param bool   $archive  Whether the provider has archive maps.
+	 */
+	public function test_format( $class, $format, $expected, $archive = true ) {
+		update_option( 'sloc_map_cache', 0 );
+		$map = $this->provider(
+			$class,
+			array(
+				'style'  => 'streets-v11',
+				'format' => $format,
+			)
+		);
+		$this->assertSame( $format, $map->get_format() );
+		$this->assertStringContainsString( $expected, $map->get_the_static_map() );
+		if ( $archive ) {
+			$this->assertStringContainsString( $expected, $map->get_archive_map( $this->locations ) );
+		}
+		$this->assertSame( $format, $map->get_cache_args()['format'] );
+	}
+
+	/**
+	 * Formats and the URL text they give, for each provider.
+	 *
+	 * @return array
+	 */
+	public function data_map_formats() {
+		return array(
+			'Google png'      => array( 'Map_Provider_Google', 'png', 'format=png32' ),
+			'Google jpg'      => array( 'Map_Provider_Google', 'jpg', 'format=jpg' ),
+			'Google gif'      => array( 'Map_Provider_Google', 'gif', 'format=gif' ),
+			'Mapbox png'      => array( 'Map_Provider_Mapbox', 'png', '/600x400.png?' ),
+			'Mapbox jpg'      => array( 'Map_Provider_Mapbox', 'jpg', '/600x400.jpeg?' ),
+			'Mapbox webp'     => array( 'Map_Provider_Mapbox', 'webp', '/600x400.webp?' ),
+			'HERE png'        => array( 'Map_Provider_Here', 'png', '/600x400/png?' ),
+			'HERE jpg'        => array( 'Map_Provider_Here', 'jpg', '/600x400/jpeg?' ),
+			'Geoapify png'    => array( 'Map_Provider_Geoapify', 'png', 'format=png' ),
+			'LocationIQ jpg'  => array( 'Map_Provider_LocationIQ', 'jpg', 'format=jpg' ),
+			'MapQuest png'    => array( 'Map_Provider_Mapquest', 'png', 'format=png' ),
+			'MapQuest gif'    => array( 'Map_Provider_Mapquest', 'gif', 'format=gif' ),
+			'TomTom jpg'      => array( 'Map_Provider_TomTom', 'jpg', 'format=jpg', false ),
+			'Static map webp' => array( 'Map_Provider_StaticMap', 'webp', 'format=webp' ),
+		);
+	}
+
+	/**
+	 * Without a chosen format, each provider asks for the format it used before the setting existed.
+	 */
+	public function test_format_default() {
+		$expected = array(
+			'Map_Provider_Google'     => array( 'png8', null ),
+			'Map_Provider_Mapbox'     => array( '', null ),
+			'Map_Provider_Here'       => array( 'png8', '/600x400/png8?' ),
+			'Map_Provider_Geoapify'   => array( 'jpg', 'format=jpeg' ),
+			'Map_Provider_LocationIQ' => array( 'png', null ),
+			'Map_Provider_Mapquest'   => array( 'jpg', null ),
+			'Map_Provider_TomTom'     => array( 'png', null ),
+		);
+		foreach ( $expected as $class => $default ) {
+			delete_option( 'sloc_' . strtolower( substr( $class, 13 ) ) . '_format' );
+			$map = $this->provider( $class, array( 'style' => 'streets-v11' ) );
+			$this->assertSame( $default[0], $map->get_format(), $class );
+			$this->assertArrayNotHasKey( 'format', $map->get_cache_args(), $class );
+			$url = $map->get_the_static_map();
+			if ( null === $default[1] ) {
+				$this->assertStringNotContainsString( 'format=', $url, $class );
+			} else {
+				$this->assertStringContainsString( $default[1], $url, $class );
+			}
+		}
+		$this->assertStringContainsString( '/600x400?', $this->provider( 'Map_Provider_Mapbox', array( 'style' => 'streets-v11' ) )->get_the_static_map() );
+		// LocationIQ's archive maps always named their format.
+		$this->assertStringContainsString( 'format=png', $this->provider( 'Map_Provider_LocationIQ' )->get_archive_map( $this->locations ) );
+	}
+
+	/**
+	 * The format setting is read for the active provider, and limited to the formats that provider has.
+	 */
+	public function test_format_setting() {
+		update_option( 'sloc_here_format', 'jpg' );
+		$this->assertSame( 'jpg', $this->provider( 'Map_Provider_Here' )->get_format() );
+
+		$this->assertSame( 'jpg', Map_Provider_Here::sanitize_format( ' JPEG ' ) );
+		// The default format is stored as the default, so it follows a change of default.
+		$this->assertSame( '', Map_Provider_Here::sanitize_format( 'png8' ) );
+		$this->assertSame( 'png', Map_Provider_Here::sanitize_format( 'png' ) );
+		$this->assertSame( '', Map_Provider_Here::sanitize_format( 'webp' ) );
+		$this->assertSame( 'webp', Map_Provider_Mapbox::sanitize_format( 'webp' ) );
+		$this->assertSame( '', Map_Provider_TomTom::sanitize_format( 'gif' ) );
+		$this->assertSame( '', Map_Provider_Google::sanitize_format( array( 'png' ) ) );
+
+		// An unsupported format passed directly gives the default.
+		$this->assertSame( 'png', $this->provider( 'Map_Provider_TomTom', array( 'format' => 'webp' ) )->get_format() );
+	}
+
+	/**
+	 * The format setting lists the default first, naming it when the plugin chooses it, then the other formats.
+	 */
+	public function test_format_names() {
+		$this->assertSame(
+			array(
+				''    => 'Default (PNG with 256 colors)',
+				'png' => 'PNG',
+				'jpg' => 'JPEG',
+			),
+			Map_Provider_Here::get_format_names()
+		);
+		$this->assertSame(
+			array(
+				''     => 'Default of the provider',
+				'png'  => 'PNG',
+				'jpg'  => 'JPEG',
+				'webp' => 'WebP',
+			),
+			Map_Provider_Mapbox::get_format_names()
+		);
+		$this->assertSame( array( '' ), array_keys( Map_Provider::get_format_names() ) );
+	}
+
+	/**
+	 * Each map provider registers its format setting and adds its field to the map settings.
+	 *
+	 * @dataProvider data_format_setting_providers
+	 *
+	 * @param string $class Provider class.
+	 * @param string $slug  Provider slug.
+	 * @param string $name  Provider name.
+	 */
+	public function test_format_setting_registered( $class, $slug, $name ) {
+		global $wp_settings_fields;
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		$option = 'sloc_' . $slug . '_format';
+		$other  = array_key_last( $class::get_format_names() );
+		$class::init();
+		$settings = get_registered_settings();
+		$this->assertArrayHasKey( $option, $settings );
+		$this->assertSame( 'simloc', $settings[ $option ]['group'] );
+		$this->assertSame( '', $settings[ $option ]['default'] );
+		$this->assertSame( $other, sanitize_option( $option, strtoupper( $other ) ) );
+		$this->assertSame( '', sanitize_option( $option, $class::DEFAULT_FORMAT ) );
+		$this->assertSame( '', sanitize_option( $option, 'tiff' ) );
+
+		$class::admin_init();
+		$field = $wp_settings_fields['simloc']['sloc_map'][ $option ];
+		$this->assertSame( $name . ' Image Format', $field['title'] );
+		$this->assertSame( $class::get_format_names(), $field['args']['list'] );
+
+		update_option( $option, $other );
+		ob_start();
+		call_user_func( $field['callback'], $field['args'] );
+		$html = ob_get_clean();
+		$this->assertMatchesRegularExpression( '#<option value="' . $other . '"\s+selected#', $html );
+	}
+
+	/**
+	 * Map providers with a format setting.
+	 *
+	 * @return array
+	 */
+	public function data_format_setting_providers() {
+		return array(
+			'Google'     => array( 'Map_Provider_Google', 'google', 'Google' ),
+			'Mapbox'     => array( 'Map_Provider_Mapbox', 'mapbox', 'Mapbox' ),
+			'HERE'       => array( 'Map_Provider_Here', 'here', 'HERE' ),
+			'Geoapify'   => array( 'Map_Provider_Geoapify', 'geoapify', 'Geoapify' ),
+			'LocationIQ' => array( 'Map_Provider_LocationIQ', 'locationiq', 'LocationIQ' ),
+			'MapQuest'   => array( 'Map_Provider_Mapquest', 'mapquest', 'MapQuest' ),
+			'TomTom'     => array( 'Map_Provider_TomTom', 'tomtom', 'TomTom' ),
+		);
+	}
 }
