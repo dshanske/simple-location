@@ -780,4 +780,60 @@ class SettingsTest extends WP_UnitTestCase {
 			$this->assertSame( $slug, get_option( $option ), $method );
 		}
 	}
+
+	/**
+	 * The marker settings are registered with the map settings, for every map provider, with fields.
+	 */
+	public function test_marker_settings() {
+		global $wp_settings_fields;
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		Loc_Config::register_map_settings();
+		$settings = get_registered_settings();
+		$expected = array(
+			'sloc_marker'       => 'pin',
+			'sloc_marker_color' => '#d32f2f',
+			'sloc_marker_size'  => 'medium',
+		);
+		foreach ( $expected as $name => $default ) {
+			$this->assertArrayHasKey( $name, $settings, $name );
+			$this->assertSame( 'simloc', $settings[ $name ]['group'], $name );
+			$this->assertSame( $default, $settings[ $name ]['default'], $name );
+		}
+		$this->assertSame( 'dot', sanitize_option( 'sloc_marker', 'Dot' ) );
+		$this->assertSame( '#43a047', sanitize_option( 'sloc_marker_color', '43A047' ) );
+		$this->assertSame( 'medium', sanitize_option( 'sloc_marker_size', 'huge' ) );
+
+		Loc_Config::admin_init();
+		$fields = $wp_settings_fields['simloc']['sloc_map'];
+		$this->assertSame( array( 'pin', 'dot' ), array_keys( $fields['sloc_marker']['args']['list'] ) );
+		$this->assertSame( array( 'small', 'medium', 'large' ), array_keys( $fields['sloc_marker_size']['args']['list'] ) );
+		$this->assertSame( 'color', $fields['sloc_marker_color']['args']['type'] );
+	}
+
+	/**
+	 * The custom static map's marker settings from 6.1.0 development move to the settings every provider uses.
+	 */
+	public function test_migrate_marker_settings() {
+		// The settings are registered, with defaults, as on a real site.
+		Loc_Config::register_map_settings();
+		update_option( 'sloc_staticmap_marker', 'dot' );
+		update_option( 'sloc_staticmap_marker_color', '#43a047' );
+		update_option( 'sloc_staticmap_marker_size', 'large' );
+		// A setting already saved under the new name is kept.
+		update_option( 'sloc_marker_size', 'small' );
+
+		Loc_Config::migrate_marker_settings();
+		$this->assertSame( 'dot', get_option( 'sloc_marker' ) );
+		$this->assertSame( '#43a047', get_option( 'sloc_marker_color' ) );
+		$this->assertSame( 'small', get_option( 'sloc_marker_size' ) );
+		foreach ( array( 'marker', 'marker_color', 'marker_size' ) as $name ) {
+			$this->assertNull( get_option( 'sloc_staticmap_' . $name, null ), $name );
+		}
+
+		// Without old settings, nothing is added.
+		delete_option( 'sloc_marker' );
+		Loc_Config::migrate_marker_settings();
+		$this->assertNull( get_option( 'sloc_marker', null ) );
+	}
 }

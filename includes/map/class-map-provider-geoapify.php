@@ -120,6 +120,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 *
 	 * @since 4.1.5
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Uses the marker settings.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -135,7 +136,14 @@ class Map_Provider_Geoapify extends Map_Provider {
 			'height' => $this->height,
 			'zoom'   => $this->map_zoom,
 			'style'  => $this->style,
-			'marker' => sprintf( 'lonlat:%1$s,%2$s;size:small;color:red', $this->longitude, $this->latitude ),
+			'marker' => sprintf(
+				'lonlat:%1$s,%2$s;type:%3$s;size:%4$s;color:%%23%5$s',
+				$this->longitude,
+				$this->latitude,
+				'dot' === $this->marker ? 'circle' : 'material',
+				$this->marker_size,
+				$this->get_marker_hex()
+			),
 		);
 		if ( 1 < $this->scale ) {
 			$args['scaleFactor'] = $this->scale;
@@ -145,20 +153,20 @@ class Map_Provider_Geoapify extends Map_Provider {
 	}
 
 	/**
-	 * Returns the parameters that describe the current map, for a map image served from the site.
+	 * Returns the settings, other than the map parameters, that change the map image.
 	 *
 	 * @since 6.1.0
 	 *
 	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
-	 * @return string[] Map parameters. Archive maps have 'options', so images stored before the plugin chose their view
-	 *                  aren't served under links placed for the new view.
+	 * @return array Setting values. Archive maps add 'view', so images stored before the plugin chose their view aren't
+	 *               served under links placed for the new view.
 	 */
-	public function get_cache_args( $locations = null ) {
-		$args = parent::get_cache_args( $locations );
+	protected function get_cache_options( $locations = null ) {
+		$options = parent::get_cache_options( $locations );
 		if ( null !== $locations ) {
-			$args['options'] = 'view';
+			$options[] = 'view';
 		}
-		return $args;
+		return $options;
 	}
 
 	/**
@@ -168,6 +176,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Markers are in the marker color.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -179,7 +188,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 
 		$markers = array();
 		foreach ( $locations as $location ) {
-			$markers[] = sprintf( 'lonlat:%1$s,%2$s;size:small;color:red', $location[1], $location[0] );
+			$markers[] = sprintf( 'lonlat:%1$s,%2$s;size:small;color:%%23%3$s', $location[1], $location[0], $this->get_marker_hex() );
 		}
 
 		$args = array(

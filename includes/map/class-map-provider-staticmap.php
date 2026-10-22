@@ -171,14 +171,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	const FORMATS = array( 'png', 'png8', 'jpg', 'webp' );
 
 	/**
-	 * Marker sizes of the map server's generated markers.
-	 *
-	 * @since 6.1.0
-	 * @var string[]
-	 */
-	const MARKER_SIZES = array( 'small', 'medium', 'large' );
-
-	/**
 	 * Scale bar settings: the map server's units, and 'site' for the site's units.
 	 *
 	 * @since 6.1.0
@@ -239,38 +231,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @var string[]
 	 */
 	const ATTRIBUTIONS = array( 'image', 'text', 'below' );
-
-	/**
-	 * Default marker color, the map server's.
-	 *
-	 * @since 6.1.0
-	 * @var string
-	 */
-	const DEFAULT_MARKER_COLOR = '#d32f2f';
-
-	/**
-	 * Marker type for a single location: 'pin' or 'dot'.
-	 *
-	 * @since 6.1.0
-	 * @var string
-	 */
-	protected $marker = 'pin';
-
-	/**
-	 * Marker color, as #RRGGBB.
-	 *
-	 * @since 6.1.0
-	 * @var string
-	 */
-	protected $marker_color = self::DEFAULT_MARKER_COLOR;
-
-	/**
-	 * Marker size for a single location: 'small', 'medium' or 'large'.
-	 *
-	 * @since 6.1.0
-	 * @var string
-	 */
-	protected $marker_size = 'medium';
 
 	/**
 	 * Scale bar: one of SCALEBARS, or an empty string for none.
@@ -355,9 +315,9 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *     @type string $client_secret Signing secret. Default the sloc_staticmap_client_secret setting.
 	 *     @type string $client_key    Plain client key, used when URLs aren't signed. Default the sloc_staticmap_client_key setting.
 	 *     @type string   $format            Image format, one of FORMATS, or empty for the server's default. Default the sloc_staticmap_format setting.
-	 *     @type string   $marker            Marker type, 'pin' or 'dot'. Default the sloc_staticmap_marker setting.
-	 *     @type string   $marker_color      Marker color, #RRGGBB. Default the sloc_staticmap_marker_color setting.
-	 *     @type string   $marker_size       Marker size, one of MARKER_SIZES. Default the sloc_staticmap_marker_size setting.
+	 *     @type string   $marker            Marker type, 'pin' or 'dot'. Default the sloc_marker setting.
+	 *     @type string   $marker_color      Marker color, #rrggbb. Default the sloc_marker_color setting.
+	 *     @type string   $marker_size       Marker size, one of MARKER_SIZES. Default the sloc_marker_size setting.
 	 *     @type string   $scalebar          Scale bar, one of SCALEBARS, or empty for none. Default the sloc_staticmap_scalebar setting.
 	 *     @type string   $scalebar_position Scale bar corner, one of POSITIONS. Default the sloc_staticmap_scalebar_position setting.
 	 *     @type string[] $overlays          Overlay IDs. Default the sloc_staticmap_overlays setting.
@@ -385,9 +345,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 		}
 
 		$display = array(
-			'marker'               => 'sanitize_marker',
-			'marker_color'         => 'sanitize_marker_color',
-			'marker_size'          => 'sanitize_marker_size',
 			'scalebar'             => 'sanitize_scalebar',
 			'scalebar_position'    => 'sanitize_scalebar_position',
 			'overlays'             => 'sanitize_overlays',
@@ -453,7 +410,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 4.1.6
 	 * @since 6.1.0 The style setting is sanitized to a provider and style ID, and defaults to the map server's default map.
 	 * @since 6.1.0 Registers the client ID, signing secret and client key settings.
-	 * @since 6.1.0 Registers the image format, marker, scale bar and overlay settings.
+	 * @since 6.1.0 Registers the image format, scale bar and overlay settings.
 	 * @since 6.1.0 Registers the attribution settings.
 	 */
 	public static function init() {
@@ -476,9 +433,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 
 		$settings = array(
 			'sloc_staticmap_format'               => array( 'Custom Static Map Image Format', '', 'sanitize_format' ),
-			'sloc_staticmap_marker'               => array( 'Custom Static Map Marker', 'pin', 'sanitize_marker' ),
-			'sloc_staticmap_marker_color'         => array( 'Custom Static Map Marker Color', self::DEFAULT_MARKER_COLOR, 'sanitize_marker_color' ),
-			'sloc_staticmap_marker_size'          => array( 'Custom Static Map Marker Size', 'medium', 'sanitize_marker_size' ),
 			'sloc_staticmap_scalebar'             => array( 'Custom Static Map Scale Bar', '', 'sanitize_scalebar' ),
 			'sloc_staticmap_scalebar_position'    => array( 'Custom Static Map Scale Bar Position', 'bottomleft', 'sanitize_scalebar_position' ),
 			'sloc_staticmap_attribution'          => array( 'Custom Static Map Attribution', 'image', 'sanitize_attribution' ),
@@ -516,7 +470,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 4.1.6
 	 * @since 6.1.0 The style field warns when the map server doesn't answer its query API.
 	 * @since 6.1.0 Adds the client ID, signing secret and client key fields.
-	 * @since 6.1.0 Adds the image format, marker, scale bar and overlay fields.
+	 * @since 6.1.0 Adds the image format, scale bar and overlay fields.
 	 * @since 6.1.0 Adds the attribution fields.
 	 */
 	public static function admin_init() {
@@ -577,21 +531,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 					'webp' => __( 'WebP (smallest, if the server supports it)', 'simple-location' ),
 				),
 			),
-			'sloc_staticmap_marker'               => array(
-				__( 'Static Map Marker', 'simple-location' ),
-				array(
-					'pin' => __( 'Pin', 'simple-location' ),
-					'dot' => __( 'Dot', 'simple-location' ),
-				),
-			),
-			'sloc_staticmap_marker_size'          => array(
-				__( 'Static Map Marker Size', 'simple-location' ),
-				array(
-					'small'  => __( 'Small', 'simple-location' ),
-					'medium' => __( 'Medium', 'simple-location' ),
-					'large'  => __( 'Large', 'simple-location' ),
-				),
-			),
 			'sloc_staticmap_scalebar'             => array(
 				__( 'Static Map Scale Bar', 'simple-location' ),
 				array(
@@ -643,19 +582,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 					'description' => $field[2] ?? '',
 				)
 			);
-			if ( 'sloc_staticmap_marker_size' === $option ) {
-				add_settings_field(
-					'sloc_staticmap_marker_color',
-					__( 'Static Map Marker Color', 'simple-location' ),
-					array( 'Loc_Config', 'string_callback' ),
-					'simloc',
-					'sloc_map',
-					array(
-						'label_for' => 'sloc_staticmap_marker_color',
-						'type'      => 'color',
-					)
-				);
-			}
 		}
 
 		add_settings_field(
@@ -739,45 +665,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	protected static function sanitize_choice( $value, $allowed, $default ) {
 		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
 		return in_array( $value, $allowed, true ) ? $value : $default;
-	}
-
-	/**
-	 * Sanitizes the marker type setting.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param mixed $value Marker type.
-	 * @return string 'pin' or 'dot'. Default 'pin'.
-	 */
-	public static function sanitize_marker( $value ) {
-		return self::sanitize_choice( $value, array( 'pin', 'dot' ), 'pin' );
-	}
-
-	/**
-	 * Sanitizes the marker color setting.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param mixed $value Color, #RRGGBB or RRGGBB.
-	 * @return string Color as #RRGGBB, in lower case. Default DEFAULT_MARKER_COLOR.
-	 */
-	public static function sanitize_marker_color( $value ) {
-		if ( ! is_string( $value ) || ! preg_match( '/^#?([0-9a-f]{6})$/i', trim( $value ), $match ) ) {
-			return self::DEFAULT_MARKER_COLOR;
-		}
-		return '#' . strtolower( $match[1] );
-	}
-
-	/**
-	 * Sanitizes the marker size setting.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param mixed $value Marker size.
-	 * @return string One of MARKER_SIZES. Default 'medium'.
-	 */
-	public static function sanitize_marker_size( $value ) {
-		return self::sanitize_choice( $value, self::MARKER_SIZES, 'medium' );
 	}
 
 	/**
@@ -1197,7 +1084,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @return string Options, as `key:value` pairs separated by semicolons.
 	 */
 	protected function get_marker_options( $type, $size ) {
-		return sprintf( 'icon:%1$s;size:%2$s;color:%3$s', $type, $size, ltrim( $this->marker_color, '#' ) );
+		return sprintf( 'icon:%1$s;size:%2$s;color:%3$s', $type, $size, $this->get_marker_hex() );
 	}
 
 	/**
@@ -1414,38 +1301,26 @@ class Map_Provider_StaticMap extends Map_Provider {
 	}
 
 	/**
-	 * Returns the parameters that describe the current map, for a map image served from the site.
+	 * Returns the settings, other than the map parameters, that change the map image.
 	 *
 	 * @since 6.1.0
 	 *
 	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
-	 * @return string[] Map parameters, with 'options', a hash of the settings that change the image, so a changed setting
-	 *                  gives new images.
+	 * @return array Setting values: the image format and markers, then the scale bar, overlays, attribution and credentials.
 	 */
-	public function get_cache_args( $locations = null ) {
-		$args            = parent::get_cache_args( $locations );
-		$args['options'] = substr(
-			md5(
-				wp_json_encode(
-					array(
-						$this->format,
-						$this->marker,
-						$this->marker_color,
-						$this->marker_size,
-						$this->scalebar,
-						'site' === $this->scalebar ? get_option( 'sloc_measurements' ) : '',
-						$this->scalebar_position,
-						$this->overlays,
-						$this->attribution,
-						$this->attribution_position,
-						$this->get_credentials(),
-					)
-				)
-			),
-			0,
-			12
+	protected function get_cache_options( $locations = null ) {
+		return array_merge(
+			parent::get_cache_options( $locations ),
+			array(
+				$this->scalebar,
+				'site' === $this->scalebar ? get_option( 'sloc_measurements' ) : '',
+				$this->scalebar_position,
+				$this->overlays,
+				$this->attribution,
+				$this->attribution_position,
+				$this->get_credentials(),
+			)
 		);
-		return $args;
 	}
 
 	/**

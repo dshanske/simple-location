@@ -119,6 +119,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 6.0.0 Uses Map Image API v3.
 	 * @since 6.0.0 Draws a high-density map when the scale is 2.
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Uses the marker settings.
 	 *
 	 * @return string URL, or an empty string without an API key.
 	 */
@@ -140,13 +141,32 @@ class Map_Provider_Here extends Map_Provider {
 		$args = array(
 			'apiKey'  => $this->api,
 			'style'   => $this->style,
-			'overlay' => sprintf( 'point:%1$s,%2$s', $this->latitude, $this->longitude ),
+			'overlay' => sprintf( 'point:%1$s,%2$s;%3$s', $this->latitude, $this->longitude, $this->get_marker_style() ),
 		);
 		// A high-density map is twice the size at scale 2, showing the same area.
 		if ( 1 < $this->scale ) {
 			$args['scale'] = $this->scale;
 		}
 		return add_query_arg( $args, $url );
+	}
+
+	/**
+	 * Returns the overlay style of a single location's marker.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Style properties, such as `icon=pin;size=medium;color=%23d32f2f`.
+	 */
+	protected function get_marker_style() {
+		if ( 'dot' === $this->marker ) {
+			$widths = array(
+				'small'  => 8,
+				'medium' => 12,
+				'large'  => 16,
+			);
+			return sprintf( 'style=circle;width=%1$d;color=%%23%2$s', $widths[ $this->marker_size ], $this->get_marker_hex() );
+		}
+		return sprintf( 'icon=pin;size=%1$s;color=%%23%2$s', $this->marker_size, $this->get_marker_hex() );
 	}
 
 	/**
@@ -189,6 +209,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Markers are in the marker color.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -206,7 +227,8 @@ class Map_Provider_Here extends Map_Provider {
 		$args = array(
 			'apiKey'  => $this->api,
 			'style'   => $this->style,
-			'overlay' => 'point:' . implode( '|', $points ),
+			// A style after the last point applies to all of them.
+			'overlay' => 'point:' . implode( '|', $points ) . '|color=%23' . $this->get_marker_hex(),
 		);
 		// A high-density map is twice the size at scale 2, showing the same area.
 		if ( 1 < $this->scale ) {
