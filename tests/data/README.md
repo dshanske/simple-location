@@ -113,6 +113,7 @@ list is shortened to a few providers and styles.
 | `staticmap-providers.json` | `GET {staticmap_url}/api/v1/providers` | Captured 2026-10-22, shortened |
 | `staticmap-overlays.json` | `GET {staticmap_url}/api/v1/overlays` | Captured 2026-10-22, shortened |
 | `staticmap-attribution.json` | `GET {staticmap_url}/api/v1/attribution?provider=esri&style=topo&overlay=railways,seamarks` | Captured 2026-10-22 |
+| `staticmap-plan.json` | `GET {staticmap_url}/api/v1/plan` with the archive map of the tests' two Philadelphia points (600×400, `esri/topo`) | Captured 2026-10-22 |
 
 ## Location providers (`location/`)
 

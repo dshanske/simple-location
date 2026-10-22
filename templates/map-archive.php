@@ -25,7 +25,7 @@ if ( is_day() ) {
 				?>
 			</header><!-- .page-header -->
 			<?php $sloc_map_provider = Loc_Config::map_provider(); ?>
-		<img class="archive-map sloc-map" src="<?php echo esc_url( $sloc_map_provider->get_archive_map_src( get_geo_archive_location_list() ) ); ?>" alt="<?php esc_attr_e( 'Map of the locations listed on this page', 'simple-location' ); ?>" />
+			<?php echo $sloc_map_provider->get_archive_map_html( get_geo_archive_location_list(), get_geo_archive_post_list() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped in get_archive_map_html(). ?>
 			<?php echo wp_kses( $sloc_map_provider->get_attribution_html(), Simple_Location_Plugin::kses_clean() ); ?>
 		<ul>
 			<?php

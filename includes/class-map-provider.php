@@ -437,6 +437,58 @@ abstract class Map_Provider extends Sloc_Provider {
 		return Sloc_Map_Cache::is_enabled( $this ) ? Sloc_Map_Cache::get_url( $this, $locations ) : $map;
 	}
 
+	/**
+	 * Returns where each location's marker is on the archive map.
+	 *
+	 * Providers that can say where they draw markers override this; the default map has no clickable markers.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return array Boxes keyed by the location's index in $locations, each array( left, top, right, bottom ) in percent of
+	 *               the image's width and height. Markers outside the image are left out.
+	 */
+	public function get_archive_marker_boxes( $locations ) {
+		return array();
+	}
+
+	/**
+	 * Returns the HTML for an archive map, with a link to each post over its marker when the provider says where they are.
+	 *
+	 * The links are positioned in percent, so they stay over their markers when the image is scaled.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @param int[] $post_ids  Optional. The post of each location, in the same order. Default empty, for no links.
+	 * @return string HTML.
+	 */
+	public function get_archive_map_html( $locations, $post_ids = array() ) {
+		$src  = $this->get_archive_map_src( $locations );
+		$html = sprintf( '<img class="archive-map sloc-map" src="%1$s" alt="%2$s" />', esc_url( $src ), esc_attr__( 'Map of the locations listed on this page', 'simple-location' ) );
+		if ( '' === $src || empty( $post_ids ) || ! is_array( $locations ) || count( $post_ids ) !== count( $locations ) ) {
+			return $html;
+		}
+		$post_ids = array_values( $post_ids );
+		$links    = array();
+		foreach ( $this->get_archive_marker_boxes( $locations ) as $index => $box ) {
+			if ( ! isset( $post_ids[ $index ] ) ) {
+				continue;
+			}
+			$title   = wp_strip_all_tags( get_the_title( $post_ids[ $index ] ) );
+			$links[] = sprintf(
+				'<a class="sloc-archive-map-marker" href="%1$s" style="%2$s" title="%3$s" aria-label="%3$s"></a>',
+				esc_url( get_permalink( $post_ids[ $index ] ) ),
+				esc_attr( sprintf( 'left:%1$s%%;top:%2$s%%;width:%3$s%%;height:%4$s%%', round( $box[0], 3 ), round( $box[1], 3 ), round( $box[2] - $box[0], 3 ), round( $box[3] - $box[1], 3 ) ) ),
+				esc_attr( '' === $title ? __( 'Untitled', 'simple-location' ) : $title )
+			);
+		}
+		if ( empty( $links ) ) {
+			return $html;
+		}
+		return '<div class="sloc-archive-map">' . $html . implode( '', $links ) . '</div>';
+	}
+
 
 	/**
 	 * Return an array of styles with key being id and value being display name.

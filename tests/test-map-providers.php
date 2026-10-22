@@ -1342,6 +1342,147 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Archive map markers are placed from the map server's plan, asked for with the image's parameters and stored.
+	 */
+	public function test_staticmap_archive_marker_boxes() {
+		$this->mock_http(
+			array(
+				'maps.example.org/api/v1/plan' => array( 'body' => $this->fixture( 'map/staticmap-plan.json' ) ),
+				'maps.example.org/api/v1/'     => array( 'body' => $this->fixture( 'map/staticmap-api.json' ) ),
+			)
+		);
+		$map = $this->provider(
+			'Map_Provider_StaticMap',
+			array(
+				'api'   => 'https://maps.example.org/',
+				'style' => 'esri/topo',
+			)
+		);
+
+		$boxes = $map->get_archive_marker_boxes( $this->locations );
+		$this->assertSame( array( 0, 1 ), array_keys( $boxes ) );
+		// Marker 1's box is 134,139 to 149,154 on a 600x400 image.
+		$this->assertEqualsWithDelta( array( 22.333, 34.75, 24.833, 38.5 ), $boxes[0], 0.001 );
+		$this->assertEqualsWithDelta( array( 75.167, 61.25, 77.667, 65 ), $boxes[1], 0.001 );
+
+		$plan_requests = array_values( array_filter( $this->http_requests, fn( $request ) => false !== strpos( $request['url'], '/api/v1/plan' ) ) );
+		$this->assertCount( 1, $plan_requests );
+		$this->assertSame( 'GET', $plan_requests[0]['args']['method'] );
+		// The plan is for the same map as the image.
+		$this->assertSame(
+			wp_parse_url( $map->get_archive_map( $this->locations ), PHP_URL_QUERY ),
+			wp_parse_url( $plan_requests[0]['url'], PHP_URL_QUERY )
+		);
+
+		// The plan is stored.
+		$map->get_archive_marker_boxes( $this->locations );
+		$this->assertCount( 1, array_filter( $this->http_requests, fn( $request ) => false !== strpos( $request['url'], '/api/v1/plan' ) ) );
+	}
+
+	/**
+	 * Markers partly outside the image are clipped to it, and markers wholly outside it, or that aren't a location's, are
+	 * left out.
+	 */
+	public function test_staticmap_archive_marker_boxes_outside() {
+		$plan            = $this->fixture( 'map/staticmap-plan.json' );
+		$plan['markers'] = array(
+			array(
+				'n'   => 1,
+				'box' => array( -10, 390, 10, 410 ),
+			),
+			array(
+				'n'   => 2,
+				'box' => array( 610, 10, 625, 25 ),
+			),
+			array(
+				'n'   => 3,
+				'box' => array( 100, 100, 115, 115 ),
+			),
+			array( 'n' => 1 ),
+			'marker',
+		);
+		$this->mock_http( array( 'maps.example.org' => array( 'body' => $plan ) ) );
+		$map   = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) );
+		$boxes = $map->get_archive_marker_boxes( $this->locations );
+		$this->assertSame( array( 0 ), array_keys( $boxes ) );
+		$this->assertEqualsWithDelta( array( 0, 97.5, 1.667, 100 ), $boxes[0], 0.001 );
+	}
+
+	/**
+	 * Without a usable plan, archive maps have no marker positions.
+	 */
+	public function test_staticmap_archive_marker_boxes_unavailable() {
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
+		$this->assertSame( array(), $map->get_archive_marker_boxes( $this->locations ) );
+
+		$this->mock_http( array( 'maps.example.org' => new WP_Error( 'http_request_failed', 'Connection refused' ) ) );
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) );
+		$this->assertSame( array(), $map->get_archive_marker_boxes( $this->locations ) );
+		$this->assertSame( array(), $map->get_archive_marker_boxes( array() ) );
+
+		// A plan without an image size.
+		$plan = $this->fixture( 'map/staticmap-plan.json' );
+		unset( $plan['width'] );
+		$this->mock_http( array( 'other.example.org' => array( 'body' => $plan ) ) );
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://other.example.org/' ) );
+		$this->assertSame( array(), $map->get_archive_marker_boxes( $this->locations ) );
+
+		// The query API only answers GET requests, so a map too long for a URL isn't planned.
+		$this->mock_http( array( 'third.example.org' => array( 'body' => $this->fixture( 'map/staticmap-plan.json' ) ) ) );
+		$locations = array();
+		for ( $i = 0; $i < 300; $i++ ) {
+			$locations[] = array( round( 39.94 + $i / 5000, 4 ), round( -75.18 + $i / 5000, 4 ) );
+		}
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://third.example.org/' ) );
+		$this->assertSame( array(), $map->get_archive_marker_boxes( $locations ) );
+		$this->assertCount( 0, array_filter( $this->http_requests, fn( $request ) => false !== strpos( $request['url'], '/api/v1/plan' ) ) );
+	}
+
+	/**
+	 * The archive map links each marker to its post, positioned in percent over the image.
+	 */
+	public function test_archive_map_html_links() {
+		$this->mock_http(
+			array(
+				'maps.example.org/api/v1/plan' => array( 'body' => $this->fixture( 'map/staticmap-plan.json' ) ),
+				'maps.example.org/api/v1/'     => array( 'body' => $this->fixture( 'map/staticmap-api.json' ) ),
+			)
+		);
+		$map   = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) );
+		$posts = array(
+			self::factory()->post->create( array( 'post_title' => 'City Hall' ) ),
+			self::factory()->post->create( array( 'post_title' => 'Independence "Hall" & Park' ) ),
+		);
+		$html = $map->get_archive_map_html( $this->locations, $posts );
+		$this->assertMatchesRegularExpression( '#^<div class="sloc-archive-map"><img class="archive-map sloc-map" src="[^"]+" alt="Map of the locations listed on this page" /><a [^>]+></a><a [^>]+></a></div>$#', $html );
+		$this->assertStringContainsString(
+			sprintf( '<a class="sloc-archive-map-marker" href="%s" style="left:22.333%%;top:34.75%%;width:2.5%%;height:3.75%%" title="City Hall" aria-label="City Hall"></a>', get_permalink( $posts[0] ) ),
+			$html
+		);
+		$this->assertStringContainsString( 'href="' . get_permalink( $posts[1] ) . '" style="left:75.167%;top:61.25%;', $html );
+		$this->assertStringContainsString( 'title="Independence &#8220;Hall&#8221; &amp; Park"', $html );
+
+		// Without the posts, or with a different number of them, the map isn't clickable.
+		$plain = '#^<img class="archive-map sloc-map" src="[^"]+" alt="[^"]+" />$#';
+		$this->assertMatchesRegularExpression( $plain, $map->get_archive_map_html( $this->locations ) );
+		$this->assertMatchesRegularExpression( $plain, $map->get_archive_map_html( $this->locations, array( $posts[0] ) ) );
+	}
+
+	/**
+	 * Providers that don't say where markers are draw a plain archive map, as before.
+	 */
+	public function test_archive_map_html_plain() {
+		$map  = $this->provider( 'Map_Provider_Mapbox', array( 'style' => 'streets-v11' ) );
+		$post = self::factory()->post->create();
+		$this->assertSame( array(), $map->get_archive_marker_boxes( $this->locations ) );
+		$this->assertMatchesRegularExpression( '#^<img class="archive-map sloc-map" src="https://api\.mapbox\.com/[^"]+" alt="[^"]+" />$#', $map->get_archive_map_html( $this->locations, array( $post, $post ) ) );
+
+		// Without a map, the image is empty, as it was.
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
+		$this->assertSame( '<img class="archive-map sloc-map" src="" alt="Map of the locations listed on this page" />', $map->get_archive_map_html( $this->locations, array( $post, $post ) ) );
+	}
+
+	/**
 	 * Map server URLs from before 1.0.0, which drew maps at img.php, draw them at the server's root.
 	 */
 	public function test_staticmap_url_img_php() {

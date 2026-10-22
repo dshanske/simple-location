@@ -1375,6 +1375,62 @@ class Map_Provider_StaticMap extends Map_Provider {
 	}
 
 	/**
+	 * Returns where each location's marker is on the archive map, from the map server's `/api/v1/plan`.
+	 *
+	 * The plan is asked for with the same parameters as the image and stored like the server's other answers. The query
+	 * API only answers GET requests, so a map whose request is too long for a URL has no marker positions.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return array Boxes keyed by the location's index in $locations, each array( left, top, right, bottom ) in percent of
+	 *               the image's width and height. Markers outside the image are left out, and so is everything if the
+	 *               plan can't be fetched.
+	 */
+	public function get_archive_marker_boxes( $locations ) {
+		if ( '' === $this->get_server_url() || empty( $locations ) || ! is_array( $locations ) ) {
+			return array();
+		}
+		$this->load_server_limits();
+		$params = $this->get_archive_params( $locations );
+		if ( strlen( $this->build_url( $params, 'api/v1/plan' ) ) > self::MAX_GET_LENGTH ) {
+			return array();
+		}
+		$plan = $this->get_api( 'plan', false, $params );
+		if ( is_wp_error( $plan ) || empty( $plan['markers'] ) || ! is_array( $plan['markers'] ) ) {
+			return array();
+		}
+		$width  = isset( $plan['width'] ) && is_numeric( $plan['width'] ) ? (float) $plan['width'] : 0;
+		$height = isset( $plan['height'] ) && is_numeric( $plan['height'] ) ? (float) $plan['height'] : 0;
+		if ( $width <= 0 || $height <= 0 ) {
+			return array();
+		}
+		$count = count( $locations );
+		$boxes = array();
+		foreach ( $plan['markers'] as $marker ) {
+			if ( ! is_array( $marker ) || ! isset( $marker['n'], $marker['box'] ) || ! is_array( $marker['box'] ) || 4 !== count( $marker['box'] ) ) {
+				continue;
+			}
+			// Markers are numbered from 1, in the order they were sent.
+			$index = (int) $marker['n'] - 1;
+			if ( $index < 0 || $index >= $count ) {
+				continue;
+			}
+			$box = array_map( 'floatval', array_values( $marker['box'] ) );
+			// Keep the part of the marker that is on the image.
+			$left   = max( 0, min( $width, $box[0] ) );
+			$top    = max( 0, min( $height, $box[1] ) );
+			$right  = max( 0, min( $width, $box[2] ) );
+			$bottom = max( 0, min( $height, $box[3] ) );
+			if ( $right <= $left || $bottom <= $top ) {
+				continue;
+			}
+			$boxes[ $index ] = array( 100 * $left / $width, 100 * $top / $height, 100 * $right / $width, 100 * $bottom / $height );
+		}
+		return $boxes;
+	}
+
+	/**
 	 * Whether the site may store this provider's map images and serve them itself.
 	 *
 	 * With only a plain client key, the map server marks every image private, so those maps aren't stored.
