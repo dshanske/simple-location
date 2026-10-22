@@ -884,7 +884,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( array( 'esri', 'topo' ), array( $url['query']['provider'], $url['query']['style'] ) );
 		$this->assertArrayNotHasKey( 'basemap', $url['query'] );
 		$this->assertArrayNotHasKey( 'attribution', $url['query'] );
-		$this->assertStringEndsWith( '&marker[]=lat:39.9524;lng:-75.1636;icon:dot;size:small&marker[]=lat:39.9489;lng:-75.15;icon:dot;size:small', $archive );
+		$this->assertSame( array( 'lat:39.9524;lng:-75.1636;icon:dot;size:small', 'lat:39.9489;lng:-75.15;icon:dot;size:small' ), $url['query']['marker'] );
+		$this->assertArrayNotHasKey( 'key', $url['query'] );
 
 		// Without a style, the map server draws its default map.
 		$map = $this->provider(
@@ -914,6 +915,121 @@ class MapProvidersTest extends WP_UnitTestCase {
 
 		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
 		$this->assertSame( 'https://opt.example/', $this->parse( $map->get_the_static_map() )['base'] );
+	}
+
+	/**
+	 * Signs a path and query as the README of Static Maps API 1.0.0 shows, to check the provider's signatures.
+	 *
+	 * @param string $path_and_query Path and query, as requested.
+	 * @param string $secret         Signing secret.
+	 * @return string Signature.
+	 */
+	protected function staticmap_signature( $path_and_query, $secret ) {
+		return rtrim( strtr( base64_encode( hash_hmac( 'sha256', $path_and_query, $secret, true ) ), '+/', '-_' ), '=' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+	}
+
+	/**
+	 * With a plain client key, every map URL carries it as `key`, unsigned.
+	 */
+	public function test_staticmap_client_key() {
+		update_option( 'sloc_staticmap_url', 'https://maps.example.org/' );
+		update_option( 'sloc_staticmap_client_key', ' plain-key ' );
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
+
+		$url = $this->parse( $map->get_the_static_map() );
+		$this->assertSame( 'plain-key', $url['query']['key'] );
+		$this->assertArrayNotHasKey( 'signature', $url['query'] );
+		$this->assertSame( 'plain-key', $this->parse( $map->get_archive_map( $this->locations ) )['query']['key'] );
+
+		// A client ID without a signing secret doesn't sign, and the plain key is still used.
+		update_option( 'sloc_staticmap_client_id', 'blog' );
+		$url = $this->parse( $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) )->get_the_static_map() );
+		$this->assertSame( 'plain-key', $url['query']['key'] );
+		$this->assertArrayNotHasKey( 'signature', $url['query'] );
+	}
+
+	/**
+	 * With a client ID and signing secret, map URLs carry the ID as `key` and end in a signature of their path and query.
+	 */
+	public function test_staticmap_signed_urls() {
+		$map = $this->provider(
+			'Map_Provider_StaticMap',
+			array(
+				'api'           => 'https://example.org/maps/',
+				'style'         => 'carto/dark',
+				'client_id'     => 'blog',
+				'client_secret' => 'the-secret',
+				'client_key'    => 'plain-key',
+			)
+		);
+
+		foreach ( array( $map->get_the_static_map(), $map->get_archive_map( $this->locations ) ) as $image ) {
+			$this->assertStringStartsWith( 'https://example.org/maps/?', $image );
+			$this->assertStringNotContainsString( 'the-secret', $image );
+			$this->assertStringNotContainsString( 'plain-key', $image );
+			$this->assertMatchesRegularExpression( '/^[^?]+\?[A-Za-z0-9%._~&=-]+&signature=[A-Za-z0-9_-]+$/', $image, 'Every character is percent-encoded and the signature comes last.' );
+
+			list( $signed, $signature ) = explode( '&signature=', substr( $image, strlen( 'https://example.org' ) ) );
+			$this->assertSame( $this->staticmap_signature( $signed, 'the-secret' ), $signature );
+
+			$url = $this->parse( $image );
+			$this->assertSame( 'blog', $url['query']['key'] );
+			$this->assertSame( array( 'carto', 'dark' ), array( $url['query']['provider'], $url['query']['style'] ) );
+		}
+		$this->assertSame( 'lat:39.9524;lng:-75.1636;icon:pin', $this->parse( $map->get_the_static_map() )['query']['marker'] );
+
+		// The page shows the image URL exactly as signed.
+		preg_match( '/src="([^"]+)"/', $map->get_the_static_map_html(), $match );
+		$this->assertSame( $map->get_the_static_map(), html_entity_decode( $match[1] ) );
+	}
+
+	/**
+	 * The query API is asked with the client's credentials, signed like the maps, and each client's answers are stored apart.
+	 */
+	public function test_staticmap_api_with_credentials() {
+		$this->mock_http( array( 'maps.example.org/api/v1/providers' => array( 'body' => $this->fixture( 'map/staticmap-providers.json' ) ) ) );
+		$args = array(
+			'api'           => 'https://maps.example.org/',
+			'client_id'     => 'blog',
+			'client_secret' => 'the-secret',
+		);
+		$this->provider( 'Map_Provider_StaticMap', $args )->get_styles();
+		$request = $this->last_request();
+		$this->assertSame( 'https://maps.example.org/api/v1/providers?key=blog&signature=' . $this->staticmap_signature( '/api/v1/providers?key=blog', 'the-secret' ), $request['url'] );
+
+		$this->provider( 'Map_Provider_StaticMap', $args )->get_styles();
+		$this->assertCount( 1, $this->http_requests );
+
+		$this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) )->get_styles();
+		$this->assertCount( 2, $this->http_requests );
+		$this->assertSame( 'https://maps.example.org/api/v1/providers', $this->last_request()['url'] );
+
+		$this->provider(
+			'Map_Provider_StaticMap',
+			array(
+				'api'        => 'https://maps.example.org/',
+				'client_key' => 'plain-key',
+			)
+		)->get_styles();
+		$this->assertCount( 3, $this->http_requests );
+		$this->assertSame( 'https://maps.example.org/api/v1/providers?key=plain-key', $this->last_request()['url'] );
+	}
+
+	/**
+	 * The client settings are registered, with fields on the API settings page.
+	 */
+	public function test_staticmap_client_settings() {
+		global $wp_settings_fields;
+		Map_Provider_StaticMap::init();
+		Map_Provider_StaticMap::admin_init();
+		$settings = get_registered_settings();
+		foreach ( array( 'sloc_staticmap_client_id', 'sloc_staticmap_client_secret', 'sloc_staticmap_client_key' ) as $option ) {
+			$this->assertArrayHasKey( $option, $settings );
+			$this->assertArrayHasKey( $option, $wp_settings_fields['sloc_api']['sloc_api'] );
+		}
+		$this->assertSame( 'password', $wp_settings_fields['sloc_api']['sloc_api']['sloc_staticmap_client_secret']['args']['type'] );
+		$this->assertSame( 'password', $wp_settings_fields['sloc_api']['sloc_api']['sloc_staticmap_client_key']['args']['type'] );
+		$this->assertSame( 'blog', sanitize_option( 'sloc_staticmap_client_id', ' blog ' ) );
 	}
 
 	/**
@@ -1058,6 +1174,22 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'needs version 1.0.0 or later', $html );
 		$this->assertStringContainsString( 'HTTP status 404', $html );
 		$this->assertStringContainsString( '<option value="esri/natgeo"', $html );
+
+		// Credentials the server refuses get their own warning.
+		$this->mock_http(
+			array(
+				'maps.example.org' => array(
+					'code' => 403,
+					'body' => 'The signature is not valid',
+				),
+			)
+		);
+		ob_start();
+		Map_Provider_StaticMap::style_field( $args );
+		$html = ob_get_clean();
+		$this->assertStringContainsString( 'refused the client ID, signing secret or client key', $html );
+		$this->assertStringContainsString( 'The signature is not valid', $html );
+		$this->assertStringNotContainsString( 'needs version 1.0.0', $html );
 
 		// Without a URL there is nothing to warn about.
 		$args['provider'] = $this->provider( 'Map_Provider_StaticMap', array( 'api' => '' ) );

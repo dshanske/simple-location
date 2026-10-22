@@ -138,9 +138,11 @@ abstract class Sloc_Provider {
 	 * @since 4.0.6
 	 * @since 6.0.0 Error messages are short and plain text, without credentials; the response is in the error data.
 	 * @since 6.0.0 JSON that isn't an object or array, such as `true`, is an error.
+	 * @since 6.1.0 Without a query, the URL is fetched exactly as given.
 	 */
 	public function fetch_json( $url, $query, $headers = null ) {
-		$fetch = add_query_arg( $query, $url );
+		// Without a query, the URL is used exactly as given, as a signed URL must be.
+		$fetch = empty( $query ) ? $url : add_query_arg( $query, $url );
 		$args  = array(
 			'headers'             => array(
 				'Accept' => 'application/json',
