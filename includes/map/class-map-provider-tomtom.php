@@ -16,6 +16,22 @@ class Map_Provider_TomTom extends Map_Provider {
 	use Sloc_API_TomTom;
 
 	/**
+	 * Image formats the provider can be asked for.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FORMATS = array( 'png', 'jpg' );
+
+	/**
+	 * Image format the plugin asks for when none is chosen.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_FORMAT = 'png';
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 4.4.9
@@ -57,6 +73,7 @@ class Map_Provider_TomTom extends Map_Provider {
 	 * Returns the URL of a static map of the location.
 	 *
 	 * @since 4.4.9
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -77,6 +94,9 @@ class Map_Provider_TomTom extends Map_Provider {
 			),
 			$url
 		);
+		if ( '' !== $this->format ) {
+			$map = add_query_arg( 'format', $this->get_vendor_format(), $map );
+		}
 		return $map;
 	}
 

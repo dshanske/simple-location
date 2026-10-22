@@ -17,6 +17,22 @@ class Map_Provider_LocationIQ extends Map_Provider {
 
 
 	/**
+	 * Image formats the provider can be asked for.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FORMATS = array( 'png', 'jpg' );
+
+	/**
+	 * Image format the plugin asks for when none is chosen.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_FORMAT = 'png';
+
+	/**
 	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps.
 	 *
 	 * @since 6.1.0
@@ -70,6 +86,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Centered at the map zoom setting, with a marker icon from the v3 API.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @return string|WP_Error URL, or an error without an API key.
 	 */
@@ -87,6 +104,9 @@ class Map_Provider_LocationIQ extends Map_Provider {
 			),
 			'https://maps.locationiq.com/v3/staticmap'
 		);
+		if ( '' !== $this->format ) {
+			$map = add_query_arg( 'format', $this->get_vendor_format(), $map );
+		}
 		return $map;
 	}
 
@@ -96,6 +116,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 * @since 1.0.0
 	 * @since 6.0.0 Uses the v3 API, with one marker parameter per location and a valid path.
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -113,7 +134,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 		$map  = add_query_arg(
 			array(
 				'key'    => $this->api,
-				'format' => 'png',
+				'format' => $this->get_vendor_format(),
 				'size'   => sprintf( '%1$sx%2$s', $this->width, $this->height ),
 			),
 			'https://maps.locationiq.com/v3/staticmap'

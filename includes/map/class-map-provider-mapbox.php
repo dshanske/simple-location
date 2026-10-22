@@ -16,6 +16,22 @@ class Map_Provider_Mapbox extends Map_Provider {
 	use Sloc_API_Mapbox;
 
 	/**
+	 * Image formats the provider can be asked for. Without one, Mapbox draws PNGs of styles with vector layers and JPEGs of raster-only styles.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FORMATS = array( 'png', 'jpg', 'webp' );
+
+	/**
+	 * Image format the plugin asks for when none is chosen.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_FORMAT = '';
+
+	/**
 	 * Width, in pixels, of the whole world at zoom 0 on this provider's static maps. Mapbox draws 512-pixel tiles.
 	 *
 	 * @since 6.1.0
@@ -159,6 +175,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 * @since 4.0.0
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -179,7 +196,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 		$polyline = Sloc_Polyline::encode( $locations );
 		$view     = $this->get_archive_view( $locations );
 		$map      = sprintf(
-			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/%3$s,path-5+f44-0.5(%4$s)/%8$s/%5$sx%6$s%9$s?access_token=%7$s',
+			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/%3$s,path-5+f44-0.5(%4$s)/%8$s/%5$sx%6$s%9$s%10$s?access_token=%7$s',
 			$user,
 			$this->style,
 			implode( ',', $markers ),
@@ -188,7 +205,8 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$this->height,
 			$this->api,
 			null === $view ? 'auto' : sprintf( '%1$s,%2$s,%3$s', $view['longitude'], $view['latitude'], $view['zoom'] ),
-			( 2 === $this->scale ) ? '@2x' : ''
+			( 2 === $this->scale ) ? '@2x' : '',
+			$this->get_format_extension()
 		);
 		return $map;
 	}
@@ -208,6 +226,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 * Returns the URL of a static map of the location.
 	 *
 	 * @since 3.4.0
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -221,7 +240,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$user = 'mapbox';
 		}
 		$map = sprintf(
-			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s,%5$s,0,0/%6$sx%7$s%9$s?access_token=%8$s',
+			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/pin-s(%3$s,%4$s)/%3$s,%4$s,%5$s,0,0/%6$sx%7$s%9$s%10$s?access_token=%8$s',
 			$user,
 			$this->style,
 			$this->longitude,
@@ -230,8 +249,21 @@ class Map_Provider_Mapbox extends Map_Provider {
 			$this->width,
 			$this->height,
 			$this->api,
-			( 2 === $this->scale ) ? '@2x' : ''
+			( 2 === $this->scale ) ? '@2x' : '',
+			$this->get_format_extension()
 		);
 		return $map;
+	}
+
+	/**
+	 * Returns the file extension that asks Mapbox for the chosen image format.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Extension, such as `.jpeg`, or an empty string to let Mapbox choose.
+	 */
+	protected function get_format_extension() {
+		$format = $this->get_vendor_format( array( 'jpg' => 'jpeg' ) );
+		return '' === $format ? '' : '.' . $format;
 	}
 }

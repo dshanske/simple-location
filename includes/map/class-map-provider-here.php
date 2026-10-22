@@ -17,6 +17,22 @@ class Map_Provider_Here extends Map_Provider {
 	use Sloc_API_Here;
 
 	/**
+	 * Image formats the provider can be asked for.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FORMATS = array( 'png', 'png8', 'jpg' );
+
+	/**
+	 * Image format the plugin asks for when none is chosen.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_FORMAT = 'png8';
+
+	/**
 	 * Base URL of the Map Image API v3.
 	 *
 	 * @since 6.0.0
@@ -102,6 +118,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 1.0.0
 	 * @since 6.0.0 Uses Map Image API v3.
 	 * @since 6.0.0 Draws a high-density map when the scale is 2.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @return string URL, or an empty string without an API key.
 	 */
@@ -110,13 +127,14 @@ class Map_Provider_Here extends Map_Provider {
 			return '';
 		}
 		$url = sprintf(
-			'%1$scenter:%2$s,%3$s;zoom=%4$s/%5$sx%6$s/png8',
+			'%1$scenter:%2$s,%3$s;zoom=%4$s/%5$sx%6$s/%7$s',
 			self::BASE_URL,
 			$this->latitude,
 			$this->longitude,
 			$this->map_zoom,
 			$this->width * $this->scale,
-			$this->height * $this->scale
+			$this->height * $this->scale,
+			$this->get_vendor_format( array( 'jpg' => 'jpeg' ) )
 		);
 
 		$args = array(
@@ -170,6 +188,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 6.0.0 Uses Map Image API v3.
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -195,7 +214,14 @@ class Map_Provider_Here extends Map_Provider {
 		}
 		$url = add_query_arg(
 			$args,
-			sprintf( '%1$s%2$s/%3$sx%4$s/png8', self::BASE_URL, $this->get_archive_position( $locations ), $this->width * $this->scale, $this->height * $this->scale )
+			sprintf(
+				'%1$s%2$s/%3$sx%4$s/%5$s',
+				self::BASE_URL,
+				$this->get_archive_position( $locations ),
+				$this->width * $this->scale,
+				$this->height * $this->scale,
+				$this->get_vendor_format( array( 'jpg' => 'jpeg' ) )
+			)
 		);
 		// Lines and points are separate overlays, and a line needs at least two points.
 		if ( count( $points ) > 1 ) {

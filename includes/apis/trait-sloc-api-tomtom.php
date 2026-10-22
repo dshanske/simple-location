@@ -17,6 +17,7 @@ trait Sloc_API_TomTom {
 	 * Admin Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 Adds the image format field for the map provider.
 	 */
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'TomTom', 'simple-location' ), 'sloc_tomtom_api' );
@@ -33,6 +34,8 @@ trait Sloc_API_TomTom {
 					'provider'  => new Map_Provider_TomTom(),
 				)
 			);
+
+			self::add_format_setting( __( 'TomTom', 'simple-location' ), 'tomtom' );
 		}
 	}
 
@@ -40,6 +43,7 @@ trait Sloc_API_TomTom {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 Registers the image format setting for the map provider.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'TomTom', 'simple-location' ), 'sloc_tomtom_api' );
@@ -55,6 +59,8 @@ trait Sloc_API_TomTom {
 					'default'      => 'main',
 				)
 			);
+
+			self::register_format_setting( __( 'TomTom', 'simple-location' ), 'tomtom' );
 		}
 	}
 }

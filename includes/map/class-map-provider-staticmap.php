@@ -249,14 +249,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	const DEFAULT_MARKER_COLOR = '#d32f2f';
 
 	/**
-	 * Image format, or an empty string for the map server's default.
-	 *
-	 * @since 6.1.0
-	 * @var string
-	 */
-	protected $format = '';
-
-	/**
 	 * Marker type for a single location: 'pin' or 'dot'.
 	 *
 	 * @since 6.1.0
@@ -393,7 +385,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 		}
 
 		$display = array(
-			'format'               => 'sanitize_format',
 			'marker'               => 'sanitize_marker',
 			'marker_color'         => 'sanitize_marker_color',
 			'marker_size'          => 'sanitize_marker_size',
@@ -748,21 +739,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	protected static function sanitize_choice( $value, $allowed, $default ) {
 		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
 		return in_array( $value, $allowed, true ) ? $value : $default;
-	}
-
-	/**
-	 * Sanitizes the image format setting.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param mixed $value Image format.
-	 * @return string One of FORMATS, or an empty string for the map server's default. 'jpeg' becomes 'jpg'.
-	 */
-	public static function sanitize_format( $value ) {
-		if ( 'jpeg' === $value ) {
-			$value = 'jpg';
-		}
-		return self::sanitize_choice( $value, self::FORMATS, '' );
 	}
 
 	/**

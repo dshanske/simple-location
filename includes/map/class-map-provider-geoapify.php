@@ -16,6 +16,22 @@ class Map_Provider_Geoapify extends Map_Provider {
 	use Sloc_API_GeoApify;
 
 	/**
+	 * Image formats the provider can be asked for.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FORMATS = array( 'png', 'jpg' );
+
+	/**
+	 * Image format the plugin asks for when none is chosen.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_FORMAT = 'jpg';
+
+	/**
 	 * Geoapify's terms allow storing and caching its static maps, with no time limit, so they are served from the site.
 	 *
 	 * @since 6.0.0
@@ -103,6 +119,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 * Returns the URL of a static map of the location.
 	 *
 	 * @since 4.1.5
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -113,7 +130,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 		$args = array(
 			'apiKey' => $this->api,
 			'center' => sprintf( 'lonlat:%1$s,%2$s', $this->longitude, $this->latitude ),
-			'format' => 'jpeg',
+			'format' => $this->get_vendor_format( array( 'jpg' => 'jpeg' ) ),
 			'width'  => $this->width,
 			'height' => $this->height,
 			'zoom'   => $this->map_zoom,
@@ -150,6 +167,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 * @since 4.1.5
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Drawn at the map's pixel density, for high-density images.
+	 * @since 6.1.0 Uses the image format setting.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -166,7 +184,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 
 		$args = array(
 			'apiKey' => $this->api,
-			'format' => 'jpeg',
+			'format' => $this->get_vendor_format( array( 'jpg' => 'jpeg' ) ),
 			'width'  => $this->width,
 			'height' => $this->height,
 			'zoom'   => $this->map_zoom,
