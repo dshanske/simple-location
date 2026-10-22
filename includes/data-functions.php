@@ -493,6 +493,7 @@ function get_term_location( $id, $args = array() ) {
  * Returns the public locations of the posts in the main query, keyed by post ID.
  *
  * @since 6.1.0
+ * @since 6.1.0 Skips posts without a location without a warning.
  *
  * @return array Array( latitude, longitude ) points keyed by post ID, in the query's order.
  */
@@ -504,7 +505,8 @@ function sloc_get_geo_archive_locations() {
 	}
 	foreach ( $wp_query->posts as $post ) {
 		$location = get_post_geodata( $post->ID, false );
-		if ( 'public' === $location['visibility'] && array_key_exists( 'latitude', $location ) ) {
+		// Posts without a location have no geodata.
+		if ( is_array( $location ) && isset( $location['visibility'] ) && 'public' === $location['visibility'] && array_key_exists( 'latitude', $location ) ) {
 			$locations[ $post->ID ] = array_values(
 				wp_array_slice_assoc(
 					$location,
