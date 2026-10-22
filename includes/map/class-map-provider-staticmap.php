@@ -163,6 +163,102 @@ class Map_Provider_StaticMap extends Map_Provider {
 	);
 
 	/**
+	 * Image formats the map server can send.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FORMATS = array( 'png', 'png8', 'jpg', 'webp' );
+
+	/**
+	 * Marker sizes of the map server's generated markers.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const MARKER_SIZES = array( 'small', 'medium', 'large' );
+
+	/**
+	 * Scale bar settings: the map server's units, and 'site' for the site's units.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const SCALEBARS = array( 'site', 'metric', 'imperial', 'both' );
+
+	/**
+	 * Corners of the map for the scale bar.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const POSITIONS = array( 'bottomleft', 'bottomright', 'topleft', 'topright' );
+
+	/**
+	 * Default marker color, the map server's.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const DEFAULT_MARKER_COLOR = '#d32f2f';
+
+	/**
+	 * Image format, or an empty string for the map server's default.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $format = '';
+
+	/**
+	 * Marker type for a single location: 'pin' or 'dot'.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $marker = 'pin';
+
+	/**
+	 * Marker color, as #RRGGBB.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $marker_color = self::DEFAULT_MARKER_COLOR;
+
+	/**
+	 * Marker size for a single location: 'small', 'medium' or 'large'.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $marker_size = 'medium';
+
+	/**
+	 * Scale bar: one of SCALEBARS, or an empty string for none.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $scalebar = '';
+
+	/**
+	 * Corner of the scale bar, one of POSITIONS.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $scalebar_position = 'bottomleft';
+
+	/**
+	 * IDs of the map server's overlays to draw on the map.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	protected $overlays = array();
+
+	/**
 	 * Client ID the map server knows this site by, sent as `key` in signed URLs.
 	 *
 	 * @since 6.1.0
@@ -195,6 +291,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 6.1.0 The map size is limited when the map is drawn, to the map server's own limits when they are known.
 	 * @since 6.1.0 The style is a provider and style ID, `provider/style`. Basemap IDs from before 6.1.0 are converted.
 	 * @since 6.1.0 Added the `client_id`, `client_secret` and `client_key` arguments.
+	 * @since 6.1.0 Added the `format`, `marker`, `marker_color`, `marker_size`, `scalebar`, `scalebar_position` and `overlays` arguments.
 	 *
 	 * @param array $args {
 	 *     Arguments. See Map_Provider::__construct(), and also the following.
@@ -202,6 +299,13 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *     @type string $client_id     Client ID for signed URLs. Default the sloc_staticmap_client_id setting.
 	 *     @type string $client_secret Signing secret. Default the sloc_staticmap_client_secret setting.
 	 *     @type string $client_key    Plain client key, used when URLs aren't signed. Default the sloc_staticmap_client_key setting.
+	 *     @type string   $format            Image format, one of FORMATS, or empty for the server's default. Default the sloc_staticmap_format setting.
+	 *     @type string   $marker            Marker type, 'pin' or 'dot'. Default the sloc_staticmap_marker setting.
+	 *     @type string   $marker_color      Marker color, #RRGGBB. Default the sloc_staticmap_marker_color setting.
+	 *     @type string   $marker_size       Marker size, one of MARKER_SIZES. Default the sloc_staticmap_marker_size setting.
+	 *     @type string   $scalebar          Scale bar, one of SCALEBARS, or empty for none. Default the sloc_staticmap_scalebar setting.
+	 *     @type string   $scalebar_position Scale bar corner, one of POSITIONS. Default the sloc_staticmap_scalebar_position setting.
+	 *     @type string[] $overlays          Overlay IDs. Default the sloc_staticmap_overlays setting.
 	 * }
 	 */
 	public function __construct( $args = array() ) {
@@ -221,6 +325,19 @@ class Map_Provider_StaticMap extends Map_Provider {
 		foreach ( array( 'client_id', 'client_secret', 'client_key' ) as $credential ) {
 			$value               = $args[ $credential ] ?? get_option( 'sloc_staticmap_' . $credential );
 			$this->{$credential} = is_string( $value ) ? trim( $value ) : '';
+		}
+
+		$display = array(
+			'format'            => 'sanitize_format',
+			'marker'            => 'sanitize_marker',
+			'marker_color'      => 'sanitize_marker_color',
+			'marker_size'       => 'sanitize_marker_size',
+			'scalebar'          => 'sanitize_scalebar',
+			'scalebar_position' => 'sanitize_scalebar_position',
+			'overlays'          => 'sanitize_overlays',
+		);
+		foreach ( $display as $property => $sanitize ) {
+			$this->{$property} = self::$sanitize( $args[ $property ] ?? get_option( 'sloc_staticmap_' . $property, $this->{$property} ) );
 		}
 
 		// Providers are created on every request, so the map server's limits are only looked up when a map is drawn.
@@ -278,6 +395,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 4.1.6
 	 * @since 6.1.0 The style setting is sanitized to a provider and style ID, and defaults to the map server's default map.
 	 * @since 6.1.0 Registers the client ID, signing secret and client key settings.
+	 * @since 6.1.0 Registers the image format, marker, scale bar and overlay settings.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Custom Static Map URL', 'simple-location' ), 'sloc_staticmap_url' );
@@ -296,6 +414,39 @@ class Map_Provider_StaticMap extends Map_Provider {
 				'sanitize_callback' => array( __CLASS__, 'sanitize_style' ),
 			)
 		);
+
+		$settings = array(
+			'sloc_staticmap_format'            => array( 'Custom Static Map Image Format', '', 'sanitize_format' ),
+			'sloc_staticmap_marker'            => array( 'Custom Static Map Marker', 'pin', 'sanitize_marker' ),
+			'sloc_staticmap_marker_color'      => array( 'Custom Static Map Marker Color', self::DEFAULT_MARKER_COLOR, 'sanitize_marker_color' ),
+			'sloc_staticmap_marker_size'       => array( 'Custom Static Map Marker Size', 'medium', 'sanitize_marker_size' ),
+			'sloc_staticmap_scalebar'          => array( 'Custom Static Map Scale Bar', '', 'sanitize_scalebar' ),
+			'sloc_staticmap_scalebar_position' => array( 'Custom Static Map Scale Bar Position', 'bottomleft', 'sanitize_scalebar_position' ),
+		);
+		foreach ( $settings as $option => $setting ) {
+			register_setting(
+				'simloc',
+				$option,
+				array(
+					'type'              => 'string',
+					'description'       => $setting[0],
+					'show_in_rest'      => false,
+					'default'           => $setting[1],
+					'sanitize_callback' => array( __CLASS__, $setting[2] ),
+				)
+			);
+		}
+		register_setting(
+			'simloc',
+			'sloc_staticmap_overlays',
+			array(
+				'type'              => 'array',
+				'description'       => 'Custom Static Map Overlays',
+				'show_in_rest'      => false,
+				'default'           => array(),
+				'sanitize_callback' => array( __CLASS__, 'sanitize_overlays' ),
+			)
+		);
 	}
 
 	/**
@@ -304,6 +455,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 4.1.6
 	 * @since 6.1.0 The style field warns when the map server doesn't answer its query API.
 	 * @since 6.1.0 Adds the client ID, signing secret and client key fields.
+	 * @since 6.1.0 Adds the image format, marker, scale bar and overlay fields.
 	 */
 	public static function admin_init() {
 		self::add_settings_url_parameter( __( 'Custom Static Map', 'simple-location' ), 'sloc_staticmap_url' );
@@ -348,6 +500,91 @@ class Map_Provider_StaticMap extends Map_Provider {
 			'sloc_map',
 			array(
 				'label_for' => 'sloc_staticmap_style',
+				'provider'  => new Map_Provider_StaticMap(),
+			)
+		);
+
+		$lists = array(
+			'sloc_staticmap_format'            => array(
+				__( 'Static Map Image Format', 'simple-location' ),
+				array(
+					''     => __( 'Default of the map server', 'simple-location' ),
+					'png'  => __( 'PNG', 'simple-location' ),
+					'png8' => __( 'PNG with 256 colors (smaller)', 'simple-location' ),
+					'jpg'  => __( 'JPEG', 'simple-location' ),
+					'webp' => __( 'WebP (smallest, if the server supports it)', 'simple-location' ),
+				),
+			),
+			'sloc_staticmap_marker'            => array(
+				__( 'Static Map Marker', 'simple-location' ),
+				array(
+					'pin' => __( 'Pin', 'simple-location' ),
+					'dot' => __( 'Dot', 'simple-location' ),
+				),
+			),
+			'sloc_staticmap_marker_size'       => array(
+				__( 'Static Map Marker Size', 'simple-location' ),
+				array(
+					'small'  => __( 'Small', 'simple-location' ),
+					'medium' => __( 'Medium', 'simple-location' ),
+					'large'  => __( 'Large', 'simple-location' ),
+				),
+			),
+			'sloc_staticmap_scalebar'          => array(
+				__( 'Static Map Scale Bar', 'simple-location' ),
+				array(
+					''         => __( 'None', 'simple-location' ),
+					'site'     => __( 'In the units the site displays', 'simple-location' ),
+					'metric'   => __( 'Metric', 'simple-location' ),
+					'imperial' => __( 'Imperial', 'simple-location' ),
+					'both'     => __( 'Metric and imperial', 'simple-location' ),
+				),
+			),
+			'sloc_staticmap_scalebar_position' => array(
+				__( 'Static Map Scale Bar Position', 'simple-location' ),
+				array(
+					'bottomleft'  => __( 'Bottom left', 'simple-location' ),
+					'bottomright' => __( 'Bottom right', 'simple-location' ),
+					'topleft'     => __( 'Top left', 'simple-location' ),
+					'topright'    => __( 'Top right', 'simple-location' ),
+				),
+			),
+		);
+		foreach ( $lists as $option => $field ) {
+			add_settings_field(
+				$option,
+				$field[0],
+				array( 'Loc_Config', 'values_callback' ),
+				'simloc',
+				'sloc_map',
+				array(
+					'label_for' => $option,
+					'list'      => $field[1],
+				)
+			);
+			if ( 'sloc_staticmap_marker_size' === $option ) {
+				add_settings_field(
+					'sloc_staticmap_marker_color',
+					__( 'Static Map Marker Color', 'simple-location' ),
+					array( 'Loc_Config', 'string_callback' ),
+					'simloc',
+					'sloc_map',
+					array(
+						'label_for' => 'sloc_staticmap_marker_color',
+						'type'      => 'color',
+					)
+				);
+			}
+		}
+
+		add_settings_field(
+			'sloc_staticmap_overlays',
+			__( 'Static Map Overlays', 'simple-location' ),
+			array( __CLASS__, 'overlays_field' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_staticmap_overlays',
 				'provider'  => new Map_Provider_StaticMap(),
 			)
 		);
@@ -406,6 +643,204 @@ class Map_Provider_StaticMap extends Map_Provider {
 			return '';
 		}
 		return $style;
+	}
+
+	/**
+	 * Returns a value if it is one of a list, or a default.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed    $value   Value.
+	 * @param string[] $allowed Allowed values.
+	 * @param string   $default Value returned for anything else.
+	 * @return string
+	 */
+	protected static function sanitize_choice( $value, $allowed, $default ) {
+		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
+		return in_array( $value, $allowed, true ) ? $value : $default;
+	}
+
+	/**
+	 * Sanitizes the image format setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Image format.
+	 * @return string One of FORMATS, or an empty string for the map server's default. 'jpeg' becomes 'jpg'.
+	 */
+	public static function sanitize_format( $value ) {
+		if ( 'jpeg' === $value ) {
+			$value = 'jpg';
+		}
+		return self::sanitize_choice( $value, self::FORMATS, '' );
+	}
+
+	/**
+	 * Sanitizes the marker type setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Marker type.
+	 * @return string 'pin' or 'dot'. Default 'pin'.
+	 */
+	public static function sanitize_marker( $value ) {
+		return self::sanitize_choice( $value, array( 'pin', 'dot' ), 'pin' );
+	}
+
+	/**
+	 * Sanitizes the marker color setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Color, #RRGGBB or RRGGBB.
+	 * @return string Color as #RRGGBB, in lower case. Default DEFAULT_MARKER_COLOR.
+	 */
+	public static function sanitize_marker_color( $value ) {
+		if ( ! is_string( $value ) || ! preg_match( '/^#?([0-9a-f]{6})$/i', trim( $value ), $match ) ) {
+			return self::DEFAULT_MARKER_COLOR;
+		}
+		return '#' . strtolower( $match[1] );
+	}
+
+	/**
+	 * Sanitizes the marker size setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Marker size.
+	 * @return string One of MARKER_SIZES. Default 'medium'.
+	 */
+	public static function sanitize_marker_size( $value ) {
+		return self::sanitize_choice( $value, self::MARKER_SIZES, 'medium' );
+	}
+
+	/**
+	 * Sanitizes the scale bar setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Scale bar.
+	 * @return string One of SCALEBARS, or an empty string for none.
+	 */
+	public static function sanitize_scalebar( $value ) {
+		return self::sanitize_choice( $value, self::SCALEBARS, '' );
+	}
+
+	/**
+	 * Sanitizes the scale bar position setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Corner.
+	 * @return string One of POSITIONS. Default 'bottomleft'.
+	 */
+	public static function sanitize_scalebar_position( $value ) {
+		return self::sanitize_choice( $value, self::POSITIONS, 'bottomleft' );
+	}
+
+	/**
+	 * Sanitizes the overlays setting.
+	 *
+	 * The map server draws at most a few overlays (3 by default) and leaves out the rest, so no limit is applied here.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Overlay IDs, as an array or a comma-separated string.
+	 * @return string[] Overlay IDs, without duplicates.
+	 */
+	public static function sanitize_overlays( $value ) {
+		if ( is_string( $value ) ) {
+			$value = explode( ',', $value );
+		}
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+		$overlays = array();
+		foreach ( $value as $overlay ) {
+			if ( is_string( $overlay ) ) {
+				$overlay = strtolower( trim( $overlay ) );
+				if ( preg_match( '/^[a-z0-9_-]+$/', $overlay ) ) {
+					$overlays[] = $overlay;
+				}
+			}
+		}
+		return array_values( array_unique( $overlays ) );
+	}
+
+	/**
+	 * Returns the overlays the map server offers.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array|WP_Error Overlay names keyed by ID, with 'max' the most a map can have; or an error.
+	 */
+	public function get_overlays() {
+		$json = $this->get_api( 'overlays' );
+		if ( is_wp_error( $json ) ) {
+			return $json;
+		}
+		$overlays = array();
+		if ( isset( $json['overlays'] ) && is_array( $json['overlays'] ) ) {
+			foreach ( $json['overlays'] as $overlay ) {
+				if ( is_array( $overlay ) && isset( $overlay['id'] ) && is_string( $overlay['id'] ) ) {
+					$overlays[ $overlay['id'] ] = isset( $overlay['name'] ) && is_scalar( $overlay['name'] ) ? (string) $overlay['name'] : $overlay['id'];
+				}
+			}
+		}
+		return array(
+			'overlays' => $overlays,
+			'max'      => isset( $json['max_overlays'] ) && is_numeric( $json['max_overlays'] ) ? (int) $json['max_overlays'] : 0,
+		);
+	}
+
+	/**
+	 * Echoes the overlays field: a checkbox for each overlay the map server offers.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $args {
+	 *     Arguments for the field.
+	 *
+	 *     @type string                 $label_for Option name.
+	 *     @type Map_Provider_StaticMap $provider  Provider.
+	 * }
+	 */
+	public static function overlays_field( array $args ) {
+		$name     = $args['label_for'];
+		$selected = self::sanitize_overlays( get_option( $name ) );
+		$overlays = $args['provider']->get_overlays();
+		if ( is_wp_error( $overlays ) ) {
+			// The style field above already says why the map server didn't answer.
+			$overlays = array(
+				'overlays' => array(),
+				'max'      => 0,
+			);
+		}
+		// Keep overlays that are chosen but not offered now, such as while the server is down.
+		foreach ( array_diff( $selected, array_keys( $overlays['overlays'] ) ) as $id ) {
+			$overlays['overlays'][ $id ] = $id;
+		}
+		if ( ! $overlays['overlays'] ) {
+			printf( '<p class="description">%s</p>', esc_html__( 'The map server offers no overlays.', 'simple-location' ) );
+			return;
+		}
+		// An empty value, so unchecking every box saves an empty list.
+		printf( '<input type="hidden" name="%s[]" value="" />', esc_attr( $name ) );
+		foreach ( $overlays['overlays'] as $id => $label ) {
+			printf(
+				'<label><input type="checkbox" name="%1$s[]" value="%2$s"%3$s /> %4$s</label><br />',
+				esc_attr( $name ),
+				esc_attr( $id ),
+				checked( in_array( $id, $selected, true ), true, false ),
+				esc_html( $label )
+			);
+		}
+		$description = __( 'Transparent layers drawn on top of the map, with their credit added to the map\'s.', 'simple-location' );
+		if ( $overlays['max'] ) {
+			/* translators: %d: Number of overlays. */
+			$description .= ' ' . sprintf( _n( 'The map server draws at most %d overlay.', 'The map server draws at most %d overlays.', $overlays['max'], 'simple-location' ), $overlays['max'] );
+		}
+		printf( '<p class="description">%s</p>', esc_html( $description ) );
 	}
 
 	/**
@@ -575,6 +1010,73 @@ class Map_Provider_StaticMap extends Map_Provider {
 	}
 
 	/**
+	 * Returns the request parameters for how the map is drawn, other than its markers and paths.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array List of array( name, value ) pairs: the provider and style, format, pixel density, overlays and scale bar.
+	 */
+	protected function get_display_params() {
+		$params = array();
+		foreach ( $this->get_style_args() as $name => $value ) {
+			$params[] = array( $name, $value );
+		}
+		if ( '' !== $this->format ) {
+			$params[] = array( 'format', $this->format );
+		}
+		if ( 1 !== $this->scale ) {
+			$params[] = array( 'scale', $this->scale );
+		}
+		if ( $this->overlays ) {
+			$params[] = array( 'overlay', implode( ',', $this->overlays ) );
+		}
+		$scalebar = $this->scalebar;
+		if ( 'site' === $scalebar ) {
+			$scalebar = 'imperial' === get_option( 'sloc_measurements', Loc_Config::measurement_default() ) ? 'imperial' : 'metric';
+		}
+		if ( '' !== $scalebar ) {
+			$params[] = array( 'scalebar', $scalebar );
+			$params[] = array( 'scalebar_position', $this->scalebar_position );
+		}
+		return $params;
+	}
+
+	/**
+	 * Returns a marker's options for the map server.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $type Marker type, 'pin' or 'dot'.
+	 * @param string $size Marker size, one of MARKER_SIZES.
+	 * @return string Options, as `key:value` pairs separated by semicolons.
+	 */
+	protected function get_marker_options( $type, $size ) {
+		return sprintf( 'icon:%1$s;size:%2$s;color:%3$s', $type, $size, ltrim( $this->marker_color, '#' ) );
+	}
+
+	/**
+	 * Returns the pixel densities the map server can draw this map at.
+	 *
+	 * The map server's size limit applies to the image it sends, so a high-density map is only offered when twice its
+	 * size fits.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return int[] Pixel densities.
+	 */
+	public function get_scales() {
+		$info   = $this->get_cached_api( '' );
+		$scales = is_array( $info ) && isset( $info['scales'] ) && is_array( $info['scales'] ) ? array_map( 'intval', $info['scales'] ) : array( 1, 2 );
+		if ( ! in_array( 2, $scales, true ) ) {
+			return array( 1 );
+		}
+		if ( ( $this->max_width && 2 * $this->width > $this->max_width ) || ( $this->max_height && 2 * $this->height > $this->max_height ) ) {
+			return array( 1 );
+		}
+		return array( 1, 2 );
+	}
+
+	/**
 	 * Returns the request parameter that identifies this site to the map server.
 	 *
 	 * @since 6.1.0
@@ -639,6 +1141,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 4.1.6
 	 * @since 6.1.0 Chooses the map with `provider` and `style`, draws a generated pin, and leaves the attribution to the map server.
 	 * @since 6.1.0 Sends the client key, signing the URL when there is a signing secret. Every parameter is percent-encoded.
+	 * @since 6.1.0 Uses the marker, image format, pixel density, overlay and scale bar settings.
 	 *
 	 * @return string|WP_Error URL, or an error without a map server URL.
 	 */
@@ -654,12 +1157,9 @@ class Map_Provider_StaticMap extends Map_Provider {
 			array( 'zoom', $this->map_zoom ),
 			array( 'latitude', $this->latitude ),
 			array( 'longitude', $this->longitude ),
-			array( 'marker', sprintf( 'lat:%1$s;lng:%2$s;icon:pin', $this->latitude, $this->longitude ) ),
+			array( 'marker', sprintf( 'lat:%1$s;lng:%2$s;%3$s', $this->latitude, $this->longitude, $this->get_marker_options( $this->marker, $this->marker_size ) ) ),
 		);
-		foreach ( $this->get_style_args() as $name => $value ) {
-			$params[] = array( $name, $value );
-		}
-		return $this->build_url( $params );
+		return $this->build_url( array_merge( $params, $this->get_display_params() ) );
 	}
 
 	/**
@@ -668,6 +1168,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 4.1.6
 	 * @since 6.1.0 Chooses the map with `provider` and `style`, draws generated dots, and leaves the attribution to the map server.
 	 * @since 6.1.0 Sends the client key, signing the URL when there is a signing secret. Every parameter is percent-encoded.
+	 * @since 6.1.0 Draws the path as an encoded polyline, with dots in the marker color, and uses the image format, pixel density, overlay and scale bar settings.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without a map server URL or without locations.
@@ -679,22 +1180,16 @@ class Map_Provider_StaticMap extends Map_Provider {
 		}
 		$this->load_server_limits();
 
-		$markers = array();
-		$path    = array();
-		foreach ( $locations as $location ) {
-			$markers[] = array( 'marker[]', sprintf( 'lat:%1$s;lng:%2$s;icon:dot;size:small', $location[0], $location[1] ) );
-			$path[]    = sprintf( '[%1$s,%2$s]', $location[1], $location[0] );
-		}
-
 		$params = array(
 			array( 'width', $this->width ),
 			array( 'height', $this->height ),
-			array( 'path[]', implode( ',', $path ) ),
+			// An encoded polyline, in latitude, longitude order, keeps the URL short.
+			array( 'polyline', 'enc:' . Sloc_Polyline::encode( $locations ) ),
 		);
-		foreach ( $this->get_style_args() as $name => $value ) {
-			$params[] = array( $name, $value );
+		foreach ( $locations as $location ) {
+			$params[] = array( 'marker[]', sprintf( 'lat:%1$s;lng:%2$s;%3$s', $location[0], $location[1], $this->get_marker_options( 'dot', 'small' ) ) );
 		}
-		return $this->build_url( array_merge( $params, $markers ) );
+		return $this->build_url( array_merge( $params, $this->get_display_params() ) );
 	}
 
 	/**

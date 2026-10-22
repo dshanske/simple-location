@@ -111,6 +111,7 @@ list is shortened to a few providers and styles.
 | `mapbox-styles.json` | `GET https://api.mapbox.com/styles/v1/{user}?access_token=…&limit=50` | Hand-built from docs |
 | `staticmap-api.json` | `GET {staticmap_url}/api/v1/` | Captured 2026-10-22 |
 | `staticmap-providers.json` | `GET {staticmap_url}/api/v1/providers` | Captured 2026-10-22, shortened |
+| `staticmap-overlays.json` | `GET {staticmap_url}/api/v1/overlays` | Captured 2026-10-22, shortened |
 
 ## Location providers (`location/`)
 
