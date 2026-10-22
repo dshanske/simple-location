@@ -171,22 +171,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	const FORMATS = array( 'png', 'png8', 'jpg', 'webp' );
 
 	/**
-	 * Scale bar settings: the map server's units, and 'site' for the site's units.
-	 *
-	 * @since 6.1.0
-	 * @var string[]
-	 */
-	const SCALEBARS = array( 'site', 'metric', 'imperial', 'both' );
-
-	/**
-	 * Corners of the map for the scale bar.
-	 *
-	 * @since 6.1.0
-	 * @var string[]
-	 */
-	const POSITIONS = array( 'bottomleft', 'bottomright', 'topleft', 'topright' );
-
-	/**
 	 * Longest map URL, in bytes, the site fetches with GET for its map cache. Longer maps are sent as a POST request.
 	 *
 	 * Web servers often refuse request lines over 8 KB, such as nginx with its default buffers.
@@ -231,22 +215,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @var string[]
 	 */
 	const ATTRIBUTIONS = array( 'image', 'text', 'below' );
-
-	/**
-	 * Scale bar: one of SCALEBARS, or an empty string for none.
-	 *
-	 * @since 6.1.0
-	 * @var string
-	 */
-	protected $scalebar = '';
-
-	/**
-	 * Corner of the scale bar, one of POSITIONS.
-	 *
-	 * @since 6.1.0
-	 * @var string
-	 */
-	protected $scalebar_position = 'bottomleft';
 
 	/**
 	 * Where the map's credit goes, one of ATTRIBUTIONS.
@@ -318,8 +286,8 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *     @type string   $marker            Marker type, 'pin' or 'dot'. Default the sloc_marker setting.
 	 *     @type string   $marker_color      Marker color, #rrggbb. Default the sloc_marker_color setting.
 	 *     @type string   $marker_size       Marker size, one of MARKER_SIZES. Default the sloc_marker_size setting.
-	 *     @type string   $scalebar          Scale bar, one of SCALEBARS, or empty for none. Default the sloc_staticmap_scalebar setting.
-	 *     @type string   $scalebar_position Scale bar corner, one of POSITIONS. Default the sloc_staticmap_scalebar_position setting.
+	 *     @type string   $scalebar          Scale bar, one of SCALEBARS, or empty for none. Default the sloc_scalebar setting.
+	 *     @type string   $scalebar_position Scale bar corner, one of POSITIONS. Default the sloc_scalebar_position setting.
 	 *     @type string[] $overlays          Overlay IDs. Default the sloc_staticmap_overlays setting.
 	 *     @type string   $attribution          Where the credit goes, one of ATTRIBUTIONS. Default the sloc_staticmap_attribution setting.
 	 *     @type string   $attribution_position Corner of the credit on the image, one of POSITIONS. Default the sloc_staticmap_attribution_position setting.
@@ -345,8 +313,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 		}
 
 		$display = array(
-			'scalebar'             => 'sanitize_scalebar',
-			'scalebar_position'    => 'sanitize_scalebar_position',
 			'overlays'             => 'sanitize_overlays',
 			'attribution'          => 'sanitize_attribution',
 			'attribution_position' => 'sanitize_attribution_position',
@@ -410,7 +376,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 4.1.6
 	 * @since 6.1.0 The style setting is sanitized to a provider and style ID, and defaults to the map server's default map.
 	 * @since 6.1.0 Registers the client ID, signing secret and client key settings.
-	 * @since 6.1.0 Registers the image format, scale bar and overlay settings.
+	 * @since 6.1.0 Registers the image format and overlay settings.
 	 * @since 6.1.0 Registers the attribution settings.
 	 */
 	public static function init() {
@@ -433,8 +399,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 
 		$settings = array(
 			'sloc_staticmap_format'               => array( 'Custom Static Map Image Format', '', 'sanitize_format' ),
-			'sloc_staticmap_scalebar'             => array( 'Custom Static Map Scale Bar', '', 'sanitize_scalebar' ),
-			'sloc_staticmap_scalebar_position'    => array( 'Custom Static Map Scale Bar Position', 'bottomleft', 'sanitize_scalebar_position' ),
 			'sloc_staticmap_attribution'          => array( 'Custom Static Map Attribution', 'image', 'sanitize_attribution' ),
 			'sloc_staticmap_attribution_position' => array( 'Custom Static Map Attribution Position', 'bottomright', 'sanitize_attribution_position' ),
 		);
@@ -470,7 +434,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 4.1.6
 	 * @since 6.1.0 The style field warns when the map server doesn't answer its query API.
 	 * @since 6.1.0 Adds the client ID, signing secret and client key fields.
-	 * @since 6.1.0 Adds the image format, scale bar and overlay fields.
+	 * @since 6.1.0 Adds the image format and overlay fields.
 	 * @since 6.1.0 Adds the attribution fields.
 	 */
 	public static function admin_init() {
@@ -529,25 +493,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 					'png8' => __( 'PNG with 256 colors (smaller)', 'simple-location' ),
 					'jpg'  => __( 'JPEG', 'simple-location' ),
 					'webp' => __( 'WebP (smallest, if the server supports it)', 'simple-location' ),
-				),
-			),
-			'sloc_staticmap_scalebar'             => array(
-				__( 'Static Map Scale Bar', 'simple-location' ),
-				array(
-					''         => __( 'None', 'simple-location' ),
-					'site'     => __( 'In the units the site displays', 'simple-location' ),
-					'metric'   => __( 'Metric', 'simple-location' ),
-					'imperial' => __( 'Imperial', 'simple-location' ),
-					'both'     => __( 'Metric and imperial', 'simple-location' ),
-				),
-			),
-			'sloc_staticmap_scalebar_position'    => array(
-				__( 'Static Map Scale Bar Position', 'simple-location' ),
-				array(
-					'bottomleft'  => __( 'Bottom left', 'simple-location' ),
-					'bottomright' => __( 'Bottom right', 'simple-location' ),
-					'topleft'     => __( 'Top left', 'simple-location' ),
-					'topright'    => __( 'Top right', 'simple-location' ),
 				),
 			),
 			'sloc_staticmap_attribution'          => array(
@@ -665,30 +610,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	protected static function sanitize_choice( $value, $allowed, $default ) {
 		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
 		return in_array( $value, $allowed, true ) ? $value : $default;
-	}
-
-	/**
-	 * Sanitizes the scale bar setting.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param mixed $value Scale bar.
-	 * @return string One of SCALEBARS, or an empty string for none.
-	 */
-	public static function sanitize_scalebar( $value ) {
-		return self::sanitize_choice( $value, self::SCALEBARS, '' );
-	}
-
-	/**
-	 * Sanitizes the scale bar position setting.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param mixed $value Corner.
-	 * @return string One of POSITIONS. Default 'bottomleft'.
-	 */
-	public static function sanitize_scalebar_position( $value ) {
-		return self::sanitize_choice( $value, self::POSITIONS, 'bottomleft' );
 	}
 
 	/**
@@ -1021,10 +942,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 				$params[] = array( 'attribution_position', $this->attribution_position );
 			}
 		}
-		$scalebar = $this->scalebar;
-		if ( 'site' === $scalebar ) {
-			$scalebar = 'imperial' === get_option( 'sloc_measurements', Loc_Config::measurement_default() ) ? 'imperial' : 'metric';
-		}
+		$scalebar = $this->get_scalebar_units();
 		if ( '' !== $scalebar ) {
 			$params[] = array( 'scalebar', $scalebar );
 			$params[] = array( 'scalebar_position', $this->scalebar_position );
@@ -1306,15 +1224,12 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 6.1.0
 	 *
 	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
-	 * @return array Setting values: the image format and markers, then the scale bar, overlays, attribution and credentials.
+	 * @return array Setting values: the image format, markers and scale bar, then the overlays, attribution and credentials.
 	 */
 	protected function get_cache_options( $locations = null ) {
 		return array_merge(
 			parent::get_cache_options( $locations ),
 			array(
-				$this->scalebar,
-				'site' === $this->scalebar ? get_option( 'sloc_measurements' ) : '',
-				$this->scalebar_position,
 				$this->overlays,
 				$this->attribution,
 				$this->attribution_position,

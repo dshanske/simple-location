@@ -1065,8 +1065,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 		update_option( 'sloc_marker', 'dot' );
 		update_option( 'sloc_marker_color', '#43A047' );
 		update_option( 'sloc_marker_size', 'large' );
-		update_option( 'sloc_staticmap_scalebar', 'both' );
-		update_option( 'sloc_staticmap_scalebar_position', 'topright' );
+		update_option( 'sloc_scalebar', 'both' );
+		update_option( 'sloc_scalebar_position', 'topright' );
 		update_option( 'sloc_staticmap_overlays', array( 'railways', 'seamarks' ) );
 		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
 
@@ -1101,7 +1101,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_staticmap_scalebar_site_units() {
 		update_option( 'sloc_staticmap_url', 'https://maps.example.org/' );
-		update_option( 'sloc_staticmap_scalebar', 'site' );
+		update_option( 'sloc_scalebar', 'site' );
 
 		update_option( 'sloc_measurements', 'imperial' );
 		$url = $this->parse( $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) )->get_the_static_map() )['query'];
@@ -1213,12 +1213,12 @@ class MapProvidersTest extends WP_UnitTestCase {
 		Map_Provider_StaticMap::init();
 		Map_Provider_StaticMap::admin_init();
 		$settings = get_registered_settings();
-		foreach ( array( 'format', 'scalebar', 'scalebar_position', 'overlays' ) as $name ) {
+		foreach ( array( 'format', 'overlays' ) as $name ) {
 			$this->assertArrayHasKey( 'sloc_staticmap_' . $name, $settings );
 			$this->assertArrayHasKey( 'sloc_staticmap_' . $name, $wp_settings_fields['simloc']['sloc_map'] );
 		}
-		// The marker settings are every provider's.
-		foreach ( array( 'marker', 'marker_color', 'marker_size' ) as $name ) {
+		// The marker and scale bar settings are every provider's.
+		foreach ( array( 'marker', 'marker_color', 'marker_size', 'scalebar', 'scalebar_position' ) as $name ) {
 			$this->assertArrayNotHasKey( 'sloc_staticmap_' . $name, $settings );
 		}
 		$this->assertSame( array( 'seamarks' ), sanitize_option( 'sloc_staticmap_overlays', array( '', 'seamarks' ) ) );
@@ -2421,5 +2421,69 @@ class MapProvidersTest extends WP_UnitTestCase {
 			)
 		)->get_the_static_map();
 		$this->assertStringNotContainsString( '43a047', $url );
+	}
+
+	/**
+	 * HERE draws the scale bar in the chosen units, with the site's units on top when it draws both.
+	 */
+	public function test_here_scalebar() {
+		$expected = array(
+			''         => null,
+			'metric'   => 'km',
+			'imperial' => 'mi',
+			'both'     => 'kmMi',
+		);
+		update_option( 'sloc_measurements', 'si' );
+		foreach ( $expected as $setting => $value ) {
+			$map = $this->provider( 'Map_Provider_Here', array( 'scalebar' => $setting ) );
+			foreach ( array( $map->get_the_static_map(), $map->get_archive_map( $this->locations ) ) as $url ) {
+				$this->assertSame( $value, $this->parse( $url )['query']['scaleBar'] ?? null, $setting );
+			}
+		}
+
+		update_option( 'sloc_measurements', 'imperial' );
+		foreach ( array( 'both' => 'miKm', 'site' => 'mi' ) as $setting => $value ) {
+			$map = $this->provider( 'Map_Provider_Here', array( 'scalebar' => $setting ) );
+			$this->assertSame( $value, $this->parse( $map->get_the_static_map() )['query']['scaleBar'], $setting );
+		}
+	}
+
+	/**
+	 * MapQuest draws a scale bar at the top, or at the bottom for a bottom corner, in its own units.
+	 */
+	public function test_mapquest_scalebar() {
+		$map = $this->provider( 'Map_Provider_Mapquest' );
+		$this->assertArrayNotHasKey( 'scalebar', $this->parse( $map->get_the_static_map() )['query'] );
+
+		$expected = array(
+			'bottomleft'  => 'true|bottom',
+			'bottomright' => 'true|bottom',
+			'topleft'     => 'true',
+			'topright'    => 'true',
+		);
+		foreach ( $expected as $position => $value ) {
+			$map = $this->provider(
+				'Map_Provider_Mapquest',
+				array(
+					'scalebar'          => 'imperial',
+					'scalebar_position' => $position,
+				)
+			);
+			foreach ( array( $map->get_the_static_map(), $map->get_archive_map( $this->locations ) ) as $url ) {
+				$this->assertSame( $value, $this->parse( $url )['query']['scalebar'], $position );
+			}
+		}
+	}
+
+	/**
+	 * The scale bar changes a stored map's parameters, including the site's units when the scale bar follows them.
+	 */
+	public function test_scalebar_cache_options() {
+		update_option( 'sloc_measurements', 'si' );
+		$none = $this->provider( 'Map_Provider_Geoapify' )->get_cache_args()['options'];
+		$site = $this->provider( 'Map_Provider_Geoapify', array( 'scalebar' => 'site' ) )->get_cache_args()['options'];
+		$this->assertNotSame( $none, $site );
+		update_option( 'sloc_measurements', 'imperial' );
+		$this->assertNotSame( $site, $this->provider( 'Map_Provider_Geoapify', array( 'scalebar' => 'site' ) )->get_cache_args()['options'] );
 	}
 }

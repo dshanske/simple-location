@@ -324,10 +324,10 @@ class Loc_Config {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 The default width comes from get_default_map_width().
-	 * @since 6.1.0 Registers the marker settings, used by every map provider.
+	 * @since 6.1.0 Registers the marker and scale bar settings, used by every map provider.
 	 */
 	public static function register_map_settings() {
-		self::migrate_marker_settings();
+		self::migrate_map_settings();
 
 		register_setting(
 			'simloc', // option group.
@@ -361,9 +361,11 @@ class Loc_Config {
 			)
 		);
 		$markers = array(
-			'sloc_marker'       => array( 'Simple Location Map Marker', 'pin', 'sanitize_marker' ),
-			'sloc_marker_color' => array( 'Simple Location Map Marker Color', Map_Provider::DEFAULT_MARKER_COLOR, 'sanitize_marker_color' ),
-			'sloc_marker_size'  => array( 'Simple Location Map Marker Size', 'medium', 'sanitize_marker_size' ),
+			'sloc_marker'            => array( 'Simple Location Map Marker', 'pin', 'sanitize_marker' ),
+			'sloc_marker_color'      => array( 'Simple Location Map Marker Color', Map_Provider::DEFAULT_MARKER_COLOR, 'sanitize_marker_color' ),
+			'sloc_marker_size'       => array( 'Simple Location Map Marker Size', 'medium', 'sanitize_marker_size' ),
+			'sloc_scalebar'          => array( 'Simple Location Map Scale Bar', '', 'sanitize_scalebar' ),
+			'sloc_scalebar_position' => array( 'Simple Location Map Scale Bar Position', 'bottomleft', 'sanitize_scalebar_position' ),
 		);
 		foreach ( $markers as $option => $setting ) {
 			register_setting(
@@ -391,16 +393,17 @@ class Loc_Config {
 	}
 
 	/**
-	 * Moves the custom static map's marker settings to the settings every map provider uses.
+	 * Moves the custom static map's marker and scale bar settings to the settings every map provider uses.
 	 *
-	 * The marker settings were the custom static map's own during 6.1.0 development, as sloc_staticmap_marker,
-	 * sloc_staticmap_marker_color and sloc_staticmap_marker_size. They are copied once, unless the new
-	 * setting is already saved, and the old options are deleted.
+	 * The settings were the custom static map's own during 6.1.0 development, as sloc_staticmap_marker,
+	 * sloc_staticmap_marker_color, sloc_staticmap_marker_size, sloc_staticmap_scalebar and
+	 * sloc_staticmap_scalebar_position. They are copied once, unless the new setting is already saved, and the
+	 * old options are deleted.
 	 *
 	 * @since 6.1.0
 	 */
-	public static function migrate_marker_settings() {
-		foreach ( array( 'marker', 'marker_color', 'marker_size' ) as $name ) {
+	public static function migrate_map_settings() {
+		foreach ( array( 'marker', 'marker_color', 'marker_size', 'scalebar', 'scalebar_position' ) as $name ) {
 			// A passed default stops the registered default from being returned for a missing option.
 			$old = get_option( 'sloc_staticmap_' . $name, null );
 			if ( null === $old ) {
@@ -638,7 +641,7 @@ class Loc_Config {
 	 * Initialize Settings Fields.
 	 *
 	 * @since 1.0.0
-	 * @since 6.1.0 Adds the marker fields to the map settings.
+	 * @since 6.1.0 Adds the marker and scale bar fields to the map settings.
 	 */
 	public static function admin_init() {
 		add_settings_section(
@@ -898,6 +901,43 @@ class Loc_Config {
 			array(
 				'label_for' => 'sloc_marker_color',
 				'type'      => 'color',
+			)
+		);
+
+		add_settings_field(
+			'sloc_scalebar',
+			__( 'Map Scale Bar', 'simple-location' ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for'   => 'sloc_scalebar',
+				'list'        => array(
+					''         => __( 'None', 'simple-location' ),
+					'site'     => __( 'In the units the site displays', 'simple-location' ),
+					'metric'   => __( 'Metric', 'simple-location' ),
+					'imperial' => __( 'Imperial', 'simple-location' ),
+					'both'     => __( 'Metric and imperial', 'simple-location' ),
+				),
+				'description' => __( 'Drawn by the custom static map, HERE and MapQuest; other providers have no scale bar. MapQuest chooses its own units.', 'simple-location' ),
+			)
+		);
+
+		add_settings_field(
+			'sloc_scalebar_position',
+			__( 'Map Scale Bar Position', 'simple-location' ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for'   => 'sloc_scalebar_position',
+				'list'        => array(
+					'bottomleft'  => __( 'Bottom left', 'simple-location' ),
+					'bottomright' => __( 'Bottom right', 'simple-location' ),
+					'topleft'     => __( 'Top left', 'simple-location' ),
+					'topright'    => __( 'Top right', 'simple-location' ),
+				),
+				'description' => __( 'HERE places its scale bar itself, and MapQuest only at the top or bottom.', 'simple-location' ),
 			)
 		);
 

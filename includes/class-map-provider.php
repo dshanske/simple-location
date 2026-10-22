@@ -170,6 +170,38 @@ abstract class Map_Provider extends Sloc_Provider {
 	const DEFAULT_MARKER_COLOR = '#d32f2f';
 
 	/**
+	 * Scale bar settings: the units, and 'site' for the units the site displays.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const SCALEBARS = array( 'site', 'metric', 'imperial', 'both' );
+
+	/**
+	 * Corners of the map, for the scale bar.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const POSITIONS = array( 'bottomleft', 'bottomright', 'topleft', 'topright' );
+
+	/**
+	 * Scale bar: one of SCALEBARS, or an empty string for none. Only some providers draw one.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $scalebar = '';
+
+	/**
+	 * Corner of the scale bar, one of POSITIONS, as near as the provider can place it.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $scalebar_position = 'bottomleft';
+
+	/**
 	 * Marker shape for a single location, one of MARKERS.
 	 *
 	 * Providers without a dot draw their smallest pin instead.
@@ -245,6 +277,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.0.0 Without a usable width setting, the default width is the theme's content width, as for the setting itself.
 	 * @since 6.1.0 Added the `format` argument.
 	 * @since 6.1.0 Added the `marker`, `marker_color` and `marker_size` arguments.
+	 * @since 6.1.0 Added the `scalebar` and `scalebar_position` arguments.
 	 *
 	 * @param array $args {
 	 *  Arguments.
@@ -261,6 +294,8 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *  @type string $marker Marker shape, one of MARKERS. Default the sloc_marker setting.
 	 *  @type string $marker_color Marker color, #rrggbb. Default the sloc_marker_color setting.
 	 *  @type string $marker_size Marker size, one of MARKER_SIZES. Default the sloc_marker_size setting.
+	 *  @type string $scalebar Scale bar, one of SCALEBARS, or empty for none. Default the sloc_scalebar setting.
+	 *  @type string $scalebar_position Scale bar corner, one of POSITIONS. Default the sloc_scalebar_position setting.
 	 */
 	public function __construct( $args = array() ) {
 		// The setting's registered default is the content width, but it isn't registered before init.
@@ -269,20 +304,22 @@ abstract class Map_Provider extends Sloc_Provider {
 			$width = Loc_Config::get_default_map_width();
 		}
 		$defaults = array(
-			'width'        => $width,
-			'height'       => round( $width / get_option( 'sloc_aspect', ( 16 / 9 ) ) ),
-			'map_zoom'     => get_option( 'sloc_zoom' ),
-			'api'          => '',
-			'latitude'     => null,
-			'longitude'    => null,
-			'altitude'     => null,
-			'location'     => '',
-			'user'         => '',
-			'style'        => '',
-			'format'       => get_option( 'sloc_' . $this->slug . '_format', '' ),
-			'marker'       => get_option( 'sloc_marker', 'pin' ),
-			'marker_color' => get_option( 'sloc_marker_color', self::DEFAULT_MARKER_COLOR ),
-			'marker_size'  => get_option( 'sloc_marker_size', 'medium' ),
+			'width'             => $width,
+			'height'            => round( $width / get_option( 'sloc_aspect', ( 16 / 9 ) ) ),
+			'map_zoom'          => get_option( 'sloc_zoom' ),
+			'api'               => '',
+			'latitude'          => null,
+			'longitude'         => null,
+			'altitude'          => null,
+			'location'          => '',
+			'user'              => '',
+			'style'             => '',
+			'format'            => get_option( 'sloc_' . $this->slug . '_format', '' ),
+			'marker'            => get_option( 'sloc_marker', 'pin' ),
+			'marker_color'      => get_option( 'sloc_marker_color', self::DEFAULT_MARKER_COLOR ),
+			'marker_size'       => get_option( 'sloc_marker_size', 'medium' ),
+			'scalebar'          => get_option( 'sloc_scalebar', '' ),
+			'scalebar_position' => get_option( 'sloc_scalebar_position', 'bottomleft' ),
 		);
 		/** This filter is documented in includes/class-geo-provider.php */
 		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
@@ -300,6 +337,9 @@ abstract class Map_Provider extends Sloc_Provider {
 		$this->marker       = self::sanitize_marker( $r['marker'] );
 		$this->marker_color = self::sanitize_marker_color( $r['marker_color'] );
 		$this->marker_size  = self::sanitize_marker_size( $r['marker_size'] );
+
+		$this->scalebar          = self::sanitize_scalebar( $r['scalebar'] );
+		$this->scalebar_position = self::sanitize_scalebar_position( $r['scalebar_position'] );
 		$this->set( $r['latitude'], $r['longitude'], $r['altitude'] );
 		$this->fit_size();
 
@@ -425,6 +465,57 @@ abstract class Map_Provider extends Sloc_Provider {
 	public static function sanitize_marker_size( $value ) {
 		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
 		return in_array( $value, self::MARKER_SIZES, true ) ? $value : 'medium';
+	}
+
+	/**
+	 * Sanitizes the scale bar setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Scale bar.
+	 * @return string One of SCALEBARS, or an empty string for none.
+	 */
+	public static function sanitize_scalebar( $value ) {
+		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
+		return in_array( $value, self::SCALEBARS, true ) ? $value : '';
+	}
+
+	/**
+	 * Sanitizes the scale bar position setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Corner.
+	 * @return string One of POSITIONS. Default 'bottomleft'.
+	 */
+	public static function sanitize_scalebar_position( $value ) {
+		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
+		return in_array( $value, self::POSITIONS, true ) ? $value : 'bottomleft';
+	}
+
+	/**
+	 * Returns the units of the scale bar, with the site's units in place of 'site'.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string 'metric', 'imperial', 'both', or an empty string for no scale bar.
+	 */
+	public function get_scalebar_units() {
+		if ( 'site' !== $this->scalebar ) {
+			return $this->scalebar;
+		}
+		return $this->site_uses_imperial() ? 'imperial' : 'metric';
+	}
+
+	/**
+	 * Whether the site displays imperial units.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return bool
+	 */
+	protected function site_uses_imperial() {
+		return 'imperial' === get_option( 'sloc_measurements', Loc_Config::measurement_default() );
 	}
 
 	/**
@@ -682,7 +773,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @return array Setting values.
 	 */
 	protected function get_cache_options( $locations = null ) {
-		return array( $this->format, $this->marker, $this->marker_color, $this->marker_size );
+		return array( $this->format, $this->marker, $this->marker_color, $this->marker_size, $this->get_scalebar_units(), $this->scalebar_position );
 	}
 
 	/**
