@@ -324,7 +324,7 @@ class Loc_Config {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 The default width comes from get_default_map_width().
-	 * @since 6.1.0 Registers the marker and scale bar settings, used by every map provider.
+	 * @since 6.1.0 Registers the marker, scale bar and attribution settings, used by every map provider.
 	 */
 	public static function register_map_settings() {
 		self::migrate_map_settings();
@@ -361,11 +361,13 @@ class Loc_Config {
 			)
 		);
 		$markers = array(
-			'sloc_marker'            => array( 'Simple Location Map Marker', 'pin', 'sanitize_marker' ),
-			'sloc_marker_color'      => array( 'Simple Location Map Marker Color', Map_Provider::DEFAULT_MARKER_COLOR, 'sanitize_marker_color' ),
-			'sloc_marker_size'       => array( 'Simple Location Map Marker Size', 'medium', 'sanitize_marker_size' ),
-			'sloc_scalebar'          => array( 'Simple Location Map Scale Bar', '', 'sanitize_scalebar' ),
-			'sloc_scalebar_position' => array( 'Simple Location Map Scale Bar Position', 'bottomleft', 'sanitize_scalebar_position' ),
+			'sloc_marker'               => array( 'Simple Location Map Marker', 'pin', 'sanitize_marker' ),
+			'sloc_marker_color'         => array( 'Simple Location Map Marker Color', Map_Provider::DEFAULT_MARKER_COLOR, 'sanitize_marker_color' ),
+			'sloc_marker_size'          => array( 'Simple Location Map Marker Size', 'medium', 'sanitize_marker_size' ),
+			'sloc_scalebar'             => array( 'Simple Location Map Scale Bar', '', 'sanitize_scalebar' ),
+			'sloc_scalebar_position'    => array( 'Simple Location Map Scale Bar Position', 'bottomleft', 'sanitize_scalebar_position' ),
+			'sloc_attribution'          => array( 'Simple Location Map Attribution', 'image', 'sanitize_attribution' ),
+			'sloc_attribution_position' => array( 'Simple Location Map Attribution Position', 'bottomright', 'sanitize_attribution_position' ),
 		);
 		foreach ( $markers as $option => $setting ) {
 			register_setting(
@@ -393,17 +395,17 @@ class Loc_Config {
 	}
 
 	/**
-	 * Moves the custom static map's marker and scale bar settings to the settings every map provider uses.
+	 * Moves the custom static map's marker, scale bar and attribution settings to the settings every map provider uses.
 	 *
 	 * The settings were the custom static map's own during 6.1.0 development, as sloc_staticmap_marker,
-	 * sloc_staticmap_marker_color, sloc_staticmap_marker_size, sloc_staticmap_scalebar and
-	 * sloc_staticmap_scalebar_position. They are copied once, unless the new setting is already saved, and the
-	 * old options are deleted.
+	 * sloc_staticmap_marker_color, sloc_staticmap_marker_size, sloc_staticmap_scalebar,
+	 * sloc_staticmap_scalebar_position, sloc_staticmap_attribution and sloc_staticmap_attribution_position. They
+	 * are copied once, unless the new setting is already saved, and the old options are deleted.
 	 *
 	 * @since 6.1.0
 	 */
 	public static function migrate_map_settings() {
-		foreach ( array( 'marker', 'marker_color', 'marker_size', 'scalebar', 'scalebar_position' ) as $name ) {
+		foreach ( array( 'marker', 'marker_color', 'marker_size', 'scalebar', 'scalebar_position', 'attribution', 'attribution_position' ) as $name ) {
 			// A passed default stops the registered default from being returned for a missing option.
 			$old = get_option( 'sloc_staticmap_' . $name, null );
 			if ( null === $old ) {
@@ -641,7 +643,7 @@ class Loc_Config {
 	 * Initialize Settings Fields.
 	 *
 	 * @since 1.0.0
-	 * @since 6.1.0 Adds the marker and scale bar fields to the map settings.
+	 * @since 6.1.0 Adds the marker, scale bar and attribution fields to the map settings.
 	 */
 	public static function admin_init() {
 		add_settings_section(
@@ -938,6 +940,41 @@ class Loc_Config {
 					'topright'    => __( 'Top right', 'simple-location' ),
 				),
 				'description' => __( 'HERE places its scale bar itself, and MapQuest only at the top or bottom.', 'simple-location' ),
+			)
+		);
+
+		add_settings_field(
+			'sloc_attribution',
+			__( 'Map Attribution', 'simple-location' ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for'   => 'sloc_attribution',
+				'list'        => array(
+					'image' => __( 'On the map, as the provider draws it', 'simple-location' ),
+					'text'  => __( 'On the map, as text only, without logos (custom static map only)', 'simple-location' ),
+					'below' => __( 'Under the map, with links', 'simple-location' ),
+				),
+				'description' => __( 'Map providers\' terms require their credit. The custom static map, HERE and Mapbox can print it under the map; Mapbox keeps its logo on the map, and HERE archive maps keep their credit on the map. Other providers, and any credit that can\'t be fetched, stay on the map. Check the terms of the providers you use: some, such as Esri, require their logo.', 'simple-location' ),
+			)
+		);
+
+		add_settings_field(
+			'sloc_attribution_position',
+			__( 'Map Attribution Position', 'simple-location' ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for'   => 'sloc_attribution_position',
+				'list'        => array(
+					'bottomright' => __( 'Bottom right', 'simple-location' ),
+					'bottomleft'  => __( 'Bottom left', 'simple-location' ),
+					'topright'    => __( 'Top right', 'simple-location' ),
+					'topleft'     => __( 'Top left', 'simple-location' ),
+				),
+				'description' => __( 'For a credit drawn on the map by the custom static map.', 'simple-location' ),
 			)
 		);
 

@@ -23,7 +23,7 @@ add_filter(
 
 ## Files
 
-- [includes/map/class-map-provider-staticmap.php:367](https://github.com/dshanske/simple-location/blob/trunk/includes/map/class-map-provider-staticmap.php#L367)
+- [includes/map/class-map-provider-staticmap.php:340](https://github.com/dshanske/simple-location/blob/trunk/includes/map/class-map-provider-staticmap.php#L340)
 ```php
 apply_filters( 'sloc_staticmap_max_size', $max_size )
 ```

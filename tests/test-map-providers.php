@@ -1235,8 +1235,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'attribution_position', $url );
 		$this->assertSame( '', $map->get_attribution_html() );
 
-		update_option( 'sloc_staticmap_attribution', 'text' );
-		update_option( 'sloc_staticmap_attribution_position', 'topleft' );
+		update_option( 'sloc_attribution', 'text' );
+		update_option( 'sloc_attribution_position', 'topleft' );
 		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
 		foreach ( array( $map->get_the_static_map(), $map->get_archive_map( $this->locations ) ) as $image ) {
 			$url = $this->parse( $image )['query'];
@@ -1349,16 +1349,20 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'topleft', Map_Provider_StaticMap::sanitize_attribution_position( 'topleft' ) );
 		$this->assertSame( 'bottomright', Map_Provider_StaticMap::sanitize_attribution_position( 'center' ) );
 
+		// The settings are every provider's.
 		Map_Provider_StaticMap::init();
-		Map_Provider_StaticMap::admin_init();
-		$this->assertArrayHasKey( 'sloc_staticmap_attribution', get_registered_settings() );
-		$this->assertArrayHasKey( 'sloc_staticmap_attribution_position', get_registered_settings() );
-		$field = $wp_settings_fields['simloc']['sloc_map']['sloc_staticmap_attribution'];
+		$this->assertArrayNotHasKey( 'sloc_staticmap_attribution', get_registered_settings() );
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+		Loc_Config::register_map_settings();
+		Loc_Config::admin_init();
+		$this->assertArrayHasKey( 'sloc_attribution', get_registered_settings() );
+		$this->assertArrayHasKey( 'sloc_attribution_position', get_registered_settings() );
+		$field = $wp_settings_fields['simloc']['sloc_map']['sloc_attribution'];
 		ob_start();
 		call_user_func( $field['callback'], $field['args'] );
 		$html = ob_get_clean();
 		$this->assertStringContainsString( '<option value="below"', $html );
-		$this->assertStringContainsString( '<p class="description">The map providers&#039; terms require their credit.', $html );
+		$this->assertStringContainsString( '<p class="description">Map providers&#039; terms require their credit.', $html );
 	}
 
 	/**
@@ -2485,5 +2489,104 @@ class MapProvidersTest extends WP_UnitTestCase {
 		$this->assertNotSame( $none, $site );
 		update_option( 'sloc_measurements', 'imperial' );
 		$this->assertNotSame( $site, $this->provider( 'Map_Provider_Geoapify', array( 'scalebar' => 'site' ) )->get_cache_args()['options'] );
+	}
+
+	/**
+	 * HERE's copyright notice goes under single maps, built from the copyright list for the map's style, area and zoom.
+	 */
+	public function test_here_attribution_below() {
+		delete_transient( 'sloc_here_copyright' );
+		$this->mock_http( array( 'image.maps.hereapi.com/mia/v3/copyright' => array( 'body' => $this->fixture( 'map/here-copyright.json' ) ) ) );
+		$year = gmdate( 'Y' );
+
+		$map = $this->provider(
+			'Map_Provider_Here',
+			array(
+				'style'       => 'explore.day',
+				'attribution' => 'below',
+			)
+		);
+		$this->assertSame( '<p class="sloc-map-attribution">© ' . $year . ' HERE, Example US Data</p>', $map->get_attribution_html() );
+		$this->assertSame( 'false', $this->parse( $map->get_the_static_map() )['query']['copyright'] );
+		$this->assertStringEndsWith( '</a><p class="sloc-map-attribution">© ' . $year . ' HERE, Example US Data</p>', $map->get_the_map() );
+		// Archive maps have no single location, so their notice stays on the image.
+		$this->assertStringNotContainsString( 'copyright=', $map->get_archive_map( $this->locations ) );
+
+		// The list is fetched once a day.
+		$requests = array_filter( $this->http_requests, fn( $request ) => false !== strpos( $request['url'], '/mia/v3/copyright' ) );
+		$this->assertCount( 1, $requests );
+		$this->assertStringContainsString( 'apiKey=KEY', array_values( $requests )[0]['url'] );
+
+		// The style's layers, the zoom and the area choose the labels, including across the antimeridian.
+		$map = $this->provider(
+			'Map_Provider_Here',
+			array(
+				'style'       => 'satellite.day',
+				'attribution' => 'below',
+				'latitude'    => -17.7,
+				'longitude'   => 178.0,
+				'map_zoom'    => 3,
+			)
+		);
+		$this->assertSame( '<p class="sloc-map-attribution">© ' . $year . ' HERE, Example Pacific Data, Example Low Zoom Data, Example Imagery</p>', $map->get_attribution_html() );
+	}
+
+	/**
+	 * Without the copyright list, or with the credit on the image, HERE draws its notice on the map.
+	 */
+	public function test_here_attribution_on_image() {
+		delete_transient( 'sloc_here_copyright' );
+		$this->mock_http( array( 'image.maps.hereapi.com/mia/v3/copyright' => array( 'code' => 503 ) ) );
+		$map = $this->provider( 'Map_Provider_Here', array( 'attribution' => 'below' ) );
+		$this->assertSame( '', $map->get_attribution_html() );
+		$this->assertArrayNotHasKey( 'copyright', $this->parse( $map->get_the_static_map() )['query'] );
+		$this->assertFalse( get_transient( 'sloc_here_copyright' ) );
+
+		$map = $this->provider( 'Map_Provider_Here' );
+		$this->assertSame( '', $map->get_attribution_html() );
+		$this->assertArrayNotHasKey( 'copyright', $this->parse( $map->get_the_static_map() )['query'] );
+		$this->assertStringEndsWith( '</a>', $map->get_the_map() );
+	}
+
+	/**
+	 * Mapbox's credit can go under the map, with its logo left on the image.
+	 */
+	public function test_mapbox_attribution_below() {
+		$map = $this->provider(
+			'Map_Provider_Mapbox',
+			array(
+				'style'       => 'streets-v11',
+				'attribution' => 'below',
+			)
+		);
+		$html = '<p class="sloc-map-attribution"><a href="https://www.mapbox.com/about/maps/">© Mapbox</a> <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a> <a href="https://apps.mapbox.com/feedback/">Improve this map</a></p>';
+		$this->assertSame( $html, $map->get_attribution_html() );
+		$this->assertStringEndsWith( '?access_token=KEY&attribution=false', $map->get_the_static_map() );
+		$this->assertStringEndsWith( '?access_token=KEY&attribution=false', $map->get_archive_map( $this->locations ) );
+		$this->assertStringNotContainsString( 'logo=', $map->get_the_static_map() );
+		$this->assertStringEndsWith( '</a>' . $html, $map->get_the_map() );
+
+		$map = $this->provider(
+			'Map_Provider_Mapbox',
+			array(
+				'style'       => 'satellite-streets-v11',
+				'attribution' => 'below',
+			)
+		);
+		$this->assertStringContainsString( '<a href="https://www.maxar.com/">© Maxar</a>', $map->get_attribution_html() );
+
+		$map = $this->provider( 'Map_Provider_Mapbox', array( 'style' => 'streets-v11' ) );
+		$this->assertSame( '', $map->get_attribution_html() );
+		$this->assertStringNotContainsString( 'attribution=', $map->get_the_static_map() );
+	}
+
+	/**
+	 * Providers that can't move their credit keep it on the image, whatever the setting.
+	 */
+	public function test_attribution_stays_on_image() {
+		foreach ( array( 'Map_Provider_Google', 'Map_Provider_Geoapify', 'Map_Provider_LocationIQ', 'Map_Provider_Mapquest', 'Map_Provider_TomTom' ) as $class ) {
+			$map = $this->provider( $class, array( 'attribution' => 'below' ) );
+			$this->assertSame( '', $map->get_attribution_html(), $class );
+		}
 	}
 }

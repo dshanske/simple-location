@@ -208,31 +208,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	protected $cacheable = true;
 
 	/**
-	 * Where the map's credit goes: drawn on the image with the provider's logo, drawn on the image as text only, or
-	 * printed under the map.
-	 *
-	 * @since 6.1.0
-	 * @var string[]
-	 */
-	const ATTRIBUTIONS = array( 'image', 'text', 'below' );
-
-	/**
-	 * Where the map's credit goes, one of ATTRIBUTIONS.
-	 *
-	 * @since 6.1.0
-	 * @var string
-	 */
-	protected $attribution = 'image';
-
-	/**
-	 * Corner of the credit drawn on the image, one of POSITIONS.
-	 *
-	 * @since 6.1.0
-	 * @var string
-	 */
-	protected $attribution_position = 'bottomright';
-
-	/**
 	 * IDs of the map server's overlays to draw on the map.
 	 *
 	 * @since 6.1.0
@@ -289,8 +264,8 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 *     @type string   $scalebar          Scale bar, one of SCALEBARS, or empty for none. Default the sloc_scalebar setting.
 	 *     @type string   $scalebar_position Scale bar corner, one of POSITIONS. Default the sloc_scalebar_position setting.
 	 *     @type string[] $overlays          Overlay IDs. Default the sloc_staticmap_overlays setting.
-	 *     @type string   $attribution          Where the credit goes, one of ATTRIBUTIONS. Default the sloc_staticmap_attribution setting.
-	 *     @type string   $attribution_position Corner of the credit on the image, one of POSITIONS. Default the sloc_staticmap_attribution_position setting.
+	 *     @type string   $attribution          Where the credit goes, one of ATTRIBUTIONS. Default the sloc_attribution setting.
+	 *     @type string   $attribution_position Corner of the credit on the image, one of POSITIONS. Default the sloc_attribution_position setting.
 	 * }
 	 */
 	public function __construct( $args = array() ) {
@@ -313,9 +288,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 		}
 
 		$display = array(
-			'overlays'             => 'sanitize_overlays',
-			'attribution'          => 'sanitize_attribution',
-			'attribution_position' => 'sanitize_attribution_position',
+			'overlays' => 'sanitize_overlays',
 		);
 		foreach ( $display as $property => $sanitize ) {
 			$this->{$property} = self::$sanitize( $args[ $property ] ?? get_option( 'sloc_staticmap_' . $property, $this->{$property} ) );
@@ -377,7 +350,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 6.1.0 The style setting is sanitized to a provider and style ID, and defaults to the map server's default map.
 	 * @since 6.1.0 Registers the client ID, signing secret and client key settings.
 	 * @since 6.1.0 Registers the image format and overlay settings.
-	 * @since 6.1.0 Registers the attribution settings.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Custom Static Map URL', 'simple-location' ), 'sloc_staticmap_url' );
@@ -398,9 +370,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 		);
 
 		$settings = array(
-			'sloc_staticmap_format'               => array( 'Custom Static Map Image Format', '', 'sanitize_format' ),
-			'sloc_staticmap_attribution'          => array( 'Custom Static Map Attribution', 'image', 'sanitize_attribution' ),
-			'sloc_staticmap_attribution_position' => array( 'Custom Static Map Attribution Position', 'bottomright', 'sanitize_attribution_position' ),
+			'sloc_staticmap_format' => array( 'Custom Static Map Image Format', '', 'sanitize_format' ),
 		);
 		foreach ( $settings as $option => $setting ) {
 			register_setting(
@@ -435,7 +405,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 6.1.0 The style field warns when the map server doesn't answer its query API.
 	 * @since 6.1.0 Adds the client ID, signing secret and client key fields.
 	 * @since 6.1.0 Adds the image format and overlay fields.
-	 * @since 6.1.0 Adds the attribution fields.
 	 */
 	public static function admin_init() {
 		self::add_settings_url_parameter( __( 'Custom Static Map', 'simple-location' ), 'sloc_staticmap_url' );
@@ -485,7 +454,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 		);
 
 		$lists = array(
-			'sloc_staticmap_format'               => array(
+			'sloc_staticmap_format' => array(
 				__( 'Static Map Image Format', 'simple-location' ),
 				array(
 					''     => __( 'Default of the map server', 'simple-location' ),
@@ -493,24 +462,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 					'png8' => __( 'PNG with 256 colors (smaller)', 'simple-location' ),
 					'jpg'  => __( 'JPEG', 'simple-location' ),
 					'webp' => __( 'WebP (smallest, if the server supports it)', 'simple-location' ),
-				),
-			),
-			'sloc_staticmap_attribution'          => array(
-				__( 'Static Map Attribution', 'simple-location' ),
-				array(
-					'image' => __( 'On the map, as the map server draws it', 'simple-location' ),
-					'text'  => __( 'On the map, as text only, without logos', 'simple-location' ),
-					'below' => __( 'Under the map, with links', 'simple-location' ),
-				),
-				__( 'The map providers\' terms require their credit. Under the map, the full credit is shown with links; if the map server can\'t supply it, the credit is drawn on the map instead. Check the terms of the providers you use: some, such as Esri, require their logo.', 'simple-location' ),
-			),
-			'sloc_staticmap_attribution_position' => array(
-				__( 'Static Map Attribution Position', 'simple-location' ),
-				array(
-					'bottomright' => __( 'Bottom right', 'simple-location' ),
-					'bottomleft'  => __( 'Bottom left', 'simple-location' ),
-					'topright'    => __( 'Top right', 'simple-location' ),
-					'topleft'     => __( 'Top left', 'simple-location' ),
 				),
 			),
 		);
@@ -595,45 +546,6 @@ class Map_Provider_StaticMap extends Map_Provider {
 			return '';
 		}
 		return $style;
-	}
-
-	/**
-	 * Returns a value if it is one of a list, or a default.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param mixed    $value   Value.
-	 * @param string[] $allowed Allowed values.
-	 * @param string   $default Value returned for anything else.
-	 * @return string
-	 */
-	protected static function sanitize_choice( $value, $allowed, $default ) {
-		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
-		return in_array( $value, $allowed, true ) ? $value : $default;
-	}
-
-	/**
-	 * Sanitizes the attribution setting.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param mixed $value Where the credit goes.
-	 * @return string One of ATTRIBUTIONS. Default 'image'.
-	 */
-	public static function sanitize_attribution( $value ) {
-		return self::sanitize_choice( $value, self::ATTRIBUTIONS, 'image' );
-	}
-
-	/**
-	 * Sanitizes the attribution position setting.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @param mixed $value Corner.
-	 * @return string One of POSITIONS. Default 'bottomright'.
-	 */
-	public static function sanitize_attribution_position( $value ) {
-		return self::sanitize_choice( $value, self::POSITIONS, 'bottomright' );
 	}
 
 	/**
@@ -1224,15 +1136,13 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 6.1.0
 	 *
 	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
-	 * @return array Setting values: the image format, markers and scale bar, then the overlays, attribution and credentials.
+	 * @return array Setting values: the image format, markers, scale bar and attribution, then the overlays and credentials.
 	 */
 	protected function get_cache_options( $locations = null ) {
 		return array_merge(
 			parent::get_cache_options( $locations ),
 			array(
 				$this->overlays,
-				$this->attribution,
-				$this->attribution_position,
 				$this->get_credentials(),
 			)
 		);

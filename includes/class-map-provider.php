@@ -202,6 +202,31 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $scalebar_position = 'bottomleft';
 
 	/**
+	 * Where the map's credit goes: drawn on the image with the provider's logo, drawn on the image as text only, or
+	 * printed under the map. Providers that can't do one draw the credit on the image.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const ATTRIBUTIONS = array( 'image', 'text', 'below' );
+
+	/**
+	 * Where the map's credit goes, one of ATTRIBUTIONS.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $attribution = 'image';
+
+	/**
+	 * Corner of the credit drawn on the image, one of POSITIONS, for providers that can move it.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $attribution_position = 'bottomright';
+
+	/**
 	 * Marker shape for a single location, one of MARKERS.
 	 *
 	 * Providers without a dot draw their smallest pin instead.
@@ -278,6 +303,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.1.0 Added the `format` argument.
 	 * @since 6.1.0 Added the `marker`, `marker_color` and `marker_size` arguments.
 	 * @since 6.1.0 Added the `scalebar` and `scalebar_position` arguments.
+	 * @since 6.1.0 Added the `attribution` and `attribution_position` arguments.
 	 *
 	 * @param array $args {
 	 *  Arguments.
@@ -296,6 +322,9 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *  @type string $marker_size Marker size, one of MARKER_SIZES. Default the sloc_marker_size setting.
 	 *  @type string $scalebar Scale bar, one of SCALEBARS, or empty for none. Default the sloc_scalebar setting.
 	 *  @type string $scalebar_position Scale bar corner, one of POSITIONS. Default the sloc_scalebar_position setting.
+	 *  @type string $attribution Where the credit goes, one of ATTRIBUTIONS. Default the sloc_attribution setting.
+	 *  @type string $attribution_position Corner of the credit on the image, one of POSITIONS. Default the
+	 *                                     sloc_attribution_position setting.
 	 */
 	public function __construct( $args = array() ) {
 		// The setting's registered default is the content width, but it isn't registered before init.
@@ -304,22 +333,24 @@ abstract class Map_Provider extends Sloc_Provider {
 			$width = Loc_Config::get_default_map_width();
 		}
 		$defaults = array(
-			'width'             => $width,
-			'height'            => round( $width / get_option( 'sloc_aspect', ( 16 / 9 ) ) ),
-			'map_zoom'          => get_option( 'sloc_zoom' ),
-			'api'               => '',
-			'latitude'          => null,
-			'longitude'         => null,
-			'altitude'          => null,
-			'location'          => '',
-			'user'              => '',
-			'style'             => '',
-			'format'            => get_option( 'sloc_' . $this->slug . '_format', '' ),
-			'marker'            => get_option( 'sloc_marker', 'pin' ),
-			'marker_color'      => get_option( 'sloc_marker_color', self::DEFAULT_MARKER_COLOR ),
-			'marker_size'       => get_option( 'sloc_marker_size', 'medium' ),
-			'scalebar'          => get_option( 'sloc_scalebar', '' ),
-			'scalebar_position' => get_option( 'sloc_scalebar_position', 'bottomleft' ),
+			'width'                => $width,
+			'height'               => round( $width / get_option( 'sloc_aspect', ( 16 / 9 ) ) ),
+			'map_zoom'             => get_option( 'sloc_zoom' ),
+			'api'                  => '',
+			'latitude'             => null,
+			'longitude'            => null,
+			'altitude'             => null,
+			'location'             => '',
+			'user'                 => '',
+			'style'                => '',
+			'format'               => get_option( 'sloc_' . $this->slug . '_format', '' ),
+			'marker'               => get_option( 'sloc_marker', 'pin' ),
+			'marker_color'         => get_option( 'sloc_marker_color', self::DEFAULT_MARKER_COLOR ),
+			'marker_size'          => get_option( 'sloc_marker_size', 'medium' ),
+			'scalebar'             => get_option( 'sloc_scalebar', '' ),
+			'scalebar_position'    => get_option( 'sloc_scalebar_position', 'bottomleft' ),
+			'attribution'          => get_option( 'sloc_attribution', 'image' ),
+			'attribution_position' => get_option( 'sloc_attribution_position', 'bottomright' ),
 		);
 		/** This filter is documented in includes/class-geo-provider.php */
 		$defaults = apply_filters( 'sloc_geo_provider_defaults', $defaults );
@@ -340,6 +371,9 @@ abstract class Map_Provider extends Sloc_Provider {
 
 		$this->scalebar          = self::sanitize_scalebar( $r['scalebar'] );
 		$this->scalebar_position = self::sanitize_scalebar_position( $r['scalebar_position'] );
+
+		$this->attribution          = self::sanitize_attribution( $r['attribution'] );
+		$this->attribution_position = self::sanitize_attribution_position( $r['attribution_position'] );
 		$this->set( $r['latitude'], $r['longitude'], $r['altitude'] );
 		$this->fit_size();
 
@@ -491,6 +525,32 @@ abstract class Map_Provider extends Sloc_Provider {
 	public static function sanitize_scalebar_position( $value ) {
 		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
 		return in_array( $value, self::POSITIONS, true ) ? $value : 'bottomleft';
+	}
+
+	/**
+	 * Sanitizes the attribution setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Where the credit goes.
+	 * @return string One of ATTRIBUTIONS. Default 'image'.
+	 */
+	public static function sanitize_attribution( $value ) {
+		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
+		return in_array( $value, self::ATTRIBUTIONS, true ) ? $value : 'image';
+	}
+
+	/**
+	 * Sanitizes the attribution position setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Corner.
+	 * @return string One of POSITIONS. Default 'bottomright'.
+	 */
+	public static function sanitize_attribution_position( $value ) {
+		$value = is_string( $value ) ? strtolower( trim( $value ) ) : '';
+		return in_array( $value, self::POSITIONS, true ) ? $value : 'bottomright';
 	}
 
 	/**
@@ -773,7 +833,16 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @return array Setting values.
 	 */
 	protected function get_cache_options( $locations = null ) {
-		return array( $this->format, $this->marker, $this->marker_color, $this->marker_size, $this->get_scalebar_units(), $this->scalebar_position );
+		return array(
+			$this->format,
+			$this->marker,
+			$this->marker_color,
+			$this->marker_size,
+			$this->get_scalebar_units(),
+			$this->scalebar_position,
+			$this->attribution,
+			$this->attribution_position,
+		);
 	}
 
 	/**
