@@ -1202,6 +1202,143 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * By default the map server draws the credit on the image; it can draw text only, in another corner.
+	 */
+	public function test_staticmap_attribution_on_image() {
+		update_option( 'sloc_staticmap_url', 'https://maps.example.org/' );
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
+		$url = $this->parse( $map->get_the_static_map() )['query'];
+		$this->assertArrayNotHasKey( 'attribution', $url );
+		$this->assertArrayNotHasKey( 'attribution_position', $url );
+		$this->assertSame( '', $map->get_attribution_html() );
+
+		update_option( 'sloc_staticmap_attribution', 'text' );
+		update_option( 'sloc_staticmap_attribution_position', 'topleft' );
+		$map = $this->provider( 'Map_Provider_StaticMap', array( 'api' => null ) );
+		foreach ( array( $map->get_the_static_map(), $map->get_archive_map( $this->locations ) ) as $image ) {
+			$url = $this->parse( $image )['query'];
+			$this->assertSame( array( 'text', 'topleft' ), array( $url['attribution'], $url['attribution_position'] ) );
+		}
+		$this->assertSame( '', $map->get_attribution_html() );
+
+		// Other providers draw their credit on the image.
+		$this->assertSame( '', $this->provider( 'Map_Provider_Geoapify' )->get_attribution_html() );
+	}
+
+	/**
+	 * Under the map, the credit is the map server's, for the map's provider, style and overlays, with only links kept,
+	 * and the image is drawn without one.
+	 */
+	public function test_staticmap_attribution_below() {
+		$fixture         = $this->fixture( 'map/staticmap-attribution.json' );
+		$fixture['html'] = '<script>alert(1)</script><b>Powered by</b> <a href="https://www.esri.com" onclick="x()">Esri</a> | ' . $fixture['html'];
+		$this->mock_http( array( 'maps.example.org/api/v1/attribution' => array( 'body' => $fixture ) ) );
+		$map = $this->provider(
+			'Map_Provider_StaticMap',
+			array(
+				'api'                  => 'https://maps.example.org/',
+				'style'                => 'esri/topo',
+				'overlays'             => array( 'railways', 'seamarks' ),
+				'attribution'          => 'below',
+				'attribution_position' => 'topleft',
+			)
+		);
+
+		$html = $map->get_the_map();
+		$this->assertMatchesRegularExpression( '#^<a target="_blank" href="[^"]+"><img [^>]+></a><p class="sloc-map-attribution">.+</p>$#', $html );
+		$this->assertStringContainsString( 'Powered by <a href="https://www.esri.com">Esri</a> |', $html );
+		$this->assertStringContainsString( '<a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>', $html );
+		$this->assertStringNotContainsString( 'script', $html );
+		$this->assertStringNotContainsString( 'onclick', $html );
+		$this->assertStringNotContainsString( '<b>', $html );
+
+		$attribution_requests = array_values( array_filter( $this->http_requests, fn( $request ) => false !== strpos( $request['url'], '/api/v1/attribution' ) ) );
+		$this->assertCount( 1, $attribution_requests );
+		parse_str( (string) wp_parse_url( $attribution_requests[0]['url'], PHP_URL_QUERY ), $query );
+		$this->assertSame(
+			array(
+				'provider' => 'esri',
+				'style'    => 'topo',
+				'overlay'  => 'railways,seamarks',
+			),
+			$query
+		);
+
+		$url = $this->parse( $map->get_the_static_map() )['query'];
+		$this->assertSame( 'none', $url['attribution'] );
+		$this->assertArrayNotHasKey( 'attribution_position', $url );
+		$this->assertSame( 'none', $this->parse( $map->get_archive_map( $this->locations ) )['query']['attribution'] );
+
+		// The credit is stored, so drawing the maps didn't fetch it again.
+		$attribution_requests = array_filter( $this->http_requests, fn( $request ) => false !== strpos( $request['url'], '/api/v1/attribution' ) );
+		$this->assertCount( 1, $attribution_requests );
+
+		// A map without a location shows no credit either.
+		update_option( 'sloc_staticmap_url', '' );
+		$map = $this->provider(
+			'Map_Provider_StaticMap',
+			array(
+				'api'         => null,
+				'attribution' => 'below',
+			)
+		);
+		$this->assertSame( '', $map->get_the_map() );
+	}
+
+	/**
+	 * When the map server can't supply the credit, it is drawn on the image instead, so the map is never without one.
+	 */
+	public function test_staticmap_attribution_below_fallback() {
+		$this->mock_http( array( 'maps.example.org' => new WP_Error( 'http_request_failed', 'Connection refused' ) ) );
+		$map = $this->provider(
+			'Map_Provider_StaticMap',
+			array(
+				'api'                  => 'https://maps.example.org/',
+				'attribution'          => 'below',
+				'attribution_position' => 'topleft',
+			)
+		);
+		$this->assertSame( '', $map->get_attribution_html() );
+		$url = $this->parse( $map->get_the_static_map() )['query'];
+		$this->assertArrayNotHasKey( 'attribution', $url );
+		$this->assertSame( 'topleft', $url['attribution_position'] );
+		$this->assertStringEndsWith( '</a>', $map->get_the_map() );
+
+		// An answer without HTML counts the same.
+		$this->mock_http( array( 'other.example.org' => array( 'body' => array( 'text' => 'Credit' ) ) ) );
+		$map = $this->provider(
+			'Map_Provider_StaticMap',
+			array(
+				'api'         => 'https://other.example.org/',
+				'attribution' => 'below',
+			)
+		);
+		$this->assertSame( '', $map->get_attribution_html() );
+	}
+
+	/**
+	 * The attribution settings are sanitized, registered and shown with a description.
+	 */
+	public function test_staticmap_attribution_settings() {
+		global $wp_settings_fields;
+		$this->assertSame( 'below', Map_Provider_StaticMap::sanitize_attribution( 'BELOW' ) );
+		$this->assertSame( 'image', Map_Provider_StaticMap::sanitize_attribution( 'none' ) );
+		$this->assertSame( 'topleft', Map_Provider_StaticMap::sanitize_attribution_position( 'topleft' ) );
+		$this->assertSame( 'bottomright', Map_Provider_StaticMap::sanitize_attribution_position( 'center' ) );
+
+		Map_Provider_StaticMap::init();
+		Map_Provider_StaticMap::admin_init();
+		$this->assertArrayHasKey( 'sloc_staticmap_attribution', get_registered_settings() );
+		$this->assertArrayHasKey( 'sloc_staticmap_attribution_position', get_registered_settings() );
+		$field = $wp_settings_fields['simloc']['sloc_map']['sloc_staticmap_attribution'];
+		ob_start();
+		call_user_func( $field['callback'], $field['args'] );
+		$html = ob_get_clean();
+		$this->assertStringContainsString( '<option value="below"', $html );
+		$this->assertStringContainsString( '<p class="description">The map providers&#039; terms require their credit.', $html );
+	}
+
+	/**
 	 * Map server URLs from before 1.0.0, which drew maps at img.php, draw them at the server's root.
 	 */
 	public function test_staticmap_url_img_php() {

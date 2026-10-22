@@ -1239,8 +1239,10 @@ class Loc_Config {
 	 *  Arguments for the value list.
 	 *  @type string $label_for Label for Select Box.
 	 *  @type array $list List of values.
+	 *  @type string $description Optional. Description shown under the list.
 	 * }
 	 * @since 1.0.0
+	 * @since 6.1.0 Shows a description.
 	 */
 	public static function values_callback( array $args ) {
 		$name = $args['label_for'];
@@ -1251,6 +1253,9 @@ class Loc_Config {
 		}
 		$text = get_option( $name );
 		self::select_callback( $name, $text, $list );
+		if ( ! empty( $args['description'] ) ) {
+			printf( '<p class="description">%s</p>', esc_html( $args['description'] ) );
+		}
 	}
 
 	/**
