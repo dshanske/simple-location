@@ -654,21 +654,40 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Set and Validate Coordinates.
 	 *
+	 * A lookup is either by station or by location, so setting one clears the other: coordinates without a station
+	 * clear the station, and a station without coordinates clears the location. An array with both keeps both.
+	 *
+	 * @since 1.0.0
+	 * @since 6.1.0 Setting coordinates clears the station, and setting only a station clears the location (#681).
+	 *              An empty station_id clears the station.
+	 *
 	 * @param array|float $lat Latitude or array of all three properties.
 	 * @param float       $lng Longitude. Optional if first property is an array.
 	 * @param float       $alt Altitude. Optional.
 	 * @return boolean Return False if Validation Failed
 	 */
 	public function set( $lat, $lng = null, $alt = null ) {
+		$location = true;
 		if ( ! $lng && is_array( $lat ) ) {
-			if ( isset( $lat['station_id'] ) ) {
-				$this->station_id = $lat['station_id'];
-			}
 			if ( isset( $lat['units'] ) ) {
 				$this->units = $lat['units'];
 			}
+			$location = isset( $lat['latitude'], $lat['longitude'] );
+			if ( array_key_exists( 'station_id', $lat ) ) {
+				$this->station_id = ( is_scalar( $lat['station_id'] ) && '' !== (string) $lat['station_id'] ) ? $lat['station_id'] : null;
+				if ( $this->station_id && ! $location ) {
+					$this->latitude  = null;
+					$this->longitude = null;
+					$this->altitude  = null;
+				}
+				return parent::set( $lat, $lng, $alt );
+			}
 		}
-		return parent::set( $lat, $lng, $alt );
+		$result = parent::set( $lat, $lng, $alt );
+		if ( $result && $location ) {
+			$this->station_id = null;
+		}
+		return $result;
 	}
 
 

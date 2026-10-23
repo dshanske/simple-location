@@ -432,7 +432,8 @@ class WeatherDataTest extends WP_UnitTestCase {
 		$this->assertSame( 39.9524, Weather_Provider_Sloc_Test::$location['latitude'] );
 
 		$this->assertSame( 'light rain', Sloc_Weather_Data::get_weather_by_station( 'KNYC', null, 60 )['summary'] );
-		$this->assertSame( 'KNYC', Loc_Config::weather_provider()->get_station() );
+		$this->assertSame( 'KNYC', Weather_Provider_Sloc_Test::$station );
+		$this->assertEmpty( Loc_Config::weather_provider()->get_station(), 'The shared provider is left as it was (#681).' );
 
 		Weather_Provider_Sloc_Test::$conditions = new WP_Error( 'down', 'Down' );
 		$this->assertWPError( Sloc_Weather_Data::get_weather_by_station( 'KNYC' ) );
