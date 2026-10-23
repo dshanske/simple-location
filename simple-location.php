@@ -326,6 +326,7 @@ class Simple_Location_Plugin {
 			'class-weather-provider-visualcrossing.php', // Visual Crossing.
 			'class-weather-provider-meteostat.php', // Meteostat.
 			'class-weather-provider-pirateweather.php', // Pirate Weather.
+			'class-weather-provider-openmeteo.php', // Open-Meteo.
 			'class-weather-provider-station.php', // Custom Station Weather Provider.
 		);
 
