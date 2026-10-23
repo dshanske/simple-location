@@ -768,7 +768,9 @@ class LocationProvidersTest extends WP_UnitTestCase {
 				),
 			)
 		);
-		$this->assertSame( 401, $provider->retrieve()->get_error_code() );
+		$error = $provider->retrieve();
+		$this->assertSame( 401, $error->get_error_code() );
+		$this->assertStringNotContainsString( 'TOKEN', wp_json_encode( $error->get_all_error_data() ), 'The token is not in the error.' );
 
 		$this->mock_http( array( 'compass.example.com' => array( 'body' => array( 'error' => 'no data' ) ) ) );
 		$error = $provider->retrieve();
@@ -783,6 +785,28 @@ class LocationProvidersTest extends WP_UnitTestCase {
 
 		$this->mock_http( array( 'compass.example.com' => array( 'body' => array( 'data' => array( 'type' => 'Feature' ) ) ) ) );
 		$this->assertFalse( $provider->retrieve() );
+	}
+
+	/**
+	 * Compass lookups refuse local and private addresses, since the URL comes from the user's profile, and encode
+	 * the token (#649).
+	 */
+	public function test_compass_safe_request() {
+		update_user_meta( $this->user_id, 'compass_api', 'TO&KEN' );
+		$this->mock_http( array( 'compass.example.com' => array( 'body' => $this->fixture( 'location/compass-last.json' ) ) ) );
+		( new Location_Provider_Compass() )->retrieve();
+		$request = $this->last_request();
+		$this->assertTrue( $request['args']['reject_unsafe_urls'] );
+		$this->assertSame( 'TO&KEN', $request['query']['token'] );
+
+		// Without the mock, WordPress refuses the request before it is made.
+		$this->mock_http( array() );
+		remove_all_filters( 'pre_http_request' );
+		update_user_meta( $this->user_id, 'compass_url', 'http://127.0.0.1:8080' );
+		$error = ( new Location_Provider_Compass() )->retrieve();
+		$this->assertWPError( $error );
+		$this->assertSame( 'http_request_failed', $error->get_error_code() );
+		$this->assertSame( 'A valid URL was not provided.', $error->get_error_message() );
 	}
 
 	/**

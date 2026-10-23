@@ -221,6 +221,7 @@ class Location_Provider_Compass extends Location_Provider {
 	 * Retrieves the user's location from Compass, at a time or the latest.
 	 *
 	 * @since 3.6.4
+	 * @since 6.1.0 Refuses local and private addresses, encodes the token, and leaves the URL out of errors.
 	 *
 	 * @param string|int|DateTime $time An ISO8601 time string, unix timestamp, or DateTime. Optional; defaults to the latest location.
 	 * @param array               $args Optional arguments to be passed.
@@ -241,7 +242,7 @@ class Location_Provider_Compass extends Location_Provider {
 		if ( ! $api ) {
 			return null;
 		}
-		$url  = sprintf( '%1$s/api/last/?token=%2$s', $compass, $api );
+		$url  = add_query_arg( 'token', rawurlencode( $api ), sprintf( '%1$s/api/last/', $compass ) );
 		$args = array(
 			'headers'             => array(
 				'Accept' => 'application/json',
@@ -260,18 +261,19 @@ class Location_Provider_Compass extends Location_Provider {
 			$this->time = $time->format( DATE_W3C );
 			$url        = add_query_arg( 'before', $time->format( 'Y-m-d\TH:i:s' ), $url );
 		}
-		$response = wp_remote_get( $url, $args );
+		// The URL comes from the user's profile, so local and private addresses are refused.
+		$response = wp_safe_remote_get( $url, $args );
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 		$code = wp_remote_retrieve_response_code( $response );
 		if ( 200 !== $code ) {
+			// The URL has the token, so it isn't part of the error.
 			return new WP_Error(
 				$code,
 				wp_remote_retrieve_response_message( $response ),
 				array(
 					'time' => $time,
-					'url'  => $url,
 				)
 			);
 		}
