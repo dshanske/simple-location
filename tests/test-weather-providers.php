@@ -181,6 +181,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 			array(
 				'temperature' => $current['temperature'],
 				'humidity'    => $current['humidity'] * 100,
+				'dewpoint'    => $current['dewPoint'],
 				'pressure'    => $current['pressure'],
 				'cloudiness'  => $current['cloudCover'] * 100,
 				'windspeed'   => $current['windSpeed'],
