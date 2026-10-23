@@ -335,6 +335,7 @@ class Simple_Location_Plugin {
 			'class-weather-provider-pirateweather.php', // Pirate Weather.
 			'class-weather-provider-openmeteo.php', // Open-Meteo.
 			'class-weather-provider-station.php', // Custom Station Weather Provider.
+			'class-weather-provider-weewx.php', // WeeWX, with weewx-current-json.
 		);
 
 		self::register_providers( $providers, 'includes/weather/' );
