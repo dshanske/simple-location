@@ -36,15 +36,17 @@ class Sloc_Map_Shortcode {
 	/**
 	 * Renders the [sloc_map] shortcode.
 	 *
-	 * The points come from, in order of preference: the `points` attribute; the posts or attachments in `ids`; or the
-	 * current post's attached images. Posts and images are only drawn when their location is public, and their markers
-	 * link to them where the map provider allows.
+	 * The points come from, in order of preference: the `track` attribute, drawn as a line; the `points` attribute; the
+	 * posts or attachments in `ids`; or the current post's attached images. Posts and images are only drawn when their
+	 * location is public, and their markers link to them where the map provider allows.
 	 *
 	 * @since 6.1.0
 	 *
 	 * @param array|string $atts {
 	 *     Shortcode attributes.
 	 *
+	 *     @type string $track   A route as an encoded polyline, drawn as a line, simplified to Sloc_Track::MAX_POINTS.
+	 *     @type string $markers Markers of a track: 'ends' (default) for its start and end, or 'none'.
 	 *     @type string $points Points as "latitude,longitude", separated by `|`, such as "39.95,-75.16|40.71,-74.01".
 	 *     @type string $ids    Post or attachment IDs, separated by commas.
 	 *     @type int    $width  Map width in pixels. Default the map width setting.
@@ -55,16 +57,25 @@ class Sloc_Map_Shortcode {
 	public static function shortcode( $atts ) {
 		$atts = shortcode_atts(
 			array(
-				'points' => '',
-				'ids'    => '',
-				'width'  => '',
-				'height' => '',
+				'track'   => '',
+				'markers' => 'ends',
+				'points'  => '',
+				'ids'     => '',
+				'width'   => '',
+				'height'  => '',
 			),
 			$atts,
 			'sloc_map'
 		);
 
-		if ( '' !== trim( (string) $atts['points'] ) ) {
+		$track = '' !== trim( (string) $atts['track'] );
+		if ( $track ) {
+			$locations = Sloc_Track::simplify( Sloc_Track::decode( $atts['track'] ) );
+			// A line needs two points.
+			if ( count( $locations ) < 2 ) {
+				$locations = array();
+			}
+		} elseif ( '' !== trim( (string) $atts['points'] ) ) {
 			$locations = self::parse_points( $atts['points'] );
 		} elseif ( '' !== trim( (string) $atts['ids'] ) ) {
 			$locations = self::post_locations( wp_parse_id_list( $atts['ids'] ) );
@@ -81,6 +92,9 @@ class Sloc_Map_Shortcode {
 		}
 		// The provider is shared, so its size isn't changed for the page's other maps.
 		$map = clone $map;
+		if ( $track ) {
+			$map->set_track( $atts['markers'] );
+		}
 		$size = array_filter(
 			array(
 				'width'  => absint( $atts['width'] ),
@@ -91,8 +105,8 @@ class Sloc_Map_Shortcode {
 			$map->set( $size );
 		}
 
-		// Points given in the shortcode have no posts to link to.
-		$post_ids = array_filter( array_keys( $locations ), 'is_int' );
+		// Points and tracks given in the shortcode have no posts to link to.
+		$post_ids = $track ? array() : array_filter( array_keys( $locations ), 'is_int' );
 		$post_ids = count( $post_ids ) === count( $locations ) ? $post_ids : array();
 
 		return sprintf(

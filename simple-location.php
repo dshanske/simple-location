@@ -253,6 +253,7 @@ class Simple_Location_Plugin {
 			'class-sloc-provider.php', // Base Provider Class.
 			'class-map-provider.php', // Map Provider Class.
 			'class-sloc-map-cache.php', // Map images served from the site.
+			'class-sloc-track.php', // Tracks, as encoded polylines.
 			'class-sloc-map-shortcode.php', // The [sloc_map] shortcode.
 			'class-geo-provider.php', // Geo Provider Class.
 			'class-elevation-provider.php', // Elevation Provider Class.

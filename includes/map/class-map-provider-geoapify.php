@@ -198,6 +198,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the marker color.
 	 * @since 6.1.0 Labels are in the site's language.
+	 * @since 6.1.0 A track has markers only at its ends, or none, and is drawn as a line.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -208,7 +209,7 @@ class Map_Provider_Geoapify extends Map_Provider {
 		}
 
 		$markers = array();
-		foreach ( $locations as $location ) {
+		foreach ( $this->get_marker_locations( $locations ) as $location ) {
 			$markers[] = sprintf( 'lonlat:%1$s,%2$s;size:small;color:%%23%3$s', $location[1], $location[0], $this->get_marker_hex() );
 		}
 
@@ -232,6 +233,17 @@ class Map_Provider_Geoapify extends Map_Provider {
 		}
 		if ( 1 < $this->scale ) {
 			$args['scaleFactor'] = $this->scale;
+		}
+		if ( empty( $markers ) ) {
+			unset( $args['marker'] );
+		}
+		// A track is a line through its points, as longitude, latitude pairs.
+		if ( $this->track && count( $locations ) > 1 ) {
+			$coordinates = array();
+			foreach ( $locations as $location ) {
+				$coordinates[] = $location[1] . ',' . $location[0];
+			}
+			$args['geometry'] = sprintf( 'polyline:%1$s;linewidth:4;linecolor:%%23%2$s', implode( ',', $coordinates ), $this->get_marker_hex() );
 		}
 		return add_query_arg( $args, 'https://maps.geoapify.com/v1/staticmap' );
 	}

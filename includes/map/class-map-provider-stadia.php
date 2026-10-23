@@ -233,7 +233,7 @@ class Map_Provider_Stadia extends Map_Provider {
 	 * Returns the URL of a static map with multiple locations.
 	 *
 	 * The plugin centres and zooms the map, so its markers can be linked to their posts. If it can't, Stadia fits the
-	 * map to the markers.
+	 * map to the markers. A track has markers only at its ends, or none, and is drawn as a line.
 	 *
 	 * @since 6.1.0
 	 *
@@ -245,10 +245,15 @@ class Map_Provider_Stadia extends Map_Provider {
 			return '';
 		}
 		$markers = array();
-		foreach ( $locations as $location ) {
+		foreach ( $this->get_marker_locations( $locations ) as $location ) {
 			$markers[] = $this->get_marker( $location[0], $location[1], 'medium' );
 		}
 		$args = array();
+		// A track is a line, as an encoded polyline with five decimal places.
+		if ( $this->track && count( $locations ) > 1 ) {
+			$args['l']              = sprintf( '%1$s,%2$s,3', Sloc_Polyline::encode( $locations ), $this->get_marker_hex() );
+			$args['line_precision'] = 5;
+		}
 		$view = $this->get_archive_view( $locations );
 		if ( null !== $view ) {
 			$args['center'] = sprintf( '%1$s,%2$s', $view['latitude'], $view['longitude'] );

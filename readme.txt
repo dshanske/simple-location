@@ -298,6 +298,7 @@ Use the `[sloc_map]` shortcode. It draws a map with a marker at each place, in t
 * `[sloc_map]` maps the post's attached images that have GPS data.
 * `[sloc_map ids="12,34,56"]` maps those posts or images.
 * `[sloc_map points="39.9524,-75.1636|40.7128,-74.0060"]` maps the given latitude and longitude points.
+* `[sloc_map track="_p~iF~ps|U_ulLnnqC"]` draws a route, given as an encoded polyline, as a line. `markers="ends"` (the default) marks its start and end, and `markers="none"` draws only the line. Long routes are simplified to 200 points, keeping their shape.
 * `width` and `height` set the map's size in pixels.
 
 Only published posts and images with a public location are drawn, and images take the visibility of the post they are attached to. At most 100 places are drawn, and if there are none, nothing is shown.

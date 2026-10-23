@@ -68,6 +68,22 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $max_map_zoom;
 
 	/**
+	 * Whether the archive map is a track: a line along its points, with markers only as track_markers says.
+	 *
+	 * @since 6.1.0
+	 * @var bool
+	 */
+	protected $track = false;
+
+	/**
+	 * Markers of a track: 'ends' for its start and end, or 'none'.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $track_markers = 'ends';
+
+	/**
 	 * Map Height.
 	 *
 	 * @since 1.0.0
@@ -389,6 +405,50 @@ abstract class Map_Provider extends Sloc_Provider {
 			add_action( 'init', array( $this, 'init' ) );
 			add_action( 'admin_init', array( $this, 'admin_init' ) );
 		}
+	}
+
+	/**
+	 * Makes the archive map a track: a line along its points, with markers at its ends or none.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $markers Optional. 'ends' (default) or 'none'.
+	 */
+	public function set_track( $markers = 'ends' ) {
+		$this->track         = true;
+		$this->track_markers = ( 'none' === $markers ) ? 'none' : 'ends';
+	}
+
+	/**
+	 * Whether the archive map is a track.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return bool
+	 */
+	public function is_track() {
+		return $this->track;
+	}
+
+	/**
+	 * Returns the locations of an archive map that get a marker.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $locations List of array( latitude, longitude ) points.
+	 * @return array Every location, or for a track its start and end, or none.
+	 */
+	protected function get_marker_locations( $locations ) {
+		$locations = array_values( $locations );
+		if ( ! $this->track ) {
+			return $locations;
+		}
+		if ( 'none' === $this->track_markers || empty( $locations ) ) {
+			return array();
+		}
+		$first = reset( $locations );
+		$last  = end( $locations );
+		return ( $first === $last ) ? array( $first ) : array( $first, $last );
 	}
 
 	/**
@@ -952,6 +1012,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * @since 6.0.0
 	 * @since 6.1.0 Has 'options', a hash of the settings that change the image, from get_cache_options().
+	 * @since 6.1.0 A track has 'track', its markers.
 	 *
 	 * @param array|null $locations Optional. List of array( latitude, longitude ) points for an archive map.
 	 * @return string[] Map parameters.
@@ -973,6 +1034,9 @@ abstract class Map_Provider extends Sloc_Provider {
 		}
 		// The settings are signed as a hash, so a changed setting gives new images.
 		$args['options'] = substr( md5( (string) wp_json_encode( $this->get_cache_options( $locations ) ) ), 0, 12 );
+		if ( $this->track && null !== $locations ) {
+			$args['track'] = $this->track_markers;
+		}
 		return $args;
 	}
 

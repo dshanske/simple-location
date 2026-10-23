@@ -280,6 +280,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the marker color.
 	 * @since 6.1.0 Leaves the credit off the image when the attribution setting puts it under the map.
+	 * @since 6.1.0 A track has markers only at its ends, or none, and a line through its points.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -293,24 +294,23 @@ class Map_Provider_Mapbox extends Map_Provider {
 		if ( array_key_exists( $this->style, $styles ) ) {
 			$user = 'mapbox';
 		}
-		$markers = array();
-		foreach ( $locations as $location ) {
-			$markers[] = sprintf( 'pin-s+%1$s(%2$s,%3$s)', $this->get_marker_hex(), $location[1], $location[0] );
+		$overlays = array();
+		foreach ( $this->get_marker_locations( $locations ) as $location ) {
+			$overlays[] = sprintf( 'pin-s+%1$s(%2$s,%3$s)', $this->get_marker_hex(), $location[1], $location[0] );
 		}
-		$polyline = Sloc_Polyline::encode( $locations );
-		$view     = $this->get_archive_view( $locations );
-		$map      = sprintf(
-			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/%3$s,path-5+f44-0.5(%4$s)/%8$s/%5$sx%6$s%9$s%10$s?access_token=%7$s%11$s',
+		$overlays[] = sprintf( 'path-5+f44-0.5(%s)', rawurlencode( Sloc_Polyline::encode( $locations ) ) );
+		$view       = $this->get_archive_view( $locations );
+		$map        = sprintf(
+			'https://api.mapbox.com/styles/v1/%1$s/%2$s/static/%3$s/%4$s/%5$sx%6$s%7$s%8$s?access_token=%9$s%10$s',
 			$user,
 			$this->style,
-			implode( ',', $markers ),
-			rawurlencode( $polyline ),
+			implode( ',', $overlays ),
+			null === $view ? 'auto' : sprintf( '%1$s,%2$s,%3$s', $view['longitude'], $view['latitude'], $view['zoom'] ),
 			$this->width,
 			$this->height,
-			$this->api,
-			null === $view ? 'auto' : sprintf( '%1$s,%2$s,%3$s', $view['longitude'], $view['latitude'], $view['zoom'] ),
 			( 2 === $this->scale ) ? '@2x' : '',
 			$this->get_format_extension(),
+			$this->api,
 			$this->get_attribution_query()
 		);
 		return $map;

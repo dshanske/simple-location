@@ -69,9 +69,10 @@ class Sloc_Map_Cache {
 	 *
 	 * @since 6.0.0
 	 * @since 6.1.0 Added 'options', a hash of the provider's other settings that change the image.
+	 * @since 6.1.0 Added 'track', the markers of a track map.
 	 * @var string[]
 	 */
-	const PARAMETERS = array( 'provider', 'lat', 'lng', 'points', 'width', 'height', 'zoom', 'style', 'scale', 'options' );
+	const PARAMETERS = array( 'provider', 'lat', 'lng', 'points', 'width', 'height', 'zoom', 'style', 'scale', 'options', 'track' );
 
 	/**
 	 * Prefix of the transients that hold the provider's URL of a map image the site doesn't store.
@@ -535,6 +536,7 @@ class Sloc_Map_Cache {
 	 * Creates the map provider a signed URL describes.
 	 *
 	 * @since 6.0.0
+	 * @since 6.1.0 Makes a track map a track again.
 	 *
 	 * @param array $args Map parameters.
 	 * @return Map_Provider|null Map provider, or null if the provider doesn't exist or its terms don't allow storing its images.
@@ -559,6 +561,9 @@ class Sloc_Map_Cache {
 			)
 		);
 		$map->set_scale( (int) ( $args['scale'] ?? 1 ) );
+		if ( isset( $args['track'] ) && is_string( $args['track'] ) ) {
+			$map->set_track( $args['track'] );
+		}
 		return $map;
 	}
 

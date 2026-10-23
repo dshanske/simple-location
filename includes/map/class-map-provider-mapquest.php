@@ -189,6 +189,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the marker color.
 	 * @since 6.1.0 Draws the scale bar setting.
+	 * @since 6.1.0 A track has markers only at its ends, or none, and a line through its points.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without the settings it needs or without locations.
@@ -199,7 +200,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 		}
 
 		$markers = array();
-		foreach ( $locations as $location ) {
+		foreach ( $this->get_marker_locations( $locations ) as $location ) {
 			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
 		$polyline = Sloc_Polyline::encode( $locations );
@@ -221,6 +222,9 @@ class Map_Provider_Mapquest extends Map_Provider {
 		}
 		if ( '' !== $this->format ) {
 			$args['format'] = $this->get_vendor_format();
+		}
+		if ( empty( $markers ) ) {
+			unset( $args['locations'], $args['defaultMarker'] );
 		}
 		$map = add_query_arg( $this->add_scalebar( $args ), $url );
 		return $map;

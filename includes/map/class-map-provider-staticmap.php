@@ -1051,6 +1051,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 	 * @since 6.1.0 Chooses the map with `provider` and `style`, draws generated dots, and leaves the attribution to the map server.
 	 * @since 6.1.0 Sends the client key, signing the URL when there is a signing secret. Every parameter is percent-encoded.
 	 * @since 6.1.0 Draws the path as an encoded polyline, with dots in the marker color, and uses the image format, pixel density, overlay and scale bar settings.
+	 * @since 6.1.0 A track has markers only at its ends, or none, and a line through its points.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without a map server URL or without locations.
@@ -1080,7 +1081,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 			// An encoded polyline, in latitude, longitude order, keeps the URL short.
 			array( 'polyline', 'enc:' . Sloc_Polyline::encode( $locations ) ),
 		);
-		foreach ( $locations as $location ) {
+		foreach ( $this->get_marker_locations( $locations ) as $location ) {
 			$params[] = array( 'marker[]', sprintf( 'lat:%1$s;lng:%2$s;%3$s', $location[0], $location[1], $this->get_marker_options( 'dot', 'small' ) ) );
 		}
 		return array_merge( $params, $this->get_display_params() );
