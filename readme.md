@@ -302,6 +302,8 @@ Use the `[sloc_map]` shortcode. It draws a map with a marker at each place, in t
 * `[sloc_map track="_p~iF~ps|U_ulLnnqC"]` draws a route, given as an encoded polyline, as a line. `markers="ends"` (the default) marks its start and end, and `markers="none"` draws only the line. Long routes are simplified to 200 points, keeping their shape.
 * `width` and `height` set the map's size in pixels.
 
+To make a route map without writing the polyline yourself, use Tools > Location Track. Choose a start and end time, and it gets your route from your location provider (Compass, Dawarich or GeoPulse), shows a preview of the map, and gives you the shortcode to paste. Points inside venues whose posts are private or protected, such as home, are left out.
+
 Only published posts and images with a public location are drawn, and images take the visibility of the post they are attached to. At most 100 places are drawn, and if there are none, nothing is shown.
 
 ### Can I see the weather of an archive?
