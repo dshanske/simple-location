@@ -48,11 +48,33 @@ class Map_Provider_Mapbox extends Map_Provider {
 	protected $fractional_zoom = true;
 
 	/**
+	 * Token for listing the user's styles, which needs the secret styles:list scope. It is only sent from the server.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	protected $styles_token = '';
+
+	/**
+	 * Whether map images have no token because the only one set is a secret token.
+	 *
+	 * @since 6.1.0
+	 * @var bool
+	 */
+	protected $secret_token = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 3.4.0
+	 * @since 6.1.0 Map images use the Mapbox map API key when one is set, and never a secret token. The style list uses
+	 *              the Mapbox API key.
 	 *
-	 * @param array $args Arguments. See Map_Provider::__construct().
+	 * @param array $args {
+	 *     Arguments. See Map_Provider::__construct() for the others.
+	 *
+	 *     @type string $styles_token Token for the style list. Default the sloc_mapbox_api setting.
+	 * }
 	 */
 	public function __construct( $args = array() ) {
 		$this->name         = __( 'Mapbox', 'simple-location' );
@@ -62,8 +84,18 @@ class Map_Provider_Mapbox extends Map_Provider {
 		$this->max_width    = 1280;
 		$this->max_height   = 1280;
 		$this->max_map_zoom = 22;
+		if ( ! isset( $args['styles_token'] ) ) {
+			$args['styles_token'] = get_option( 'sloc_mapbox_api' );
+		}
+		$this->styles_token = is_string( $args['styles_token'] ) ? $args['styles_token'] : '';
+
 		if ( ! isset( $args['api'] ) ) {
-			$args['api'] = get_option( 'sloc_mapbox_api' );
+			$args['api'] = self::get_map_api_key( 'mapbox' );
+		}
+		// Every visitor sees the token in map images, so a secret token is never used for them.
+		if ( self::is_secret_token( $args['api'] ) ) {
+			$args['api']        = '';
+			$this->secret_token = true;
 		}
 
 		if ( ! isset( $args['user'] ) ) {
@@ -75,6 +107,18 @@ class Map_Provider_Mapbox extends Map_Provider {
 		}
 
 		parent::__construct( $args );
+	}
+
+	/**
+	 * Whether a token is a Mapbox secret token, which must not be shown to visitors.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $token Token.
+	 * @return bool True for a secret (sk.) token.
+	 */
+	public static function is_secret_token( $token ) {
+		return is_string( $token ) && 0 === strpos( trim( $token ), 'sk.' );
 	}
 
 	/**
@@ -102,6 +146,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Errors carry the HTTP status, and Mapbox's message when there is one.
+	 * @since 6.1.0 Uses the style list token, not the map image token.
 	 *
 	 * @return array|WP_Error Style names keyed by ID, or an error if the user's styles can't be fetched.
 	 */
@@ -116,7 +161,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 		$json = $this->fetch_json(
 			'https://api.mapbox.com/styles/v1/' . rawurlencode( $this->user ),
 			array(
-				'access_token' => $this->api,
+				'access_token' => $this->styles_token,
 				'limit'        => 50,
 			)
 		);
@@ -168,7 +213,8 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 */
 	public function get_the_map( $static = true ) {
 		$map = $this->get_the_static_map_html( true );
-		return '' === $map ? '' : $map . $this->get_attribution_html();
+		// Without an image, $map is empty or the reason shown to administrators.
+		return false === strpos( $map, '<img' ) ? $map : $map . $this->get_attribution_html();
 	}
 
 	/**
@@ -271,11 +317,18 @@ class Map_Provider_Mapbox extends Map_Provider {
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Uses the marker settings.
 	 * @since 6.1.0 Leaves the credit off the image when the attribution setting puts it under the map.
+	 * @since 6.1.0 Returns an error without a usable token.
 	 *
-	 * @return string URL, or an empty string without the settings it needs.
+	 * @return string|WP_Error URL, an empty string without a style, or an error without a token that may be shown.
 	 */
 	public function get_the_static_map() {
-		if ( empty( $this->api ) || empty( $this->style ) ) {
+		if ( $this->secret_token ) {
+			return new WP_Error( 'secret_api_key', __( 'The Mapbox API key is a secret token, which map images would show to every visitor. Enter a public token as the Mapbox Map API Key.', 'simple-location' ) );
+		}
+		if ( empty( $this->api ) ) {
+			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Mapbox', 'simple-location' ) );
+		}
+		if ( empty( $this->style ) ) {
 			return '';
 		}
 		$user   = $this->user;

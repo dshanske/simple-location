@@ -751,13 +751,69 @@ class MapProvidersTest extends WP_UnitTestCase {
 
 		$fixture = $this->fixture( 'map/mapbox-styles.json' );
 		$this->mock_http( array( 'api.mapbox.com/styles/v1/someone' => array( 'body' => $fixture ) ) );
-		$map    = $this->provider( 'Map_Provider_Mapbox', array( 'user' => 'someone' ) );
+		$map    = $this->provider(
+			'Map_Provider_Mapbox',
+			array(
+				'user'         => 'someone',
+				'styles_token' => 'sk.STYLES',
+			)
+		);
 		$styles = $map->get_styles();
-		$this->assertSame( 'KEY', $this->last_request()['query']['access_token'] );
+		$this->assertSame( 'sk.STYLES', $this->last_request()['query']['access_token'] );
 		$this->assertArrayHasKey( 'streets-v11', $styles );
 		foreach ( $fixture as $style ) {
 			$this->assertSame( $style['name'], $styles[ $style['id'] ] );
 		}
+	}
+
+	/**
+	 * The style list uses the Mapbox API key, and map images use the map key, so a secret token can list styles without
+	 * appearing in map images.
+	 */
+	public function test_mapbox_styles_token() {
+		update_option( 'sloc_mapbox_api', 'sk.SECRET' );
+		update_option( 'sloc_mapbox_map_api', 'pk.PUBLIC' );
+		$this->mock_http( array( 'api.mapbox.com/styles/v1/someone' => array( 'body' => '[]' ) ) );
+		$map = new Map_Provider_Mapbox(
+			array(
+				'latitude'  => self::LAT,
+				'longitude' => self::LNG,
+				'user'      => 'someone',
+				'style'     => 'streets-v11',
+			)
+		);
+		$map->get_styles();
+		$this->assertSame( 'sk.SECRET', $this->last_request()['query']['access_token'] );
+		$this->assertSame( 'pk.PUBLIC', $this->parse( $map->get_the_static_map() )['query']['access_token'] );
+	}
+
+	/**
+	 * A secret token is never put in a map image: without a public map key, administrators are told why there is no map.
+	 */
+	public function test_mapbox_secret_token() {
+		$this->assertTrue( Map_Provider_Mapbox::is_secret_token( 'sk.abc' ) );
+		$this->assertTrue( Map_Provider_Mapbox::is_secret_token( ' sk.abc' ) );
+		$this->assertFalse( Map_Provider_Mapbox::is_secret_token( 'pk.abc' ) );
+		$this->assertFalse( Map_Provider_Mapbox::is_secret_token( null ) );
+
+		update_option( 'sloc_mapbox_api', 'sk.SECRET' );
+		$location = array(
+			'latitude'  => self::LAT,
+			'longitude' => self::LNG,
+			'style'     => 'streets-v11',
+		);
+		$map      = new Map_Provider_Mapbox( $location );
+		$this->assertSame( 'secret_api_key', $map->get_the_static_map()->get_error_code() );
+		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
+		$this->assertSame( '', $map->get_the_map() );
+		update_option( 'sloc_attribution', 'below' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( $map->get_the_static_map()->get_error_message(), $map->get_the_map() );
+
+		// A secret map key or a secret token passed in is refused too.
+		update_option( 'sloc_mapbox_map_api', 'sk.MAP' );
+		$this->assertWPError( ( new Map_Provider_Mapbox( $location ) )->get_the_static_map() );
+		$this->assertWPError( ( new Map_Provider_Mapbox( array_merge( $location, array( 'api' => 'sk.PASSED' ) ) ) )->get_the_static_map() );
 	}
 
 	/**
@@ -1976,6 +2032,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 		return array(
 			'Geoapify'   => array( 'Map_Provider_Geoapify', 'You have not set an API key for GeoApify' ),
 			'LocationIQ' => array( 'Map_Provider_LocationIQ', 'You have not set an API key for Location IQ' ),
+			'Mapbox'     => array( 'Map_Provider_Mapbox', 'You have not set an API key for Mapbox' ),
 			'StaticMap'  => array( 'Map_Provider_StaticMap', 'You have not set a URL for your custom map endpoint' ),
 		);
 	}
@@ -2011,6 +2068,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'HERE'       => array( 'Map_Provider_Here', 'here', 'apiKey' ),
 			'LocationIQ' => array( 'Map_Provider_LocationIQ', 'locationiq', 'key' ),
 			'MapQuest'   => array( 'Map_Provider_Mapquest', 'mapquest', 'key' ),
+			'Mapbox'     => array( 'Map_Provider_Mapbox', 'mapbox', 'access_token' ),
 		);
 	}
 
@@ -2028,6 +2086,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'latitude'  => self::LAT,
 			'longitude' => self::LNG,
 		);
+		// Mapbox needs a style for a map.
+		update_option( 'sloc_mapbox_style', 'streets-v11' );
 		update_option( 'sloc_' . $vendor . '_api', 'MAIN' );
 		$map = new $class( $location );
 		$this->assertSame( 'MAIN', $this->parse( $map->get_the_static_map() )['query'][ $param ] );
@@ -2088,6 +2148,23 @@ class MapProvidersTest extends WP_UnitTestCase {
 		unset( $wp_settings_fields['sloc_api']['sloc_api']['sloc_here_map_api'] );
 		Geo_Provider_Here::admin_init();
 		$this->assertArrayNotHasKey( 'sloc_here_map_api', $wp_settings_fields['sloc_api']['sloc_api'] );
+	}
+
+	/**
+	 * Mapbox's map key asks for a public token and says a secret token is only used for the style list.
+	 */
+	public function test_mapbox_map_api_setting() {
+		global $wp_settings_fields;
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		Map_Provider_Mapbox::init();
+		$this->assertArrayHasKey( 'sloc_mapbox_map_api', get_registered_settings() );
+
+		Map_Provider_Mapbox::admin_init();
+		$field = $wp_settings_fields['sloc_api']['sloc_api']['sloc_mapbox_map_api'];
+		$this->assertSame( 'Mapbox Map API Key', $field['title'] );
+		$this->assertStringContainsString( 'A public token (starting pk.)', $field['args']['description'] );
+		$this->assertStringContainsString( 'secret token (starting sk.)', $field['args']['description'] );
 	}
 
 	/**

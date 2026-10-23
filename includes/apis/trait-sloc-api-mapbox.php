@@ -17,12 +17,18 @@ trait Sloc_API_Mapbox {
 	 * Admin Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
-	 * @since 6.1.0 Adds the image format field for the map provider.
+	 * @since 6.1.0 Adds the image format and map API key fields for the map provider.
 	 */
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'Mapbox', 'simple-location' ), 'sloc_mapbox_api' );
 		self::add_settings_parameter( __( 'Mapbox User', 'simple-location' ), 'sloc_mapbox_user', __( 'Username', 'simple-location' ) );
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
+			self::add_map_api_setting(
+				__( 'Mapbox', 'simple-location' ),
+				'mapbox',
+				__( 'Optional. A public token (starting pk.) for map images, which show it to every visitor, so restrict it to this site\'s URL. Leave empty to use the Mapbox API key, unless that is a secret token (starting sk.), which is only used to list your styles and never shown.', 'simple-location' )
+			);
+
 			add_settings_field(
 				'mapboxstyle', // id
 				__( 'Mapbox Style', 'simple-location' ),
@@ -44,13 +50,15 @@ trait Sloc_API_Mapbox {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
-	 * @since 6.1.0 Registers the image format setting for the map provider.
+	 * @since 6.1.0 Registers the image format and map API key settings for the map provider.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Mapbox', 'simple-location' ), 'sloc_mapbox_api' );
 		self::register_settings_api( __( 'Mapbox User', 'simple-location' ), 'sloc_mapbox_user' );
 
 		if ( 'Map_Provider' === get_parent_class( get_called_class() ) ) {
+			self::register_map_api_setting( __( 'Mapbox', 'simple-location' ), 'mapbox' );
+
 			register_setting(
 				'simloc',
 				'sloc_mapbox_style',

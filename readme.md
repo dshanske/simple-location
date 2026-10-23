@@ -104,7 +104,7 @@ location of a three letter airport code, and [Compass](https://github.com/aaronp
 
 API Keys are required to use certain services.
 * [Google](https://developers.google.com/maps/documentation/javascript/get-api-key)
-* [Mapbox](https://www.mapbox.com/help/create-api-access-token/) - To retrieve style list inside the UI, you need a token with the styles:list scope
+* [Mapbox](https://www.mapbox.com/help/create-api-access-token/) - To list your own styles in the settings, you need a secret token with the styles:list scope, plus a public token for the maps (see "How do I protect my map API keys?")
 * [OpenWeatherMap](http://openweathermap.com/api)
 * [MapQuest](https://developer.mapquest.com/)
 * [HERE](https://developer.here.com/)
@@ -163,7 +163,7 @@ The other self-serve option is to self-host a caching static map API endpoint (s
 For most map providers, the map image is loaded directly from the provider, so the API key is part of the image link and anyone viewing the page can read it.
 The same key is often used for geocoding, elevation, venues or weather, which your server requests itself.
 
-To limit what someone can do with a visible key, Google, HERE, LocationIQ and MapQuest have an optional Map API Key setting. Use a separate key there that only allows static maps and is restricted to your site.
+To limit what someone can do with a visible key, Google, HERE, LocationIQ, MapQuest and Mapbox have an optional Map API Key setting. Use a separate key there that only allows static maps and is restricted to your site.
 If it is empty, the provider's main key is used for maps too.
 
 Don't restrict your main key to your site's domain. Requests your server makes don't come from a web page, so a domain restriction would block geocoding and the other lookups.
@@ -178,6 +178,20 @@ Don't restrict your main key to your site's domain. Requests your server makes d
 * Open the new app's Trusted domains tab, turn on "Enable Trusted domains", and enter your site's domain without a path, for example `example.com`. Changes can take up to 30 minutes to take effect.
 * Leave trusted domains off for the app that holds your main HERE key, which your server uses for geocoding and weather.
 * Maps may not load where no referring page is sent, such as some feed readers and email.
+
+**Mapbox:** Mapbox uses its token only for maps, and for listing your own styles in the settings.
+* Create a public token (starting `pk.`) with the default public scopes. Add URL restrictions for your site, for example `https://example.com`, and enter the token as the Mapbox Map API Key. Mapbox's default public token can't be restricted.
+* Listing your own styles needs the `styles:list` scope, which only secret tokens (starting `sk.`) can have. Enter that token as the Mapbox API Key. It is only sent from your server. The plugin never puts a secret token in a map image, so if the Mapbox API Key is a secret token and the Mapbox Map API Key is empty, no Mapbox maps are shown.
+* Mapbox checks URL restrictions against the referring page and refuses requests without one. Restricted maps may therefore not load in feed readers or email, or on a site whose referrer policy is `no-referrer` or `same-origin`.
+
+**LocationIQ:** LocationIQ tokens can be restricted by HTTP referrer (for maps) or by IP address (for your server's lookups).
+* If your account allows a second token, enter it as the LocationIQ Map API Key and restrict it by HTTP referrer to your site, for example `example.com/*`. Restrict the main token to your server's IP address.
+* Free accounts get one token, used for both maps and geocoding. LocationIQ doesn't say whether one token with both kinds of restriction accepts requests matching either, so leave it unrestricted, or test both maps and lookups after restricting it.
+
+**TomTom:** TomTom uses its key only for maps. In the TomTom developer dashboard, allow the key only the Map Display API, so a copied key can't be used for other products.
+TomTom's domain whitelist works through CORS, which browsers don't apply to images, so it may not stop others from using a copied key.
+
+**MapQuest:** MapQuest doesn't document a way to restrict a key. Use a separate key as the MapQuest Map API Key, so you can replace it without changing geocoding if it is misused.
 
 **Geoapify:** Geoapify maps are served from your site, so the key is never shown to visitors and doesn't need a separate map key. Every Geoapify request comes from your server, so you can restrict the key to your server's IP address:
 * In Geoapify's MyProjects, open your project's API Keys section and add your server's outgoing IP address to the key's allowed IP addresses.
