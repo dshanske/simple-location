@@ -1035,6 +1035,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 				'visibility'  => $properties['visibility']['value'],
 				'summary'     => $properties['textDescription'],
 				'code'        => 802,
+				'cloudiness'  => 44,
 				'name'        => $station['properties']['name'],
 				'timezone'    => $station['properties']['timeZone'],
 			),
@@ -1182,8 +1183,33 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 			$provider->set( array( 'station_id' => 'KPHL' ) );
 			$conditions = $provider->get_conditions();
 			$this->assertArrayNotHasKey( 'code', $conditions );
+			$this->assertArrayNotHasKey( 'cloudiness', $conditions );
 			$this->assertSame( $observation['properties']['temperature']['value'], $conditions['temperature'] );
 		}
+	}
+
+	/**
+	 * NWS: the cloud cover is the largest amount among the cloud layers, in the middle of its okta range (#657).
+	 */
+	public function test_nws_cloud_cover() {
+		$layer = function ( $amount ) {
+			return array(
+				'base'   => array(
+					'unitCode' => 'wmoUnit:m',
+					'value'    => 1520,
+				),
+				'amount' => $amount,
+			);
+		};
+		$this->assertSame( 0, Weather_Provider_NWSUS::cloud_cover( array( $layer( 'CLR' ) ) ) );
+		$this->assertSame( 0, Weather_Provider_NWSUS::cloud_cover( array( $layer( 'SKC' ) ) ) );
+		$this->assertSame( 19, Weather_Provider_NWSUS::cloud_cover( array( $layer( 'FEW' ) ) ) );
+		$this->assertSame( 75, Weather_Provider_NWSUS::cloud_cover( array( $layer( 'FEW' ), $layer( 'SCT' ), $layer( 'BKN' ) ) ) );
+		$this->assertSame( 100, Weather_Provider_NWSUS::cloud_cover( array( $layer( 'OVC' ), $layer( 'FEW' ) ) ) );
+		$this->assertSame( 100, Weather_Provider_NWSUS::cloud_cover( array( $layer( 'VV' ) ) ) );
+		$this->assertSame( 44, Weather_Provider_NWSUS::cloud_cover( array( $layer( 'unknown' ), $layer( 'SCT' ), 'junk' ) ) );
+		$this->assertNull( Weather_Provider_NWSUS::cloud_cover( array( $layer( 'unknown' ) ) ) );
+		$this->assertNull( Weather_Provider_NWSUS::cloud_cover( null ) );
 	}
 
 	/**
