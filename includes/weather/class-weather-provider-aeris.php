@@ -91,8 +91,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$client_id     = get_option( 'sloc_aeris_client_id' );
 		$client_secret = get_option( 'sloc_aeris_client_secret' );
 		if ( empty( $client_id ) || empty( $client_secret ) ) {
-			return array();
-
+			return $this->missing_api_key_error();
 		}
 
 		if ( ! empty( $this->station_id ) && empty( $this->latitude ) ) {

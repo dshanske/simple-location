@@ -63,6 +63,18 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	}
 
 	/**
+	 * Returns whether the provider has weather for a time: only current weather, within an hour of now.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int|string|DateTime|null $time Time, or null for now.
+	 * @return bool Whether to try the provider for this time.
+	 */
+	public function supports_time( $time = null ) {
+		return $this->is_current( $time );
+	}
+
+	/**
 	 * Return array of current conditions
 	 *
 	 * @since 4.0.0
@@ -74,7 +86,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 	 */
 	public function get_conditions( $time = null ) {
 		if ( empty( $this->api ) ) {
-			return array();
+			return $this->missing_api_key_error();
 		}
 
 		$datetime = $this->datetime( $time );

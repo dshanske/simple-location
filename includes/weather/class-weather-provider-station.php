@@ -322,14 +322,16 @@ class Weather_Provider_Station extends Weather_Provider {
 	 *
 	 * @since 4.0.0
 	 * @since 6.1.0 Conditions for a station ID are cached too, and the nearest station only counts stations with coordinates.
+	 * @since 6.1.0 Returns an error instead of using the fallback provider: the station's error when it can't be
+	 *              read, `station_stale` when its reading is too old, and `no_results` without a station in range.
 	 *
 	 * @param int $time Timestamp.
-	 * @return array|WP_Error Current Conditions in Array, or an error for a station ID that can't be read.
+	 * @return array|WP_Error Current Conditions in Array, or an error.
 	 */
 	public function get_conditions( $time = null ) {
 		$datetime = $this->datetime( $time );
-		if ( static::MAX_AGE < abs( $datetime->getTimestamp() - time() ) ) {
-			return self::get_fallback_conditions( $time );
+		if ( ! $this->supports_time( $time ) ) {
+			return $this->get_unsupported_time_conditions( $time );
 		}
 
 		$conditions = $this->get_cache();
@@ -350,18 +352,24 @@ class Weather_Provider_Station extends Weather_Provider {
 				$return           = $this->get_station_data();
 				$this->station_id = null;
 				if ( is_wp_error( $return ) ) {
-					$return = array();
-				} else {
-					$return['distance'] = $nearest['distance'];
+					return $return;
 				}
+				$return['distance'] = $nearest['distance'];
 			}
 		}
 
+		if ( empty( $return ) ) {
+			return $this->no_results_error();
+		}
 		if ( isset( $return['timestamp'] ) && is_numeric( $return['timestamp'] ) && static::MAX_AGE > abs( $datetime->getTimestamp() - (int) $return['timestamp'] ) ) {
 			$this->set_cache( $return );
 			return $return;
 		}
-		return self::get_fallback_conditions( $time );
+		return new WP_Error(
+			'station_stale',
+			/* translators: %s: Provider name. */
+			sprintf( __( 'The %s station has no reading from the last hour.', 'simple-location' ), $this->get_name() )
+		);
 	}
 
 	/**

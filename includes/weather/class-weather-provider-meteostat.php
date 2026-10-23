@@ -95,7 +95,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	 */
 	public function get_conditions( $time = null ) {
 		if ( empty( $this->api ) ) {
-			return array();
+			return $this->missing_api_key_error();
 		}
 
 		if ( $this->station_id && ! $this->latitude ) {
@@ -115,7 +115,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 			$this->set_cache( $return, $time );
 			return $return;
 		}
-		return self::get_fallback_conditions( $time );
+		return $this->no_results_error();
 	}
 
 	/**

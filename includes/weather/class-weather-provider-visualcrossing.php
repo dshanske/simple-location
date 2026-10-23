@@ -70,7 +70,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	 */
 	public function get_conditions( $time = null ) {
 		if ( empty( $this->api ) ) {
-			return array();
+			return $this->missing_api_key_error();
 		}
 
 		if ( is_null( $time ) || 0 === $time ) {

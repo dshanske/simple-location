@@ -40,14 +40,27 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	}
 
 	/**
+	 * Returns whether the provider has weather for a time: only current weather, within an hour of now.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int|string|DateTime|null $time Time, or null for now.
+	 * @return bool Whether to try the provider for this time.
+	 */
+	public function supports_time( $time = null ) {
+		return $this->is_current( $time );
+	}
+
+	/**
 	 * Return array of current conditions
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Uses the fallback weather provider when a location lookup finds no observation.
 	 * @since 6.0.0 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
+	 * @since 6.1.0 Returns the error, or a `no_results` error, instead of using the fallback provider.
 	 *
 	 * @param int $time Time. Optional.
-	 * @return array|WP_Error|false Current conditions, the fallback provider's conditions when NWS has none for the location, or false without a location.
+	 * @return array|WP_Error|false Current conditions, an error when NWS has none for the location, or false without a location.
 	 */
 	public function get_conditions( $time = null ) {
 		$return   = array();
@@ -78,23 +91,23 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 
 			$response = wp_remote_get( $url, $args );
 			if ( is_wp_error( $response ) ) {
-				return self::get_fallback_conditions( $time );
+				return $response;
 			}
 			$response = wp_remote_retrieve_body( $response );
 			$response = json_decode( $response, true );
 			// NWS has no grid point outside the US.
 			if ( ! isset( $response['properties']['observationStations'] ) ) {
-				return self::get_fallback_conditions( $time );
+				return $this->no_results_error();
 			}
 			$url      = $response['properties']['observationStations'];
 			$response = wp_remote_get( $url, $args );
 			if ( is_wp_error( $response ) ) {
-				return self::get_fallback_conditions( $time );
+				return $response;
 			}
 			$response = wp_remote_retrieve_body( $response );
 			$response = json_decode( $response, true );
 			if ( empty( $response['features'] ) || ! is_array( $response['features'] ) ) {
-				return self::get_fallback_conditions( $time );
+				return $this->no_results_error();
 			}
 			$sitelist = $response['features'];
 			foreach ( $sitelist as $key => $value ) {
@@ -111,11 +124,14 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			$return           = self::get_station_data();
 			// Set the Caching Based on the Latitude and Longitude as that is what Was Called.
 			$this->station_id = null;
-			if ( ! is_wp_error( $return ) && ! empty( $return ) ) {
+			if ( is_wp_error( $return ) ) {
+				return $return;
+			}
+			if ( ! empty( $return ) ) {
 				$this->set_cache( $return );
 				return $return;
 			}
-			return self::get_fallback_conditions( $time );
+			return $this->no_results_error();
 		}
 		return false;
 	}

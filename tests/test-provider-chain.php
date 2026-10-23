@@ -339,6 +339,33 @@ class ProviderChainTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * When the site's own station can't be read, the administrator is told and the next provider is used.
+	 */
+	public function test_station_down_reported() {
+		update_option(
+			'sloc_weewx_stations',
+			array(
+				array(
+					'id'        => 'home',
+					'name'      => 'Home',
+					'url'       => 'https://home.example.com/current.json',
+					'latitude'  => self::LAT,
+					'longitude' => self::LNG,
+				),
+			)
+		);
+		update_option( 'sloc_weather_provider', 'weewx' );
+		$block = fn() => new WP_Error( 'http_request_failed', 'cURL error 7: Failed to connect' );
+		add_filter( 'pre_http_request', $block );
+		$conditions = Sloc_Provider_Chain::weather( self::LAT, self::LNG );
+		remove_filter( 'pre_http_request', $block );
+
+		$this->assertSame( 'sloc_test_fallback', $conditions['provider'] );
+		$this->assertArrayHasKey( 'weather:weewx', Sloc_Provider_Errors::get_errors() );
+		$this->assertSame( 'Simple Location: WeeWX (beta) weather lookups are failing: cURL error 7: Failed to connect', $this->notifications[0][1] );
+	}
+
+	/**
 	 * Errors that aren't for the administrator, such as a service being down, aren't recorded.
 	 */
 	public function test_other_errors_not_recorded() {

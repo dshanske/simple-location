@@ -72,7 +72,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	 */
 	public function get_conditions( $time = null ) {
 		if ( empty( $this->api ) ) {
-			return array();
+			return $this->missing_api_key_error();
 		}
 		$return = array();
 		if ( $this->latitude && $this->longitude ) {
