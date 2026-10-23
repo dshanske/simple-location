@@ -257,6 +257,7 @@ class Simple_Location_Plugin {
 			'class-venue-provider.php', // Venue Provider Class.
 			'class-weather-provider.php', // Weather Provider Class.
 			'class-location-provider.php', // Location Provider Class.
+			'class-location-provider-account.php', // Location Providers for a user's own location history service.
 			'class-rest-geo.php', // REST endpoint for Geo.
 			'class-loc-config.php', // Configuration and Settings Page.
 			'class-timezone-result.php',
@@ -310,6 +311,8 @@ class Simple_Location_Plugin {
 			'class-location-provider-airport.php', // Airport Location Provider.
 			'class-location-provider-address.php', // Address Lookup Location Provider.
 			'class-location-provider-compass.php', // Compass https://github.com/aaronpk/Compass Location Provder.
+			'class-location-provider-dawarich.php', // Dawarich.
+			'class-location-provider-geopulse.php', // GeoPulse.
 		);
 
 		self::register_providers( $providers, 'includes/location/' );

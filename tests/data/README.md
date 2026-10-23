@@ -123,8 +123,8 @@ list is shortened to a few providers and styles.
 
 ## Location providers (`location/`)
 
-Compass is a self-hosted location tracker, so the requests go to the user's own Compass URL (the tests
-use `https://compass.example.com`). `compass-last.json` is a GeoJSON point at Philadelphia City
+Compass, Dawarich and GeoPulse are self-hosted, so the requests go to the user's own server (the tests
+use `https://compass.example.com`, `https://dawarich.example.com` and `https://geopulse.example.com`). `compass-last.json` is a GeoJSON point at Philadelphia City
 Hall; `compass-query.json` is a GeoJSON line starting there. The tests compare coordinates, altitude,
 speed, heading and activity against the fixture itself.
 
@@ -132,3 +132,7 @@ speed, heading and activity against the fixture itself.
 |---|---|---|
 | `compass-last.json` | `GET {compass_url}/api/last/?token=…` (optionally `&before=YYYY-MM-DDTHH:MM:SS` in UTC) | Hand-built from docs |
 | `compass-query.json` | `GET {compass_url}/api/query/?token=…&format=linestring&start=…&end=…&tz=…` | Hand-built from docs |
+| `dawarich-points.json` | `GET {dawarich_url}/api/v1/points?api_key=…&order=desc&per_page=1` (optionally `&end_at=…Z`) | Hand-built from the Dawarich OpenAPI spec (`swagger/v1/swagger.yaml`) |
+| `dawarich-track.json` | `GET {dawarich_url}/api/v1/points?api_key=…&start_at=…&end_at=…&order=asc&per_page=1000&page=1` | Hand-built from the Dawarich OpenAPI spec |
+| `geopulse-points.json` | `GET {geopulse_url}/api/v1/gps/points?size=1&sortBy=timestamp&sortDirection=desc` (optionally `&to=…Z`), with `Authorization: Bearer …` | Hand-built from GeoPulse 2.1.0's `GpsPointResource`, `PageResponse` and `GpsPointDTO` |
+| `geopulse-path.json` | `GET {geopulse_url}/api/v1/gps/points/path?from=…&to=…&simplify=true`, with `Authorization: Bearer …` | Hand-built from GeoPulse 2.1.0's `GpsPointPathDTO` |

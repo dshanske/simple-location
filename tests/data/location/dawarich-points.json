@@ -1,0 +1,33 @@
+[
+  {
+    "id": 1842,
+    "battery_status": "unplugged",
+    "ping": null,
+    "battery": 74,
+    "tracker_id": "phone",
+    "topic": "owntracks/user/phone",
+    "altitude": 17,
+    "longitude": -75.1636,
+    "velocity": 18,
+    "trigger": null,
+    "bssid": null,
+    "ssid": "cityhall",
+    "connection": "w",
+    "vertical_accuracy": 4,
+    "accuracy": 8,
+    "timestamp": 1751385600,
+    "latitude": 39.9524,
+    "mode": null,
+    "inrids": [],
+    "in_regions": [],
+    "raw_data": "",
+    "import_id": null,
+    "city": "Philadelphia",
+    "country": "United States",
+    "created_at": "2025-07-01T16:00:05.000Z",
+    "updated_at": "2025-07-01T16:00:05.000Z",
+    "user_id": 1,
+    "geodata": null,
+    "visit_id": null
+  }
+]
