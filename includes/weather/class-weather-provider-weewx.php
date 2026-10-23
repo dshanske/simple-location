@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
  * Only each station's file URL is entered. The station's ID, name and coordinates are read from the file when the
  * settings are saved, and the file must be in the current conditions format.
  *
+ * In beta for 6.1.0, until weewx-current-json has been used in production.
+ *
  * @since 6.1.0
  */
 class Weather_Provider_Weewx extends Weather_Provider_Station {
@@ -32,9 +34,9 @@ class Weather_Provider_Weewx extends Weather_Provider_Station {
 	 */
 	public function __construct( $args = array() ) {
 		parent::__construct( $args );
-		$this->name        = __( 'WeeWX', 'simple-location' );
+		$this->name        = __( 'WeeWX (beta)', 'simple-location' );
 		$this->url         = 'https://github.com/dshanske/weewx-current-json';
-		$this->description = __( 'Weather from your WeeWX stations, with the weewx-current-json extension installed. When it is the weather provider, the nearest station within 10 km is used.', 'simple-location' );
+		$this->description = __( 'Beta. Weather from your WeeWX stations, with the weewx-current-json extension installed, which is also new. When it is the weather provider, the nearest station within 10 km is used.', 'simple-location' );
 		$this->slug        = 'weewx';
 	}
 
