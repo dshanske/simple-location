@@ -89,6 +89,8 @@ The JSON should use the current conditions format, version 1, which the [weewx-c
 * `code` is a condition code, as listed in the weather settings, and `summary` is text; a known summary such as "Partly Cloudy" also gives a code.
 * `station.attribution` is the station's credit. A credit set in the station settings replaces it.
 
+For a WeeWX station, install [weewx-current-json](https://github.com/dshanske/weewx-current-json) and use the WeeWX weather provider instead. Its stations, under WeeWX Stations on the same tab, only need the URL of the file the extension writes, such as `https://weather.example.com/current.json`: the station's ID, name and location are read from it when you save. The extension also estimates the condition, such as rain or partly cloudy, from the station's sensors, a nearby airport, or the National Weather Service forecast.
+
 JSON without `format` is read in the earlier format: the weather properties at the top level, in metric units, with wind as `wind: { speed, degree, gust }`, `timestamp` for the time, and `N/A` for missing values.
 
 ## WordPress GeoData

@@ -59,12 +59,20 @@ class Weather_Provider_Station extends Weather_Provider {
 	const FIELDS = array( 'id', 'url', 'latitude', 'longitude', 'attribution', 'attribution_url' );
 
 	/**
-	 * Name of the setting holding the stations.
+	 * Name of the setting holding the stations, which is also its settings section's ID.
 	 *
 	 * @since 6.1.0
 	 * @var string
 	 */
 	const OPTION = 'sloc_stations';
+
+	/**
+	 * Settings page, and option group, of the stations: the Stations tab.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const SETTINGS_PAGE = 'sloc_stations';
 
 	/**
 	 * Constructor
@@ -96,7 +104,7 @@ class Weather_Provider_Station extends Weather_Provider {
 	 */
 	public static function init() {
 		register_setting(
-			static::OPTION, // option group.
+			static::SETTINGS_PAGE, // option group.
 			static::OPTION, // option name.
 			array(
 				'type'              => 'array',
@@ -110,22 +118,36 @@ class Weather_Provider_Station extends Weather_Provider {
 
 	/**
 	 * Admin Init Function
-	 **/
+	 *
+	 * @since 4.0.0
+	 * @since 6.1.0 The section is on the Stations tab, whatever the option is called, so subclasses share it.
+	 */
 	public static function admin_init() {
 		add_settings_section(
 			static::OPTION,
-			__( 'Custom Station Data', 'simple-location' ),
+			static::section_title(),
 			array( static::class, 'stations_section' ),
-			static::OPTION
+			static::SETTINGS_PAGE
 		);
 		add_settings_field(
 			static::OPTION, // id.
 			__( 'Stations', 'simple-location' ), // setting title.
 			array( static::class, 'stations_callback' ), // display callback.
-			static::OPTION, // option group.
+			static::SETTINGS_PAGE, // settings page.
 			static::OPTION, // settings section.
 			array()
 		);
+	}
+
+	/**
+	 * Returns the title of the stations' settings section.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Title.
+	 */
+	protected static function section_title() {
+		return __( 'Custom Station Data', 'simple-location' );
 	}
 
 	/**
