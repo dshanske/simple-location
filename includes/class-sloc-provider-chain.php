@@ -36,9 +36,17 @@ class Sloc_Provider_Chain {
 	 * @var array[]
 	 */
 	const TYPES = array(
-		'weather' => array(
+		'weather'   => array(
 			'option'    => 'sloc_weather_provider',
 			'fallbacks' => 'sloc_weather_fallbacks',
+		),
+		'geo'       => array(
+			'option'    => 'sloc_geo_provider',
+			'fallbacks' => 'sloc_geo_fallbacks',
+		),
+		'elevation' => array(
+			'option'    => 'sloc_elevation_provider',
+			'fallbacks' => 'sloc_elevation_fallbacks',
 		),
 	);
 
@@ -51,12 +59,8 @@ class Sloc_Provider_Chain {
 	 * @return string[] Provider slugs.
 	 */
 	public static function slugs( $type ) {
-		if ( ! isset( self::TYPES[ $type ] ) ) {
-			return array();
-		}
-		$fallbacks = get_option( self::TYPES[ $type ]['fallbacks'] );
-		$slugs     = array_merge( array( get_option( self::TYPES[ $type ]['option'] ) ), is_array( $fallbacks ) ? $fallbacks : array() );
-		$known     = self::known( $type );
+		$slugs = self::configured( $type );
+		$known = self::known( $type );
 		$slugs     = array_values( array_unique( array_filter( $slugs, fn( $slug ) => is_string( $slug ) && isset( $known[ $slug ] ) ) ) );
 
 		/**
@@ -72,6 +76,24 @@ class Sloc_Provider_Chain {
 	}
 
 	/**
+	 * Returns the slugs saved in a type's settings, in order, unchecked.
+	 *
+	 * For a provider's is_active(), which runs while providers are still being registered.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $type Provider type, a key of TYPES.
+	 * @return array Saved values: the provider setting, then the fallbacks.
+	 */
+	public static function configured( $type ) {
+		if ( ! isset( self::TYPES[ $type ] ) ) {
+			return array();
+		}
+		$fallbacks = get_option( self::TYPES[ $type ]['fallbacks'] );
+		return array_merge( array( get_option( self::TYPES[ $type ]['option'] ) ), is_array( $fallbacks ) ? $fallbacks : array() );
+	}
+
+	/**
 	 * Returns the registered providers of a type, keyed by slug.
 	 *
 	 * @since 6.1.0
@@ -83,6 +105,10 @@ class Sloc_Provider_Chain {
 		switch ( $type ) {
 			case 'weather':
 				return Loc_Config::weather_providers();
+			case 'geo':
+				return Loc_Config::geo_providers();
+			case 'elevation':
+				return Loc_Config::elevation_providers();
 		}
 		return array();
 	}
@@ -100,6 +126,10 @@ class Sloc_Provider_Chain {
 		switch ( $type ) {
 			case 'weather':
 				return Loc_Config::weather_provider( $slug );
+			case 'geo':
+				return Loc_Config::geo_provider( $slug );
+			case 'elevation':
+				return Loc_Config::elevation_provider( $slug );
 		}
 		return null;
 	}
@@ -114,8 +144,8 @@ class Sloc_Provider_Chain {
 	 * @param array    $args {
 	 *     Lookup.
 	 *
-	 *     @type float           $latitude  Latitude.
-	 *     @type float           $longitude Longitude.
+	 *     @type float           $latitude  Latitude. Optional, such as for geocoding an address.
+	 *     @type float           $longitude Longitude. Optional.
 	 *     @type float|null      $altitude  Altitude. Optional.
 	 *     @type int|string|null $time      For weather, the time to look up. Optional; defaults to now.
 	 * }
@@ -142,9 +172,12 @@ class Sloc_Provider_Chain {
 			if ( $provider instanceof Weather_Provider ) {
 				$provider->set( array( 'station_id' => '' ) );
 			}
-			$provider->set( $args['latitude'] ?? null, $args['longitude'] ?? null, $args['altitude'] ?? null );
-			if ( ! $provider->covers() ) {
-				continue;
+			// Without a location, such as for an address, every provider is tried.
+			if ( isset( $args['latitude'], $args['longitude'] ) ) {
+				$provider->set( $args['latitude'], $args['longitude'], $args['altitude'] ?? null );
+				if ( ! $provider->covers() ) {
+					continue;
+				}
 			}
 			if ( $provider instanceof Weather_Provider && ! $provider->supports_time( $time ) ) {
 				continue;
@@ -205,6 +238,65 @@ class Sloc_Provider_Chain {
 	}
 
 	/**
+	 * Looks up the address of a location with the geocoding chain.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param float $latitude  Latitude.
+	 * @param float $longitude Longitude.
+	 * @return array|WP_Error Address, or the last error.
+	 */
+	public static function reverse_lookup( $latitude, $longitude ) {
+		return self::run(
+			'geo',
+			fn( $provider ) => $provider->reverse_lookup(),
+			array(
+				'latitude'  => $latitude,
+				'longitude' => $longitude,
+			)
+		);
+	}
+
+	/**
+	 * Looks up the location of an address with the geocoding chain.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $address Address.
+	 * @return array|WP_Error Location, or the last error.
+	 */
+	public static function geocode( $address ) {
+		return self::run( 'geo', fn( $provider ) => $provider->geocode( $address ), array() );
+	}
+
+	/**
+	 * Looks up the elevation of a location with the elevation chain.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param float $latitude  Latitude.
+	 * @param float $longitude Longitude.
+	 * @return float|WP_Error Elevation in meters, or the last error.
+	 */
+	public static function elevation( $latitude, $longitude ) {
+		$elevation = self::run(
+			'elevation',
+			fn( $provider ) => $provider->elevation(),
+			array(
+				'latitude'  => $latitude,
+				'longitude' => $longitude,
+			)
+		);
+		if ( is_wp_error( $elevation ) && 'no_provider' === $elevation->get_error_code() ) {
+			return new WP_Error( 'no_elevation_provider', __( 'No elevation provider is set', 'simple-location' ) );
+		}
+		if ( ! is_numeric( $elevation ) && ! is_wp_error( $elevation ) ) {
+			return new WP_Error( 'no_elevation_data', __( 'No elevation was found', 'simple-location' ) );
+		}
+		return $elevation;
+	}
+
+	/**
 	 * Sanitizes a fallbacks setting: up to two known provider slugs, without repeats or None.
 	 *
 	 * @since 6.1.0
@@ -235,6 +327,30 @@ class Sloc_Provider_Chain {
 	 */
 	public static function sanitize_weather_fallbacks( $value ) {
 		return self::sanitize_fallbacks( 'weather', $value );
+	}
+
+	/**
+	 * Sanitizes the geocoding fallbacks setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Slugs.
+	 * @return string[] Slugs.
+	 */
+	public static function sanitize_geo_fallbacks( $value ) {
+		return self::sanitize_fallbacks( 'geo', $value );
+	}
+
+	/**
+	 * Sanitizes the elevation fallbacks setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Slugs.
+	 * @return string[] Slugs.
+	 */
+	public static function sanitize_elevation_fallbacks( $value ) {
+		return self::sanitize_fallbacks( 'elevation', $value );
 	}
 
 	/**

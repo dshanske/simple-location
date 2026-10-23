@@ -275,6 +275,8 @@ Weather is looked up with up to three providers, tried in order: the weather pro
 
 A provider is skipped, without asking it, where it can't have weather: outside the country it covers, such as the National Weather Service outside the US and the Met Office outside the UK; more than 10 km from your stations, for Custom Station and WeeWX; or for a time it has no weather for. If a provider fails with an error, the next one is tried.
 
+Geocoding and elevation work the same way, with Fallback Geo Providers and Fallback Elevation Providers, tried when a provider finds nothing or fails, such as when its quota runs out. Maps have no fallback, because the map provider decides how your maps look.
+
 = How do I know when a provider stops working? =
 
 When a provider fails with an error you can fix, such as a missing or rejected API key, an exhausted quota, or one of your stations that can't be read or has stopped updating, administrators see a notice on the Dashboard and the Simple Location settings, and it is listed in Tools → Site Health. The notice can be dismissed, and the error clears by itself the next time that provider works.

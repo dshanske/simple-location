@@ -96,15 +96,10 @@ abstract class Venue_Provider extends Sloc_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Returns an error instead of 0 (sea level) when no elevation provider is set.
+	 * @since 6.1.0 Tries the elevation providers in order. See Sloc_Provider_Chain.
 	 */
 	public function elevation() {
-		$provider = Loc_Config::elevation_provider();
-		if ( ! $provider ) {
-			return new WP_Error( 'no_elevation_provider', __( 'No elevation provider is set', 'simple-location' ) );
-		}
-
-		$provider->set( $this->latitude, $this->longitude );
-		return $provider->elevation();
+		return Sloc_Provider_Chain::elevation( $this->latitude, $this->longitude );
 	}
 
 	/**

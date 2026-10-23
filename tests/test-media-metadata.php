@@ -17,6 +17,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	public function set_up() {
 		parent::set_up();
 		update_option( 'sloc_geo_provider', 'sloc_test' );
+		update_option( 'sloc_elevation_provider', 'sloc_test' );
 		update_option( 'timezone_string', 'Europe/London' );
 		Geo_Provider_Sloc_Test::reset();
 	}
@@ -345,7 +346,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 		$geodata = get_post_geodata( $attachment_id );
 		$this->assertEquals( 40.7128, $geodata['latitude'] );
 		$this->assertEquals( -74.006, $geodata['longitude'] );
-		$this->assertEquals( 50, $geodata['altitude'], 'Elevation comes from the geo provider when the photo has none.' );
+		$this->assertEquals( 123, $geodata['altitude'], 'Elevation is looked up when the photo has none.' );
 		$this->assertSame( 'Lower Manhattan, New York', $geodata['address'] );
 		$this->assertSame( array( 40.7128, -74.006 ), Geo_Provider_Sloc_Test::$last );
 
@@ -359,8 +360,8 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 */
 	public function test_attachment_location_without_elevation() {
 		$this->full_address();
-		Geo_Provider_Sloc_Test::$elevation = new WP_Error( 'no_results', 'No elevation found' );
-		$attachment_id                     = self::factory()->attachment->create();
+		Elevation_Provider_Sloc_Test::$elevation = new WP_Error( 'no_results', 'No elevation found' );
+		$attachment_id                           = self::factory()->attachment->create();
 		Sloc_Media_Metadata::attachment(
 			array(
 				'image_meta' => array(
@@ -372,6 +373,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 			),
 			$attachment_id
 		);
+		Elevation_Provider_Sloc_Test::$elevation = 123.0;
 		$this->assertSame( '', get_post_meta( $attachment_id, 'geo_altitude', true ) );
 		$this->assertEquals( 40.7128, get_post_meta( $attachment_id, 'geo_latitude', true ) );
 	}

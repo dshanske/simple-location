@@ -24,7 +24,7 @@ add_action(
 
 ## Files
 
-- [includes/class-sloc-provider-errors.php:198](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-provider-errors.php#L198)
+- [includes/class-sloc-provider-errors.php:199](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-provider-errors.php#L199)
 ```php
 do_action( 'sloc_provider_error_resolved', self::message( $record, true ), $record )
 ```

@@ -281,8 +281,8 @@ class MicropubTest extends WP_UnitTestCase {
 		return array(
 			'sent'       => array( 120, 120 ),
 			'below sea'  => array( -10.5, -10.5 ),
-			'zero'       => array( 0, 50 ),
-			'not number' => array( 'NaN', 50 ),
+			'zero'       => array( 0, 123 ),
+			'not number' => array( 'NaN', 123 ),
 		);
 	}
 
@@ -302,7 +302,7 @@ class MicropubTest extends WP_UnitTestCase {
 		$this->assertSame( array( self::LAT, self::LNG ), Geo_Provider_Sloc_Test::$last );
 		$this->assertSame( 'public', get_post_geodata( $args['ID'], 'visibility' ) );
 		$this->assertSame( 'Philadelphia City Hall', get_post_meta( $args['ID'], 'geo_address', true ) );
-		$this->assertEquals( 50, get_post_meta( $args['ID'], 'geo_altitude', true ) );
+		$this->assertEquals( 123, get_post_meta( $args['ID'], 'geo_altitude', true ) );
 		$this->assertEquals( 16, get_post_geodata( $args['ID'], 'zoom' ) );
 		$this->assertSame( 'Philadelphia', Location_Taxonomy::get_post_location( $args['ID'] ) ? get_term( Location_Taxonomy::get_post_location( $args['ID'] ) )->name : '' );
 	}

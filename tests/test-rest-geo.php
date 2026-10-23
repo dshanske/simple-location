@@ -734,7 +734,7 @@ class RestGeoTest extends WP_UnitTestCase {
 		$this->assertEquals( 45.01, $geodata['latitude'] );
 		$this->assertEquals( -75.44, $geodata['longitude'] );
 		$this->assertSame( 'Test Address', $geodata['address'] );
-		$this->assertEquals( 50, $geodata['altitude'], 'Without an altitude, it is looked up.' );
+		$this->assertEquals( 123, $geodata['altitude'], 'Without an altitude, it is looked up.' );
 	}
 
 	/**

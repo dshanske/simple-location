@@ -26,7 +26,7 @@ add_action(
 
 ## Files
 
-- [includes/class-sloc-provider-errors.php:166](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-provider-errors.php#L166)
+- [includes/class-sloc-provider-errors.php:167](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-provider-errors.php#L167)
 ```php
 do_action( 'sloc_provider_error', self::message( $errors[ $key ] ), $errors[ $key ], $error )
 ```

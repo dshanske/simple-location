@@ -316,6 +316,28 @@ class Loc_Config {
 				'sanitize_callback' => array( 'Sloc_Provider_Chain', 'sanitize_weather_fallbacks' ),
 			)
 		);
+		register_setting(
+			'sloc_providers', // option group.
+			'sloc_geo_fallbacks', // option name.
+			array(
+				'type'              => 'array',
+				'description'       => 'Geocoding providers to try, in order, after the geo provider',
+				'show_in_rest'      => false,
+				'default'           => array(),
+				'sanitize_callback' => array( 'Sloc_Provider_Chain', 'sanitize_geo_fallbacks' ),
+			)
+		);
+		register_setting(
+			'sloc_providers', // option group.
+			'sloc_elevation_fallbacks', // option name.
+			array(
+				'type'              => 'array',
+				'description'       => 'Elevation providers to try, in order, after the elevation provider',
+				'show_in_rest'      => false,
+				'default'           => array(),
+				'sanitize_callback' => array( 'Sloc_Provider_Chain', 'sanitize_elevation_fallbacks' ),
+			)
+		);
 	}
 
 	/**
@@ -810,6 +832,18 @@ class Loc_Config {
 			)
 		);
 		add_settings_field(
+			'sloc_geo_fallbacks', // id.
+			__( 'Fallback Geo Providers', 'simple-location' ), // setting title.
+			array( 'Sloc_Provider_Chain', 'fallbacks_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
+			array(
+				'label_for'   => 'sloc_geo_fallbacks',
+				'type'        => 'geo',
+				'description' => __( 'Tried in order when the geo provider finds nothing or fails, such as when its quota runs out. Errors you can fix are shown on the Dashboard.', 'simple-location' ),
+			)
+		);
+		add_settings_field(
 			'sloc_geolocation_provider', // id.
 			__( 'Geolocation Provider', 'simple-location' ), // setting title.
 			array( 'Loc_Config', 'provider_callback' ), // display callback.
@@ -844,6 +878,18 @@ class Loc_Config {
 				'label_for'   => 'sloc_elevation_provider',
 				'description' => __( 'Services that allow your site to determine elevation for a set of coordinates', 'simple-location' ),
 				'providers'   => self::elevation_providers(),
+			)
+		);
+		add_settings_field(
+			'sloc_elevation_fallbacks', // id.
+			__( 'Fallback Elevation Providers', 'simple-location' ), // setting title.
+			array( 'Sloc_Provider_Chain', 'fallbacks_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
+			array(
+				'label_for'   => 'sloc_elevation_fallbacks',
+				'type'        => 'elevation',
+				'description' => __( 'Tried in order when the elevation provider has no elevation or fails. Errors you can fix are shown on the Dashboard.', 'simple-location' ),
 			)
 		);
 		add_settings_field(

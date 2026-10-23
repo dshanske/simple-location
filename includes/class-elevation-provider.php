@@ -57,10 +57,12 @@ abstract class Elevation_Provider extends Sloc_Provider {
 
 	/**
 	 * Is Provider Active
+	 *
+	 * @since 5.0.0
+	 * @since 6.1.0 Active anywhere in the elevation chain.
 	 */
 	public function is_active() {
-		$option = get_option( 'sloc_elevation_provider' );
-		return ( $this->slug === $option );
+		return in_array( $this->slug, Sloc_Provider_Chain::configured( 'elevation' ), true );
 	}
 
 	/**

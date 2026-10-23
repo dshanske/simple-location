@@ -182,9 +182,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @since 6.1.0 Active anywhere in the weather chain.
 	 */
 	public function is_active() {
-		$fallbacks = get_option( 'sloc_weather_fallbacks' );
-		$slugs     = array_merge( array( get_option( 'sloc_weather_provider' ) ), is_array( $fallbacks ) ? $fallbacks : array() );
-		return in_array( $this->slug, $slugs, true );
+		return in_array( $this->slug, Sloc_Provider_Chain::configured( 'weather' ), true );
 	}
 
 	/**

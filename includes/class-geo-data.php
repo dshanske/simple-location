@@ -678,8 +678,7 @@ class Geo_Data {
 					$term    = Location_Taxonomy::get_location_taxonomy( $post );
 					$reverse = Loc_Config::geo_provider();
 					if ( ( empty( $term ) || ! array_key_exists( 'address', $geodata ) ) && is_object( $reverse ) ) {
-						$reverse->set( $geodata['latitude'], $geodata['longitude'] );
-						$reverse_adr = $reverse->reverse_lookup();
+						$reverse_adr = Sloc_Provider_Chain::reverse_lookup( $geodata['latitude'], $geodata['longitude'] );
 						if ( is_array( $reverse_adr ) ) {
 							$term = Location_Taxonomy::get_location( $reverse_adr );
 							Location_Taxonomy::set_location( $post_id, $term );
