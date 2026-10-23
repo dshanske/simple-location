@@ -87,7 +87,7 @@ In order to access private location information, the following custom capabiliti
 
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
-* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, and TomTom.
+* Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, TomTom, and Stadia Maps.
 * Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, HERE, MapQuest, Google, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses
 * Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues.
 * Elevation Providers optionally derive the elevation from an API when not available. Elevation is used to estimate altitude and adjust estimated sunrise/sunset levels accordingly.
@@ -120,6 +120,7 @@ API Keys are required to use certain services.
 * [Meteostat](https://meteostat.net/)
 * [Pirate Weather](https://pirateweather.net)
 * [TomTom](https://developer.tomtom.com/)
+* [Stadia Maps](https://stadiamaps.com/) - static maps need a paid plan
 * [AerisWeather](https://aerisweather.com/) - Individuals who share their personal weather station data with PWSWeather.com are offered a free contributor account.
 
 At this time, all map services require an API key, but most permit limited non-commercial use.
@@ -146,6 +147,10 @@ This is why the plugin does not save maps to the media library.
 
 Geoapify's terms allow storing its static maps, so Geoapify maps are served from your site. The first time a map is shown, your site fetches it from Geoapify, stores it in `wp-content/uploads/sloc-maps`, and serves it from there. Your API key stays on your server, and visitors' browsers never contact Geoapify.
 The image links are signed with a secret only your site knows, so nobody else can use your site to request other maps with your key.
+
+Stadia Maps maps are stored the same way when you enter a Stadia Maps API key. Your site then fetches them from Stadia's cacheable endpoint, whose images you may keep for as long as you have a paid Stadia subscription.
+Each map from the cacheable endpoint costs many more credits than a standard one (see Stadia's pricing), and each high-density copy and each refresh is a new map, so consider setting Refresh Stored Maps After to 0.
+Without a key, or with Serve Maps From This Site turned off, maps load from Stadia's standard endpoint, which may not be stored.
 
 Maps from your own custom map server (see the custom map provider below) are stored the same way, when it signs its URLs or needs no key. Maps the server marks as private, such as Stadia Maps, whose terms forbid caching, are never stored: visitors are sent to the server's signed image link instead. So are maps where the server had to draw its default map, which are asked for again after 5 minutes. With only a plain client key, the server marks every map private, so those maps are loaded from the server.
 
@@ -192,6 +197,8 @@ Don't restrict your main key to your site's domain. Requests your server makes d
 TomTom's domain whitelist works through CORS, which browsers don't apply to images, so it may not stop others from using a copied key.
 
 **MapQuest:** MapQuest doesn't document a way to restrict a key. Use a separate key as the MapQuest Map API Key, so you can replace it without changing geocoding if it is misused.
+
+**Stadia Maps:** With an API key, Stadia maps are served from your site, so the key is never shown to visitors. If you turn off Serve Maps From This Site, leave the Stadia Maps API Key empty and add your site's domain under Authentication in Stadia's client dashboard instead: maps then load from Stadia without a key in the page. As with other domain restrictions, maps may not load where no referring page is sent.
 
 **Geoapify:** Geoapify maps are served from your site, so the key is never shown to visitors and doesn't need a separate map key. Every Geoapify request comes from your server, so you can restrict the key to your server's IP address:
 * In Geoapify's MyProjects, open your project's API Keys section and add your server's outgoing IP address to the key's allowed IP addresses.

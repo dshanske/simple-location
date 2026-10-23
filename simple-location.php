@@ -299,6 +299,7 @@ class Simple_Location_Plugin {
 			'trait-sloc-api-geonames.php', // GeoNames API Traits.
 			'trait-sloc-api-mapbox.php', // MapBox API Traits.
 			'trait-sloc-api-tomtom.php', // TomTom API Traits.
+			'trait-sloc-api-stadia.php', // Stadia Maps API Traits.
 		);
 
 		self::load( $traits, 'includes/apis/' );
@@ -339,6 +340,7 @@ class Simple_Location_Plugin {
 			'class-map-provider-locationiq.php', // LocationIQ.
 			'class-map-provider-geoapify.php', // Geoapify.
 			'class-map-provider-tomtom.php', // Tom Tom.
+			'class-map-provider-stadia.php', // Stadia Maps.
 			'class-map-provider-staticmap.php', // Custom Provider.
 		);
 

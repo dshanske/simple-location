@@ -601,6 +601,54 @@ class MapCacheTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Stadia maps are stored and served from the site, fetched from Stadia's cacheable endpoint with the key, which
+	 * never reaches the page.
+	 */
+	public function test_stadia_served_from_site() {
+		update_option( 'sloc_stadia_api', 'STADIAKEY' );
+		// The registered provider was created when the plugin loaded, without a key.
+		Loc_Config::register_provider( new Map_Provider_Stadia() );
+		$this->mock_http(
+			array(
+				'tiles.stadiamaps.com' => array(
+					'body'    => base64_decode( self::PNG ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+					'headers' => array( 'content-type' => 'image/png' ),
+				),
+			)
+		);
+		$map  = new Map_Provider_Stadia(
+			array(
+				'latitude'  => self::LAT,
+				'longitude' => self::LNG,
+				'style'     => 'outdoors',
+			)
+		);
+		$html = $map->get_the_static_map_html( true );
+		$this->assertStringNotContainsString( 'STADIAKEY', $html );
+		$this->assertStringNotContainsString( 'stadiamaps.com', $html );
+
+		$urls = $this->image_urls( $html );
+		$this->assertCount( 3, $urls );
+		$this->assertSame( 302, $this->request( $urls[2] )->get_status() );
+		$this->assertCount( 1, $this->http_requests );
+		$this->assertStringStartsWith( 'https://tiles.stadiamaps.com/static_cacheable/outdoors.png?', $this->http_requests[0]['url'] );
+		$this->assertStringContainsString( 'size=600x400%402x', $this->http_requests[0]['url'] );
+		$this->assertStringContainsString( 'api_key=STADIAKEY', $this->http_requests[0]['url'] );
+
+		// Archive maps too.
+		$url = $map->get_archive_map_src( $this->locations );
+		$this->assertStringNotContainsString( 'STADIAKEY', $url );
+		$this->assertSame( 302, $this->request( $url )->get_status() );
+		$this->assertStringContainsString( '&m=39.9489%2C-75.15%2C%2Cd32f2f', $this->http_requests[1]['url'] );
+
+		// Without a key, the site can't fetch from Stadia, so maps load from Stadia with its domain authentication.
+		update_option( 'sloc_stadia_api', '' );
+		Loc_Config::register_provider( new Map_Provider_Stadia() );
+		$this->assertFalse( Sloc_Map_Cache::is_enabled( new Map_Provider_Stadia( array( 'style' => 'outdoors' ) ) ) );
+		$this->assertSame( 404, $this->request( $urls[0] )->get_status() );
+	}
+
+	/**
 	 * Custom static maps are stored and served from the site, fetched with the signed URL.
 	 */
 	public function test_staticmap_served_from_site() {
