@@ -65,6 +65,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 	 * Return array of current conditions
 	 *
 	 * @since 6.0.0 Times more than an hour ago are requested from the Time Machine API.
+	 * @since 6.1.0 Includes the dew point.
 	 *
 	 * @param int $time Time to retrieve weather. Optional.
 	 * @return array Current Conditions in Array
@@ -107,6 +108,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			if ( isset( $current['humidity'] ) ) {
 				$return['humidity'] = round( $current['humidity'] * 100, 1 );
 			}
+			$return['dewpoint'] = self::round_value( $current['dewPoint'] ?? null, 1 );
 			$return['pressure'] = self::round_value( $current['pressure'] ?? null, 1 );
 			if ( isset( $current['cloudCover'] ) ) {
 				$return['cloudiness'] = round( $current['cloudCover'] * 100, 1 );
