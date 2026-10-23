@@ -284,6 +284,16 @@ Choose one as the Location Provider in Settings, then each user enters their ser
 The key is never shown again after it is saved, and only the user, or someone who can edit them, can use their account.
 Your server must be reachable at a public address: WordPress refuses requests to local and private network addresses.
 
+= How do I add a map of several places to a post or page? =
+
+Use the `[sloc_map]` shortcode. It draws a map with a marker at each place, in the style of the archive maps, and each marker links to its post or image where the map provider allows.
+* `[sloc_map]` maps the post's attached images that have GPS data.
+* `[sloc_map ids="12,34,56"]` maps those posts or images.
+* `[sloc_map points="39.9524,-75.1636|40.7128,-74.0060"]` maps the given latitude and longitude points.
+* `width` and `height` set the map's size in pixels.
+
+Only published posts and images with a public location are drawn, and images take the visibility of the post they are attached to. At most 100 places are drawn, and if there are none, nothing is shown.
+
 = How can I show a list of posts tagged with a location? =
 
 You can filter any query or archive by adding `?geo={all|public|text}` to it to show only public posts with location. Adding /geo/all to the homepage or archive pages should also work
