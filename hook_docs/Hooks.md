@@ -51,6 +51,17 @@
 - [`sloc_map_cache_directory`](sloc_map_cache_directory) Filters where stored map images are kept.
 - [`sloc_map_cache_max_age`](sloc_map_cache_max_age) Filters how many days a stored map image is used before it is fetched again from the provider.
 
+## class-sloc-provider-chain.php
+
+- [`sloc_provider_chain`](sloc_provider_chain) Filters the providers a lookup tries, in order.
+
+## class-sloc-provider-errors.php
+
+- [`sloc_provider_error`](sloc_provider_error) Fires when a provider starts failing with an error an administrator can fix.
+- [`sloc_provider_error_actionable`](sloc_provider_error_actionable) Filters whether a provider error is recorded for administrators to fix.
+- [`sloc_provider_error_message`](sloc_provider_error_message) Filters the one-line message about a provider error, or the provider's recovery.
+- [`sloc_provider_error_resolved`](sloc_provider_error_resolved) Fires when a provider with a recorded error answers again.
+
 ## class-venue-provider.php
 
 - [`sloc_venue_provider_defaults`](sloc_venue_provider_defaults) Filters the default arguments of venue providers.

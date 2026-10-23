@@ -24,7 +24,7 @@ add_filter(
 apply_filters( 'sloc_geo_provider_defaults', $defaults )
 ```
 
-- [includes/class-map-provider.php:356](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L356)
+- [includes/class-map-provider.php:380](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L380)
 ```php
 apply_filters( 'sloc_geo_provider_defaults', $defaults )
 ```

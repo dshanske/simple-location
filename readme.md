@@ -120,7 +120,7 @@ location of a three letter airport code, and three self-hosted location history 
 * Weather Providers retrieve weather data about your location and include OpenWeatherMap, Pirate Weather, Dark Sky, Weatherstack, WeatherBit, HERE, Open-Meteo and the US National Weather Service. Open-Meteo needs no key for non-commercial use, has historical weather, and can be self-hosted. HERE, Pirate Weather, Dark Sky, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs that must return the properties as they are stored in WordPress.
 ** The National Weather Service(US) uses their station lookup API to find the closest weather station, and uses weather from there. Therefore, if this returns no options, if you are outside the US, it will return no weather.
 ** The Met Office(UK) uses the distance from your current location to the nearest UK weather station and finds the closest one. However, if the nearest station is more than 100km away, it will return nothing.
-** For Weather services like the NWS, Met Office, and the Custom Provider, where coverage is not worldwide, if nothing is found, a fallback provider can be set and used.
+** For weather services like the NWS, Met Office, and your own stations, where coverage is not worldwide, up to two fallback weather providers can be set. They are tried in order when a provider has no weather. See the FAQ.
 
 ## Frequently Asked Questions
 
@@ -270,10 +270,17 @@ takes a URL and an ID. So you could run a script that generates a static page an
 
 Currently, only Visual Crossing supports historic weather data on their basic plan. Meteostat consists solely of historical data and has no current data.
 
-### What is the fallback weather provider?
+### What are the fallback weather providers?
 
-Several providers, including the custom provider, the National Weather Service(US), and the Met Office(UK) only provide limited locations for retrieving weather data. This specifies where to look if the first provider fails.
-This may be replaced with better logic in future.
+Weather is looked up with up to three providers, tried in order: the weather provider, then the 2nd and 3rd under Fallback Weather Providers, for example your own station, a free service and a paid one. The first that has weather is used, and its credit is shown.
+
+A provider is skipped, without asking it, where it can't have weather: outside the country it covers, such as the National Weather Service outside the US and the Met Office outside the UK; more than 10 km from your stations, for Custom Station and WeeWX; or for a time it has no weather for. If a provider fails with an error, the next one is tried.
+
+### How do I know when a provider stops working?
+
+When a provider fails with an error you can fix, such as a missing or rejected API key, an exhausted quota, or one of your stations that can't be read, administrators see a notice on the Dashboard and the Simple Location settings, and it is listed in Tools → Site Health. The notice can be dismissed, and the error clears by itself the next time that provider works.
+
+To be notified elsewhere, such as on your phone, hook the `sloc_provider_error` and `sloc_provider_error_resolved` actions, which receive a one-line message.
 
 ### Is this compatible with the WordPress mobile apps?
 

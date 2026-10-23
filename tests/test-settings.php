@@ -342,9 +342,10 @@ class SettingsTest extends WP_UnitTestCase {
 		$html        = $this->capture( array( 'Loc_Config', 'simloc_options' ) );
 		$this->assertMatchesRegularExpression( '/class="nav-tab nav-tab-active">Providers</', $html );
 		$this->assertStringContainsString( "name='option_page' value='sloc_providers'", $html );
-		foreach ( array( 'sloc_map_provider', 'sloc_geo_provider', 'sloc_geolocation_provider', 'sloc_venue_provider', 'sloc_elevation_provider', 'sloc_weather_provider', 'sloc_fallback_weather_provider' ) as $name ) {
+		foreach ( array( 'sloc_map_provider', 'sloc_geo_provider', 'sloc_geolocation_provider', 'sloc_venue_provider', 'sloc_elevation_provider', 'sloc_weather_provider' ) as $name ) {
 			$this->assertStringContainsString( '<select name="' . $name . '">', $html, $name );
 		}
+		$this->assertSame( 2, substr_count( $html, '<select name="sloc_weather_fallbacks[]"' ), 'Two fallback weather providers.' );
 
 		$_GET['tab'] = 'api';
 		$this->assertStringContainsString( "name='option_page' value='sloc_api'", $this->capture( array( 'Loc_Config', 'simloc_options' ) ) );

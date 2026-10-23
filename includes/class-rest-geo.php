@@ -693,13 +693,10 @@ class REST_Geo {
 				}
 			}
 			if ( isset( $params['weather'] ) && ( 'no' !== $params['weather'] ) ) {
-				$weather = Loc_Config::weather_provider();
-				if ( $weather ) {
-					$weather->set( $params );
-					$time                   = $params['time'] ?? null;
-					$reverse_adr['weather'] = $weather->get_conditions( $time );
+				if ( Loc_Config::weather_provider() ) {
+					$reverse_adr['weather'] = Sloc_Provider_Chain::weather( $params['latitude'], $params['longitude'], $params['time'] ?? null );
 					if ( array_key_exists( 'units', $params ) && 'imperial' === $params['units'] ) {
-						$reverse_adr['weather'] = $weather->metric_to_imperial( $reverse_adr['weather'] );
+						$reverse_adr['weather'] = Weather_Provider::metric_to_imperial( $reverse_adr['weather'] );
 					}
 				}
 			}
@@ -751,16 +748,22 @@ class REST_Geo {
 		}
 		if ( ! empty( $params['station'] ) ) {
 			$weather->set( array( 'station_id' => $params['station'] ) );
+			$conditions = $weather->get_conditions( $time );
 		} elseif ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
-			$weather->set( $params );
 			$return = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],
 			);
+			if ( $provider ) {
+				// A provider asked for by name is the only one tried.
+				$weather->set( $params );
+				$conditions = $weather->get_conditions( $time );
+			} else {
+				$conditions = Sloc_Provider_Chain::weather( $params['latitude'], $params['longitude'], $time );
+			}
 		} else {
 				return new WP_Error( 'missing_geo', __( 'Missing Coordinates or Station for Weather Lookup', 'simple-location' ), array( 'status' => 400 ) );
 		}
-		$conditions = $weather->get_conditions( $time );
 		if ( is_wp_error( $conditions ) ) {
 			return $conditions;
 		}

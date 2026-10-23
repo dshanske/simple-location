@@ -304,14 +304,16 @@ class Loc_Config {
 				'default'      => 'none',
 			)
 		);
+		Sloc_Provider_Chain::migrate();
 		register_setting(
 			'sloc_providers', // option group.
-			'sloc_fallback_weather_provider', // option name.
+			'sloc_weather_fallbacks', // option name.
 			array(
-				'type'         => 'string',
-				'description'  => 'Fallback Weather Provider',
-				'show_in_rest' => false,
-				'default'      => 'none',
+				'type'              => 'array',
+				'description'       => 'Weather providers to try, in order, after the weather provider',
+				'show_in_rest'      => false,
+				'default'           => array(),
+				'sanitize_callback' => array( 'Sloc_Provider_Chain', 'sanitize_weather_fallbacks' ),
 			)
 		);
 	}
@@ -857,16 +859,15 @@ class Loc_Config {
 			)
 		);
 		add_settings_field(
-			'sloc_fallback_weather_provider', // id.
-			__( 'Fallback Weather Provider', 'simple-location' ), // setting title.
-			array( 'Loc_Config', 'provider_callback' ), // display callback.
+			'sloc_weather_fallbacks', // id.
+			__( 'Fallback Weather Providers', 'simple-location' ), // setting title.
+			array( 'Sloc_Provider_Chain', 'fallbacks_callback' ), // display callback.
 			'sloc_providers', // option group.
 			'sloc_providers', // settings section.
 			array(
-				'label_for'   => 'sloc_fallback_weather_provider',
-				'description' => __( 'Fallback Option if the Primary Provider Fails', 'simple-location' ),
-				'providers'   => self::weather_providers(),
-				'none'        => 1,
+				'label_for'   => 'sloc_weather_fallbacks',
+				'type'        => 'weather',
+				'description' => __( 'Tried in order when the weather provider has no weather, such as outside the area it covers, for a time it has no weather for, or after an error. Errors you can fix, such as a rejected API key, are shown on the Dashboard.', 'simple-location' ),
 			)
 		);
 
