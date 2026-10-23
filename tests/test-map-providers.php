@@ -97,7 +97,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::map_providers();
-		foreach ( array( 'geoapify', 'google', 'here', 'locationiq', 'mapbox', 'mapquest', 'staticmap', 'tomtom' ) as $slug ) {
+		foreach ( array( 'geoapify', 'google', 'here', 'locationiq', 'mapbox', 'mapquest', 'stadia', 'staticmap', 'tomtom' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}
@@ -1562,6 +1562,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'Geoapify'   => array( 'Map_Provider_Geoapify', array( -12, -28, 12, 2 ) ),
 			'LocationIQ' => array( 'Map_Provider_LocationIQ', array( -16, -48, 16, 2 ) ),
 			'MapQuest'   => array( 'Map_Provider_MapQuest', array( -12, -28, 12, 2 ) ),
+			'Stadia'     => array( 'Map_Provider_Stadia', array( -12, -28, 12, 2 ) ),
 		);
 	}
 
@@ -1710,6 +1711,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'HERE'     => array( 'Map_Provider_Here', '/1200x800/png8?' ),
 			'Geoapify' => array( 'Map_Provider_Geoapify', 'scaleFactor=2' ),
 			'MapQuest' => array( 'Map_Provider_MapQuest', 'size=600,400@2x' ),
+			'Stadia'   => array( 'Map_Provider_Stadia', 'size=600x400%402x' ),
 		);
 	}
 
@@ -2058,6 +2060,127 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Stadia maps are served from the site from the cacheable endpoint, or load from the standard endpoint.
+	 */
+	public function test_stadia() {
+		update_option( 'sloc_map_cache', 0 );
+		$map = $this->provider( 'Map_Provider_Stadia', array( 'style' => 'outdoors' ) );
+		$this->assertSame( 'https://tiles.stadiamaps.com/static/outdoors.png?center=39.9524%2C-75.1636&zoom=15&size=600x400&api_key=KEY&m=39.9524%2C-75.1636%2C%2Cd32f2f', $map->get_the_static_map() );
+		$this->assertSame( 'https://www.openstreetmap.org/?mlat=39.9524&mlon=-75.1636#map=15/39.9524/-75.1636', $map->get_the_map_url() );
+		$this->assertSame( 'https://tiles.stadiamaps.com/static/outdoors.png?center=39.95065%2C-75.1568&zoom=14.75&size=600x400&api_key=KEY&m=39.9524%2C-75.1636%2C%2Cd32f2f&m=39.9489%2C-75.15%2C%2Cd32f2f', $map->get_archive_map( $this->locations ) );
+
+		// Served from the site, the image is fetched from the cacheable endpoint.
+		update_option( 'sloc_map_cache', 1 );
+		$this->assertTrue( $map->is_cacheable() );
+		$this->assertStringStartsWith( 'https://tiles.stadiamaps.com/static_cacheable/outdoors.png?', $map->get_the_static_map() );
+		$this->assertStringNotContainsString( 'stadiamaps.com', $map->get_the_static_map_html( true ) );
+
+		// Without a key, maps load from the standard endpoint with Stadia's domain authentication.
+		$map = $this->provider(
+			'Map_Provider_Stadia',
+			array(
+				'style' => 'outdoors',
+				'api'   => '',
+			)
+		);
+		$this->assertFalse( $map->is_cacheable() );
+		$this->assertStringStartsWith( 'https://tiles.stadiamaps.com/static/outdoors.png?', $map->get_the_static_map() );
+		$this->assertStringNotContainsString( 'api_key', $map->get_the_static_map() );
+		$this->assertStringContainsString( 'src="https://tiles.stadiamaps.com/static/outdoors.png?', $map->get_the_static_map_html( true ) );
+
+		// Without a style, or locations, there's no map.
+		$map = $this->provider( 'Map_Provider_Stadia', array( 'style' => '' ) );
+		$this->assertSame( '', $map->get_the_static_map() );
+		$this->assertSame( '', $map->get_archive_map( $this->locations ) );
+		$this->assertSame( '', $this->provider( 'Map_Provider_Stadia', array( 'style' => 'outdoors' ) )->get_archive_map( array() ) );
+	}
+
+	/**
+	 * Stadia fits archive maps whose view the plugin can't choose itself.
+	 */
+	public function test_stadia_archive_fitted_by_stadia() {
+		update_option( 'sloc_map_cache', 0 );
+		$map = $this->provider( 'Map_Provider_Stadia', array( 'style' => 'outdoors' ) );
+		$url = $map->get_archive_map(
+			array(
+				array( 10, 179 ),
+				array( 10, -179 ),
+			)
+		);
+		$this->assertStringContainsString( '/static/outdoors.png?size=600x400&api_key=KEY&m=10%2C179%2C%2Cd32f2f&m=10%2C-179%2C%2Cd32f2f', $url );
+	}
+
+	/**
+	 * Stadia's credit can go under the map, with the credits each style needs, and is then left off the image.
+	 */
+	public function test_stadia_attribution_below() {
+		update_option( 'sloc_map_cache', 0 );
+		$map  = $this->provider(
+			'Map_Provider_Stadia',
+			array(
+				'style'       => 'outdoors',
+				'attribution' => 'below',
+			)
+		);
+		$html = '<p class="sloc-map-attribution"><a href="https://stadiamaps.com/attribution/">© Stadia Maps</a> <a href="https://openmaptiles.org/">© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a></p>';
+		$this->assertSame( $html, $map->get_attribution_html() );
+		$this->assertStringContainsString( '&manual_attribution=true&', $map->get_the_static_map() );
+		$this->assertStringContainsString( '&manual_attribution=true&', $map->get_archive_map( $this->locations ) );
+		$this->assertStringEndsWith( '</a>' . $html, $map->get_the_map() );
+
+		$credits = function ( $style ) {
+			return $this->provider(
+				'Map_Provider_Stadia',
+				array(
+					'style'       => $style,
+					'attribution' => 'below',
+				)
+			)->get_attribution_html();
+		};
+		$this->assertStringContainsString( '<a href="https://stamen.com/">© Stamen Design</a> <a href="https://openmaptiles.org/">', $credits( 'stamen_toner' ) );
+		$this->assertStringNotContainsString( 'OpenMapTiles', $credits( 'stamen_watercolor' ) );
+		$this->assertStringContainsString( 'Stamen Design', $credits( 'stamen_watercolor' ) );
+		$this->assertStringEndsWith( '© OpenStreetMap</a> © CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data)</p>', $credits( 'alidade_satellite' ) );
+
+		// On the image, as Stadia draws it.
+		$map = $this->provider( 'Map_Provider_Stadia', array( 'style' => 'outdoors' ) );
+		$this->assertSame( '', $map->get_attribution_html() );
+		$this->assertStringNotContainsString( 'manual_attribution', $map->get_the_static_map() );
+		$this->assertStringEndsWith( '</a>', $map->get_the_map() );
+	}
+
+	/**
+	 * Stadia registers its key and style settings, and lists its styles.
+	 */
+	public function test_stadia_settings() {
+		global $wp_settings_fields;
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		Map_Provider_Stadia::init();
+		$settings = get_registered_settings();
+		$this->assertArrayHasKey( 'sloc_stadia_api', $settings );
+		$this->assertSame( 'alidade_smooth', $settings['sloc_stadia_style']['default'] );
+
+		Map_Provider_Stadia::admin_init();
+		$this->assertSame( 'Stadia Maps API Key', $wp_settings_fields['sloc_api']['sloc_api']['sloc_stadia_api']['title'] );
+		$this->assertSame( 'Stadia Maps Style', $wp_settings_fields['simloc']['sloc_map']['stadiastyle']['title'] );
+
+		update_option( 'sloc_stadia_api', 'OPTIONKEY' );
+		update_option( 'sloc_stadia_style', 'stamen_terrain' );
+		update_option( 'sloc_map_cache', 0 );
+		$map = new Map_Provider_Stadia(
+			array(
+				'latitude'  => self::LAT,
+				'longitude' => self::LNG,
+			)
+		);
+		$this->assertStringStartsWith( 'https://tiles.stadiamaps.com/static/stamen_terrain.png?', $map->get_the_static_map() );
+		$this->assertStringContainsString( 'api_key=OPTIONKEY', $map->get_the_static_map() );
+		$this->assertArrayHasKey( 'alidade_smooth', $map->get_styles() );
+		$this->assertArrayHasKey( 'stamen_watercolor', $map->get_styles() );
+	}
+
+	/**
 	 * Vendors whose map key is shared with server-side providers, with the URL parameter that carries the key.
 	 *
 	 * @return array
@@ -2215,6 +2338,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'MapQuest png'    => array( 'Map_Provider_Mapquest', 'png', 'format=png' ),
 			'MapQuest gif'    => array( 'Map_Provider_Mapquest', 'gif', 'format=gif' ),
 			'TomTom jpg'      => array( 'Map_Provider_TomTom', 'jpg', 'format=jpg', false ),
+			'Stadia jpg'      => array( 'Map_Provider_Stadia', 'jpg', '/streets-v11.jpg?' ),
 			'Static map webp' => array( 'Map_Provider_StaticMap', 'webp', 'format=webp' ),
 		);
 	}
@@ -2231,6 +2355,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'Map_Provider_LocationIQ' => array( 'png', null ),
 			'Map_Provider_Mapquest'   => array( 'jpg', null ),
 			'Map_Provider_TomTom'     => array( 'png', null ),
+			'Map_Provider_Stadia'     => array( 'png', '/streets-v11.png?' ),
 		);
 		foreach ( $expected as $class => $default ) {
 			delete_option( 'sloc_' . strtolower( substr( $class, 13 ) ) . '_format' );
@@ -2342,6 +2467,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'LocationIQ' => array( 'Map_Provider_LocationIQ', 'locationiq', 'LocationIQ' ),
 			'MapQuest'   => array( 'Map_Provider_Mapquest', 'mapquest', 'MapQuest' ),
 			'TomTom'     => array( 'Map_Provider_TomTom', 'tomtom', 'TomTom' ),
+			'Stadia'     => array( 'Map_Provider_Stadia', 'stadia', 'Stadia Maps' ),
 		);
 	}
 
@@ -2431,6 +2557,15 @@ class MapProvidersTest extends WP_UnitTestCase {
 					'dot medium' => '|circle-md-43a047',
 				),
 				'defaultMarker=marker-43a047',
+			),
+			'Stadia'     => array(
+				'Map_Provider_Stadia',
+				array(
+					'pin small'  => '&m=39.9524%2C-75.1636%2Cstreets-v11_sm%2C43a047',
+					'pin medium' => '&m=39.9524%2C-75.1636%2C%2C43a047',
+					'dot large'  => '&m=39.9524%2C-75.1636%2C%2C43a047',
+				),
+				'&m=39.9524%2C-75.1636%2C%2C43a047&m=39.9489%2C-75.15%2C%2C43a047',
 			),
 		);
 	}
