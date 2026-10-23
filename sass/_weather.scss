@@ -24,3 +24,17 @@
 	list-style-position: inside;
 	list-style: none;
 }
+
+.sloc-temperature-chart {
+	display: block;
+	width: 100%;
+	height: auto;
+	font-size: 12px;
+	fill: currentColor;
+}
+
+.sloc-temperature-list,
+.sloc-weather-list {
+	list-style: none;
+	padding-left: 0;
+}
