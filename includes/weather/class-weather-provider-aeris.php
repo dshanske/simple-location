@@ -34,12 +34,13 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 The personal weather stations setting is saved with the API settings (#686).
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Xweather Client ID', 'simple-location' ), 'sloc_aeris_client_id' );
 		self::register_settings_api( __( 'Xweather Client Secret', 'simple-location' ), 'sloc_aeris_client_secret' );
 		register_setting(
-			'sloc_providers', // Option group.
+			'sloc_api', // Option group.
 			'sloc_aeris_pws', // Option name.
 			array(
 				'type'         => 'number',
@@ -54,6 +55,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 * Admin Init to Add Settings Field.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.0 The personal weather stations setting is on the API settings page, where it shows (#686).
 	 */
 	public static function admin_init() {
 		self::add_settings_parameter( __( 'Xweather', 'simple-location' ), 'sloc_aeris_client_id', __( 'Client ID', 'simple-location' ) );
@@ -64,7 +66,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			'aerisweatherpws', // ID.
 			__( 'Include Personal Weather Stations in Xweather Provider', 'simple-location' ), // Setting title.
 			array( 'Loc_Config', 'checkbox_callback' ), // Display callback.
-			'sloc_providers', // Settings page.
+			'sloc_api', // Settings page.
 			'sloc_api', // Settings section.
 			array(
 				'label_for' => 'sloc_aeris_pws',

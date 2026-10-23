@@ -345,9 +345,31 @@ abstract class Sloc_Provider {
 	}
 
 	/**
+	 * Names of the services on the API settings page, keyed by their group: the word after `sloc_` in their options.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	public static $api_names = array();
+
+	/**
+	 * Returns the group of an API setting: the word after `sloc_` in its option name, such as 'google'.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $option Option name.
+	 * @return string Group.
+	 */
+	public static function api_group( $option ) {
+		$parts = explode( '_', preg_replace( '/^sloc_/', '', (string) $option ), 2 );
+		return sanitize_key( $parts[0] );
+	}
+
+	/**
 	 * Adds a password field for a credential setting to the API settings page.
 	 *
 	 * @since 5.0.0
+	 * @since 6.1.0 Records the service's name for its group on the page.
 	 *
 	 * @param string      $name     Name of the service.
 	 * @param string      $property Option name.
@@ -357,6 +379,7 @@ abstract class Sloc_Provider {
 		if ( ! $type ) {
 			$type = __( 'API Key', 'simple-location' );
 		}
+		self::$api_names[ self::api_group( $property ) ] ??= $name;
 
 		add_settings_field(
 			$property, // ID.
@@ -376,6 +399,7 @@ abstract class Sloc_Provider {
 	 * Adds a URL field for a setting to the API settings page.
 	 *
 	 * @since 5.0.0
+	 * @since 6.1.0 Records the service's name for its group on the page.
 	 *
 	 * @param string      $name     Name of the service.
 	 * @param string      $property Option name.
@@ -385,6 +409,7 @@ abstract class Sloc_Provider {
 		if ( ! $type ) {
 			$type = __( 'Service URL', 'simple-location' );
 		}
+		self::$api_names[ self::api_group( $property ) ] ??= $name;
 
 		add_settings_field(
 			$property, // ID.

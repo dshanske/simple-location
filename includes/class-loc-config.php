@@ -11,6 +11,7 @@ add_filter( 'admin_init', array( 'Loc_Config', 'admin_init' ), 10 );
 add_filter( 'plugins_loaded', array( 'Loc_Config', 'init' ), 11 );
 add_action( 'admin_menu', array( 'Loc_Config', 'admin_menu' ), 10 );
 add_action( 'admin_init', array( 'Loc_Config', 'schedule_data_cleanup' ) );
+add_action( 'admin_init', array( 'Loc_Config', 'load_api_settings' ), 9 );
 add_action( 'sloc_data_cleanup', array( 'Loc_Config', 'run_data_cleanup' ) );
 
 /**
@@ -670,7 +671,7 @@ class Loc_Config {
 					break;
 				case 'api':
 					settings_fields( 'sloc_api' );
-					do_settings_sections( 'sloc_api' );
+					self::api_settings_sections();
 					break;
 				default:
 					settings_fields( 'simloc' );
@@ -1604,9 +1605,159 @@ class Loc_Config {
 	 * API settings header.
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.0 Describes the groups.
 	 */
 	public static function sloc_api_settings() {
-		esc_html_e( 'In order for a specific service to work, you must add their API key below', 'simple-location' );
+		esc_html_e( 'In order for a specific service to work, you must add their API key below. Each service has its own section: the ones in use are open and listed first, and the others can be opened to set them up ahead of time.', 'simple-location' );
+	}
+
+	/**
+	 * Returns whether this request shows or saves the API settings.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return bool Whether it is the API Keys tab, or its form being saved.
+	 */
+	public static function is_api_settings_request() {
+		global $pagenow;
+		// phpcs:disable WordPress.Security.NonceVerification -- Only decides which settings to load; options.php checks the nonce when saving.
+		if ( 'options.php' === $pagenow ) {
+			return isset( $_POST['option_page'] ) && 'sloc_api' === sanitize_key( wp_unslash( $_POST['option_page'] ) );
+		}
+		return isset( $_GET['page'], $_GET['tab'] ) && 'simloc' === sanitize_key( wp_unslash( $_GET['page'] ) ) && 'api' === sanitize_key( wp_unslash( $_GET['tab'] ) );
+		// phpcs:enable WordPress.Security.NonceVerification
+	}
+
+	/**
+	 * Loads every provider's settings on the API Keys tab, not only the providers in use, so each can be set up.
+	 *
+	 * Elsewhere, only the providers in use load their settings. The others are loaded only for the API Keys tab and
+	 * its saving: on other tabs, their settings would be saved empty, because those tabs don't show them. Loading a
+	 * provider in use again changes nothing.
+	 *
+	 * @since 6.1.0
+	 */
+	public static function load_api_settings() {
+		if ( ! self::is_api_settings_request() ) {
+			return;
+		}
+		$classes = array();
+		foreach ( self::all_providers() as $provider ) {
+			$classes[ get_class( $provider ) ] = true;
+		}
+		foreach ( array_keys( $classes ) as $class ) {
+			foreach ( array( 'init', 'admin_init' ) as $method ) {
+				if ( method_exists( $class, $method ) ) {
+					call_user_func( array( $class, $method ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns every registered provider that can have settings: map, geo, weather, elevation and venue.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return Sloc_Provider[] Providers.
+	 */
+	protected static function all_providers() {
+		return array_merge( array_values( static::$maps ), array_values( static::$geo ), array_values( static::$weather ), array_values( static::$elevation ), array_values( static::$venue ) );
+	}
+
+	/**
+	 * Echoes the API settings, with each service's settings in a section that opens and closes.
+	 *
+	 * Services in use are open and listed first, then the others, by name.
+	 *
+	 * @since 6.1.0
+	 */
+	public static function api_settings_sections() {
+		global $wp_settings_fields;
+		echo '<h2>' . esc_html__( 'API Keys', 'simple-location' ) . '</h2>';
+		echo '<p>';
+		self::sloc_api_settings();
+		echo '</p>';
+
+		$groups = array();
+		$fields = $wp_settings_fields['sloc_api']['sloc_api'] ?? array();
+		foreach ( (array) $fields as $id => $field ) {
+			$option = $field['args']['label_for'] ?? $id;
+			$groups[ Sloc_Provider::api_group( $option ) ][ $id ] = $field;
+		}
+
+		$sections = array();
+		foreach ( $groups as $group => $group_fields ) {
+			$sections[] = array(
+				'name'   => self::api_group_name( $group ),
+				'in_use' => self::api_group_in_use( $group ),
+				'fields' => $group_fields,
+				'group'  => $group,
+			);
+		}
+		usort(
+			$sections,
+			fn( $a, $b ) => array( ! $a['in_use'], strtolower( $a['name'] ) ) <=> array( ! $b['in_use'], strtolower( $b['name'] ) )
+		);
+
+		foreach ( $sections as $section ) {
+			printf(
+				'<details class="sloc-api-group" id="sloc-api-%1$s"%2$s><summary>%3$s%4$s</summary><table class="form-table" role="presentation">',
+				esc_attr( $section['group'] ),
+				$section['in_use'] ? ' open' : '',
+				esc_html( $section['name'] ),
+				$section['in_use'] ? ' <span class="sloc-api-in-use">' . esc_html__( 'In use', 'simple-location' ) . '</span>' : ''
+			);
+			foreach ( $section['fields'] as $field ) {
+				echo empty( $field['args']['class'] ) ? '<tr>' : '<tr class="' . esc_attr( $field['args']['class'] ) . '">';
+				if ( empty( $field['args']['label_for'] ) ) {
+					echo '<th scope="row">' . wp_kses_post( $field['title'] ) . '</th>';
+				} else {
+					echo '<th scope="row"><label for="' . esc_attr( $field['args']['label_for'] ) . '">' . wp_kses_post( $field['title'] ) . '</label></th>';
+				}
+				echo '<td>';
+				call_user_func( $field['callback'], $field['args'] );
+				echo '</td></tr>';
+			}
+			echo '</table></details>';
+		}
+	}
+
+	/**
+	 * Returns the name of a service on the API settings page.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $group Group, such as 'google'.
+	 * @return string The name its settings were added with, or a provider's name, or the group.
+	 */
+	protected static function api_group_name( $group ) {
+		if ( isset( Sloc_Provider::$api_names[ $group ] ) ) {
+			return Sloc_Provider::$api_names[ $group ];
+		}
+		foreach ( self::all_providers() as $provider ) {
+			if ( $provider->get_slug() === $group ) {
+				return wp_strip_all_tags( $provider->get_name() );
+			}
+		}
+		return ucfirst( $group );
+	}
+
+	/**
+	 * Returns whether a service on the API settings page is used by a provider the site uses.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $group Group, such as 'google'.
+	 * @return bool Whether a provider in use has a slug that starts with the group, such as 'metofficeuk' for 'metoffice'.
+	 */
+	protected static function api_group_in_use( $group ) {
+		foreach ( self::all_providers() as $provider ) {
+			if ( '' !== $group && 0 === strpos( (string) $provider->get_slug(), $group ) && $provider->is_active() ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
