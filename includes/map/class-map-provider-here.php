@@ -268,6 +268,7 @@ class Map_Provider_Here extends Map_Provider {
 	 * @since 6.1.0 Markers are in the marker color.
 	 * @since 6.1.0 Draws the scale bar setting.
 	 * @since 6.1.0 Labels are in the site's language.
+	 * @since 6.1.0 A track has markers only at its ends, or none, and a line through its points.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -281,13 +282,19 @@ class Map_Provider_Here extends Map_Provider {
 		foreach ( $locations as $location ) {
 			$points[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
+		$markers = array();
+		foreach ( $this->get_marker_locations( $locations ) as $location ) {
+			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
+		}
 
 		$args = array(
-			'apiKey'  => $this->api,
-			'style'   => $this->style,
-			// A style after the last point applies to all of them.
-			'overlay' => 'point:' . implode( '|', $points ) . '|color=%23' . $this->get_marker_hex(),
+			'apiKey' => $this->api,
+			'style'  => $this->style,
 		);
+		if ( $markers ) {
+			// A style after the last point applies to all of them.
+			$args['overlay'] = 'point:' . implode( '|', $markers ) . '|color=%23' . $this->get_marker_hex();
+		}
 		$args = $this->add_language_code( $args );
 		// A high-density map is twice the size at scale 2, showing the same area.
 		if ( 1 < $this->scale ) {

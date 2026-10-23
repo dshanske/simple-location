@@ -119,6 +119,7 @@ class Map_Provider_LocationIQ extends Map_Provider {
 	 * @since 6.1.0 Centred and zoomed by the plugin, so its markers can be linked to their posts.
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the nearest color LocationIQ has to the marker color.
+	 * @since 6.1.0 A track has markers only at its ends, or none, and a line through its points.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations.
@@ -152,8 +153,8 @@ class Map_Provider_LocationIQ extends Map_Provider {
 			);
 		}
 		// The v3 API takes one markers parameter per marker.
-		foreach ( $points as $point ) {
-			$map .= '&markers=icon:large-' . $this->get_marker_palette_color() . '-cutout|' . $point;
+		foreach ( $this->get_marker_locations( $locations ) as $location ) {
+			$map .= '&markers=icon:large-' . $this->get_marker_palette_color() . '-cutout|' . sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
 		// A path needs at least two points.
 		if ( count( $points ) > 1 ) {

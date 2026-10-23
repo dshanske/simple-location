@@ -348,6 +348,7 @@ class Map_Provider_Google extends Map_Provider {
 	 * @since 6.1.0 Uses the image format setting.
 	 * @since 6.1.0 Markers are in the marker color.
 	 * @since 6.1.0 Uses the language from get_language().
+	 * @since 6.1.0 A track has markers only at its ends, or none, and a line through its points.
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @return string URL, or an empty string without an API key or locations, or if the signing secret isn't valid.
@@ -358,13 +359,13 @@ class Map_Provider_Google extends Map_Provider {
 		}
 
 		$markers = array();
-		foreach ( $locations as $location ) {
+		foreach ( $this->get_marker_locations( $locations ) as $location ) {
 			$markers[] = sprintf( '%1$s,%2$s', $location[0], $location[1] );
 		}
 		$polyline = Sloc_Polyline::encode( $locations );
 
 		$args = array(
-			'markers'  => 'size:tiny|color:0x' . $this->get_marker_hex() . '|label:P|' . implode( '|', $markers ),
+			'markers'  => $markers ? 'size:tiny|color:0x' . $this->get_marker_hex() . '|label:P|' . implode( '|', $markers ) : '',
 			'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
 			'maptype'  => $this->get_maptype(),
 			'language' => $this->get_language(),
@@ -379,7 +380,7 @@ class Map_Provider_Google extends Map_Provider {
 		if ( 1 < $this->scale ) {
 			$args['scale'] = $this->scale;
 		}
-		$map = $this->build_url( $this->add_format( $args ) );
+		$map = $this->build_url( $this->add_format( array_filter( $args, 'strlen' ) ) );
 		return is_wp_error( $map ) ? '' : $map;
 	}
 
