@@ -70,7 +70,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::weather_providers();
-		foreach ( array( 'openweathermap', 'pirateweather', 'weatherbit', 'weatherstack', 'visualcrossing', 'aeris', 'nwsus', 'meteostat', 'metofficeuk', 'here', 'station' ) as $slug ) {
+		foreach ( array( 'openweathermap', 'pirateweather', 'weatherbit', 'weatherstack', 'visualcrossing', 'aeris', 'nwsus', 'meteostat', 'metofficeuk', 'here', 'station', 'openmeteo' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers, $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}
@@ -444,6 +444,198 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		);
 		$this->assertSame( 'Partly cloudy', $conditions['summary'] );
 		$this->assertSame( 802, $conditions['code'] );
+	}
+
+	/**
+	 * Open-Meteo: current conditions from the free forecast API, without a key, with wind in meters per second.
+	 */
+	public function test_openmeteo_current() {
+		$fixture = $this->fixture( 'weather/openmeteo-current.json' );
+		$this->mock_http( array( 'api.open-meteo.com/v1/forecast' => array( 'body' => $fixture ) ) );
+		$conditions = $this->provider( 'Weather_Provider_OpenMeteo' )->get_conditions();
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://api.open-meteo.com/v1/forecast', $request['base'] );
+		$this->assertEquals( self::LAT, $request['query']['latitude'] );
+		$this->assertEquals( self::LNG, $request['query']['longitude'] );
+		$this->assertSame( 'ms', $request['query']['wind_speed_unit'] );
+		$this->assertSame( implode( ',', Weather_Provider_OpenMeteo::VARIABLES ), $request['query']['current'] );
+		$this->assertArrayNotHasKey( 'apikey', $request['query'] );
+
+		$current = $fixture['current'];
+		$this->assertConditions(
+			array(
+				'temperature' => $current['temperature_2m'],
+				'dewpoint'    => $current['dew_point_2m'],
+				'humidity'    => $current['relative_humidity_2m'],
+				'pressure'    => $current['pressure_msl'],
+				'cloudiness'  => $current['cloud_cover'],
+				'windspeed'   => $current['wind_speed_10m'],
+				'windgust'    => $current['wind_gusts_10m'],
+				'winddegree'  => $current['wind_direction_10m'],
+				'visibility'  => $current['visibility'],
+				'rain'        => $current['rain'] + $current['showers'],
+				'snow'        => $current['snowfall'] * 10,
+				'code'        => Weather_Provider_OpenMeteo::code_map( $current['weather_code'] ),
+				'summary'     => Weather_Provider_OpenMeteo::wmo_summary( $current['weather_code'] ),
+			),
+			$conditions
+		);
+	}
+
+	/**
+	 * Open-Meteo: a time more than ARCHIVE_AFTER days ago uses the Historical Weather API for its UTC day, and the
+	 * nearest hour. Values the archive doesn't have are left out.
+	 */
+	public function test_openmeteo_archive() {
+		$fixture = $this->fixture( 'weather/openmeteo-archive.json' );
+		$this->mock_http( array( 'archive-api.open-meteo.com/v1/archive' => array( 'body' => $fixture ) ) );
+		// 14:20 in Philadelphia is 18:20 UTC, nearest to the 18:00 UTC hour.
+		$time       = strtotime( '2025-07-01T14:20:00-04:00' );
+		$conditions = $this->provider( 'Weather_Provider_OpenMeteo' )->get_conditions( $time );
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://archive-api.open-meteo.com/v1/archive', $request['base'] );
+		$this->assertSame( '2025-07-01', $request['query']['start_date'] );
+		$this->assertSame( '2025-07-01', $request['query']['end_date'] );
+		$this->assertSame( implode( ',', Weather_Provider_OpenMeteo::VARIABLES ), $request['query']['hourly'] );
+
+		$index = array_search( strtotime( '2025-07-01T18:00:00Z' ), $fixture['hourly']['time'], true );
+		$this->assertIsInt( $index );
+		$this->assertSame( (float) $fixture['hourly']['temperature_2m'][ $index ], $conditions['temperature'] );
+		$this->assertSame( (float) $fixture['hourly']['wind_speed_10m'][ $index ], $conditions['windspeed'] );
+		$this->assertSame( Weather_Provider_OpenMeteo::code_map( $fixture['hourly']['weather_code'][ $index ] ), $conditions['code'] );
+		$this->assertArrayNotHasKey( 'visibility', $conditions );
+		$this->assertArrayNotHasKey( 'uv', $conditions );
+	}
+
+	/**
+	 * Open-Meteo: a recent past time uses the forecast API's hourly data, which the archive doesn't have yet.
+	 */
+	public function test_openmeteo_recent_past() {
+		$hour    = (int) ( floor( strtotime( '-3 days' ) / HOUR_IN_SECONDS ) * HOUR_IN_SECONDS );
+		$hourly  = array( 'time' => array( $hour - HOUR_IN_SECONDS, $hour, $hour + HOUR_IN_SECONDS ) );
+		$hourly += array(
+			'temperature_2m' => array( 10.0, 11.5, 12.0 ),
+			'rain'           => array( 0.0, 0.4, 0.0 ),
+			'showers'        => array( 0.0, 0.3, 0.0 ),
+			'snowfall'       => array( 0.0, 0.7, 0.0 ),
+			'weather_code'   => array( 0, 61, 3 ),
+		);
+		$this->mock_http( array( 'api.open-meteo.com/v1/forecast' => array( 'body' => array( 'hourly' => $hourly ) ) ) );
+		$conditions = $this->provider( 'Weather_Provider_OpenMeteo' )->get_conditions( $hour + 600 );
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://api.open-meteo.com/v1/forecast', $request['base'] );
+		$this->assertSame( gmdate( 'Y-m-d', $hour ), $request['query']['start_date'] );
+		$this->assertArrayHasKey( 'hourly', $request['query'] );
+		$this->assertSame( 11.5, $conditions['temperature'] );
+		$this->assertSame( 0.7, $conditions['rain'] );
+		$this->assertSame( 7.0, $conditions['snow'] );
+		$this->assertSame( 500, $conditions['code'] );
+		$this->assertSame( 'Slight rain', $conditions['summary'] );
+
+		// An hour the response doesn't have is an error, not empty weather.
+		$this->assertSame( 'no_results', $this->provider( 'Weather_Provider_OpenMeteo' )->get_conditions( $hour + 5 * HOUR_IN_SECONDS )->get_error_code() );
+	}
+
+	/**
+	 * Open-Meteo: a commercial key uses the customer hosts, and a self-hosted server replaces Open-Meteo's hosts.
+	 */
+	public function test_openmeteo_hosts() {
+		$current = $this->fixture( 'weather/openmeteo-current.json' );
+		$archive = $this->fixture( 'weather/openmeteo-archive.json' );
+		$past    = strtotime( '2025-07-01T14:00:00-04:00' );
+		$this->mock_http(
+			array(
+				'/v1/forecast' => array( 'body' => $current ),
+				'/v1/archive'  => array( 'body' => $archive ),
+			)
+		);
+
+		$provider = $this->provider( 'Weather_Provider_OpenMeteo', array( 'api' => 'om-key' ) );
+		$provider->get_conditions();
+		$this->assertSame( 'https://customer-api.open-meteo.com/v1/forecast', $this->last_request()['base'] );
+		$this->assertSame( 'om-key', $this->last_request()['query']['apikey'] );
+		$provider->get_conditions( $past );
+		$this->assertSame( 'https://customer-archive-api.open-meteo.com/v1/archive', $this->last_request()['base'] );
+
+		update_option( 'sloc_openmeteo_url', 'https://weather.example.com/' );
+		$provider = $this->provider( 'Weather_Provider_OpenMeteo', array( 'api' => '' ) );
+		$provider->get_conditions();
+		$this->assertSame( 'https://weather.example.com/v1/forecast', $this->last_request()['base'] );
+		$provider->get_conditions( $past );
+		$this->assertSame( 'https://weather.example.com/v1/archive', $this->last_request()['base'] );
+
+		$this->assertSame( '', Weather_Provider_OpenMeteo::sanitize_url( 'ftp://weather.example.com' ) );
+		$this->assertSame( '', Weather_Provider_OpenMeteo::sanitize_url( null ) );
+	}
+
+	/**
+	 * Open-Meteo: a refused request carries Open-Meteo's reason.
+	 */
+	public function test_openmeteo_errors() {
+		$fixture = $this->fixture( 'weather/openmeteo-error.json' );
+		$this->mock_http(
+			array(
+				'api.open-meteo.com' => array(
+					'code' => 400,
+					'body' => $fixture,
+				),
+			)
+		);
+		$error = $this->provider( 'Weather_Provider_OpenMeteo' )->get_conditions();
+		$this->assertWPError( $error );
+		$this->assertSame( 'openmeteo_error', $error->get_error_code() );
+		$this->assertSame( $fixture['reason'], $error->get_error_message() );
+		$this->assertSame( array( 'status' => 400 ), $error->get_error_data() );
+
+		$this->mock_http(
+			array(
+				'api.open-meteo.com' => array(
+					'code' => 502,
+					'body' => 'Bad Gateway',
+				),
+			)
+		);
+		$this->assertSame( 'invalid_response', $this->provider( 'Weather_Provider_OpenMeteo' )->get_conditions()->get_error_code() );
+
+		$this->mock_http( array( 'api.open-meteo.com' => array( 'body' => array( 'latitude' => self::LAT ) ) ) );
+		$this->assertSame( 'no_results', $this->provider( 'Weather_Provider_OpenMeteo' )->get_conditions()->get_error_code() );
+	}
+
+	/**
+	 * Open-Meteo: every WMO code it documents has a description and a known condition code.
+	 */
+	public function test_openmeteo_codes() {
+		foreach ( array( 0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99 ) as $wmo ) {
+			$this->assertNotSame( '', Weather_Provider_OpenMeteo::wmo_summary( $wmo ), $wmo );
+			$code = Weather_Provider_OpenMeteo::code_map( $wmo );
+			$this->assertNotSame( '', Weather_Provider_Sloc_Test::weather_condition_codes( $code ), $wmo );
+			$this->assertNotSame( '', Weather_Provider_Sloc_Test::weather_condition_icons( $code ), $wmo );
+		}
+		$this->assertSame( '', Weather_Provider_OpenMeteo::code_map( 42 ) );
+		$this->assertSame( '', Weather_Provider_OpenMeteo::wmo_summary( 42 ) );
+	}
+
+	/**
+	 * Open-Meteo registers its optional key and server URL, with descriptions.
+	 */
+	public function test_openmeteo_settings() {
+		global $wp_settings_fields;
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		Weather_Provider_OpenMeteo::init();
+		$settings = get_registered_settings();
+		$this->assertArrayHasKey( 'sloc_openmeteo_api', $settings );
+		$this->assertSame( 'https://weather.example.com', sanitize_option( 'sloc_openmeteo_url', ' https://weather.example.com ' ) );
+
+		Weather_Provider_OpenMeteo::admin_init();
+		$fields = $wp_settings_fields['sloc_api']['sloc_api'];
+		$this->assertSame( 'password', $fields['sloc_openmeteo_api']['args']['type'] );
+		$this->assertStringContainsString( 'commercial', $fields['sloc_openmeteo_api']['args']['description'] );
+		$this->assertSame( 'url', $fields['sloc_openmeteo_url']['args']['type'] );
+		$this->assertFalse( $this->provider( 'Weather_Provider_OpenMeteo' )->is_station() );
 	}
 
 	/**

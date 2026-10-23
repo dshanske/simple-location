@@ -1,0 +1,4 @@
+{
+    "error": true,
+    "reason": "Invalid value: Cannot initialize SurfacePressureAndHeightVariable<VariableAndPreviousDay, VariableOrSpread<ForecastPressureVariable>, ForecastHeightVariable> from invalid String value nonsense"
+}
