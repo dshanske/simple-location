@@ -35,6 +35,64 @@ trait Weather_Info_Trait {
 	}
 
 	/**
+	 * Magnus formula constant a, from Alduchov and Eskridge (1996).
+	 *
+	 * @since 6.1.0
+	 * @var float
+	 */
+	protected static $magnus_a = 17.625;
+
+	/**
+	 * Magnus formula constant b, in Celsius, from Alduchov and Eskridge (1996).
+	 *
+	 * @since 6.1.0
+	 * @var float
+	 */
+	protected static $magnus_b = 243.04;
+
+	/**
+	 * Calculates the dew point from the temperature and relative humidity, with the Magnus formula.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $temperature Air temperature in Celsius.
+	 * @param mixed $humidity    Relative humidity in percent.
+	 * @return float|null Dew point in Celsius, to one decimal place, or null when an input is missing or the humidity
+	 *                    is 0 or less.
+	 */
+	public static function dew_point( $temperature, $humidity ) {
+		if ( ! is_numeric( $temperature ) || ! is_numeric( $humidity ) || (float) $humidity <= 0 ) {
+			return null;
+		}
+		$a     = self::$magnus_a;
+		$b     = self::$magnus_b;
+		$t     = (float) $temperature;
+		$gamma = log( min( 100.0, (float) $humidity ) / 100 ) + $a * $t / ( $b + $t );
+		return round( $b * $gamma / ( $a - $gamma ), 1 );
+	}
+
+	/**
+	 * Calculates the relative humidity from the temperature and dew point, with the Magnus formula.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $temperature Air temperature in Celsius.
+	 * @param mixed $dewpoint    Dew point in Celsius.
+	 * @return float|null Relative humidity in percent, to one decimal place and at most 100, or null when an input is
+	 *                    missing.
+	 */
+	public static function relative_humidity( $temperature, $dewpoint ) {
+		if ( ! is_numeric( $temperature ) || ! is_numeric( $dewpoint ) ) {
+			return null;
+		}
+		$a = self::$magnus_a;
+		$b = self::$magnus_b;
+		$t = (float) $temperature;
+		$d = (float) $dewpoint;
+		return round( min( 100.0, 100 * exp( $a * $d / ( $b + $d ) - $a * $t / ( $b + $t ) ) ), 1 );
+	}
+
+	/**
 	 * Calculates the wind chill, with the 2001 formula of the US National Weather Service and Environment Canada.
 	 *
 	 * @since 6.1.0
