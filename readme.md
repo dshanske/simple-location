@@ -303,6 +303,15 @@ Use the `[sloc_map]` shortcode. It draws a map with a marker at each place, in t
 
 Only published posts and images with a public location are drawn, and images take the visibility of the post they are attached to. At most 100 places are drawn, and if there are none, nothing is shown.
 
+### Can I see the weather of an archive?
+
+Yes. Like `/map/` for a map, add `/temperature/` or `/weather/` to any archive, such as a year, category, author or location: for example `/2025/temperature/` or `/map/location/pennsylvania/` becomes `/temperature/location/pennsylvania/`.
+* `/temperature/` shows a chart of the temperatures of the archive's posts, in your site's units, followed by a list of them.
+* `/weather/` lists each post with its weather icon, summary and temperature.
+
+Only posts with weather are shown, and only when their location isn't private, as their weather isn't shown otherwise. Both are drawn without JavaScript.
+A theme can change either view with its own `temperature-archive.php` or `weather-archive.php`, as it can the map view with `map-archive.php`.
+
 ### How can I show a list of posts tagged with a location?
 
 You can filter any query or archive by adding `?geo={all|public|text}` to it to show only public posts with location. Adding /geo/all to the homepage or archive pages should also work

@@ -606,7 +606,8 @@ class GeoBaseTest extends WP_UnitTestCase {
 		$this->assertSame( 'index.php?location=$matches[1]&map=1', $rules['map/location/(.+?)/?$'] );
 
 		$vars = Geo_Base::query_var( array( 'p' ) );
-		$this->assertSame( array( 'p', 'geo', 'map', 'sloc_units' ), $vars );
+		$this->assertSame( array( 'p', 'geo', 'map', 'sloc_temperature', 'sloc_weather', 'sloc_units' ), $vars );
+		$this->assertSame( 'index.php?location=$matches[1]&sloc_temperature=1', $rules['temperature/location/(.+?)/?$'] );
 	}
 
 	/**

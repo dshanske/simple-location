@@ -757,6 +757,7 @@ class Geo_Base {
 	 * This adds rewrite endpoints for the plugin.
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.0 Adds the temperature and weather archive views.
 	 */
 	public static function rewrite() {
 		global $wp_rewrite;
@@ -764,17 +765,27 @@ class Geo_Base {
 
 		add_rewrite_endpoint( 'geo', EP_ALL_ARCHIVES );
 		add_rewrite_endpoint( 'map', EP_ALL_ARCHIVES );
+		// The weather views' query variables are prefixed, so they can't clash with other plugins'.
+		add_rewrite_endpoint( 'temperature', EP_ALL_ARCHIVES, 'sloc_temperature' );
+		add_rewrite_endpoint( 'weather', EP_ALL_ARCHIVES, 'sloc_weather' );
 
-		add_rewrite_rule(
-			'map/location/(.+?)/' . $pagination_regex,
-			'index.php?map=1&location=$matches[1]&paged=$matches[2]',
-			'top'
+		$views = array(
+			'map'         => 'map',
+			'temperature' => 'sloc_temperature',
+			'weather'     => 'sloc_weather',
 		);
-		add_rewrite_rule(
-			'map/location/(.+?)/?$',
-			'index.php?location=$matches[1]&map=1',
-			'top'
-		);
+		foreach ( $views as $view => $query_var ) {
+			add_rewrite_rule(
+				$view . '/location/(.+?)/' . $pagination_regex,
+				'index.php?' . $query_var . '=1&location=$matches[1]&paged=$matches[2]',
+				'top'
+			);
+			add_rewrite_rule(
+				$view . '/location/(.+?)/?$',
+				'index.php?location=$matches[1]&' . $query_var . '=1',
+				'top'
+			);
+		}
 	}
 
 
@@ -787,10 +798,13 @@ class Geo_Base {
 	 * @return array $vars Returns the updated array.
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.0 Adds the temperature and weather archive views.
 	 */
 	public static function query_var( $vars ) {
 		$vars[] = 'geo';
 		$vars[] = 'map';
+		$vars[] = 'sloc_temperature';
+		$vars[] = 'sloc_weather';
 		$vars[] = 'sloc_units';
 		return $vars;
 	}
