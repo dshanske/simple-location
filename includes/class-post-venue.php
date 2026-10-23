@@ -20,6 +20,9 @@ add_action( 'init', array( 'Post_Venue', 'register' ), 1 );
 class Post_Venue {
 	/**
 	 * Register the meta for venues.
+	 *
+	 * @since 5.0.0
+	 * @since 6.1.0 Registers the visibility for posts made at the venue.
 	 */
 	public static function register_meta() {
 		register_meta(
@@ -104,6 +107,47 @@ class Post_Venue {
 				'default'        => 50,
 			)
 		);
+
+		register_meta(
+			'post',
+			'venue_post_visibility',
+			array(
+				'object_subtype'    => 'venue',
+				'type'              => 'string',
+				'description'       => __( 'Visibility of the location of posts made at the venue', 'simple-location' ),
+				'single'            => true,
+				'show_in_rest'      => false,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_post_visibility' ),
+			)
+		);
+	}
+
+	/**
+	 * Sanitizes a venue's visibility for posts made there.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Visibility.
+	 * @return string 'public', 'protected' or 'private', or an empty string for no default.
+	 */
+	public static function sanitize_post_visibility( $value ) {
+		return in_array( $value, array( 'public', 'protected', 'private' ), true ) ? $value : '';
+	}
+
+	/**
+	 * Returns the visibility a venue gives the location of posts made there, such as private at home.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int|string|false $venue_id Venue ID.
+	 * @return string 'public', 'protected' or 'private', or an empty string when the venue doesn't set one, in which case
+	 *                each way of posting keeps its own default.
+	 */
+	public static function get_post_visibility( $venue_id ) {
+		if ( ! is_numeric( $venue_id ) || 0 >= (int) $venue_id ) {
+			return '';
+		}
+		return self::sanitize_post_visibility( get_post_meta( (int) $venue_id, 'venue_post_visibility', true ) );
 	}
 
 	/**

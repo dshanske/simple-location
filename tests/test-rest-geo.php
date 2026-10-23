@@ -478,6 +478,30 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * /geocode at a venue that sets the visibility for posts made there returns that, whatever the venue's own (#143).
+	 */
+	public function test_geocode_at_venue_post_visibility() {
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		set_post_geodata( $venue_id, 'visibility', 'private' );
+		$at_venue = function () use ( $venue_id ) {
+			return $venue_id;
+		};
+		add_filter( 'pre_at_venue', $at_venue );
+		foreach ( array( 'public', 'private' ) as $visibility ) {
+			update_post_meta( $venue_id, 'venue_post_visibility', $visibility );
+			$data = $this->request(
+				'/geocode',
+				array(
+					'latitude'  => '45.01',
+					'longitude' => '-75.44',
+				)
+			)->get_data();
+			$this->assertSame( $visibility, $data['visibility'] );
+		}
+		remove_filter( 'pre_at_venue', $at_venue );
+	}
+
+	/**
 	 * /geocode at a venue with no location term doesn't fail.
 	 */
 	public function test_geocode_at_venue_without_term() {

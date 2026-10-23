@@ -125,6 +125,65 @@ class PostVenueTest extends WP_UnitTestCase {
 		$this->assertTrue( registered_meta_key_exists( 'post', 'venue_id', 'post' ) );
 		$this->assertTrue( registered_meta_key_exists( 'post', 'venue_id', 'attachment' ) );
 		$this->assertSame( 50, get_registered_meta_keys( 'post', 'venue' )['venue_radius']['default'] );
+		$this->assertTrue( registered_meta_key_exists( 'post', 'venue_post_visibility', 'venue' ) );
+	}
+
+	/**
+	 * A venue's visibility for posts made there is one of the three visibilities, or none (#143).
+	 */
+	public function test_post_visibility() {
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		$this->assertSame( '', Post_Venue::get_post_visibility( $venue_id ) );
+		foreach ( array( 'public', 'protected', 'private' ) as $visibility ) {
+			update_post_meta( $venue_id, 'venue_post_visibility', $visibility );
+			$this->assertSame( $visibility, Post_Venue::get_post_visibility( $venue_id ) );
+		}
+		update_post_meta( $venue_id, 'venue_post_visibility', 'secret' );
+		$this->assertSame( '', Post_Venue::get_post_visibility( $venue_id ) );
+		$this->assertSame( '', Post_Venue::get_post_visibility( false ) );
+		$this->assertSame( '', Post_Venue::get_post_visibility( 0 ) );
+		$this->assertSame( '', Post_Venue::sanitize_post_visibility( array( 'private' ) ) );
+	}
+
+	/**
+	 * A location found in the background at a venue takes the venue's visibility for posts made there.
+	 */
+	public function test_post_visibility_background_lookup() {
+		$author = self::factory()->user->create( array( 'role' => 'author' ) );
+		// set_user_geodata() doesn't save (#305), so store the location directly.
+		Geo_Data::set_geodata(
+			'user',
+			$author,
+			'',
+			array(
+				'latitude'  => 39.9524,
+				'longitude' => -75.1636,
+			)
+		);
+		update_option( 'sloc_geolocation_provider', 'dummy' );
+		update_option( 'sloc_geo_provider', 'sloc_test' );
+		Geo_Provider_Sloc_Test::reset();
+		Geo_Provider_Sloc_Test::$reverse = array(
+			'display-name' => 'Home',
+			'locality'     => 'Philadelphia',
+			'region'       => 'Pennsylvania',
+			'region-code'  => 'PA',
+			'country-name' => 'United States',
+			'country-code' => 'US',
+		);
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		update_post_meta( $venue_id, 'venue_post_visibility', 'private' );
+		$at_venue = function () use ( $venue_id ) {
+			return $venue_id;
+		};
+		add_filter( 'pre_at_venue', $at_venue );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$post_id = self::factory()->post->create( array( 'post_author' => $author ) );
+		Geo_Data::bulk_edit_lookup_location( $post_id );
+		remove_filter( 'pre_at_venue', $at_venue );
+
+		$this->assertEquals( $venue_id, get_post_meta( $post_id, 'venue_id', true ) );
+		$this->assertSame( 'private', get_post_geodata( $post_id, 'visibility' ) );
 	}
 
 	/**

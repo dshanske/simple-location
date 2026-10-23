@@ -378,6 +378,67 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Coordinates at a venue that sets the visibility for posts made there use it, unless the client asked for one (#143).
+	 */
+	public function test_set_location_at_venue_post_visibility() {
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		update_post_meta( $venue_id, 'venue_post_visibility', 'private' );
+		$at_venue = function () use ( $venue_id ) {
+			return $venue_id;
+		};
+		add_filter( 'pre_at_venue', $at_venue );
+		$meta = array(
+			'geo_latitude'  => self::LAT,
+			'geo_longitude' => self::LNG,
+		);
+		$args = $this->micropub_post( $meta );
+		Location_Plugins::micropub_set_location( array( 'properties' => array() ), $args );
+		$this->assertSame( 'private', get_post_geodata( $args['ID'], 'visibility' ) );
+
+		$args = $this->micropub_post( $meta );
+		Location_Plugins::micropub_set_location( array( 'properties' => array( 'location-visibility' => array( 'public' ) ) ), $args );
+		$this->assertSame( 'public', get_post_geodata( $args['ID'], 'visibility' ) );
+		remove_filter( 'pre_at_venue', $at_venue );
+	}
+
+	/**
+	 * A check-in at an existing venue that sets the visibility for posts made there uses it.
+	 */
+	public function test_set_location_checkin_post_visibility() {
+		$venue_id = self::factory()->post->create(
+			array(
+				'post_type'  => 'venue',
+				'post_title' => 'Home',
+			)
+		);
+		update_post_meta( $venue_id, 'venue_url', 'https://home.example.com/' );
+		set_post_geodata( $venue_id, 'visibility', 'public' );
+		update_post_meta( $venue_id, 'venue_post_visibility', 'protected' );
+		$args  = $this->micropub_post(
+			array(
+				'geo_latitude'  => self::LAT,
+				'geo_longitude' => self::LNG,
+			)
+		);
+		$input = array(
+			'properties' => array(
+				'checkin' => array(
+					'type'       => array( 'h-card' ),
+					'properties' => array(
+						'name'      => array( 'Home' ),
+						'latitude'  => array( self::LAT ),
+						'longitude' => array( self::LNG ),
+						'url'       => array( 'https://home.example.com/' ),
+					),
+				),
+			),
+		);
+		Location_Plugins::micropub_set_location( $input, $args );
+		$this->assertEquals( $venue_id, get_post_meta( $args['ID'], 'venue_id', true ) );
+		$this->assertSame( 'protected', get_post_geodata( $args['ID'], 'visibility' ) );
+	}
+
+	/**
 	 * Data for a requested location-visibility, with and without a venue.
 	 *
 	 * @return array Visibility and whether the post is at a venue.
