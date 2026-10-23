@@ -27,7 +27,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-sloc-provider-errors.php:236](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-provider-errors.php#L236)
+- [includes/class-sloc-provider-errors.php:237](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-provider-errors.php#L237)
 ```php
 apply_filters( 'sloc_provider_error_message', $message, $record, $resolved )
 ```

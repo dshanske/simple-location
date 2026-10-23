@@ -25,7 +25,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-sloc-provider-chain.php:70](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-provider-chain.php#L70)
+- [includes/class-sloc-provider-chain.php:74](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-provider-chain.php#L74)
 ```php
 apply_filters( 'sloc_provider_chain', $slugs, $type )
 ```

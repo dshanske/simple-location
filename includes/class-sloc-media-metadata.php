@@ -271,11 +271,9 @@ class Sloc_Media_Metadata {
 				update_post_meta( $post_id, 'venue_id', $venue );
 				$update['geo_address'] = get_the_title( $venue );
 			} else {
-				$reverse     = Loc_Config::geo_provider();
 				$reverse_adr = null;
-				if ( is_object( $reverse ) ) {
-					$reverse->set( $data['location']['latitude'], $data['location']['longitude'] );
-					$reverse_adr = $reverse->reverse_lookup();
+				if ( Loc_Config::geo_provider() ) {
+					$reverse_adr = Sloc_Provider_Chain::reverse_lookup( $data['location']['latitude'], $data['location']['longitude'] );
 				}
 				if ( is_array( $reverse_adr ) ) {
 					$term = Location_Taxonomy::get_location( $reverse_adr, true );
@@ -284,8 +282,8 @@ class Sloc_Media_Metadata {
 						$update['geo_address'] = $reverse_adr['display-name'];
 					}
 				}
-				if ( ! array_key_exists( 'geo_altitude', $update ) && is_object( $reverse ) ) {
-					$elevation = $reverse->elevation();
+				if ( ! array_key_exists( 'geo_altitude', $update ) ) {
+					$elevation = Sloc_Provider_Chain::elevation( $data['location']['latitude'], $data['location']['longitude'] );
 					// Store only a number, never an error from the elevation lookup.
 					if ( is_numeric( $elevation ) ) {
 						$update['geo_altitude'] = $elevation;

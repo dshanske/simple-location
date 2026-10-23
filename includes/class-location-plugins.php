@@ -401,8 +401,7 @@ class Location_Plugins {
 			}
 			Location_Taxonomy::set_location( $args['ID'], $term );
 		} elseif ( isset( $location['latitude'] ) && isset( $location['longitude'] ) && is_object( $reverse ) ) {
-			$reverse->set( $location['latitude'], $location['longitude'] );
-			$reverse_adr = $reverse->reverse_lookup();
+			$reverse_adr = Sloc_Provider_Chain::reverse_lookup( $location['latitude'], $location['longitude'] );
 			if ( ! is_array( $reverse_adr ) ) {
 				// The lookup failed; keep what the client sent.
 				$reverse_adr = array();
@@ -412,7 +411,7 @@ class Location_Plugins {
 				unset( $meta['geo_altitude'] );
 			}
 			if ( ! isset( $meta['geo_altitude'] ) && isset( $meta['geo_latitude'] ) && isset( $meta['geo_longitude'] ) ) {
-				$elevation = $reverse->elevation();
+				$elevation = Sloc_Provider_Chain::elevation( $meta['geo_latitude'], $meta['geo_longitude'] );
 				// Store only a number, never an error from the elevation lookup.
 				if ( is_numeric( $elevation ) ) {
 					update_post_meta( $args['ID'], 'geo_altitude', $elevation );
@@ -464,10 +463,8 @@ class Location_Plugins {
 
 		$venues      = array();
 		$reverse_adr = array();
-		$reverse     = Loc_Config::geo_provider();
-		if ( is_object( $reverse ) ) {
-			$reverse->set( $lat, $lon );
-			$reverse_adr = $reverse->reverse_lookup();
+		if ( Loc_Config::geo_provider() ) {
+			$reverse_adr = Sloc_Provider_Chain::reverse_lookup( $lat, $lon );
 		}
 		$venue = Loc_Config::venue_provider();
 		if ( is_object( $venue ) ) {

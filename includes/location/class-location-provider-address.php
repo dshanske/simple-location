@@ -47,8 +47,7 @@ class Location_Provider_Address extends Location_Provider {
 			return new WP_Error( 'no_string', __( 'Non String Passed Through', 'simple-location' ) );
 		}
 		$address = trim( $args['address'] );
-		$geocode = Loc_Config::geo_provider();
-		$address = $geocode->geocode( $address );
+		$address = Sloc_Provider_Chain::geocode( $address );
 		if ( is_wp_error( $address ) ) {
 			$this->annotation = __( 'No Item Found', 'simple-location' );
 			return null;

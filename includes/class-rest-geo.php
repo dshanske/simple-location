@@ -499,12 +499,10 @@ class REST_Geo {
 		}
 		$location = array_filter( $location );
 		if ( isset( $location['latitude'] ) && isset( $location['longitude'] ) ) {
-			$reverse = Loc_Config::geo_provider();
-			if ( ! $reverse ) {
+			if ( ! Loc_Config::geo_provider() ) {
 				return __( 'Provider Not Available', 'simple-location' );
 			}
-			$reverse->set( $location['latitude'], $location['longitude'] );
-			$reverse_adr = $reverse->reverse_lookup();
+			$reverse_adr = Sloc_Provider_Chain::reverse_lookup( $location['latitude'], $location['longitude'] );
 
 			if ( isset( $reverse_adr['display-name'] ) ) {
 				$location['address'] = $reverse_adr['display-name'];
@@ -514,7 +512,7 @@ class REST_Geo {
 				unset( $location['altitude'] );
 			}
 			if ( ! isset( $location['altitude'] ) ) {
-				$location['altitude'] = $reverse->elevation();
+				$location['altitude'] = Sloc_Provider_Chain::elevation( $location['latitude'], $location['longitude'] );
 			}
 		}
 
@@ -589,6 +587,10 @@ class REST_Geo {
 		$params   = $request->get_params();
 		$provider = empty( $params['provider'] ) ? null : $params['provider'];
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+			if ( ! $provider ) {
+				return Sloc_Provider_Chain::elevation( $params['latitude'], $params['longitude'] );
+			}
+			// A provider asked for by name is the only one tried.
 			$elevation = Loc_Config::elevation_provider( $provider );
 			if ( ! $elevation ) {
 				return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
@@ -662,8 +664,13 @@ class REST_Geo {
 				if ( ! $reverse ) {
 					return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
 				}
-				$reverse->set( $params );
-				$reverse_adr = $reverse->reverse_lookup();
+				if ( $provider ) {
+					// A provider asked for by name is the only one tried.
+					$reverse->set( $params );
+					$reverse_adr = $reverse->reverse_lookup();
+				} else {
+					$reverse_adr = Sloc_Provider_Chain::reverse_lookup( $params['latitude'], $params['longitude'] );
+				}
 				if ( is_wp_error( $reverse_adr ) ) {
 					return $reverse_adr;
 				}
@@ -702,14 +709,10 @@ class REST_Geo {
 			}
 
 			if ( ! isset( $reverse_adr['altitude'] ) ) {
-				$provider = Loc_Config::elevation_provider();
-				if ( $provider ) {
-					$provider->set( $params['latitude'], $params['longitude'] );
-					$elevation = $provider->elevation();
-					// Leave the altitude out when it can't be looked up.
-					if ( is_numeric( $elevation ) ) {
-						$reverse_adr['altitude'] = $elevation;
-					}
+				$elevation = Sloc_Provider_Chain::elevation( $params['latitude'], $params['longitude'] );
+				// Leave the altitude out when it can't be looked up.
+				if ( is_numeric( $elevation ) ) {
+					$reverse_adr['altitude'] = $elevation;
 				}
 			}
 
@@ -723,7 +726,8 @@ class REST_Geo {
 			if ( ! $geocode ) {
 				return new WP_Error( 'no_provider', __( 'Reverse Geolocation Provider Not Set', 'simple-location' ) );
 			}
-			return $geocode->geocode( $params['address'] );
+			// A provider asked for by name is the only one tried.
+			return $provider ? $geocode->geocode( $params['address'] ) : Sloc_Provider_Chain::geocode( $params['address'] );
 		}
 		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
 	}
