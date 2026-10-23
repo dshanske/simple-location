@@ -1,0 +1,4 @@
+{
+  "error": "Dataset 'nosuchdataset' not in config.",
+  "status": "INVALID_REQUEST"
+}

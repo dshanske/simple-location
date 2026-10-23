@@ -64,7 +64,7 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::elevation_providers();
-		foreach ( array( 'geonames', 'google', 'openroute' ) as $slug ) {
+		foreach ( array( 'geonames', 'google', 'openroute', 'opentopodata' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}
@@ -210,6 +210,101 @@ class ElevationProvidersTest extends WP_UnitTestCase {
 
 		$this->mock_http( array( 'api.openrouteservice.org/elevation/point' => array( 'body' => array( 'geometry' => array( -75.1636, 39.9524, 14.256 ) ) ) ) );
 		$this->assertSame( 14.26, $this->provider( 'Elevation_Provider_OpenRoute', array( 'api' => 'KEY' ) )->elevation() );
+	}
+
+	/**
+	 * Open Topo Data's public API needs no key, and returns the dataset's elevation for the point.
+	 */
+	public function test_opentopodata() {
+		$fixture = $this->fixture( 'elevation/opentopodata-mapzen.json' );
+		$this->mock_http( array( 'api.opentopodata.org/v1/mapzen' => array( 'body' => $fixture ) ) );
+		$elevation = $this->provider( 'Elevation_Provider_OpenTopoData' )->elevation();
+
+		$request = $this->last_request();
+		$this->assertStringStartsWith( 'https://api.opentopodata.org/v1/mapzen?', $request['url'] );
+		$this->assertSame( '39.9524,-75.1636', $request['query']['locations'] );
+		$this->assertSame( round( $fixture['results'][0]['elevation'], 2 ), $elevation );
+	}
+
+	/**
+	 * A self-hosted server and other datasets come from the settings, or from arguments.
+	 */
+	public function test_opentopodata_settings() {
+		$this->mock_http( array( 'topo.example.com' => array( 'body' => $this->fixture( 'elevation/opentopodata-mapzen.json' ) ) ) );
+		update_option( 'sloc_opentopodata_url', 'https://topo.example.com/' );
+		update_option( 'sloc_opentopodata_dataset', 'ned10m,mapzen' );
+		$this->provider( 'Elevation_Provider_OpenTopoData' )->elevation();
+		$this->assertStringStartsWith( 'https://topo.example.com/v1/ned10m,mapzen?', $this->last_request()['url'] );
+
+		$this->provider(
+			'Elevation_Provider_OpenTopoData',
+			array(
+				'server'  => 'https://topo.example.com/elevation',
+				'dataset' => 'eudem25m',
+			)
+		)->elevation();
+		$this->assertStringStartsWith( 'https://topo.example.com/elevation/v1/eudem25m?', $this->last_request()['url'] );
+
+		$this->assertSame( 'srtm30m,aster30m', Elevation_Provider_OpenTopoData::sanitize_dataset( ' SRTM30m, aster30m,,bad/name ' ) );
+		$this->assertSame( '', Elevation_Provider_OpenTopoData::sanitize_dataset( array( 'srtm30m' ) ) );
+		$this->assertSame( 'http://192.0.2.1:5000', Elevation_Provider_OpenTopoData::sanitize_url( ' http://192.0.2.1:5000 ' ) );
+		$this->assertSame( '', Elevation_Provider_OpenTopoData::sanitize_url( 'javascript:alert(1)' ) );
+		$this->assertSame( '', Elevation_Provider_OpenTopoData::sanitize_url( null ) );
+	}
+
+	/**
+	 * Open Topo Data's null for a point outside the dataset is an error, not sea level, and a refused request
+	 * carries the server's explanation.
+	 */
+	public function test_opentopodata_errors() {
+		$this->mock_http( array( 'api.opentopodata.org' => array( 'body' => $this->fixture( 'elevation/opentopodata-no-data.json' ) ) ) );
+		$result = $this->provider( 'Elevation_Provider_OpenTopoData', array( 'latitude' => 70 ) )->elevation();
+		$this->assertWPError( $result );
+		$this->assertSame( 'no_elevation_data', $result->get_error_code() );
+
+		$this->mock_http(
+			array(
+				'api.opentopodata.org' => array(
+					'code' => 400,
+					'body' => $this->fixture( 'elevation/opentopodata-invalid-dataset.json' ),
+				),
+			)
+		);
+		$result = $this->provider( 'Elevation_Provider_OpenTopoData', array( 'dataset' => 'nosuchdataset' ) )->elevation();
+		$this->assertWPError( $result );
+		$this->assertSame( 'opentopodata_error', $result->get_error_code() );
+		$this->assertSame( "Dataset 'nosuchdataset' not in config.", $result->get_error_message() );
+		$this->assertSame( array( 'status' => 400 ), $result->get_error_data() );
+
+		$this->mock_http(
+			array(
+				'api.opentopodata.org' => array(
+					'body' => array(
+						'status' => 'SERVER_ERROR',
+						'error'  => 'Unhandled server error.',
+					),
+				),
+			)
+		);
+		$this->assertSame( 'Unhandled server error.', $this->provider( 'Elevation_Provider_OpenTopoData' )->elevation()->get_error_message() );
+	}
+
+	/**
+	 * Open Topo Data registers its server and dataset settings, with descriptions, on the API settings page.
+	 */
+	public function test_opentopodata_settings_registered() {
+		global $wp_settings_fields;
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		Elevation_Provider_OpenTopoData::init();
+		$this->assertSame( 'https://topo.example.com', sanitize_option( 'sloc_opentopodata_url', 'https://topo.example.com' ) );
+		$this->assertSame( 'mapzen', sanitize_option( 'sloc_opentopodata_dataset', 'Mapzen' ) );
+
+		Elevation_Provider_OpenTopoData::admin_init();
+		$fields = $wp_settings_fields['sloc_api']['sloc_api'];
+		$this->assertSame( 'url', $fields['sloc_opentopodata_url']['args']['type'] );
+		$this->assertStringContainsString( 'public API', $fields['sloc_opentopodata_url']['args']['description'] );
+		$this->assertStringContainsString( 'Default mapzen', $fields['sloc_opentopodata_dataset']['args']['description'] );
 	}
 
 	/**

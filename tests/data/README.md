@@ -88,6 +88,9 @@ Each test checks that the elevation the plugin returns is the one in the fixture
 | `geonames-srtm1.json` | `GET https://secure.geonames.org/srtm1?username=…&lat=39.9524&lng=-75.1636` (errors reuse `geo/geonames-error.json`) | Hand-built from docs |
 | `google-elevation.json` | `GET https://maps.googleapis.com/maps/api/elevation/json?locations=39.9524,-75.1636&key=…` (errors reuse `geo/google-denied.json`) | Hand-built from docs |
 | `openroute-point.json` | `GET https://api.openrouteservice.org/elevation/point?api_key=…&format_out=point&geometry=-75.1636,39.9524` | Hand-built from docs |
+| `opentopodata-mapzen.json` | `GET https://api.opentopodata.org/v1/mapzen?locations=39.9524,-75.1636` | Captured 2026-10-22 |
+| `opentopodata-no-data.json` | `GET https://api.opentopodata.org/v1/srtm30m?locations=70,-75.1636` (north of SRTM's coverage) | Captured 2026-10-22 |
+| `opentopodata-invalid-dataset.json` | `GET https://api.opentopodata.org/v1/nosuchdataset?locations=39.9524,-75.1636` (HTTP 400) | Captured 2026-10-22 |
 
 ## Venue providers (`venue/`)
 
