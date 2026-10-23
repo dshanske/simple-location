@@ -46,7 +46,7 @@ class WeatherDataTest extends WP_UnitTestCase {
 	public function set_up() {
 		parent::set_up();
 		update_option( 'sloc_weather_provider', 'sloc_test' );
-		update_option( 'sloc_fallback_weather_provider', 'none' );
+		delete_option( 'sloc_weather_fallbacks' );
 		update_option( 'sloc_measurements', 'metric' );
 		update_option( 'timezone_string', 'America/New_York' );
 		Weather_Provider_Sloc_Test::reset();
@@ -429,7 +429,7 @@ class WeatherDataTest extends WP_UnitTestCase {
 		);
 		$this->assertSame( 'light rain', Sloc_Weather_Data::get_weather_by_user( $user_id )['summary'] );
 		$this->assertSame( 'light rain', Sloc_Weather_Data::get_weather_by_user( new WP_User( $user_id ) )['summary'] );
-		$this->assertSame( 39.9524, Loc_Config::weather_provider()->get()['latitude'] );
+		$this->assertSame( 39.9524, Weather_Provider_Sloc_Test::$location['latitude'] );
 
 		$this->assertSame( 'light rain', Sloc_Weather_Data::get_weather_by_station( 'KNYC', null, 60 )['summary'] );
 		$this->assertSame( 'KNYC', Loc_Config::weather_provider()->get_station() );
@@ -674,8 +674,8 @@ class WeatherDataTest extends WP_UnitTestCase {
 
 		update_option( 'sloc_weather_provider', 'none' );
 		$this->assertFalse( $provider->is_active() );
-		update_option( 'sloc_fallback_weather_provider', 'sloc_test' );
-		$this->assertTrue( $provider->is_active() );
+		update_option( 'sloc_weather_fallbacks', array( 'sloc_test_fallback', 'sloc_test' ) );
+		$this->assertTrue( $provider->is_active(), 'A fallback provider is active.' );
 	}
 
 	/**
@@ -805,7 +805,7 @@ class WeatherDataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The fallback provider is used when one is set, and is an error otherwise.
+	 * A provider's fallback conditions are an error, without calling another provider: the chain does that (#490).
 	 */
 	public function test_fallback_conditions() {
 		$provider = new Weather_Provider_Sloc_Test();
@@ -813,21 +813,10 @@ class WeatherDataTest extends WP_UnitTestCase {
 		if ( PHP_VERSION_ID < 80100 ) {
 			$method->setAccessible( true );
 		}
-
-		$this->assertWPError( $method->invoke( $provider, null ) );
-
-		update_option( 'sloc_fallback_weather_provider', 'sloc_test_fallback' );
-		Weather_Provider_Sloc_Test::$conditions = array(
-			'temperature' => 5,
-			'raw'         => array( 'debug' ),
-		);
-		$this->assertSame( array( 'temperature' => 5 ), $method->invoke( $provider, 123 ) );
-		$this->assertSame( 123, Weather_Provider_Sloc_Test::$time );
-
-		Weather_Provider_Sloc_Test::$conditions = new WP_Error( 'down', 'Down' );
-		$this->assertWPError( $method->invoke( $provider, null ) );
-
-		update_option( 'sloc_fallback_weather_provider', 'sloc_test' );
-		$this->assertWPError( $method->invoke( $provider, null ), 'A provider is never its own fallback.' );
+		update_option( 'sloc_weather_fallbacks', array( 'sloc_test_fallback' ) );
+		$error = $method->invoke( $provider, 123 );
+		$this->assertSame( 'no_results', $error->get_error_code() );
+		$this->assertStringContainsString( 'Test Weather', $error->get_error_message() );
+		$this->assertSame( array(), Weather_Provider_Sloc_Test::$calls );
 	}
 }

@@ -728,14 +728,10 @@ class Geo_Data {
 
 		$weather = get_post_weatherdata( $post_id );
 		if ( empty( $weather ) && ( 'post' === get_post_type( $post_id ) ) && isset( $geodata['latitude'], $geodata['longitude'] ) ) {
-			$weather = Loc_Config::weather_provider();
-			if ( $weather ) {
-				$weather->set( $geodata['latitude'], $geodata['longitude'] );
-				$conditions = $weather->get_conditions( get_post_timestamp( $post ) );
-				if ( ! empty( $conditions ) && ! is_wp_error( $conditions ) ) {
-					$update = true;
-					set_post_weatherdata( $post_id, null, $conditions );
-				}
+			$conditions = Sloc_Provider_Chain::weather( $geodata['latitude'], $geodata['longitude'], get_post_timestamp( $post ) );
+			if ( ! empty( $conditions ) && ! is_wp_error( $conditions ) ) {
+				$update = true;
+				set_post_weatherdata( $post_id, null, $conditions );
 			}
 		}
 		return ( true === $update ) ? $post_id : false;

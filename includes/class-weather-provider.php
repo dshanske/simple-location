@@ -177,11 +177,26 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 	/**
 	 * Is Provider Active
+	 *
+	 * @since 1.0.0
+	 * @since 6.1.0 Active anywhere in the weather chain.
 	 */
 	public function is_active() {
-		$option   = get_option( 'sloc_weather_provider' );
-		$fallback = get_option( 'sloc_fallback_weather_provider' );
-		return ( in_array( $this->slug, array( $option, $fallback ), true ) );
+		$fallbacks = get_option( 'sloc_weather_fallbacks' );
+		$slugs     = array_merge( array( get_option( 'sloc_weather_provider' ) ), is_array( $fallbacks ) ? $fallbacks : array() );
+		return in_array( $this->slug, $slugs, true );
+	}
+
+	/**
+	 * Returns whether the provider has weather for a time, so the weather chain can skip it without a request.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int|string|DateTime|null $time Time, or null for now.
+	 * @return bool Whether to try the provider for this time.
+	 */
+	public function supports_time( $time = null ) {
+		return true;
 	}
 
 	/**
@@ -543,29 +558,20 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * All floats rounded to 2 decimal points. Fields describing the location
 	 * are expected if this is a station return.
 	 *
+	 * The weather chain tries the next provider itself, so this no longer calls the fallback provider.
+	 *
+	 * @since 1.0.0
+	 * @since 6.1.0 Returns a `no_results` error. Sloc_Provider_Chain tries the next provider.
+	 *
 	 * @param string|int|DateTime $time ISO8601, timestamp, or DateTime.
-	 * @return WP_Error|array Return the fallback set of conditions.
+	 * @return WP_Error No conditions from this provider.
 	 */
 	protected function get_fallback_conditions( $time ) {
-		// Fallback Weather Provider.
-		$fallback = get_option( 'sloc_fallback_weather_provider' );
-		$provider = $this->get_slug();
-
-		// Sanity Check.
-		if ( $fallback !== $provider && 'none' !== $fallback ) {
-			$weather = Loc_Config::weather_provider( $fallback );
-			$weather->set( $this->latitude, $this->longitude );
-			$conditions = $weather->get_conditions( $time );
-			if ( is_wp_error( $conditions ) ) {
-				return $conditions;
-			}
-			if ( ! empty( $conditions ) ) {
-				// if debug mode is on remove the raw data from storage.
-				unset( $conditions['raw'] );
-			}
-			return $conditions;
-		}
-		return new WP_Error( 'failed', __( 'Failure', 'simple-location' ) );
+		return new WP_Error(
+			'no_results',
+			/* translators: %s: Weather provider name. */
+			sprintf( __( '%s has no weather for this location and time.', 'simple-location' ), $this->get_name() )
+		);
 	}
 
 	/**
@@ -576,13 +582,11 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @since 6.0.0
 	 *
 	 * @param string|int|DateTime $time ISO8601, timestamp, or DateTime.
-	 * @return WP_Error|array The fallback provider's conditions, or a `historic_unsupported` error when no fallback is set.
+	 * @since 6.1.0 Always the error. Sloc_Provider_Chain tries the next provider.
+	 *
+	 * @return WP_Error A `historic_unsupported` error.
 	 */
 	protected function get_unsupported_time_conditions( $time ) {
-		$fallback = get_option( 'sloc_fallback_weather_provider' );
-		if ( ! empty( $fallback ) && 'none' !== $fallback && $fallback !== $this->get_slug() ) {
-			return $this->get_fallback_conditions( $time );
-		}
 		return new WP_Error(
 			'historic_unsupported',
 			/* translators: %s: Weather provider name. */

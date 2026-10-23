@@ -21,7 +21,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-sloc-map-cache.php:640](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-map-cache.php#L640)
+- [includes/class-sloc-map-cache.php:645](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-map-cache.php#L645)
 ```php
 apply_filters( 'sloc_map_cache_directory', $directory )
 ```

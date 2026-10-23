@@ -262,6 +262,8 @@ class Simple_Location_Plugin {
 			'class-location-provider.php', // Location Provider Class.
 			'class-location-provider-account.php', // Location Providers for a user's own location history service.
 			'class-rest-geo.php', // REST endpoint for Geo.
+			'class-sloc-provider-chain.php', // Providers tried in order.
+			'class-sloc-provider-errors.php', // Provider errors for administrators.
 			'class-loc-config.php', // Configuration and Settings Page.
 			'class-sloc-track-tool.php', // Tools > Location Track.
 			'class-timezone-result.php',

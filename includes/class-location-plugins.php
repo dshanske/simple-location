@@ -307,15 +307,11 @@ class Location_Plugins {
 			}
 
 			is_day_post( $args['ID'] ); // Set whether this is day or not.
-			$weather = Loc_Config::weather_provider();
-			if ( $weather ) {
-				$weather->set( $meta['geo_latitude'], $meta['geo_longitude'] );
-				$conditions = $weather->get_conditions( $published->getTimestamp() );
-				if ( ! empty( $conditions ) && ! is_wp_error( $conditions ) ) {
-					// if debug mode is on remove the raw data from storage.
-					unset( $conditions['raw'] );
-					set_post_weatherdata( $args['ID'], '', $conditions );
-				}
+			$conditions = Sloc_Provider_Chain::weather( $meta['geo_latitude'], $meta['geo_longitude'], $published->getTimestamp() );
+			if ( ! empty( $conditions ) && ! is_wp_error( $conditions ) ) {
+				// if debug mode is on remove the raw data from storage.
+				unset( $conditions['raw'] );
+				set_post_weatherdata( $args['ID'], '', $conditions );
 			}
 
 			$venue = Post_Venue::at_venue( $meta['geo_latitude'], $meta['geo_longitude'] );

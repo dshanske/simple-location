@@ -23,7 +23,7 @@ class StationFormatTest extends WP_UnitTestCase {
 	public function set_up() {
 		parent::set_up();
 		update_option( 'sloc_measurements', 'metric' );
-		update_option( 'sloc_fallback_weather_provider', 'none' );
+		delete_option( 'sloc_weather_fallbacks' );
 		delete_option( 'sloc_weather_attribution' );
 		delete_option( 'sloc_stations' );
 	}
@@ -278,14 +278,14 @@ class StationFormatTest extends WP_UnitTestCase {
 		$this->mock_http( array() );
 		$provider = new Weather_Provider_Station();
 		$provider->set( self::LAT, self::LNG );
-		$this->assertSame( 'failed', $provider->get_conditions()->get_error_code() );
+		$this->assertSame( 'no_results', $provider->get_conditions()->get_error_code() );
 
 		update_option( 'sloc_stations', 'not an array' );
-		$this->assertSame( 'failed', $provider->get_conditions()->get_error_code() );
+		$this->assertSame( 'no_results', $provider->get_conditions()->get_error_code() );
 
 		// A station without coordinates isn't treated as being at 0,0.
 		$this->station();
-		$this->assertSame( 'failed', $provider->get_conditions()->get_error_code() );
+		$this->assertSame( 'no_results', $provider->get_conditions()->get_error_code() );
 		$this->assertEmpty( $this->http_requests );
 	}
 

@@ -61,14 +61,11 @@ class Sloc_Weather_Widget extends WP_Widget {
 			echo $args['after_widget']; // phpcs:ignore
 			return;
 		}
-		if ( isset( $instance['cache_time'] ) ) {
-			$w->set_cache_time( $instance['cache_time'] );
-		}
+		$cache_time = $instance['cache_time'] ?? null;
 		if ( self::uses_user( $instance ) ) {
-			$weather = Sloc_Weather_Data::get_weather_by_user( $instance['user'] ); // phpcs:ignore
+			$weather = Sloc_Weather_Data::get_weather_by_user( $instance['user'], $cache_time ); // phpcs:ignore
 		} elseif ( ! empty( $instance['latitude'] ) && ! empty( $instance['longitude'] ) ) {
-			$w->set( $instance['latitude'], $instance['longitude'] );
-			$weather = $w->get_conditions();
+			$weather = Sloc_Provider_Chain::weather( $instance['latitude'], $instance['longitude'], null, $cache_time );
 		} else {
 			esc_html_e( 'No Input Provided', 'simple-location' );
 			echo $args['after_widget']; // phpcs:ignore

@@ -25,6 +25,34 @@ class Weather_Provider_Sloc_Test extends Weather_Provider {
 	public static $time;
 
 	/**
+	 * Values returned by get_conditions() for a provider slug, in place of $conditions.
+	 *
+	 * @var array
+	 */
+	public static $responses = array();
+
+	/**
+	 * Slugs of the providers get_conditions() was called on, in order.
+	 *
+	 * @var string[]
+	 */
+	public static $calls = array();
+
+	/**
+	 * Location of the last get_conditions() call.
+	 *
+	 * @var array|false|null
+	 */
+	public static $location;
+
+	/**
+	 * Whether a provider slug has weather for any time. Default true.
+	 *
+	 * @var bool[]
+	 */
+	public static $supports = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array $args Arguments.
@@ -44,6 +72,29 @@ class Weather_Provider_Sloc_Test extends Weather_Provider {
 			'summary'     => 'Clear',
 		);
 		static::$time       = null;
+		static::$responses  = array();
+		static::$calls      = array();
+		static::$location   = null;
+		static::$supports   = array();
+	}
+
+	/**
+	 * Sets the countries the provider covers.
+	 *
+	 * @param string|string[]|false $region Two-letter country codes, or false for everywhere.
+	 */
+	public function set_region( $region ) {
+		$this->region = $region;
+	}
+
+	/**
+	 * Whether the provider has weather for a time, from $supports.
+	 *
+	 * @param mixed $time Time.
+	 * @return bool
+	 */
+	public function supports_time( $time = null ) {
+		return static::$supports[ $this->slug ] ?? true;
 	}
 
 	/**
@@ -62,7 +113,9 @@ class Weather_Provider_Sloc_Test extends Weather_Provider {
 	 * @return array|WP_Error
 	 */
 	public function get_conditions( $time = null ) {
-		static::$time = $time;
-		return static::$conditions;
+		static::$time     = $time;
+		static::$calls[]  = $this->slug;
+		static::$location = $this->get();
+		return array_key_exists( $this->slug, static::$responses ) ? static::$responses[ $this->slug ] : static::$conditions;
 	}
 }

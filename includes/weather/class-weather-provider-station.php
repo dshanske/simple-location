@@ -365,6 +365,32 @@ class Weather_Provider_Station extends Weather_Provider {
 	}
 
 	/**
+	 * Returns whether a station is within range of the location, or a station is set.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return bool Whether to try the provider here.
+	 */
+	public function covers() {
+		if ( ! empty( $this->station_id ) || ! is_numeric( $this->latitude ) || ! is_numeric( $this->longitude ) ) {
+			return true;
+		}
+		return null !== $this->get_nearest_station();
+	}
+
+	/**
+	 * Returns whether the provider has weather for a time: only current conditions, within MAX_AGE of now.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int|string|DateTime|null $time Time, or null for now.
+	 * @return bool Whether to try the provider for this time.
+	 */
+	public function supports_time( $time = null ) {
+		return static::MAX_AGE >= abs( $this->datetime( $time )->getTimestamp() - time() );
+	}
+
+	/**
 	 * Returns the nearest station with coordinates within RANGE of the location.
 	 *
 	 * @since 6.1.0

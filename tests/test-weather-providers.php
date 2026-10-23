@@ -25,7 +25,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		parent::set_up();
 		update_option( 'timezone_string', 'America/New_York' );
 		update_option( 'sloc_measurements', 'metric' );
-		update_option( 'sloc_fallback_weather_provider', 'none' );
+		delete_option( 'sloc_weather_fallbacks' );
 	}
 
 	/**
@@ -1274,7 +1274,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * NWS: outside the US there is no grid point, so the fallback provider is used, or an error when none is set.
+	 * NWS: outside the US there is no grid point, so an error; in the chain, NWS is skipped there without a request.
 	 */
 	public function test_nws_outside_us_fallback() {
 		Weather_Provider_Sloc_Test::reset();
@@ -1292,18 +1292,25 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$london = new Weather_Provider_NWSUS();
 		$london->set( 51.5, -0.12 );
 		$this->assertWPError( $london->get_conditions() );
+		$this->assertFalse( $london->covers(), 'NWS covers the US only.' );
+		$requests = count( $this->http_requests );
 
-		update_option( 'sloc_fallback_weather_provider', 'sloc_test_fallback' );
-		$this->assertSame( Weather_Provider_Sloc_Test::$conditions, $london->get_conditions() );
-		$this->assertCount( 2, $this->http_requests, 'Only the grid point is requested from NWS.' );
+		update_option( 'sloc_weather_provider', 'nwsus' );
+		update_option( 'sloc_weather_fallbacks', array( 'sloc_test_fallback' ) );
+		$conditions = Sloc_Provider_Chain::weather( 51.5, -0.12 );
+		$this->assertSame( 20, $conditions['temperature'] );
+		$this->assertSame( 'sloc_test_fallback', $conditions['provider'] );
+		$this->assertCount( $requests, $this->http_requests, 'NWS is not asked outside the US.' );
 	}
 
 	/**
-	 * NWS: a failed request or empty answer anywhere in a location lookup uses the fallback provider, and isn't cached.
+	 * NWS: a failed request or empty answer anywhere in a location lookup is an error that isn't cached, and the
+	 * chain uses the next provider.
 	 */
 	public function test_nws_lookup_failures_fallback() {
 		Weather_Provider_Sloc_Test::reset();
-		update_option( 'sloc_fallback_weather_provider', 'sloc_test_fallback' );
+		update_option( 'sloc_weather_provider', 'nwsus' );
+		update_option( 'sloc_weather_fallbacks', array( 'sloc_test_fallback' ) );
 		$points   = array( 'body' => array( 'properties' => array( 'observationStations' => 'https://api.weather.gov/gridpoints/PHI/49,75/stations' ) ) );
 		$stations = array(
 			'body' => array(
@@ -1340,12 +1347,10 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		);
 		foreach ( $cases as $case => $responses ) {
 			$this->mock_http( $responses );
-			$provider = $this->provider( 'Weather_Provider_NWSUS' );
-			$this->assertSame( Weather_Provider_Sloc_Test::$conditions, $provider->get_conditions(), $case );
-
-			update_option( 'sloc_fallback_weather_provider', 'none' );
+			$this->assertWPError( $this->provider( 'Weather_Provider_NWSUS' )->get_conditions(), $case );
 			$this->assertWPError( $this->provider( 'Weather_Provider_NWSUS' )->get_conditions(), "$case: nothing was cached." );
-			update_option( 'sloc_fallback_weather_provider', 'sloc_test_fallback' );
+			$conditions = Sloc_Provider_Chain::weather( self::LAT, self::LNG );
+			$this->assertSame( 'sloc_test_fallback', $conditions['provider'], $case );
 		}
 	}
 
@@ -1597,7 +1602,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Providers with only current weather use the fallback provider for other times, or return an error, without a request.
+	 * Providers with only current weather return an error for other times without a request, and the chain moves on.
 	 */
 	public function test_unsupported_times() {
 		Weather_Provider_Sloc_Test::reset();
@@ -1605,7 +1610,6 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$past   = strtotime( '-2 days' );
 		$future = strtotime( '+2 days' );
 		foreach ( array( 'Weather_Provider_OpenWeatherMap', 'Weather_Provider_Weatherbit', 'Weather_Provider_Weatherstack', 'Weather_Provider_HERE', 'Weather_Provider_NWSUS', 'Weather_Provider_MetOffice' ) as $class ) {
-			update_option( 'sloc_fallback_weather_provider', 'none' );
 			$provider = $this->provider( $class, array( 'api' => 'key' ) );
 			foreach ( array( $past, $future ) as $time ) {
 				$error = $provider->get_conditions( $time );
@@ -1614,12 +1618,18 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 				$this->assertStringContainsString( $provider->get_name(), $error->get_error_message(), $class );
 			}
 
-			update_option( 'sloc_fallback_weather_provider', 'sloc_test_fallback' );
-			$this->assertSame( Weather_Provider_Sloc_Test::$conditions, $provider->get_conditions( $past ), $class );
-			$this->assertSame( $past, Weather_Provider_Sloc_Test::$time, "$class passes the time to the fallback." );
+			update_option( 'sloc_weather_provider', $provider->get_slug() );
+			update_option( 'sloc_weather_fallbacks', array( 'sloc_test_fallback' ) );
+			// Met Office covers the UK only.
+			$location   = 'metofficeuk' === $provider->get_slug() ? array( 51.5, -0.12 ) : array( self::LAT, self::LNG );
+			$conditions = Sloc_Provider_Chain::weather( $location[0], $location[1], $past );
+			$this->assertSame( 'sloc_test_fallback', $conditions['provider'], $class );
+			$this->assertSame( $past, Weather_Provider_Sloc_Test::$time, "$class: the time is passed to the next provider." );
 
-			update_option( 'sloc_fallback_weather_provider', $provider->get_slug() );
-			$this->assertSame( 'historic_unsupported', $provider->get_conditions( $past )->get_error_code(), "$class is never its own fallback." );
+			update_option( 'sloc_weather_fallbacks', array( $provider->get_slug() ) );
+			Weather_Provider_Sloc_Test::$calls = array();
+			Sloc_Provider_Chain::weather( $location[0], $location[1], $past );
+			$this->assertSame( array(), Weather_Provider_Sloc_Test::$calls, "$class is never its own fallback." );
 		}
 		$this->assertSame( array(), $this->http_requests );
 	}

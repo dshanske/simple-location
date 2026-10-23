@@ -19,7 +19,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-loc-config.php:1065](https://github.com/dshanske/simple-location/blob/trunk/includes/class-loc-config.php#L1065)
+- [includes/class-loc-config.php:1119](https://github.com/dshanske/simple-location/blob/trunk/includes/class-loc-config.php#L1119)
 ```php
 apply_filters(
 			'default_sloc_aspect_ratios',

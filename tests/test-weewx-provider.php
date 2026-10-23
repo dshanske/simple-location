@@ -17,7 +17,7 @@ class WeewxProviderTest extends WP_UnitTestCase {
 	public function set_up() {
 		parent::set_up();
 		update_option( 'sloc_measurements', 'metric' );
-		update_option( 'sloc_fallback_weather_provider', 'none' );
+		delete_option( 'sloc_weather_fallbacks' );
 		delete_option( 'sloc_weewx_stations' );
 		global $wp_settings_errors;
 		$wp_settings_errors = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited

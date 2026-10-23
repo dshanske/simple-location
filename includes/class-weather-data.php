@@ -782,9 +782,10 @@ class Sloc_Weather_Data {
 	}
 
 	/**
-	 * Looks up the current weather at coordinates with the weather provider.
+	 * Looks up the current weather at coordinates with the weather providers, in order.
 	 *
 	 * @since 3.5.0
+	 * @since 6.1.0 Tries the fallback weather providers in order. See Sloc_Provider_Chain.
 	 *
 	 * @param float    $lat        Latitude.
 	 * @param float    $lng        Longitude.
@@ -792,18 +793,12 @@ class Sloc_Weather_Data {
 	 * @return array|WP_Error Weather conditions, with an icon and summary when the provider gives a condition code.
 	 */
 	public static function get_weather_data( $lat, $lng, $cache_time = null ) {
-		$provider = Loc_Config::weather_provider();
-		if ( ! $provider ) {
+		if ( ! Loc_Config::weather_provider() ) {
 			return self::no_provider_error();
 		}
-		$provider->set( $lat, $lng );
-		if ( is_numeric( $cache_time ) ) {
-			$provider->set_cache_time( $cache_time );
-		}
+		$weather = Sloc_Provider_Chain::weather( $lat, $lng, null, $cache_time );
 
-		$weather = $provider->get_conditions();
-
-		if ( isset( $weather['code'] ) ) {
+		if ( is_array( $weather ) && isset( $weather['code'] ) ) {
 			$weather['icon']    = self::weather_condition_icons( $weather['code'] );
 			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
 		}
