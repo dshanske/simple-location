@@ -1,0 +1,36 @@
+{
+  "format": "current-conditions",
+  "version": 1,
+  "time": 0,
+  "units": "metric",
+  "station": {
+    "id": "backyard",
+    "name": "Backyard Weather",
+    "latitude": 39.9524,
+    "longitude": -75.1636,
+    "altitude": 12,
+    "url": "https://weather.example.com/",
+    "attribution": {
+      "text": "Weather from Backyard Weather",
+      "url": "https://weather.example.com/"
+    }
+  },
+  "observations": {
+    "temperature": 21.5,
+    "humidity": 61,
+    "dewpoint": 13.7,
+    "pressure": 1015.2,
+    "windspeed": 3.58,
+    "winddegree": 230,
+    "windgust": 6.26,
+    "rain": 1.27,
+    "rainrate": 3.05,
+    "radiation": 412,
+    "uv": 3.1,
+    "code": 503
+  },
+  "derived": {
+    "code": "sensors_precipitation"
+  },
+  "generator": "weewx-current-json 0.1.0; WeeWX 5.5.2"
+}

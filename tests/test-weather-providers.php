@@ -1696,7 +1696,12 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'name="sloc_stations[0][id]"', $output );
 		$this->assertStringContainsString( 'value="backyard"', $output );
 		$this->assertStringContainsString( 'value="https://station.example.com/data.json"', $output );
-		$this->assertStringContainsString( 'add-location-stations-button', $output );
+		// An empty row adds a station, and each saved station can be removed, without scripts (#677).
+		$this->assertStringContainsString( 'name="sloc_stations[1][id]" value=""', $output );
+		$this->assertStringContainsString( 'name="sloc_stations[0][remove]"', $output );
+		$this->assertStringNotContainsString( 'name="sloc_stations[1][remove]"', $output );
+		$this->assertStringContainsString( 'name="sloc_stations[0][attribution]"', $output );
+		$this->assertStringNotContainsString( 'add-location-stations-button', $output );
 		$this->assertSame( '', Weather_Provider_Station::key( 'text', 'id' ) );
 	}
 }

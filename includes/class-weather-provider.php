@@ -845,6 +845,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Convert array of metric to Imperial Measurements.
 	 *
+	 * @since 6.1.0 Converts the rain rate too.
+	 *
 	 * @param array $conditions Conditions.
 	 * @return array {
 	 *  Below outlines only the datapoints that will be converted.
@@ -883,7 +885,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 			}
 		}
 
-		foreach ( array( 'rain', 'snow' ) as $fall ) {
+		// A rate per hour converts like an amount.
+		foreach ( array( 'rain', 'snow', 'rainrate' ) as $fall ) {
 			if ( array_key_exists( $fall, $conditions ) && is_numeric( $conditions[ $fall ] ) ) {
 				$conditions[ $fall ] = self::mm_to_inches( $conditions[ $fall ] );
 			}
@@ -894,6 +897,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 
 	/**
 	 * Convert array of imperial to metric measurements.
+	 *
+	 * @since 6.1.0 Converts the rain rate too.
 	 *
 	 * @param array $conditions Conditions.
 	 * @return array $conditions
@@ -921,7 +926,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 			}
 		}
 
-		foreach ( array( 'rain', 'snow' ) as $fall ) {
+		// A rate per hour converts like an amount.
+		foreach ( array( 'rain', 'snow', 'rainrate' ) as $fall ) {
 			if ( array_key_exists( $fall, $conditions ) ) {
 				$conditions[ $fall ] = self::inches_to_mm( $conditions[ $fall ] );
 			}
