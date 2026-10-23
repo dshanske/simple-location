@@ -44,6 +44,7 @@ trait Sloc_API_TomTom {
 	 *
 	 * @since 4.0.0
 	 * @since 6.1.0 Registers the image format setting for the map provider.
+	 * @since 6.1.0 The style setting is empty by default, to use the Map Style setting.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'TomTom', 'simple-location' ), 'sloc_tomtom_api' );
@@ -56,7 +57,7 @@ trait Sloc_API_TomTom {
 					'type'         => 'string',
 					'description'  => 'TomTom Map Style',
 					'show_in_rest' => false,
-					'default'      => 'main',
+					'default'      => '',
 				)
 			);
 

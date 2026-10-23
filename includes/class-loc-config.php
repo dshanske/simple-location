@@ -337,9 +337,32 @@ class Loc_Config {
 	 * @since 1.0.0
 	 * @since 6.0.0 The default width comes from get_default_map_width().
 	 * @since 6.1.0 Registers the marker, scale bar and attribution settings, used by every map provider.
+	 * @since 6.1.0 Registers the Map Style and Dark Mode Maps settings.
 	 */
 	public static function register_map_settings() {
 		self::migrate_map_settings();
+
+		register_setting(
+			'simloc',
+			'sloc_map_style',
+			array(
+				'type'              => 'string',
+				'description'       => 'Simple Location Map Style Family',
+				'show_in_rest'      => false,
+				'default'           => 'standard',
+				'sanitize_callback' => array( 'Map_Provider', 'sanitize_style_family' ),
+			)
+		);
+		register_setting(
+			'simloc',
+			'sloc_map_dark_mode',
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Simple Location Dark Mode Maps',
+				'show_in_rest' => false,
+				'default'      => false,
+			)
+		);
 
 		register_setting(
 			'simloc', // option group.
@@ -890,6 +913,36 @@ class Loc_Config {
 		);
 
 		add_settings_field(
+			'sloc_map_style',
+			__( 'Map Style', 'simple-location' ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for'   => 'sloc_map_style',
+				'list'        => array(
+					'standard'  => __( 'Standard', 'simple-location' ),
+					'light'     => __( 'Light', 'simple-location' ),
+					'dark'      => __( 'Dark', 'simple-location' ),
+					'satellite' => __( 'Satellite', 'simple-location' ),
+					'terrain'   => __( 'Terrain', 'simple-location' ),
+				),
+				'description' => __( 'Each map provider draws its closest style, so maps keep their look when you change providers. A provider without that style draws its standard style. A provider\'s own style setting, if set, is used instead.', 'simple-location' ),
+			)
+		);
+
+		add_settings_field(
+			'sloc_map_dark_mode',
+			__( 'Dark Mode Maps', 'simple-location' ),
+			array( 'Loc_Config', 'checkbox_callback' ),
+			'simloc',
+			'sloc_map',
+			array(
+				'label_for' => 'sloc_map_dark_mode',
+			)
+		);
+
+		add_settings_field(
 			'sloc_marker',
 			__( 'Map Marker', 'simple-location' ),
 			array( 'Loc_Config', 'values_callback' ),
@@ -1389,6 +1442,7 @@ class Loc_Config {
 	 *  @type object $provider Provider object.
 	 * }
 	 * @since 1.0.0
+	 * @since 6.1.0 The first choice, empty, uses the Map Style setting.
 	 */
 	public static function style_callback( array $args ) {
 		$name     = $args['label_for'];
@@ -1399,6 +1453,8 @@ class Loc_Config {
 			return;
 		}
 		$text = get_option( $name );
+		// An empty style uses the Map Style setting.
+		$styles = array( '' => __( 'Use the Map Style setting', 'simple-location' ) ) + $styles;
 		self::select_callback( $name, $text, $styles );
 	}
 

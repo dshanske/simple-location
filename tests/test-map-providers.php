@@ -2159,7 +2159,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 		Map_Provider_Stadia::init();
 		$settings = get_registered_settings();
 		$this->assertArrayHasKey( 'sloc_stadia_api', $settings );
-		$this->assertSame( 'alidade_smooth', $settings['sloc_stadia_style']['default'] );
+		// Empty, so the Map Style setting is used.
+		$this->assertSame( '', $settings['sloc_stadia_style']['default'] );
 
 		Map_Provider_Stadia::admin_init();
 		$this->assertSame( 'Stadia Maps API Key', $wp_settings_fields['sloc_api']['sloc_api']['sloc_stadia_api']['title'] );

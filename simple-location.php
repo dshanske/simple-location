@@ -544,6 +544,11 @@ class Simple_Location_Plugin {
 				'srcset' => array(),
 				'type'   => array(),
 			),
+			'source'     => array(
+				'srcset' => array(),
+				'media'  => array(),
+				'type'   => array(),
+			),
 			'svg'        => array(
 				'version'     => array(),
 				'viewbox'     => array(),

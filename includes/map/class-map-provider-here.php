@@ -85,7 +85,7 @@ class Map_Provider_Here extends Map_Provider {
 			$args['api'] = self::get_map_api_key( 'here' );
 		}
 		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_here_style' );
+			$args['style'] = $this->get_style_setting( 'sloc_here_style' );
 		}
 		// Styles from the retired API, such as alps, aren't valid in v3.
 		if ( ! is_string( $args['style'] ) || ! array_key_exists( $args['style'], $this->get_styles() ) ) {
@@ -93,6 +93,23 @@ class Map_Provider_Here extends Map_Provider {
 		}
 
 		parent::__construct( $args );
+	}
+
+	/**
+	 * Returns the provider's style for each style family.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Style IDs keyed by family. See Map_Provider::get_family_styles().
+	 */
+	public function get_family_styles() {
+		return array(
+			'standard'  => 'explore.day',
+			'light'     => 'lite.day',
+			'dark'      => 'explore.night',
+			'satellite' => 'explore.satellite.day',
+			'terrain'   => 'topo.day',
+		);
 	}
 
 	/**

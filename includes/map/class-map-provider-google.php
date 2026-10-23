@@ -87,7 +87,7 @@ class Map_Provider_Google extends Map_Provider {
 			$args['api'] = self::get_map_api_key( 'google' );
 		}
 		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_google_style' );
+			$args['style'] = $this->get_style_setting( 'sloc_google_style' );
 		}
 		// The style setting is only registered, with its default, while Google is the map provider.
 		if ( empty( $args['style'] ) ) {
@@ -99,6 +99,25 @@ class Map_Provider_Google extends Map_Provider {
 		$this->secret = is_string( $args['secret'] ) ? trim( $args['secret'] ) : '';
 
 		parent::__construct( $args );
+	}
+
+	/**
+	 * Returns the provider's style for each style family.
+	 *
+	 * Light and dark are Google's roadmap with its silver and night styling.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Style IDs keyed by family. See Map_Provider::get_family_styles().
+	 */
+	public function get_family_styles() {
+		return array(
+			'standard'  => 'roadmap',
+			'light'     => 'light',
+			'dark'      => 'dark',
+			'satellite' => 'hybrid',
+			'terrain'   => 'terrain',
+		);
 	}
 
 	/**
@@ -114,7 +133,74 @@ class Map_Provider_Google extends Map_Provider {
 			'satellite' => __( 'Satellite', 'simple-location' ),
 			'terrain'   => __( 'Terrain', 'simple-location' ),
 			'hybrid'    => __( 'Satellite and Roadmap Hybrid', 'simple-location' ),
+			'light'     => __( 'Light (styled roadmap)', 'simple-location' ),
+			'dark'      => __( 'Dark (styled roadmap)', 'simple-location' ),
 		);
+	}
+
+	/**
+	 * Returns the map styling rules of the light and dark styles, which are Google's roadmap restyled.
+	 *
+	 * These are Google's silver and night examples for styled maps.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[][] Rules for the `style` parameter, keyed by style.
+	 */
+	public static function get_style_rules() {
+		return array(
+			'light' => array(
+				'element:geometry|color:0xf5f5f5',
+				'element:labels.icon|visibility:off',
+				'element:labels.text.fill|color:0x616161',
+				'element:labels.text.stroke|color:0xf5f5f5',
+				'feature:administrative.land_parcel|element:labels.text.fill|color:0xbdbdbd',
+				'feature:poi|element:geometry|color:0xeeeeee',
+				'feature:poi|element:labels.text.fill|color:0x757575',
+				'feature:poi.park|element:geometry|color:0xe5e5e5',
+				'feature:poi.park|element:labels.text.fill|color:0x9e9e9e',
+				'feature:road|element:geometry|color:0xffffff',
+				'feature:road.arterial|element:labels.text.fill|color:0x757575',
+				'feature:road.highway|element:geometry|color:0xdadada',
+				'feature:road.highway|element:labels.text.fill|color:0x616161',
+				'feature:road.local|element:labels.text.fill|color:0x9e9e9e',
+				'feature:transit.line|element:geometry|color:0xe5e5e5',
+				'feature:transit.station|element:geometry|color:0xeeeeee',
+				'feature:water|element:geometry|color:0xc9c9c9',
+				'feature:water|element:labels.text.fill|color:0x9e9e9e',
+			),
+			'dark'  => array(
+				'element:geometry|color:0x242f3e',
+				'element:labels.text.stroke|color:0x242f3e',
+				'element:labels.text.fill|color:0x746855',
+				'feature:administrative.locality|element:labels.text.fill|color:0xd59563',
+				'feature:poi|element:labels.text.fill|color:0xd59563',
+				'feature:poi.park|element:geometry|color:0x263c3f',
+				'feature:poi.park|element:labels.text.fill|color:0x6b9a76',
+				'feature:road|element:geometry|color:0x38414e',
+				'feature:road|element:geometry.stroke|color:0x212a37',
+				'feature:road|element:labels.text.fill|color:0x9ca5b3',
+				'feature:road.highway|element:geometry|color:0x746855',
+				'feature:road.highway|element:geometry.stroke|color:0x1f2835',
+				'feature:road.highway|element:labels.text.fill|color:0xf3d19c',
+				'feature:transit|element:geometry|color:0x2f3948',
+				'feature:transit.station|element:labels.text.fill|color:0xd59563',
+				'feature:water|element:geometry|color:0x17263c',
+				'feature:water|element:labels.text.fill|color:0x515c6d',
+				'feature:water|element:labels.text.stroke|color:0x17263c',
+			),
+		);
+	}
+
+	/**
+	 * Returns Google's map type for the style: the light and dark styles are the roadmap restyled.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Map type.
+	 */
+	protected function get_maptype() {
+		return array_key_exists( $this->style, self::get_style_rules() ) ? 'roadmap' : (string) $this->style;
 	}
 
 	/**
@@ -148,7 +234,7 @@ class Map_Provider_Google extends Map_Provider {
 				array(
 					'markers'  => sprintf( '%1$s|%2$s,%3$s', $this->get_marker_style(), $this->latitude, $this->longitude ),
 					'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
-					'maptype'  => $this->style,
+					'maptype'  => $this->get_maptype(),
 					'language' => $this->get_language(),
 					'key'      => $this->api,
 					'zoom'     => $this->map_zoom,
@@ -201,6 +287,7 @@ class Map_Provider_Google extends Map_Provider {
 	 * The query is encoded before signing, because Google checks the signature against the URL exactly as sent.
 	 *
 	 * @since 6.0.0
+	 * @since 6.1.0 Adds the styling rules of the light and dark styles.
 	 *
 	 * @param array $query Query parameters.
 	 * @return string|WP_Error URL, or an error if the signing secret isn't valid.
@@ -211,6 +298,10 @@ class Map_Provider_Google extends Map_Provider {
 			unset( $query['language'] );
 		}
 		$url = self::BASE_URL . '?' . http_build_query( $query, '', '&', PHP_QUERY_RFC3986 );
+		// Each styling rule is its own style parameter, which http_build_query() can't repeat.
+		foreach ( self::get_style_rules()[ $this->style ] ?? array() as $rule ) {
+			$url .= '&style=' . rawurlencode( $rule );
+		}
 		if ( '' === $this->secret ) {
 			return $url;
 		}
@@ -275,7 +366,7 @@ class Map_Provider_Google extends Map_Provider {
 		$args = array(
 			'markers'  => 'size:tiny|color:0x' . $this->get_marker_hex() . '|label:P|' . implode( '|', $markers ),
 			'size'     => sprintf( '%1$sx%2$s', $this->width, $this->height ),
-			'maptype'  => $this->style,
+			'maptype'  => $this->get_maptype(),
 			'language' => $this->get_language(),
 			'key'      => $this->api,
 			'path'     => 'color:0xff0000ff|weight:5|enc:' . $polyline,

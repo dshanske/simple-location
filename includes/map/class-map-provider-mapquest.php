@@ -60,7 +60,7 @@ class Map_Provider_Mapquest extends Map_Provider {
 			$args['api'] = self::get_map_api_key( 'mapquest' );
 		}
 		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_mapquest_style' );
+			$args['style'] = $this->get_style_setting( 'sloc_mapquest_style' );
 		}
 		// The style setting is only registered, with its default, while MapQuest is the map provider.
 		if ( empty( $args['style'] ) ) {
@@ -68,6 +68,24 @@ class Map_Provider_Mapquest extends Map_Provider {
 		}
 
 		parent::__construct( $args );
+	}
+
+	/**
+	 * Returns the provider's style for each style family.
+	 *
+	 * MapQuest has no terrain style.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Style IDs keyed by family. See Map_Provider::get_family_styles().
+	 */
+	public function get_family_styles() {
+		return array(
+			'standard'  => 'map',
+			'light'     => 'light',
+			'dark'      => 'dark',
+			'satellite' => 'hyb',
+		);
 	}
 
 	/**
