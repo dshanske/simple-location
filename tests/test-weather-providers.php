@@ -77,16 +77,65 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Providers that need credentials return no conditions and make no request without them.
+	 * Providers that need credentials return a `missing_api_key` error, which administrators are told about, and make
+	 * no request without them.
 	 */
 	public function test_missing_credentials() {
 		$this->mock_http( array() );
-		foreach ( array( 'OpenWeatherMap', 'PirateWeather', 'Weatherbit', 'Weatherstack', 'VisualCrossing', 'Meteostat', 'HERE' ) as $name ) {
-			$class = 'Weather_Provider_' . $name;
-			$this->assertSame( array(), $this->provider( $class, array( 'api' => '' ) )->get_conditions(), $name );
+		foreach ( array( 'OpenWeatherMap', 'PirateWeather', 'Weatherbit', 'Weatherstack', 'VisualCrossing', 'Meteostat', 'HERE', 'MetOffice', 'Aeris' ) as $name ) {
+			$class    = 'Weather_Provider_' . $name;
+			$provider = $this->provider( $class, array( 'api' => '' ) );
+			$error    = $provider->get_conditions();
+			$this->assertWPError( $error, $name );
+			$this->assertSame( 'missing_api_key', $error->get_error_code(), $name );
+			$this->assertStringContainsString( $provider->get_name(), $error->get_error_message(), $name );
+			$this->assertTrue( Sloc_Provider_Errors::is_actionable( $error, $provider ), $name );
 		}
-		$this->assertSame( array(), $this->provider( 'Weather_Provider_Aeris' )->get_conditions(), 'Aeris' );
 		$this->assertSame( array(), $this->http_requests );
+	}
+
+	/**
+	 * Providers with only current weather say so, so the weather chain skips them for other times (#490).
+	 */
+	public function test_supports_time() {
+		foreach ( array( 'OpenWeatherMap', 'Weatherbit', 'Weatherstack', 'HERE', 'NWSUS', 'MetOffice', 'Station', 'Weewx' ) as $name ) {
+			$provider = $this->provider( 'Weather_Provider_' . $name );
+			$this->assertTrue( $provider->supports_time(), $name );
+			$this->assertTrue( $provider->supports_time( time() - 1800 ), $name );
+			$this->assertFalse( $provider->supports_time( strtotime( '-2 days' ) ), $name );
+			$this->assertFalse( $provider->supports_time( strtotime( '+2 days' ) ), $name );
+		}
+		foreach ( array( 'PirateWeather', 'VisualCrossing', 'Meteostat', 'Aeris', 'OpenMeteo' ) as $name ) {
+			$this->assertTrue( $this->provider( 'Weather_Provider_' . $name )->supports_time( strtotime( '-2 days' ) ), $name );
+		}
+	}
+
+	/**
+	 * Met Office: without its site list, an error instead of warnings (#683); without a site within 100 km, no results.
+	 */
+	public function test_metoffice_sitelist_errors() {
+		delete_transient( 'metoffice_sites' );
+		$provider = new Weather_Provider_MetOffice( array( 'api' => 'key' ) );
+		$provider->set( 51.5, -0.12 );
+
+		$this->mock_http( array( 'datapoint.metoffice.gov.uk' => new WP_Error( 'http_request_failed', 'Down' ) ) );
+		$this->assertSame( 'http_request_failed', $provider->get_conditions()->get_error_code() );
+
+		$this->mock_http( array( 'datapoint.metoffice.gov.uk' => array( 'body' => array( 'error' => 'Invalid key' ) ) ) );
+		$this->assertSame( 'invalid_response', $provider->get_conditions()->get_error_code() );
+
+		set_transient(
+			'metoffice_sites',
+			array(
+				array(
+					'id'        => '3772',
+					'latitude'  => 21.3,
+					'longitude' => -157.8,
+				),
+			)
+		);
+		$this->assertSame( 'no_results', $provider->get_conditions()->get_error_code(), 'No site within 100 km.' );
+		delete_transient( 'metoffice_sites' );
 	}
 
 	/**
@@ -1654,8 +1703,17 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array( 'station.example.com' => array( 'body' => $fixture ) ) );
 		$provider = new Weather_Provider_Station();
 		$provider->set( array( 'station_id' => 'backyard' ) );
-		$this->assertWPError( $provider->get_conditions() );
-		$this->assertWPError( $provider->get_conditions( strtotime( '-1 day' ) ), 'Past times go straight to the fallback.' );
+		$this->assertSame( 'station_stale', $provider->get_conditions()->get_error_code() );
+		$this->assertTrue( Sloc_Provider_Errors::is_actionable( $provider->get_conditions(), $provider ), 'A station that stopped updating is for the administrator.' );
+		$this->assertSame( 'historic_unsupported', $provider->get_conditions( strtotime( '-1 day' ) )->get_error_code(), 'Past times are an error without a request.' );
+
+		// By location too, and a station that can't be read is its error, not empty weather.
+		$provider = $this->provider( 'Weather_Provider_Station' );
+		$this->assertSame( 'station_stale', $provider->get_conditions()->get_error_code() );
+		$this->mock_http( array( 'station.example.com' => new WP_Error( 'http_request_failed', 'Down' ) ) );
+		$this->assertSame( 'http_request_failed', $provider->get_conditions()->get_error_code() );
+		$provider->set( 0, 0 );
+		$this->assertSame( 'no_results', $provider->get_conditions()->get_error_code(), 'No station in range.' );
 	}
 
 	/**

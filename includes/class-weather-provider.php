@@ -562,16 +562,55 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.1.0 Returns a `no_results` error. Sloc_Provider_Chain tries the next provider.
+	 * @deprecated 6.1.0 Return no_results_error(), or the error that stopped the lookup.
 	 *
 	 * @param string|int|DateTime $time ISO8601, timestamp, or DateTime.
 	 * @return WP_Error No conditions from this provider.
 	 */
 	protected function get_fallback_conditions( $time ) {
+		return $this->no_results_error();
+	}
+
+	/**
+	 * Returns the error for a lookup the provider has no weather for.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return WP_Error A `no_results` error.
+	 */
+	protected function no_results_error() {
 		return new WP_Error(
 			'no_results',
 			/* translators: %s: Weather provider name. */
 			sprintf( __( '%s has no weather for this location and time.', 'simple-location' ), $this->get_name() )
 		);
+	}
+
+	/**
+	 * Returns the error for a provider without its API key, which administrators are told about.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return WP_Error A `missing_api_key` error.
+	 */
+	protected function missing_api_key_error() {
+		return new WP_Error(
+			'missing_api_key',
+			/* translators: %s: Weather provider name. */
+			sprintf( __( 'You have not set an API key for %s', 'simple-location' ), $this->get_name() )
+		);
+	}
+
+	/**
+	 * Returns whether a time is current: within an hour of now.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int|string|DateTime|null $time Time, or null for now.
+	 * @return bool Whether it is current.
+	 */
+	protected function is_current( $time = null ) {
+		return HOUR_IN_SECONDS >= abs( $this->datetime( $time )->getTimestamp() - time() );
 	}
 
 	/**

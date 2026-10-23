@@ -277,7 +277,7 @@ A provider is skipped, without asking it, where it can't have weather: outside t
 
 = How do I know when a provider stops working? =
 
-When a provider fails with an error you can fix, such as a missing or rejected API key, an exhausted quota, or one of your stations that can't be read, administrators see a notice on the Dashboard and the Simple Location settings, and it is listed in Tools → Site Health. The notice can be dismissed, and the error clears by itself the next time that provider works.
+When a provider fails with an error you can fix, such as a missing or rejected API key, an exhausted quota, or one of your stations that can't be read or has stopped updating, administrators see a notice on the Dashboard and the Simple Location settings, and it is listed in Tools → Site Health. The notice can be dismissed, and the error clears by itself the next time that provider works.
 
 To be notified elsewhere, such as on your phone, hook the `sloc_provider_error` and `sloc_provider_error_resolved` actions, which receive a one-line message.
 

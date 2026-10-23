@@ -50,6 +50,7 @@ class Sloc_Provider_Errors {
 		'station_format_version',
 		'station_empty',
 		'station_not_found',
+		'station_stale',
 	);
 
 	/**

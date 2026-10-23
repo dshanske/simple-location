@@ -97,9 +97,23 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 	}
 
 	/**
+	 * Returns whether the provider has weather for a time: only current weather, within an hour of now.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int|string|DateTime|null $time Time, or null for now.
+	 * @return bool Whether to try the provider for this time.
+	 */
+	public function supports_time( $time = null ) {
+		return $this->is_current( $time );
+	}
+
+	/**
 	 * Return array of current conditions
 	 *
 	 * @since 6.0.0 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
+	 * @since 6.1.0 Returns an error without an API key, when the site list can't be read (#683), or without a site
+	 *              within 100 km, instead of using the fallback provider.
 	 *
 	 * @param int $time Time. Optional.
 	 * @return array|WP_Error Current Conditions in Array, or an error.
@@ -111,6 +125,9 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 		if ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) ) {
 			return $this->get_unsupported_time_conditions( $time );
 		}
+		if ( empty( $this->api ) ) {
+			return $this->missing_api_key_error();
+		}
 		if ( ! empty( $this->station_id ) ) {
 			return self::get_station_data();
 		}
@@ -121,6 +138,12 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 			}
 
 			$sitelist = $this->get_sitelist();
+			if ( is_wp_error( $sitelist ) ) {
+				return $sitelist;
+			}
+			if ( empty( $sitelist ) || ! is_array( $sitelist ) ) {
+				return new WP_Error( 'invalid_response', __( 'The Met Office did not return its list of sites.', 'simple-location' ) );
+			}
 			foreach ( $sitelist as $key => $value ) {
 				$sitelist[ $key ]['distance'] = round( geo_distance( $this->latitude, $this->longitude, $value['latitude'], $value['longitude'] ) );
 			}
@@ -138,7 +161,7 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 				$this->set_cache( $return );
 				return $return;
 			}
-			return self::get_fallback_conditions( $time );
+			return $this->no_results_error();
 		}
 		return new WP_Error( 'failed', __( 'Failure', 'simple-location' ) );
 	}
