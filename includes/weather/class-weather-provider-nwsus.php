@@ -156,6 +156,8 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	/**
 	 * Return info on the current station.
 	 *
+	 * @since 6.1.0 Includes the cloud cover, from the cloud layers.
+	 *
 	 * @return array Info on Site.
 	 */
 	public function get_station_data() {
@@ -204,7 +206,8 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		$pressure              = self::get_value( $properties, 'barometricPressure' );
 		$return['pressure']    = is_numeric( $pressure ) ? round( $pressure / 100, 2 ) : null;
 
-		$return['summary'] = $properties['textDescription'] ?? null;
+		$return['summary']    = $properties['textDescription'] ?? null;
+		$return['cloudiness'] = self::cloud_cover( $properties['cloudLayers'] ?? null );
 
 		if ( ! empty( $properties['presentWeather'] ) ) {
 			$return['code'] = self::phenomenon_code_map( $properties['presentWeather'] );
@@ -233,6 +236,41 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 		return $return;
 	}
 
+
+	/**
+	 * Returns the cloud cover of an observation's cloud layers.
+	 *
+	 * Each layer's METAR amount covers the layers below it too, so the largest amount is the sky's cover. Amounts in
+	 * eighths of the sky (oktas) are given the middle of their range.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array|null $layers Cloud layers, each with an 'amount' such as SCT.
+	 * @return int|null Cloud cover in percent, or null without layers with a known amount.
+	 */
+	public static function cloud_cover( $layers ) {
+		if ( empty( $layers ) || ! is_array( $layers ) ) {
+			return null;
+		}
+		// FEW is 1-2 oktas, SCT 3-4, BKN 5-7; VV is a sky hidden by fog or other obscuration.
+		$cover = array(
+			'SKC' => 0,
+			'CLR' => 0,
+			'FEW' => 19,
+			'SCT' => 44,
+			'BKN' => 75,
+			'OVC' => 100,
+			'VV'  => 100,
+		);
+		$found = null;
+		foreach ( $layers as $layer ) {
+			$amount = is_array( $layer ) ? ( $layer['amount'] ?? null ) : null;
+			if ( is_string( $amount ) && isset( $cover[ $amount ] ) ) {
+				$found = max( (int) $found, $cover[ $amount ] );
+			}
+		}
+		return $found;
+	}
 
 	/**
 	 * Return the condition code based on cloudlayer.
