@@ -303,6 +303,12 @@ trait Weather_Info_Trait {
 				'name'  => __( 'Rainfall', 'simple-location' ),
 				'icon'  => 'wi-rain',
 			),
+			'rainrate'    => array(
+				'unit'  => __( 'mm/h', 'simple-location' ),
+				'label' => __( 'millimeters per hour', 'simple-location' ),
+				'name'  => __( 'Rain Rate', 'simple-location' ),
+				'icon'  => 'wi-raindrops',
+			),
 			'snow'        => array(
 				'unit'  => __( 'mm', 'simple-location' ),
 				'label' => __( 'millimeters in the last hour', 'simple-location' ),
@@ -445,6 +451,12 @@ trait Weather_Info_Trait {
 					'label' => __( 'inches in the last hour', 'simple-location' ),
 					'name'  => __( 'Rainfall', 'simple-location' ),
 					'icon'  => 'wi-rain',
+				),
+				'rainrate'    => array(
+					'unit'  => __( 'in/h', 'simple-location' ),
+					'label' => __( 'inches per hour', 'simple-location' ),
+					'name'  => __( 'Rain Rate', 'simple-location' ),
+					'icon'  => 'wi-raindrops',
 				),
 				'snow'        => array(
 					'unit'  => __( 'in', 'simple-location' ),

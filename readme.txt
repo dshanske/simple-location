@@ -65,9 +65,30 @@ that can be set to a specific location, a user, station ID, or airport code. Sta
 
 == Stations ==
 
-Stations allow for using a custom data source for weather data. This source should be a URL that returns a JSON object. When using the Custom Station provider for weather, it
-will look for when one of the stations defined is within 10km of your current location. It will then use the return as the current weather conditions. Please note that the
-return must be in the format documented in the code.
+Stations allow for using a custom data source for weather data: a URL that returns the station's current conditions as JSON. When using the Custom Station provider for weather,
+it uses the nearest station within 10 km of your location, and the widgets can show any station by its ID. Readings more than an hour old are not used.
+
+Each station has an ID, a URL, and optionally its latitude and longitude, which are read from the station when it gives them, and a credit with a link, shown with its weather.
+
+The JSON should use the current conditions format, version 1, which the [weewx-current-json](https://github.com/dshanske/weewx-current-json) extension writes for WeeWX stations:
+
+    {
+      "format": "current-conditions",
+      "version": 1,
+      "time": 1761231600,
+      "units": "metric",
+      "station": { "id": "backyard", "name": "Backyard Weather", "latitude": 39.9524, "longitude": -75.1636, "altitude": 12,
+                   "attribution": { "text": "Weather from Backyard Weather", "url": "https://weather.example.com/" } },
+      "observations": { "temperature": 21.5, "humidity": 61, "pressure": 1015.2, "windspeed": 3.58, "winddegree": 230, "rain": 1.27, "rainrate": 3.05, "code": 503 }
+    }
+
+* `time` is when the observations were made, in Unix seconds.
+* `units` is `metric` (degrees C, hPa, m/s, mm, mm/h, meters) or `us` (degrees F, inHg, mph, inches, inches per hour, miles).
+* `observations` has any of the plugin's weather properties: temperature, humidity, dewpoint, heatindex, windchill, pressure, cloudiness, windspeed, winddegree, windgust, rain (in the last hour), rainrate, snow, visibility, radiation, illuminance, uv, aqi, and the pollutants pm1_0, pm2_5, pm10_0, co, co2, nh3, o3, pb and so2. Leave out what the station doesn't measure.
+* `code` is a condition code, as listed in the weather settings, and `summary` is text; a known summary such as "Partly Cloudy" also gives a code.
+* `station.attribution` is the station's credit. A credit set in the station settings replaces it.
+
+JSON without `format` is read in the earlier format: the weather properties at the top level, in metric units, with wind as `wind: { speed, degree, gust }`, `timestamp` for the time, and `N/A` for missing values.
 
 == WordPress GeoData ==
 

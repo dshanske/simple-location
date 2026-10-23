@@ -56,7 +56,18 @@ class Sloc_Weather_Data {
 		'icon',
 		'code',
 		'provider',
+		'rainrate',
+		'attribution',
+		'attribution_url',
 	);
+
+	/**
+	 * Properties that say where the weather came from, which aren't weather on their own.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const SOURCE_PROPERTIES = array( 'provider', 'attribution', 'attribution_url' );
 
 	/**
 	 * Credits to print in the page footer, keyed by provider slug.
@@ -108,6 +119,7 @@ class Sloc_Weather_Data {
 	 * Registers Geo Metadata.
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.0 Registers the rain rate and a weather station's credit.
 	 */
 	public static function register_meta() {
 		// Legacy Weather Storage
@@ -132,6 +144,7 @@ class Sloc_Weather_Data {
 			'pressure'    => __( 'Atmospheric Pressure', 'simple-location' ),
 			'cloudiness'  => __( 'Cloudiness', 'simple-location' ),
 			'rain'        => __( 'Rainfall', 'simple-location' ),
+			'rainrate'    => __( 'Rain Rate', 'simple-location' ),
 			'snow'        => __( 'Snowfall', 'simple-location' ),
 			'visibility'  => __( 'Visibility', 'simple-location' ),
 			'radiation'   => __( 'Radiation', 'simple-location' ),
@@ -199,6 +212,24 @@ class Sloc_Weather_Data {
 		foreach ( array( 'post', 'comment', 'user', 'term' ) as $type ) {
 			register_meta( $type, 'weather_provider', $args );
 		}
+
+		// The credit of a weather station, stored with its weather.
+		$credits = array(
+			'attribution'     => array( 'sanitize_text_field', __( 'Weather Credit', 'simple-location' ) ),
+			'attribution_url' => array( 'esc_url_raw', __( 'Weather Credit Link', 'simple-location' ) ),
+		);
+		foreach ( $credits as $key => $credit ) {
+			$args = array(
+				'sanitize_callback' => $credit[0],
+				'type'              => 'string',
+				'description'       => $credit[1],
+				'single'            => true,
+				'show_in_rest'      => false,
+			);
+			foreach ( array( 'post', 'comment', 'user', 'term' ) as $type ) {
+				register_meta( $type, 'weather_' . $key, $args );
+			}
+		}
 	}
 
 	/**
@@ -222,8 +253,43 @@ class Sloc_Weather_Data {
 			return '';
 		}
 		$credit = $weather->get_attribution();
-		if ( empty( $credit['adjacent'] ) && 'footer' === Weather_Provider::sanitize_attribution( get_option( 'sloc_weather_attribution', 'next' ) ) ) {
-			self::$footer_credits[ $provider ] = $html;
+		return self::place_credit( $provider, $html, ! empty( $credit['adjacent'] ) );
+	}
+
+	/**
+	 * Returns the credit to show with some weather: its station's own credit when it has one, otherwise its provider's.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $weather Weather data, with 'attribution' and 'attribution_url' for a station's credit, and 'provider'.
+	 * @return string HTML, or an empty string without a credit to show here.
+	 */
+	public static function get_weather_credit_markup( $weather ) {
+		if ( ! is_array( $weather ) ) {
+			return '';
+		}
+		$text = isset( $weather['attribution'] ) && is_string( $weather['attribution'] ) ? trim( $weather['attribution'] ) : '';
+		if ( '' === $text ) {
+			return self::get_attribution_markup( $weather['provider'] ?? '' );
+		}
+		$url  = isset( $weather['attribution_url'] ) && is_string( $weather['attribution_url'] ) ? esc_url( $weather['attribution_url'] ) : '';
+		$html = '' === $url ? esc_html( $text ) : sprintf( '<a href="%1$s">%2$s</a>', $url, esc_html( $text ) );
+		return self::place_credit( 'station:' . md5( $text . '|' . $url ), $html, false );
+	}
+
+	/**
+	 * Returns a credit to show with the weather, or keeps it for the footer when the Weather Credits setting says so.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $key      Key of the credit, so each is printed in the footer once.
+	 * @param string $html     Credit HTML, escaped.
+	 * @param bool   $adjacent Whether the credit must stay next to the weather.
+	 * @return string HTML, or an empty string if the credit goes in the footer.
+	 */
+	protected static function place_credit( $key, $html, $adjacent ) {
+		if ( ! $adjacent && 'footer' === Weather_Provider::sanitize_attribution( get_option( 'sloc_weather_attribution', 'next' ) ) ) {
+			self::$footer_credits[ $key ] = $html;
 			if ( ! has_action( 'wp_footer', array( __CLASS__, 'footer_credits' ) ) ) {
 				add_action( 'wp_footer', array( __CLASS__, 'footer_credits' ) );
 			}
@@ -578,11 +644,11 @@ class Sloc_Weather_Data {
 	 * @return boolean True if the object has weather data.
 	 *
 	 * @since 1.0.0
-	 * @since 6.1.0 The weather's provider alone isn't weather data.
+	 * @since 6.1.0 The weather's provider or credit alone isn't weather data.
 	 */
 	public static function has_weather( $type, $id ) {
 		$weather = self::get_object_weatherdata( $type, $id );
-		return is_array( $weather ) && ! empty( array_diff_key( $weather, array( 'provider' => true ) ) );
+		return is_array( $weather ) && ! empty( array_diff_key( $weather, array_flip( self::SOURCE_PROPERTIES ) ) );
 	}
 
 	/**
@@ -614,7 +680,7 @@ class Sloc_Weather_Data {
 		);
 		$args     = wp_parse_args( $args, $defaults );
 		// The provider alone isn't weather.
-		if ( ! is_array( $weather ) || empty( array_diff_key( $weather, array( 'provider' => true ) ) ) ) {
+		if ( ! is_array( $weather ) || empty( array_diff_key( $weather, array_flip( self::SOURCE_PROPERTIES ) ) ) ) {
 			return '';
 		}
 
@@ -644,7 +710,7 @@ class Sloc_Weather_Data {
 				$return[] = sprintf( '<p>%1$s</p>', $weather['name'] );
 			}
 		}
-		$return[] = self::get_attribution_markup( $weather['provider'] ?? '' );
+		$return[] = self::get_weather_credit_markup( $weather );
 		return sprintf( '<%1$s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], esc_attr( $class ), implode( PHP_EOL, array_filter( $return ) ) );
 	}
 

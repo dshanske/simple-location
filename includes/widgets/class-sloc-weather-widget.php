@@ -241,7 +241,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			'units'  => $units,
 			'markup' => false,
 		);
-		foreach ( array_diff_key( $weather, array( 'provider' => true ) ) as $key => $value ) {
+		foreach ( array_diff_key( $weather, array_flip( Sloc_Weather_Data::SOURCE_PROPERTIES ) ) as $key => $value ) {
 			$return[] = Weather_Provider::markup_value( $key, $value, $args );
 		}
 
@@ -255,7 +255,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		}
 
 		$return[] = '</ul>';
-		$return[] = Sloc_Weather_Data::get_attribution_markup( $weather['provider'] ?? '' );
+		$return[] = Sloc_Weather_Data::get_weather_credit_markup( $weather );
 		return implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
 	}
 
