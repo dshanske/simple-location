@@ -305,7 +305,7 @@ Only published posts and images with a public location are drawn, and images tak
 
 ### Can I see the weather of an archive?
 
-Yes. Like `/map/` for a map, add `/temperature/` or `/weather/` to any archive, such as a year, category, author or location: for example `/2025/temperature/` or `/map/location/pennsylvania/` becomes `/temperature/location/pennsylvania/`.
+Yes. Like `/map/` for a map, add `/temperature/` or `/weather/` to any archive, such as a year, category, author or location: for example `/2025/temperature/`. For a location, use `/temperature/location/pennsylvania/` or `/weather/location/pennsylvania/`, as with `/map/location/pennsylvania/`.
 * `/temperature/` shows a chart of the temperatures of the archive's posts, in your site's units, followed by a list of them.
 * `/weather/` lists each post with its weather icon, summary and temperature.
 
