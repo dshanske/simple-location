@@ -140,11 +140,14 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *
 	 * @since 6.0.0 Values of 0, and `day` when it is false, are kept.
 	 * @since 6.0.0 Rounds cloudiness to a whole percentage.
+	 * @since 6.1.0 Calculates the wind chill and heat index when the provider didn't give them.
 	 *
 	 * @param array $return Weather data.
 	 * @param int   $timestamp Unix timestamp. Optional.
 	 * @return array {
 	 *  Arguments.
+	 *  @type float  $windchill Wind chill in Celsius, if the provider gave it or it applies. See wind_chill().
+	 *  @type float  $heatindex Heat index in Celsius, if the provider gave it or it applies. See heat_index().
 	 *  @type bool   $day True if daytime, false if night.
 	 *  @type string $sunset Sunset in iso8601 format.
 	 *  @type string $sunrise Sunrise in iso8601 format.
@@ -159,6 +162,13 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 		if ( isset( $return['cloudiness'] ) && is_numeric( $return['cloudiness'] ) ) {
 			$return['cloudiness'] = (int) round( (float) $return['cloudiness'] );
+		}
+		// A provider's own values are kept.
+		if ( ! isset( $return['windchill'] ) || ! is_numeric( $return['windchill'] ) ) {
+			$return['windchill'] = self::wind_chill( $return['temperature'] ?? null, $return['windspeed'] ?? null );
+		}
+		if ( ! isset( $return['heatindex'] ) || ! is_numeric( $return['heatindex'] ) ) {
+			$return['heatindex'] = self::heat_index( $return['temperature'] ?? null, $return['humidity'] ?? null );
 		}
 		$latitude           = array_key_return( 'latitude', $return, $this->latitude );
 		$longitude          = array_key_return( 'longitude', $return, $this->longitude );

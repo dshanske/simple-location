@@ -35,6 +35,65 @@ trait Weather_Info_Trait {
 	}
 
 	/**
+	 * Calculates the wind chill, with the 2001 formula of the US National Weather Service and Environment Canada.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $temperature Air temperature in Celsius.
+	 * @param mixed $windspeed   Wind speed at 10 meters, in meters per second.
+	 * @return float|null Wind chill in Celsius, to one decimal place, or null when an input is missing or outside the
+	 *                    formula's range: 10 °C or colder, with wind faster than 4.8 km/h.
+	 */
+	public static function wind_chill( $temperature, $windspeed ) {
+		if ( ! is_numeric( $temperature ) || ! is_numeric( $windspeed ) ) {
+			return null;
+		}
+		$temperature = (float) $temperature;
+		$kmh         = (float) $windspeed * 3.6;
+		if ( $temperature > 10 || $kmh <= 4.8 ) {
+			return null;
+		}
+		$factor = pow( $kmh, 0.16 );
+		return round( 13.12 + 0.6215 * $temperature - 11.37 * $factor + 0.3965 * $temperature * $factor, 1 );
+	}
+
+	/**
+	 * Calculates the heat index, with the method of the US National Weather Service.
+	 *
+	 * The Rothfusz regression is used, with the National Weather Service's adjustments for very dry and very humid air,
+	 * where Steadman's simpler formula gives 80 °F or more.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $temperature Air temperature in Celsius.
+	 * @param mixed $humidity    Relative humidity in percent.
+	 * @return float|null Heat index in Celsius, to one decimal place, or null when an input is missing or the air is
+	 *                    cooler than 80 °F (26.7 °C), where the heat index isn't used.
+	 */
+	public static function heat_index( $temperature, $humidity ) {
+		if ( ! is_numeric( $temperature ) || ! is_numeric( $humidity ) ) {
+			return null;
+		}
+		$t  = (float) $temperature * 9 / 5 + 32;
+		$rh = max( 0.0, min( 100.0, (float) $humidity ) );
+		if ( $t < 80 ) {
+			return null;
+		}
+		$index = 0.5 * ( $t + 61 + ( $t - 68 ) * 1.2 + $rh * 0.094 );
+		if ( ( $index + $t ) / 2 >= 80 ) {
+			$index = -42.379 + 2.04901523 * $t + 10.14333127 * $rh - 0.22475541 * $t * $rh - 0.00683783 * $t * $t
+				- 0.05481717 * $rh * $rh + 0.00122874 * $t * $t * $rh + 0.00085282 * $t * $rh * $rh
+				- 0.00000199 * $t * $t * $rh * $rh;
+			if ( $rh < 13 && $t <= 112 ) {
+				$index -= ( ( 13 - $rh ) / 4 ) * sqrt( ( 17 - abs( $t - 95 ) ) / 17 );
+			} elseif ( $rh > 85 && $t <= 87 ) {
+				$index += ( ( $rh - 85 ) / 10 ) * ( ( 87 - $t ) / 5 );
+			}
+		}
+		return round( ( $index - 32 ) * 5 / 9, 1 );
+	}
+
+	/**
 	 * Converts hPa to inHg.
 	 *
 	 * @since 6.0.0 Uses 0.02953 inHg per hPa; it used 0.03, which was 1.6% high.

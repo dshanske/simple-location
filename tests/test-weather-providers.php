@@ -639,6 +639,149 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Heat index values from the US National Weather Service's heat index chart.
+	 *
+	 * @return array Temperature in Fahrenheit, relative humidity, and the chart's heat index in Fahrenheit.
+	 */
+	public function data_heat_index_chart() {
+		return array(
+			'80 °F, 40 %'                => array( 80, 40, 80 ),
+			'90 °F, 60 %'                => array( 90, 60, 100 ),
+			'96 °F, 65 %'                => array( 96, 65, 121 ),
+			'100 °F, 40 %'               => array( 100, 40, 109 ),
+			'84 °F, 90 % (humid air)'    => array( 84, 90, 98 ),
+			'104 °F, 10 % (dry air)'     => array( 104, 10, 98 ),
+			'86 °F, 40 % (simple index)' => array( 86, 40, 85 ),
+		);
+	}
+
+	/**
+	 * The heat index matches the National Weather Service's chart (#652).
+	 *
+	 * @dataProvider data_heat_index_chart
+	 *
+	 * @param int $fahrenheit Temperature in Fahrenheit.
+	 * @param int $humidity   Relative humidity in percent.
+	 * @param int $expected   Heat index in Fahrenheit, from the chart.
+	 */
+	public function test_heat_index_chart( $fahrenheit, $humidity, $expected ) {
+		$index = Weather_Provider_Sloc_Test::heat_index( Weather_Provider_Sloc_Test::fahrenheit_to_celsius( $fahrenheit ), $humidity );
+		$this->assertIsFloat( $index );
+		$this->assertEqualsWithDelta( $expected, Weather_Provider_Sloc_Test::celsius_to_fahrenheit( $index ), 0.6 );
+	}
+
+	/**
+	 * Wind chill values from the National Weather Service's wind chill chart.
+	 *
+	 * @return array Temperature in Fahrenheit, wind speed in miles per hour, and the chart's wind chill in Fahrenheit.
+	 */
+	public function data_wind_chill_chart() {
+		return array(
+			'40 °F, 5 mph'   => array( 40, 5, 36 ),
+			'30 °F, 10 mph'  => array( 30, 10, 21 ),
+			'0 °F, 15 mph'   => array( 0, 15, -19 ),
+			'-10 °F, 30 mph' => array( -10, 30, -39 ),
+		);
+	}
+
+	/**
+	 * The wind chill matches the National Weather Service's chart (#652).
+	 *
+	 * @dataProvider data_wind_chill_chart
+	 *
+	 * @param int $fahrenheit Temperature in Fahrenheit.
+	 * @param int $mph        Wind speed in miles per hour.
+	 * @param int $expected   Wind chill in Fahrenheit, from the chart.
+	 */
+	public function test_wind_chill_chart( $fahrenheit, $mph, $expected ) {
+		$chill = Weather_Provider_Sloc_Test::wind_chill( Weather_Provider_Sloc_Test::fahrenheit_to_celsius( $fahrenheit ), $mph * 0.44704 );
+		$this->assertIsFloat( $chill );
+		$this->assertEqualsWithDelta( $expected, Weather_Provider_Sloc_Test::celsius_to_fahrenheit( $chill ), 0.6 );
+	}
+
+	/**
+	 * Outside their ranges, or without their inputs, the wind chill and heat index aren't calculated.
+	 */
+	public function test_feels_like_out_of_range() {
+		$this->assertNull( Weather_Provider_Sloc_Test::heat_index( 26, 90 ), 'Below 80 °F.' );
+		$this->assertNull( Weather_Provider_Sloc_Test::heat_index( 30, null ) );
+		$this->assertNull( Weather_Provider_Sloc_Test::heat_index( 'hot', 50 ) );
+		$this->assertNull( Weather_Provider_Sloc_Test::wind_chill( 10.5, 10 ), 'Above 10 °C.' );
+		$this->assertNull( Weather_Provider_Sloc_Test::wind_chill( -5, 1.3 ), 'Wind of 4.8 km/h or less.' );
+		$this->assertNull( Weather_Provider_Sloc_Test::wind_chill( null, 10 ) );
+		// Humidity over 100 % is treated as 100 %.
+		$this->assertSame( Weather_Provider_Sloc_Test::heat_index( 30, 100 ), Weather_Provider_Sloc_Test::heat_index( 30, 140 ) );
+	}
+
+	/**
+	 * Conditions get a calculated wind chill or heat index when they apply and the provider didn't give one, and a
+	 * provider's own value is kept.
+	 */
+	public function test_feels_like_in_conditions() {
+		$provider = $this->provider( 'Weather_Provider_Sloc_Test' );
+
+		$cold = $provider->extra_data(
+			array(
+				'temperature' => -5,
+				'windspeed'   => 8,
+				'humidity'    => 80,
+			)
+		);
+		$this->assertSame( Weather_Provider_Sloc_Test::wind_chill( -5, 8 ), $cold['windchill'] );
+		$this->assertArrayNotHasKey( 'heatindex', $cold );
+
+		$hot = $provider->extra_data(
+			array(
+				'temperature' => 32,
+				'windspeed'   => 3,
+				'humidity'    => 60,
+			)
+		);
+		$this->assertSame( Weather_Provider_Sloc_Test::heat_index( 32, 60 ), $hot['heatindex'] );
+		$this->assertArrayNotHasKey( 'windchill', $hot );
+
+		$mild = $provider->extra_data(
+			array(
+				'temperature' => 18,
+				'windspeed'   => 5,
+				'humidity'    => 50,
+			)
+		);
+		$this->assertArrayNotHasKey( 'windchill', $mild );
+		$this->assertArrayNotHasKey( 'heatindex', $mild );
+
+		$given = $provider->extra_data(
+			array(
+				'temperature' => -5,
+				'windspeed'   => 8,
+				'windchill'   => -9.9,
+			)
+		);
+		$this->assertSame( -9.9, $given['windchill'] );
+		$this->assertSame(
+			0,
+			$provider->extra_data(
+				array(
+					'temperature' => -5,
+					'windspeed'   => 8,
+					'windchill'   => 0,
+				)
+			)['windchill']
+		);
+	}
+
+	/**
+	 * Providers without their own heat index now have one, such as Open-Meteo on a hot, humid afternoon.
+	 */
+	public function test_feels_like_from_provider() {
+		$fixture = $this->fixture( 'weather/openmeteo-archive.json' );
+		$this->mock_http( array( 'archive-api.open-meteo.com' => array( 'body' => $fixture ) ) );
+		$conditions = $this->provider( 'Weather_Provider_OpenMeteo' )->get_conditions( strtotime( '2025-07-01T14:00:00-04:00' ) );
+		$this->assertSame( Weather_Provider_Sloc_Test::heat_index( $conditions['temperature'], $conditions['humidity'] ), $conditions['heatindex'] );
+		$this->assertGreaterThan( $conditions['temperature'], $conditions['heatindex'] );
+	}
+
+	/**
 	 * Visual Crossing: readings of 0 are kept, and missing readings are left out instead of becoming 0.
 	 */
 	public function test_visualcrossing_zero_and_missing_values() {
