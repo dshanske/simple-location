@@ -74,6 +74,7 @@ class Map_Provider_TomTom extends Map_Provider {
 	 *
 	 * @since 4.4.9
 	 * @since 6.1.0 Uses the image format setting.
+	 * @since 6.1.0 Uses the language from get_language().
 	 *
 	 * @return string URL, or an empty string without the settings it needs.
 	 */
@@ -89,11 +90,14 @@ class Map_Provider_TomTom extends Map_Provider {
 				'zoom'     => $this->map_zoom,
 				'width'    => $this->width,
 				'height'   => $this->height,
-				'language' => get_bloginfo( 'language' ),
+				'language' => $this->get_language(),
 				'layer'    => $this->style,
 			),
 			$url
 		);
+		if ( '' === $this->get_language() ) {
+			$map = remove_query_arg( 'language', $map );
+		}
 		if ( '' !== $this->format ) {
 			$map = add_query_arg( 'format', $this->get_vendor_format(), $map );
 		}
