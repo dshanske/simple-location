@@ -700,6 +700,66 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The Magnus formula gives the dew point from the humidity and back (#655).
+	 */
+	public function test_dew_point_and_humidity() {
+		$this->assertSame( 9.3, Weather_Provider_Sloc_Test::dew_point( 20, 50 ) );
+		$this->assertSame( -12.8, Weather_Provider_Sloc_Test::dew_point( -10, 80 ) );
+		$this->assertSame( 30.0, Weather_Provider_Sloc_Test::dew_point( 30, 100 ) );
+		$this->assertSame( 55.1, Weather_Provider_Sloc_Test::relative_humidity( 30, 20 ) );
+		$this->assertSame( 100.0, Weather_Provider_Sloc_Test::relative_humidity( 15, 15 ) );
+		// A dew point above the temperature means saturated air.
+		$this->assertSame( 100.0, Weather_Provider_Sloc_Test::relative_humidity( 15, 16 ) );
+		$this->assertEqualsWithDelta( 37, Weather_Provider_Sloc_Test::relative_humidity( 25, Weather_Provider_Sloc_Test::dew_point( 25, 37 ) ), 0.3 );
+
+		$this->assertNull( Weather_Provider_Sloc_Test::dew_point( 20, 0 ) );
+		$this->assertNull( Weather_Provider_Sloc_Test::dew_point( null, 50 ) );
+		$this->assertNull( Weather_Provider_Sloc_Test::relative_humidity( 20, 'wet' ) );
+		// Humidity over 100 % is treated as 100 %.
+		$this->assertSame( 20.0, Weather_Provider_Sloc_Test::dew_point( 20, 120 ) );
+	}
+
+	/**
+	 * Conditions get a dew point or humidity when only the other is given, which also gives a heat index, and a
+	 * provider's own values are kept.
+	 */
+	public function test_dew_point_and_humidity_in_conditions() {
+		$provider = $this->provider( 'Weather_Provider_Sloc_Test' );
+
+		$conditions = $provider->extra_data(
+			array(
+				'temperature' => 20,
+				'humidity'    => 50,
+			)
+		);
+		$this->assertSame( 9.3, $conditions['dewpoint'] );
+
+		// A station with only the dew point gets the humidity, and from it a heat index.
+		$conditions = $provider->extra_data(
+			array(
+				'temperature' => 32,
+				'dewpoint'    => 24,
+			)
+		);
+		$this->assertSame( Weather_Provider_Sloc_Test::relative_humidity( 32, 24 ), $conditions['humidity'] );
+		$this->assertSame( Weather_Provider_Sloc_Test::heat_index( 32, $conditions['humidity'] ), $conditions['heatindex'] );
+
+		$conditions = $provider->extra_data(
+			array(
+				'temperature' => 20,
+				'humidity'    => 50,
+				'dewpoint'    => 9.0,
+			)
+		);
+		$this->assertSame( 9.0, $conditions['dewpoint'] );
+		$this->assertSame( 50, $conditions['humidity'] );
+
+		$conditions = $provider->extra_data( array( 'temperature' => 20 ) );
+		$this->assertArrayNotHasKey( 'dewpoint', $conditions );
+		$this->assertArrayNotHasKey( 'humidity', $conditions );
+	}
+
+	/**
 	 * Outside their ranges, or without their inputs, the wind chill and heat index aren't calculated.
 	 */
 	public function test_feels_like_out_of_range() {

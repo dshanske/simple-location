@@ -141,11 +141,14 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @since 6.0.0 Values of 0, and `day` when it is false, are kept.
 	 * @since 6.0.0 Rounds cloudiness to a whole percentage.
 	 * @since 6.1.0 Calculates the wind chill and heat index when the provider didn't give them.
+	 * @since 6.1.0 Calculates the dew point or relative humidity when the provider gave only one.
 	 *
 	 * @param array $return Weather data.
 	 * @param int   $timestamp Unix timestamp. Optional.
 	 * @return array {
 	 *  Arguments.
+	 *  @type float  $dewpoint  Dew point in Celsius, if the provider gave it or the humidity. See dew_point().
+	 *  @type float  $humidity  Relative humidity in percent, if the provider gave it or the dew point. See relative_humidity().
 	 *  @type float  $windchill Wind chill in Celsius, if the provider gave it or it applies. See wind_chill().
 	 *  @type float  $heatindex Heat index in Celsius, if the provider gave it or it applies. See heat_index().
 	 *  @type bool   $day True if daytime, false if night.
@@ -163,7 +166,13 @@ abstract class Weather_Provider extends Sloc_Provider {
 		if ( isset( $return['cloudiness'] ) && is_numeric( $return['cloudiness'] ) ) {
 			$return['cloudiness'] = (int) round( (float) $return['cloudiness'] );
 		}
-		// A provider's own values are kept.
+		// A provider's own values are kept. Humidity comes first, as the heat index needs it.
+		if ( ! isset( $return['dewpoint'] ) || ! is_numeric( $return['dewpoint'] ) ) {
+			$return['dewpoint'] = self::dew_point( $return['temperature'] ?? null, $return['humidity'] ?? null );
+		}
+		if ( ! isset( $return['humidity'] ) || ! is_numeric( $return['humidity'] ) ) {
+			$return['humidity'] = self::relative_humidity( $return['temperature'] ?? null, $return['dewpoint'] ?? null );
+		}
 		if ( ! isset( $return['windchill'] ) || ! is_numeric( $return['windchill'] ) ) {
 			$return['windchill'] = self::wind_chill( $return['temperature'] ?? null, $return['windspeed'] ?? null );
 		}
