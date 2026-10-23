@@ -50,9 +50,25 @@ class Map_Provider_TomTom extends Map_Provider {
 			$args['api'] = get_option( 'sloc_tomtom_api' );
 		}
 		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_tomtom_style' );
+			$args['style'] = $this->get_style_setting( 'sloc_tomtom_style' );
 		}
 		parent::__construct( $args );
+	}
+
+	/**
+	 * Returns the provider's style for each style family.
+	 *
+	 * TomTom has only a day and a night style.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Style IDs keyed by family. See Map_Provider::get_family_styles().
+	 */
+	public function get_family_styles() {
+		return array(
+			'standard' => 'main',
+			'dark'     => 'night',
+		);
 	}
 
 	/**

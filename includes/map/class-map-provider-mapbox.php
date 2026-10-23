@@ -103,7 +103,7 @@ class Map_Provider_Mapbox extends Map_Provider {
 		}
 
 		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_mapbox_style' );
+			$args['style'] = $this->get_style_setting( 'sloc_mapbox_style' );
 		}
 
 		parent::__construct( $args );
@@ -138,6 +138,23 @@ class Map_Provider_Mapbox extends Map_Provider {
 			'satellite-streets-v11' => 'Mapbox Satellite Streets',
 			'navigation-day-v1'     => 'Mapbox Navigation Day',
 			'navigation-night-v1'   => 'Mapbox Navigation Night',
+		);
+	}
+
+	/**
+	 * Returns the provider's style for each style family.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Style IDs keyed by family. See Map_Provider::get_family_styles().
+	 */
+	public function get_family_styles() {
+		return array(
+			'standard'  => 'streets-v11',
+			'light'     => 'light-v10',
+			'dark'      => 'dark-v10',
+			'satellite' => 'satellite-streets-v11',
+			'terrain'   => 'outdoors-v11',
 		);
 	}
 

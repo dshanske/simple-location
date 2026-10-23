@@ -278,7 +278,7 @@ class Map_Provider_StaticMap extends Map_Provider {
 		}
 
 		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_staticmap_style' );
+			$args['style'] = $this->get_style_setting( 'sloc_staticmap_style' );
 		}
 		$args['style'] = self::sanitize_style( $args['style'] );
 
@@ -779,6 +779,25 @@ class Map_Provider_StaticMap extends Map_Provider {
 			}
 		}
 		return $providers ? $providers : self::FALLBACK_PROVIDERS;
+	}
+
+	/**
+	 * Returns the provider's style for each style family.
+	 *
+	 * Standard is the map server's default map. The others are Esri's, which every version 1.0.0 server offers without a key.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Style IDs keyed by family. See Map_Provider::get_family_styles().
+	 */
+	public function get_family_styles() {
+		return array(
+			'standard'  => '',
+			'light'     => 'esri/light',
+			'dark'      => 'esri/dark',
+			'satellite' => 'esri/hybrid',
+			'terrain'   => 'esri/terrain',
+		);
 	}
 
 	/**

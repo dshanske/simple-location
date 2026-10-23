@@ -79,10 +79,27 @@ class Map_Provider_Stadia extends Map_Provider {
 		}
 
 		if ( ! isset( $args['style'] ) ) {
-			$args['style'] = get_option( 'sloc_stadia_style' );
+			$args['style'] = $this->get_style_setting( 'sloc_stadia_style' );
 		}
 
 		parent::__construct( $args );
+	}
+
+	/**
+	 * Returns the provider's style for each style family.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Style IDs keyed by family. See Map_Provider::get_family_styles().
+	 */
+	public function get_family_styles() {
+		return array(
+			'standard'  => 'alidade_smooth',
+			'light'     => 'stamen_toner_lite',
+			'dark'      => 'alidade_smooth_dark',
+			'satellite' => 'alidade_satellite',
+			'terrain'   => 'outdoors',
+		);
 	}
 
 	/**

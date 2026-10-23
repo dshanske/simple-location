@@ -138,6 +138,14 @@ abstract class Map_Provider extends Sloc_Provider {
 	const FORMATS = array();
 
 	/**
+	 * Map style families, which each provider draws in its closest style.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const STYLE_FAMILIES = array( 'standard', 'light', 'dark', 'satellite', 'terrain' );
+
+	/**
 	 * Image format the plugin asks for when none is chosen, one of FORMATS, or an empty string to leave it to the provider.
 	 *
 	 * @since 6.1.0
@@ -381,6 +389,93 @@ abstract class Map_Provider extends Sloc_Provider {
 			add_action( 'init', array( $this, 'init' ) );
 			add_action( 'admin_init', array( $this, 'admin_init' ) );
 		}
+	}
+
+	/**
+	 * Sanitizes the map style family setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Style family.
+	 * @return string One of STYLE_FAMILIES, 'standard' by default.
+	 */
+	public static function sanitize_style_family( $value ) {
+		return in_array( $value, self::STYLE_FAMILIES, true ) ? $value : 'standard';
+	}
+
+	/**
+	 * Returns the provider's style for each style family.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Style IDs keyed by family. A family the provider has no style for is left out, and drawn in the
+	 *                  standard style.
+	 */
+	public function get_family_styles() {
+		return array();
+	}
+
+	/**
+	 * Returns the provider's style for a style family.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $family One of STYLE_FAMILIES.
+	 * @return string Style ID, the standard style for a family the provider doesn't have, or an empty string if the
+	 *                provider has no styles.
+	 */
+	public function get_family_style( $family ) {
+		$styles = $this->get_family_styles();
+		return $styles[ $family ] ?? ( $styles['standard'] ?? '' );
+	}
+
+	/**
+	 * Returns the style the provider's style setting chooses, or the Map Style family's style when it isn't set.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $option Name of the provider's style setting, such as sloc_google_style.
+	 * @return string Style ID.
+	 */
+	protected function get_style_setting( $option ) {
+		$style = get_option( $option, '' );
+		if ( is_string( $style ) && '' !== $style ) {
+			return $style;
+		}
+		return $this->get_family_style( self::sanitize_style_family( get_option( 'sloc_map_style', 'standard' ) ) );
+	}
+
+	/**
+	 * Returns a copy of the provider that draws the dark style, for visitors whose system is set to dark mode.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return Map_Provider|null The copy, or null if the Dark Mode Maps setting is off, the provider has no dark style,
+	 *                           or the map already uses it.
+	 */
+	public function get_dark_variant() {
+		if ( ! get_option( 'sloc_map_dark_mode' ) ) {
+			return null;
+		}
+		$styles = $this->get_family_styles();
+		if ( ! isset( $styles['dark'] ) || $styles['dark'] === $this->style ) {
+			return null;
+		}
+		$dark        = clone $this;
+		$dark->style = $styles['dark'];
+		return $dark;
+	}
+
+	/**
+	 * Returns a `<source>` for the dark mode variant of a map image, to put in a `<picture>` before the image.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $srcset Image candidates of the dark variant, not escaped.
+	 * @return string HTML.
+	 */
+	protected static function dark_source( $srcset ) {
+		return sprintf( '<source media="(prefers-color-scheme: dark)" srcset="%s" />', esc_attr( $srcset ) );
 	}
 
 	/**
@@ -1156,6 +1251,15 @@ abstract class Map_Provider extends Sloc_Provider {
 			'' === $srcset ? '' : sprintf( ' srcset="%s"', esc_attr( $srcset ) ),
 			esc_attr__( 'Map of the locations listed on this page', 'simple-location' )
 		);
+		// The dark style shows the same view, so the marker links fit it too.
+		$dark = '' === $src ? null : $this->get_dark_variant();
+		if ( $dark ) {
+			$dark_src = $dark->get_archive_map_src( $locations );
+			if ( '' !== $dark_src ) {
+				$dark_srcset = $dark->get_archive_srcset( $locations );
+				$html        = '<picture>' . self::dark_source( '' === $dark_srcset ? esc_url_raw( $dark_src ) : $dark_srcset ) . $html . '</picture>';
+			}
+		}
 		if ( '' === $src || empty( $post_ids ) || ! is_array( $locations ) || count( $post_ids ) !== count( $locations ) ) {
 			return $html;
 		}
@@ -1265,44 +1369,79 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.0.0 The srcset uses the provider's high-density maps of the same area, and is left out when the provider has none.
 	 * @since 6.0.0 Providers whose terms allow it are served from the site, so the API key isn't in the page.
 	 * @since 6.0.0 The image has alternative text.
+	 * @since 6.1.0 With the Dark Mode Maps setting on, a `<picture>` adds the provider's dark style for visitors in dark mode.
 	 *
 	 * @param bool $srcset Optional. Add a srcset with the provider's high-density maps. Default false.
 	 * @return string HTML.
 	 */
 	public function get_the_static_map_html( $srcset = false ) {
-		$orig = $this->get_the_static_map();
-		if ( is_wp_error( $orig ) ) {
-			return $this->static_map_error( $orig );
+		$images = $this->get_static_images( $srcset );
+		if ( is_wp_error( $images ) ) {
+			return $this->static_map_error( $images );
+		}
+		$img = sprintf(
+			'<img class="sloc-map" src="%1$s"%2$s width="%3$s" height="%4$s" alt="%5$s" loading="lazy" />',
+			esc_url( $images['src'] ),
+			'' === $images['srcset'] ? '' : sprintf( ' srcset="%s"', esc_attr( $images['srcset'] ) ),
+			esc_attr( $this->width ),
+			esc_attr( $this->height ),
+			esc_attr( $this->get_alt_text() )
+		);
+		$dark = $this->get_dark_variant();
+		if ( $dark ) {
+			$dark_images = $dark->get_static_images( $srcset );
+			if ( ! is_wp_error( $dark_images ) ) {
+				$img = '<picture>' . self::dark_source( '' === $dark_images['srcset'] ? esc_url( $dark_images['src'] ) : $dark_images['srcset'] ) . $img . '</picture>';
+			}
+		}
+		return sprintf( '<a target="_blank" href="%1$s">%2$s</a>', esc_url( $this->get_the_map_url() ), $img );
+	}
+
+	/**
+	 * Returns the image URL of the static map, and its high-density candidates.
+	 *
+	 * Providers whose terms allow it are served from the site.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param bool $srcset Whether to include the provider's high-density maps.
+	 * @return array|WP_Error Array with 'src', and 'srcset' (image candidates with escaped URLs, or an empty string), or
+	 *                        an error if the map can't be built.
+	 */
+	protected function get_static_images( $srcset ) {
+		$src = $this->get_the_static_map();
+		if ( is_wp_error( $src ) ) {
+			return $src;
 		}
 		if ( Sloc_Map_Cache::is_enabled( $this ) ) {
-			$orig = Sloc_Map_Cache::get_url( $this );
+			$src = Sloc_Map_Cache::get_url( $this );
 		}
-		$link   = $this->get_the_map_url();
-		$height = $this->height;
-		$width  = $this->width;
-
 		$scales = $this->get_scales();
-		if ( $srcset && count( $scales ) > 1 ) {
-			$srcset = array();
-			$scale  = $this->scale;
-			foreach ( $scales as $density ) {
-				$this->scale = $density;
-				$image       = $this->get_the_static_map();
-				if ( is_wp_error( $image ) ) {
-					$this->scale = $scale;
-					return $this->static_map_error( $image );
-				}
-				if ( Sloc_Map_Cache::is_enabled( $this ) ) {
-					$image = Sloc_Map_Cache::get_url( $this );
-				}
-				$srcset[] = sprintf( '%1$s %2$sx', esc_url( $image ), $density );
-			}
-			$this->scale = $scale;
-
-			$srcset = implode( ',', $srcset );
-			return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" srcset="%3$s" width="%4$s" height="%5$s" alt="%6$s" loading="lazy" /></a>', esc_url( $link ), esc_url( $orig ), esc_attr( $srcset ), esc_attr( $width ), esc_attr( $height ), esc_attr( $this->get_alt_text() ) );
+		if ( ! $srcset || count( $scales ) < 2 ) {
+			return array(
+				'src'    => $src,
+				'srcset' => '',
+			);
 		}
-		return sprintf( '<a target="_blank" href="%1$s"><img class="sloc-map" src="%2$s" width="%3$s" height="%4$s" alt="%5$s" loading="lazy" /></a>', esc_url( $link ), esc_url( $orig ), esc_attr( $width ), esc_attr( $height ), esc_attr( $this->get_alt_text() ) );
+		$candidates = array();
+		$scale      = $this->scale;
+		foreach ( $scales as $density ) {
+			$this->scale = $density;
+			$image       = $this->get_the_static_map();
+			if ( is_wp_error( $image ) ) {
+				$this->scale = $scale;
+				return $image;
+			}
+			if ( Sloc_Map_Cache::is_enabled( $this ) ) {
+				$image = Sloc_Map_Cache::get_url( $this );
+			}
+			$candidates[] = sprintf( '%1$s %2$sx', esc_url( $image ), $density );
+		}
+		$this->scale = $scale;
+		return array(
+			'src'    => $src,
+			'srcset' => implode( ',', $candidates ),
+		);
 	}
 
 	/**

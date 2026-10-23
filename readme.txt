@@ -140,6 +140,14 @@ The appropriate API keys should be entered in Settings->Simple Location or will 
 
 The software uses two custom features to declare that the post type supports these features, otherwise the location and weather features do not show in the editor.
 
+= How do I choose the look of my maps? =
+
+The Map Style setting, under Map Settings, chooses a family: Standard, Light, Dark, Satellite or Terrain. Each map provider draws its closest style, so maps keep their look when you change providers. A provider without that kind of style, such as Geoapify for satellite, draws its standard style.
+Each provider also has its own style setting, with all its styles. It is empty by default, which uses the Map Style setting; choosing a style there uses that style instead. Sites that chose a provider style before version 6.1.0 keep it.
+Google's light and dark styles are its road map recolored with Google's silver and night styling.
+
+With Dark Mode Maps on, maps also have the provider's dark style for visitors whose system is set to dark mode. Browsers only load the one they show. For providers served from your site, the dark style is stored as its own image.
+
 = Why are my maps served from the provider instead of saved as images to my site? =
 
 The terms of service of most map providers expressly forbid this. While the likelihood of one of these providers coming after an individual is slim, this would be a violation of WordPress plugin guidelines.
