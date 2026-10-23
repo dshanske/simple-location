@@ -651,6 +651,7 @@ class Geo_Data {
 	 * weather is looked up for posts with coordinates and no weather.
 	 *
 	 * @since 5.0.3
+	 * @since 6.1.0 A venue's visibility for posts made there is used.
 	 *
 	 * @param int $post_id Post ID.
 	 * @return int|false The post ID if anything was updated, otherwise false.
@@ -685,6 +686,10 @@ class Geo_Data {
 							$venue = Post_Venue::at_venue( $geodata['latitude'], $geodata['longitude'] );
 							if ( $venue ) {
 								update_post_meta( $post_id, 'venue_id', $venue );
+								$visibility = Post_Venue::get_post_visibility( $venue );
+								if ( '' !== $visibility ) {
+									$geodata['visibility'] = $visibility;
+								}
 							} elseif ( ! array_key_exists( 'address', $geodata ) && array_key_exists( 'display-name', $reverse_adr ) ) {
 								$geodata['address'] = $reverse_adr['display-name'];
 							}
@@ -704,7 +709,8 @@ class Geo_Data {
 			if ( is_numeric( $venue ) ) {
 				$update = true;
 				Post_Venue::set_post_venue( $post_id, $venue );
-				set_post_geodata( $post_id, 'visibility', get_post_geodata( $venue, 'visibility' ) );
+				$visibility = Post_Venue::get_post_visibility( $venue );
+				set_post_geodata( $post_id, 'visibility', '' === $visibility ? get_post_geodata( $venue, 'visibility' ) : $visibility );
 				update_post_meta(
 					$post_id,
 					'mf2_checkin',

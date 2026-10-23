@@ -322,6 +322,15 @@ class SaveMetaTest extends WP_UnitTestCase {
 		Geo_Base::save_post_meta( $venue_id );
 		$this->assertEquals( 75, get_post_meta( $venue_id, 'venue_radius', true ) );
 		$this->assertSame( 'https://example.com/cafe', get_post_meta( $venue_id, 'venue_url', true ) );
+		$this->assertSame( '', get_post_meta( $venue_id, 'venue_post_visibility', true ) );
+
+		// The visibility for posts made there is saved, and removed for no default or an unknown value.
+		$_POST['venue_post_visibility'] = 'private';
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertSame( 'private', get_post_meta( $venue_id, 'venue_post_visibility', true ) );
+		$_POST['venue_post_visibility'] = 'secret';
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertSame( '', get_post_meta( $venue_id, 'venue_post_visibility', true ) );
 	}
 
 	/**

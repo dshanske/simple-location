@@ -272,6 +272,8 @@ class Location_Plugins {
 	/**
 	 * Fires after the Micropub Request is complete to add additional location information.
 	 *
+	 * @since 6.1.0 A venue's visibility for posts made there is used, unless the client asked for one.
+	 *
 	 * @param array $input The Micropub Input.
 	 * @param array $args Micropub Arguments.
 	 */
@@ -326,7 +328,9 @@ class Location_Plugins {
 				// The client asked for a visibility, so use it.
 				set_post_geodata( $args['ID'], 'visibility', $requested );
 			} elseif ( false !== $venue ) {
-				set_post_geodata( $args['ID'], 'visibility', 'protected' );
+				// The venue's visibility for posts made there, or only the venue's name.
+				$visibility = Post_Venue::get_post_visibility( $venue );
+				set_post_geodata( $args['ID'], 'visibility', '' === $visibility ? 'protected' : $visibility );
 				// Set the Address to Null
 				set_post_geodata( $args['ID'], 'address', '' );
 			} else {
@@ -373,7 +377,8 @@ class Location_Plugins {
 			$venue = Post_Venue::add_new_venue( $location );
 			if ( ! is_wp_error( $venue ) ) {
 				Post_Venue::set_post_venue( $args['ID'], $venue );
-				set_post_geodata( $args['ID'], 'visibility', get_post_geodata( $venue, 'visibility' ) );
+				$visibility = Post_Venue::get_post_visibility( $venue );
+				set_post_geodata( $args['ID'], 'visibility', '' === $visibility ? get_post_geodata( $venue, 'visibility' ) : $visibility );
 				update_post_meta(
 					$args['ID'],
 					'mf2_checkin',

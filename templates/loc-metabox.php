@@ -19,6 +19,7 @@ if ( 'comment' === $screen->id ) {
 	if ( 'venue' === $sloc_type ) {
 		$geodata['venue_radius'] = get_post_meta( get_the_ID(), 'venue_radius', true );
 		$geodata['venue_url']    = get_post_meta( get_the_ID(), 'venue_url', true );
+		$geodata['post_visibility'] = Post_Venue::get_post_visibility( get_the_ID() );
 	} else {
 		$geodata['venue_id'] = get_post_meta( get_the_ID(), 'venue_id', true );
 	}
@@ -97,6 +98,16 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			<?php esc_html_e( 'Venue URL:', 'simple-location' ); ?>
 			<input class="widefat" type="url" name="venue_url" id="venue_url" value="<?php echo esc_attr( $geodata['venue_url'] ?? '' ); ?>" />
 		</label>
+		<label for="venue_post_visibility">
+			<?php esc_html_e( 'Visibility of Posts Here:', 'simple-location' ); ?>
+			<select name="venue_post_visibility" id="venue_post_visibility" class="widefat">
+				<option value="" <?php selected( $geodata['post_visibility'] ?? '', '' ); ?>><?php esc_html_e( 'No default', 'simple-location' ); ?></option>
+				<?php foreach ( Geo_Base::geo_public() as $sloc_value => $sloc_label ) : ?>
+					<option value="<?php echo esc_attr( $sloc_value ); ?>" <?php selected( $geodata['post_visibility'] ?? '', $sloc_value ); ?>><?php echo esc_html( $sloc_label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</label>
+		<p class="description"><?php esc_html_e( 'The location visibility given to posts made here, such as Private at home. You can still change it on each post.', 'simple-location' ); ?></p>
 
 	<?php } else { ?>
 		<label for="venue_id" class="quarter">

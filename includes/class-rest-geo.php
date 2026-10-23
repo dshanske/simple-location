@@ -602,6 +602,8 @@ class REST_Geo {
 	/**
 	 * Callback handler for Geolocation Retrieval.
 	 *
+	 * @since 6.1.0 At a venue, the visibility is the venue's visibility for posts made there, when it sets one.
+	 *
 	 * @param WP_Rest_Request $request REST Request.
 	 */
 	public static function geocode( $request ) {
@@ -645,10 +647,14 @@ class REST_Geo {
 					),
 					'nearby_select' => Post_Venue::nearby_select( $params['latitude'], $params['longitude'], $venue, false ),
 				);
-				$visibility  = get_post_geodata( $venue, 'visibility' );
-				// A private venue becomes protected as you do not want to show the coordinates but you would want to show the label
-				if ( 'private' === $visibility ) {
-					$visibility = 'protected';
+				// The venue's visibility for posts made there, if it sets one.
+				$visibility = Post_Venue::get_post_visibility( $venue );
+				if ( '' === $visibility ) {
+					$visibility = get_post_geodata( $venue, 'visibility' );
+					// A private venue becomes protected as you do not want to show the coordinates but you would want to show the label
+					if ( 'private' === $visibility ) {
+						$visibility = 'protected';
+					}
 				}
 				$reverse_adr['visibility'] = $visibility;
 			} else {

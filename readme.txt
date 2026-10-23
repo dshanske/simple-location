@@ -56,6 +56,7 @@ due to various changes since that was set up, they were switched to a custom pos
 information about the venue. At this time, venues are shared between users and it is not assumed that each user has unique venues, though this may be a consideration in future.
 
 Venues can be set to hide the actual location for privacy purposes, for example 'Home'.
+A venue can also set the visibility of posts made there with "Visibility of Posts Here", for example Private at home. It applies when a post's location is looked up in the editor, found in the background, sent by Micropub, or a check-in. A visibility chosen on the post, or sent by a Micropub client, still wins.
 
 == Weather ==
 

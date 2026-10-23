@@ -1322,6 +1322,7 @@ class Geo_Base {
 	 * Saves the location metabox fields for a post.
 	 *
 	 * @since 3.3.0
+	 * @since 6.1.0 Saves a venue's visibility for posts made there.
 	 *
 	 * @param int $post_id Post ID.
 	 */
@@ -1367,6 +1368,12 @@ class Geo_Base {
 				update_post_meta( $post_id, 'venue_url', sanitize_url( wp_unslash( $_POST['venue_url'] ) ) );
 			} else {
 				delete_post_meta( $post_id, 'venue_url' );
+			}
+			$visibility = isset( $_POST['venue_post_visibility'] ) ? Post_Venue::sanitize_post_visibility( sanitize_key( wp_unslash( $_POST['venue_post_visibility'] ) ) ) : '';
+			if ( '' === $visibility ) {
+				delete_post_meta( $post_id, 'venue_post_visibility' );
+			} else {
+				update_post_meta( $post_id, 'venue_post_visibility', $visibility );
 			}
 		}
 		self::save_meta( 'post', $post_id );
