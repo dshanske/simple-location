@@ -144,4 +144,21 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 		}
 		return false;
 	}
+
+	/**
+	 * Returns the credit for the provider's weather.
+	 *
+	 * Weatherbit requires a visible link on its free and hobby plans. Sites on a paid plan can remove it with the sloc_weather_credit filter.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit. See Weather_Provider::attribution().
+	 */
+	protected function attribution() {
+		return array(
+			'text'     => __( 'Weather data by Weatherbit.io', 'simple-location' ),
+			'url'      => 'https://www.weatherbit.io/',
+			'adjacent' => false,
+		);
+	}
 }

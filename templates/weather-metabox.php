@@ -38,6 +38,7 @@ if ( $imperial ) {
 	<a href="#weather" class="edit-weather hide-if-no-js" role="button"><span aria-hidden="true">Edit</a><span class="screen-reader-text">weather</span>
 
 	<div id="weather-fields" class="field-row hide-if-js">
+		<input type="hidden" name="weather_provider" id="weather_provider" value="<?php echo esc_attr( $weather['provider'] ?? '' ); ?>" />
 		<p class="field-row">
 			<label for="temperature">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'temperature', $imperial ) ); ?>

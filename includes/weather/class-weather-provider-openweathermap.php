@@ -218,4 +218,21 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 		}
 		return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
 	}
+
+	/**
+	 * Returns the credit for the provider's weather.
+	 *
+	 * OpenWeather requires a visible credit on its Free to Professional plans. Sites on a plan that doesn't can remove it with the sloc_weather_credit filter.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit. See Weather_Provider::attribution().
+	 */
+	protected function attribution() {
+		return array(
+			'text'     => __( 'Weather data provided by OpenWeather', 'simple-location' ),
+			'url'      => 'https://openweathermap.org/',
+			'adjacent' => false,
+		);
+	}
 }

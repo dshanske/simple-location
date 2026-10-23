@@ -413,4 +413,21 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 		);
 		return $codes[ $code ] ?? '';
 	}
+
+	/**
+	 * Returns the credit for the provider's weather.
+	 *
+	 * Open-Meteo's licence requires a link next to wherever its data is shown.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit. See Weather_Provider::attribution().
+	 */
+	protected function attribution() {
+		return array(
+			'text'     => __( 'Weather data by Open-Meteo.com', 'simple-location' ),
+			'url'      => 'https://open-meteo.com/',
+			'adjacent' => true,
+		);
+	}
 }

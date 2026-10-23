@@ -163,4 +163,6 @@ class Weather_Provider_HERE extends Weather_Provider {
 		$id    = (int) $id;
 		return isset( $codes[ $id ] ) ? $codes[ $id ] : '';
 	}
+
+	// No credit: no attribution requirement was found in HERE's terms (checked 2026-10-22). Add one with the sloc_weather_credit filter.
 }

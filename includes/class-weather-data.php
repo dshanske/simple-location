@@ -55,7 +55,16 @@ class Sloc_Weather_Data {
 		'summary',
 		'icon',
 		'code',
+		'provider',
 	);
+
+	/**
+	 * Credits to print in the page footer, keyed by provider slug.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	protected static $footer_credits = array();
 
 	/**
 	 * Weather Data Initialization Function.
@@ -179,6 +188,65 @@ class Sloc_Weather_Data {
 		register_meta( 'comment', 'weather_icon', $args );
 		register_meta( 'user', 'weather_icon', $args );
 		register_meta( 'term', 'weather_icon', $args );
+
+		$args = array(
+			'sanitize_callback' => 'sanitize_key',
+			'type'              => 'string',
+			'description'       => __( 'Weather Provider', 'simple-location' ),
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		foreach ( array( 'post', 'comment', 'user', 'term' ) as $type ) {
+			register_meta( $type, 'weather_provider', $args );
+		}
+	}
+
+	/**
+	 * Returns the credit for weather from a provider, to show with the weather.
+	 *
+	 * With the Weather Credits setting on footer, a credit whose provider allows it is printed once in the page footer
+	 * instead, and an empty string is returned. Credits the provider requires next to its weather are always returned.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $provider Weather provider slug.
+	 * @return string HTML, or an empty string without a credit to show here.
+	 */
+	public static function get_attribution_markup( $provider ) {
+		$weather = ( is_string( $provider ) && '' !== $provider ) ? Loc_Config::weather_provider( $provider ) : null;
+		if ( ! $weather instanceof Weather_Provider ) {
+			return '';
+		}
+		$html = $weather->get_attribution_html();
+		if ( '' === $html ) {
+			return '';
+		}
+		$credit = $weather->get_attribution();
+		if ( empty( $credit['adjacent'] ) && 'footer' === Weather_Provider::sanitize_attribution( get_option( 'sloc_weather_attribution', 'next' ) ) ) {
+			self::$footer_credits[ $provider ] = $html;
+			if ( ! has_action( 'wp_footer', array( __CLASS__, 'footer_credits' ) ) ) {
+				add_action( 'wp_footer', array( __CLASS__, 'footer_credits' ) );
+			}
+			return '';
+		}
+		return sprintf( '<span class="sloc-weather-attribution">%s</span>', $html );
+	}
+
+	/**
+	 * Prints the credits of the weather shown on the page, once, in the footer.
+	 *
+	 * @since 6.1.0
+	 */
+	public static function footer_credits() {
+		if ( empty( self::$footer_credits ) ) {
+			return;
+		}
+		printf(
+			'<p class="sloc-weather-attribution">%1$s %2$s</p>',
+			esc_html__( 'Weather:', 'simple-location' ),
+			wp_kses( implode( ' · ', self::$footer_credits ), array( 'a' => array( 'href' => array() ) ) )
+		);
+		self::$footer_credits = array();
 	}
 
 	/**
@@ -510,15 +578,18 @@ class Sloc_Weather_Data {
 	 * @return boolean True if the object has weather data.
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.0 The weather's provider alone isn't weather data.
 	 */
 	public static function has_weather( $type, $id ) {
-		return ! empty( self::get_object_weatherdata( $type, $id ) );
+		$weather = self::get_object_weatherdata( $type, $id );
+		return is_array( $weather ) && ! empty( array_diff_key( $weather, array( 'provider' => true ) ) );
 	}
 
 	/**
 	 * Returns the weather markup for an object.
 	 *
 	 * @since 3.3.0
+	 * @since 6.1.0 Followed by the weather provider's credit, unless the Weather Credits setting puts it in the footer.
 	 *
 	 * @param string     $type Object type.
 	 * @param int        $id   Object ID.
@@ -542,7 +613,8 @@ class Sloc_Weather_Data {
 			'wrapper-type'  => 'p', // HTML type to wrap the weather in
 		);
 		$args     = wp_parse_args( $args, $defaults );
-		if ( ! is_array( $weather ) || empty( $weather ) ) {
+		// The provider alone isn't weather.
+		if ( ! is_array( $weather ) || empty( array_diff_key( $weather, array( 'provider' => true ) ) ) ) {
 			return '';
 		}
 
@@ -572,6 +644,7 @@ class Sloc_Weather_Data {
 				$return[] = sprintf( '<p>%1$s</p>', $weather['name'] );
 			}
 		}
+		$return[] = self::get_attribution_markup( $weather['provider'] ?? '' );
 		return sprintf( '<%1$s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], esc_attr( $class ), implode( PHP_EOL, array_filter( $return ) ) );
 	}
 

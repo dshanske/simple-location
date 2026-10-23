@@ -190,4 +190,6 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 				return '';
 		}
 	}
+
+	// No credit: no attribution requirement was found in Pirate Weather's documentation (checked 2026-10-22). Add one with the sloc_weather_credit filter.
 }

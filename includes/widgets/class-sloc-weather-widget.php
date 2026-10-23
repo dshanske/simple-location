@@ -190,6 +190,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 	 * Returns the weather conditions as a heading and list.
 	 *
 	 * @since 4.1.5
+	 * @since 6.1.0 Followed by the weather provider's credit.
 	 *
 	 * @param array      $weather  Weather conditions.
 	 * @param string     $icon     Icon for the location or station name. Default 'fa-map'.
@@ -240,7 +241,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 			'units'  => $units,
 			'markup' => false,
 		);
-		foreach ( $weather as $key => $value ) {
+		foreach ( array_diff_key( $weather, array( 'provider' => true ) ) as $key => $value ) {
 			$return[] = Weather_Provider::markup_value( $key, $value, $args );
 		}
 
@@ -254,6 +255,7 @@ class Sloc_Weather_Widget extends WP_Widget {
 		}
 
 		$return[] = '</ul>';
+		$return[] = Sloc_Weather_Data::get_attribution_markup( $weather['provider'] ?? '' );
 		return implode( PHP_EOL, array_filter( $return ) ); // phpcs:ignore
 	}
 

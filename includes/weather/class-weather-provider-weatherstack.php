@@ -191,4 +191,6 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 				return '';
 		}
 	}
+
+	// No credit: no attribution requirement was found in weatherstack's terms (checked 2026-10-22). Add one with the sloc_weather_credit filter.
 }

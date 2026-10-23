@@ -356,4 +356,21 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		}
 		return '';
 	}
+
+	/**
+	 * Returns the credit for the provider's weather.
+	 *
+	 * Xweather's terms require this credit on the page showing its data.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit. See Weather_Provider::attribution().
+	 */
+	protected function attribution() {
+		return array(
+			'text'     => __( 'Powered by Vaisala Xweather', 'simple-location' ),
+			'url'      => 'https://www.xweather.com/',
+			'adjacent' => false,
+		);
+	}
 }

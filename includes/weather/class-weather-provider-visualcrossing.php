@@ -285,4 +285,6 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 		}
 		return '';
 	}
+
+	// No credit: no attribution requirement was found in Visual Crossing's terms (checked 2026-10-22). Add one with the sloc_weather_credit filter.
 }
