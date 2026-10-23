@@ -365,6 +365,7 @@ class Simple_Location_Plugin {
 			'class-elevation-provider-geonames.php', // Geonames.
 			'class-elevation-provider-google.php', // Google.
 			'class-elevation-provider-openroute.php', // OpenRoute.
+			'class-elevation-provider-opentopodata.php', // Open Topo Data.
 		);
 		self::register_providers( $providers, 'includes/elevation/' );
 

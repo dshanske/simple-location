@@ -1,0 +1,13 @@
+{
+  "results": [
+    {
+      "dataset": "srtm30m",
+      "elevation": null,
+      "location": {
+        "lat": 70.0,
+        "lng": -75.1636
+      }
+    }
+  ],
+  "status": "OK"
+}
