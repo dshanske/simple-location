@@ -44,6 +44,14 @@ abstract class Weather_Provider extends Sloc_Provider {
 	protected $cache_time;
 
 	/**
+	 * Where weather credits may be shown: next to the weather, or once in the page footer.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const ATTRIBUTIONS = array( 'next', 'footer' );
+
+	/**
 	 * Constructor for the Abstract Class.
 	 *
 	 * The default version of this just sets the parameters.
@@ -86,6 +94,53 @@ abstract class Weather_Provider extends Sloc_Provider {
 			add_action( 'admin_init', array( $this, 'admin_init' ) );
 			add_action( 'init', array( $this, 'init' ) );
 		}
+	}
+
+	/**
+	 * Returns the credit the provider's terms ask for wherever its weather is shown.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array {
+	 *     Credit, or an empty array if none is needed.
+	 *
+	 *     @type string $text     Credit text, such as "Weather data by Open-Meteo.com".
+	 *     @type string $url      Link for the credit.
+	 *     @type bool   $adjacent Whether the terms require the credit next to the weather, rather than anywhere on the page.
+	 * }
+	 */
+	public function get_attribution() {
+		return array();
+	}
+
+	/**
+	 * Returns the provider's credit as a link.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string HTML, or an empty string if the provider needs no credit.
+	 */
+	public function get_attribution_html() {
+		$credit = $this->get_attribution();
+		if ( empty( $credit['text'] ) ) {
+			return '';
+		}
+		if ( empty( $credit['url'] ) ) {
+			return esc_html( $credit['text'] );
+		}
+		return sprintf( '<a href="%1$s">%2$s</a>', esc_url( $credit['url'] ), esc_html( $credit['text'] ) );
+	}
+
+	/**
+	 * Sanitizes the weather credit setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Setting value.
+	 * @return string One of ATTRIBUTIONS, 'next' by default.
+	 */
+	public static function sanitize_attribution( $value ) {
+		return in_array( $value, self::ATTRIBUTIONS, true ) ? $value : 'next';
 	}
 
 	/**
@@ -142,11 +197,13 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @since 6.0.0 Rounds cloudiness to a whole percentage.
 	 * @since 6.1.0 Calculates the wind chill and heat index when the provider didn't give them.
 	 * @since 6.1.0 Calculates the dew point or relative humidity when the provider gave only one.
+	 * @since 6.1.0 Adds the provider's slug as `provider`, so its credit can be shown with the weather.
 	 *
 	 * @param array $return Weather data.
 	 * @param int   $timestamp Unix timestamp. Optional.
 	 * @return array {
 	 *  Arguments.
+	 *  @type string $provider  Slug of the provider the weather came from, unless set already, such as by a fallback provider.
 	 *  @type float  $dewpoint  Dew point in Celsius, if the provider gave it or the humidity. See dew_point().
 	 *  @type float  $humidity  Relative humidity in percent, if the provider gave it or the dew point. See relative_humidity().
 	 *  @type float  $windchill Wind chill in Celsius, if the provider gave it or it applies. See wind_chill().
@@ -165,6 +222,9 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 		if ( isset( $return['cloudiness'] ) && is_numeric( $return['cloudiness'] ) ) {
 			$return['cloudiness'] = (int) round( (float) $return['cloudiness'] );
+		}
+		if ( empty( $return['provider'] ) ) {
+			$return['provider'] = $this->slug;
 		}
 		// A provider's own values are kept. Humidity comes first, as the heat index needs it.
 		if ( ! isset( $return['dewpoint'] ) || ! is_numeric( $return['dewpoint'] ) ) {

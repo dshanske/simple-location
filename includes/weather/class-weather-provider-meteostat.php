@@ -422,4 +422,21 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		}
 		return '';
 	}
+
+	/**
+	 * Returns the credit for the provider's weather.
+	 *
+	 * Meteostat's data is CC BY 4.0, credited in any reasonable manner.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit. See Weather_Provider::get_attribution().
+	 */
+	public function get_attribution() {
+		return array(
+			'text'     => __( 'Source: Meteostat and its data providers', 'simple-location' ),
+			'url'      => 'https://meteostat.net/',
+			'adjacent' => false,
+		);
+	}
 }

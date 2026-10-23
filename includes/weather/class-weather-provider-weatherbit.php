@@ -144,4 +144,21 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 		}
 		return false;
 	}
+
+	/**
+	 * Returns the credit for the provider's weather.
+	 *
+	 * Weatherbit's free plans require a visible link.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit. See Weather_Provider::get_attribution().
+	 */
+	public function get_attribution() {
+		return array(
+			'text'     => __( 'Weather data by Weatherbit.io', 'simple-location' ),
+			'url'      => 'https://www.weatherbit.io/',
+			'adjacent' => false,
+		);
+	}
 }

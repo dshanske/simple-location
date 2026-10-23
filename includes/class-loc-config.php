@@ -212,6 +212,18 @@ class Loc_Config {
 		);
 
 		register_setting(
+			'simloc',
+			'sloc_weather_attribution',
+			array(
+				'type'              => 'string',
+				'description'       => 'Where weather providers are credited',
+				'show_in_rest'      => false,
+				'default'           => 'next',
+				'sanitize_callback' => array( 'Weather_Provider', 'sanitize_attribution' ),
+			)
+		);
+
+		register_setting(
 			'simloc', // option group.
 			'sloc_measurements', // option name.
 			array(
@@ -724,6 +736,21 @@ class Loc_Config {
 			'sloc_general', // settings section.
 			array(
 				'label_for' => 'sloc_measurements',
+			)
+		);
+		add_settings_field(
+			'sloc_weather_attribution',
+			__( 'Weather Credits', 'simple-location' ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_general',
+			array(
+				'label_for'   => 'sloc_weather_attribution',
+				'list'        => array(
+					'next'   => __( 'Next to the weather', 'simple-location' ),
+					'footer' => __( 'Once in the page footer, where the provider allows it', 'simple-location' ),
+				),
+				'description' => __( 'Weather providers\' terms ask for a credit where their weather is shown. Some, such as Open-Meteo, require it next to the weather, so theirs stays there either way. The footer needs a theme that calls wp_footer(). Weather saved before version 6.1.0 doesn\'t record its provider, so it has no credit.', 'simple-location' ),
 			)
 		);
 		add_settings_section(

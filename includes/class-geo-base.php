@@ -1203,6 +1203,7 @@ class Geo_Base {
 	 * @since 1.0.0
 	 * @since 6.0.0 Coordinates are validated and saved only as a pair, numeric fields that aren't numbers are not
 	 *               saved, values of 0 are kept, and input is unslashed.
+	 * @since 6.1.0 Saves the provider the weather was looked up from, as `weather_provider`.
 	 *
 	 * @param string  $meta_type Object type: post, comment or user.
 	 * @param int     $object_id Object ID.
@@ -1303,6 +1304,12 @@ class Geo_Base {
 
 		if ( 'imperial' === $units && $convert ) {
 			$weather = Weather_Provider::imperial_to_metric( $weather );
+		}
+
+		// The provider the weather was looked up from, for its credit. An empty or unknown provider removes it.
+		if ( ! empty( $weather ) && array_key_exists( 'weather_provider', $_POST ) ) {
+			$provider            = sanitize_key( wp_unslash( $_POST['weather_provider'] ) );
+			$weather['provider'] = Loc_Config::weather_provider( $provider ) ? $provider : '';
 		}
 
 		if ( ! empty( $weather ) ) {

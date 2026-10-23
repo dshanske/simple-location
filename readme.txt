@@ -162,6 +162,13 @@ Developers can change the refresh age with the `sloc_map_cache_max_age` filter, 
 
 The other self-serve option is to self-host a caching static map API endpoint (see the custom map provider below).
 
+= How are weather providers credited? =
+
+Most weather providers' terms ask for a credit where their weather is shown, so weather looked up from a provider records which one it came from, and its credit is shown with it, linked to the provider.
+The Weather Credits setting, under General Settings, puts the credits next to the weather (the default) or once in the page footer. Open-Meteo requires its credit next to its data, so it stays there either way.
+The US National Weather Service's data is public domain, so it has no credit. Weather saved before version 6.1.0, or entered by hand, doesn't record a provider, so it has no credit.
+Check the terms of the plan you use: some providers, such as OpenWeather and Weatherbit, only require a credit on their free plans.
+
 = How do I protect my map API keys? =
 
 For most map providers, the map image is loaded directly from the provider, so the API key is part of the image link and anyone viewing the page can read it.

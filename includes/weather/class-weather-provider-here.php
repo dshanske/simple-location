@@ -163,4 +163,21 @@ class Weather_Provider_HERE extends Weather_Provider {
 		$id    = (int) $id;
 		return isset( $codes[ $id ] ) ? $codes[ $id ] : '';
 	}
+
+	/**
+	 * Returns the credit for the provider's weather.
+	 *
+	 * A courtesy credit; HERE's display terms weren't confirmed.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit. See Weather_Provider::get_attribution().
+	 */
+	public function get_attribution() {
+		return array(
+			'text'     => __( 'Weather data © HERE', 'simple-location' ),
+			'url'      => 'https://www.here.com/',
+			'adjacent' => false,
+		);
+	}
 }

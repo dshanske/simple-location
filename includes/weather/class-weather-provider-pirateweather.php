@@ -190,4 +190,21 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 				return '';
 		}
 	}
+
+	/**
+	 * Returns the credit for the provider's weather.
+	 *
+	 * A courtesy credit; Pirate Weather doesn't require one.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit. See Weather_Provider::get_attribution().
+	 */
+	public function get_attribution() {
+		return array(
+			'text'     => __( 'Weather data by Pirate Weather', 'simple-location' ),
+			'url'      => 'https://pirateweather.net/',
+			'adjacent' => false,
+		);
+	}
 }

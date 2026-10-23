@@ -325,4 +325,21 @@ class Weather_Provider_MetOffice extends Weather_Provider {
 
 		return $return;
 	}
+
+	/**
+	 * Returns the credit for the provider's weather.
+	 *
+	 * The Met Office DataHub asks for this credit.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit. See Weather_Provider::get_attribution().
+	 */
+	public function get_attribution() {
+		return array(
+			'text'     => __( 'Powered by Met Office data', 'simple-location' ),
+			'url'      => 'https://www.metoffice.gov.uk/',
+			'adjacent' => false,
+		);
+	}
 }

@@ -47,6 +47,12 @@ ul.sloc-lastseen-data {
   display: block;
 }
 
+.sloc-weather-attribution {
+  display: block;
+  font-size: 0.75em;
+  margin-top: 0.25em;
+}
+
 .sloc-weather-icon {
   vertical-align: middle;
   display: inline-block;

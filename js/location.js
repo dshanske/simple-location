@@ -254,6 +254,10 @@ jQuery( document ).ready( function( $ ) {
 						if ( 'units' in weather ) {
 							$( '#units' ).val( weather.units );
 						}
+						// The provider the weather came from, for its credit.
+						if ( 'provider' in weather && ( '' === $( '#weather_provider' ).val() ) ) {
+							$( '#weather_provider' ).val( weather.provider );
+						}
 					}
 
 					if ( window.console ) {
