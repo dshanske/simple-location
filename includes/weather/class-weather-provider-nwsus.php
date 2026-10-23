@@ -417,4 +417,6 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 				return null;
 		}
 	}
+
+	// No credit: the National Weather Service's data is public domain. Add one with the sloc_weather_credit filter.
 }

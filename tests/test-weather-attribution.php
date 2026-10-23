@@ -45,10 +45,6 @@ class WeatherAttributionTest extends WP_UnitTestCase {
 			'Weatherbit'     => array( 'weatherbit', '<a href="https://www.weatherbit.io/">Weather data by Weatherbit.io</a>', false ),
 			'Meteostat'      => array( 'meteostat', '<a href="https://meteostat.net/">Source: Meteostat and its data providers</a>', false ),
 			'Met Office'     => array( 'metofficeuk', '<a href="https://www.metoffice.gov.uk/">Powered by Met Office data</a>', false ),
-			'HERE'           => array( 'here', '<a href="https://www.here.com/">Weather data © HERE</a>', false ),
-			'Visual'         => array( 'visualcrossing', '<a href="https://www.visualcrossing.com/">Weather data by Visual Crossing</a>', false ),
-			'weatherstack'   => array( 'weatherstack', '<a href="https://weatherstack.com/">Weather data by weatherstack</a>', false ),
-			'Pirate Weather' => array( 'pirateweather', '<a href="https://pirateweather.net/">Weather data by Pirate Weather</a>', false ),
 		);
 	}
 
@@ -69,16 +65,46 @@ class WeatherAttributionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The National Weather Service's data is public domain, and custom stations are credited separately (#661).
+	 * Providers that don't require a credit have none: the National Weather Service's data is public domain, no
+	 * requirement was found for HERE, Visual Crossing, weatherstack or Pirate Weather, and custom stations will be
+	 * credited separately (#661).
 	 */
 	public function test_providers_without_credit() {
-		foreach ( array( 'nwsus', 'station' ) as $slug ) {
+		foreach ( array( 'nwsus', 'station', 'here', 'visualcrossing', 'weatherstack', 'pirateweather' ) as $slug ) {
 			$this->assertSame( array(), Loc_Config::weather_provider( $slug )->get_attribution(), $slug );
 			$this->assertSame( '', Loc_Config::weather_provider( $slug )->get_attribution_html(), $slug );
 			$this->assertSame( '', Sloc_Weather_Data::get_attribution_markup( $slug ), $slug );
 		}
 		$this->assertSame( '', Sloc_Weather_Data::get_attribution_markup( 'retired-provider' ) );
 		$this->assertSame( '', Sloc_Weather_Data::get_attribution_markup( '' ) );
+	}
+
+	/**
+	 * The sloc_weather_credit filter can remove a credit, such as on a paid plan, or add one.
+	 */
+	public function test_credit_filter() {
+		$filter = function ( $credit, $provider ) {
+			if ( 'openweathermap' === $provider->get_slug() ) {
+				return array();
+			}
+			if ( 'here' === $provider->get_slug() ) {
+				return array(
+					'text'     => 'Weather from HERE',
+					'url'      => 'https://www.here.com/',
+					'adjacent' => false,
+				);
+			}
+			if ( 'weatherbit' === $provider->get_slug() ) {
+				return 'not a credit';
+			}
+			return $credit;
+		};
+		add_filter( 'sloc_weather_credit', $filter, 10, 2 );
+		$this->assertSame( '', Sloc_Weather_Data::get_attribution_markup( 'openweathermap' ) );
+		$this->assertSame( '<span class="sloc-weather-attribution"><a href="https://www.here.com/">Weather from HERE</a></span>', Sloc_Weather_Data::get_attribution_markup( 'here' ) );
+		$this->assertSame( array(), Loc_Config::weather_provider( 'weatherbit' )->get_attribution() );
+		$this->assertStringContainsString( 'Open-Meteo.com', Sloc_Weather_Data::get_attribution_markup( 'openmeteo' ) );
+		remove_filter( 'sloc_weather_credit', $filter, 10 );
 	}
 
 	/**
@@ -130,7 +156,7 @@ class WeatherAttributionTest extends WP_UnitTestCase {
 	public function test_credit_in_footer() {
 		update_option( 'sloc_weather_attribution', 'footer' );
 		$posts = array();
-		foreach ( array( 'openweathermap', 'openweathermap', 'meteostat', 'openmeteo' ) as $provider ) {
+		foreach ( array( 'openweathermap', 'openweathermap', 'meteostat', 'openmeteo', 'here' ) as $provider ) {
 			$post_id = self::factory()->post->create();
 			set_post_weatherdata(
 				$post_id,

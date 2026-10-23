@@ -167,8 +167,8 @@ The other self-serve option is to self-host a caching static map API endpoint (s
 
 Most weather providers' terms ask for a credit where their weather is shown, so weather looked up from a provider records which one it came from, and its credit is shown with it, linked to the provider.
 The Weather Credits setting, under General Settings, puts the credits next to the weather (the default) or once in the page footer. Open-Meteo requires its credit next to its data, so it stays there either way.
-The US National Weather Service's data is public domain, so it has no credit. Weather saved before version 6.1.0, or entered by hand, doesn't record a provider, so it has no credit.
-Check the terms of the plan you use: some providers, such as OpenWeather and Weatherbit, only require a credit on their free plans.
+Providers without a credit requirement have no credit: the US National Weather Service, whose data is public domain, and HERE, Visual Crossing, weatherstack and Pirate Weather, where no requirement was found. Weather saved before version 6.1.0, or entered by hand, doesn't record a provider, so it has no credit.
+OpenWeather and Weatherbit only require their credit on free plans. The plugin can't tell which plan a key is on, so it shows them; a site on a paid plan can remove them, or change any credit, with the `sloc_weather_credit` filter.
 
 ### How do I protect my map API keys?
 

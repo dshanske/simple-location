@@ -222,13 +222,13 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	/**
 	 * Returns the credit for the provider's weather.
 	 *
-	 * OpenWeather's free to Professional plans require a visible credit.
+	 * OpenWeather requires a visible credit on its Free to Professional plans. Sites on a plan that doesn't can remove it with the sloc_weather_credit filter.
 	 *
 	 * @since 6.1.0
 	 *
-	 * @return array Credit. See Weather_Provider::get_attribution().
+	 * @return array Credit. See Weather_Provider::attribution().
 	 */
-	public function get_attribution() {
+	protected function attribution() {
 		return array(
 			'text'     => __( 'Weather data provided by OpenWeather', 'simple-location' ),
 			'url'      => 'https://openweathermap.org/',

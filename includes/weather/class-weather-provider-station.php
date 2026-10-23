@@ -356,4 +356,6 @@ class Weather_Provider_Station extends Weather_Provider {
 				return '';
 		}
 	}
+
+	// No credit: custom stations will have their own credit settings (#661).
 }

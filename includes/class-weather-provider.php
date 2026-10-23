@@ -99,6 +99,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 	/**
 	 * Returns the credit the provider's terms ask for wherever its weather is shown.
 	 *
+	 * Providers whose terms ask for none return an empty array.
+	 *
 	 * @since 6.1.0
 	 *
 	 * @return array {
@@ -109,8 +111,38 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *     @type bool   $adjacent Whether the terms require the credit next to the weather, rather than anywhere on the page.
 	 * }
 	 */
-	public function get_attribution() {
+	protected function attribution() {
 		return array();
+	}
+
+	/**
+	 * Returns the provider's credit, after the `sloc_weather_credit` filter.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array Credit, or an empty array for none. See attribution().
+	 */
+	public function get_attribution() {
+		/**
+		 * Filters the credit shown with a weather provider's weather.
+		 *
+		 * Some providers only require their credit on free plans, such as OpenWeather and Weatherbit; a site on a paid
+		 * plan can remove it by returning an empty array. A site can also add a credit for a provider that doesn't
+		 * require one.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param array            $credit {
+		 *     Credit, or an empty array for none.
+		 *
+		 *     @type string $text     Credit text.
+		 *     @type string $url      Link for the credit.
+		 *     @type bool   $adjacent Whether the credit must be next to the weather, rather than in the footer.
+		 * }
+		 * @param Weather_Provider $provider Weather provider.
+		 */
+		$credit = apply_filters( 'sloc_weather_credit', $this->attribution(), $this );
+		return is_array( $credit ) ? $credit : array();
 	}
 
 	/**

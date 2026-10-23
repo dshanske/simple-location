@@ -192,20 +192,5 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 		}
 	}
 
-	/**
-	 * Returns the credit for the provider's weather.
-	 *
-	 * A courtesy credit; weatherstack's terms don't state one.
-	 *
-	 * @since 6.1.0
-	 *
-	 * @return array Credit. See Weather_Provider::get_attribution().
-	 */
-	public function get_attribution() {
-		return array(
-			'text'     => __( 'Weather data by weatherstack', 'simple-location' ),
-			'url'      => 'https://weatherstack.com/',
-			'adjacent' => false,
-		);
-	}
+	// No credit: no attribution requirement was found in weatherstack's terms (checked 2026-10-22). Add one with the sloc_weather_credit filter.
 }

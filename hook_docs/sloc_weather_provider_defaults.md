@@ -19,7 +19,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-weather-provider.php:77](https://github.com/dshanske/simple-location/blob/trunk/includes/class-weather-provider.php#L77)
+- [includes/class-weather-provider.php:85](https://github.com/dshanske/simple-location/blob/trunk/includes/class-weather-provider.php#L85)
 ```php
 apply_filters( 'sloc_weather_provider_defaults', $defaults )
 ```

@@ -421,9 +421,9 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 	 *
 	 * @since 6.1.0
 	 *
-	 * @return array Credit. See Weather_Provider::get_attribution().
+	 * @return array Credit. See Weather_Provider::attribution().
 	 */
-	public function get_attribution() {
+	protected function attribution() {
 		return array(
 			'text'     => __( 'Weather data by Open-Meteo.com', 'simple-location' ),
 			'url'      => 'https://open-meteo.com/',
