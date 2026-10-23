@@ -69,7 +69,7 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 		$this->assertTrue( $taxonomy->public );
 		$this->assertContains( 'post', $taxonomy->object_type );
 		$this->assertContains( 'venue', $taxonomy->object_type );
-		foreach ( array( 'country', 'region', 'locality' ) as $key ) {
+		foreach ( array( 'country', 'region', 'locality', 'location_about_url' ) as $key ) {
 			$this->assertTrue( registered_meta_key_exists( 'term', $key, 'location' ), $key );
 		}
 	}
@@ -82,6 +82,7 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 		$this->assertSame( 10, has_action( 'edited_location', array( 'Location_Taxonomy', 'save_data' ) ) );
 		$this->assertSame( 10, has_action( 'pre_get_posts', array( 'Location_Taxonomy', 'filter_location_posts' ) ) );
 		$this->assertSame( 10, has_filter( 'get_the_archive_title', array( 'Location_Taxonomy', 'archive_title' ) ) );
+		$this->assertSame( 10, has_filter( 'get_the_archive_description', array( 'Location_Taxonomy', 'archive_description' ) ) );
 	}
 
 	/**
@@ -489,6 +490,43 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A location's about URL is linked from its archive description, as an about link rather than its own URL (#211).
+	 */
+	public function test_archive_description_about_url() {
+		$terms = $this->hierarchy();
+		$this->assertSame( 'Text', Location_Taxonomy::archive_description( 'Text' ), 'Not a location archive.' );
+
+		$this->go_to( get_term_link( $terms['region'] ) );
+		$this->assertSame( 'Text', Location_Taxonomy::archive_description( 'Text' ), 'No about URL.' );
+
+		update_term_meta( $terms['region'], 'location_about_url', 'https://en.wikipedia.org/wiki/Pennsylvania' );
+		$html = Location_Taxonomy::archive_description( 'Text' );
+		$this->assertStringStartsWith( 'Text<p class="sloc-location-about"><a href="https://en.wikipedia.org/wiki/Pennsylvania">About ', $html );
+		$this->assertStringContainsString( 'Pennsylvania', wp_strip_all_tags( $html ) );
+		$this->assertStringNotContainsString( 'u-url', $html );
+
+		// A stored value that isn't an http or https URL isn't linked.
+		update_term_meta( $terms['region'], 'location_about_url', 'javascript:alert(1)' );
+		$this->assertSame( '', Location_Taxonomy::get_about_url( $terms['region'] ) );
+		$this->assertSame( 'Text', Location_Taxonomy::archive_description( 'Text' ) );
+	}
+
+	/**
+	 * The add and edit forms have the about URL field, with the saved value.
+	 */
+	public function test_about_url_fields() {
+		$terms = $this->hierarchy();
+		ob_start();
+		Location_Taxonomy::create_screen_fields( 'location' );
+		$this->assertStringContainsString( 'name="location_about_url"', ob_get_clean() );
+
+		update_term_meta( $terms['locality'], 'location_about_url', 'https://en.wikipedia.org/wiki/Philadelphia' );
+		ob_start();
+		Location_Taxonomy::edit_screen_fields( get_term( $terms['locality'] ), 'location' );
+		$this->assertStringContainsString( 'value="https://en.wikipedia.org/wiki/Philadelphia"', ob_get_clean() );
+	}
+
+	/**
 	 * Location archives show visitors only posts with a public location, and never venues.
 	 */
 	public function test_filter_location_posts_visitor() {
@@ -656,6 +694,34 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 		unset( $_POST['country'] );
 		Location_Taxonomy::save_data( $terms['region'] );
 		$this->assertSame( strtoupper( get_term( $terms['region'] )->slug ), get_term_meta( $terms['region'], 'region', true ) );
+	}
+
+	/**
+	 * Saving either form stores the about URL, removes it when emptied, and refuses other schemes.
+	 */
+	public function test_save_data_about_url() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$terms = $this->hierarchy();
+		$_POST = array(
+			'location_taxonomy_meta' => wp_create_nonce( 'create' ),
+			'location-code'          => 'PA',
+			'location_about_url'     => ' https://en.wikipedia.org/wiki/Pennsylvania ',
+		);
+		Location_Taxonomy::save_data( $terms['region'] );
+		$this->assertSame( 'https://en.wikipedia.org/wiki/Pennsylvania', get_term_meta( $terms['region'], 'location_about_url', true ) );
+
+		$_POST = array(
+			'location_taxonomy_meta' => wp_create_nonce( 'edit' ),
+			'location_about_url'     => 'ftp://example.com/pa',
+		);
+		Location_Taxonomy::save_data( $terms['region'] );
+		$this->assertSame( '', get_term_meta( $terms['region'], 'location_about_url', true ) );
+
+		// Without the nonce, nothing changes.
+		update_term_meta( $terms['region'], 'location_about_url', 'https://example.com/pa' );
+		$_POST = array( 'location_about_url' => 'https://evil.example.com/' );
+		Location_Taxonomy::save_data( $terms['region'] );
+		$this->assertSame( 'https://example.com/pa', get_term_meta( $terms['region'], 'location_about_url', true ) );
 	}
 
 	/**
