@@ -1,0 +1,33 @@
+/* API Keys tab: one section per service, which opens and closes. */
+.sloc-api-group {
+  max-width: 960px;
+  margin: 0 0 8px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+
+  > summary {
+    cursor: pointer;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  &[open] > summary {
+    border-bottom: 1px solid #c3c4c7;
+  }
+
+  .form-table {
+    margin: 0 12px;
+    width: calc(100% - 24px);
+  }
+}
+
+.sloc-api-in-use {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: #00a32a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+}
