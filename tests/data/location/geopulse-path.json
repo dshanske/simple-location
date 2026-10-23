@@ -1,0 +1,10 @@
+{
+  "userId": "0b9c5c2e-6a51-4c1e-9d6f-3f1f0b7f2a10",
+  "points": [
+    { "id": 5529, "longitude": -75.1652, "latitude": 39.9526, "timestamp": "2025-07-01T15:50:00Z", "accuracy": 10.0, "altitude": 15.0, "velocity": 4.0, "sourceType": "OWNTRACKS" },
+    { "id": 5530, "longitude": -75.1644, "latitude": 39.9525, "timestamp": "2025-07-01T15:55:00Z", "accuracy": 9.0, "altitude": 16.0, "velocity": 5.0, "sourceType": "OWNTRACKS" },
+    { "id": 5531, "longitude": -75.1636, "latitude": 39.9524, "timestamp": "2025-07-01T16:00:00Z", "accuracy": 8.0, "altitude": 17.0, "velocity": 18.0, "sourceType": "OWNTRACKS" }
+  ],
+  "pointCount": 3,
+  "segments": []
+}

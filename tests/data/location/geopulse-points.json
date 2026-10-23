@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "id": 5531,
+      "timestamp": "2025-07-01T16:00:00Z",
+      "coordinates": { "lat": 39.9524, "lng": -75.1636 },
+      "accuracy": 8.0,
+      "battery": 74.0,
+      "velocity": 18.0,
+      "altitude": 17.0,
+      "sourceType": "OWNTRACKS",
+      "telemetryGpsData": [],
+      "telemetryCurrentPopup": []
+    }
+  ],
+  "page": 1,
+  "size": 1,
+  "totalElements": 2318,
+  "totalPages": 2318
+}

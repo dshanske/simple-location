@@ -91,7 +91,7 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 * Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues.
 * Elevation Providers optionally derive the elevation from an API when not available. Elevation is used to estimate altitude and adjust estimated sunrise/sunset levels accordingly. Providers include GeoNames, Google, OpenRoute and Open Topo Data, whose public API needs no key and which you can also host yourself.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
-location of a three letter airport code, and [Compass](https://github.com/aaronpk/Compass), a self-hosted option for storing your location.
+location of a three letter airport code, and three self-hosted location history services: [Compass](https://github.com/aaronpk/Compass), [Dawarich](https://dawarich.app/) and [GeoPulse](https://github.com/tess1o/geopulse).
 * Weather Providers retrieve weather data about your location and include OpenWeatherMap, Pirate Weather, Dark Sky, Weatherstack, WeatherBit, HERE, Open-Meteo and the US National Weather Service. Open-Meteo needs no key for non-commercial use, has historical weather, and can be self-hosted. HERE, Pirate Weather, Dark Sky, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs that must return the properties as they are stored in WordPress.
 ** The National Weather Service(US) uses their station lookup API to find the closest weather station, and uses weather from there. Therefore, if this returns no options, if you are outside the US, it will return no weather.
 ** The Met Office(UK) uses the distance from your current location to the nearest UK weather station and finds the closest one. However, if the nearest station is more than 100km away, it will return nothing.
@@ -268,6 +268,13 @@ There are REST API endpoints to retrieve the data so it can be used in the admin
 
 [Compass](https://github.com/aaronpk/Compass) is a GPS tracking server that stores data in flat files. The instructions for installation are available in the GitHub repository. GPS
 data can be sent to it from iOS or Android devices using various apps.
+
+= How do I use Dawarich or GeoPulse? =
+
+[Dawarich](https://dawarich.app/) and [GeoPulse](https://github.com/tess1o/geopulse) are self-hosted location history services, which receive your location from apps such as OwnTracks or Overland.
+Choose one as the Location Provider in Settings, then each user enters their server's URL and API key on their profile. Dawarich's key is on its Account page. GeoPulse needs version 2.1.0 or later; create an API token with only the read scope.
+The key is never shown again after it is saved, and only the user, or someone who can edit them, can use their account.
+Your server must be reachable at a public address: WordPress refuses requests to local and private network addresses.
 
 = How can I show a list of posts tagged with a location? =
 
