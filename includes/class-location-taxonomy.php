@@ -21,6 +21,7 @@ final class Location_Taxonomy {
 	 * Registers the taxonomy and its hooks.
 	 *
 	 * @since 4.4.0
+	 * @since 6.1.0 Adds the about link to location archive descriptions.
 	 */
 	public static function init() {
 		self::register();
@@ -37,6 +38,7 @@ final class Location_Taxonomy {
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'location_dropdown' ), 12, 2 );
 
 		add_filter( 'get_the_archive_title', array( __CLASS__, 'archive_title' ), 10 );
+		add_filter( 'get_the_archive_description', array( __CLASS__, 'archive_description' ), 10 );
 		add_filter( 'get_pages_query_args', array( __CLASS__, 'get_pages_query_args' ), 10, 2 );
 	}
 
@@ -101,6 +103,60 @@ final class Location_Taxonomy {
 		$type    = self::location_type( self::get_location_type( $term->term_id ) );
 		/* translators: 1. Location Type. 2: Location Name */
 		return sprintf( __( '%1$1s: %2$2s', 'simple-location' ), $type, $display );
+	}
+
+	/**
+	 * Sanitizes a location's about URL.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value URL.
+	 * @return string HTTP or HTTPS URL, or an empty string.
+	 */
+	public static function sanitize_about_url( $value ) {
+		return is_string( $value ) ? (string) esc_url_raw( trim( $value ), array( 'http', 'https' ) ) : '';
+	}
+
+	/**
+	 * Returns the link to another page about a location, such as the Wikipedia article on the region.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int $term_id Term ID.
+	 * @return string URL, or an empty string if none is set.
+	 */
+	public static function get_about_url( $term_id ) {
+		return self::sanitize_about_url( get_term_meta( (int) $term_id, 'location_about_url', true ) );
+	}
+
+	/**
+	 * Adds a link to the location's about page to the description of a location archive.
+	 *
+	 * The link isn't marked up as the location's URL, which is the archive itself.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $description Archive description.
+	 * @return string Archive description.
+	 */
+	public static function archive_description( $description ) {
+		if ( ! is_tax( 'location' ) ) {
+			return $description;
+		}
+		$term = get_queried_object();
+		if ( ! $term instanceof WP_Term ) {
+			return $description;
+		}
+		$url = self::get_about_url( $term->term_id );
+		if ( '' === $url ) {
+			return $description;
+		}
+		return $description . sprintf(
+			'<p class="sloc-location-about"><a href="%1$s">%2$s</a></p>',
+			esc_url( $url ),
+			/* translators: %s: Location name. */
+			esc_html( sprintf( __( 'About %s', 'simple-location' ), self::display_name( $term->term_id ) ) )
+		);
 	}
 
 	/**
@@ -246,6 +302,7 @@ final class Location_Taxonomy {
 	 * Prints the location code field on the form for adding a location.
 	 *
 	 * @since 4.4.0
+	 * @since 6.1.0 Adds the about URL field.
 	 *
 	 * @param string $taxonomy Taxonomy name.
 	 */
@@ -255,6 +312,11 @@ final class Location_Taxonomy {
 		printf( '<input class="widefat" type="text" name="location-code" required />' );
 		printf( '<p>%1$s</p>', esc_html__( 'Required. The code for this location. If no code, you can use the location.', 'simple-location' ) );
 		echo '</div>';
+		echo '<div class="form-field">';
+		printf( '<label for="location-about-url">%1$s</label>', esc_html__( 'About URL:', 'simple-location' ) );
+		echo '<input class="widefat" type="url" name="location_about_url" id="location-about-url" />';
+		printf( '<p>%1$s</p>', esc_html__( 'Optional. A page about this location, such as its Wikipedia article.', 'simple-location' ) );
+		echo '</div>';
 		wp_nonce_field( 'create', 'location_taxonomy_meta' );
 	}
 
@@ -262,6 +324,7 @@ final class Location_Taxonomy {
 	 * Prints the fields for the location's code, and its type's other data, on the form for editing a location.
 	 *
 	 * @since 4.4.0
+	 * @since 6.1.0 Adds the about URL field.
 	 *
 	 * @param WP_Term $term     Term being edited.
 	 * @param string  $taxonomy Taxonomy name.
@@ -302,6 +365,14 @@ final class Location_Taxonomy {
 				<?php
 		}
 		echo '</tr>';
+		?>
+		<tr class="form-field">
+			<th><label for="location-about-url"><?php esc_html_e( 'About URL:', 'simple-location' ); ?></label></th>
+			<td><input class="widefat" type="url" name="location_about_url" id="location-about-url" value="<?php echo esc_attr( self::get_about_url( $term->term_id ) ); ?>" />
+				<p class="description"><?php esc_html_e( 'Optional. A page about this location, such as its Wikipedia article. It is linked from the location archive.', 'simple-location' ); ?></p>
+			</td>
+		</tr>
+		<?php
 		wp_nonce_field( 'edit', 'location_taxonomy_meta' );
 	}
 
@@ -309,6 +380,7 @@ final class Location_Taxonomy {
 	 * Saves the country, region or locality code of a location term from the term form.
 	 *
 	 * @since 6.0.0 Stops for terms nested too deep to have a type.
+	 * @since 6.1.0 Saves the about URL.
 	 *
 	 * @param int $term_id Term ID.
 	 */
@@ -333,6 +405,15 @@ final class Location_Taxonomy {
 			return;
 		}
 
+		if ( array_key_exists( 'location_about_url', $_POST ) ) {
+			$url = self::sanitize_about_url( wp_unslash( $_POST['location_about_url'] ) );
+			if ( '' === $url ) {
+				delete_term_meta( $term_id, 'location_about_url' );
+			} else {
+				update_term_meta( $term_id, 'location_about_url', $url );
+			}
+		}
+
 		// Only countries, regions and localities have a code; a deeper term has no type.
 		$type = self::get_location_type( $term_id );
 		if ( ! $type ) {
@@ -354,6 +435,9 @@ final class Location_Taxonomy {
 
 	/**
 	 * Register the custom taxonomy for location.
+	 *
+	 * @since 4.4.0
+	 * @since 6.1.0 Registers the about URL term meta.
 	 */
 	public static function register() {
 		$labels = array(
@@ -433,6 +517,19 @@ final class Location_Taxonomy {
 				'description'       => __( 'Locality Name', 'simple-location' ),
 				'single'            => true,
 				'sanitize_callback' => 'sanitize_text_field',
+				'show_in_rest'      => true,
+			)
+		);
+
+		register_meta(
+			'term',
+			'location_about_url',
+			array(
+				'object_subtype'    => 'location',
+				'type'              => 'string',
+				'description'       => __( 'Link to a page about the location, such as its Wikipedia article', 'simple-location' ),
+				'single'            => true,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_about_url' ),
 				'show_in_rest'      => true,
 			)
 		);
