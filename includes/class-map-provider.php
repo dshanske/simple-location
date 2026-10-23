@@ -419,11 +419,21 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Adds the field for a vendor's map API key to the API settings.
 	 *
 	 * @since 6.0.0
+	 * @since 6.1.0 Adds the `$description` parameter.
 	 *
-	 * @param string $name   Vendor name.
-	 * @param string $vendor Vendor slug, as in the option name sloc_{vendor}_map_api.
+	 * @param string      $name        Vendor name.
+	 * @param string      $vendor      Vendor slug, as in the option name sloc_{vendor}_map_api.
+	 * @param string|null $description Field description. Default a note that visitors see the key, and that the vendor's
+	 *                                 main key is used without one.
 	 */
-	protected static function add_map_api_setting( $name, $vendor ) {
+	protected static function add_map_api_setting( $name, $vendor, $description = null ) {
+		if ( null === $description ) {
+			$description = sprintf(
+				// translators: Name of the map vendor.
+				__( 'Optional. Map images show this key to every visitor, so use a key that only allows static maps and is restricted to this site. Leave empty to use the %s API key.', 'simple-location' ),
+				$name
+			);
+		}
 		add_settings_field(
 			'sloc_' . $vendor . '_map_api',
 			// translators: Name of the map vendor.
@@ -434,11 +444,7 @@ abstract class Map_Provider extends Sloc_Provider {
 			array(
 				'label_for'   => 'sloc_' . $vendor . '_map_api',
 				'type'        => 'password',
-				'description' => sprintf(
-					// translators: Name of the map vendor.
-					__( 'Optional. Map images show this key to every visitor, so use a key that only allows static maps and is restricted to this site. Leave empty to use the %s API key.', 'simple-location' ),
-					$name
-				),
+				'description' => $description,
 			)
 		);
 	}
