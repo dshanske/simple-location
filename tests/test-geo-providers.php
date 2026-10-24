@@ -74,7 +74,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::geo_providers();
-		foreach ( array( 'nominatim', 'locationiq', 'google', 'mapquest', 'pelias', 'openroute', 'geoapify', 'here', 'geonames' ) as $slug ) {
+		foreach ( array( 'nominatim', 'photon', 'locationiq', 'google', 'mapquest', 'pelias', 'openroute', 'geoapify', 'here', 'geonames' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['url'], $slug );
@@ -451,6 +451,107 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup();
 		$this->assertCount( 1, $this->http_requests, 'The public server is asked once.' );
 		delete_option( 'sloc_nominatim_fallback' );
+	}
+
+	/**
+	 * Photon reverse geocoding asks the public server, in the site's language, and parses the place (#560).
+	 */
+	public function test_photon_reverse() {
+		$fixture = $this->fixture( 'geo/photon-reverse.json' );
+		$this->mock_http( array( 'photon.komoot.io/reverse' => array( 'body' => $fixture ) ) );
+		$addr = $this->provider( 'Geo_Provider_Photon' )->reverse_lookup();
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://photon.komoot.io/reverse', $request['base'] );
+		$this->assertEquals( self::LAT, $request['query']['lat'] );
+		$this->assertEquals( self::LNG, $request['query']['lon'] );
+		$this->assertSame( '1', $request['query']['limit'] );
+		$this->assertSame( 'en', $request['query']['lang'] );
+
+		$this->assertCityHall( $addr );
+		$properties = $fixture['features'][0]['properties'];
+		$this->assertSame( $properties['name'], $addr['name'] );
+		$this->assertSame( $properties['housenumber'] . ' ' . $properties['street'], $addr['street-address'] );
+		$this->assertSame( $properties['district'], $addr['extended-address'] );
+		$this->assertSame( $properties['country'], $addr['country-name'] );
+		$this->assertSame( $properties['name'] . ', Philadelphia, PA, US', $addr['display-name'] );
+		$this->assertSame( 'America/New_York', $addr['timezone'] );
+	}
+
+	/**
+	 * Photon forward geocoding returns the first result with its coordinates, from your own server if set (#560).
+	 */
+	public function test_photon_geocode() {
+		update_option( 'sloc_photon_url', 'https://photon.example.com/' );
+		$fixture = $this->fixture( 'geo/photon-search.json' );
+		$this->mock_http( array( 'photon.example.com/api' => array( 'body' => $fixture ) ) );
+		$provider = $this->provider( 'Geo_Provider_Photon' );
+		$provider->set( 51.5, -0.12 );
+		$result = $provider->geocode( 'Philadelphia City Hall' );
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://photon.example.com/api', $request['base'] );
+		$this->assertSame( 'Philadelphia City Hall', $request['query']['q'] );
+		$this->assertCityHall( $result );
+		$this->assertSame( 'America/New_York', $result['timezone'] );
+		$this->assertEquals( 51.5, $provider->get()['latitude'], 'The provider keeps its own location.' );
+	}
+
+	/**
+	 * Photon: nothing found or a refused request is an error, and other kinds of places are named sensibly (#560).
+	 */
+	public function test_photon_results() {
+		$empty = array(
+			'features' => array(),
+			'type'     => 'FeatureCollection',
+		);
+		$this->mock_http( array( 'photon.komoot.io' => array( 'body' => $empty ) ) );
+		$this->assertSame( 'no_results', $this->provider( 'Geo_Provider_Photon' )->reverse_lookup()->get_error_code() );
+		$this->assertSame( 'no_results', $this->provider( 'Geo_Provider_Photon' )->geocode( 'Nowhere' )->get_error_code() );
+
+		$this->mock_http(
+			array(
+				'photon.komoot.io' => array(
+					'code' => 400,
+					'body' => array( 'message' => 'Language is not supported.' ),
+				),
+			)
+		);
+		$this->assertSame( 400, $this->provider( 'Geo_Provider_Photon' )->reverse_lookup()->get_error_data()['status'] );
+
+		// A street is named for the street, and a city for the city, not as a place.
+		$street = array(
+			'type'        => 'street',
+			'name'        => 'Market Street',
+			'city'        => 'Philadelphia',
+			'state'       => 'Pennsylvania',
+			'countrycode' => 'US',
+		);
+		$this->mock_http( array( 'photon.komoot.io' => array( 'body' => array( 'features' => array( array( 'properties' => $street ) ) ) ) ) );
+		$addr = $this->provider( 'Geo_Provider_Photon' )->reverse_lookup();
+		$this->assertArrayNotHasKey( 'name', $addr );
+		$this->assertSame( 'Market Street', $addr['street-address'] );
+		$this->assertSame( 'United States', $addr['country-name'] );
+
+		$city = array(
+			'type'        => 'city',
+			'name'        => 'Berlin',
+			'state'       => 'Berlin',
+			'countrycode' => 'de',
+		);
+		$this->mock_http( array( 'photon.komoot.io' => array( 'body' => array( 'features' => array( array( 'properties' => $city ) ) ) ) ) );
+		$addr = $this->provider( 'Geo_Provider_Photon' )->reverse_lookup();
+		$this->assertSame( 'Berlin', $addr['locality'] );
+		$this->assertSame( 'DE', $addr['country-code'] );
+		$this->assertArrayNotHasKey( 'name', $addr );
+
+		// Only languages Photon has are asked for.
+		$spanish = fn() => 'es_ES';
+		add_filter( 'locale', $spanish );
+		$this->mock_http( array( 'photon.komoot.io' => array( 'body' => $empty ) ) );
+		$this->provider( 'Geo_Provider_Photon' )->reverse_lookup();
+		remove_filter( 'locale', $spanish );
+		$this->assertArrayNotHasKey( 'lang', $this->last_request()['query'] );
 	}
 
 	/**

@@ -36,6 +36,8 @@ Philadelphia City Hall: latitude `39.9524`, longitude `-75.1636`; forward-geocod
 | `nominatim-reverse.json` | `GET https://nominatim.openstreetmap.org/reverse?format=jsonv2&extratags=1&addressdetails=1&namedetails=1&lat=39.9524&lon=-75.1636&zoom=18` | Hand-built from docs |
 | `nominatim-search.json` | `GET https://nominatim.openstreetmap.org/search?q=Philadelphia+City+Hall&format=jsonv2&extratags=1&addressdetails=1&namedetails=1` | Hand-built from docs |
 | `nominatim-error.json` | Reverse geocoding a point with no address (e.g. open ocean) | Hand-built from docs |
+| `photon-reverse.json` | `GET https://photon.komoot.io/reverse?limit=1&lang=en&lat=39.9524&lon=-75.1636` | Hand-built from docs |
+| `photon-search.json` | `GET https://photon.komoot.io/api?limit=1&lang=en&q=Philadelphia+City+Hall` | Hand-built from docs |
 | `locationiq-reverse.json` | `GET https://us1.locationiq.com/v1/reverse.php?key=…&format=json&lat=39.9524&lon=-75.1636&statecode=1&extratags=1&addressdetails=1` | Hand-built from docs |
 | `google-reverse.json` | `GET https://maps.googleapis.com/maps/api/geocode/json?latlng=39.9524,-75.1636&location_type=ROOFTOP\|RANGE_INTERPOLATED&key=…` | Hand-built from docs |
 | `google-denied.json` | The same request with an invalid key | Hand-built from docs |
