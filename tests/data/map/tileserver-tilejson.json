@@ -1,0 +1,12 @@
+{
+  "tilejson": "2.0.0",
+  "name": "OSM Bright",
+  "attribution": "<a href=\"https://openmaptiles.org/\" target=\"_blank\">&copy; OpenMapTiles</a> <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">&copy; OpenStreetMap contributors</a><script>alert(1)</script>",
+  "minzoom": 0,
+  "maxzoom": 22,
+  "format": "png",
+  "type": "baselayer",
+  "tiles": [
+    "https://tiles.example.com/styles/osm-bright/{z}/{x}/{y}.png"
+  ]
+}

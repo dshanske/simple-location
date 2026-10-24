@@ -97,7 +97,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::map_providers();
-		foreach ( array( 'geoapify', 'google', 'here', 'locationiq', 'mapbox', 'mapquest', 'stadia', 'staticmap', 'tomtom' ) as $slug ) {
+		foreach ( array( 'geoapify', 'google', 'here', 'locationiq', 'mapbox', 'mapquest', 'stadia', 'staticmap', 'tileserver', 'tomtom' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}
@@ -2111,6 +2111,154 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * TileServer GL: a single map from the server's first style or the one chosen, with a dot or an icon, at either
+	 * pixel density (#552).
+	 */
+	public function test_tileserver_single() {
+		$this->mock_http( array( 'tiles.example.com/styles.json' => array( 'body' => $this->fixture( 'map/tileserver-styles.json' ) ) ) );
+		$map = $this->provider( 'Map_Provider_TileServer', array( 'api' => 'https://tiles.example.com' ) );
+		$this->assertSame( 'https://tiles.example.com/', $map->get_server_url() );
+		$this->assertTrue( $map->is_cacheable() );
+
+		// Without a style, the server's first; a dot in the marker color.
+		$url = $this->parse( $map->get_the_static_map() );
+		$this->assertSame( 'https://tiles.example.com/styles/osm-bright/static/-75.1636,39.9524,15/600x400.png', $url['base'] );
+		$this->assertStringStartsWith( 'fill:#d32f2f|stroke:#ffffff|width:2|-75.16', $url['query']['path'] );
+		$this->assertSame( 17, count( explode( '|', $url['query']['path'] ) ) - 3, 'A closed 16-sided dot, in plain coordinates when zoomed in.' );
+		$this->assertArrayNotHasKey( 'marker', $url['query'] );
+
+		// A chosen style, format and pixel density; an icon on the server instead of a dot.
+		$map = $this->provider(
+			'Map_Provider_TileServer',
+			array(
+				'api'    => 'https://tiles.example.com/',
+				'style'  => 'dark-matter',
+				'format' => 'webp',
+				'icon'   => 'pins/red.svg',
+			)
+		);
+		$map->set_scale( 2 );
+		$url = $this->parse( $map->get_the_static_map() );
+		$this->assertSame( 'https://tiles.example.com/styles/dark-matter/static/-75.1636,39.9524,15/600x400@2x.webp', $url['base'] );
+		$this->assertSame( '-75.1636,39.9524|pins/red.svg|scale:1', $url['query']['marker'] );
+
+		// Without a server, no map.
+		$this->assertSame( '', $this->provider( 'Map_Provider_TileServer', array( 'api' => '' ) )->get_the_static_map() );
+		$this->assertSame( '', $this->provider( 'Map_Provider_TileServer', array( 'api' => 'not a url' ) )->get_the_static_map() );
+	}
+
+	/**
+	 * TileServer GL: archive maps at the plugin's view, with encoded dots and a track line; fitted by the server
+	 * without a view (#552).
+	 */
+	public function test_tileserver_archive() {
+		$map       = $this->provider(
+			'Map_Provider_TileServer',
+			array(
+				'api'   => 'https://tiles.example.com',
+				'style' => 'osm-bright',
+			)
+		);
+		$locations = array( array( 39.9524, -75.1636 ), array( 39.98, -75.2 ) );
+		$view      = $map->get_archive_view( $locations );
+		$url       = $this->parse( $map->get_archive_map( $locations ) );
+		$this->assertSame( sprintf( 'https://tiles.example.com/styles/osm-bright/static/%1$s,%2$s,%3$s/600x400.png', $view['longitude'], $view['latitude'], $view['zoom'] ), $url['base'] );
+		$this->assertMatchesRegularExpression( '/^fill:#d32f2f\|stroke:#ffffff\|width:2\|(enc:|-75)/', $url['query']['path'] );
+		$this->assertCount( 2, $map->get_archive_marker_boxes( $locations ), 'Clickable markers.' );
+
+		// A track: a line, then dots at its ends.
+		$map->set_track( 'ends' );
+		$raw   = $map->get_archive_map( array( array( 39.95, -75.16 ), array( 39.96, -75.17 ), array( 39.97, -75.18 ) ) );
+		$paths = array();
+		foreach ( explode( '&', (string) wp_parse_url( $raw, PHP_URL_QUERY ) ) as $pair ) {
+			list( $name, $value ) = explode( '=', $pair );
+			if ( 'path' === $name ) {
+				$paths[] = rawurldecode( $value );
+			}
+		}
+		$this->assertCount( 3, $paths );
+		$this->assertStringStartsWith( 'stroke:#d32f2f|width:3|enc:', $paths[0] );
+
+		// Points either side of the antimeridian are fitted by the server.
+		$url = $this->parse( $map->get_archive_map( array( array( 0, 179 ), array( 0, -179 ) ) ) );
+		$this->assertStringContainsString( '/static/auto/600x400.png', $url['base'] );
+		$this->assertSame( '0.1', $url['query']['padding'] );
+		$this->assertSame( '', $map->get_archive_map( array() ) );
+	}
+
+	/**
+	 * TileServer GL: styles and families from the server; densities within its size limit; icons and the credit
+	 * below the map (#552).
+	 */
+	public function test_tileserver_styles_and_credit() {
+		$this->mock_http(
+			array(
+				'tiles.example.com/styles.json'            => array( 'body' => $this->fixture( 'map/tileserver-styles.json' ) ),
+				'tiles.example.com/styles/osm-bright.json' => array( 'body' => $this->fixture( 'map/tileserver-tilejson.json' ) ),
+			)
+		);
+		$map = $this->provider( 'Map_Provider_TileServer', array( 'api' => 'https://tiles.example.com' ) );
+		$this->assertSame(
+			array(
+				'osm-bright'  => 'OSM Bright',
+				'positron'    => 'Positron',
+				'dark-matter' => 'Dark Matter',
+			),
+			$map->get_styles()
+		);
+		$families = $map->get_family_styles();
+		$this->assertSame( 'osm-bright', $families['standard'] );
+		$this->assertSame( 'positron', $families['light'] );
+		$this->assertSame( 'dark-matter', $families['dark'] );
+		$this->assertSame( 'osm-bright', $families['satellite'], 'None: the standard style.' );
+		$map->get_styles();
+		$this->assertCount( 1, $this->http_requests, 'The list is kept.' );
+
+		$this->assertSame( array( 1, 2 ), $map->get_scales() );
+		$wide = $this->provider(
+			'Map_Provider_TileServer',
+			array(
+				'api'    => 'https://tiles.example.com',
+				'width'  => 1500,
+				'height' => 1000,
+			)
+		);
+		$this->assertSame( array( 1 ), $wide->get_scales(), 'Twice 1500 is over the server\'s 2048.' );
+
+		$this->assertSame( 'marker.png', Map_Provider_TileServer::sanitize_icon( ' marker.png ' ) );
+		$this->assertSame( '', Map_Provider_TileServer::sanitize_icon( '../secret.png' ) );
+		$this->assertSame( '', Map_Provider_TileServer::sanitize_icon( 'https://evil.example/x.png' ) );
+		$this->assertSame( '', Map_Provider_TileServer::sanitize_icon( 'marker.exe' ) );
+
+		$this->assertSame( '', $map->get_attribution_html(), 'On the image by default.' );
+		$below = $this->provider(
+			'Map_Provider_TileServer',
+			array(
+				'api'         => 'https://tiles.example.com',
+				'attribution' => 'below',
+			)
+		);
+		$html  = $below->get_attribution_html();
+		$this->assertStringContainsString( 'OpenMapTiles', $html );
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringContainsString( $html, $below->get_the_map() );
+
+		// A server that can't be reached: no styles, and an OpenStreetMap credit.
+		$this->mock_http( array( 'down.example.com' => new WP_Error( 'http_request_failed', 'Down' ) ) );
+		$down = $this->provider(
+			'Map_Provider_TileServer',
+			array(
+				'api'         => 'https://down.example.com',
+				'style'       => 'x',
+				'attribution' => 'below',
+			)
+		);
+		$this->assertSame( array(), $down->get_styles() );
+		$this->assertStringContainsString( 'OpenStreetMap', $down->get_attribution_html() );
+		$this->assertWPError( $this->provider( 'Map_Provider_TileServer', array( 'api' => '' ) )->get_json( 'styles.json' ) );
+	}
+
+	/**
 	 * Stadia maps are served from the site from the cacheable endpoint, or load from the standard endpoint.
 	 */
 	public function test_stadia() {
@@ -2520,6 +2668,7 @@ class MapProvidersTest extends WP_UnitTestCase {
 			'MapQuest'   => array( 'Map_Provider_Mapquest', 'mapquest', 'MapQuest' ),
 			'TomTom'     => array( 'Map_Provider_TomTom', 'tomtom', 'TomTom' ),
 			'Stadia'     => array( 'Map_Provider_Stadia', 'stadia', 'Stadia Maps' ),
+			'TileServer' => array( 'Map_Provider_TileServer', 'tileserver', 'TileServer GL' ),
 		);
 	}
 
