@@ -94,6 +94,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 	 *
 	 * @since 6.0.0 Uses the venue's own coordinates and name; no longer sets the search point's altitude.
 	 * @since 6.0.0 Handles Wikipedia tags without a language prefix.
+	 * @since 6.1.0 Adds the shared venue category and a location icon (#707).
 	 *
 	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.
@@ -270,6 +271,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 			$addr['boundingbox'] = $json['boundingbox'];
 		}
 		$addr = array_filter( $addr );
+		$addr = self::add_category( $addr, self::osm_category( $json['class'] ?? $json['category'] ?? '', $json['type'] ?? '' ) );
 		$tz   = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );

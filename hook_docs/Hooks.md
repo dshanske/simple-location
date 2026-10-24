@@ -70,6 +70,7 @@
 
 ## class-venue-provider.php
 
+- [`sloc_venue_category`](sloc_venue_category) Filters the shared category and location icon a provider's venue is given.
 - [`sloc_venue_provider_defaults`](sloc_venue_provider_defaults) Filters the default arguments of venue providers.
 
 ## class-weather-provider.php

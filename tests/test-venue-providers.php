@@ -328,6 +328,97 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * OpenStreetMap tags are mapped to the shared categories, with an icon for transport and lodging (#707).
+	 */
+	public function test_osm_category() {
+		$cases = array(
+			array( 'amenity', 'cafe', 'food', '' ),
+			array( 'amenity', 'pub', 'drink', '' ),
+			array( 'tourism', 'hotel', 'lodging', 'fa-suitcase' ),
+			array( 'tourism', 'attraction', 'culture', '' ),
+			array( 'leisure', 'park', 'outdoors', '' ),
+			array( 'leisure', 'stadium', 'sport', '' ),
+			array( 'shop', 'books', 'shop', '' ),
+			array( 'office', 'company', 'office', '' ),
+			array( 'historic', 'castle', 'culture', '' ),
+			array( 'aeroway', 'aerodrome', 'transport', 'fa-plane' ),
+			array( 'railway', 'station', 'transport', 'fa-train' ),
+			array( 'amenity', 'townhall', 'government', '' ),
+			array( 'AMENITY', 'Place_Of_Worship', 'worship', '' ),
+			array( 'building', 'yes', 'other', '' ),
+			array( '', '', 'other', '' ),
+		);
+		foreach ( $cases as $case ) {
+			$this->assertSame(
+				array(
+					'category' => $case[2],
+					'icon'     => $case[3],
+				),
+				Venue_Provider::osm_category( $case[0], $case[1] ),
+				$case[0] . '=' . $case[1]
+			);
+		}
+		$this->assertContains( 'other', array_keys( Venue_Provider::categories() ) );
+	}
+
+	/**
+	 * Google types are mapped from the most specific, and any kind of store is a shop (#707).
+	 */
+	public function test_google_category() {
+		$this->assertSame( 'government', Venue_Provider_Google::google_category( array( 'city_hall', 'tourist_attraction', 'point_of_interest' ) )['category'] );
+		$this->assertSame( 'fa-train', Venue_Provider_Google::google_category( array( 'train_station', 'transit_station' ) )['icon'] );
+		$this->assertSame( 'shop', Venue_Provider_Google::google_category( array( 'book_store', 'store' ) )['category'] );
+		$this->assertSame( 'other', Venue_Provider_Google::google_category( array( 'point_of_interest', 'establishment' ) )['category'] );
+		$this->assertSame( 'other', Venue_Provider_Google::google_category( array() )['category'] );
+	}
+
+	/**
+	 * Every provider's venues have their shared category, and their own categories as before; a filter can change
+	 * them (#707).
+	 */
+	public function test_venue_categories() {
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => $this->fixture( 'venue/locationiq-nearby.json' ) ) ) );
+		$items = $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->reverse_lookup()['items'];
+		$this->assertSame( array( 'culture', 'outdoors' ), wp_list_pluck( $items, 'venue-category' ) );
+		$this->assertSame( array( 'attraction', 'park' ), wp_list_pluck( $items, 'category' ) );
+
+		$this->mock_http( array( 'maps.googleapis.com' => array( 'body' => $this->fixture( 'venue/google-nearbysearch.json' ) ) ) );
+		$items = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup()['items'];
+		$this->assertSame( array( 'government', 'outdoors' ), wp_list_pluck( $items, 'venue-category' ) );
+
+		$this->mock_http( array( 'nominatim.openstreetmap.org/reverse' => array( 'body' => $this->fixture( 'geo/nominatim-reverse.json' ) ) ) );
+		$this->assertSame( 'culture', $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup()['items'][0]['venue-category'] );
+
+		$filter = fn( $match ) => array(
+			'category' => 'food',
+			'icon'     => 'fa-home',
+		);
+		add_filter( 'sloc_venue_category', $filter );
+		$this->mock_http( array( 'nominatim.openstreetmap.org/reverse' => array( 'body' => $this->fixture( 'geo/nominatim-reverse.json' ) ) ) );
+		$card = $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup()['items'][0];
+		remove_filter( 'sloc_venue_category', $filter );
+		$this->assertSame( 'food', $card['venue-category'] );
+		$this->assertSame( 'fa-home', $card['icon'] );
+	}
+
+	/**
+	 * Nominatim's venue has the place's own coordinates, not the search point's (#720).
+	 */
+	public function test_nominatim_venue_coordinates() {
+		$fixture        = $this->fixture( 'geo/nominatim-reverse.json' );
+		$fixture['lat'] = '39.9530';
+		$fixture['lon'] = '-75.1640';
+		$this->mock_http( array( 'nominatim.openstreetmap.org/reverse' => array( 'body' => $fixture ) ) );
+		$provider = $this->provider( 'Venue_Provider_Nominatim' );
+		$provider->set( self::LAT, self::LNG, 12 );
+		$card = $provider->reverse_lookup()['items'][0];
+		$this->assertSame( 39.953, $card['latitude'] );
+		$this->assertSame( -75.164, $card['longitude'] );
+		$this->assertArrayNotHasKey( 'altitude', $card );
+		$this->assertGreaterThan( 0, $provider->nearby()['items'][0]['distance'] ?? 0, 'Not 0 m away.' );
+	}
+
+	/**
 	 * LocationIQ falls back to the address name, then the address type keys, for venues without a name.
 	 */
 	public function test_locationiq_name_fallback() {
