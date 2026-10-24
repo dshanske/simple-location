@@ -71,7 +71,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::venue_providers();
-		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass', 'geoapify', 'here', 'tomtom' ) as $slug ) {
+		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass', 'geoapify', 'here', 'tomtom', 'pelias', 'stadia' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['url'], $slug );
@@ -867,10 +867,10 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	 * Providers of OpenStreetMap places allow keeping the details; the others, only references (#729).
 	 */
 	public function test_storage() {
-		foreach ( array( 'Venue_Provider_Nominatim', 'Venue_Provider_LocationIQ', 'Venue_Provider_Overpass', 'Venue_Provider_Geoapify' ) as $class ) {
+		foreach ( array( 'Venue_Provider_Nominatim', 'Venue_Provider_LocationIQ', 'Venue_Provider_Overpass', 'Venue_Provider_Geoapify', 'Venue_Provider_Pelias' ) as $class ) {
 			$this->assertSame( Venue_Provider::STORAGE_FULL, $this->provider( $class )->storage(), $class );
 		}
-		foreach ( array( 'Venue_Provider_Google', 'Venue_Provider_HERE', 'Venue_Provider_TomTom' ) as $class ) {
+		foreach ( array( 'Venue_Provider_Google', 'Venue_Provider_HERE', 'Venue_Provider_TomTom', 'Venue_Provider_Stadia' ) as $class ) {
 			$this->assertSame( Venue_Provider::STORAGE_REFERENCE, $this->provider( $class )->storage(), $class );
 		}
 	}
@@ -953,6 +953,109 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		$google->nearby();
 		$google->nearby();
 		$this->assertCount( 3, $this->http_requests, 'Cached once filtered.' );
+	}
+
+	/**
+	 * A Pelias server's venue layer is searched within the radius, in kilometers; its places become venues with
+	 * their OpenStreetMap or Foursquare page as identifier, and their details are kept (#713).
+	 */
+	public function test_pelias() {
+		update_option( 'sloc_pelias_url', 'https://pelias.example.com/v1' );
+		$fixture = $this->fixture( 'venue/pelias-reverse.json' );
+		$this->mock_http( array( 'pelias.example.com/v1/reverse' => array( 'body' => $fixture ) ) );
+		$provider = $this->provider( 'Venue_Provider_Pelias', array( 'api' => '' ) );
+		$items    = $provider->reverse_lookup()['items'];
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://pelias.example.com/v1/reverse', $request['base'] );
+		$this->assertSame( 'venue', $request['query']['layers'] );
+		$this->assertSame( '0.25', $request['query']['boundary_circle_radius'] ?? $request['query']['boundary.circle.radius'] ?? null );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_LIMIT, $request['query']['size'] );
+		$this->assertSame( 'en', $request['query']['lang'] );
+		$this->assertStringNotContainsString( 'api_key', $request['url'], 'No key unless one is set.' );
+
+		$this->assertSame( array( 'Philadelphia City Hall', 'Rival Bros Coffee', 'Suburban Station' ), wp_list_pluck( $items, 'name' ), 'Places without a name are left out.' );
+		$this->assertPhiladelphia( $items[0] );
+		$this->assertEasternTime( $items[0] );
+		$this->assertSame( '1400 John F. Kennedy Boulevard', $items[0]['street-address'] );
+		$this->assertSame( 'Center City', $items[0]['extended-address'] );
+		$this->assertSame( 'https://www.phila.gov/', $items[0]['url'] );
+		$this->assertSame( 39.9527, $items[0]['latitude'] );
+		$this->assertSame( -75.1635, $items[0]['longitude'] );
+		$this->assertSame(
+			array( 'https://www.openstreetmap.org/way/31414402', 'https://foursquare.com/v/4b0a1f7cf964a520a52123e3', 'whosonfirst:venue:102087579' ),
+			wp_list_pluck( $items, 'uid' )
+		);
+		$this->assertSame( array( 'government', 'food', 'transport' ), wp_list_pluck( $items, 'venue-category' ) );
+		$this->assertSame( 'fa-train', $items[2]['icon'] );
+		$this->assertSame( Venue_Provider::STORAGE_FULL, $provider->storage() );
+		$this->assertSame( Venue_Provider::CACHE_TIME, $provider->cache_time() );
+
+		$this->provider( 'Venue_Provider_Pelias', array( 'api' => 'KEY' ) )->reverse_lookup();
+		$this->assertSame( 'KEY', $this->last_request()['query']['api_key'] );
+
+		// The server and key settings are the Pelias geocoder's.
+		Venue_Provider_Pelias::init();
+		$this->assertArrayHasKey( 'sloc_pelias_url', get_registered_settings() );
+		$this->assertArrayHasKey( 'sloc_pelias_api', get_registered_settings() );
+		Venue_Provider_Stadia::init();
+		$this->assertArrayHasKey( 'sloc_stadia_api', get_registered_settings() );
+	}
+
+	/**
+	 * Pelias needs a server, and passes on its errors (#713).
+	 */
+	public function test_pelias_errors() {
+		delete_option( 'sloc_pelias_url' );
+		$this->assertSame( 'missing_pelias_url', $this->provider( 'Venue_Provider_Pelias' )->reverse_lookup()->get_error_code() );
+		update_option( 'sloc_pelias_url', 'not a url' );
+		$this->assertSame( 'missing_pelias_url', $this->provider( 'Venue_Provider_Pelias' )->reverse_lookup()->get_error_code() );
+
+		update_option( 'sloc_pelias_url', 'https://pelias.example.com/v1' );
+		$this->mock_http( array( 'pelias.example.com' => array( 'body' => array( 'geocoding' => array( 'errors' => array( 'Invalid layer' ) ) ) ) ) );
+		$error = $this->provider( 'Venue_Provider_Pelias' )->reverse_lookup();
+		$this->assertSame( 'pelias_error', $error->get_error_code() );
+		$this->assertSame( 'Invalid layer', $error->get_error_message() );
+
+		$this->mock_http( array( 'pelias.example.com' => array( 'body' => array( 'features' => array() ) ) ) );
+		$this->assertSame( array( 'items' => array() ), $this->provider( 'Venue_Provider_Pelias' )->reverse_lookup() );
+	}
+
+	/**
+	 * Pelias categories are mapped to the shared categories, the most specific first (#713).
+	 */
+	public function test_pelias_category() {
+		$this->assertSame(
+			array(
+				'category' => 'transport',
+				'icon'     => 'fa-plane',
+			),
+			Venue_Provider_Pelias::pelias_category( array( 'transport', 'transport:air:aerodrome' ) )
+		);
+		$this->assertSame( 'drink', Venue_Provider_Pelias::pelias_category( array( 'nightlife' ) )['category'] );
+		$this->assertSame( 'lodging', Venue_Provider_Pelias::pelias_category( array( 'accommodation' ) )['category'] );
+		$this->assertSame( 'other', Venue_Provider_Pelias::pelias_category( array( 'industry', 5 ) )['category'] );
+	}
+
+	/**
+	 * Stadia Maps is a Pelias server, with its own key; only references are kept, so it isn't cached (#713).
+	 */
+	public function test_stadia() {
+		update_option( 'sloc_stadia_api', 'STADIA' );
+		update_option( 'sloc_pelias_api', 'PELIAS' );
+		$this->mock_http( array( 'api.stadiamaps.com/geocoding/v1/reverse' => array( 'body' => $this->fixture( 'venue/pelias-reverse.json' ) ) ) );
+		$provider = $this->provider( 'Venue_Provider_Stadia' );
+		$this->assertSame( 'stadia', $provider->get_slug() );
+		$this->assertSame( 'Stadia Maps', $provider->get_name() );
+		$items = $provider->nearby()['items'];
+		$this->assertSame( 'STADIA', $this->last_request()['query']['api_key'] );
+		$this->assertSame( 'venue', $this->last_request()['query']['layers'] );
+		$this->assertSame( 'stadia', $items[0]['provider'] );
+		$this->assertSame( 'https://www.openstreetmap.org/way/31414402', $items[0]['uid'] );
+		$this->assertSame( Venue_Provider::STORAGE_REFERENCE, $provider->storage() );
+		$this->assertSame( 0, $provider->cache_time() );
+
+		$this->assertSame( 'missing_api_key', $this->provider( 'Venue_Provider_Stadia', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
 	}
 
 	/**
