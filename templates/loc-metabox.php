@@ -177,7 +177,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 
 		<label for="altitude" class="quarter">
 			<?php esc_html_e( 'Altitude:', 'simple-location' ); ?>
-			<input class="widefat" type="number" name="altitude" id="altitude" step="0.01" value="<?php echo esc_attr( $geodata['altitude'] ?? '' ); ?>" />
+			<input class="widefat" type="number" name="altitude" id="altitude" step="0.01" value="<?php echo esc_attr( sloc_round_value( $geodata['altitude'] ?? '', 2 ) ); ?>" />
 		</label>
 
 		<p class="field-row">

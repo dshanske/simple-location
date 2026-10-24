@@ -126,6 +126,69 @@ class TemplatesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Asserts that each number field's value fits its step, as the browser requires to save the form.
+	 *
+	 * @param string $html Form.
+	 */
+	protected function assertValuesFitSteps( $html ) {
+		preg_match_all( '/<input[^>]*type="number"[^>]*>/', $html, $inputs );
+		$this->assertNotEmpty( $inputs[0] );
+		foreach ( $inputs[0] as $input ) {
+			preg_match( '/value="([^"]*)"/', $input, $value );
+			preg_match( '/step="([^"]*)"/', $input, $step );
+			preg_match( '/name="([^"]*)"/', $input, $name );
+			if ( empty( $value[1] ) ) {
+				continue;
+			}
+			$step     = (float) ( $step[1] ?? 1 );
+			$multiple = (float) $value[1] / $step;
+			$this->assertEqualsWithDelta( round( $multiple ), $multiple, 1e-6, $name[1] . ' = ' . $value[1] . ' fits step ' . $step );
+		}
+	}
+
+	/**
+	 * Weather and altitude are shown rounded to what their fields allow, so the post can be saved (#741).
+	 */
+	public function test_metabox_values_fit_their_fields() {
+		update_option( 'sloc_measurements', 'metric' );
+		$post_id = self::factory()->post->create();
+		set_post_weatherdata(
+			$post_id,
+			'',
+			array(
+				'temperature' => 12.34567,
+				'humidity'    => 55.555,
+				'winddegree'  => 247.567,
+				'windspeed'   => 3.14159,
+				'pressure'    => 1013.256,
+				'visibility'  => 9.87654,
+				'cloudiness'  => 33.3333,
+				'rain'        => 0.12345,
+				'snow'        => 1.005,
+			)
+		);
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'  => 39.9524,
+				'longitude' => -75.1636,
+				'altitude'  => 12.3456,
+			)
+		);
+		$this->edit_post( $post_id );
+		$weather = $this->render( 'weather-metabox.php' );
+		$this->assertValuesFitSteps( $weather );
+		$this->assertStringContainsString( 'value="247.57"', $weather );
+		$this->assertStringContainsString( 'value="33.33"', $weather );
+		$this->assertStringContainsString( 'value="12.35"', $weather );
+
+		$location = $this->render( 'loc-metabox.php' );
+		$this->assertValuesFitSteps( $location );
+		$this->assertStringContainsString( 'value="12.35"', $location );
+	}
+
+	/**
 	 * The weather metabox shows the comment's weather on the comment screen.
 	 */
 	public function test_weather_metabox_comment() {

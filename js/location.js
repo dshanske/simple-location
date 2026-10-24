@@ -1,6 +1,17 @@
 jQuery( document ).ready( function( $ ) {
 	const DateTime = luxon.DateTime;
 	let weather = 1;
+
+	/**
+	 * Rounds a looked-up number to the two decimal places the editor's number fields allow (#741).
+	 *
+	 * @param {*} value Value from a lookup.
+	 * @return {*} The number, rounded, or the value unchanged if it isn't a number.
+	 */
+	function fieldValue( value ) {
+		const number = parseFloat( value );
+		return isNaN( number ) ? value : Math.round( number * 100 ) / 100;
+	}
 	const originalDate = DateTime.fromObject(
 		{
 			year: $( '#hidden_aa' ).val(),
@@ -209,7 +220,7 @@ jQuery( document ).ready( function( $ ) {
 						$( '#hide-map' ).html( response.map_return );
 					}
 					if ( 'altitude' in response && ( '' === $( '#altitude' ).val() ) ) {
-						$( '#altitude' ).val( response.altitude );
+						$( '#altitude' ).val( fieldValue( response.altitude ) );
 					}
 
 					if ( 'venue_id' in response && ( '' === $( '#venue_id' ).val() ) ) {
@@ -236,35 +247,35 @@ jQuery( document ).ready( function( $ ) {
 					if ( 'weather' in response ) {
 						weather = response.weather;
 						if ( ( 'temperature' in weather ) && ( '' === $( '#temperature' ).val() ) ) {
-							$( '#temperature' ).val( weather.temperature );
+							$( '#temperature' ).val( fieldValue( weather.temperature ) );
 						}
 						if ( ( 'humidity' in weather ) && ( '' === $( '#humidity' ).val() ) ) {
-							$( '#humidity' ).val( weather.humidity );
+							$( '#humidity' ).val( fieldValue( weather.humidity ) );
 						}
 						if ( ( 'code' in weather ) && ( 'none' === $( '#weather_code' ).val() ) ) {
 							$( '#weather_code' ).val( weather.code ).change();
 							$( '#weather-label' ).text( weather.summary );
 						}
 						if ( ( 'pressure' in weather ) && ( '' === $( '#pressure' ).val() ) ) {
-							$( '#pressure' ).val( weather.pressure );
+							$( '#pressure' ).val( fieldValue( weather.pressure ) );
 						}
 						if ( ( 'cloudiness' in weather ) && ( '' === $( '#cloudiness' ).val() ) ) {
-							$( '#cloudiness' ).val( weather.cloudiness );
+							$( '#cloudiness' ).val( fieldValue( weather.cloudiness ) );
 						}
 						if ( ( 'rain' in weather ) && ( '' === $( '#rain' ).val() ) ) {
-							$( '#rain' ).val( weather.rain );
+							$( '#rain' ).val( fieldValue( weather.rain ) );
 						}
 						if ( ( 'snow' in weather ) && ( '' === $( '#snow' ).val() ) ) {
-							$( '#snow' ).val( weather.snow );
+							$( '#snow' ).val( fieldValue( weather.snow ) );
 						}
 						if ( ( 'visibility' in weather ) && ( '' === $( '#weather_visibility' ).val() ) ) {
-							$( '#weather_visibility' ).val( weather.visibility );
+							$( '#weather_visibility' ).val( fieldValue( weather.visibility ) );
 						}
 						if ( 'windspeed' in weather && ( '' === $( '#windspeed' ).val() ) ) {
-							$( '#windspeed' ).val( weather.windspeed );
+							$( '#windspeed' ).val( fieldValue( weather.windspeed ) );
 						}
 						if ( 'winddegree' in weather && ( '' === $( '#winddegree' ).val() ) ) {
-							$( '#winddegree' ).val( weather.winddegree );
+							$( '#winddegree' ).val( fieldValue( weather.winddegree ) );
 						}
 						if ( 'units' in weather ) {
 							$( '#units' ).val( weather.units );

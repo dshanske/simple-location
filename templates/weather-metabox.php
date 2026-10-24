@@ -66,7 +66,7 @@ if ( $imperial ) {
 			<label for="winddegree">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'winddegree', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" max="360" name="winddegree" id="winddegree" value="<?php echo esc_attr( $weather['winddegree'] ?? '' ); ?>" />
+			<input class="widefat" type="number" min="0" max="360" name="winddegree" id="winddegree" step="0.01" value="<?php echo esc_attr( sloc_round_value( $weather['winddegree'] ?? '', 2 ) ); ?>" />
 		</p>
 
 		<p class="field-row">
@@ -94,7 +94,7 @@ if ( $imperial ) {
 			<label for="cloudiness">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'cloudiness', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" max="100" name="cloudiness" id="cloudiness" value="<?php echo esc_attr( $weather['cloudiness'] ?? '' ); ?>" />
+			<input class="widefat" type="number" min="0" max="100" name="cloudiness" id="cloudiness" step="0.01" value="<?php echo esc_attr( sloc_round_value( $weather['cloudiness'] ?? '', 2 ) ); ?>" />
 		</p>
 
 		<p class="field-row">
