@@ -213,6 +213,8 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'KEY', $request['query']['key'] );
 		$this->assertEquals( self::LAT, $request['query']['lat'] );
 		$this->assertEquals( self::LNG, $request['query']['lon'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_RADIUS, $request['query']['radius'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_LIMIT, $request['query']['limit'] );
 
 		$this->assertCount( count( $fixture ), $result['items'] );
 		foreach ( $fixture as $i => $item ) {
@@ -227,6 +229,102 @@ class VenueProvidersTest extends WP_UnitTestCase {
 			$this->assertSame( (float) $item['lon'], $card['longitude'] );
 			$this->assertSame( $item['name'], $card['name'] );
 		}
+	}
+
+	/**
+	 * The radius and limit come from the settings, or the constructor, within bounds (#706).
+	 */
+	public function test_radius_and_limit() {
+		$provider = $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) );
+		$this->assertSame( Venue_Provider::DEFAULT_RADIUS, $provider->get_radius() );
+		$this->assertSame( Venue_Provider::DEFAULT_LIMIT, $provider->get_limit() );
+
+		update_option( 'sloc_venue_radius', 500 );
+		update_option( 'sloc_venue_limit', 3 );
+		$provider = $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) );
+		$this->assertSame( 500, $provider->get_radius() );
+		$this->assertSame( 3, $provider->get_limit() );
+		$this->assertSame( 100, $this->provider( 'Venue_Provider_LocationIQ', array( 'radius' => 100 ) )->get_radius() );
+
+		$this->assertSame( Venue_Provider::MIN_RADIUS, Venue_Provider::sanitize_radius( 1 ) );
+		$this->assertSame( Venue_Provider::MAX_RADIUS, Venue_Provider::sanitize_radius( 999999 ) );
+		$this->assertSame( Venue_Provider::DEFAULT_RADIUS, Venue_Provider::sanitize_radius( 'far' ) );
+		$this->assertSame( 1, Venue_Provider::sanitize_limit( -4 ) );
+		$this->assertSame( Venue_Provider::MAX_LIMIT, Venue_Provider::sanitize_limit( 500 ) );
+		$this->assertSame( Venue_Provider::DEFAULT_LIMIT, Venue_Provider::sanitize_limit( null ) );
+		$this->assertSame( 300, sanitize_option( 'sloc_venue_radius', '300' ), 'Saved through the settings.' );
+		delete_option( 'sloc_venue_radius' );
+		delete_option( 'sloc_venue_limit' );
+	}
+
+	/**
+	 * Venues are sorted nearest first with their distance, those beyond the radius are dropped, and the list is
+	 * limited; venues without coordinates come last (#706).
+	 */
+	public function test_sort_items() {
+		$items = array(
+			array(
+				'name'      => 'Far',
+				'latitude'  => self::LAT + 0.01,
+				'longitude' => self::LNG,
+			),
+			array( 'name' => 'Nowhere' ),
+			array(
+				'name'      => 'Middle',
+				'latitude'  => self::LAT + 0.001,
+				'longitude' => self::LNG,
+			),
+			array(
+				'name'      => 'Here',
+				'latitude'  => self::LAT,
+				'longitude' => self::LNG,
+			),
+			'not a venue',
+			array(),
+		);
+		$sorted = Venue_Provider::sort_items( $items, self::LAT, self::LNG, 250 );
+		$this->assertSame( array( 'Here', 'Middle', 'Nowhere' ), wp_list_pluck( $sorted, 'name' ) );
+		$this->assertSame( 0, $sorted[0]['distance'] );
+		$this->assertEqualsWithDelta( 111, $sorted[1]['distance'], 1 );
+		$this->assertArrayNotHasKey( 'distance', $sorted[2] );
+
+		$this->assertSame( array( 'Here', 'Middle', 'Far', 'Nowhere' ), wp_list_pluck( Venue_Provider::sort_items( $items, self::LAT, self::LNG ), 'name' ), 'Any distance.' );
+		$this->assertSame( array( 'Here' ), wp_list_pluck( Venue_Provider::sort_items( $items, self::LAT, self::LNG, 0, 1 ), 'name' ), 'Limited.' );
+	}
+
+	/**
+	 * nearby() returns the provider's venues sorted, limited and with distances; errors are passed on (#706).
+	 */
+	public function test_nearby() {
+		$fixture = $this->fixture( 'venue/locationiq-nearby.json' );
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => array_reverse( $fixture ) ) ) );
+		$result = $this->provider(
+			'Venue_Provider_LocationIQ',
+			array(
+				'api'    => 'KEY',
+				'radius' => Venue_Provider::MAX_RADIUS,
+			)
+		)->nearby();
+		$distances = wp_list_pluck( $result['items'], 'distance' );
+		$this->assertCount( count( $fixture ), $distances );
+		$sorted = $distances;
+		sort( $sorted );
+		$this->assertSame( $sorted, $distances, 'Nearest first.' );
+
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => $fixture ) ) );
+		$this->assertCount(
+			1,
+			$this->provider(
+				'Venue_Provider_LocationIQ',
+				array(
+					'api'   => 'KEY',
+					'limit' => 1,
+				)
+			)->nearby()['items']
+		);
+
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => new WP_Error( 'http_request_failed', 'Down' ) ) );
+		$this->assertWPError( $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->nearby() );
 	}
 
 	/**
@@ -275,7 +373,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 
 		$request = $this->last_request();
 		$this->assertSame( '39.9524,-75.1636', $request['query']['location'] );
-		$this->assertSame( '200', $request['query']['radius'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_RADIUS, $request['query']['radius'], 'The venue search radius (#706).' );
 		$this->assertSame( 'establishment', $request['query']['type'] );
 		$this->assertSame( 'KEY', $request['query']['key'] );
 

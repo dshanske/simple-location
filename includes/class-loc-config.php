@@ -297,6 +297,30 @@ class Loc_Config {
 
 		register_setting(
 			'sloc_providers', // option group.
+			'sloc_venue_radius', // option name.
+			array(
+				'type'              => 'integer',
+				'description'       => 'Venue Search Radius in Meters',
+				'show_in_rest'      => false,
+				'default'           => Venue_Provider::DEFAULT_RADIUS,
+				'sanitize_callback' => array( 'Venue_Provider', 'sanitize_radius' ),
+			)
+		);
+
+		register_setting(
+			'sloc_providers', // option group.
+			'sloc_venue_limit', // option name.
+			array(
+				'type'              => 'integer',
+				'description'       => 'Most Venues Found in a Search',
+				'show_in_rest'      => false,
+				'default'           => Venue_Provider::DEFAULT_LIMIT,
+				'sanitize_callback' => array( 'Venue_Provider', 'sanitize_limit' ),
+			)
+		);
+
+		register_setting(
+			'sloc_providers', // option group.
 			'sloc_weather_provider', // option name.
 			array(
 				'type'         => 'string',
@@ -880,6 +904,30 @@ class Loc_Config {
 			)
 		);
 		add_settings_field(
+			'sloc_venue_radius', // id.
+			__( 'Venue Search Radius', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'number_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
+			array(
+				'label_for'   => 'sloc_venue_radius',
+				/* translators: 1: Smallest radius in meters. 2: Largest radius in meters. */
+				'description' => sprintf( __( 'In meters, from %1$d to %2$d. Venues are listed nearest first.', 'simple-location' ), Venue_Provider::MIN_RADIUS, Venue_Provider::MAX_RADIUS ),
+			)
+		);
+		add_settings_field(
+			'sloc_venue_limit', // id.
+			__( 'Most Venues Found', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'number_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
+			array(
+				'label_for'   => 'sloc_venue_limit',
+				/* translators: %d: Largest number of venues. */
+				'description' => sprintf( __( 'Up to %d.', 'simple-location' ), Venue_Provider::MAX_LIMIT ),
+			)
+		);
+		add_settings_field(
 			'sloc_elevation_provider', // id.
 			__( 'Elevation Provider', 'simple-location' ), // setting title.
 			array( 'Loc_Config', 'provider_callback' ), // display callback.
@@ -1225,14 +1273,19 @@ class Loc_Config {
 	 *
 	 * @param array $args {
 	 *  Arguments for a numberic input.
-	 *  @type string $label_for Label for a Number.
+	 *  @type string $label_for   Label for a Number.
+	 *  @type string $description Description shown below the input. Optional.
 	 * }
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.0 Shows the description, if any.
 	 */
 	public static function number_callback( array $args ) {
 		$name = $args['label_for'];
 		printf( '<input name="%1$s" type="number" min="0" step="1" size="4" class="small-text" value="%2$s" />', esc_attr( $name ), esc_attr( get_option( $name ) ) );
+		if ( ! empty( $args['description'] ) ) {
+			printf( '<p class="description">%1$s</p>', esc_html( $args['description'] ) );
+		}
 	}
 
 	/**

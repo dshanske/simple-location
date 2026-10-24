@@ -469,7 +469,7 @@ class Location_Plugins {
 		$venue = Loc_Config::venue_provider();
 		if ( is_object( $venue ) ) {
 			$venue->set( $lat, $lon );
-			$venues = $venue->reverse_lookup();
+			$venues = $venue->nearby();
 		}
 
 		// Use the site default, but at a private venue show the place without the coordinates (see Geo_Data::get_attachment_visibility()).
