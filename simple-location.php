@@ -62,10 +62,13 @@ class Simple_Location_Plugin {
 	 * Triggered on Plugin Activation to add rewrite rules.
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.0 Adds the GeoJSON feed's rules.
 	 */
 	public static function activate() {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-geo-base.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-sloc-geojson.php';
 		Geo_Base::rewrite();
+		add_feed( Sloc_GeoJSON::FEED, array( 'Sloc_GeoJSON', 'feed' ) );
 		flush_rewrite_rules();
 	}
 
@@ -264,6 +267,7 @@ class Simple_Location_Plugin {
 			'class-rest-geo.php', // REST endpoint for Geo.
 			'class-sloc-provider-chain.php', // Providers tried in order.
 			'class-sloc-plus-code.php', // Plus Codes.
+			'class-sloc-geojson.php', // GeoJSON feeds.
 			'class-sloc-provider-errors.php', // Provider errors for administrators.
 			'class-loc-config.php', // Configuration and Settings Page.
 			'class-sloc-track-tool.php', // Tools > Location Track.
@@ -362,6 +366,7 @@ class Simple_Location_Plugin {
 		// Load Geo Providers.
 		$providers = array(
 			'class-geo-provider-nominatim.php', // Nominatim.
+			'class-geo-provider-photon.php', // Photon.
 			'class-geo-provider-pelias.php', // Pelias.
 			'class-geo-provider-mapquest.php', // MapQuest.
 			'class-geo-provider-google.php', // Google.

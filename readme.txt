@@ -111,12 +111,12 @@ In order to access private location information, the following custom capabiliti
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
 * Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, TomTom, and Stadia Maps.
-* Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, which can use the public OpenStreetMap server, your own server or another host, HERE, MapQuest, Google, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses
+* Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, which can use the public OpenStreetMap server, your own server or another host, Photon, HERE, MapQuest, Google, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses. Photon needs no key, and you can use komoot's public server or run your own
 * Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues. Providers include Google, HERE, LocationIQ, Geoapify, Nominatim and OpenStreetMap Overpass, which needs no key.
 * Elevation Providers optionally derive the elevation from an API when not available. Elevation is used to estimate altitude and adjust estimated sunrise/sunset levels accordingly. Providers include GeoNames, Google, OpenRoute and Open Topo Data, whose public API needs no key and which you can also host yourself.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
 location of a three letter airport code, and three self-hosted location history services: [Compass](https://github.com/aaronpk/Compass), [Dawarich](https://dawarich.app/) and [GeoPulse](https://github.com/tess1o/geopulse).
-* Weather Providers retrieve weather data about your location and include OpenWeatherMap, Pirate Weather, Dark Sky, Weatherstack, WeatherBit, HERE, Open-Meteo, MET Norway and the US National Weather Service. Open-Meteo needs no key for non-commercial use, has historical weather, and can be self-hosted. MET Norway needs no key and covers the whole world. HERE, Pirate Weather, Dark Sky, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs that must return the properties as they are stored in WordPress.
+* Weather Providers retrieve weather data about your location and include OpenWeatherMap, Pirate Weather, Weatherstack, WeatherBit, HERE, Open-Meteo, MET Norway and the US National Weather Service. Open-Meteo needs no key for non-commercial use, has historical weather, and can be self-hosted. MET Norway needs no key and covers the whole world. HERE, Pirate Weather, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs that must return the properties as they are stored in WordPress.
 ** The National Weather Service(US) uses their station lookup API to find the closest weather station, and uses weather from there. Therefore, if this returns no options, if you are outside the US, it will return no weather.
 ** For weather services like the NWS and your own stations, where coverage is not worldwide, up to two fallback weather providers can be set. They are tried in order when a provider has no weather. See the FAQ.
 
@@ -124,35 +124,33 @@ location of a three letter airport code, and three self-hosted location history 
 
 = What are the requirements to use this plugin? =
 
-API Keys are required to use certain services.
-* [Google](https://developers.google.com/maps/documentation/javascript/get-api-key)
-* [Mapbox](https://www.mapbox.com/help/create-api-access-token/) - To list your own styles in the settings, you need a secret token with the styles:list scope, plus a public token for the maps (see "How do I protect my map API keys?")
-* [OpenWeatherMap](http://openweathermap.com/api)
-* [MapQuest](https://developer.mapquest.com/)
-* [HERE](https://developer.here.com/)
-* [Compass](https://github.com/aaronpk/Compass)
-* [Weatherstack](https://weatherstack.com)
-* [Weatherbit](https://www.weatherbit.io/api/weather-current)
-* [GeoNames](https://www.geonames.org) - requires a username
-* [LocationIQ](https://locationiq.com/)
-* [OpenRoute Service](https://openrouteservice.org/)
-* [GeoApify](https://geoapify.com)
-* [Visual Crossing](https://www.visualcrossing.com/)
-* [Meteostat](https://meteostat.net/)
-* [Pirate Weather](https://pirateweather.net)
-* [TomTom](https://developer.tomtom.com/)
-* [Stadia Maps](https://stadiamaps.com/) - static maps need a paid plan
-* [AerisWeather](https://aerisweather.com/) - Individuals who share their personal weather station data with PWSWeather.com are offered a free contributor account.
+Nothing else is needed to save locations. Looking up addresses, drawing maps, and adding weather and elevation use outside services, chosen under Settings > Simple Location > Providers (IndieWeb > Location when the IndieWeb plugin is installed). Some need no key: Nominatim for addresses, Open-Meteo, MET Norway and the US National Weather Service for weather, Open Topo Data for elevation, and your own weather stations. The others need an account, and an API key entered on the API Keys tab, where each service has its own section. See "How do I set up each service?"
 
-At this time, all map services require an API key, but most permit limited non-commercial use.
-Nominatim does not require an API key, but it does ask for an email address, which will be the admin email of the site
-If not provided there will be no map displayed regardless of setting, reverse geo lookup will not work
-Without a weather provider this service will not work.
+Without a map provider, no maps are shown. Without a geocoding provider, addresses aren't looked up. Without a weather provider, weather isn't added.
 
-API Keys may have free limits, or may incur fees if overused. This plugin only uses a request when you post, which is usually well within the free tier which is usually thousands of requests. In all cases, you must comply
-with the provider's terms of use.
+Most services have a free allowance and charge, or stop, beyond it. The plugin only asks a service when you look up a location or publish a post, which usually stays well within it. You must follow each provider's terms. If a key stops working, or a quota runs out, administrators are told; see "How do I know when a provider stops working?"
 
-The appropriate API keys should be entered in Settings->Simple Location or will move to Indieweb->Location if the Indieweb plugin if installed.
+= How do I set up each service? =
+
+Sign up with the service, create an API key, and enter it in the service's section of the API Keys tab. Notes for each:
+
+* [Google Maps Platform](https://developers.google.com/maps/get-started) - needs a billing account, and gives each API a monthly free allowance. In the Google Cloud console, enable the APIs for what you use Google for: the Maps Static API for maps, the Geocoding API for addresses, the Elevation API for elevation, and the Places API (New) for venues. Restrict the key to those APIs. For maps, see also "How do I protect my map API keys?"
+* [Mapbox](https://account.mapbox.com/access-tokens/) - a public token (starting pk.) draws the maps. To list your own styles in the settings, enter a secret token with the styles:list scope as the Mapbox API Key, your username, and the public token as the Mapbox Map API Key; the secret token is never shown on your site.
+* [HERE](https://platform.here.com/) - one API key for maps, addresses and weather.
+* [LocationIQ](https://locationiq.com/) - one API key for maps, addresses and venues.
+* [MapQuest](https://developer.mapquest.com/) - one API key for maps and addresses.
+* [Geoapify](https://www.geoapify.com/) - one API key for maps and addresses.
+* [TomTom](https://developer.tomtom.com/) - maps.
+* [Stadia Maps](https://stadiamaps.com/) - static maps need a paid plan.
+* [OpenRouteService](https://openrouteservice.org/) - one API key for addresses and elevation.
+* [GeoNames](https://www.geonames.org/login) - addresses and elevation, with your username instead of a key. After signing up, enable the free web services on your GeoNames account page, or every lookup is refused.
+* [Pelias](https://pelias.io/) - addresses from a Pelias server: enter its URL, and its API key if it needs one.
+* [OpenWeatherMap](https://openweathermap.org/api/one-call-3) - the plugin uses One Call API 3.0, which needs its own "One Call by Call" subscription, with a payment card, even for the free daily calls. A key without it is refused.
+* [Weatherbit](https://www.weatherbit.io/), [Weatherstack](https://weatherstack.com/), [Visual Crossing](https://www.visualcrossing.com/) and [Pirate Weather](https://pirateweather.net/) - an API key each.
+* [Xweather](https://www.xweather.com/) - a client ID and client secret. People who share their personal weather station with PWSWeather.com get a free contributor account. You can choose whether personal weather stations are used.
+* [Meteostat](https://dev.meteostat.net/) - historic weather, with an API key from RapidAPI.
+* Nominatim, Open-Meteo, MET Norway, Open Topo Data and the National Weather Service need no key. Nominatim's public server is for light use only; you can set your own, with the public one as a fallback. Open-Meteo is free for non-commercial use; commercial use needs a key. Open-Meteo and Open Topo Data can also use your own server.
+* The custom map provider, custom station provider and WeeWX use your own servers; see their questions below. Compass, Dawarich and GeoPulse find where you are; see "How do I use Dawarich or GeoPulse?"
 
 = How do I add support for location to a custom post type? =
 
@@ -278,12 +276,46 @@ Geocoding, elevation and venues work the same way, with Fallback Geo Providers, 
 = Can I enter a Plus Code? =
 
 Yes. [Plus Codes](https://maps.google.com/pluscodes/) are the short codes for places that Google Maps shows, such as 87F6XR2P+WH. Enter one in the Plus Code field of the Location box and choose Lookup, and it replaces the location. A short code, such as XR2P+WH, needs the town or city after it, such as XR2P+WH Philadelphia. Plus Codes are decoded on your site; the town is looked up with your geocoding provider.
+= Can I get my locations as GeoJSON? =
+
+Yes. Add geojson to any feed address: /feed/geojson/ for your latest posts, /location/philadelphia/feed/geojson/ for a location's posts, or a post's own feed, such as /2024/07/01/a-post/feed/geojson/, for that post. Without pretty permalinks, add ?feed=geojson instead. Each post with a public location is a point, with its title, link, date and address. Posts whose location isn't public are left out. Pages with a feed link to it, so mapping tools can find it. The sloc_geojson and sloc_geojson_feature filters change what is included.
 
 = How do I know when a provider stops working? =
 
 When a provider fails with an error you can fix, such as a missing or rejected API key, an exhausted quota, or one of your stations that can't be read or has stopped updating, administrators see a notice on the Dashboard and the Simple Location settings, and it is listed in Tools → Site Health. The notice can be dismissed, and the error clears by itself the next time that provider works.
 
 To be notified elsewhere, such as on your phone, hook the `sloc_provider_error` and `sloc_provider_error_resolved` actions, which receive a one-line message.
+
+= How do I show the location in my theme? =
+
+By default, the location, with the weather, is added after each post's content, and the map after the content of single posts, or of every post with "Show Maps on Home and Archive Pages". A comment's location is added after its text.
+
+To place the location yourself, declare support for it in your theme's functions.php. The location is then no longer added to the content:
+
+`add_theme_support( 'simple-location' );`
+
+Then show it in your templates, where you want it:
+
+`if ( function_exists( 'get_post_location' ) ) { echo get_post_location(); }`
+
+get_post_location() returns the location's HTML, already escaped, and nothing for a location that isn't shown. It respects the post's location visibility: a protected location shows its description without coordinates, and a private one shows nothing to visitors. Its second argument changes what is shown, for example `get_post_location( null, array( 'weather' => false ) )` without the weather. The simple_location_display_defaults filter changes the defaults everywhere. Similar functions show the location of comments, users and terms: get_comment_location(), get_user_location() and get_term_location().
+
+get_post_map() returns the map, for a public location. The map is still added to the content with theme support; to place it yourself, remove it after the plugin adds it:
+
+`add_action( 'init', function () { remove_filter( 'the_content', array( 'Geo_Data', 'content_map' ), 11 ); }, 2 );`
+
+The location is wrapped in a div with the class sloc-display, for styling. get_post_geodata() and get_post_weatherdata() return the raw data. Check the 'visibility' they return before showing coordinates.
+
+= How do my profile location and my posts' locations relate? =
+
+Each user has a location in their profile, set under Users > Profile or with the user REST endpoint (see "How can I update the location of my user profile?"). The Last Seen widget shows it, and the weather widget can show the weather there.
+
+Two settings connect it with posts:
+
+* "Update the Author with Posts Location when Saving a Post", on by default: when you publish a new post with a location, within ten minutes of its date, the post's location becomes your profile location, unless the post's location is private. Editing or publishing older posts doesn't change it.
+* The location provider "Set Location from Author Profile": looking up the location in the editor uses your profile location, as do Micropub posts with automatic lookup, and the bulk lookup of posts without one.
+
+With both, a post takes your profile location, and publishing it saves the same location back, so your profile only changes when you edit it, or change a new post's location before publishing. To keep your profile as a fixed default location, such as home, turn the first setting off. With another location provider, such as your browser's location or Compass, the first setting keeps your profile up to date with where you last posted from.
 
 = Is this compatible with the WordPress mobile apps? =
 

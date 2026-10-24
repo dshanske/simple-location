@@ -93,7 +93,7 @@ class ApiSettingsTest extends WP_UnitTestCase {
 		$_GET['tab'] = 'api';
 		Loc_Config::load_api_settings();
 		$settings = get_registered_settings();
-		foreach ( array( 'sloc_weatherbit_api', 'sloc_openweathermap_api', 'sloc_google_api', 'sloc_mapbox_api', 'sloc_here_api', 'sloc_aeris_client_id', 'sloc_staticmap_url' ) as $option ) {
+		foreach ( array( 'sloc_weatherbit_api', 'sloc_openweathermap_api', 'sloc_google_api', 'sloc_mapbox_api', 'sloc_here_api', 'sloc_aeris_client_id', 'sloc_staticmap_url', 'sloc_photon_url' ) as $option ) {
 			$this->assertArrayHasKey( $option, $settings, $option );
 			$this->assertSame( 'sloc_api', $settings[ $option ]['group'], $option );
 		}
