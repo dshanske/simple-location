@@ -258,6 +258,7 @@ class Post_Venue {
 		register_taxonomy( 'venue_type', 'venue', $args );
 
 		add_filter( 'manage_venue_posts_columns', array( __CLASS__, 'remove_date_admin_column' ) );
+		add_filter( 'rest_prepare_venue', array( __CLASS__, 'rest_prepare_venue' ), 10, 2 );
 		add_filter( 'manage_venue_posts_columns', array( 'Geo_Base', 'add_location_admin_column' ) );
 		add_filter( 'manage_venue_posts_columns', array( __CLASS__, 'add_checkins_admin_column' ) );
 		add_action( 'manage_venue_posts_custom_column', array( 'Geo_Base', 'manage_location_admin_column' ), 10, 2 );
@@ -691,6 +692,28 @@ class Post_Venue {
 		}
 
 		return $id;
+	}
+
+	/**
+	 * Leaves a venue's alternate URLs out of REST responses unless its location is public or the user can edit it.
+	 *
+	 * Alternate URLs include map pages, such as an OpenStreetMap or Google Maps link, that give away where a
+	 * private venue is.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param WP_REST_Response $response Response.
+	 * @param WP_Post          $post     Venue.
+	 * @return WP_REST_Response Response.
+	 */
+	public static function rest_prepare_venue( $response, $post ) {
+		$data = $response->get_data();
+		if ( ! isset( $data['meta']['venue_alternate'] ) || current_user_can( 'edit_post', $post->ID ) || 'public' === get_post_geodata( $post->ID, 'visibility' ) ) {
+			return $response;
+		}
+		unset( $data['meta']['venue_alternate'] );
+		$response->set_data( $data );
+		return $response;
 	}
 
 	/**

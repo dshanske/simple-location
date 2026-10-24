@@ -802,6 +802,27 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A venue's alternate URLs, which can be map links, are in REST only when its location is public, or to its
+	 * editors (#729).
+	 */
+	public function test_rest_alternates_follow_visibility() {
+		// The test framework unregisters meta keys after each test, so register again.
+		Post_Venue::register_meta();
+		$venue_id = $this->venue();
+		update_post_meta( $venue_id, 'venue_alternate', array( 'https://www.openstreetmap.org/node/1' ) );
+		$request = new WP_REST_Request( 'GET', '/wp/v2/venue/' . $venue_id );
+		$this->assertSame( array( 'https://www.openstreetmap.org/node/1' ), rest_do_request( $request )->get_data()['meta']['venue_alternate'] );
+
+		set_post_geodata( $venue_id, 'visibility', 'private' );
+		$this->assertArrayNotHasKey( 'venue_alternate', rest_do_request( $request )->get_data()['meta'] );
+		set_post_geodata( $venue_id, 'visibility', 'protected' );
+		$this->assertArrayNotHasKey( 'venue_alternate', rest_do_request( $request )->get_data()['meta'] );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( array( 'https://www.openstreetmap.org/node/1' ), rest_do_request( $request )->get_data()['meta']['venue_alternate'] );
+	}
+
+	/**
 	 * A new venue keeps its website and its pages on other sites apart (#729).
 	 */
 	public function test_add_new_venue_alternates() {
