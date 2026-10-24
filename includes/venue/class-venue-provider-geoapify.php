@@ -89,6 +89,17 @@ class Venue_Provider_Geoapify extends Venue_Provider {
 	}
 
 	/**
+	 * Returns what a site may keep of this provider's places: the details, which Geoapify's terms allow storing, with credit to OpenStreetMap.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Venue_Provider::STORAGE_FULL.
+	 */
+	public function storage() {
+		return self::STORAGE_FULL;
+	}
+
+	/**
 	 * Returns the places near the location.
 	 *
 	 * @since 6.1.0

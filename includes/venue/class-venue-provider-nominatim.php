@@ -39,6 +39,17 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 	}
 
 	/**
+	 * Returns what a site may keep of this provider's places: the details, as OpenStreetMap's license allows with credit.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Venue_Provider::STORAGE_FULL.
+	 */
+	public function storage() {
+		return self::STORAGE_FULL;
+	}
+
+	/**
 	 * Return an address.
 	 *
 	 * @since 6.0.0 An error response is an error, or an empty list when there is nothing at the point.

@@ -56,6 +56,22 @@ abstract class Venue_Provider extends Sloc_Provider {
 	const MAX_LIMIT = 50;
 
 	/**
+	 * Storage level of a provider whose places may be stored, such as OpenStreetMap's, with credit.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const STORAGE_FULL = 'full';
+
+	/**
+	 * Storage level of a provider whose terms allow storing only a place's identifier and links.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const STORAGE_REFERENCE = 'reference';
+
+	/**
 	 * Search radius in meters.
 	 *
 	 * @since 6.1.0
@@ -193,6 +209,20 @@ abstract class Venue_Provider extends Sloc_Provider {
 			$title    = trim( $parts[1] );
 		}
 		return 'https://' . $language . '.wikipedia.org/wiki/' . rawurlencode( str_replace( ' ', '_', $title ) );
+	}
+
+	/**
+	 * Returns what a site may keep of this provider's places, as the maintainers read the provider's terms.
+	 *
+	 * With STORAGE_REFERENCE, a venue keeps only the place's name as the user chose it, its coordinates, its
+	 * identifier and links; its address comes from the site's geocoder. With STORAGE_FULL, it keeps the details.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string STORAGE_FULL or STORAGE_REFERENCE. Default STORAGE_REFERENCE.
+	 */
+	public function storage() {
+		return self::STORAGE_REFERENCE;
 	}
 
 	/**

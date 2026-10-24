@@ -19,7 +19,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-venue-provider.php:136](https://github.com/dshanske/simple-location/blob/trunk/includes/class-venue-provider.php#L136)
+- [includes/class-venue-provider.php:152](https://github.com/dshanske/simple-location/blob/trunk/includes/class-venue-provider.php#L152)
 ```php
 apply_filters( 'sloc_venue_provider_defaults', $defaults )
 ```

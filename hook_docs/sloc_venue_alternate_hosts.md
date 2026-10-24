@@ -21,7 +21,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-post-venue.php:754](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L754)
+- [includes/class-post-venue.php:812](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L812)
 ```php
 apply_filters( 'sloc_venue_alternate_hosts', $hosts )
 ```
