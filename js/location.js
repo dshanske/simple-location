@@ -20,6 +20,26 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	/**
+	 * Replaces the venue list, keeping the venue chosen, even if the new list doesn't have it (#247).
+	 *
+	 * @param {string} html New venue list.
+	 */
+	function replaceVenueSelect( html ) {
+		const current = $( '#venue_id' ).val();
+		const $chosen = $( '#venue_id option:selected' ).clone();
+		$( '#venue_id' ).replaceWith( html );
+		if ( ! current || '0' === current ) {
+			return;
+		}
+		if ( 0 === $( '#venue_id option' ).filter( function() {
+			return $( this ).val() === current;
+		} ).length ) {
+			$( '#venue_id' ).append( $chosen );
+		}
+		$( '#venue_id' ).val( current );
+	}
+
+	/**
 	 * Fills a weather field with a looked-up value, rounded for display, and keeps the exact value, which is
 	 * saved unless the field is changed (#741).
 	 *
@@ -115,7 +135,7 @@ jQuery( document ).ready( function( $ ) {
 					if ( 'undefined' === typeof response ) {
 					} else {
 						if ( ( 'venue_select' in response ) ) {
-							$( '#venue_id' ).replaceWith( response.venue_select);
+							replaceVenueSelect( response.venue_select );
 						}
 					}
 				}
@@ -250,7 +270,7 @@ jQuery( document ).ready( function( $ ) {
 						$( '#location_dropdown' ).replaceWith( response.terms );
 					}
 					if ( 'nearby_select' in response ) {
-						$( '#venue_id' ).replaceWith( response.nearby_select );
+						replaceVenueSelect( response.nearby_select );
 					}
 
 					if ( 'visibility' in response ) {
