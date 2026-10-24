@@ -423,7 +423,7 @@ class REST_Geo {
 	public static function map( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
 		$params = $request->get_params();
-		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+		if ( is_numeric( $params['longitude'] ?? null ) && is_numeric( $params['latitude'] ?? null ) ) {
 			$args = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],
@@ -632,7 +632,7 @@ class REST_Geo {
 			}
 			return new WP_Error( 'no_venues_found', __( 'Venues Not Found', 'simple-location' ) );
 		}
-		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+		if ( is_numeric( $params['longitude'] ?? null ) && is_numeric( $params['latitude'] ?? null ) ) {
 			$venue = Loc_Config::venue_provider( $provider );
 			if ( ! $venue ) {
 				return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
@@ -658,7 +658,7 @@ class REST_Geo {
 		// We dont need to check the nonce like with admin-ajax.
 		$params   = $request->get_params();
 		$provider = empty( $params['provider'] ) ? null : $params['provider'];
-		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+		if ( is_numeric( $params['longitude'] ?? null ) && is_numeric( $params['latitude'] ?? null ) ) {
 			if ( ! $provider ) {
 				return Sloc_Provider_Chain::elevation( $params['latitude'], $params['longitude'] );
 			}
@@ -697,7 +697,7 @@ class REST_Geo {
 			$params['longitude'] = $plus_code['longitude'];
 			unset( $params['altitude'] );
 		}
-		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+		if ( is_numeric( $params['longitude'] ?? null ) && is_numeric( $params['latitude'] ?? null ) ) {
 			$map = Loc_Config::map_provider();
 			if ( is_object( $map ) ) {
 				$map_args = array(
@@ -845,7 +845,7 @@ class REST_Geo {
 		if ( ! empty( $params['station'] ) ) {
 			$weather->set( array( 'station_id' => $params['station'] ) );
 			$conditions = $weather->get_conditions( $time );
-		} elseif ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
+		} elseif ( is_numeric( $params['longitude'] ?? null ) && is_numeric( $params['latitude'] ?? null ) ) {
 			$return = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],

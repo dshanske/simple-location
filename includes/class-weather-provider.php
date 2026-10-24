@@ -476,7 +476,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	private function cache_key( $time = null ) {
 		if ( ! empty( $this->station_id ) ) {
 			$key = array( get_called_class(), md5( $this->station_id ) );
-		} elseif ( ! empty( $this->latitude ) && ! empty( $this->longitude ) ) {
+		} elseif ( is_numeric( $this->latitude ) && is_numeric( $this->longitude ) ) {
 			$key = array( get_called_class(), md5( implode( ',', array( $this->latitude, $this->longitude ) ) ) );
 		} else {
 			return false;

@@ -894,7 +894,7 @@ class Geo_Base {
 		if ( ! is_array( $geodata ) ) {
 			return '';
 		}
-		if ( empty( $geodata['longitude'] ) ) {
+		if ( ! is_numeric( $geodata['longitude'] ?? null ) ) {
 			return '';
 		}
 		if ( 'public' === $geodata['visibility'] ) {
@@ -919,7 +919,7 @@ class Geo_Base {
 		if ( ! is_array( $geodata ) ) {
 			return '';
 		}
-		if ( empty( $geodata['latitude'] ) ) {
+		if ( ! is_numeric( $geodata['latitude'] ?? null ) ) {
 			return '';
 		}
 		if ( 'public' === $geodata['visibility'] ) {
@@ -1015,7 +1015,8 @@ class Geo_Base {
 	public static function rest_prepare_post( $response, $post, $request ) {
 		$data = $response->get_data();
 		foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
-			if ( empty( $data[ $field ] ) ) {
+			// A coordinate of 0 is kept (#746).
+			if ( empty( $data[ $field ] ) && ! is_numeric( $data[ $field ] ?? null ) ) {
 				unset( $data[ $field ] );
 			}
 		}
@@ -1036,7 +1037,8 @@ class Geo_Base {
 	public static function rest_prepare_comment( $response, $comment, $request ) {
 		$data = $response->get_data();
 		foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
-			if ( empty( $data[ $field ] ) ) {
+			// A coordinate of 0 is kept (#746).
+			if ( empty( $data[ $field ] ) && ! is_numeric( $data[ $field ] ?? null ) ) {
 				unset( $data[ $field ] );
 			}
 		}
@@ -1057,7 +1059,8 @@ class Geo_Base {
 	public static function rest_prepare_user( $response, $user, $request ) {
 		$data = $response->get_data();
 		foreach ( array( 'latitude', 'longitude', 'geo_address', 'timezone' ) as $field ) {
-			if ( empty( $data[ $field ] ) ) {
+			// A coordinate of 0 is kept (#746).
+			if ( empty( $data[ $field ] ) && ! is_numeric( $data[ $field ] ?? null ) ) {
 				unset( $data[ $field ] );
 			}
 		}
