@@ -659,7 +659,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.1.0 Setting coordinates clears the station, and setting only a station clears the location (#681).
-	 *              An empty station_id clears the station.
+	 *              An empty station_id clears the station, and whitespace around it is trimmed (#352).
 	 *
 	 * @param array|float $lat Latitude or array of all three properties.
 	 * @param float       $lng Longitude. Optional if first property is an array.
@@ -674,7 +674,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 			}
 			$location = isset( $lat['latitude'], $lat['longitude'] );
 			if ( array_key_exists( 'station_id', $lat ) ) {
-				$this->station_id = ( is_scalar( $lat['station_id'] ) && '' !== (string) $lat['station_id'] ) ? $lat['station_id'] : null;
+				$station          = is_string( $lat['station_id'] ) ? trim( $lat['station_id'] ) : $lat['station_id'];
+				$this->station_id = ( is_scalar( $station ) && '' !== (string) $station ) ? $station : null;
 				if ( $this->station_id && ! $location ) {
 					$this->latitude  = null;
 					$this->longitude = null;

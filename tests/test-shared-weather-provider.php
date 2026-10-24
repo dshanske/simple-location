@@ -105,6 +105,25 @@ class SharedWeatherProviderTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Station IDs are trimmed, so one typed with spaces finds its station, and only whitespace is no station (#352).
+	 */
+	public function test_station_id_trimmed() {
+		$provider = new Weather_Provider_Station();
+		$provider->set( array( 'station_id' => ' cabin ' ) );
+		$this->assertSame( 'cabin', $provider->get_station() );
+		$this->assertSame( 30, $provider->get_conditions()['temperature'] );
+
+		$this->assertSame( 10, Sloc_Weather_Data::get_weather_by_station( "home\n" )['temperature'] );
+
+		$provider->set( array( 'station_id' => '  ' ) );
+		$this->assertNull( $provider->get_station() );
+
+		$nws = new Weather_Provider_NWSUS();
+		$nws->set( array( 'station_id' => ' KPHL' ) );
+		$this->assertSame( 'KPHL', $nws->get_station(), 'For every provider.' );
+	}
+
+	/**
 	 * Setting coordinates clears a station; setting only a station clears the coordinates; setting both keeps both.
 	 */
 	public function test_set() {

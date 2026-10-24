@@ -292,23 +292,6 @@ class Weather_Provider_Station extends Weather_Provider {
 	}
 
 	/**
-	 * Set and Validate Coordinates.
-	 *
-	 * @param array|float $lat Latitude or array of all three properties.
-	 * @param float       $lng Longitude. Optional if first property is an array.
-	 * @param float       $alt Altitude. Optional.
-	 * @return boolean Return False if Validation Failed.
-	 */
-	public function set( $lat, $lng = null, $alt = null ) {
-		if ( ! $lng && is_array( $lat ) ) {
-			if ( isset( $lat['station_id'] ) ) {
-				$this->station_id = trim( $lat['station_id'] );
-			}
-		}
-		return parent::set( $lat, $lng, $alt );
-	}
-
-	/**
 	 * Does This Provider Offer Station Data.
 	 *
 	 * @return boolean If supports station data return true.
@@ -436,7 +419,7 @@ class Weather_Provider_Station extends Weather_Provider {
 	public function get_station_data() {
 		$stations = static::get_stations();
 		foreach ( $stations as $key => $station ) {
-			if ( trim( (string) self::key( $station, 'id' ) ) !== $this->station_id ) {
+			if ( trim( (string) self::key( $station, 'id' ) ) !== (string) $this->station_id ) {
 				continue;
 			}
 			$json = $this->fetch_json( self::key( $station, 'url' ), array() );
