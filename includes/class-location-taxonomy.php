@@ -46,10 +46,12 @@ final class Location_Taxonomy {
 	 * Removes the default location taxonomy metaboxes, which the location metabox replaces.
 	 *
 	 * @since 4.4.6
+	 * @since 6.1.0 Removes them from every post type with the location metabox, such as pages and attachments (#295).
 	 */
 	public static function admin_menu() {
-		remove_meta_box( 'locationdiv', 'post', 'side' );
-		remove_meta_box( 'locationdiv', 'venue', 'side' );
+		foreach ( array_unique( array_merge( Geo_Base::screens(), array( 'post', 'venue' ) ) ) as $post_type ) {
+			remove_meta_box( 'locationdiv', $post_type, 'side' );
+		}
 	}
 
 	/**

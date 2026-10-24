@@ -200,8 +200,11 @@ class Sloc_Media_Metadata {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Values are escaped.
+	 * @since 6.1.0 Removes the location taxonomy's field, and the coordinates field is sloc_coordinates (#295).
 	 */
 	public static function attachment_fields_to_edit( $form_fields, $post ) {
+		// The location taxonomy is set from the coordinates, not edited as a list of slugs.
+		unset( $form_fields['location'] );
 		$geodata                    = get_post_geodata( $post->ID );
 		$form_fields['geo_address'] = array(
 			'value'        => $geodata['address'] ?? '',
@@ -211,7 +214,7 @@ class Sloc_Media_Metadata {
 			'html'         => sprintf( '<span>%1$s</span>', esc_html( $geodata['address'] ?? '' ) ),
 		);
 		if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
-			$form_fields['location'] = array(
+			$form_fields['sloc_coordinates'] = array(
 				'value'        => '',
 				'label'        => __( 'Geo Coordinates', 'simple-location' ),
 				'input'        => 'html',

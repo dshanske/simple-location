@@ -86,6 +86,19 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The default location box is removed wherever the location metabox replaces it, including pages and attachments (#295).
+	 */
+	public function test_admin_menu_removes_default_box() {
+		global $wp_meta_boxes;
+		require_once ABSPATH . 'wp-admin/includes/template.php';
+		Location_Taxonomy::admin_menu();
+		foreach ( array( 'post', 'page', 'attachment', 'venue' ) as $post_type ) {
+			$this->assertFalse( $wp_meta_boxes[ $post_type ]['side']['core']['locationdiv'], $post_type );
+		}
+		$wp_meta_boxes = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	/**
 	 * A full address creates country, region, and locality terms with their codes.
 	 */
 	public function test_get_location_creates_hierarchy() {
