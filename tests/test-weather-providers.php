@@ -70,7 +70,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::weather_providers();
-		foreach ( array( 'openweathermap', 'pirateweather', 'weatherbit', 'weatherstack', 'visualcrossing', 'aeris', 'nwsus', 'meteostat', 'here', 'station', 'openmeteo', 'metno' ) as $slug ) {
+		foreach ( array( 'openweathermap', 'pirateweather', 'weatherbit', 'weatherstack', 'visualcrossing', 'aeris', 'nwsus', 'meteostat', 'here', 'station', 'openmeteo', 'metno', 'eccc' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers, $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}
@@ -631,6 +631,144 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 
 		$this->mock_http( array( 'api.met.no' => array( 'body' => array( 'type' => 'Feature' ) ) ) );
 		$this->assertSame( 'no_results', $this->provider( 'Weather_Provider_Metno' )->get_conditions()->get_error_code() );
+	}
+
+	/**
+	 * Environment Canada: the conditions of the nearest city with a reading, in metric units, in the site's language,
+	 * cached (#154).
+	 */
+	public function test_eccc_current() {
+		$fixture = $this->fixture( 'weather/eccc-citypage.json' );
+		$this->mock_http( array( 'api.weather.gc.ca' => array( 'body' => $fixture ) ) );
+		$provider = $this->provider( 'Weather_Provider_ECCC', array( 'cache_time' => 600 ) );
+		// Parliament Hill, Ottawa.
+		$provider->set( 45.4236, -75.7009 );
+		$this->assertTrue( $provider->covers() );
+		$conditions = $provider->get_conditions();
+
+		$request = $this->last_request();
+		$this->assertSame( Weather_Provider_ECCC::ENDPOINT, $request['base'] );
+		$this->assertSame( '-75.9509,45.1736,-75.4509,45.6736', $request['query']['bbox'] );
+		$this->assertSame( 'en', $request['query']['lang'] );
+
+		// Ottawa, not Gatineau, nor the nearer city without a reading.
+		$ottawa = $fixture['features'][0]['properties']['currentConditions'];
+		$this->assertSame( 'on-118', $fixture['features'][0]['properties']['identifier'] );
+		$this->assertConditions(
+			array(
+				'temperature' => $ottawa['temperature']['value']['en'],
+				'humidity'    => $ottawa['relativeHumidity']['value']['en'],
+				'dewpoint'    => $ottawa['dewpoint']['value']['en'],
+				'windchill'   => $ottawa['windChill']['value']['en'],
+				'pressure'    => round( $ottawa['pressure']['value']['en'] * 10, 1 ),
+				'windspeed'   => round( $ottawa['wind']['speed']['value']['en'] / 3.6, 2 ),
+				'windgust'    => round( $ottawa['wind']['gust']['value']['en'] / 3.6, 2 ),
+				'winddegree'  => $ottawa['wind']['bearing']['value']['en'],
+				'code'        => Weather_Provider_ECCC::ICON_CODES[ $ottawa['iconCode']['value'] ],
+				'summary'     => $ottawa['condition']['en'],
+			),
+			$conditions
+		);
+		$this->assertSame( 'eccc', $conditions['provider'] );
+
+		$provider->get_conditions();
+		$this->assertCount( 1, $this->http_requests, 'The second call is served from the cache.' );
+	}
+
+	/**
+	 * Environment Canada: only in Canada and for now; a wider search without a city near; errors (#154).
+	 */
+	public function test_eccc_search_and_errors() {
+		$provider = $this->provider( 'Weather_Provider_ECCC' );
+		$this->assertFalse( $provider->covers(), 'Philadelphia is not in Canada.' );
+		$this->mock_http( array() );
+		$this->assertSame( 'historic_unsupported', $provider->get_conditions( strtotime( '-2 days' ) )->get_error_code() );
+		$this->assertSame( array(), $this->http_requests );
+
+		// Nothing in the near box, then the city in the wider one; one too far away isn't used.
+		$fixture  = $this->fixture( 'weather/eccc-citypage.json' );
+		$provider = $this->provider( 'Weather_Provider_ECCC' );
+		$provider->set( 45.9, -75.7 );
+		$responses = array( array( 'features' => array() ), $fixture );
+		remove_all_filters( 'pre_http_request' );
+		add_filter(
+			'pre_http_request',
+			function () use ( &$responses ) {
+				return array(
+					'headers'  => array( 'content-type' => 'application/json' ),
+					'body'     => wp_json_encode( array_shift( $responses ) ),
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+					'cookies'  => array(),
+					'filename' => null,
+				);
+			},
+			5
+		);
+		$conditions = $provider->get_conditions();
+		$this->assertSame( $fixture['features'][1]['properties']['currentConditions']['temperature']['value']['en'], $conditions['temperature'], 'Gatineau, the nearest with a reading.' );
+
+		$far = $this->provider( 'Weather_Provider_ECCC' );
+		$far->set( 47.5, -75.7 );
+		$responses = array( $fixture, $fixture );
+		$this->assertSame( 'no_results', $far->get_conditions()->get_error_code(), 'Over 100 km away.' );
+		remove_all_filters( 'pre_http_request', 5 );
+
+		$this->mock_http( array( 'api.weather.gc.ca' => array( 'code' => 500 ) ) );
+		$broken = $this->provider( 'Weather_Provider_ECCC' );
+		$broken->set( 45.42, -75.7 );
+		$this->assertWPError( $broken->get_conditions() );
+	}
+
+	/**
+	 * Environment Canada's values are in English and French; French sites get French text, and its icon codes are all
+	 * known conditions (#154).
+	 */
+	public function test_eccc_language_and_codes() {
+		$this->assertSame( 'en', Weather_Provider_ECCC::language() );
+		$this->assertSame(
+			8.8,
+			Weather_Provider_ECCC::value(
+				array(
+					'value' => array(
+						'en' => 8.8,
+						'fr' => 8.8,
+					),
+				)
+			)
+		);
+		$this->assertSame(
+			'Partiellement nuageux',
+			Weather_Provider_ECCC::value(
+				array(
+					'en' => 'Partly Cloudy',
+					'fr' => 'Partiellement nuageux',
+				),
+				'fr'
+			)
+		);
+		$this->assertNull( Weather_Provider_ECCC::value( 'x' ) );
+		$this->assertSame( 2, Weather_Provider_ECCC::value( array( 'value' => 2 ) ) );
+		add_filter( 'locale', fn() => 'fr_CA' );
+		$this->assertSame( 'fr', Weather_Provider_ECCC::language() );
+		remove_all_filters( 'locale' );
+
+		$known = Weather_Provider_ECCC::weather_condition_codes( null );
+		foreach ( Weather_Provider_ECCC::ICON_CODES as $icon => $code ) {
+			$this->assertArrayHasKey( (string) $code, $known, "Icon $icon" );
+		}
+		$converted = $this->provider( 'Weather_Provider_ECCC' )->convert_data(
+			array(
+				'iconCode'   => array( 'value' => 99 ),
+				'visibility' => array( 'value' => array( 'en' => 24.1 ) ),
+				'humidex'    => array( 'value' => array( 'en' => 31 ) ),
+			)
+		);
+		$this->assertArrayNotHasKey( 'code', $converted, 'An unknown icon.' );
+		$this->assertEquals( 24100, $converted['visibility'] );
+		$this->assertEquals( 31, $converted['heatindex'] );
 	}
 
 	/**
