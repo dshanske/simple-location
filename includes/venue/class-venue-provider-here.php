@@ -194,6 +194,7 @@ class Venue_Provider_HERE extends Venue_Provider {
 			'category'         => is_array( $item['categories'] ?? null ) ? array_values( array_filter( array_column( array_filter( $item['categories'], 'is_array' ), 'name' ), 'is_string' ) ) : null,
 			'latitude'         => (float) $item['position']['lat'],
 			'longitude'        => (float) $item['position']['lng'],
+			'uid'              => ( isset( $item['id'] ) && is_string( $item['id'] ) ) ? $item['id'] : null,
 		);
 		if ( WP_DEBUG ) {
 			$card['raw'] = $item;

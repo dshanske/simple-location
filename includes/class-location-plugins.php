@@ -356,7 +356,7 @@ class Location_Plugins {
 		}
 
 		// Strip out anything that might not be relevant to an address.
-		$location = wp_array_slice_assoc( $location, array( 'street-address', 'extended-address', 'post-office-box', 'locality', 'region', 'postal-code', 'country-name', 'country-code', 'region-code', 'region', 'latitude', 'longitude', 'altitude', 'name', 'label', 'url' ) );
+		$location = wp_array_slice_assoc( $location, array( 'street-address', 'extended-address', 'post-office-box', 'locality', 'region', 'postal-code', 'country-name', 'country-code', 'region-code', 'region', 'latitude', 'longitude', 'altitude', 'name', 'label', 'url', 'uid', 'provider' ) );
 		foreach ( $location as $key => $value ) {
 			if ( is_array( $value ) && 1 === count( $value ) ) {
 				$location[ $key ] = array_shift( $value );

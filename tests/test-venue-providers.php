@@ -816,6 +816,63 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Each provider identifies its places: OpenStreetMap places by their page, whichever provider found them (#729).
+	 */
+	public function test_uids() {
+		$this->mock_http( array( 'nominatim.openstreetmap.org/reverse' => array( 'body' => $this->fixture( 'geo/nominatim-reverse.json' ) ) ) );
+		$this->assertSame( 'https://www.openstreetmap.org/way/28331796', $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup()['items'][0]['uid'] );
+
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => $this->fixture( 'venue/locationiq-nearby.json' ) ) ) );
+		$this->assertSame(
+			array( 'https://www.openstreetmap.org/way/28331796', 'https://www.openstreetmap.org/way/126713011' ),
+			wp_list_pluck( $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->reverse_lookup()['items'], 'uid' )
+		);
+
+		$this->mock_http( array( 'overpass-api.de' => array( 'body' => $this->fixture( 'venue/overpass-nearby.json' ) ) ) );
+		$this->assertSame(
+			array( 'https://www.openstreetmap.org/way/31414402', 'https://www.openstreetmap.org/node/4567890123', 'https://www.openstreetmap.org/relation/9876543' ),
+			wp_list_pluck( $this->provider( 'Venue_Provider_Overpass' )->reverse_lookup()['items'], 'uid' )
+		);
+
+		$this->mock_http( array( 'api.geoapify.com' => array( 'body' => $this->fixture( 'venue/geoapify-places.json' ) ) ) );
+		$this->assertSame(
+			array( 'https://www.openstreetmap.org/way/31414402', 'https://www.openstreetmap.org/node/4567890123', 'geoapify:51c5…station' ),
+			wp_list_pluck( $this->provider( 'Venue_Provider_Geoapify', array( 'api' => 'KEY' ) )->reverse_lookup()['items'], 'uid' ),
+			'A place from OpenStreetMap has its OpenStreetMap page; another has its Geoapify ID.'
+		);
+
+		$this->mock_http( array( 'places.googleapis.com' => array( 'body' => $this->fixture( 'venue/google-places-nearby.json' ) ) ) );
+		$this->assertSame( 'https://www.google.com/maps/place/?q=place_id:ChIJ-0aoJS7GxokRkHmKyYQ5yX0', $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup()['items'][0]['uid'] );
+
+		$this->mock_http( array( 'browse.search.hereapi.com' => array( 'body' => $this->fixture( 'venue/here-browse.json' ) ) ) );
+		$this->assertSame( array( 'here:pds:place:840dr4ux-cityhall', 'here:pds:place:840dr4ux-coffee' ), wp_list_pluck( $this->provider( 'Venue_Provider_HERE', array( 'api' => 'KEY' ) )->reverse_lookup()['items'], 'uid' ) );
+
+		$this->mock_http( array( 'api.tomtom.com' => array( 'body' => $this->fixture( 'venue/tomtom-nearby.json' ) ) ) );
+		$this->assertSame( 'tomtom:g6JpZK84NDA5MDkwMDAwMDAwMDAx', $this->provider( 'Venue_Provider_TomTom', array( 'api' => 'KEY' ) )->reverse_lookup()['items'][0]['uid'] );
+	}
+
+	/**
+	 * OpenStreetMap identifiers are pages on openstreetmap.org, from long or short element types (#729).
+	 */
+	public function test_osm_uid() {
+		$this->assertSame( 'https://www.openstreetmap.org/node/4567890123', Venue_Provider::osm_uid( 'N', 4567890123 ) );
+		$this->assertSame( 'https://www.openstreetmap.org/relation/5', Venue_Provider::osm_uid( 'relation', '5' ) );
+		$this->assertSame( '', Venue_Provider::osm_uid( 'area', 5 ) );
+		$this->assertSame( '', Venue_Provider::osm_uid( 'way', '0' ) );
+		$this->assertSame( '', Venue_Provider::osm_uid( 'way', '12a' ) );
+		$this->assertSame( '', Venue_Provider::osm_uid( null, null ) );
+	}
+
+	/**
+	 * Nearby venues name the provider that found them (#729).
+	 */
+	public function test_nearby_provider() {
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => $this->fixture( 'venue/locationiq-nearby.json' ) ) ) );
+		$items = $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->nearby()['items'];
+		$this->assertSame( array( 'locationiq', 'locationiq' ), wp_list_pluck( $items, 'provider' ) );
+	}
+
+	/**
 	 * HTTP failures are returned as errors.
 	 */
 	public function test_http_errors() {

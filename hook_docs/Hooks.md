@@ -41,6 +41,8 @@
 
 - [`pre_at_venue`](pre_at_venue) Short-circuits the checking for a venue if it is not stored as normal.
 - [`pre_nearby_venue`](pre_nearby_venue) Short-circuits the checking for a venue if it is not stored as normal.
+- [`sloc_find_venue`](sloc_find_venue) Filters the venue a check-in is at.
+- [`sloc_venue_alternate_hosts`](sloc_venue_alternate_hosts) Filters the hosts of sites with pages about places.
 
 ## class-rest-geo.php
 

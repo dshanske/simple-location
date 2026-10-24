@@ -537,6 +537,38 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A check-in keeps the venue's identifier and provider, and a second check-in there finds the venue (#729).
+	 */
+	public function test_set_location_checkin_uid() {
+		$properties = array(
+			'name'      => array( 'Philadelphia City Hall' ),
+			'latitude'  => array( self::LAT ),
+			'longitude' => array( self::LNG ),
+			'uid'       => array( 'https://www.openstreetmap.org/way/31414402' ),
+			'provider'  => array( 'overpass' ),
+		);
+		$input      = array(
+			'properties' => array(
+				'checkin' => array(
+					'type'       => array( 'h-card' ),
+					'properties' => $properties,
+				),
+			),
+		);
+		$args       = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location( $input, $args );
+		$venue_id = (int) get_post_meta( $args['ID'], 'venue_id', true );
+		$sources  = Post_Venue::get_venue_sources( $venue_id );
+		$this->assertSame( 'overpass', $sources[0]['provider'] );
+		$this->assertSame( 'https://www.openstreetmap.org/way/31414402', $sources[0]['uid'] );
+
+		$input['properties']['checkin']['properties']['name'] = array( 'City Hall' );
+		$second = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location( $input, $second );
+		$this->assertSame( $venue_id, (int) get_post_meta( $second['ID'], 'venue_id', true ) );
+	}
+
+	/**
 	 * A location h-adr sets the location term without a reverse lookup.
 	 */
 	public function test_set_location_address() {

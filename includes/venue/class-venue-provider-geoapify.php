@@ -150,6 +150,23 @@ class Venue_Provider_Geoapify extends Venue_Provider {
 	}
 
 	/**
+	 * Returns a place's identifier: its OpenStreetMap page for a place from OpenStreetMap, or its Geoapify ID.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $place Place properties.
+	 * @return string|null Identifier.
+	 */
+	protected static function uid( $place ) {
+		$raw = is_array( $place['datasource']['raw'] ?? null ) ? $place['datasource']['raw'] : array();
+		$uid = self::osm_uid( $raw['osm_type'] ?? '', $raw['osm_id'] ?? '' );
+		if ( '' !== $uid ) {
+			return $uid;
+		}
+		return ( isset( $place['place_id'] ) && is_string( $place['place_id'] ) ) ? 'geoapify:' . $place['place_id'] : null;
+	}
+
+	/**
 	 * Converts a place's properties to an h-card.
 	 *
 	 * @since 6.1.0
@@ -184,6 +201,7 @@ class Venue_Provider_Geoapify extends Venue_Provider {
 			'category'         => $categories,
 			'latitude'         => (float) $place['lat'],
 			'longitude'        => (float) $place['lon'],
+			'uid'              => self::uid( $place ),
 		);
 		if ( WP_DEBUG ) {
 			$card['raw'] = $place;

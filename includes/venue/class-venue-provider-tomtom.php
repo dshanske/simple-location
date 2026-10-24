@@ -191,6 +191,7 @@ class Venue_Provider_TomTom extends Venue_Provider {
 			'category'         => $names,
 			'latitude'         => (float) $result['position']['lat'],
 			'longitude'        => (float) $result['position']['lon'],
+			'uid'              => ( isset( $result['id'] ) && is_string( $result['id'] ) ) ? 'tomtom:' . $result['id'] : null,
 		);
 		if ( WP_DEBUG ) {
 			$card['raw'] = $result;

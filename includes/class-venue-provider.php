@@ -196,6 +196,35 @@ abstract class Venue_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns the identifier of an OpenStreetMap place: its page on openstreetmap.org.
+	 *
+	 * Providers whose places come from OpenStreetMap use it as a venue's 'uid', so the same place matches
+	 * whichever of them found it.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string     $type Element type: node, way or relation, or N, W or R.
+	 * @param string|int $id   Element ID.
+	 * @return string URL, such as https://www.openstreetmap.org/way/28331796, or an empty string.
+	 */
+	public static function osm_uid( $type, $id ) {
+		$types = array(
+			'n'        => 'node',
+			'w'        => 'way',
+			'r'        => 'relation',
+			'node'     => 'node',
+			'way'      => 'way',
+			'relation' => 'relation',
+		);
+		$type  = $types[ strtolower( is_string( $type ) ? $type : '' ) ] ?? '';
+		$id    = is_int( $id ) ? (string) $id : $id;
+		if ( '' === $type || ! is_string( $id ) || ! preg_match( '/^[1-9][0-9]*$/', $id ) ) {
+			return '';
+		}
+		return 'https://www.openstreetmap.org/' . $type . '/' . $id;
+	}
+
+	/**
 	 * Sanitizes the search radius setting.
 	 *
 	 * @since 6.1.0
@@ -251,7 +280,7 @@ abstract class Venue_Provider extends Sloc_Provider {
 	 * Returns the venues near the location: the provider's, within the radius, nearest first, up to the limit.
 	 *
 	 * Each venue with coordinates gets its distance from the location, in meters, as 'distance'. Venues without
-	 * coordinates come last.
+	 * coordinates come last. Each venue names the provider that found it as 'provider'.
 	 *
 	 * @since 6.1.0
 	 *
@@ -263,6 +292,11 @@ abstract class Venue_Provider extends Sloc_Provider {
 			return $result;
 		}
 		$items = ( is_array( $result ) && isset( $result['items'] ) && is_array( $result['items'] ) ) ? $result['items'] : array();
+		foreach ( $items as $key => $item ) {
+			if ( is_array( $item ) && ! empty( $item ) && empty( $item['provider'] ) ) {
+				$items[ $key ]['provider'] = $this->slug;
+			}
+		}
 		return array( 'items' => self::sort_items( $items, $this->latitude, $this->longitude, $this->radius, $this->limit ) );
 	}
 
@@ -444,7 +478,12 @@ abstract class Venue_Provider extends Sloc_Provider {
 	/**
 	 * Returns a list of one or more possible venues in h-card jf2 format.
 	 *
-	 * Callers use nearby(), which sorts and limits the venues.
+	 * Callers use nearby(), which sorts and limits the venues. Each venue should have a 'uid' that identifies the
+	 * place at the provider: a page about it, such as osm_uid() returns, or an identifier such as
+	 * here:pds:place:840dr4ux-1234.
+	 *
+	 * @since 1.0.0
+	 * @since 6.1.0 Venues have a 'uid' (#729).
 	 *
 	 * @return array Array of jf2 h-card elements under property items.
 	 */

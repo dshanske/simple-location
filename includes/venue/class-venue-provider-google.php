@@ -220,6 +220,8 @@ class Venue_Provider_Google extends Venue_Provider {
 			'category'  => is_array( $place['types'] ?? null ) ? $place['types'] : null,
 			'url'       => $place['websiteUri'] ?? null,
 			'tel'       => $place['internationalPhoneNumber'] ?? null,
+			// A Google Maps link to the place, by its place ID.
+			'uid'       => ( isset( $place['id'] ) && is_string( $place['id'] ) ) ? 'https://www.google.com/maps/place/?q=place_id:' . rawurlencode( $place['id'] ) : null,
 		);
 		if ( isset( $place['viewport'] ) ) {
 			$card['boundingbox'] = $place['viewport'];
