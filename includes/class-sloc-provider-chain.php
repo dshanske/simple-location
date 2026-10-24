@@ -260,12 +260,30 @@ class Sloc_Provider_Chain {
 	/**
 	 * Looks up the location of an address with the geocoding chain.
 	 *
+	 * A Plus Code, such as "87F6XR2P+WH" or "XR2P+WH Philadelphia", is decoded, and its address looked up (#197).
+	 *
 	 * @since 6.1.0
 	 *
 	 * @param string $address Address.
 	 * @return array|WP_Error Location, or the last error.
 	 */
 	public static function geocode( $address ) {
+		if ( Sloc_Plus_Code::parse( $address ) ) {
+			$area = Sloc_Plus_Code::locate( $address );
+			if ( is_wp_error( $area ) ) {
+				return $area;
+			}
+			$location = self::reverse_lookup( $area['latitude'], $area['longitude'] );
+			// The code's location, with its address when one is found.
+			return array_merge(
+				is_array( $location ) ? $location : array(),
+				array(
+					'latitude'  => $area['latitude'],
+					'longitude' => $area['longitude'],
+					'plus_code' => $area['plus_code'],
+				)
+			);
+		}
 		return self::run( 'geo', fn( $provider ) => $provider->geocode( $address ), array() );
 	}
 

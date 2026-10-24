@@ -253,6 +253,9 @@ class REST_Geo {
 						'address'   => array(
 							'sanitize_callback' => 'sanitize_text_field',
 						),
+						'plus_code' => array(
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 						'weather'   => array(
 							'sanitize_callback' => 'sanitize_text_field',
 						),
@@ -605,6 +608,8 @@ class REST_Geo {
 	 * Callback handler for Geolocation Retrieval.
 	 *
 	 * @since 6.1.0 At a venue, the visibility is the venue's visibility for posts made there, when it sets one.
+	 * @since 6.1.0 A plus_code is decoded and looked up in place of the coordinates, which are used to find a short
+	 *              code without a place (#197). The response then has the code's latitude, longitude and plus_code.
 	 *
 	 * @param WP_Rest_Request $request REST Request.
 	 */
@@ -613,6 +618,16 @@ class REST_Geo {
 		$params      = $request->get_params();
 		$provider    = empty( $params['provider'] ) ? null : $params['provider'];
 		$term_lookup = array_key_exists( 'term', $params );
+		$plus_code   = null;
+		if ( ! empty( $params['plus_code'] ) ) {
+			$plus_code = Sloc_Plus_Code::locate( $params['plus_code'], $params['latitude'] ?? null, $params['longitude'] ?? null );
+			if ( is_wp_error( $plus_code ) ) {
+				return $plus_code;
+			}
+			$params['latitude']  = $plus_code['latitude'];
+			$params['longitude'] = $plus_code['longitude'];
+			unset( $params['altitude'] );
+		}
 		if ( ! empty( $params['longitude'] ) && ! empty( $params['latitude'] ) ) {
 			$map = Loc_Config::map_provider();
 			if ( is_object( $map ) ) {
@@ -718,6 +733,12 @@ class REST_Geo {
 
 			if ( ! isset( $reverse_adr['nearby_select'] ) ) {
 				$reverse_adr['nearby_select'] = Post_Venue::nearby_select( $params['latitude'], $params['longitude'], 0, false );
+			}
+
+			if ( $plus_code ) {
+				$reverse_adr['latitude']  = $plus_code['latitude'];
+				$reverse_adr['longitude'] = $plus_code['longitude'];
+				$reverse_adr['plus_code'] = $plus_code['plus_code'];
 			}
 
 			return array_filter( $reverse_adr );

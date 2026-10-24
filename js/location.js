@@ -42,6 +42,11 @@ jQuery( document ).ready( function( $ ) {
 		if ( attemptedDate < currentDate ) {
 			time = attemptedDate.toISO();
 		}
+		// A Plus Code is looked up in place of the current location.
+		if ( '' !== $.trim( $( '#plus_code' ).val() || '' ) ) {
+			reverseLookup();
+			return;
+		}
 		if ( 'HTML5' === slocOptions.lookup ) { // eslint-disable-line camelcase
 			if ( ( '' === $( '#latitude' ).val() ) && ( '' === $( '#longitude' ).val() ) ) {
 				if ( navigator.geolocation ) {
@@ -149,7 +154,8 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function reverseLookup() {
-		if ( ( '' === $( '#longitude' ).val() ) && ( '' === $( '#latitude' ).val() ) ) {
+		const plusCode = $.trim( $( '#plus_code' ).val() || '' );
+		if ( ( '' === $( '#longitude' ).val() ) && ( '' === $( '#latitude' ).val() ) && ( '' === plusCode ) ) {
 			return;
 		}
 
@@ -166,6 +172,7 @@ jQuery( document ).ready( function( $ ) {
 				latitude: $( '#latitude' ).val(),
 				longitude: $( '#longitude' ).val(),
 				altitude: $( '#altitude' ).val(),
+				plus_code: plusCode, // eslint-disable-line camelcase
 				term: true,
 				weather: slocOptions.weather,
 				map_zoom: $( '#map_zoom' ).val(), // eslint-disable-line camelcase
@@ -177,6 +184,14 @@ jQuery( document ).ready( function( $ ) {
 			success( response ) {
 				if ( 'undefined' === typeof response ) {
 				} else {
+					// A Plus Code's location replaces the one in the form.
+					if ( 'plus_code' in response ) {
+						$( '#latitude' ).val( response.latitude );
+						$( '#longitude' ).val( response.longitude );
+						$( '#altitude' ).val( '' );
+						$( '#address' ).val( '' );
+						$( '#plus_code' ).val( '' );
+					}
 					if ( ( 'display-name' in response ) && ( '' === $( '#address' ).val() ) ) {
 						$( '#address' ).val( response[ 'display-name' ] );
 						$( '#location-label' ).text( response[ 'display-name' ] );
@@ -297,6 +312,7 @@ jQuery( document ).ready( function( $ ) {
 		$.each( fieldIds, function( count, val ) {
 			document.getElementById( val ).value = '';
 		} );
+		$( '#plus_code' ).val( '' );
 		$( '#location-label' ).text( 'None' );
 		$( '#weather-label' ).text( 'None' );
 		$( '#hide-map' ).html( '' );
