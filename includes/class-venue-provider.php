@@ -16,6 +16,62 @@ abstract class Venue_Provider extends Sloc_Provider {
 	use GeoLocation_Trait;
 
 	/**
+	 * Search radius in meters, without a setting.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const DEFAULT_RADIUS = 250;
+
+	/**
+	 * Smallest search radius in meters.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const MIN_RADIUS = 10;
+
+	/**
+	 * Largest search radius in meters.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const MAX_RADIUS = 5000;
+
+	/**
+	 * Most venues found in a search, without a setting.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const DEFAULT_LIMIT = 10;
+
+	/**
+	 * Most venues a search can be set to find.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const MAX_LIMIT = 50;
+
+	/**
+	 * Search radius in meters.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	protected $radius = self::DEFAULT_RADIUS;
+
+	/**
+	 * Most venues found in a search.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	protected $limit = self::DEFAULT_LIMIT;
+
+	/**
 	 * Timezone.
 	 *
 	 * @since 1.0.0
@@ -53,6 +109,12 @@ abstract class Venue_Provider extends Sloc_Provider {
 	 *  @type string $address Formatted Address String
 	 *  @type int $reverse_zoom Reverse Zoom. Default 18.
 	 *  @type string $user User name.
+	 *  @type int $radius Search radius in meters. Default the sloc_venue_radius setting.
+	 *  @type int $limit Most venues found. Default the sloc_venue_limit setting.
+	 * }
+	 *
+	 * @since 1.0.0
+	 * @since 6.1.0 Takes the search radius and limit.
 	 */
 	public function __construct( $args = array() ) {
 		$defaults = array(
@@ -61,6 +123,8 @@ abstract class Venue_Provider extends Sloc_Provider {
 			'longitude' => null,
 			'altitude'  => null,
 			'user'      => '',
+			'radius'    => get_option( 'sloc_venue_radius', self::DEFAULT_RADIUS ),
+			'limit'     => get_option( 'sloc_venue_limit', self::DEFAULT_LIMIT ),
 		);
 		/**
 		 * Filters the default arguments of venue providers.
@@ -69,10 +133,12 @@ abstract class Venue_Provider extends Sloc_Provider {
 		 *
 		 * @param array $defaults Default arguments: api, latitude, longitude, altitude and user.
 		 */
-		$defaults   = apply_filters( 'sloc_venue_provider_defaults', $defaults );
-		$r          = wp_parse_args( $args, $defaults );
-		$this->user = $r['user'];
-		$this->api  = $r['api'];
+		$defaults     = apply_filters( 'sloc_venue_provider_defaults', $defaults );
+		$r            = wp_parse_args( $args, $defaults );
+		$this->user   = $r['user'];
+		$this->api    = $r['api'];
+		$this->radius = self::sanitize_radius( $r['radius'] );
+		$this->limit  = self::sanitize_limit( $r['limit'] );
 		$this->set( $r['latitude'], $r['longitude'] );
 
 		if ( $this->is_active() && method_exists( $this, 'admin_init' ) ) {
@@ -128,7 +194,114 @@ abstract class Venue_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Sanitizes the search radius setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Radius in meters.
+	 * @return int Radius from MIN_RADIUS to MAX_RADIUS, or DEFAULT_RADIUS for anything that isn't a number.
+	 */
+	public static function sanitize_radius( $value ) {
+		if ( ! is_numeric( $value ) ) {
+			return self::DEFAULT_RADIUS;
+		}
+		return max( self::MIN_RADIUS, min( self::MAX_RADIUS, (int) round( (float) $value ) ) );
+	}
+
+	/**
+	 * Sanitizes the most venues setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Most venues.
+	 * @return int From 1 to MAX_LIMIT, or DEFAULT_LIMIT for anything that isn't a number.
+	 */
+	public static function sanitize_limit( $value ) {
+		if ( ! is_numeric( $value ) ) {
+			return self::DEFAULT_LIMIT;
+		}
+		return max( 1, min( self::MAX_LIMIT, (int) $value ) );
+	}
+
+	/**
+	 * Returns the search radius in meters.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return int Radius.
+	 */
+	public function get_radius() {
+		return $this->radius;
+	}
+
+	/**
+	 * Returns the most venues a search finds.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return int Limit.
+	 */
+	public function get_limit() {
+		return $this->limit;
+	}
+
+	/**
+	 * Returns the venues near the location: the provider's, within the radius, nearest first, up to the limit.
+	 *
+	 * Each venue with coordinates gets its distance from the location, in meters, as 'distance'. Venues without
+	 * coordinates come last.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return array|WP_Error Array with the venues as h-cards under 'items', or an error.
+	 */
+	public function nearby() {
+		$result = $this->reverse_lookup();
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		$items = ( is_array( $result ) && isset( $result['items'] ) && is_array( $result['items'] ) ) ? $result['items'] : array();
+		return array( 'items' => self::sort_items( $items, $this->latitude, $this->longitude, $this->radius, $this->limit ) );
+	}
+
+	/**
+	 * Sorts venues by distance from a location, leaving out those beyond the radius.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $items     Venues as h-cards.
+	 * @param float $latitude  Latitude.
+	 * @param float $longitude Longitude.
+	 * @param int   $radius    Radius in meters, or 0 for any distance.
+	 * @param int   $limit     Most venues, or 0 for all.
+	 * @return array Venues, nearest first, each with 'distance' in meters if it has coordinates.
+	 */
+	public static function sort_items( $items, $latitude, $longitude, $radius = 0, $limit = 0 ) {
+		$near = array();
+		$rest = array();
+		foreach ( (array) $items as $item ) {
+			if ( ! is_array( $item ) || empty( $item ) ) {
+				continue;
+			}
+			if ( ! is_numeric( $item['latitude'] ?? null ) || ! is_numeric( $item['longitude'] ?? null ) || ! is_numeric( $latitude ) || ! is_numeric( $longitude ) ) {
+				$rest[] = $item;
+				continue;
+			}
+			$item['distance'] = (int) round( geo_distance( $latitude, $longitude, $item['latitude'], $item['longitude'] ) );
+			if ( $radius > 0 && $item['distance'] > $radius ) {
+				continue;
+			}
+			$near[] = $item;
+		}
+		usort( $near, fn( $a, $b ) => $a['distance'] <=> $b['distance'] );
+		$items = array_merge( $near, $rest );
+		return $limit > 0 ? array_slice( $items, 0, $limit ) : $items;
+	}
+
+	/**
 	 * Returns a list of one or more possible venues in h-card jf2 format.
+	 *
+	 * Callers use nearby(), which sorts and limits the venues.
 	 *
 	 * @return array Array of jf2 h-card elements under property items.
 	 */
