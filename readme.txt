@@ -47,6 +47,8 @@ from the locations added aren't consistent, it will duplicate and explode the li
 
 Locations are matched using the country code, region code, and locality field, and therefore, you can edit the displayed name or the region code without issue. Due to matching issues, you may have to make some manual changes and there may be some occasional duplication.
 
+When duplicates are created, such as two localities for the same city, select them in the Locations list and choose Merge. On the next screen, pick the location to keep; the oldest is picked by default. You can merge only locations of the same kind: countries, regions or localities. Their posts and child locations move to the one kept, the others' names and codes are added to it so future lookups find it instead of creating the duplicate again, and the others are deleted, with their archive addresses redirecting to it.
+
 There is no top level Location page, /location included in the plugin. You can create a page at this location and use a custom template to allow it to show a list of your locations.
 
 == Venues ==

@@ -10,8 +10,8 @@ defined( 'ABSPATH' ) || exit;
 add_action( 'init', array( 'Sloc_Merge', 'init' ) );
 
 /**
- * Merges duplicate venues: a Merge bulk action, a screen to choose which to keep, and redirects from the
- * addresses of those merged.
+ * Merges duplicate venues and locations: a Merge bulk action, a screen to choose which to keep, and redirects from
+ * the addresses of those merged.
  *
  * @since 6.1.0
  */
@@ -66,7 +66,8 @@ class Sloc_Merge {
 	 */
 	public static function screens() {
 		return array(
-			'venue' => 'edit-venue',
+			'venue'    => 'edit-venue',
+			'location' => 'edit-location',
 		);
 	}
 
@@ -154,6 +155,28 @@ class Sloc_Merge {
 				}
 			}
 		}
+		$taxonomy = get_taxonomy( 'location' );
+		if ( 'location' === $type && $taxonomy && current_user_can( $taxonomy->cap->edit_terms ) ) {
+			foreach ( $ids as $id ) {
+				$term = get_term( $id, 'location' );
+				if ( $term instanceof WP_Term ) {
+					$items[] = array(
+						'id'     => $term->term_id,
+						'name'   => Location_Taxonomy::display_name(
+							$term->term_id,
+							array(
+								'links' => false,
+								'flag'  => false,
+							)
+						),
+						'detail' => Location_Taxonomy::location_type( Location_Taxonomy::get_location_type( $term->term_id ) ),
+						'count'  => (int) $term->count,
+						// Terms have no date; the lowest ID is the oldest.
+						'order'  => sprintf( '%020d', $term->term_id ),
+					);
+				}
+			}
+		}
 		usort( $items, fn( $a, $b ) => strcmp( $a['order'], $b['order'] ) );
 		return $items;
 	}
@@ -237,6 +260,9 @@ class Sloc_Merge {
 		if ( 'venue' === $type ) {
 			return Post_Venue::merge_venues( $keep, $ids );
 		}
+		if ( 'location' === $type ) {
+			return Location_Taxonomy::merge_locations( $keep, $ids );
+		}
 		return 0;
 	}
 
@@ -249,6 +275,9 @@ class Sloc_Merge {
 	 * @return string URL.
 	 */
 	public static function list_url( $type ) {
+		if ( 'location' === $type ) {
+			return admin_url( 'edit-tags.php?taxonomy=location' );
+		}
 		return 'venue' === $type ? admin_url( 'edit.php?post_type=venue' ) : admin_url();
 	}
 
@@ -341,6 +370,25 @@ class Sloc_Merge {
 		);
 		if ( ! empty( $posts ) ) {
 			return get_permalink( $posts[0] );
+		}
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'location',
+				'hide_empty' => false,
+				'number'     => 1,
+				'fields'     => 'ids',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Run only for addresses that weren't found.
+				'meta_query' => array(
+					array(
+						'key'   => self::REDIRECT_KEY,
+						'value' => $key,
+					),
+				),
+			)
+		);
+		if ( is_array( $terms ) && ! empty( $terms ) ) {
+			$link = get_term_link( (int) $terms[0], 'location' );
+			return is_wp_error( $link ) ? false : $link;
 		}
 		return false;
 	}

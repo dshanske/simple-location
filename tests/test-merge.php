@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for merging duplicates (#242).
+ * Tests for merging duplicates (#242, #738).
  *
  * @package Simple_Location
  */
@@ -274,6 +274,101 @@ class MergeTest extends WP_UnitTestCase {
 		ob_start();
 		Sloc_Merge::admin_notices();
 		$this->assertSame( '', ob_get_clean() );
+	}
+
+	/**
+	 * Returns the address of a Philadelphia locality, by the name given.
+	 *
+	 * @param string $locality Locality.
+	 * @return array Address.
+	 */
+	protected function philadelphia( $locality = 'Philadelphia' ) {
+		return array(
+			'locality'     => $locality,
+			'region'       => 'Pennsylvania',
+			'region-code'  => 'PA',
+			'country-code' => 'US',
+			'country-name' => 'United States',
+		);
+	}
+
+	/**
+	 * Posts in a duplicate locality move to the one kept, whose lookups then match the duplicate's name too; the
+	 * duplicate is deleted, and its address redirects (#738).
+	 */
+	public function test_merge_locations() {
+		$keep      = Location_Taxonomy::get_location( $this->philadelphia(), true );
+		$duplicate = Location_Taxonomy::get_location( $this->philadelphia( 'Philly' ), true );
+		$this->assertNotSame( $keep, $duplicate );
+		$post_id = self::factory()->post->create();
+		Location_Taxonomy::set_location( $post_id, $duplicate );
+		$link = get_term_link( $duplicate, 'location' );
+
+		$this->assertSame( 1, Location_Taxonomy::merge_locations( $keep, array( $keep, $duplicate ) ) );
+		$this->assertNull( get_term( $duplicate, 'location' ), 'Deleted outright.' );
+		$this->assertSame( array( $keep ), wp_get_object_terms( $post_id, 'location', array( 'fields' => 'ids' ) ) );
+		$this->assertSame( $keep, Location_Taxonomy::get_location( $this->philadelphia( 'Philly' ), true ), 'Not created again.' );
+		$this->assertSame( $keep, Location_Taxonomy::get_location( $this->philadelphia() ) );
+		$this->assertSame( 'Philadelphia', get_term( $keep )->name );
+		$this->assertSame( get_term_link( $keep, 'location' ), Sloc_Merge::redirect_url( $link ) );
+	}
+
+	/**
+	 * Merged regions' localities move to the region kept; only locations of the same kind are merged, by users who
+	 * can manage locations (#738).
+	 */
+	public function test_merge_locations_kinds() {
+		$locality = Location_Taxonomy::get_location( $this->philadelphia(), true );
+		$region   = get_term( $locality )->parent;
+		$country  = get_term( $region )->parent;
+		$other    = wp_insert_term(
+			'Penna.',
+			'location',
+			array( 'parent' => $country )
+		)['term_id'];
+		add_term_meta( $other, 'region', 'Penna.' );
+		$child = wp_insert_term(
+			'Pittsburgh',
+			'location',
+			array( 'parent' => $other )
+		)['term_id'];
+
+		$this->assertSame( 0, Location_Taxonomy::merge_locations( $region, array( $locality, $country ) ), 'Not of the same kind.' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
+		$this->assertSame( 0, Location_Taxonomy::merge_locations( $region, array( $other ) ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$this->assertSame( 1, Location_Taxonomy::merge_locations( $region, array( $other ) ) );
+		$this->assertSame( $region, get_term( $child )->parent );
+		$this->assertContains( 'Penna.', get_term_meta( $region, 'region' ) );
+		$this->assertSame(
+			$region,
+			Location_Taxonomy::get_region(
+				array(
+					'region'       => 'Penna.',
+					'country-code' => 'US',
+				)
+			)
+		);
+		$this->assertSame( 0, Location_Taxonomy::merge_locations( 999999, array( $region ) ), 'Not a location.' );
+	}
+
+	/**
+	 * The Locations list has the Merge action, and its screen lists locations oldest first, with their kind (#738).
+	 */
+	public function test_location_bulk_action_and_items() {
+		$this->assertArrayHasKey( Sloc_Merge::ACTION, apply_filters( 'bulk_actions-edit-location', array() ) );
+		$url = apply_filters( 'handle_bulk_actions-edit-location', 'edit-tags.php?taxonomy=location', Sloc_Merge::ACTION, array( 9, 8 ) );
+		$this->assertStringContainsString( 'type=location', $url );
+
+		$first  = Location_Taxonomy::get_location( $this->philadelphia(), true );
+		$second = Location_Taxonomy::get_location( $this->philadelphia( 'Philly' ), true );
+		$items  = Sloc_Merge::items( 'location', array( $second, $first, 999999 ) );
+		$this->assertSame( array( $first, $second ), wp_list_pluck( $items, 'id' ) );
+		$this->assertSame( 'Locality', $items[0]['detail'] );
+		$this->assertStringContainsString( 'Philadelphia', $items[0]['name'] );
+		$this->assertSame( admin_url( 'edit-tags.php?taxonomy=location' ), Sloc_Merge::list_url( 'location' ) );
+		$this->assertSame( 1, Sloc_Merge::merge( 'location', $first, array( $first, $second ) ) );
 	}
 
 	/**
