@@ -90,6 +90,19 @@ class Post_Venue {
 
 		register_meta(
 			'post',
+			'venue_category',
+			array(
+				'object_subtype'    => 'venue',
+				'type'              => 'string',
+				'description'       => __( 'Shared category of the venue, such as food', 'simple-location' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_category' ),
+			)
+		);
+
+		register_meta(
+			'post',
 			'venue_street_address',
 			array(
 				'object_subtype'    => 'venue',
@@ -621,7 +634,8 @@ class Post_Venue {
 	 *
 	 * @since 5.0.0
 	 * @since 6.1.0 Matches by identifier and by name nearby, and keeps the identifier and provider pages. Keeps
-	 *              only what the provider allows; see storage() (#729).
+	 *              only what the provider allows; see storage(). Gives a new venue one of the user's venue types,
+	 *              and its shared category (#729).
 	 *
 	 * @param array $venue Check-in or address properties. Needs a name or label.
 	 * @return int|WP_Error|false The venue ID, or false without a name.
@@ -651,6 +665,9 @@ class Post_Venue {
 			return $id;
 		}
 
+		// The type is one of the user's own terms, so it is chosen before a reference provider's details are left out.
+		$type     = self::match_venue_type( $venue );
+		$category = self::sanitize_category( $venue['venue-category'] ?? '' );
 		if ( Venue_Provider::STORAGE_REFERENCE === self::storage( $venue ) ) {
 			$venue = self::reference_details( $venue );
 		}
@@ -689,6 +706,12 @@ class Post_Venue {
 		$id = wp_insert_post( $wp, true );
 		if ( ! is_wp_error( $id ) ) {
 			self::add_venue_sources( $id, $venue, array() );
+			if ( $type ) {
+				wp_set_object_terms( $id, array( $type ), 'venue_type' );
+			}
+			if ( '' !== $category ) {
+				update_post_meta( $id, 'venue_category', $category );
+			}
 			if ( $location ) {
 				Location_Taxonomy::set_location( $id, $location );
 			}
@@ -915,6 +938,110 @@ class Post_Venue {
 			return $content;
 		}
 		return $content . self::venue_links_html( $venue_id );
+	}
+
+	/**
+	 * Sanitizes a venue's shared category.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Category, a key of Venue_Provider::categories(), such as 'food'.
+	 * @return string Category, or an empty string for anything else.
+	 */
+	public static function sanitize_category( $value ) {
+		return ( is_string( $value ) && isset( Venue_Provider::categories()[ $value ] ) ) ? $value : '';
+	}
+
+	/**
+	 * Returns the existing venue type that fits a check-in's venue.
+	 *
+	 * A venue type fits when its slug or name is the venue's shared category, such as food or Food, or one of the
+	 * provider's own categories, such as cafe. Venue types are the user's own: none is created.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $venue Check-in or venue properties, with 'venue-category' and 'category'.
+	 * @return int Venue type term ID, or 0 if none fits.
+	 */
+	public static function match_venue_type( $venue ) {
+		$candidates = array();
+		$category   = self::sanitize_category( $venue['venue-category'] ?? '' );
+		if ( '' !== $category && 'other' !== $category ) {
+			$candidates[] = $category;
+			$candidates[] = Venue_Provider::categories()[ $category ];
+		}
+		foreach ( (array) ( $venue['category'] ?? array() ) as $name ) {
+			if ( is_string( $name ) && '' !== trim( $name ) ) {
+				$candidates[] = str_replace( '_', ' ', trim( $name ) );
+			}
+		}
+		$term_id = 0;
+		foreach ( $candidates as $candidate ) {
+			$term = get_term_by( 'slug', sanitize_title( $candidate ), 'venue_type' );
+			if ( ! $term ) {
+				$term = get_term_by( 'name', $candidate, 'venue_type' );
+			}
+			if ( $term instanceof WP_Term ) {
+				$term_id = $term->term_id;
+				break;
+			}
+		}
+		/**
+		 * Filters the venue type given to a new venue.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param int   $term_id Venue type term ID, or 0 for none.
+		 * @param array $venue   Check-in or venue properties.
+		 */
+		return (int) apply_filters( 'sloc_venue_type', $term_id, $venue );
+	}
+
+	/**
+	 * Returns the venue type suggested for a venue without one, from its shared category.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int $venue_id Venue ID.
+	 * @return array|null Array with 'category', 'name' and 'term_id', the existing term or 0 for a new one; or null
+	 *                    if the venue has a type, or no category to suggest one from.
+	 */
+	public static function suggested_type( $venue_id ) {
+		$category = self::sanitize_category( get_post_meta( $venue_id, 'venue_category', true ) );
+		if ( '' === $category || 'other' === $category || ! empty( wp_get_object_terms( $venue_id, 'venue_type', array( 'fields' => 'ids' ) ) ) ) {
+			return null;
+		}
+		return array(
+			'category' => $category,
+			'name'     => Venue_Provider::categories()[ $category ],
+			'term_id'  => self::match_venue_type( array( 'venue-category' => $category ) ),
+		);
+	}
+
+	/**
+	 * Gives a venue the venue type suggested for it, creating the type if the user may.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int $venue_id Venue ID.
+	 * @return int|false Venue type term ID, or false if there is no suggestion or the user can't add it.
+	 */
+	public static function add_suggested_type( $venue_id ) {
+		$suggestion = self::suggested_type( $venue_id );
+		$taxonomy   = get_taxonomy( 'venue_type' );
+		if ( ! $suggestion || ! $taxonomy || ! current_user_can( $taxonomy->cap->assign_terms ) || ! current_user_can( 'edit_post', $venue_id ) ) {
+			return false;
+		}
+		$term_id = $suggestion['term_id'];
+		if ( ! $term_id ) {
+			$term = wp_insert_term( $suggestion['name'], 'venue_type', array( 'slug' => $suggestion['category'] ) );
+			if ( is_wp_error( $term ) ) {
+				return false;
+			}
+			$term_id = (int) $term['term_id'];
+		}
+		wp_set_object_terms( $venue_id, array( $term_id ), 'venue_type', true );
+		return $term_id;
 	}
 
 	/**

@@ -45,6 +45,7 @@
 - [`sloc_venue_alternate_hosts`](sloc_venue_alternate_hosts) Filters the hosts of sites with pages about places.
 - [`sloc_venue_links`](sloc_venue_links) Filters the links shown for a venue.
 - [`sloc_venue_storage`](sloc_venue_storage) Filters what may be kept of a check-in's venue.
+- [`sloc_venue_type`](sloc_venue_type) Filters the venue type given to a new venue.
 
 ## class-rest-geo.php
 

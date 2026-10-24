@@ -21,6 +21,7 @@ if ( 'comment' === $screen->id ) {
 		$geodata['venue_url']       = get_post_meta( get_the_ID(), 'venue_url', true );
 		$geodata['venue_alternate'] = Post_Venue::sanitize_alternate( get_post_meta( get_the_ID(), 'venue_alternate', true ) );
 		$geodata['post_visibility'] = Post_Venue::get_post_visibility( get_the_ID() );
+		$geodata['suggested_type']  = Post_Venue::suggested_type( get_the_ID() );
 	} else {
 		$geodata['venue_id'] = get_post_meta( get_the_ID(), 'venue_id', true );
 	}
@@ -114,6 +115,18 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			</select>
 		</label>
 		<p class="description"><?php esc_html_e( 'The location visibility given to posts made here, such as Private at home. You can still change it on each post.', 'simple-location' ); ?></p>
+		<?php if ( ! empty( $geodata['suggested_type'] ) ) : ?>
+			<label for="venue_type_suggestion">
+				<input type="checkbox" name="venue_type_suggestion" id="venue_type_suggestion" value="1" />
+				<?php
+				printf(
+					/* translators: %s: Venue type, such as Food. */
+					esc_html( $geodata['suggested_type']['term_id'] ? __( 'Add the type %s', 'simple-location' ) : __( 'Add the new type %s', 'simple-location' ) ),
+					esc_html( $geodata['suggested_type']['name'] )
+				);
+				?>
+			</label>
+		<?php endif; ?>
 
 	<?php } else { ?>
 		<label for="venue_id" class="quarter">

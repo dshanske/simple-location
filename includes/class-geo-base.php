@@ -1402,6 +1402,9 @@ class Geo_Base {
 					update_post_meta( $post_id, 'venue_alternate', $alternate );
 				}
 			}
+			if ( ! empty( $_POST['venue_type_suggestion'] ) ) {
+				Post_Venue::add_suggested_type( $post_id );
+			}
 			$visibility = isset( $_POST['venue_post_visibility'] ) ? Post_Venue::sanitize_post_visibility( sanitize_key( wp_unslash( $_POST['venue_post_visibility'] ) ) ) : '';
 			if ( '' === $visibility ) {
 				delete_post_meta( $post_id, 'venue_post_visibility' );

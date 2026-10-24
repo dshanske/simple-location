@@ -984,6 +984,128 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A venue type fits by the shared category's key or name, or the provider's own category; none is created (#729).
+	 */
+	public function test_match_venue_type() {
+		$this->assertSame( 0, Post_Venue::match_venue_type( array( 'venue-category' => 'food' ) ), 'No types yet.' );
+		$food   = self::factory()->term->create(
+			array(
+				'taxonomy' => 'venue_type',
+				'name'     => 'Food',
+				'slug'     => 'eating',
+			)
+		);
+		$coffee = self::factory()->term->create(
+			array(
+				'taxonomy' => 'venue_type',
+				'name'     => 'Coffee Shop',
+			)
+		);
+		$this->assertSame( $food, Post_Venue::match_venue_type( array( 'venue-category' => 'food' ) ), 'By name.' );
+		$this->assertSame( $coffee, Post_Venue::match_venue_type( array( 'category' => array( 'coffee_shop' ) ) ), 'By the provider\'s category.' );
+		$this->assertSame( $coffee, Post_Venue::match_venue_type( array( 'category' => 'Coffee Shop' ) ) );
+		$this->assertSame(
+			$food,
+			Post_Venue::match_venue_type(
+				array(
+					'venue-category' => 'food',
+					'category'       => array( 'coffee_shop' ),
+				)
+			),
+			'The shared category first.'
+		);
+		$this->assertSame( 0, Post_Venue::match_venue_type( array( 'venue-category' => 'other' ) ) );
+		$this->assertSame( 0, Post_Venue::match_venue_type( array( 'venue-category' => 'not a category' ) ) );
+
+		add_filter( 'sloc_venue_type', fn() => 7 );
+		$this->assertSame( 7, Post_Venue::match_venue_type( array() ) );
+	}
+
+	/**
+	 * A new venue gets an existing type that fits, and its shared category; with no type that fits, none is
+	 * created (#729).
+	 */
+	public function test_add_new_venue_type() {
+		$venue_id = Post_Venue::add_new_venue(
+			array(
+				'name'           => 'Diner',
+				'venue-category' => 'food',
+				'latitude'       => 40.7128,
+				'longitude'      => -74.006,
+			)
+		);
+		$this->assertSame( array(), wp_get_object_terms( $venue_id, 'venue_type', array( 'fields' => 'ids' ) ) );
+		$this->assertSame(
+			0,
+			(int) wp_count_terms(
+				array(
+					'taxonomy'   => 'venue_type',
+					'hide_empty' => false,
+				)
+			)
+		);
+		$this->assertSame( 'food', get_post_meta( $venue_id, 'venue_category', true ) );
+
+		$food = self::factory()->term->create(
+			array(
+				'taxonomy' => 'venue_type',
+				'name'     => 'Food',
+			)
+		);
+		// From a provider that allows only references too: the type is the user's own.
+		Venue_Provider_Sloc_Test::$storage = Venue_Provider::STORAGE_REFERENCE;
+		$venue_id                          = Post_Venue::add_new_venue(
+			array(
+				'name'           => 'Other Diner',
+				'provider'       => 'sloc_test',
+				'venue-category' => 'food',
+				'latitude'       => 41,
+				'longitude'      => -74,
+			)
+		);
+		Venue_Provider_Sloc_Test::reset();
+		$this->assertSame( array( $food ), wp_get_object_terms( $venue_id, 'venue_type', array( 'fields' => 'ids' ) ) );
+		$this->assertSame( 'food', get_post_meta( $venue_id, 'venue_category', true ) );
+	}
+
+	/**
+	 * A venue without a type is offered the type of its category, which the user can add, creating it if needed (#729).
+	 */
+	public function test_suggested_type() {
+		$venue_id = $this->venue();
+		$this->assertNull( Post_Venue::suggested_type( $venue_id ), 'No category.' );
+		update_post_meta( $venue_id, 'venue_category', 'drink' );
+		$this->assertSame(
+			array(
+				'category' => 'drink',
+				'name'     => 'Drink',
+				'term_id'  => 0,
+			),
+			Post_Venue::suggested_type( $venue_id )
+		);
+		$this->assertFalse( Post_Venue::add_suggested_type( $venue_id ), 'Logged out.' );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$term_id = Post_Venue::add_suggested_type( $venue_id );
+		$this->assertIsInt( $term_id );
+		$this->assertSame( 'Drink', get_term( $term_id )->name );
+		$this->assertSame( 'drink', get_term( $term_id )->slug );
+		$this->assertSame( array( $term_id ), wp_get_object_terms( $venue_id, 'venue_type', array( 'fields' => 'ids' ) ) );
+		$this->assertNull( Post_Venue::suggested_type( $venue_id ), 'It has a type now.' );
+
+		// Another venue is offered the existing type.
+		$other = $this->venue( 41, -74 );
+		update_post_meta( $other, 'venue_category', 'drink' );
+		$this->assertSame( $term_id, Post_Venue::suggested_type( $other )['term_id'] );
+		$this->assertSame( $term_id, Post_Venue::add_suggested_type( $other ) );
+
+		update_post_meta( $other, 'venue_category', 'other' );
+		wp_set_object_terms( $other, array(), 'venue_type' );
+		$this->assertNull( Post_Venue::suggested_type( $other ) );
+		$this->assertSame( '', Post_Venue::sanitize_category( 'nonsense' ) );
+	}
+
+	/**
 	 * Child venues are found among venues, not posts, and all of them are returned.
 	 */
 	public function test_get_venue_children() {
