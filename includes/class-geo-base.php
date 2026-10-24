@@ -1325,7 +1325,12 @@ class Geo_Base {
 			$weather['code'] = wp_unslash( $_POST['weather_code'] );
 		}
 
+		// A field left empty, or the condition set to None, removes what was stored (#743).
+		$cleared = array();
 		foreach( $weather as $key => $value ) {
+			if ( ( is_string( $value ) && '' === trim( $value ) ) || ( 'code' === $key && 'none' === $value ) ) {
+				$cleared[] = $key;
+			}
 			if ( ! is_numeric( $value ) ) {
 				unset( $weather[ $key ] );
 			}
@@ -1364,6 +1369,14 @@ class Geo_Base {
 			$weather = Weather_Provider::imperial_to_metric( $weather );
 		}
 		$weather = array_merge( $weather, $kept );
+		foreach ( $cleared as $key ) {
+			$weather[ $key ] = '';
+		}
+		// The summary and icon are those of the condition.
+		if ( in_array( 'code', $cleared, true ) ) {
+			$weather['summary'] = '';
+			$weather['icon']    = '';
+		}
 
 		// The provider the weather was looked up from, for its credit. An empty or unknown provider removes it.
 		if ( ! empty( $weather ) && array_key_exists( 'weather_provider', $_POST ) ) {

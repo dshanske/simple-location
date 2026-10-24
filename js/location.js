@@ -318,31 +318,36 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	function clearLocation() {
+		// The location and weather fields; a screen may have only some of them (#743).
 		const fieldIds = [
 			'address',
 			'latitude',
 			'longitude',
 			'altitude',
+			'accuracy',
 			'map_zoom',
-			'temperature',
-			'humidity',
 			'speed',
 			'heading',
-			'weather_summary',
-			'weather_icon',
-			'wind_speed',
-			'wind_degree',
-			'weather-visibility',
+			'plus_code',
+			'temperature',
+			'humidity',
+			'windspeed',
+			'winddegree',
+			'weather_visibility',
 			'pressure',
 			'cloudiness',
+			'rain',
+			'snow',
+			'weather_provider',
 		];
 		if ( ! confirm( 'Are you sure you want to remove the location details?' ) ) {
 			return;
 		}
-		$.each( fieldIds, function( count, val ) {
-			document.getElementById( val ).value = '';
+		$.each( fieldIds, function( count, id ) {
+			$( '#' + id ).val( '' );
+			$( '#' + id + '_exact' ).val( '' );
 		} );
-		$( '#plus_code' ).val( '' );
+		$( '#weather_code' ).val( 'none' );
 		$( '#location-label' ).text( 'None' );
 		$( '#weather-label' ).text( 'None' );
 		$( '#hide-map' ).html( '' );
