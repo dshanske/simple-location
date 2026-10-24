@@ -134,7 +134,7 @@ Most services have a free allowance and charge, or stop, beyond it. The plugin o
 
 Sign up with the service, create an API key, and enter it in the service's section of the API Keys tab. Notes for each:
 
-* [Google Maps Platform](https://developers.google.com/maps/get-started) - needs a billing account, and gives each API a monthly free allowance. In the Google Cloud console, enable the APIs for what you use Google for: the Maps Static API for maps, the Geocoding API for addresses, the Elevation API for elevation, and the Places API for venues. Restrict the key to those APIs. For maps, see also "How do I protect my map API keys?"
+* [Google Maps Platform](https://developers.google.com/maps/get-started) - needs a billing account, and gives each API a monthly free allowance. In the Google Cloud console, enable the APIs for what you use Google for: the Maps Static API for maps, the Geocoding API for addresses, the Elevation API for elevation, and the Places API (New) for venues. Restrict the key to those APIs. For maps, see also "How do I protect my map API keys?"
 * [Mapbox](https://account.mapbox.com/access-tokens/) - a public token (starting pk.) draws the maps. To list your own styles in the settings, enter a secret token with the styles:list scope as the Mapbox API Key, your username, and the public token as the Mapbox Map API Key; the secret token is never shown on your site.
 * [HERE](https://platform.here.com/) - one API key for maps, addresses and weather.
 * [LocationIQ](https://locationiq.com/) - one API key for maps, addresses and venues.
