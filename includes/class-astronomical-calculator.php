@@ -677,7 +677,7 @@ class Astronomical_Calculator {
 	 *
 	 * @param float    $interval  The time interval over which the radiation is to be calculated in hours.
 	 * @param int|null $timestamp Optional. Unix timestamp at the end of the interval. Default now.
-	 * @return float The Average Solar Radiation over the time interval in MJ/m^2/hr.
+	 * @return float The solar radiation over the time interval in MJ/m^2: per hour for an interval of one hour.
 	 */
 	public function sun_radiation( $interval, $timestamp = null ) {
 		if ( is_null( $timestamp ) ) {

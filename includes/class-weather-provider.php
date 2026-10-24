@@ -236,6 +236,95 @@ abstract class Weather_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Lux of daylight per watt per square meter of solar radiation, roughly, to compare illuminance with radiation.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const LUX_PER_WATT = 120;
+
+	/**
+	 * Least clear-sky radiation, in W/m², at which the sky is estimated from sunlight; below it, about when the sun is
+	 * under 10 degrees, the measurement says little about clouds.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const MIN_CLEAR_SKY_RADIATION = 150;
+
+	/**
+	 * Returns the radiation a clear sky would give at a place and time, in W/m².
+	 *
+	 * The FAO-56 clear-sky radiation over the 15 minutes around the time, from Astronomical_Calculator.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param Astronomical_Calculator $calc      Calculator for the place.
+	 * @param int                     $timestamp Unix timestamp.
+	 * @return float Radiation in W/m².
+	 */
+	public static function clear_sky_radiation( $calc, $timestamp ) {
+		// The radiation over the quarter hour, in MJ/m², as an hourly rate, then in W/m².
+		return $calc->clear_sky_radiation( $calc->sun_radiation( 0.25, $timestamp + 450 ) ) / 0.25 * 1000000 / 3600;
+	}
+
+	/**
+	 * Estimates the sky by day from the sunlight measured, as a weather station gives it, by comparing it with what a
+	 * clear sky would give at that time and place.
+	 *
+	 * The ratio, the clearness index, is about 1 under a clear sky and falls as clouds block the sun: 0.8 or more is a
+	 * clear sky, then few, scattered and broken clouds, and under 0.3, overcast.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param float|null              $radiation   Solar radiation in W/m², if measured.
+	 * @param float|null              $illuminance Illuminance in lux, used without the radiation.
+	 * @param Astronomical_Calculator $calc        Calculator for the place.
+	 * @param int|DateTime|null       $timestamp   Time. Default now.
+	 * @return int|null Condition code, 800 to 804, or null without a measurement or with the sun too low.
+	 */
+	public static function condition_from_sunlight( $radiation, $illuminance, $calc, $timestamp = null ) {
+		if ( is_numeric( $radiation ) ) {
+			$measured = (float) $radiation;
+		} elseif ( is_numeric( $illuminance ) ) {
+			$measured = (float) $illuminance / self::LUX_PER_WATT;
+		} else {
+			return null;
+		}
+		if ( $timestamp instanceof DateTimeInterface ) {
+			$timestamp = $timestamp->getTimestamp();
+		}
+		$timestamp = is_numeric( $timestamp ) ? (int) $timestamp : time();
+		$clear     = self::clear_sky_radiation( $calc, $timestamp );
+		if ( $clear < self::MIN_CLEAR_SKY_RADIATION || $measured < 0 ) {
+			return null;
+		}
+		$index = $measured / $clear;
+		$code  = 804;
+		foreach ( array(
+			800 => 0.8,
+			801 => 0.65,
+			802 => 0.5,
+			803 => 0.3,
+		) as $condition => $least ) {
+			if ( $index >= $least ) {
+				$code = $condition;
+				break;
+			}
+		}
+		/**
+		 * Filters the condition estimated from the sunlight measured.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param int   $code  Condition code, 800 (clear sky) to 804 (overcast).
+		 * @param float $index Clearness index: the radiation measured over that of a clear sky.
+		 * @param float $clear Clear-sky radiation in W/m².
+		 */
+		return (int) apply_filters( 'sloc_condition_from_sunlight', $code, $index, $clear );
+	}
+
+	/**
 	 * Extra Parameters for location.
 	 *
 	 * @since 6.0.0 Values of 0, and `day` when it is false, are kept.
@@ -243,6 +332,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * @since 6.1.0 Calculates the wind chill and heat index when the provider didn't give them.
 	 * @since 6.1.0 Calculates the dew point or relative humidity when the provider gave only one.
 	 * @since 6.1.0 Adds the provider's slug as `provider`, so its credit can be shown with the weather.
+	 * @since 6.1.0 Estimates the condition from the solar radiation or illuminance when the provider gave none.
 	 *
 	 * @param array $return Weather data.
 	 * @param int   $timestamp Unix timestamp. Optional.
@@ -253,6 +343,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type float  $humidity  Relative humidity in percent, if the provider gave it or the dew point. See relative_humidity().
 	 *  @type float  $windchill Wind chill in Celsius, if the provider gave it or it applies. See wind_chill().
 	 *  @type float  $heatindex Heat index in Celsius, if the provider gave it or it applies. See heat_index().
+	 *  @type int    $code      Condition, if the provider gave it, or estimated by day from the sunlight measured. See
+	 *                          condition_from_sunlight().
 	 *  @type bool   $day True if daytime, false if night.
 	 *  @type string $sunset Sunset in iso8601 format.
 	 *  @type string $sunrise Sunrise in iso8601 format.
@@ -293,7 +385,11 @@ abstract class Weather_Provider extends Sloc_Provider {
 		$return['moonrise'] = $calc->get_iso8601( $timestamp, 'moonrise' );
 		$return['moonset']  = $calc->get_iso8601( $timestamp, 'moonset' );
 		$return['day']      = $calc->is_daytime( $timestamp );
-		$timezone           = Loc_Timezone::timezone_for_location( $latitude, $longitude );
+		// Without a condition, such as from a station, one is estimated from the sunlight measured (#204).
+		if ( empty( $return['code'] ) && ! empty( $return['day'] ) ) {
+			$return['code'] = self::condition_from_sunlight( $return['radiation'] ?? null, $return['illuminance'] ?? null, $calc, $timestamp );
+		}
+		$timezone = Loc_Timezone::timezone_for_location( $latitude, $longitude );
 		if ( $timezone instanceof Timezone_Result ) {
 			$timezone = $timezone->timezone;
 		}

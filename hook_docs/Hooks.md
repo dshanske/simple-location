@@ -88,5 +88,6 @@
 
 ## class-weather-provider.php
 
+- [`sloc_condition_from_sunlight`](sloc_condition_from_sunlight) Filters the condition estimated from the sunlight measured.
 - [`sloc_weather_credit`](sloc_weather_credit) Filters the credit shown with a weather provider's weather.
 - [`sloc_weather_provider_defaults`](sloc_weather_provider_defaults) Filters the default arguments of weather providers.
