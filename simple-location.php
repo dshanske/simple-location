@@ -390,6 +390,7 @@ class Simple_Location_Plugin {
 			'class-venue-provider-overpass.php', // OpenStreetMap Overpass.
 			'class-venue-provider-geoapify.php', // Geoapify.
 			'class-venue-provider-here.php', // HERE.
+			'class-venue-provider-tomtom.php', // TomTom.
 		);
 		self::register_providers( $providers, 'includes/venue/' );
 	}
