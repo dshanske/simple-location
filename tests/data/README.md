@@ -80,7 +80,7 @@ Current conditions are for Philadelphia (`39.9524,-75.1636`); station requests u
 | `station-custom.json` | A custom station URL (the plugin's own format; `timestamp` is set by the test) | Hand-built from the plugin's parser |
 | `station-current-conditions.json` | A custom station URL in the current conditions format, version 1, as weewx-current-json writes it (`time` is set by the test) | Hand-built from weewx-current-json's output |
 
-Weatherstack (API-5), HERE weather (API-4), Met Office (API-3) and the location lookups that sort
+Weatherstack (API-5), HERE weather (API-4) and the location lookups that sort
 stations (NWS, Meteostat, custom station) have no fixtures yet.
 
 ## Elevation providers (`elevation/`)

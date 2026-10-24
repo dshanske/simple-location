@@ -119,8 +119,7 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 location of a three letter airport code, and three self-hosted location history services: [Compass](https://github.com/aaronpk/Compass), [Dawarich](https://dawarich.app/) and [GeoPulse](https://github.com/tess1o/geopulse).
 * Weather Providers retrieve weather data about your location and include OpenWeatherMap, Pirate Weather, Dark Sky, Weatherstack, WeatherBit, HERE, Open-Meteo and the US National Weather Service. Open-Meteo needs no key for non-commercial use, has historical weather, and can be self-hosted. HERE, Pirate Weather, Dark Sky, WeatherBit, and Weatherstack do not support stations. There is also an option for custom station URLs that must return the properties as they are stored in WordPress.
 ** The National Weather Service(US) uses their station lookup API to find the closest weather station, and uses weather from there. Therefore, if this returns no options, if you are outside the US, it will return no weather.
-** The Met Office(UK) uses the distance from your current location to the nearest UK weather station and finds the closest one. However, if the nearest station is more than 100km away, it will return nothing.
-** For weather services like the NWS, Met Office, and your own stations, where coverage is not worldwide, up to two fallback weather providers can be set. They are tried in order when a provider has no weather. See the FAQ.
+** For weather services like the NWS and your own stations, where coverage is not worldwide, up to two fallback weather providers can be set. They are tried in order when a provider has no weather. See the FAQ.
 
 ## Frequently Asked Questions
 
@@ -137,7 +136,6 @@ API Keys are required to use certain services.
 * [Weatherbit](https://www.weatherbit.io/api/weather-current)
 * [GeoNames](https://www.geonames.org) - requires a username
 * [LocationIQ](https://locationiq.com/)
-* [Met Office UK](https://www.metoffice.gov.uk/services/data/datapoint)
 * [OpenRoute Service](https://openrouteservice.org/)
 * [GeoApify](https://geoapify.com)
 * [Visual Crossing](https://www.visualcrossing.com/)
@@ -274,7 +272,7 @@ Currently, only Visual Crossing supports historic weather data on their basic pl
 
 Weather is looked up with up to three providers, tried in order: the weather provider, then the 2nd and 3rd under Fallback Weather Providers, for example your own station, a free service and a paid one. The first that has weather is used, and its credit is shown.
 
-A provider is skipped, without asking it, where it can't have weather: outside the country it covers, such as the National Weather Service outside the US and the Met Office outside the UK; more than 10 km from your stations, for Custom Station and WeeWX; or for a time it has no weather for. If a provider fails with an error, the next one is tried.
+A provider is skipped, without asking it, where it can't have weather: outside the country it covers, such as the National Weather Service outside the US; more than 10 km from your stations, for Custom Station and WeeWX; or for a time it has no weather for. If a provider fails with an error, the next one is tried.
 
 Geocoding and elevation work the same way, with Fallback Geo Providers and Fallback Elevation Providers, tried when a provider finds nothing or fails, such as when its quota runs out. Maps have no fallback, because the map provider decides how your maps look.
 

@@ -1749,7 +1749,7 @@ class Loc_Config {
 	 * @since 6.1.0
 	 *
 	 * @param string $group Group, such as 'google'.
-	 * @return bool Whether a provider in use has a slug that starts with the group, such as 'metofficeuk' for 'metoffice'.
+	 * @return bool Whether a provider in use has a slug that starts with the group, such as 'google'.
 	 */
 	protected static function api_group_in_use( $group ) {
 		foreach ( self::all_providers() as $provider ) {

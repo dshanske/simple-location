@@ -44,7 +44,6 @@ class WeatherAttributionTest extends WP_UnitTestCase {
 			'Xweather'       => array( 'aeris', '<a href="https://www.xweather.com/">Powered by Vaisala Xweather</a>', false ),
 			'Weatherbit'     => array( 'weatherbit', '<a href="https://www.weatherbit.io/">Weather data by Weatherbit.io</a>', false ),
 			'Meteostat'      => array( 'meteostat', '<a href="https://meteostat.net/">Source: Meteostat and its data providers</a>', false ),
-			'Met Office'     => array( 'metofficeuk', '<a href="https://www.metoffice.gov.uk/">Powered by Met Office data</a>', false ),
 		);
 	}
 

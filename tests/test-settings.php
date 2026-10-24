@@ -10,6 +10,7 @@
  * Settings and bootstrap tests.
  */
 class SettingsTest extends WP_UnitTestCase {
+	use Sloc_Http_Mock;
 
 	/**
 	 * Loads the admin functions the settings page uses.
@@ -761,6 +762,23 @@ class SettingsTest extends WP_UnitTestCase {
 			)
 		);
 		$this->assertSame( '', Geo_Data::get_map( 'post', $post_id ) );
+	}
+
+	/**
+	 * Sites that chose the Met Office, which was removed, have the choice cleared, and it is skipped as a fallback (#479).
+	 */
+	public function test_removed_metoffice_provider() {
+		$this->assertArrayNotHasKey( 'metofficeuk', Loc_Config::weather_providers() );
+		update_option( 'sloc_weather_provider', 'metofficeuk' );
+		$this->assertNull( Loc_Config::weather_provider() );
+		$this->assertNotSame( 'metofficeuk', get_option( 'sloc_weather_provider' ) );
+
+		update_option( 'sloc_weather_provider', 'metofficeuk' );
+		update_option( 'sloc_weather_fallbacks', array( 'metofficeuk' ) );
+		$this->mock_http( array() );
+		$this->assertSame( 'no_provider', Sloc_Provider_Chain::weather( 51.5, -0.12 )->get_error_code() );
+		$this->assertSame( array(), $this->http_requests );
+		delete_option( 'sloc_weather_fallbacks' );
 	}
 
 	/**
