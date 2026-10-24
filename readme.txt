@@ -58,6 +58,20 @@ information about the venue. At this time, venues are shared between users and i
 Venues can be set to hide the actual location for privacy purposes, for example 'Home'.
 A venue can also set the visibility of posts made there with "Visibility of Posts Here", for example Private at home. It applies when a post's location is looked up in the editor, found in the background, sent by Micropub, or a check-in. A visibility chosen on the post, or sent by a Micropub client, still wins.
 
+A venue is created when you check in, such as from a Micropub client, or with a bulk location lookup of check-ins. Before creating one, Simple Location looks for the venue you already have: the same place at a venue provider, the same website or page, or the same name close by. Checking in again from another provider adds to the venue you have instead of making a second one.
+
+A venue's website is shown on its page. Its pages on other sites, such as OpenStreetMap, Google Maps, Foursquare or Wikipedia, are shown too when the venue's location is public, since a map link gives away where it is. You can edit both on the venue, under Website and Other Pages.
+
+A new venue gets one of your venue types when one fits, such as Food for a restaurant, but Simple Location doesn't create types. When a venue has no type, the venue editor offers one, which you can add.
+
+= What is kept from venue providers =
+
+Venue providers have different terms on what a site may keep. The plugin follows the maintainers' reading of them, below. It is your site and your decision: if you read a provider's terms differently, or aren't comfortable with them, choose another provider.
+
+* OpenStreetMap Overpass, Nominatim, LocationIQ and Geoapify - the place's details are kept: address, phone, categories and links. OpenStreetMap data is under the Open Database License, which allows this with credit to OpenStreetMap contributors.
+* Google, HERE and TomTom - only the place's identifier and links are kept, such as its Google Maps link and its own website. The name is the one you checked in with, the coordinates are your own, and the address is looked up with your geocoding providers. Their phone numbers, categories and addresses are not stored.
+* A check-in from a Micropub client that doesn't name a venue provider is your own, and is kept as sent.
+
 == Weather ==
 
 Weather consists of at minimum the current conditions and temperature but includes future parameters for use such as pressure, wind speed, wind direction degree, etc. Weather widgets are available
