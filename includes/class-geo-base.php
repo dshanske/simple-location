@@ -1393,6 +1393,15 @@ class Geo_Base {
 			} else {
 				delete_post_meta( $post_id, 'venue_url' );
 			}
+			// Left as it is when the form has no field for it, as the alternates also match check-ins to the venue.
+			if ( isset( $_POST['venue_alternate'] ) ) {
+				$alternate = Post_Venue::sanitize_alternate( sanitize_textarea_field( wp_unslash( $_POST['venue_alternate'] ) ) );
+				if ( empty( $alternate ) ) {
+					delete_post_meta( $post_id, 'venue_alternate' );
+				} else {
+					update_post_meta( $post_id, 'venue_alternate', $alternate );
+				}
+			}
 			$visibility = isset( $_POST['venue_post_visibility'] ) ? Post_Venue::sanitize_post_visibility( sanitize_key( wp_unslash( $_POST['venue_post_visibility'] ) ) ) : '';
 			if ( '' === $visibility ) {
 				delete_post_meta( $post_id, 'venue_post_visibility' );

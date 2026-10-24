@@ -334,6 +334,29 @@ class SaveMetaTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Saving a venue stores its other pages, one per line; an empty field removes them, and a form without the field
+	 * leaves them (#729).
+	 */
+	public function test_save_post_meta_venue_alternate() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		$_POST    = array(
+			'location_metabox_nonce' => wp_create_nonce( 'location_metabox' ),
+			'venue_alternate'        => "https://www.openstreetmap.org/node/1\r\nnot a url\r\nhttps://en.wikipedia.org/wiki/Cafe",
+		);
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertSame( array( 'https://www.openstreetmap.org/node/1', 'https://en.wikipedia.org/wiki/Cafe' ), get_post_meta( $venue_id, 'venue_alternate', true ) );
+
+		unset( $_POST['venue_alternate'] );
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertCount( 2, get_post_meta( $venue_id, 'venue_alternate', true ) );
+
+		$_POST['venue_alternate'] = '';
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertSame( '', get_post_meta( $venue_id, 'venue_alternate', true ) );
+	}
+
+	/**
 	 * Bulk "Public Location" and "Private Location" change visibility on posts the user can edit.
 	 */
 	public function test_bulk_visibility_actions() {

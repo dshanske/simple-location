@@ -922,6 +922,68 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Alternate URLs are kept as a list of web addresses, from a list or one per line (#729).
+	 */
+	public function test_sanitize_alternate() {
+		$this->assertSame(
+			array( 'https://www.openstreetmap.org/node/1', 'https://en.wikipedia.org/wiki/Cafe' ),
+			Post_Venue::sanitize_alternate( " https://www.openstreetmap.org/node/1\r\n\r\nhttps://en.wikipedia.org/wiki/Cafe\nhttps://www.openstreetmap.org/node/1\njavascript:alert(1)" )
+		);
+		$this->assertSame( array( 'https://a.example/' ), Post_Venue::sanitize_alternate( array( 'https://a.example/', array( 'x' ), 5, '' ) ) );
+		$this->assertSame( array(), Post_Venue::sanitize_alternate( null ) );
+
+		// The registered meta is sanitized the same way.
+		Post_Venue::register_meta();
+		$venue_id = $this->venue();
+		update_post_meta( $venue_id, 'venue_alternate', 'https://www.openstreetmap.org/node/1' );
+		$this->assertSame( array( 'https://www.openstreetmap.org/node/1' ), get_post_meta( $venue_id, 'venue_alternate', true ) );
+	}
+
+	/**
+	 * Links to pages about places are named for their site (#729).
+	 */
+	public function test_link_name() {
+		$this->assertSame( 'OpenStreetMap', Post_Venue::link_name( 'https://www.openstreetmap.org/node/1' ) );
+		$this->assertSame( 'Google Maps', Post_Venue::link_name( 'https://www.google.com/maps/place/?q=place_id:X' ) );
+		$this->assertSame( 'Wikipedia', Post_Venue::link_name( 'https://de.wikipedia.org/wiki/Cafe' ) );
+		$this->assertSame( 'cafe.example.com', Post_Venue::link_name( 'https://www.cafe.example.com/menu' ) );
+	}
+
+	/**
+	 * A venue's links are its website, then its pages elsewhere when its location is public; the venue page shows
+	 * them (#729).
+	 */
+	public function test_venue_links() {
+		$venue_id = $this->venue();
+		update_post_meta( $venue_id, 'venue_url', 'https://cafe.example.com/' );
+		update_post_meta( $venue_id, 'venue_alternate', array( 'https://www.openstreetmap.org/node/1', 'https://cafe.example.com/' ) );
+		$links = Post_Venue::get_venue_links( $venue_id );
+		$this->assertSame( array( 'https://cafe.example.com/', 'https://www.openstreetmap.org/node/1' ), wp_list_pluck( $links, 'url' ), 'The website once, first.' );
+		$this->assertSame( array( 'website', 'alternate' ), wp_list_pluck( $links, 'type' ) );
+		$this->assertSame( 'OpenStreetMap', $links[1]['name'] );
+
+		$this->go_to( get_permalink( $venue_id ) );
+		$GLOBALS['post'] = get_post( $venue_id );
+		$html            = Post_Venue::venue_content( '<p>About.</p>' );
+		$this->assertStringStartsWith( '<p>About.</p><ul class="sloc-venue-links">', $html );
+		$this->assertStringContainsString( '<li class="venue-link venue-link-website"><a class="u-url" href="https://cafe.example.com/">Website</a></li>', $html );
+		$this->assertStringContainsString( '<a class="u-url" href="https://www.openstreetmap.org/node/1">OpenStreetMap</a>', $html );
+
+		// A private venue doesn't show where it is.
+		set_post_geodata( $venue_id, 'visibility', 'private' );
+		$this->assertSame( array( 'website' ), wp_list_pluck( Post_Venue::get_venue_links( $venue_id ), 'type' ) );
+
+		// Other posts, and venues without links, are unchanged.
+		delete_post_meta( $venue_id, 'venue_url' );
+		$this->assertSame( 'x', Post_Venue::venue_content( 'x' ) );
+		$GLOBALS['post'] = get_post( self::factory()->post->create() );
+		$this->assertSame( 'x', Post_Venue::venue_content( 'x' ) );
+
+		add_filter( 'sloc_venue_links', fn() => array( array( 'url' => 'https://x.example/"><script>' ) ) );
+		$this->assertStringNotContainsString( '<script>', Post_Venue::venue_links_html( $venue_id ) );
+	}
+
+	/**
 	 * Child venues are found among venues, not posts, and all of them are returned.
 	 */
 	public function test_get_venue_children() {

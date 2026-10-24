@@ -17,8 +17,9 @@ if ( 'comment' === $screen->id ) {
 	$sloc_type = get_post_type();
 	$geodata   = get_post_geodata();
 	if ( 'venue' === $sloc_type ) {
-		$geodata['venue_radius'] = get_post_meta( get_the_ID(), 'venue_radius', true );
-		$geodata['venue_url']    = get_post_meta( get_the_ID(), 'venue_url', true );
+		$geodata['venue_radius']    = get_post_meta( get_the_ID(), 'venue_radius', true );
+		$geodata['venue_url']       = get_post_meta( get_the_ID(), 'venue_url', true );
+		$geodata['venue_alternate'] = Post_Venue::sanitize_alternate( get_post_meta( get_the_ID(), 'venue_alternate', true ) );
 		$geodata['post_visibility'] = Post_Venue::get_post_visibility( get_the_ID() );
 	} else {
 		$geodata['venue_id'] = get_post_meta( get_the_ID(), 'venue_id', true );
@@ -95,9 +96,14 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			<input class="widefat" type="number" name="venue_radius" id="venue_radius" step="1" min="1" value="<?php echo esc_attr( $geodata['venue_radius'] ?? '' ); ?>" />
 		</label>
 		<label for="venue_url" class="quarter">
-			<?php esc_html_e( 'Venue URL:', 'simple-location' ); ?>
+			<?php esc_html_e( 'Website:', 'simple-location' ); ?>
 			<input class="widefat" type="url" name="venue_url" id="venue_url" value="<?php echo esc_attr( $geodata['venue_url'] ?? '' ); ?>" />
 		</label>
+		<label for="venue_alternate">
+			<?php esc_html_e( 'Other Pages:', 'simple-location' ); ?>
+			<textarea class="widefat" name="venue_alternate" id="venue_alternate" rows="3"><?php echo esc_textarea( implode( "\n", $geodata['venue_alternate'] ?? array() ) ); ?></textarea>
+		</label>
+		<p class="description"><?php esc_html_e( 'Pages about this venue on other sites, such as OpenStreetMap, Google Maps or Wikipedia, one per line. They are shown on the venue page when its location is public.', 'simple-location' ); ?></p>
 		<label for="venue_post_visibility">
 			<?php esc_html_e( 'Visibility of Posts Here:', 'simple-location' ); ?>
 			<select name="venue_post_visibility" id="venue_post_visibility" class="widefat">

@@ -59,11 +59,12 @@ class Post_Venue {
 			'post',
 			'venue_alternate',
 			array(
-				'object_subtype' => 'venue',
-				'type'           => 'array',
-				'description'    => __( 'Alternate URLs for Venue', 'simple-location' ),
-				'single'         => true,
-				'show_in_rest'   => array(
+				'object_subtype'    => 'venue',
+				'type'              => 'array',
+				'description'       => __( 'Alternate URLs for Venue', 'simple-location' ),
+				'single'            => true,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_alternate' ),
+				'show_in_rest'      => array(
 					'schema' => array(
 						'type'  => 'array',
 						'items' => array(
@@ -259,6 +260,10 @@ class Post_Venue {
 
 		add_filter( 'manage_venue_posts_columns', array( __CLASS__, 'remove_date_admin_column' ) );
 		add_filter( 'rest_prepare_venue', array( __CLASS__, 'rest_prepare_venue' ), 10, 2 );
+		// A theme that supports Simple Location shows the links itself, with get_venue_links().
+		if ( ! current_theme_supports( 'simple-location' ) ) {
+			add_filter( 'the_content', array( __CLASS__, 'venue_content' ), 13 );
+		}
 		add_filter( 'manage_venue_posts_columns', array( 'Geo_Base', 'add_location_admin_column' ) );
 		add_filter( 'manage_venue_posts_columns', array( __CLASS__, 'add_checkins_admin_column' ) );
 		add_action( 'manage_venue_posts_custom_column', array( 'Geo_Base', 'manage_location_admin_column' ), 10, 2 );
@@ -772,6 +777,144 @@ class Post_Venue {
 			$kept    = Location_Taxonomy::normalize_address( array_merge( $address, $kept ) );
 		}
 		return $kept;
+	}
+
+	/**
+	 * Sanitizes a venue's alternate URLs.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value URLs, as a list, or a string with one URL per line.
+	 * @return string[] HTTP and HTTPS URLs, each once.
+	 */
+	public static function sanitize_alternate( $value ) {
+		$list = is_string( $value ) ? preg_split( '/[\r\n]+/', $value ) : (array) $value;
+		$urls = array();
+		foreach ( $list as $url ) {
+			$url = is_string( $url ) ? trim( $url ) : '';
+			// Only web addresses; esc_url_raw() would make one of a word.
+			$url = preg_match( '#^https?://#i', $url ) ? esc_url_raw( $url, array( 'http', 'https' ) ) : '';
+			if ( '' !== $url && ! in_array( $url, $urls, true ) ) {
+				$urls[] = $url;
+			}
+		}
+		return $urls;
+	}
+
+	/**
+	 * Returns the name of a site with pages about places, for a link to one of them.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $url URL.
+	 * @return string Name, such as OpenStreetMap, or the host without www.
+	 */
+	public static function link_name( $url ) {
+		$host  = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+		$names = array(
+			'openstreetmap.org' => 'OpenStreetMap',
+			'osm.org'           => 'OpenStreetMap',
+			'google.com'        => 'Google Maps',
+			'maps.app.goo.gl'   => 'Google Maps',
+			'maps.apple.com'    => 'Apple Maps',
+			'bing.com'          => 'Bing Maps',
+			'here.com'          => 'HERE WeGo',
+			'foursquare.com'    => 'Foursquare',
+			'4sq.com'           => 'Foursquare',
+			'swarmapp.com'      => 'Swarm',
+			'wikipedia.org'     => 'Wikipedia',
+			'wikidata.org'      => 'Wikidata',
+			'yelp.com'          => 'Yelp',
+			'tripadvisor.com'   => 'Tripadvisor',
+		);
+		foreach ( $names as $match => $name ) {
+			if ( $host === $match || substr( $host, -strlen( $match ) - 1 ) === '.' . $match ) {
+				return $name;
+			}
+		}
+		return preg_replace( '/^www\./', '', $host );
+	}
+
+	/**
+	 * Returns the links of a venue: its website, then its pages on other sites.
+	 *
+	 * The pages on other sites, which can be map links, are left out unless the venue's location is public.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int $venue_id Venue ID.
+	 * @return array[] Links, each with 'url', 'name' and 'type', 'website' or 'alternate'.
+	 */
+	public static function get_venue_links( $venue_id ) {
+		$links   = array();
+		$website = esc_url_raw( (string) get_post_meta( $venue_id, 'venue_url', true ), array( 'http', 'https' ) );
+		if ( '' !== $website ) {
+			$links[] = array(
+				'url'  => $website,
+				'name' => __( 'Website', 'simple-location' ),
+				'type' => 'website',
+			);
+		}
+		if ( 'public' === get_post_geodata( $venue_id, 'visibility' ) ) {
+			foreach ( self::sanitize_alternate( get_post_meta( $venue_id, 'venue_alternate', true ) ) as $url ) {
+				if ( $url !== $website ) {
+					$links[] = array(
+						'url'  => $url,
+						'name' => self::link_name( $url ),
+						'type' => 'alternate',
+					);
+				}
+			}
+		}
+		/**
+		 * Filters the links shown for a venue.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param array[] $links    Links, each with 'url', 'name' and 'type', 'website' or 'alternate'.
+		 * @param int     $venue_id Venue ID.
+		 */
+		return (array) apply_filters( 'sloc_venue_links', $links, $venue_id );
+	}
+
+	/**
+	 * Returns a venue's links as a list, each marked up as a URL of the venue.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int $venue_id Venue ID.
+	 * @return string HTML list, or an empty string without links.
+	 */
+	public static function venue_links_html( $venue_id ) {
+		$items = '';
+		foreach ( self::get_venue_links( $venue_id ) as $link ) {
+			if ( empty( $link['url'] ) ) {
+				continue;
+			}
+			$items .= sprintf(
+				'<li class="venue-link venue-link-%1$s"><a class="u-url" href="%2$s">%3$s</a></li>',
+				esc_attr( $link['type'] ?? 'alternate' ),
+				esc_url( $link['url'] ),
+				esc_html( $link['name'] ?? $link['url'] )
+			);
+		}
+		return '' === $items ? '' : '<ul class="sloc-venue-links">' . $items . '</ul>';
+	}
+
+	/**
+	 * Adds a venue's links to its content. Hooked to `the_content`.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $content Content.
+	 * @return string Content, with the links on a venue.
+	 */
+	public static function venue_content( $content ) {
+		$venue_id = get_the_ID();
+		if ( ! $venue_id || 'venue' !== get_post_type( $venue_id ) ) {
+			return $content;
+		}
+		return $content . self::venue_links_html( $venue_id );
 	}
 
 	/**
