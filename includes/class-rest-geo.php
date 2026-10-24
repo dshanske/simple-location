@@ -572,8 +572,12 @@ class REST_Geo {
 			if ( ! $venue ) {
 				return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
 			}
-			$venue->set( $params );
-			return $venue->nearby();
+			// A provider asked for by name is the only one tried.
+			if ( $provider ) {
+				$venue->set( $params );
+				return $venue->nearby();
+			}
+			return Sloc_Provider_Chain::venues( $params['latitude'], $params['longitude'] );
 		}
 		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
 	}

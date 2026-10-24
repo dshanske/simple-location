@@ -149,10 +149,12 @@ abstract class Venue_Provider extends Sloc_Provider {
 
 	/**
 	 * Is Provider Active
+	 *
+	 * @since 1.0.0
+	 * @since 6.1.0 Active anywhere in the venue chain.
 	 */
 	public function is_active() {
-		$option = get_option( 'sloc_venue_provider' );
-		return ( $this->slug === $option );
+		return in_array( $this->slug, Sloc_Provider_Chain::configured( 'venue' ), true );
 	}
 
 	/**
