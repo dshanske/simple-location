@@ -1,0 +1,100 @@
+{
+  "items": [
+    {
+      "title": "Philadelphia City Hall",
+      "id": "here:pds:place:840dr4ux-cityhall",
+      "resultType": "place",
+      "address": {
+        "label": "Philadelphia City Hall, 1400 John F Kennedy Blvd, Philadelphia, PA 19107, United States",
+        "countryCode": "USA",
+        "countryName": "United States",
+        "stateCode": "PA",
+        "state": "Pennsylvania",
+        "county": "Philadelphia",
+        "city": "Philadelphia",
+        "district": "Center City",
+        "street": "John F Kennedy Blvd",
+        "postalCode": "19107",
+        "houseNumber": "1400"
+      },
+      "position": {
+        "lat": 39.9527,
+        "lng": -75.1635
+      },
+      "access": [
+        {
+          "lat": 39.95245,
+          "lng": -75.16352
+        }
+      ],
+      "distance": 34,
+      "categories": [
+        {
+          "id": "300-3000-0025",
+          "name": "Historical Monument"
+        },
+        {
+          "id": "800-8100-0163",
+          "name": "City Hall",
+          "primary": true
+        }
+      ],
+      "contacts": [
+        {
+          "phone": [
+            {
+              "value": "+12156862181"
+            }
+          ],
+          "www": [
+            {
+              "value": "https://www.phila.gov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Rival Bros Coffee",
+      "id": "here:pds:place:840dr4ux-coffee",
+      "resultType": "place",
+      "address": {
+        "label": "Rival Bros Coffee, 1528 Sansom St, Philadelphia, PA 19102, United States",
+        "countryCode": "USA",
+        "countryName": "United States",
+        "stateCode": "PA",
+        "state": "Pennsylvania",
+        "county": "Philadelphia",
+        "city": "Philadelphia",
+        "district": "Center City",
+        "street": "Sansom St",
+        "postalCode": "19102",
+        "houseNumber": "1528"
+      },
+      "position": {
+        "lat": 39.9531,
+        "lng": -75.1642
+      },
+      "distance": 92,
+      "categories": [
+        {
+          "id": "100-1100-0010",
+          "name": "Coffee Shop",
+          "primary": true
+        }
+      ]
+    },
+    {
+      "title": "Market Street",
+      "id": "here:af:street:x",
+      "resultType": "street",
+      "address": {
+        "label": "Market St"
+      },
+      "position": {
+        "lat": 39.9522,
+        "lng": -75.163
+      }
+    }
+  ]
+}
