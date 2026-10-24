@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 6.1.0
  */
 class Venue_Provider_HERE extends Venue_Provider {
-	use Sloc_API_HERE;
+	use Sloc_API_Here;
 
 	/**
 	 * HERE category ID prefixes and their shared categories and icons, most specific first.
