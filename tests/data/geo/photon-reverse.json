@@ -1,0 +1,38 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          -75.1635112,
+          39.9524152
+        ],
+        "type": "Point"
+      },
+      "type": "Feature",
+      "properties": {
+        "osm_type": "W",
+        "osm_id": 167519000,
+        "extent": [
+          -75.1648297,
+          39.9530987,
+          -75.1622049,
+          39.9516884
+        ],
+        "country": "United States",
+        "osm_key": "tourism",
+        "housenumber": "1400",
+        "city": "Philadelphia",
+        "street": "John F. Kennedy Boulevard",
+        "osm_value": "attraction",
+        "postcode": "19107",
+        "name": "Philadelphia City Hall",
+        "county": "Philadelphia County",
+        "state": "Pennsylvania",
+        "type": "house",
+        "district": "Center City",
+        "countrycode": "US"
+      }
+    }
+  ],
+  "type": "FeatureCollection"
+}

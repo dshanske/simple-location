@@ -362,6 +362,7 @@ class Simple_Location_Plugin {
 		// Load Geo Providers.
 		$providers = array(
 			'class-geo-provider-nominatim.php', // Nominatim.
+			'class-geo-provider-photon.php', // Photon.
 			'class-geo-provider-pelias.php', // Pelias.
 			'class-geo-provider-mapquest.php', // MapQuest.
 			'class-geo-provider-google.php', // Google.
