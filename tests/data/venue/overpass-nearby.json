@@ -1,0 +1,69 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62",
+  "osm3s": {
+    "timestamp_osm_base": "2026-10-24T00:00:00Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "way",
+      "id": 31414402,
+      "center": {
+        "lat": 39.9527,
+        "lon": -75.1635
+      },
+      "tags": {
+        "name": "Philadelphia City Hall",
+        "amenity": "townhall",
+        "tourism": "attraction",
+        "building": "civic",
+        "addr:housenumber": "1400",
+        "addr:street": "John F. Kennedy Boulevard",
+        "addr:city": "Philadelphia",
+        "addr:state": "PA",
+        "addr:postcode": "19107",
+        "addr:country": "US",
+        "website": "https://www.phila.gov/",
+        "wikipedia": "en:Philadelphia City Hall"
+      }
+    },
+    {
+      "type": "node",
+      "id": 4567890123,
+      "lat": 39.9531,
+      "lon": -75.1642,
+      "tags": {
+        "name": "Rival Bros Coffee",
+        "amenity": "cafe",
+        "addr:housenumber": "1528",
+        "addr:street": "Sansom Street",
+        "addr:city": "Philadelphia",
+        "addr:postcode": "19102",
+        "phone": "+1 215 555 0100"
+      }
+    },
+    {
+      "type": "relation",
+      "id": 9876543,
+      "center": {
+        "lat": 39.952,
+        "lon": -75.1648
+      },
+      "tags": {
+        "name": "Dilworth Park",
+        "leisure": "park",
+        "wikipedia": "en:Dilworth Park"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1,
+      "lat": 39.95,
+      "lon": -75.16,
+      "tags": {
+        "amenity": "bench"
+      }
+    }
+  ]
+}

@@ -71,7 +71,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::venue_providers();
-		foreach ( array( 'google', 'locationiq', 'nominatim' ) as $slug ) {
+		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['url'], $slug );
@@ -569,6 +569,75 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'X', $result['items'][0]['name'] );
 		$this->assertArrayNotHasKey( 'category', $result['items'][0] );
 		$this->assertSame( 'other', $result['items'][0]['venue-category'] );
+	}
+
+	/**
+	 * Overpass finds the named OpenStreetMap places around the point, with their addresses and categories (#709).
+	 */
+	public function test_overpass() {
+		$fixture = $this->fixture( 'venue/overpass-nearby.json' );
+		$this->mock_http( array( 'overpass-api.de/api/interpreter' => array( 'body' => $fixture ) ) );
+		$provider = $this->provider( 'Venue_Provider_Overpass' );
+		$result   = $provider->reverse_lookup();
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://overpass-api.de/api/interpreter', $request['base'] );
+		$this->assertSame( $provider->query(), $request['query']['data'] );
+		$this->assertStringContainsString( 'around:250,39.9524,-75.1636', $request['query']['data'] );
+		$this->assertStringContainsString( '[name]', $request['query']['data'] );
+		$this->assertStringContainsString( 'out center tags', $request['query']['data'] );
+		$this->assertSame( 'Simple Location for WordPress (' . home_url( '/' ) . ')', $request['args']['headers']['User-Agent'] );
+
+		$items = $result['items'];
+		$this->assertSame( array( 'Philadelphia City Hall', 'Rival Bros Coffee', 'Dilworth Park' ), wp_list_pluck( $items, 'name' ), 'Places without a name are left out.' );
+		$this->assertPhiladelphia(
+			array_merge(
+				$items[0],
+				array( 'region' => 'Pennsylvania' )
+			)
+		);
+		$this->assertSame( '1400 John F. Kennedy Boulevard', $items[0]['street-address'] );
+		$this->assertSame( 'https://www.phila.gov/', $items[0]['url'] );
+		$this->assertSame( 'townhall', $items[0]['category'] );
+		$this->assertSame( 'government', $items[0]['venue-category'] );
+		$this->assertSame( 39.9527, $items[0]['latitude'], 'A way is at its center.' );
+		$this->assertSame( 'food', $items[1]['venue-category'] );
+		$this->assertSame( '+1 215 555 0100', $items[1]['tel'] );
+		$this->assertSame( 'https://en.wikipedia.org/wiki/Dilworth_Park', $items[2]['url'] );
+		$this->assertSame( 'outdoors', $items[2]['venue-category'] );
+		$this->assertEasternTime( $items[2] );
+
+		$this->mock_http( array( 'overpass-api.de' => array( 'body' => $fixture ) ) );
+		$this->assertSame( array( 'Philadelphia City Hall', 'Rival Bros Coffee', 'Dilworth Park' ), wp_list_pluck( $provider->nearby()['items'], 'name' ), 'Nearest first.' );
+	}
+
+	/**
+	 * Overpass uses the server in its setting, and passes on a busy server's error (#709).
+	 */
+	public function test_overpass_server_and_errors() {
+		update_option( 'sloc_overpass_url', 'https://overpass.example.com/api/interpreter' );
+		$this->mock_http( array( 'overpass.example.com' => array( 'body' => array( 'elements' => array() ) ) ) );
+		$this->assertSame( array( 'items' => array() ), $this->provider( 'Venue_Provider_Overpass' )->reverse_lookup() );
+		$this->assertSame( 'https://overpass.example.com/api/interpreter', $this->last_request()['base'] );
+		delete_option( 'sloc_overpass_url' );
+		$this->assertSame( '', Venue_Provider_Overpass::sanitize_url( 'javascript:alert(1)' ) );
+
+		$this->mock_http(
+			array(
+				'overpass-api.de' => array(
+					'code' => 429,
+					'body' => 'Too Many Requests',
+				),
+			)
+		);
+		$provider = $this->provider( 'Venue_Provider_Overpass' );
+		$error    = $provider->reverse_lookup();
+		$this->assertSame( 429, $error->get_error_data()['status'] );
+		$this->assertTrue( Sloc_Provider_Errors::is_actionable( $error, $provider ) );
+
+		$this->mock_http( array() );
+		$this->assertSame( array( 'items' => array() ), ( new Venue_Provider_Overpass() )->reverse_lookup(), 'No request without a location.' );
+		$this->assertEmpty( $this->http_requests );
 	}
 
 	/**

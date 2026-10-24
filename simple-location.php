@@ -392,6 +392,7 @@ class Simple_Location_Plugin {
 			'class-venue-provider-nominatim.php', // Nominatim.
 			'class-venue-provider-google.php', // Google.
 			'class-venue-provider-locationiq.php',
+			'class-venue-provider-overpass.php', // OpenStreetMap Overpass.
 		);
 		self::register_providers( $providers, 'includes/venue/' );
 	}
