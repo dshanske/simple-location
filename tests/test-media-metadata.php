@@ -706,7 +706,7 @@ class MediaMetadataTest extends WP_UnitTestCase {
 		$fields = Sloc_Media_Metadata::attachment_fields_to_edit( array(), $attachment );
 		$this->assertSame( 'Lower Manhattan', $fields['geo_address']['value'] );
 		$this->assertStringContainsString( 'Lower Manhattan', $fields['geo_address']['html'] );
-		$this->assertStringContainsString( '40.7128, -74.006', $fields['location']['html'] );
+		$this->assertStringContainsString( '40.7128, -74.006', $fields['sloc_coordinates']['html'] );
 		$this->assertStringContainsString( '2024-07-01T12:00:00-04:00', $fields['mf2_published']['html'] );
 	}
 
@@ -742,10 +742,9 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The coordinates field doesn't reuse the location taxonomy's field key.
+	 * The location taxonomy's own field is removed, and the coordinates field doesn't reuse its key (#295).
 	 */
 	public function test_attachment_fields_to_edit_key() {
-		$this->markTestSkipped( 'Known bug, see #295' );
 		$attachment = self::factory()->attachment->create_and_get();
 		set_post_geodata(
 			$attachment->ID,
@@ -757,6 +756,11 @@ class MediaMetadataTest extends WP_UnitTestCase {
 		);
 		$fields = Sloc_Media_Metadata::attachment_fields_to_edit( array( 'location' => array( 'label' => 'Locations' ) ), $attachment );
 		$this->assertArrayNotHasKey( 'location', $fields );
+		$this->assertStringContainsString( '40.7128, -74.006', $fields['sloc_coordinates']['html'] );
+
+		$fields = get_attachment_fields_to_edit( $attachment );
+		$this->assertArrayNotHasKey( 'location', $fields, 'Core adds the field, as attachments have the taxonomy.' );
+		$this->assertArrayHasKey( 'sloc_coordinates', $fields );
 	}
 
 	/**
