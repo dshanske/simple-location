@@ -145,10 +145,36 @@ abstract class Geo_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns whether a place keeps its region code although the region has the same name as the locality.
+	 *
+	 * Some places are customarily named with the code of the region they share a name with, such as New York, NY.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $reverse Address properties, with 'country-code' and 'region-code'.
+	 * @return bool Whether to show the region code.
+	 */
+	public static function keeps_region( $reverse ) {
+		if ( empty( $reverse['country-code'] ) || empty( $reverse['region-code'] ) ) {
+			return false;
+		}
+		/**
+		 * Filters the regions whose code is shown after a locality of the same name.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param string[] $regions Country and region codes, such as 'US-NY' for New York, NY.
+		 */
+		$regions = (array) apply_filters( 'sloc_display_region_codes', array( 'US-NY' ) );
+		return in_array( strtoupper( $reverse['country-code'] . '-' . $reverse['region-code'] ), array_map( 'strtoupper', $regions ), true );
+	}
+
+	/**
 	 * Generate Display Name for a Reverse Address Lookup.
 	 *
 	 * @since 1.0.0
-	 * @since 6.1.0 A region with the same name as the locality, such as Berlin, and repeated names are left out (#240).
+	 * @since 6.1.0 A region with the same name as the locality, such as Berlin, and repeated names are left out (#240),
+	 *              except where the region code is customary, such as New York, NY.
 	 *
 	 * @param array $reverse Array of MF2 Address Properties.
 	 * @return string|boolean Return Display Name or False if Failed.
@@ -182,7 +208,7 @@ abstract class Geo_Provider extends Sloc_Provider {
 		$text   = array_filter( $text );
 		if ( empty( $text ) ) {
 			$text[] = $reverse['region'] ?? '';
-		} elseif ( self::same_name( $reverse['locality'] ?? '', $reverse['region'] ?? '' ) ) {
+		} elseif ( self::same_name( $reverse['locality'] ?? '', $reverse['region'] ?? '' ) && ! self::keeps_region( $reverse ) ) {
 			// A city that is its own region, such as Berlin, is named once.
 			$text[] = '';
 		} elseif ( array_key_exists( 'region-code', $reverse ) ) {

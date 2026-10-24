@@ -17,6 +17,7 @@
 ## class-geo-provider.php
 
 - [`location_display_name`](location_display_name) This filter is documented in includes/class-geo-provider.php
+- [`sloc_display_region_codes`](sloc_display_region_codes) Filters the regions whose code is shown after a locality of the same name.
 - [`sloc_geo_provider_defaults`](sloc_geo_provider_defaults) This filter is documented in includes/class-geo-provider.php
 
 ## class-loc-config.php

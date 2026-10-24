@@ -1001,6 +1001,17 @@ class GeoProvidersTest extends WP_UnitTestCase {
 				)
 			)
 		);
+		$new_york = array(
+			'locality'     => 'New York',
+			'region'       => 'New York',
+			'region-code'  => 'NY',
+			'country-code' => 'US',
+		);
+		$this->assertSame( 'New York, NY', $provider->display_name( $new_york ), 'New York keeps its region code.' );
+		$filter = fn() => array();
+		add_filter( 'sloc_display_region_codes', $filter );
+		$this->assertSame( 'New York', $provider->display_name( $new_york ), 'Unless filtered out.' );
+		remove_filter( 'sloc_display_region_codes', $filter );
 		$this->assertSame(
 			'Singapore',
 			$provider->display_name(
