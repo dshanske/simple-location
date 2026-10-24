@@ -33,7 +33,7 @@ class Elevation_Provider_Google extends Elevation_Provider {
 	public function __construct( $args = array() ) {
 		$this->name        = __( 'Google', 'simple-location' );
 		$this->url         = 'https://developers.google.com/maps/';
-		$this->description = __( 'Google Maps Platform API key is required, however Google offers a $200 per month credit, which is the equivalent of 28,000 queries. Click Get Started. Make sure to enable the Geocoding API. Follow the tutorial', 'simple-location' );
+		$this->description = __( 'Google Maps Platform needs an API key and a billing account, and gives each API a monthly free allowance. Enable the Elevation API.', 'simple-location' );
 		$this->slug        = 'google';
 		if ( ! isset( $args['api'] ) ) {
 			$args['api'] = get_option( 'sloc_google_api' );
