@@ -106,7 +106,7 @@ timezone. Nominatim venues reuse `geo/nominatim-reverse.json`, since it is the s
 
 | File | Request | Status |
 |---|---|---|
-| `google-nearbysearch.json` | `GET https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=39.9524,-75.1636&radius=200&type=establishment&language=en-US&key=…` | Hand-built from docs |
+| `google-places-nearby.json` | `POST https://places.googleapis.com/v1/places:searchNearby` with `X-Goog-FieldMask: places.id,places.displayName,places.formattedAddress,places.addressComponents,places.location,places.types,places.primaryType,places.plusCode,places.viewport,places.googleMapsUri` and the body `{"locationRestriction":{"circle":{"center":{"latitude":39.9524,"longitude":-75.1636},"radius":250}},"maxResultCount":10,"rankPreference":"DISTANCE","languageCode":"en-US"}` | Hand-built from docs |
 | `locationiq-nearby.json` | `GET https://us1.locationiq.com/v1/nearby?key=…&lat=39.9524&lon=-75.1636` | Hand-built from docs |
 
 ## Map providers (`map/`)
