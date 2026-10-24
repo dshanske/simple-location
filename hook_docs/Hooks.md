@@ -47,6 +47,11 @@
 - [~~`sloc_local_api_protected`~~](sloc_local_api_protected) **DEPRECATED** Use `sloc_local_api_public` instead
 - [`sloc_local_api_public`](sloc_local_api_public) Filters whether the local airport and timezone lookup endpoints are open to everyone.
 
+## class-sloc-geojson.php
+
+- [`sloc_geojson`](sloc_geojson) Filters the GeoJSON FeatureCollection of a feed.
+- [`sloc_geojson_feature`](sloc_geojson_feature) Filters a post's GeoJSON feature. Return null to leave the post out.
+
 ## class-sloc-map-cache.php
 
 - [`sloc_map_cache_directory`](sloc_map_cache_directory) Filters where stored map images are kept.

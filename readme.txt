@@ -278,6 +278,9 @@ Geocoding and elevation work the same way, with Fallback Geo Providers and Fallb
 = Can I enter a Plus Code? =
 
 Yes. [Plus Codes](https://maps.google.com/pluscodes/) are the short codes for places that Google Maps shows, such as 87F6XR2P+WH. Enter one in the Plus Code field of the Location box and choose Lookup, and it replaces the location. A short code, such as XR2P+WH, needs the town or city after it, such as XR2P+WH Philadelphia. Plus Codes are decoded on your site; the town is looked up with your geocoding provider.
+= Can I get my locations as GeoJSON? =
+
+Yes. Add geojson to any feed address: /feed/geojson/ for your latest posts, /location/philadelphia/feed/geojson/ for a location's posts, or a post's own feed, such as /2024/07/01/a-post/feed/geojson/, for that post. Without pretty permalinks, add ?feed=geojson instead. Each post with a public location is a point, with its title, link, date and address. Posts whose location isn't public are left out. Pages with a feed link to it, so mapping tools can find it. The sloc_geojson and sloc_geojson_feature filters change what is included.
 
 = How do I know when a provider stops working? =
 
