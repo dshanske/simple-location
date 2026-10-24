@@ -152,7 +152,7 @@ function is_day_post( $post = null ) {
 	$latitude  = get_post_geodata( $post, 'latitude' );
 	$longitude = get_post_geodata( $post, 'longitude' );
 	$altitude  = get_post_geodata( $post, 'altitude' );
-	if ( ! $latitude || ! $longitude ) {
+	if ( ! is_numeric( $latitude ) || ! is_numeric( $longitude ) ) {
 		return null;
 	}
 	$calc = new Astronomical_Calculator( $latitude, $longitude, $altitude );

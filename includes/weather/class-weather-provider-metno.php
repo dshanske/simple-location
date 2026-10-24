@@ -87,7 +87,7 @@ class Weather_Provider_Metno extends Weather_Provider {
 		if ( ! $this->supports_time( $time ) ) {
 			return $this->get_unsupported_time_conditions( $time );
 		}
-		if ( empty( $this->latitude ) || empty( $this->longitude ) ) {
+		if ( ! is_numeric( $this->latitude ) || ! is_numeric( $this->longitude ) ) {
 			return array();
 		}
 		$conditions = $this->get_cache();

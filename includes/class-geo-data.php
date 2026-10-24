@@ -388,7 +388,8 @@ class Geo_Data {
 			unset( $geodata['visibility'] );
 		}
 		foreach ( $geodata as $key => $value ) {
-			if ( ! empty( $value ) ) {
+			// Zero is a value: the equator, the prime meridian, sea level, standing still or due north (#746).
+			if ( is_numeric( $value ) || ! empty( $value ) ) {
 				update_metadata( $type, $id, 'geo_' . $key, $value );
 			} else {
 				delete_metadata( $type, $id, 'geo_' . $key );
@@ -412,7 +413,7 @@ class Geo_Data {
 		$longitude = self::get_geodata( $type, $id, 'longitude' );
 		$altitude  = self::get_geodata( $type, $id, 'altitude' );
 
-		if ( ! $latitude || ! $longitude ) {
+		if ( ! is_numeric( $latitude ) || ! is_numeric( $longitude ) ) {
 			return false;
 		}
 
@@ -608,7 +609,7 @@ class Geo_Data {
 		$geodata['visibility'] = self::get_geodata( $type, $id, 'visibility' );
 		$geodata['map_zoom']   = get_metadata( $type, $id, 'geo_zoom', true );
 
-		if ( empty( $geodata['longitude'] ) && empty( $geodata['address'] ) ) {
+		if ( ! is_numeric( $geodata['longitude'] ?? null ) && empty( $geodata['address'] ) ) {
 			return null;
 		}
 
@@ -616,7 +617,8 @@ class Geo_Data {
 			$geodata['icon'] = self::get_default_icon();
 		}
 
-		return array_filter( $geodata );
+		// Zero is a value (#746).
+		return array_filter( $geodata, fn( $value ) => is_numeric( $value ) || ! empty( $value ) );
 	}
 
 	/**

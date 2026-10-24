@@ -82,7 +82,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 		// Use timeline or current endpoint.
 		$timeline = ( HOUR_IN_SECONDS < abs( $datetime->getTimestamp() - time() ) );
 
-		if ( empty( $this->latitude ) || empty( $this->longitude ) ) {
+		if ( ! is_numeric( $this->latitude ) || ! is_numeric( $this->longitude ) ) {
 			return array();
 		}
 

@@ -260,4 +260,58 @@ class DataFunctionsTest extends WP_UnitTestCase {
 		set_post_geodata( $post->ID, '', $geo );
 		$this->assertStringContainsString( 'Test Location', get_simple_location( $post ) );
 	}
+
+	/**
+	 * Zero is a coordinate, an altitude, a speed and a heading: they are saved, read and shown, not deleted (#746).
+	 */
+	public function test_zero_values() {
+		$post_id = self::factory()->post->create( array( 'post_date' => '2025-06-21 12:00:00' ) );
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'   => 0,
+				'longitude'  => 0,
+				'altitude'   => 0,
+				'speed'      => '0',
+				'heading'    => 0.0,
+				'address'    => '',
+				'visibility' => 'public',
+			)
+		);
+		$geodata = get_post_geodata( $post_id );
+		foreach ( array( 'latitude', 'longitude', 'altitude', 'speed', 'heading' ) as $key ) {
+			$this->assertArrayHasKey( $key, $geodata, $key );
+			$this->assertEquals( 0, $geodata[ $key ], $key );
+		}
+		$this->assertArrayNotHasKey( 'address', $geodata, 'An empty string is still removed.' );
+		$this->assertEquals( array( 0, 0 ), array_slice( Geo_Data::get_geopoint( 'post', $post_id ), 0, 2 ) );
+		$this->assertIsBool( is_day_post( $post_id ), 'A location at 0, 0 has a sunrise and sunset.' );
+
+		// REST shows a public coordinate of 0.
+		$response = rest_do_request( new WP_REST_Request( 'GET', '/wp/v2/posts/' . $post_id ) );
+		$this->assertSame( 0.0, $response->get_data()['latitude'] );
+		$this->assertSame( 0.0, $response->get_data()['longitude'] );
+
+		// An empty string removes a value.
+		set_post_geodata( $post_id, '', array( 'speed' => '' ) );
+		$this->assertArrayNotHasKey( 'speed', get_post_geodata( $post_id ) );
+	}
+
+	/**
+	 * The REST lookups take a coordinate of 0 (#746).
+	 */
+	public function test_zero_coordinates_in_rest() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$request = new WP_REST_Request( 'GET', '/sloc_geo/1.0/geocode' );
+		$request->set_query_params(
+			array(
+				'latitude'  => '0',
+				'longitude' => '6.5',
+			)
+		);
+		$data = rest_do_request( $request )->get_data();
+		$this->assertIsArray( $data );
+		$this->assertNotSame( 'missing_params', $data['code'] ?? '', 'Not taken for missing coordinates.' );
+	}
 }

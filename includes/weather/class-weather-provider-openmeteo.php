@@ -189,7 +189,7 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 	 * @return array|WP_Error Conditions, or an error.
 	 */
 	public function get_conditions( $time = null ) {
-		if ( empty( $this->latitude ) || empty( $this->longitude ) ) {
+		if ( ! is_numeric( $this->latitude ) || ! is_numeric( $this->longitude ) ) {
 			return array();
 		}
 		if ( is_null( $time ) || 0 === $time ) {
