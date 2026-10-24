@@ -307,6 +307,7 @@ class Simple_Location_Plugin {
 			'trait-sloc-api-mapbox.php', // MapBox API Traits.
 			'trait-sloc-api-tomtom.php', // TomTom API Traits.
 			'trait-sloc-api-stadia.php', // Stadia Maps API Traits.
+			'trait-sloc-api-nominatim.php', // Nominatim API Traits.
 		);
 
 		self::load( $traits, 'includes/apis/' );

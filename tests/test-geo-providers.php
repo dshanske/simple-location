@@ -392,6 +392,68 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Nominatim asks the server in the server URL setting, for reverse lookups, searches and venues (#233).
+	 */
+	public function test_nominatim_server() {
+		update_option( 'sloc_nominatim_url', 'https://nominatim.example.com/' );
+		$fixture = $this->fixture( 'geo/nominatim-reverse.json' );
+		$this->mock_http( array( 'nominatim.example.com' => array( 'body' => $fixture ) ) );
+		$this->assertCityHall( $this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup() );
+		$this->assertSame( 'https://nominatim.example.com/reverse', $this->last_request()['base'] );
+
+		$this->mock_http( array( 'nominatim.example.com' => array( 'body' => $this->fixture( 'geo/nominatim-search.json' ) ) ) );
+		$this->assertCityHall( ( new Geo_Provider_Nominatim() )->geocode( 'Philadelphia City Hall' ) );
+		$this->assertSame( 'https://nominatim.example.com/search', $this->last_request()['base'] );
+
+		$this->mock_http( array( 'nominatim.example.com' => array( 'body' => $fixture ) ) );
+		$this->assertNotEmpty( $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup()['items'] );
+		$this->assertSame( 'https://nominatim.example.com/reverse', $this->last_request()['base'] );
+
+		$this->assertSame( 'https://nominatim.example.com/sub', Geo_Provider_Nominatim::sanitize_nominatim_url( ' https://nominatim.example.com/sub ' ) );
+		$this->assertSame( '', Geo_Provider_Nominatim::sanitize_nominatim_url( 'javascript:alert(1)' ) );
+		$this->assertSame( '', Geo_Provider_Nominatim::sanitize_nominatim_url( array() ) );
+		update_option( 'sloc_nominatim_url', '' );
+		$this->assertSame( 'https://nominatim.openstreetmap.org', Geo_Provider_Nominatim::nominatim_url() );
+	}
+
+	/**
+	 * With the fallback setting, the public server is asked when the server finds nothing or fails; without it, it
+	 * never is (#233).
+	 */
+	public function test_nominatim_public_fallback() {
+		update_option( 'sloc_nominatim_url', 'https://nominatim.example.com' );
+		$fixture   = $this->fixture( 'geo/nominatim-reverse.json' );
+		$responses = array(
+			'nominatim.example.com'       => array( 'body' => $this->fixture( 'geo/nominatim-error.json' ) ),
+			'nominatim.openstreetmap.org' => array( 'body' => $fixture ),
+		);
+
+		$this->mock_http( $responses );
+		$this->assertSame( 'no_results', $this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup()->get_error_code() );
+		$this->assertCount( 1, $this->http_requests, 'Without the setting, only your server is asked.' );
+
+		update_option( 'sloc_nominatim_fallback', 1 );
+		$this->mock_http( $responses );
+		$this->assertCityHall( $this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup() );
+		$this->assertSame( 'https://nominatim.openstreetmap.org/reverse', $this->last_request()['base'] );
+		$this->assertCount( 2, $this->http_requests );
+
+		$responses['nominatim.example.com'] = new WP_Error( 'http_request_failed', 'Down' );
+		$this->mock_http( $responses );
+		$this->assertNotEmpty( $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup()['items'], 'Also when your server fails.' );
+
+		$this->mock_http( array( 'nominatim.example.com' => array( 'body' => $fixture ) ) );
+		$this->assertCityHall( $this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup() );
+		$this->assertCount( 1, $this->http_requests, 'Not when your server finds the place.' );
+
+		update_option( 'sloc_nominatim_url', '' );
+		$this->mock_http( array( 'nominatim.openstreetmap.org' => array( 'body' => $this->fixture( 'geo/nominatim-error.json' ) ) ) );
+		$this->provider( 'Geo_Provider_Nominatim' )->reverse_lookup();
+		$this->assertCount( 1, $this->http_requests, 'The public server is asked once.' );
+		delete_option( 'sloc_nominatim_fallback' );
+	}
+
+	/**
 	 * Nominatim forward geocoding returns the address and coordinates of the first result.
 	 */
 	public function test_nominatim_geocode() {
