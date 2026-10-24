@@ -355,8 +355,13 @@ You can take advantage of the other built-in location providers, for example, on
 
 ### How can I update the location of my user profile?
 
-You can do so under your user profile or alternatively update using a REST API endpoint. By posting to `/wp-json/sloc_geo/1.0/user` with the latitude, longitude, altitude parameters, or with a geojson body, will
-update the user associated with the credentials you provide to the REST API.
+You can do so under your user profile or alternatively update using a REST API endpoint. Posting to `/wp-json/sloc_geo/1.0/user` updates the user associated with the credentials you provide to the REST API. Send the location in one of these ways:
+
+* the `latitude` and `longitude` parameters, with `altitude`, `speed` and `heading` if you have them;
+* a `geo` parameter with a geo URI, such as `geo:45.01,-75.44,20`;
+* a JSON body with a GeoJSON Point, or a Feature with a Point geometry and `speed` and `heading` properties, on its own or as `{"locations": …}`.
+
+A `visibility` parameter (public, private or protected) can come with any of them, or alone. Without an altitude, it is looked up, and the address is looked up from the coordinates.
 
 ### How can I access the location or weather data on the frontend?
 

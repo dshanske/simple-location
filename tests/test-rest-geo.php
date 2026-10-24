@@ -771,6 +771,148 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Sends a JSON body to /user.
+	 *
+	 * @param array $body Body.
+	 * @return WP_REST_Response Response.
+	 */
+	protected function user_json( $body ) {
+		$request = new WP_REST_Request( 'POST', '/sloc_geo/1.0/user' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( $body ) );
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
+	 * /user takes a GeoJSON Feature, as the readme says, with or without "locations", and a Point (#407).
+	 */
+	public function test_user_geojson() {
+		$feature  = array(
+			'type'       => 'Feature',
+			'geometry'   => array(
+				'type'        => 'Point',
+				'coordinates' => array( -75.44, 45.01, 15 ),
+			),
+			'properties' => array(
+				'accuracy' => 12,
+				'heading'  => 0,
+			),
+		);
+		$response = $this->user_json( array( 'locations' => $feature ) );
+		$this->assertSame( 200, $response->get_status() );
+		$geodata = get_user_geodata( self::$author );
+		$this->assertEquals( 45.01, $geodata['latitude'] );
+		$this->assertEquals( -75.44, $geodata['longitude'] );
+		$this->assertEquals( 15, $geodata['altitude'], 'Sent, not looked up.' );
+		$this->assertSame( 'Test Address', $geodata['address'] );
+
+		$feature['geometry']['coordinates'] = array( 2.35, 48.85 );
+		$this->assertSame( 200, $this->user_json( $feature )->get_status() );
+		$this->assertEquals( 48.85, get_user_geodata( self::$author, 'latitude' ) );
+
+		$this->assertSame(
+			200,
+			$this->user_json(
+				array(
+					'type'        => 'Point',
+					'coordinates' => array( -0.12, 51.5 ),
+				)
+			)->get_status()
+		);
+		$this->assertEquals( 51.5, get_user_geodata( self::$author, 'latitude' ) );
+	}
+
+	/**
+	 * /user takes a geo URI (#407).
+	 */
+	public function test_user_geo_uri() {
+		$this->assertSame( 200, $this->request( '/user', array( 'geo' => 'geo:45.01,-75.44,20;u=8' ), 'POST' )->get_status() );
+		$geodata = get_user_geodata( self::$author );
+		$this->assertEquals( 45.01, $geodata['latitude'] );
+		$this->assertEquals( 20, $geodata['altitude'] );
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/user', array( 'geo' => 'geo:45.01' ), 'POST' ), 400 );
+	}
+
+	/**
+	 * /user rejects a request without a location, GeoJSON that isn't a point, and coordinates out of range in any
+	 * format, leaving the stored location alone (#407).
+	 */
+	public function test_user_invalid_locations() {
+		$this->assertErrorResponse( 'missing_location', $this->request( '/user', array(), 'POST' ), 400 );
+		$this->assertErrorResponse(
+			'rest_invalid_param',
+			$this->user_json(
+				array(
+					'type'        => 'LineString',
+					'coordinates' => array( array( 0, 0 ), array( 1, 1 ) ),
+				)
+			),
+			400
+		);
+		$this->assertErrorResponse( 'rest_invalid_param', $this->user_json( array( 'locations' => array( 'type' => 'Feature' ) ) ), 400 );
+		$this->assertErrorResponse(
+			'rest_invalid_param',
+			$this->user_json(
+				array(
+					'type'        => 'Point',
+					'coordinates' => array( 300, 45 ),
+				)
+			),
+			400
+		);
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/user', array( 'geo' => 'geo:95,10' ), 'POST' ), 400 );
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/user', array( 'latitude' => '45.01' ), 'POST' ), 400, 'Both coordinates or neither.' );
+		$this->assertEmpty( get_user_meta( self::$author, 'geo_latitude', true ) );
+	}
+
+	/**
+	 * The location read from each format keeps accuracy, speed and heading, including a heading of 0 (#407).
+	 */
+	public function test_user_location() {
+		$request = new WP_REST_Request( 'POST', '/sloc_geo/1.0/user' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'type'       => 'Feature',
+					'geometry'   => array(
+						'type'        => 'Point',
+						'coordinates' => array( '-75.44', '45.01' ),
+					),
+					'properties' => array(
+						'accuracy' => 12,
+						'speed'    => '1.5',
+						'heading'  => 0,
+						'other'    => 'x',
+					),
+				)
+			)
+		);
+		$this->assertSame(
+			array(
+				'longitude' => -75.44,
+				'latitude'  => 45.01,
+				'accuracy'  => 12.0,
+				'speed'     => 1.5,
+				'heading'   => 0.0,
+			),
+			REST_Geo::user_location( $request )
+		);
+
+		$request = new WP_REST_Request( 'POST', '/sloc_geo/1.0/user' );
+		$request->set_param( 'geo', 'geo:45.01,-75.44;u=8' );
+		$this->assertEquals( 8, REST_Geo::user_location( $request )['accuracy'] );
+	}
+
+	/**
+	 * /user can change only the visibility (#407).
+	 */
+	public function test_user_visibility_only() {
+		$this->assertSame( 200, $this->request( '/user', array( 'visibility' => 'private' ), 'POST' )->get_status() );
+		$this->assertSame( 'private', get_user_geodata( self::$author, 'visibility' ) );
+	}
+
+	/**
 	 * /timezone for coordinates returns the zone and sun and moon times.
 	 */
 	public function test_timezone_coordinates() {
