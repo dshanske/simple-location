@@ -276,6 +276,10 @@ A provider is skipped, without asking it, where it can't have weather: outside t
 
 Geocoding and elevation work the same way, with Fallback Geo Providers and Fallback Elevation Providers, tried when a provider finds nothing or fails, such as when its quota runs out. Maps have no fallback, because the map provider decides how your maps look.
 
+### Can I enter a Plus Code?
+
+Yes. [Plus Codes](https://maps.google.com/pluscodes/) are the short codes for places that Google Maps shows, such as 87F6XR2P+WH. Enter one in the Plus Code field of the Location box and choose Lookup, and it replaces the location. A short code, such as XR2P+WH, needs the town or city after it, such as XR2P+WH Philadelphia. Plus Codes are decoded on your site; the town is looked up with your geocoding provider.
+
 ### How do I know when a provider stops working?
 
 When a provider fails with an error you can fix, such as a missing or rejected API key, an exhausted quota, or one of your stations that can't be read or has stopped updating, administrators see a notice on the Dashboard and the Simple Location settings, and it is listed in Tools → Site Health. The notice can be dismissed, and the error clears by itself the next time that provider works.

@@ -139,6 +139,12 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 	<?php } ?>
 
 
+		<p class="field-row">
+			<label for="plus_code"><?php esc_html_e( 'Plus Code:', 'simple-location' ); ?></label>
+			<input type="text" name="plus_code" id="plus_code" class="widefat" value="" autocomplete="off" aria-describedby="plus-code-description" />
+			<span id="plus-code-description" class="description"><?php esc_html_e( 'Optional. A Plus Code, such as 87F6XR2P+WH, or a short one with the town after it, such as XR2P+WH Philadelphia. Lookup replaces the location with it.', 'simple-location' ); ?></span>
+		</p>
+
 		<label for="latitude" class="quarter">
 			<?php esc_html_e( 'Latitude:', 'simple-location' ); ?>
 			<input type="text" name="latitude" id="latitude" class="widefat" value="<?php echo esc_html( $geodata['latitude'] ?? '' ); ?>" />

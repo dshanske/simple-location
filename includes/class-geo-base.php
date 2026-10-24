@@ -1218,6 +1218,7 @@ class Geo_Base {
 	 * @since 6.0.0 Coordinates are validated and saved only as a pair, numeric fields that aren't numbers are not
 	 *               saved, values of 0 are kept, and input is unslashed.
 	 * @since 6.1.0 Saves the provider the weather was looked up from, as `weather_provider`.
+	 * @since 6.1.0 Without coordinates, a Plus Code in `plus_code` gives them, such as when it wasn't looked up (#197).
 	 *
 	 * @param string  $meta_type Object type: post, comment or user.
 	 * @param int     $object_id Object ID.
@@ -1233,6 +1234,15 @@ class Geo_Base {
 		if ( array_key_exists( 'map_zoom', $data ) ) {
 			$data['zoom'] = $data['map_zoom'];
 			unset( $data['map_zoom'] );
+		}
+
+		// A Plus Code that wasn't looked up, such as without JavaScript, gives the coordinates.
+		if ( empty( $data['latitude'] ) && empty( $data['longitude'] ) && ! empty( $_POST['plus_code'] ) && is_string( $_POST['plus_code'] ) ) {
+			$area = Sloc_Plus_Code::locate( sanitize_text_field( wp_unslash( $_POST['plus_code'] ) ) );
+			if ( is_array( $area ) ) {
+				$data['latitude']  = (string) $area['latitude'];
+				$data['longitude'] = (string) $area['longitude'];
+			}
 		}
 
 		// A coordinate is saved only if both halves are valid; anything else clears both.
