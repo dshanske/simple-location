@@ -67,6 +67,18 @@ class Venue_Provider_HERE extends Venue_Provider {
 	}
 
 	/**
+	 * Returns how long search results are cached: HERE's terms allow keeping results for up to 30 days.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return int Seconds.
+	 */
+	public function cache_time() {
+		/** This filter is documented in includes/class-venue-provider.php */
+		return max( 0, (int) apply_filters( 'sloc_venue_cache_time', self::CACHE_TIME, $this ) );
+	}
+
+	/**
 	 * Returns the places near the location.
 	 *
 	 * @since 6.1.0

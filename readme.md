@@ -73,6 +73,8 @@ Venue providers have different terms on what a site may keep. The plugin follows
 * Google, HERE and TomTom - only the place's identifier and links are kept, such as its Google Maps link and its own website. The name is the one you checked in with, the coordinates are your own, and the address is looked up with your geocoding providers. Their phone numbers, categories and addresses are not stored.
 * A check-in from a Micropub client that doesn't name a venue provider is your own, and is kept as sent.
 
+A search for venues is remembered for 10 minutes, so a check-in app asking again from the same place doesn't use up your quota. This applies to the OpenStreetMap-based providers, Geoapify and HERE, whose terms allow it, but not to Google or TomTom.
+
 ## Weather
 
 Weather consists of at minimum the current conditions and temperature but includes future parameters for use such as pressure, wind speed, wind direction degree, etc. Weather widgets are available
