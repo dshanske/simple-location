@@ -165,12 +165,14 @@ jQuery( document ).ready( function( $ ) {
 				}
 
 				if ( 'undefined' === typeof response ) {
+					hideLoadingSpinner();
 					return null;
 				}
 				position = { timestamp: ( new Date() ).getTime(), coords: response };
 				setLocation( position, time );
 			},
 			error( request, status, error ) {
+				hideLoadingSpinner();
 				alert( request.responseText );
 			},
 		} );
@@ -333,7 +335,8 @@ jQuery( document ).ready( function( $ ) {
 			error( request, status, error ) {
 				alert( request.responseText );
 			},
-			always: hideLoadingSpinner(),
+			// When the lookup ends, whether it worked or not (#749).
+			complete: hideLoadingSpinner,
 		} );
 	}
 
