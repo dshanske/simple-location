@@ -252,6 +252,7 @@ class Simple_Location_Plugin {
 			'data-functions.php', // Global Data Functions to retrieve and store data.
 			'class-sloc-media-metadata.php', // Media Metadata Functions.
 			'class-post-venue.php', // Venue CPT.
+			'class-sloc-merge.php', // Merging duplicate venues.
 			'class-location-taxonomy.php', // Venue Taxonomy.
 			'class-sloc-provider.php', // Base Provider Class.
 			'class-map-provider.php', // Map Provider Class.
