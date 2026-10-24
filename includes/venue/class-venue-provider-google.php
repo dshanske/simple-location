@@ -43,11 +43,19 @@ class Venue_Provider_Google extends Venue_Provider {
 	}
 
 	/**
+	 * Fields asked for: only those billed as Nearby Search Pro, not the Enterprise fields such as the website.
+	 *
+	 * @since 6.1.0
+	 * @var string[]
+	 */
+	const FIELDS = array( 'id', 'displayName', 'formattedAddress', 'addressComponents', 'location', 'types', 'primaryType', 'plusCode', 'viewport', 'googleMapsUri' );
+
+	/**
 	 * Returns the establishments near the location.
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Returns the venues under 'items', like the other venue providers, and an empty list when there are none.
-	 * @since 6.1.0 Searches the venue search radius, not 200 meters.
+	 * @since 6.1.0 Uses Places API (New) Nearby Search, nearest first, within the venue search radius (#703).
 	 *
 	 * @return array|WP_Error h-cards under 'items', or an error.
 	 */
@@ -55,30 +63,77 @@ class Venue_Provider_Google extends Venue_Provider {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Google', 'simple-location' ) );
 		}
-		$args = array(
-			'location' => $this->latitude . ',' . $this->longitude,
-			'radius'   => $this->radius,
-			'type'     => 'establishment',
-			'language' => get_bloginfo( 'language' ),
-			'key'      => $this->api,
+		/**
+		 * Filters the place fields asked of Google. Fields beyond Nearby Search Pro, such as websiteUri, cost more.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param string[] $fields Place fields, such as 'displayName'.
+		 */
+		$fields = (array) apply_filters( 'sloc_google_venue_fields', self::FIELDS );
+		$json   = $this->post_json(
+			'https://places.googleapis.com/v1/places:searchNearby',
+			array(
+				'locationRestriction' => array(
+					'circle' => array(
+						'center' => array(
+							'latitude'  => (float) $this->latitude,
+							'longitude' => (float) $this->longitude,
+						),
+						'radius' => (float) $this->radius,
+					),
+				),
+				'maxResultCount'      => min( 20, $this->limit ),
+				'rankPreference'      => 'DISTANCE',
+				'languageCode'        => get_bloginfo( 'language' ),
+			),
+			array(
+				'X-Goog-Api-Key'   => $this->api,
+				'X-Goog-FieldMask' => implode( ',', array_map( fn( $field ) => 'places.' . $field, $fields ) ),
+			)
 		);
-		$url  = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?';
-		$json = $this->fetch_json( $url, $args );
-		if ( is_wp_error( $json ) ) {
-			return $json;
+		// No places nearby is an empty object.
+		if ( is_wp_error( $json ) && 'not_json_response' === $json->get_error_code() && in_array( trim( (string) ( $json->get_error_data()['body'] ?? '' ) ), array( '{}', '[]' ), true ) ) {
+			return array( 'items' => array() );
 		}
-
-		// ZERO_RESULTS means there are no establishments within the radius.
-		if ( isset( $json['status'] ) && is_string( $json['status'] ) && ! in_array( $json['status'], array( 'OK', 'ZERO_RESULTS' ), true ) ) {
-			return new WP_Error( $json['status'], $json['error_message'] ?? __( 'Error Returning Results from Google', 'simple-location' ), array( $json ) );
+		if ( is_wp_error( $json ) ) {
+			return self::api_error( $json );
 		}
 
 		$items = array();
-		foreach ( $json['results'] ?? array() as $result ) {
-			$items[] = $this->address_to_hcard( $result );
+		foreach ( is_array( $json['places'] ?? null ) ? $json['places'] : array() as $place ) {
+			if ( is_array( $place ) ) {
+				$items[] = $this->address_to_hcard( $place );
+			}
 		}
+		return array( 'items' => array_values( array_filter( $items ) ) );
+	}
 
-		return array( 'items' => $items );
+	/**
+	 * Returns Google's explanation of a refused request, when the response has one.
+	 *
+	 * Google answers with an error object, such as PERMISSION_DENIED when the Places API (New) isn't enabled.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param WP_Error $error Error from post_json().
+	 * @return WP_Error Error with Google's message, and its status, such as PERMISSION_DENIED, as 'reason' in the data;
+	 *                  or the error unchanged.
+	 */
+	protected static function api_error( $error ) {
+		$data = $error->get_error_data();
+		$body = is_array( $data ) ? json_decode( $data['body'] ?? '', true ) : null;
+		if ( is_array( $body ) && isset( $body['error']['status'], $body['error']['message'] ) && is_string( $body['error']['message'] ) ) {
+			return new WP_Error(
+				$error->get_error_code(),
+				$body['error']['message'],
+				array(
+					'status' => $data['status'] ?? 0,
+					'reason' => (string) $body['error']['status'],
+				)
+			);
+		}
+		return $error;
 	}
 
 	/**
@@ -142,35 +197,84 @@ class Venue_Provider_Google extends Venue_Provider {
 	}
 
 	/**
-	 * Convert address properties to mf2
+	 * Converts a place to an h-card.
 	 *
-	 * @param  array $data Raw JSON.
-	 * @return array $reverse microformats2 address elements in an array.
+	 * @since 1.0.0
+	 * @since 6.1.0 Reads Places API (New) places, with their address (#703).
+	 *
+	 * @param array $place Place.
+	 * @return array Venue as an h-card, or an empty array for a place without a name.
 	 */
-	private function address_to_hcard( $data ) {
+	private function address_to_hcard( $place ) {
+		$name = $place['displayName']['text'] ?? null;
+		if ( ! is_string( $name ) || '' === $name ) {
+			return array();
+		}
 		$card = array(
-			'type' => 'card',
+			'type'      => 'card',
+			'name'      => $name,
+			'label'     => $place['formattedAddress'] ?? null,
+			'plus-code' => $place['plusCode']['globalCode'] ?? null,
+			'latitude'  => is_numeric( $place['location']['latitude'] ?? null ) ? (float) $place['location']['latitude'] : null,
+			'longitude' => is_numeric( $place['location']['longitude'] ?? null ) ? (float) $place['location']['longitude'] : null,
+			'category'  => is_array( $place['types'] ?? null ) ? $place['types'] : null,
+			'url'       => $place['websiteUri'] ?? null,
+			'tel'       => $place['internationalPhoneNumber'] ?? null,
 		);
+		if ( isset( $place['viewport'] ) ) {
+			$card['boundingbox'] = $place['viewport'];
+		}
+		$card = array_merge( $card, self::address_components( $place['addressComponents'] ?? array() ) );
 		if ( WP_DEBUG ) {
-			$card['raw'] = $data;
+			$card['raw'] = $place;
 		}
-
-		$card['name']      = $data['name'] ?? null;
-		$card['plus-code'] = $data['plus_code']['global_code'] ?? null;
-		if ( isset( $data['geometry'] ) ) {
-			$card['latitude']    = $data['geometry']['location']['lat'] ?? null;
-			$card['longitude']   = $data['geometry']['location']['lng'] ?? null;
-			$card['boundingbox'] = $data['geometry']['viewport'] ?? null;
+		$types = $card['category'] ?? array();
+		// The primary type is the most specific.
+		if ( ! empty( $place['primaryType'] ) && is_string( $place['primaryType'] ) ) {
+			array_unshift( $types, $place['primaryType'] );
 		}
-		$card['category'] = $data['types'] ?? null;
-		$card             = self::add_category( $card, self::google_category( is_array( $card['category'] ) ? $card['category'] : array() ) );
+		$card = self::add_category( array_filter( $card ), self::google_category( $types ) );
 
 		$tz = $this->timezone();
 		if ( $tz ) {
 			$card = array_merge( $card, $tz );
 		}
-		$card = array_filter( $card );
-
 		return $card;
+	}
+
+	/**
+	 * Converts a place's address components to h-card address properties.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $components Address components, each with longText, shortText and types.
+	 * @return array Address properties.
+	 */
+	protected static function address_components( $components ) {
+		$parts = array();
+		foreach ( is_array( $components ) ? $components : array() as $component ) {
+			foreach ( (array) ( $component['types'] ?? array() ) as $type ) {
+				if ( ! isset( $parts[ $type ] ) ) {
+					$parts[ $type ] = $component;
+				}
+			}
+		}
+		$long    = fn( $type ) => $parts[ $type ]['longText'] ?? null;
+		$short   = fn( $type ) => $parts[ $type ]['shortText'] ?? null;
+		$number  = $long( 'street_number' );
+		$street  = $long( 'route' );
+		$country = strtoupper( (string) $short( 'country' ) );
+		return array(
+			'street-number'    => $number,
+			'street'           => $street,
+			'street-address'   => trim( self::house_number( $country ) ? $number . ' ' . $street : $street . ' ' . $number ),
+			'extended-address' => $long( 'neighborhood' ) ?? $long( 'sublocality' ),
+			'locality'         => $long( 'locality' ) ?? $long( 'postal_town' ),
+			'region'           => $long( 'administrative_area_level_1' ),
+			'region-code'      => $short( 'administrative_area_level_1' ),
+			'postal-code'      => $long( 'postal_code' ),
+			'country-name'     => $long( 'country' ),
+			'country-code'     => '' === $country ? null : $country,
+		);
 	}
 }

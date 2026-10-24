@@ -382,7 +382,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( array( 'culture', 'outdoors' ), wp_list_pluck( $items, 'venue-category' ) );
 		$this->assertSame( array( 'attraction', 'park' ), wp_list_pluck( $items, 'category' ) );
 
-		$this->mock_http( array( 'maps.googleapis.com' => array( 'body' => $this->fixture( 'venue/google-nearbysearch.json' ) ) ) );
+		$this->mock_http( array( 'places.googleapis.com' => array( 'body' => $this->fixture( 'venue/google-places-nearby.json' ) ) ) );
 		$items = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup()['items'];
 		$this->assertSame( array( 'government', 'outdoors' ), wp_list_pluck( $items, 'venue-category' ) );
 
@@ -453,79 +453,122 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Google's Nearby Search returns establishments with their own coordinates and plus codes.
+	 * Google's Places API (New) Nearby Search returns places nearest first, with their addresses (#703).
 	 */
 	public function test_google() {
-		$fixture = $this->fixture( 'venue/google-nearbysearch.json' );
-		$this->mock_http( array( 'maps.googleapis.com/maps/api/place/nearbysearch/json' => array( 'body' => $fixture ) ) );
+		$fixture = $this->fixture( 'venue/google-places-nearby.json' );
+		$this->mock_http( array( 'places.googleapis.com/v1/places:searchNearby' => array( 'body' => $fixture ) ) );
 		$result = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup();
 		$this->assertSame( array( 'items' ), array_keys( $result ), 'The same shape as the other venue providers.' );
 		$items = $result['items'];
 
 		$request = $this->last_request();
-		$this->assertSame( '39.9524,-75.1636', $request['query']['location'] );
-		$this->assertSame( (string) Venue_Provider::DEFAULT_RADIUS, $request['query']['radius'], 'The venue search radius (#706).' );
-		$this->assertSame( 'establishment', $request['query']['type'] );
-		$this->assertSame( 'KEY', $request['query']['key'] );
+		$this->assertSame( 'POST', $request['args']['method'] );
+		$this->assertSame( 'KEY', $request['args']['headers']['X-Goog-Api-Key'] );
+		$this->assertStringNotContainsString( 'KEY', $request['url'], 'The key is in a header, not the URL.' );
+		$this->assertStringContainsString( 'places.displayName', $request['args']['headers']['X-Goog-FieldMask'] );
+		$this->assertStringNotContainsString( 'websiteUri', $request['args']['headers']['X-Goog-FieldMask'], 'Only the Pro fields.' );
+		$body = json_decode( $request['args']['body'], true );
+		$this->assertEquals( self::LAT, $body['locationRestriction']['circle']['center']['latitude'] );
+		$this->assertEquals( self::LNG, $body['locationRestriction']['circle']['center']['longitude'] );
+		$this->assertEquals( Venue_Provider::DEFAULT_RADIUS, $body['locationRestriction']['circle']['radius'], 'The venue search radius (#706).' );
+		$this->assertSame( Venue_Provider::DEFAULT_LIMIT, $body['maxResultCount'] );
+		$this->assertSame( 'DISTANCE', $body['rankPreference'] );
 
-		$this->assertCount( count( $fixture['results'] ), $items );
-		foreach ( $fixture['results'] as $i => $result ) {
+		$this->assertCount( count( $fixture['places'] ), $items );
+		foreach ( $fixture['places'] as $i => $place ) {
 			$card = $items[ $i ];
 			$this->assertSame( 'card', $card['type'] );
-			$this->assertSame( $result['name'], $card['name'] );
-			$this->assertSame( $result['plus_code']['global_code'], $card['plus-code'] );
-			$this->assertSame( $result['geometry']['location']['lat'], $card['latitude'] );
-			$this->assertSame( $result['geometry']['location']['lng'], $card['longitude'] );
-			$this->assertSame( $result['geometry']['viewport'], $card['boundingbox'] );
-			$this->assertSame( $result['types'], $card['category'] );
+			$this->assertSame( $place['displayName']['text'], $card['name'] );
+			$this->assertSame( $place['formattedAddress'], $card['label'] );
+			$this->assertSame( $place['plusCode']['globalCode'], $card['plus-code'] );
+			$this->assertSame( $place['location']['latitude'], $card['latitude'] );
+			$this->assertSame( $place['location']['longitude'], $card['longitude'] );
+			$this->assertSame( $place['viewport'], $card['boundingbox'] );
+			$this->assertSame( $place['types'], $card['category'] );
+			$this->assertPhiladelphia( $card );
 			$this->assertEasternTime( $card );
 		}
+		$this->assertSame( '1400 John F Kennedy Boulevard', $items[0]['street-address'] );
+		$this->assertSame( 'Center City', $items[0]['extended-address'] );
+		$this->assertSame( 'United States', $items[0]['country-name'] );
+		$this->assertSame( array( 'government', 'outdoors' ), wp_list_pluck( $items, 'venue-category' ) );
+
+		// The limit is at most Google's 20.
+		$this->provider(
+			'Venue_Provider_Google',
+			array(
+				'api'   => 'KEY',
+				'limit' => 50,
+			)
+		)->reverse_lookup();
+		$this->assertSame( 20, json_decode( $this->last_request()['args']['body'], true )['maxResultCount'] );
+
+		// More fields can be asked for.
+		$fields = fn( $list ) => array_merge( $list, array( 'websiteUri' ) );
+		add_filter( 'sloc_google_venue_fields', $fields );
+		$this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup();
+		remove_filter( 'sloc_google_venue_fields', $fields );
+		$this->assertStringContainsString( 'places.websiteUri', $this->last_request()['args']['headers']['X-Goog-FieldMask'] );
 	}
 
 	/**
-	 * Google needs a key, and a status other than OK becomes an error with that status as the code.
+	 * Google needs a key, and a refused request is an error with Google's status and message, without the key.
 	 */
 	public function test_google_errors() {
 		$this->mock_http( array() );
 		$this->assertSame( 'missing_api_key', $this->provider( 'Venue_Provider_Google', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
 		$this->assertEmpty( $this->http_requests );
 
-		$this->mock_http( array( 'maps.googleapis.com' => array( 'body' => $this->fixture( 'geo/google-denied.json' ) ) ) );
-		$result = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup();
-		$this->assertWPError( $result );
-		$this->assertSame( 'REQUEST_DENIED', $result->get_error_code() );
-		$this->assertSame( 'The provided API key is invalid.', $result->get_error_message() );
-	}
-
-	/**
-	 * No establishments nearby is an empty list, and a result without types has no category.
-	 */
-	public function test_google_empty_results() {
 		$this->mock_http(
 			array(
-				'maps.googleapis.com' => array(
+				'places.googleapis.com' => array(
+					'code' => 403,
 					'body' => array(
-						'results' => array(),
-						'status'  => 'ZERO_RESULTS',
+						'error' => array(
+							'code'    => 403,
+							'message' => 'Places API (New) has not been used in project 123 before or it is disabled.',
+							'status'  => 'PERMISSION_DENIED',
+						),
 					),
 				),
 			)
 		);
+		$provider = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) );
+		$result   = $provider->reverse_lookup();
+		$this->assertWPError( $result );
+		$this->assertSame( 'invalid_response', $result->get_error_code() );
+		$this->assertStringContainsString( 'Places API (New)', $result->get_error_message() );
+		$this->assertSame( 403, $result->get_error_data()['status'] );
+		$this->assertSame( 'PERMISSION_DENIED', $result->get_error_data()['reason'] );
+		$this->assertTrue( Sloc_Provider_Errors::is_actionable( $result, $provider ), 'Shown to administrators.' );
+	}
+
+	/**
+	 * No places nearby is an empty list, and places without a name are left out.
+	 */
+	public function test_google_empty_results() {
+		$this->mock_http( array( 'places.googleapis.com' => array( 'body' => '{}' ) ) );
 		$this->assertSame( array( 'items' => array() ), $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup() );
 
 		$this->mock_http(
 			array(
-				'maps.googleapis.com' => array(
+				'places.googleapis.com' => array(
 					'body' => array(
-						'results' => array( array( 'name' => 'X' ) ),
-						'status'  => 'OK',
+						'places' => array(
+							array( 'displayName' => array( 'text' => 'X' ) ),
+							array( 'id' => 'no-name' ),
+							'not a place',
+						),
 					),
 				),
 			)
 		);
 		$result = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->reverse_lookup();
+		$this->assertCount( 1, $result['items'] );
 		$this->assertSame( 'X', $result['items'][0]['name'] );
 		$this->assertArrayNotHasKey( 'category', $result['items'][0] );
+		$this->assertSame( 'other', $result['items'][0]['venue-category'] );
 	}
 
 	/**
