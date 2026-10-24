@@ -297,6 +297,18 @@ class Loc_Config {
 
 		register_setting(
 			'sloc_providers', // option group.
+			'sloc_venue_fallbacks', // option name.
+			array(
+				'type'              => 'array',
+				'description'       => 'Venue providers to try, in order, after the venue provider',
+				'show_in_rest'      => false,
+				'default'           => array(),
+				'sanitize_callback' => array( 'Sloc_Provider_Chain', 'sanitize_venue_fallbacks' ),
+			)
+		);
+
+		register_setting(
+			'sloc_providers', // option group.
 			'sloc_venue_radius', // option name.
 			array(
 				'type'              => 'integer',
@@ -901,6 +913,18 @@ class Loc_Config {
 				'label_for'   => 'sloc_venue_provider',
 				'description' => __( 'Services that Look up One or More Venues from coordinates or description', 'simple-location' ),
 				'providers'   => self::venue_providers(),
+			)
+		);
+		add_settings_field(
+			'sloc_venue_fallbacks', // id.
+			__( 'Fallback Venue Providers', 'simple-location' ), // setting title.
+			array( 'Sloc_Provider_Chain', 'fallbacks_callback' ), // display callback.
+			'sloc_providers', // option group.
+			'sloc_providers', // settings section.
+			array(
+				'label_for'   => 'sloc_venue_fallbacks',
+				'type'        => 'venue',
+				'description' => __( 'Tried in order when the venue provider finds no venues or fails, such as when its quota runs out. Errors you can fix are shown on the Dashboard.', 'simple-location' ),
 			)
 		);
 		add_settings_field(

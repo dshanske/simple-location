@@ -214,6 +214,7 @@ class Sloc_Provider_Errors {
 			'weather'   => __( 'weather', 'simple-location' ),
 			'geo'       => __( 'geocoding', 'simple-location' ),
 			'elevation' => __( 'elevation', 'simple-location' ),
+			'venue'     => __( 'venue', 'simple-location' ),
 		);
 		$type  = $types[ $record['type'] ] ?? $record['type'];
 		if ( $resolved ) {

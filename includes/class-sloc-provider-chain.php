@@ -48,6 +48,10 @@ class Sloc_Provider_Chain {
 			'option'    => 'sloc_elevation_provider',
 			'fallbacks' => 'sloc_elevation_fallbacks',
 		),
+		'venue'     => array(
+			'option'    => 'sloc_venue_provider',
+			'fallbacks' => 'sloc_venue_fallbacks',
+		),
 	);
 
 	/**
@@ -109,6 +113,8 @@ class Sloc_Provider_Chain {
 				return Loc_Config::geo_providers();
 			case 'elevation':
 				return Loc_Config::elevation_providers();
+			case 'venue':
+				return Loc_Config::venue_providers();
 		}
 		return array();
 	}
@@ -130,6 +136,8 @@ class Sloc_Provider_Chain {
 				return Loc_Config::geo_provider( $slug );
 			case 'elevation':
 				return Loc_Config::elevation_provider( $slug );
+			case 'venue':
+				return Loc_Config::venue_provider( $slug );
 		}
 		return null;
 	}
@@ -315,6 +323,40 @@ class Sloc_Provider_Chain {
 	}
 
 	/**
+	 * Looks up the venues near a location with the venue chain.
+	 *
+	 * A provider that fails, or finds no venues, moves on to the next.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param float $latitude  Latitude.
+	 * @param float $longitude Longitude.
+	 * @return array|WP_Error Array with the venues under 'items', nearest first, and the slug of the provider that found
+	 *                        them as 'provider'; or the last error. Without any venues, an empty 'items'.
+	 */
+	public static function venues( $latitude, $longitude ) {
+		$result = self::run(
+			'venue',
+			function ( $provider ) {
+				$venues = $provider->nearby();
+				if ( is_wp_error( $venues ) || empty( $venues['items'] ) ) {
+					return is_wp_error( $venues ) ? $venues : array();
+				}
+				$venues['provider'] = $provider->get_slug();
+				return $venues;
+			},
+			array(
+				'latitude'  => $latitude,
+				'longitude' => $longitude,
+			)
+		);
+		if ( is_wp_error( $result ) || ! empty( $result ) ) {
+			return $result;
+		}
+		return array( 'items' => array() );
+	}
+
+	/**
 	 * Sanitizes a fallbacks setting: up to two known provider slugs, without repeats or None.
 	 *
 	 * @since 6.1.0
@@ -369,6 +411,18 @@ class Sloc_Provider_Chain {
 	 */
 	public static function sanitize_elevation_fallbacks( $value ) {
 		return self::sanitize_fallbacks( 'elevation', $value );
+	}
+
+	/**
+	 * Sanitizes the venue fallbacks setting.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param mixed $value Slugs.
+	 * @return string[] Slugs.
+	 */
+	public static function sanitize_venue_fallbacks( $value ) {
+		return self::sanitize_fallbacks( 'venue', $value );
 	}
 
 	/**

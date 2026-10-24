@@ -466,10 +466,8 @@ class Location_Plugins {
 		if ( Loc_Config::geo_provider() ) {
 			$reverse_adr = Sloc_Provider_Chain::reverse_lookup( $lat, $lon );
 		}
-		$venue = Loc_Config::venue_provider();
-		if ( is_object( $venue ) ) {
-			$venue->set( $lat, $lon );
-			$venues = $venue->nearby();
+		if ( Loc_Config::venue_provider() ) {
+			$venues = Sloc_Provider_Chain::venues( $lat, $lon );
 		}
 
 		// Use the site default, but at a private venue show the place without the coordinates (see Geo_Data::get_attachment_visibility()).
