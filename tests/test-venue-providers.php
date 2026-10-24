@@ -71,7 +71,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::venue_providers();
-		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass', 'geoapify', 'here' ) as $slug ) {
+		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass', 'geoapify', 'here', 'tomtom' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['url'], $slug );
@@ -262,7 +262,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	 * limited; venues without coordinates come last (#706).
 	 */
 	public function test_sort_items() {
-		$items = array(
+		$items  = array(
 			array(
 				'name'      => 'Far',
 				'latitude'  => self::LAT + 0.01,
@@ -298,7 +298,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	public function test_nearby() {
 		$fixture = $this->fixture( 'venue/locationiq-nearby.json' );
 		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => array_reverse( $fixture ) ) ) );
-		$result = $this->provider(
+		$result    = $this->provider(
 			'Venue_Provider_LocationIQ',
 			array(
 				'api'    => 'KEY',
@@ -758,6 +758,61 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'lodging', $category( '500-5000-0053' )['category'] );
 		$this->assertSame( 'other', $category( '1000-0000' )['category'], 'Whole levels only.' );
 		$this->assertSame( 'other', Venue_Provider_HERE::here_category( array( 'not a category' ) )['category'] );
+	}
+
+	/**
+	 * TomTom's nearby search finds places within the radius, with their addresses and classifications (#712).
+	 */
+	public function test_tomtom() {
+		$fixture = $this->fixture( 'venue/tomtom-nearby.json' );
+		$this->mock_http( array( 'api.tomtom.com/search/2/nearbySearch/.json' => array( 'body' => $fixture ) ) );
+		$items = $this->provider( 'Venue_Provider_TomTom', array( 'api' => 'KEY' ) )->reverse_lookup()['items'];
+
+		$request = $this->last_request();
+		$this->assertSame( 'KEY', $request['query']['key'] );
+		$this->assertEquals( self::LAT, $request['query']['lat'] );
+		$this->assertEquals( self::LNG, $request['query']['lon'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_RADIUS, $request['query']['radius'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_LIMIT, $request['query']['limit'] );
+
+		$this->assertSame( array( 'Philadelphia City Hall', 'Rival Bros Coffee' ), wp_list_pluck( $items, 'name' ) );
+		$this->assertPhiladelphia( $items[0] );
+		$this->assertEasternTime( $items[0] );
+		$this->assertSame( '1400 John F Kennedy Boulevard', $items[0]['street-address'] );
+		$this->assertSame( 'https://www.phila.gov', $items[0]['url'], 'A website without a scheme gets https.' );
+		$this->assertSame( 'https://rivalbros.com', $items[1]['url'] );
+		$this->assertSame( '+1 215-686-2181', $items[0]['tel'] );
+		$this->assertSame( array( 'city hall', 'government office' ), $items[0]['category'] );
+		$this->assertSame( array( 'government', 'food' ), wp_list_pluck( $items, 'venue-category' ) );
+	}
+
+	/**
+	 * TomTom needs a key, passes on refused requests, and maps its classifications (#712).
+	 */
+	public function test_tomtom_errors_and_categories() {
+		$this->mock_http( array() );
+		$this->assertSame( 'missing_api_key', $this->provider( 'Venue_Provider_TomTom', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
+		$this->assertEmpty( $this->http_requests );
+
+		$this->mock_http(
+			array(
+				'api.tomtom.com' => array(
+					'code' => 403,
+					'body' => array(
+						'errorText'      => 'Developer Inactive',
+						'detailedError'  => array( 'message' => 'Developer Inactive' ),
+						'httpStatusCode' => 403,
+					),
+				),
+			)
+		);
+		$error = $this->provider( 'Venue_Provider_TomTom', array( 'api' => 'KEY' ) )->reverse_lookup();
+		$this->assertSame( 403, $error->get_error_data()['status'] );
+		$this->assertStringNotContainsString( 'KEY', $error->get_error_message() );
+
+		$this->assertSame( 'fa-plane', Venue_Provider_TomTom::tomtom_category( array( array( 'code' => 'AIRPORT' ) ) )['icon'] );
+		$this->assertSame( 'lodging', Venue_Provider_TomTom::tomtom_category( array( array( 'code' => 'HOTEL_MOTEL' ) ) )['category'] );
+		$this->assertSame( 'other', Venue_Provider_TomTom::tomtom_category( array( array( 'code' => 'UNKNOWN' ), 'nonsense' ) )['category'] );
 	}
 
 	/**

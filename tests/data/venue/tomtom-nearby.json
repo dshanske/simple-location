@@ -1,0 +1,120 @@
+{
+  "summary": {
+    "queryType": "NEARBY",
+    "queryTime": 12,
+    "numResults": 2,
+    "offset": 0,
+    "totalResults": 2,
+    "fuzzyLevel": 1,
+    "geoBias": {
+      "lat": 39.9524,
+      "lon": -75.1636
+    }
+  },
+  "results": [
+    {
+      "type": "POI",
+      "id": "g6JpZK84NDA5MDkwMDAwMDAwMDAx",
+      "score": 0.99,
+      "dist": 34.2,
+      "info": "search:ta:840429000000001",
+      "poi": {
+        "name": "Philadelphia City Hall",
+        "phone": "+1 215-686-2181",
+        "url": "www.phila.gov",
+        "categorySet": [
+          {
+            "id": 7367
+          }
+        ],
+        "categories": [
+          "city hall",
+          "government office"
+        ],
+        "classifications": [
+          {
+            "code": "GOVERNMENT_OFFICE",
+            "names": [
+              {
+                "nameLocale": "en-US",
+                "name": "city hall"
+              },
+              {
+                "nameLocale": "en-US",
+                "name": "government office"
+              }
+            ]
+          }
+        ]
+      },
+      "address": {
+        "streetNumber": "1400",
+        "streetName": "John F Kennedy Boulevard",
+        "municipalitySubdivision": "Center City",
+        "municipality": "Philadelphia",
+        "countrySecondarySubdivision": "Philadelphia",
+        "countrySubdivision": "PA",
+        "countrySubdivisionName": "Pennsylvania",
+        "postalCode": "19107",
+        "countryCode": "US",
+        "country": "United States",
+        "countryCodeISO3": "USA",
+        "freeformAddress": "1400 John F Kennedy Boulevard, Philadelphia, PA 19107",
+        "localName": "Philadelphia"
+      },
+      "position": {
+        "lat": 39.9527,
+        "lon": -75.1635
+      }
+    },
+    {
+      "type": "POI",
+      "id": "g6JpZK84NDA5MDkwMDAwMDAwMDAy",
+      "score": 0.98,
+      "dist": 92.4,
+      "poi": {
+        "name": "Rival Bros Coffee",
+        "url": "https://rivalbros.com",
+        "categorySet": [
+          {
+            "id": 9376002
+          }
+        ],
+        "classifications": [
+          {
+            "code": "CAFE_PUB",
+            "names": [
+              {
+                "nameLocale": "en-US",
+                "name": "coffee shop"
+              },
+              {
+                "nameLocale": "en-US",
+                "name": "café/pub"
+              }
+            ]
+          }
+        ]
+      },
+      "address": {
+        "streetNumber": "1528",
+        "streetName": "Sansom Street",
+        "municipalitySubdivision": "Center City",
+        "municipality": "Philadelphia",
+        "countrySecondarySubdivision": "Philadelphia",
+        "countrySubdivision": "PA",
+        "countrySubdivisionName": "Pennsylvania",
+        "postalCode": "19102",
+        "countryCode": "US",
+        "country": "United States",
+        "countryCodeISO3": "USA",
+        "freeformAddress": "1528 Sansom Street, Philadelphia, PA 19102",
+        "localName": "Philadelphia"
+      },
+      "position": {
+        "lat": 39.9531,
+        "lon": -75.1642
+      }
+    }
+  ]
+}
