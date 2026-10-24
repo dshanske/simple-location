@@ -272,7 +272,7 @@ Weather is looked up with up to three providers, tried in order: the weather pro
 
 A provider is skipped, without asking it, where it can't have weather: outside the country it covers, such as the National Weather Service outside the US; more than 10 km from your stations, for Custom Station and WeeWX; or for a time it has no weather for. If a provider fails with an error, the next one is tried.
 
-Geocoding and elevation work the same way, with Fallback Geo Providers and Fallback Elevation Providers, tried when a provider finds nothing or fails, such as when its quota runs out. Maps have no fallback, because the map provider decides how your maps look.
+Geocoding, elevation and venues work the same way, with Fallback Geo Providers, Fallback Elevation Providers and Fallback Venue Providers, tried when a provider finds nothing or fails, such as when its quota runs out. Venues are searched for within the Venue Search Radius and listed nearest first. Maps have no fallback, because the map provider decides how your maps look.
 
 ### Can I enter a Plus Code?
 

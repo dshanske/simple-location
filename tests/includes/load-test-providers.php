@@ -17,6 +17,7 @@ require_once __DIR__ . '/class-weather-provider-sloc-test-fallback.php';
 require_once __DIR__ . '/class-elevation-provider-sloc-test.php';
 require_once __DIR__ . '/class-elevation-provider-sloc-test-fallback.php';
 require_once __DIR__ . '/class-venue-provider-sloc-test.php';
+require_once __DIR__ . '/class-venue-provider-sloc-test-fallback.php';
 
 register_sloc_provider( new Geo_Provider_Sloc_Test() );
 register_sloc_provider( new Geo_Provider_Sloc_Test_Fallback() );
@@ -26,3 +27,4 @@ register_sloc_provider( new Weather_Provider_Sloc_Test_Fallback() );
 register_sloc_provider( new Elevation_Provider_Sloc_Test() );
 register_sloc_provider( new Elevation_Provider_Sloc_Test_Fallback() );
 register_sloc_provider( new Venue_Provider_Sloc_Test() );
+register_sloc_provider( new Venue_Provider_Sloc_Test_Fallback() );
