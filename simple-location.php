@@ -393,6 +393,8 @@ class Simple_Location_Plugin {
 			'class-venue-provider-google.php', // Google.
 			'class-venue-provider-locationiq.php',
 			'class-venue-provider-overpass.php', // OpenStreetMap Overpass.
+			'class-venue-provider-geoapify.php', // Geoapify.
+			'class-venue-provider-here.php', // HERE.
 		);
 		self::register_providers( $providers, 'includes/venue/' );
 	}

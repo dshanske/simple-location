@@ -71,7 +71,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::venue_providers();
-		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass' ) as $slug ) {
+		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass', 'geoapify', 'here' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['url'], $slug );
@@ -638,6 +638,126 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array() );
 		$this->assertSame( array( 'items' => array() ), ( new Venue_Provider_Overpass() )->reverse_lookup(), 'No request without a location.' );
 		$this->assertEmpty( $this->http_requests );
+	}
+
+	/**
+	 * Geoapify's Places API finds places within the radius, with their addresses and categories (#710).
+	 */
+	public function test_geoapify() {
+		$fixture = $this->fixture( 'venue/geoapify-places.json' );
+		$this->mock_http( array( 'api.geoapify.com/v2/places' => array( 'body' => $fixture ) ) );
+		$result = $this->provider( 'Venue_Provider_Geoapify', array( 'api' => 'KEY' ) )->reverse_lookup();
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://api.geoapify.com/v2/places', $request['base'] );
+		$this->assertSame( 'KEY', $request['query']['apiKey'] );
+		$this->assertSame( 'circle:-75.1636,39.9524,' . Venue_Provider::DEFAULT_RADIUS, $request['query']['filter'], 'Longitude first.' );
+		$this->assertSame( 'proximity:-75.1636,39.9524', $request['query']['bias'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_LIMIT, $request['query']['limit'] );
+		$this->assertStringContainsString( 'catering', $request['query']['categories'] );
+		$this->assertSame( 'en', $request['query']['lang'] );
+
+		$items = $result['items'];
+		$this->assertSame( array( 'Philadelphia City Hall', 'Rival Bros Coffee', 'Suburban Station' ), wp_list_pluck( $items, 'name' ), 'Places without a name are left out.' );
+		$this->assertPhiladelphia( $items[0] );
+		$this->assertEasternTime( $items[0] );
+		$this->assertSame( '1400 John F. Kennedy Boulevard', $items[0]['street-address'] );
+		$this->assertSame( 'Center City', $items[0]['extended-address'] );
+		$this->assertSame( 'https://www.phila.gov/', $items[0]['url'] );
+		$this->assertSame( 39.9527, $items[0]['latitude'] );
+		$this->assertSame( array( 'government', 'food', 'transport' ), wp_list_pluck( $items, 'venue-category' ) );
+		$this->assertSame( 'fa-train', $items[2]['icon'] );
+		$this->assertSame( '+1 215 555 0100', $items[1]['tel'] );
+		$this->assertContains( 'catering.cafe', $items[1]['category'] );
+	}
+
+	/**
+	 * Geoapify needs a key, passes on refused requests, and maps its categories from the most specific (#710).
+	 */
+	public function test_geoapify_errors_and_categories() {
+		$this->mock_http( array() );
+		$this->assertSame( 'missing_api_key', $this->provider( 'Venue_Provider_Geoapify', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
+		$this->assertEmpty( $this->http_requests );
+
+		$this->mock_http(
+			array(
+				'api.geoapify.com' => array(
+					'code' => 401,
+					'body' => array(
+						'statusCode' => 401,
+						'error'      => 'Unauthorized',
+						'message'    => 'Invalid apiKey',
+					),
+				),
+			)
+		);
+		$error = $this->provider( 'Venue_Provider_Geoapify', array( 'api' => 'KEY' ) )->reverse_lookup();
+		$this->assertSame( 401, $error->get_error_data()['status'] );
+		$this->assertStringNotContainsString( 'KEY', $error->get_error_message() );
+
+		$this->mock_http( array( 'api.geoapify.com' => array( 'body' => array( 'features' => array() ) ) ) );
+		$this->assertSame( array( 'items' => array() ), $this->provider( 'Venue_Provider_Geoapify', array( 'api' => 'KEY' ) )->reverse_lookup() );
+
+		$this->assertSame( 'drink', Venue_Provider_Geoapify::geoapify_category( array( 'catering', 'catering.pub' ) )['category'] );
+		$this->assertSame( 'lodging', Venue_Provider_Geoapify::geoapify_category( array( 'accommodation.hotel' ) )['category'] );
+		$this->assertSame( 'fa-plane', Venue_Provider_Geoapify::geoapify_category( array( 'airport.international' ) )['icon'] );
+		$this->assertSame( 'other', Venue_Provider_Geoapify::geoapify_category( array( 'building', 'officer' ) )['category'], 'Whole keys only.' );
+	}
+
+	/**
+	 * HERE's browse endpoint finds places within the radius, with their addresses, contacts and categories (#711).
+	 */
+	public function test_here() {
+		$fixture = $this->fixture( 'venue/here-browse.json' );
+		$this->mock_http( array( 'browse.search.hereapi.com/v1/browse' => array( 'body' => $fixture ) ) );
+		$items = $this->provider( 'Venue_Provider_HERE', array( 'api' => 'KEY' ) )->reverse_lookup()['items'];
+
+		$request = $this->last_request();
+		$this->assertSame( 'KEY', $request['query']['apiKey'] );
+		$this->assertSame( '39.9524,-75.1636', $request['query']['at'] );
+		$this->assertSame( 'circle:39.9524,-75.1636;r=' . Venue_Provider::DEFAULT_RADIUS, $request['query']['in'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_LIMIT, $request['query']['limit'] );
+
+		$this->assertSame( array( 'Philadelphia City Hall', 'Rival Bros Coffee' ), wp_list_pluck( $items, 'name' ), 'Only places, not streets.' );
+		$this->assertPhiladelphia( $items[0] );
+		$this->assertEasternTime( $items[0] );
+		$this->assertSame( 'US', $items[0]['country-code'], 'From the three-letter code.' );
+		$this->assertSame( '1400 John F Kennedy Blvd', $items[0]['street-address'] );
+		$this->assertSame( 'https://www.phila.gov', $items[0]['url'] );
+		$this->assertSame( '+12156862181', $items[0]['tel'] );
+		$this->assertSame( array( 'Historical Monument', 'City Hall' ), $items[0]['category'] );
+		$this->assertSame( 'government', $items[0]['venue-category'], 'From the primary category.' );
+		$this->assertSame( 'food', $items[1]['venue-category'] );
+	}
+
+	/**
+	 * HERE needs a key, passes on refused requests, and maps category IDs by their level (#711).
+	 */
+	public function test_here_errors_and_categories() {
+		$this->mock_http( array() );
+		$this->assertSame( 'missing_api_key', $this->provider( 'Venue_Provider_HERE', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
+		$this->assertEmpty( $this->http_requests );
+
+		$this->mock_http(
+			array(
+				'hereapi.com' => array(
+					'code' => 401,
+					'body' => array(
+						'error'             => 'Unauthorized',
+						'error_description' => 'apiKey invalid. apiKey not found.',
+					),
+				),
+			)
+		);
+		$this->assertSame( 401, $this->provider( 'Venue_Provider_HERE', array( 'api' => 'KEY' ) )->reverse_lookup()->get_error_data()['status'] );
+
+		$category = fn( $id ) => Venue_Provider_HERE::here_category( array( array( 'id' => $id ) ) );
+		$this->assertSame( 'drink', $category( '200-2000-0011' )['category'] );
+		$this->assertSame( 'entertainment', $category( '200-2100-0019' )['category'] );
+		$this->assertSame( 'fa-plane', $category( '400-4000-4581' )['icon'] );
+		$this->assertSame( 'lodging', $category( '500-5000-0053' )['category'] );
+		$this->assertSame( 'other', $category( '1000-0000' )['category'], 'Whole levels only.' );
+		$this->assertSame( 'other', Venue_Provider_HERE::here_category( array( 'not a category' ) )['category'] );
 	}
 
 	/**
