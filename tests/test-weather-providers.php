@@ -70,7 +70,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::weather_providers();
-		foreach ( array( 'openweathermap', 'pirateweather', 'weatherbit', 'weatherstack', 'visualcrossing', 'aeris', 'nwsus', 'meteostat', 'metofficeuk', 'here', 'station', 'openmeteo' ) as $slug ) {
+		foreach ( array( 'openweathermap', 'pirateweather', 'weatherbit', 'weatherstack', 'visualcrossing', 'aeris', 'nwsus', 'meteostat', 'here', 'station', 'openmeteo' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers, $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}
@@ -82,7 +82,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_missing_credentials() {
 		$this->mock_http( array() );
-		foreach ( array( 'OpenWeatherMap', 'PirateWeather', 'Weatherbit', 'Weatherstack', 'VisualCrossing', 'Meteostat', 'HERE', 'MetOffice', 'Aeris' ) as $name ) {
+		foreach ( array( 'OpenWeatherMap', 'PirateWeather', 'Weatherbit', 'Weatherstack', 'VisualCrossing', 'Meteostat', 'HERE', 'Aeris' ) as $name ) {
 			$class    = 'Weather_Provider_' . $name;
 			$provider = $this->provider( $class, array( 'api' => '' ) );
 			$error    = $provider->get_conditions();
@@ -98,7 +98,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	 * Providers with only current weather say so, so the weather chain skips them for other times (#490).
 	 */
 	public function test_supports_time() {
-		foreach ( array( 'OpenWeatherMap', 'Weatherbit', 'Weatherstack', 'HERE', 'NWSUS', 'MetOffice', 'Station', 'Weewx' ) as $name ) {
+		foreach ( array( 'OpenWeatherMap', 'Weatherbit', 'Weatherstack', 'HERE', 'NWSUS', 'Station', 'Weewx' ) as $name ) {
 			$provider = $this->provider( 'Weather_Provider_' . $name );
 			$this->assertTrue( $provider->supports_time(), $name );
 			$this->assertTrue( $provider->supports_time( time() - 1800 ), $name );
@@ -108,34 +108,6 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		foreach ( array( 'PirateWeather', 'VisualCrossing', 'Meteostat', 'Aeris', 'OpenMeteo' ) as $name ) {
 			$this->assertTrue( $this->provider( 'Weather_Provider_' . $name )->supports_time( strtotime( '-2 days' ) ), $name );
 		}
-	}
-
-	/**
-	 * Met Office: without its site list, an error instead of warnings (#683); without a site within 100 km, no results.
-	 */
-	public function test_metoffice_sitelist_errors() {
-		delete_transient( 'metoffice_sites' );
-		$provider = new Weather_Provider_MetOffice( array( 'api' => 'key' ) );
-		$provider->set( 51.5, -0.12 );
-
-		$this->mock_http( array( 'datapoint.metoffice.gov.uk' => new WP_Error( 'http_request_failed', 'Down' ) ) );
-		$this->assertSame( 'http_request_failed', $provider->get_conditions()->get_error_code() );
-
-		$this->mock_http( array( 'datapoint.metoffice.gov.uk' => array( 'body' => array( 'error' => 'Invalid key' ) ) ) );
-		$this->assertSame( 'invalid_response', $provider->get_conditions()->get_error_code() );
-
-		set_transient(
-			'metoffice_sites',
-			array(
-				array(
-					'id'        => '3772',
-					'latitude'  => 21.3,
-					'longitude' => -157.8,
-				),
-			)
-		);
-		$this->assertSame( 'no_results', $provider->get_conditions()->get_error_code(), 'No site within 100 km.' );
-		delete_transient( 'metoffice_sites' );
 	}
 
 	/**
@@ -1658,7 +1630,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array() );
 		$past   = strtotime( '-2 days' );
 		$future = strtotime( '+2 days' );
-		foreach ( array( 'Weather_Provider_OpenWeatherMap', 'Weather_Provider_Weatherbit', 'Weather_Provider_Weatherstack', 'Weather_Provider_HERE', 'Weather_Provider_NWSUS', 'Weather_Provider_MetOffice' ) as $class ) {
+		foreach ( array( 'Weather_Provider_OpenWeatherMap', 'Weather_Provider_Weatherbit', 'Weather_Provider_Weatherstack', 'Weather_Provider_HERE', 'Weather_Provider_NWSUS' ) as $class ) {
 			$provider = $this->provider( $class, array( 'api' => 'key' ) );
 			foreach ( array( $past, $future ) as $time ) {
 				$error = $provider->get_conditions( $time );
@@ -1669,15 +1641,13 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 
 			update_option( 'sloc_weather_provider', $provider->get_slug() );
 			update_option( 'sloc_weather_fallbacks', array( 'sloc_test_fallback' ) );
-			// Met Office covers the UK only.
-			$location   = 'metofficeuk' === $provider->get_slug() ? array( 51.5, -0.12 ) : array( self::LAT, self::LNG );
-			$conditions = Sloc_Provider_Chain::weather( $location[0], $location[1], $past );
+			$conditions = Sloc_Provider_Chain::weather( self::LAT, self::LNG, $past );
 			$this->assertSame( 'sloc_test_fallback', $conditions['provider'], $class );
 			$this->assertSame( $past, Weather_Provider_Sloc_Test::$time, "$class: the time is passed to the next provider." );
 
 			update_option( 'sloc_weather_fallbacks', array( $provider->get_slug() ) );
 			Weather_Provider_Sloc_Test::$calls = array();
-			Sloc_Provider_Chain::weather( $location[0], $location[1], $past );
+			Sloc_Provider_Chain::weather( self::LAT, self::LNG, $past );
 			$this->assertSame( array(), Weather_Provider_Sloc_Test::$calls, "$class is never its own fallback." );
 		}
 		$this->assertSame( array(), $this->http_requests );

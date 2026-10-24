@@ -17,7 +17,7 @@ class ApiSettingsTest extends WP_UnitTestCase {
 		parent::set_up();
 		require_once ABSPATH . 'wp-admin/includes/template.php';
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		update_option( 'sloc_weather_provider', 'metofficeuk' );
+		update_option( 'sloc_weather_provider', 'weatherbit' );
 		update_option( 'sloc_geo_provider', 'nominatim' );
 		update_option( 'sloc_map_provider', 'none' );
 		update_option( 'sloc_elevation_provider', 'none' );
@@ -106,15 +106,15 @@ class ApiSettingsTest extends WP_UnitTestCase {
 		$html = $this->render();
 		$this->assertStringContainsString( '<h2>API Keys</h2>', $html );
 
-		$this->assertMatchesRegularExpression( '#<details class="sloc-api-group" id="sloc-api-metoffice" open><summary>Met Office <span class="sloc-api-in-use">In use</span></summary>#', $html );
+		$this->assertMatchesRegularExpression( '#<details class="sloc-api-group" id="sloc-api-weatherbit" open><summary>WeatherBit <span class="sloc-api-in-use">In use</span></summary>#', $html );
 		$this->assertMatchesRegularExpression( '#<details class="sloc-api-group" id="sloc-api-openweathermap"><summary>OpenWeatherMap</summary>#', $html );
 		$this->assertStringContainsString( 'name="sloc_openweathermap_api"', $html );
 		$this->assertStringContainsString( 'name="sloc_weatherbit_api"', $html );
 
 		preg_match_all( '#<details class="sloc-api-group" id="sloc-api-([a-z]+)"( open)?><summary>([^<]+)#', $html, $matches );
-		$this->assertSame( 'metoffice', $matches[1][0], 'In use first.' );
+		$this->assertSame( 'weatherbit', $matches[1][0], 'In use first.' );
 		$names = array_map( 'trim', array_slice( $matches[3], 1 ) );
-		$this->assertSame( array( 'Met Office' ), array_map( 'trim', array_slice( $matches[3], 0, 1 ) ) );
+		$this->assertSame( array( 'WeatherBit' ), array_map( 'trim', array_slice( $matches[3], 0, 1 ) ) );
 		$sorted = $names;
 		usort( $sorted, fn( $a, $b ) => strcmp( strtolower( $a ), strtolower( $b ) ) );
 		$this->assertSame( $sorted, $names, 'The others by name.' );
@@ -151,7 +151,7 @@ class ApiSettingsTest extends WP_UnitTestCase {
 		update_option( 'sloc_map_provider', 'google' );
 		$html = $this->render();
 		$this->assertStringContainsString( 'id="sloc-api-google" open><summary>Google <span class="sloc-api-in-use">', $html );
-		$this->assertStringContainsString( 'id="sloc-api-metoffice" open>', $html );
+		$this->assertStringContainsString( 'id="sloc-api-weatherbit" open>', $html );
 		$this->assertSame( 2, substr_count( $html, ' open>' ) );
 	}
 
