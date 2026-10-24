@@ -420,6 +420,16 @@ class Loc_Config {
 				'default'      => 14,
 			)
 		);
+		register_setting(
+			'simloc', // option group.
+			'sloc_zoom_always', // option name.
+			array(
+				'type'         => 'boolean',
+				'description'  => 'Simple Location Always Use the Default Map Zoom',
+				'show_in_rest' => true,
+				'default'      => false,
+			)
+		);
 		$markers = array(
 			'sloc_marker'               => array( 'Simple Location Map Marker', 'pin', 'sanitize_marker' ),
 			'sloc_marker_color'         => array( 'Simple Location Map Marker Color', Map_Provider::DEFAULT_MARKER_COLOR, 'sanitize_marker_color' ),
@@ -961,6 +971,18 @@ class Loc_Config {
 		);
 
 		add_settings_field(
+			'sloc_zoom_always', // id.
+			__( 'Always Use the Default Zoom', 'simple-location' ), // setting title.
+			array( 'Loc_Config', 'checkbox_callback' ), // display callback.
+			'simloc', // settings page.
+			'sloc_map', // settings section.
+			array(
+				'label_for'   => 'sloc_zoom_always',
+				'description' => __( 'Draw every map at the default zoom level, rather than the zoom saved with each post, such as the closer zoom of a check-in.', 'simple-location' ),
+			)
+		);
+
+		add_settings_field(
 			'sloc_map_style',
 			__( 'Map Style', 'simple-location' ),
 			array( 'Loc_Config', 'values_callback' ),
@@ -1181,16 +1203,21 @@ class Loc_Config {
 	 *
 	 * @param array $args {
 	 *  Arguments for a checkbox.
-	 *  @type string $label_for Label for Checkbox.
+	 *  @type string $label_for   Label for Checkbox.
+	 *  @type string $description Description shown below the checkbox. Optional.
 	 * }
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.0 Shows the description, if any.
 	 */
 	public static function checkbox_callback( array $args ) {
 		$name    = $args['label_for'];
 		$checked = get_option( $name );
 		printf( '<input name="%1$s" type="hidden" value="0" />', esc_attr( $name ) );
-		printf( '<input name="%1$s" type="checkbox" value="1" %2$s />', esc_attr( $name ), checked( 1, $checked, false ) );
+		printf( '<input name="%1$s" id="%1$s" type="checkbox" value="1" %2$s />', esc_attr( $name ), checked( 1, $checked, false ) );
+		if ( ! empty( $args['description'] ) ) {
+			printf( '<p class="description">%1$s</p>', esc_html( $args['description'] ) );
+		}
 	}
 
 	/**

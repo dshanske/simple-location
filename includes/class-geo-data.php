@@ -898,9 +898,29 @@ class Geo_Data {
 	}
 
 	/**
+	 * Returns the zoom to draw an object's map at: its saved zoom, or the site's default zoom.
+	 *
+	 * The default is used when the object has no saved zoom, so a map doesn't take the zoom of the map drawn before it
+	 * (#695), and always when the Always Use the Default Zoom setting is on (#273).
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $loc Geo data, with the saved zoom as 'map_zoom'.
+	 * @return int|float Zoom level.
+	 */
+	public static function map_zoom( $loc ) {
+		$zoom = $loc['map_zoom'] ?? null;
+		if ( get_option( 'sloc_zoom_always' ) || ! is_numeric( $zoom ) ) {
+			$zoom = get_option( 'sloc_zoom', 14 );
+		}
+		return is_numeric( $zoom ) ? 0 + $zoom : 14;
+	}
+
+	/**
 	 * Returns the map for an object with public location.
 	 *
 	 * @since 2.0.0
+	 * @since 6.1.0 The map is drawn at the object's saved zoom or the default zoom, see map_zoom().
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.
@@ -915,7 +935,8 @@ class Geo_Data {
 				return '';
 			}
 			if ( isset( $loc['latitude'] ) && ( isset( $loc['longitude'] ) ) ) {
-				$loc = array_merge( $loc, $args );
+				$loc['map_zoom'] = self::map_zoom( $loc );
+				$loc             = array_merge( $loc, $args );
 				$map->set( $loc );
 				return $map->get_the_map();
 			}
@@ -1135,6 +1156,7 @@ class Geo_Data {
 	 *
 	 * @since 5.0.0
 	 * @since 6.0.0 The address, link, description and wrapper are escaped.
+	 * @since 6.1.0 The map link uses the saved zoom or the default zoom, see map_zoom().
 	 *
 	 * @param string $type Object type: post, comment, term or user.
 	 * @param int    $id   Object ID.
@@ -1203,6 +1225,7 @@ class Geo_Data {
 		if ( is_null( $map ) ) {
 			$url = '';
 		} else {
+			$loc['map_zoom'] = self::map_zoom( $loc );
 			$map->set( $loc );
 			$url = $map->get_the_map_url();
 		}

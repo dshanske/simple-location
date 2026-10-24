@@ -252,6 +252,57 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A map is drawn at its saved zoom, or the default zoom without one, not the zoom of the map drawn before it (#695);
+	 * with Always Use the Default Zoom, at the default zoom (#273).
+	 */
+	public function test_post_map_zoom() {
+		update_option( 'sloc_map_provider', 'google' );
+		update_option( 'sloc_google_api', 'KEY' );
+		update_option( 'sloc_zoom', 14 );
+		$checkin = self::factory()->post->create();
+		$plain   = self::factory()->post->create();
+		foreach ( array( $checkin, $plain ) as $post_id ) {
+			set_post_geodata(
+				$post_id,
+				'',
+				array(
+					'latitude'   => self::LAT,
+					'longitude'  => self::LNG,
+					'visibility' => 'public',
+				)
+			);
+		}
+		set_post_geodata( $checkin, 'zoom', 18 );
+		$zoom = function () {
+			$property = new ReflectionProperty( 'Map_Provider', 'map_zoom' );
+			if ( PHP_VERSION_ID < 80100 ) {
+				$property->setAccessible( true );
+			}
+			return $property->getValue( Loc_Config::map_provider() );
+		};
+
+		Geo_Data::get_map( 'post', $checkin );
+		$this->assertEquals( 18, $zoom() );
+		Geo_Data::get_map( 'post', $plain );
+		$this->assertEquals( 14, $zoom(), 'Not the zoom of the map before.' );
+		get_post_location( $checkin );
+		get_post_location( $plain );
+		$this->assertEquals( 14, $zoom(), 'Nor for the map link.' );
+		Geo_Data::get_map( 'post', $plain, array( 'map_zoom' => 5 ) );
+		$this->assertEquals( 5, $zoom(), 'A zoom passed in is used.' );
+
+		update_option( 'sloc_zoom_always', 1 );
+		Geo_Data::get_map( 'post', $checkin );
+		$this->assertEquals( 14, $zoom(), 'Always the default zoom.' );
+		$this->assertSame( 14, Geo_Data::map_zoom( array( 'map_zoom' => '18' ) ) );
+
+		update_option( 'sloc_zoom_always', 0 );
+		$this->assertSame( 18, Geo_Data::map_zoom( array( 'map_zoom' => '18' ) ) );
+		$this->assertSame( 14, Geo_Data::map_zoom( array() ) );
+		$this->assertSame( 14, Geo_Data::map_zoom( array( 'map_zoom' => 'x' ) ) );
+	}
+
+	/**
 	 * Post maps use the post's address as their alternative text.
 	 */
 	public function test_post_map_alt_text() {
