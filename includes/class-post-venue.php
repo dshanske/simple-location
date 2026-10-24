@@ -615,7 +615,8 @@ class Post_Venue {
 	 * and its location term is found or created from the address.
 	 *
 	 * @since 5.0.0
-	 * @since 6.1.0 Matches by identifier and by name nearby, and keeps the identifier and provider pages (#729).
+	 * @since 6.1.0 Matches by identifier and by name nearby, and keeps the identifier and provider pages. Keeps
+	 *              only what the provider allows; see storage() (#729).
 	 *
 	 * @param array $venue Check-in or address properties. Needs a name or label.
 	 * @return int|WP_Error|false The venue ID, or false without a name.
@@ -643,6 +644,10 @@ class Post_Venue {
 		if ( $id ) {
 			self::add_venue_sources( $id, $venue, $urls );
 			return $id;
+		}
+
+		if ( Venue_Provider::STORAGE_REFERENCE === self::storage( $venue ) ) {
+			$venue = self::reference_details( $venue );
 		}
 
 		$meta = array();
@@ -714,6 +719,59 @@ class Post_Venue {
 		unset( $data['meta']['venue_alternate'] );
 		$response->set_data( $data );
 		return $response;
+	}
+
+	/**
+	 * Returns what may be kept of a check-in's venue, from the venue provider that found it.
+	 *
+	 * A check-in without a provider, such as one a Micropub client sent, is the user's own, and is kept.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $venue Check-in or venue properties, with 'provider', a venue provider's slug.
+	 * @return string Venue_Provider::STORAGE_FULL or Venue_Provider::STORAGE_REFERENCE.
+	 */
+	public static function storage( $venue ) {
+		$storage  = Venue_Provider::STORAGE_FULL;
+		$slug     = ( isset( $venue['provider'] ) && is_string( $venue['provider'] ) ) ? $venue['provider'] : '';
+		$provider = '' === $slug ? null : Loc_Config::venue_provider( $slug );
+		if ( $provider instanceof Venue_Provider ) {
+			$storage = $provider->storage();
+		}
+		/**
+		 * Filters what may be kept of a check-in's venue.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param string $storage Venue_Provider::STORAGE_FULL to keep the details, or Venue_Provider::STORAGE_REFERENCE
+		 *                        to keep only the name, coordinates, identifier and links, with the address from the
+		 *                        site's geocoder.
+		 * @param array  $venue   Check-in or venue properties.
+		 */
+		$storage = apply_filters( 'sloc_venue_storage', $storage, $venue );
+		return Venue_Provider::STORAGE_REFERENCE === $storage ? $storage : Venue_Provider::STORAGE_FULL;
+	}
+
+	/**
+	 * Returns a venue from a provider that allows keeping only references: its name, coordinates, identifier and
+	 * links, with the address looked up with the site's geocoders.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $venue Check-in or venue properties.
+	 * @return array Venue properties.
+	 */
+	public static function reference_details( $venue ) {
+		$kept = wp_array_slice_assoc( $venue, array( 'name', 'label', 'latitude', 'longitude', 'altitude', 'zoom', 'url', 'uid', 'provider' ) );
+		if ( ! is_numeric( $kept['latitude'] ?? null ) || ! is_numeric( $kept['longitude'] ?? null ) ) {
+			return $kept;
+		}
+		$address = Sloc_Provider_Chain::reverse_lookup( $kept['latitude'], $kept['longitude'] );
+		if ( is_array( $address ) ) {
+			$address = wp_array_slice_assoc( $address, array( 'street-address', 'extended-address', 'post-office-box', 'locality', 'region', 'region-code', 'postal-code', 'country-name', 'country-code' ) );
+			$kept    = Location_Taxonomy::normalize_address( array_merge( $address, $kept ) );
+		}
+		return $kept;
 	}
 
 	/**

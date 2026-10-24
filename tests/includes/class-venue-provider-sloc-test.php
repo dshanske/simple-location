@@ -25,11 +25,19 @@ class Venue_Provider_Sloc_Test extends Venue_Provider {
 	public static $calls = 0;
 
 	/**
+	 * Storage level returned by storage().
+	 *
+	 * @var string
+	 */
+	public static $storage = Venue_Provider::STORAGE_FULL;
+
+	/**
 	 * Restore the default response.
 	 */
 	public static function reset() {
-		static::$result = null;
-		static::$calls  = 0;
+		static::$result  = null;
+		static::$calls   = 0;
+		static::$storage = Venue_Provider::STORAGE_FULL;
 	}
 
 	/**
@@ -41,6 +49,15 @@ class Venue_Provider_Sloc_Test extends Venue_Provider {
 		$this->name = 'Test Venue';
 		$this->slug = 'sloc_test';
 		parent::__construct( $args );
+	}
+
+	/**
+	 * Returns the storage level set for the test.
+	 *
+	 * @return string
+	 */
+	public function storage() {
+		return static::$storage;
 	}
 
 	/**

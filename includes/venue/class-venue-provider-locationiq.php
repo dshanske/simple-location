@@ -42,6 +42,17 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 	}
 
 	/**
+	 * Returns what a site may keep of this provider's places: the details, as OpenStreetMap's license allows with credit.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string Venue_Provider::STORAGE_FULL.
+	 */
+	public function storage() {
+		return self::STORAGE_FULL;
+	}
+
+	/**
 	 * Return an address.
 	 *
 	 * @since 6.0.0 Returns an error without an API key or for an error response.

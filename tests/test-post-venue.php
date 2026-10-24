@@ -840,6 +840,88 @@ class PostVenueTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A check-in keeps everything unless its provider allows only references (#729).
+	 */
+	public function test_storage() {
+		Venue_Provider_Sloc_Test::reset();
+		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array() ), 'A check-in without a provider is the user\'s own.' );
+		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array( 'provider' => 'foursquare' ) ), 'An unknown provider.' );
+		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array( 'provider' => array( 'google' ) ) ) );
+		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array( 'provider' => 'sloc_test' ) ) );
+		Venue_Provider_Sloc_Test::$storage = Venue_Provider::STORAGE_REFERENCE;
+		$this->assertSame( Venue_Provider::STORAGE_REFERENCE, Post_Venue::storage( array( 'provider' => 'sloc_test' ) ) );
+
+		add_filter( 'sloc_venue_storage', fn() => 'everything' );
+		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array( 'provider' => 'sloc_test' ) ), 'Only the two levels.' );
+		Venue_Provider_Sloc_Test::reset();
+	}
+
+	/**
+	 * A venue from a provider that allows only references keeps its name, coordinates, identifier and links, with the
+	 * address from the site's geocoder (#729).
+	 */
+	public function test_add_new_venue_reference() {
+		Geo_Provider_Sloc_Test::reset();
+		update_option( 'sloc_geo_provider', 'sloc_test' );
+		update_option( 'sloc_geo_fallbacks', array() );
+		Geo_Provider_Sloc_Test::$reverse   = array(
+			'display-name'   => 'Geocoded',
+			'name'           => 'Geocoded name',
+			'street-address' => '1400 John F Kennedy Blvd',
+			'locality'       => 'Philadelphia',
+			'region'         => 'Pennsylvania',
+			'country-code'   => 'US',
+		);
+		Venue_Provider_Sloc_Test::$storage = Venue_Provider::STORAGE_REFERENCE;
+		$card                              = array(
+			'name'           => 'City Hall',
+			'provider'       => 'sloc_test',
+			'uid'            => 'https://www.google.com/maps/place/?q=place_id:ABC',
+			'url'            => 'https://www.phila.gov/',
+			'tel'            => '+1 215 555 0100',
+			'category'       => array( 'city_hall' ),
+			'street-address' => 'Provider street',
+			'locality'       => 'Provider city',
+			'latitude'       => 39.9524,
+			'longitude'      => -75.1636,
+		);
+		$venue_id                          = Post_Venue::add_new_venue( $card );
+
+		$this->assertSame( 'City Hall', get_the_title( $venue_id ) );
+		$this->assertSame( array( 39.9524, -75.1636 ), Geo_Provider_Sloc_Test::$last, 'The address is looked up at the coordinates.' );
+		$this->assertSame( '1400 John F Kennedy Blvd', get_post_meta( $venue_id, 'venue_street_address', true ) );
+		$data = get_post_meta( $venue_id, '_venue_data', true );
+		$this->assertSame( 'Philadelphia', $data['locality'] );
+		$this->assertSame( 'City Hall', $data['name'], 'Not the geocoder\'s name.' );
+		$this->assertArrayNotHasKey( 'tel', $data );
+		$this->assertArrayNotHasKey( 'category', $data );
+		$this->assertSame( 'https://www.phila.gov/', get_post_meta( $venue_id, 'venue_url', true ) );
+		$this->assertSame( array( 'https://www.google.com/maps/place/?q=place_id:ABC' ), get_post_meta( $venue_id, 'venue_alternate', true ) );
+		$this->assertSame( 'Philadelphia', Location_Taxonomy::get_location_taxonomy( $venue_id )->name );
+		$this->assertEquals( 39.9524, get_post_geodata( $venue_id, 'latitude' ) );
+
+		// Without an address from the geocoder, the venue has none.
+		Geo_Provider_Sloc_Test::$reverse = new WP_Error( 'down', 'Down' );
+		$data                            = Post_Venue::reference_details( array( 'name' => 'Other' ) + $card );
+		$this->assertSame( array( 'name', 'latitude', 'longitude', 'url', 'uid', 'provider' ), array_keys( $data ) );
+		$this->assertSame( array( 'name' => 'X' ), Post_Venue::reference_details( array( 'name' => 'X' ) ), 'No lookup without coordinates.' );
+
+		// A provider that allows storing keeps the details.
+		Venue_Provider_Sloc_Test::$storage = Venue_Provider::STORAGE_FULL;
+		$venue_id                          = Post_Venue::add_new_venue(
+			array(
+				'name' => 'Full Cafe',
+				'uid'  => 'https://www.openstreetmap.org/node/2',
+				'url'  => 'https://cafe.example.com/',
+			) + $card
+		);
+		$this->assertSame( 'Provider street', get_post_meta( $venue_id, 'venue_street_address', true ) );
+		$this->assertSame( '+1 215 555 0100', get_post_meta( $venue_id, '_venue_data', true )['tel'] );
+		Venue_Provider_Sloc_Test::reset();
+		Geo_Provider_Sloc_Test::reset();
+	}
+
+	/**
 	 * Child venues are found among venues, not posts, and all of them are returned.
 	 */
 	public function test_get_venue_children() {

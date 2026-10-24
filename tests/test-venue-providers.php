@@ -864,6 +864,18 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Providers of OpenStreetMap places allow keeping the details; the others, only references (#729).
+	 */
+	public function test_storage() {
+		foreach ( array( 'Venue_Provider_Nominatim', 'Venue_Provider_LocationIQ', 'Venue_Provider_Overpass', 'Venue_Provider_Geoapify' ) as $class ) {
+			$this->assertSame( Venue_Provider::STORAGE_FULL, $this->provider( $class )->storage(), $class );
+		}
+		foreach ( array( 'Venue_Provider_Google', 'Venue_Provider_HERE', 'Venue_Provider_TomTom' ) as $class ) {
+			$this->assertSame( Venue_Provider::STORAGE_REFERENCE, $this->provider( $class )->storage(), $class );
+		}
+	}
+
+	/**
 	 * Nearby venues name the provider that found them (#729).
 	 */
 	public function test_nearby_provider() {
