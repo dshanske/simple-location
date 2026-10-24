@@ -69,10 +69,10 @@ A new venue gets one of your venue types when one fits, such as Food for a resta
 Venue providers have different terms on what a site may keep. The plugin follows the maintainers' reading of them, below. It is your site and your decision: if you read a provider's terms differently, or aren't comfortable with them, choose another provider.
 
 * OpenStreetMap Overpass, Nominatim, LocationIQ, Geoapify and your own Pelias server - the place's details are kept: address, phone, categories and links. OpenStreetMap data is under the Open Database License, which allows this with credit to OpenStreetMap contributors; a Pelias server's other sources, such as Who's On First and Foursquare's open places, are open data too.
-* Google, HERE, TomTom and Stadia Maps - only the place's identifier and links are kept, such as its Google Maps link and its own website. The name is the one you checked in with, the coordinates are your own, and the address is looked up with your geocoding providers. Their phone numbers, categories and addresses are not stored.
+* Google, Foursquare, HERE, TomTom and Stadia Maps - only the place's identifier and links are kept, such as its Google Maps or Foursquare link and its own website. The name is the one you checked in with, the coordinates are your own, and the address is looked up with your geocoding providers. Their phone numbers, categories and addresses are not stored.
 * A check-in from a Micropub client that doesn't name a venue provider is your own, and is kept as sent.
 
-A search for venues is remembered for 10 minutes, so a check-in app asking again from the same place doesn't use up your quota. This applies to the OpenStreetMap-based providers, Geoapify, Pelias and HERE, whose terms allow it, but not to Google, TomTom or Stadia Maps.
+A search for venues is remembered for 10 minutes, so a check-in app asking again from the same place doesn't use up your quota. This applies to the OpenStreetMap-based providers, Geoapify, Pelias and HERE, whose terms allow it, but not to Google, Foursquare, TomTom or Stadia Maps.
 
 == Weather ==
 
@@ -128,7 +128,7 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 
 * Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, TomTom, and Stadia Maps.
 * Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, which can use the public OpenStreetMap server, your own server or another host, Photon, HERE, MapQuest, Google, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses. Photon needs no key, and you can use komoot's public server or run your own
-* Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues. Providers include Google, HERE, TomTom, LocationIQ, Geoapify, Stadia Maps, Nominatim, OpenStreetMap Overpass, which needs no key, and your own Pelias server.
+* Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues. Providers include Google, Foursquare, HERE, TomTom, LocationIQ, Geoapify, Stadia Maps, Nominatim, OpenStreetMap Overpass, which needs no key, and your own Pelias server.
 * Elevation Providers optionally derive the elevation from an API when not available. Elevation is used to estimate altitude and adjust estimated sunrise/sunset levels accordingly. Providers include GeoNames, Google, OpenRoute and Open Topo Data, whose public API needs no key and which you can also host yourself.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
 location of a three letter airport code, and three self-hosted location history services: [Compass](https://github.com/aaronpk/Compass), [Dawarich](https://dawarich.app/) and [GeoPulse](https://github.com/tess1o/geopulse).
@@ -154,6 +154,7 @@ Sign up with the service, create an API key, and enter it in the service's secti
 * [Mapbox](https://account.mapbox.com/access-tokens/) - a public token (starting pk.) draws the maps. To list your own styles in the settings, enter a secret token with the styles:list scope as the Mapbox API Key, your username, and the public token as the Mapbox Map API Key; the secret token is never shown on your site.
 * [HERE](https://platform.here.com/) - one API key for maps, addresses and weather.
 * [LocationIQ](https://locationiq.com/) - one API key for maps, addresses and venues.
+* [Foursquare](https://foursquare.com/developers/) - venues, with a service API key from the Foursquare developer console. Place search is a Pro endpoint, billed per request after a small free allowance.
 * [MapQuest](https://developer.mapquest.com/) - one API key for maps and addresses.
 * [Geoapify](https://www.geoapify.com/) - one API key for maps and addresses.
 * [TomTom](https://developer.tomtom.com/) - maps.

@@ -398,6 +398,7 @@ class Simple_Location_Plugin {
 			'class-venue-provider-tomtom.php', // TomTom.
 			'class-venue-provider-pelias.php', // Pelias.
 			'class-venue-provider-stadia.php', // Stadia Maps, a Pelias server.
+			'class-venue-provider-foursquare.php', // Foursquare.
 		);
 		self::register_providers( $providers, 'includes/venue/' );
 	}

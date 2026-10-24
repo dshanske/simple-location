@@ -1,0 +1,51 @@
+{
+  "results": [
+    {
+      "fsq_place_id": "4a7f3b5cf964a520f9f21fe3",
+      "name": "Philadelphia City Hall",
+      "latitude": 39.952583,
+      "longitude": -75.163526,
+      "distance": 20,
+      "location": {
+        "address": "1400 John F Kennedy Blvd",
+        "locality": "Philadelphia",
+        "region": "PA",
+        "postcode": "19107",
+        "country": "US",
+        "admin_region": "Pennsylvania"
+      },
+      "categories": [
+        {
+          "id": "4bf58dd8d48988d129941735",
+          "name": "City Hall",
+          "icon": { "prefix": "https://ss3.4sqi.net/img/categories_v2/building/cityhall_", "suffix": ".png" }
+        }
+      ],
+      "website": "https://www.phila.gov",
+      "tel": "(215) 686-1776"
+    },
+    {
+      "fsq_place_id": "4b0a1f7cf964a520a52123e3",
+      "name": "Rival Bros Coffee",
+      "latitude": 39.9531,
+      "longitude": -75.1641,
+      "distance": 90,
+      "location": {
+        "address": "1100 Arch St",
+        "locality": "Philadelphia",
+        "region": "PA",
+        "postcode": "19107",
+        "country": "US"
+      },
+      "categories": [
+        { "id": "4bf58dd8d48988d1e0931735", "name": "Coffee Shop" }
+      ]
+    },
+    {
+      "fsq_place_id": "5f0c9e1a2b3c4d5e6f708192",
+      "latitude": 39.9524,
+      "longitude": -75.1636,
+      "location": { "country": "US" }
+    }
+  ]
+}

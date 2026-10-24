@@ -71,7 +71,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::venue_providers();
-		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass', 'geoapify', 'here', 'tomtom', 'pelias', 'stadia' ) as $slug ) {
+		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass', 'geoapify', 'here', 'tomtom', 'pelias', 'stadia', 'foursquare' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['url'], $slug );
@@ -870,7 +870,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		foreach ( array( 'Venue_Provider_Nominatim', 'Venue_Provider_LocationIQ', 'Venue_Provider_Overpass', 'Venue_Provider_Geoapify', 'Venue_Provider_Pelias' ) as $class ) {
 			$this->assertSame( Venue_Provider::STORAGE_FULL, $this->provider( $class )->storage(), $class );
 		}
-		foreach ( array( 'Venue_Provider_Google', 'Venue_Provider_HERE', 'Venue_Provider_TomTom', 'Venue_Provider_Stadia' ) as $class ) {
+		foreach ( array( 'Venue_Provider_Google', 'Venue_Provider_HERE', 'Venue_Provider_TomTom', 'Venue_Provider_Stadia', 'Venue_Provider_Foursquare' ) as $class ) {
 			$this->assertSame( Venue_Provider::STORAGE_REFERENCE, $this->provider( $class )->storage(), $class );
 		}
 	}
@@ -1056,6 +1056,73 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $provider->cache_time() );
 
 		$this->assertSame( 'missing_api_key', $this->provider( 'Venue_Provider_Stadia', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
+	}
+
+	/**
+	 * Foursquare's place search is sorted by distance within the radius, with Pro fields only; its places become
+	 * venues with their Foursquare page as identifier, and only references are kept (#715).
+	 */
+	public function test_foursquare() {
+		$this->mock_http( array( 'places-api.foursquare.com/places/search' => array( 'body' => $this->fixture( 'venue/foursquare-search.json' ) ) ) );
+		$provider = $this->provider( 'Venue_Provider_Foursquare', array( 'api' => 'KEY' ) );
+		$items    = $provider->reverse_lookup()['items'];
+
+		$request = $this->last_request();
+		$this->assertSame( 'Bearer KEY', $request['args']['headers']['Authorization'] );
+		$this->assertSame( Venue_Provider_Foursquare::API_VERSION, $request['args']['headers']['X-Places-Api-Version'] );
+		$this->assertStringNotContainsString( 'KEY', $request['url'], 'The key is in a header, not the URL.' );
+		$this->assertSame( '39.9524,-75.1636', $request['query']['ll'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_RADIUS, $request['query']['radius'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_LIMIT, $request['query']['limit'] );
+		$this->assertSame( 'DISTANCE', $request['query']['sort'] );
+		$this->assertStringNotContainsString( 'rating', $request['query']['fields'], 'Only Pro fields.' );
+
+		$this->assertSame( array( 'Philadelphia City Hall', 'Rival Bros Coffee' ), wp_list_pluck( $items, 'name' ), 'Places without a name are left out.' );
+		$this->assertPhiladelphia( $items[0] );
+		$this->assertEasternTime( $items[0] );
+		$this->assertSame( '1400 John F Kennedy Blvd', $items[0]['street-address'] );
+		$this->assertSame( 'United States', $items[0]['country-name'] );
+		$this->assertSame( 'https://www.phila.gov', $items[0]['url'] );
+		$this->assertSame( '(215) 686-1776', $items[0]['tel'] );
+		$this->assertSame( array( 'City Hall' ), $items[0]['category'] );
+		$this->assertSame( array( 'government', 'food' ), wp_list_pluck( $items, 'venue-category' ) );
+		$this->assertSame( 'https://foursquare.com/v/4a7f3b5cf964a520f9f21fe3', $items[0]['uid'] );
+		$this->assertTrue( Post_Venue::is_alternate_url( $items[0]['uid'] ), 'Matches check-ins from Swarm.' );
+		$this->assertSame( Venue_Provider::STORAGE_REFERENCE, $provider->storage() );
+		$this->assertSame( 0, $provider->cache_time() );
+
+		$this->assertSame( 'missing_api_key', $this->provider( 'Venue_Provider_Foursquare', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
+		$this->mock_http(
+			array(
+				'places-api.foursquare.com' => array(
+					'code' => 401,
+					'body' => array( 'message' => 'Invalid request token.' ),
+				),
+			)
+		);
+		$this->assertSame( 'invalid_response', $provider->reverse_lookup()->get_error_code() );
+
+		Venue_Provider_Foursquare::init();
+		$this->assertArrayHasKey( 'sloc_foursquare_api', get_registered_settings() );
+	}
+
+	/**
+	 * Foursquare category names are mapped by whole words to the shared categories (#715).
+	 */
+	public function test_foursquare_category() {
+		$this->assertSame(
+			array(
+				'category' => 'transport',
+				'icon'     => 'fa-bus',
+			),
+			Venue_Provider_Foursquare::foursquare_category( array( 'Bus Station' ) )
+		);
+		$this->assertSame( 'food', Venue_Provider_Foursquare::foursquare_category( array( 'Coffee Shop' ) )['category'], 'Not a shop.' );
+		$this->assertSame( 'food', Venue_Provider_Foursquare::foursquare_category( array( 'Café' ) )['category'] );
+		$this->assertSame( 'drink', Venue_Provider_Foursquare::foursquare_category( array( 'Cocktail Bar' ) )['category'] );
+		$this->assertSame( 'other', Venue_Provider_Foursquare::foursquare_category( array( 'Barbershop' ) )['category'], 'Whole words.' );
+		$this->assertSame( 'lodging', Venue_Provider_Foursquare::foursquare_category( array( 'Hotels' ) )['category'] );
+		$this->assertSame( 'shop', Venue_Provider_Foursquare::foursquare_category( array( 7, 'Bookstore', 'Grocery Store' ) )['category'] );
 	}
 
 	/**
