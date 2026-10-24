@@ -1,0 +1,20 @@
+[
+  {
+    "version": 8,
+    "name": "OSM Bright",
+    "id": "osm-bright",
+    "url": "https://tiles.example.com/styles/osm-bright/style.json"
+  },
+  {
+    "version": 8,
+    "name": "Positron",
+    "id": "positron",
+    "url": "https://tiles.example.com/styles/positron/style.json"
+  },
+  {
+    "version": 8,
+    "name": "Dark Matter",
+    "id": "dark-matter",
+    "url": "https://tiles.example.com/styles/dark-matter/style.json"
+  }
+]

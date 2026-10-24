@@ -122,6 +122,10 @@ a user's styles and the custom static map server's query API. The custom server'
 a local Static Maps API 1.0.0 with its shipped configuration (`php -S 127.0.0.1:8765 -t public`); the provider
 list is shortened to a few providers and styles.
 
+TileServer GL's fixtures are hand-built from its endpoint documentation: `tileserver-styles.json` is
+`GET {server}/styles.json`, and `tileserver-tilejson.json` is `GET {server}/styles/osm-bright.json`, the TileJSON whose
+`attribution` is the credit (with a script tag added to test that it is stripped).
+
 | File | Request | Status |
 |---|---|---|
 | `mapbox-styles.json` | `GET https://api.mapbox.com/styles/v1/{user}?access_token=…&limit=50` | Hand-built from docs |

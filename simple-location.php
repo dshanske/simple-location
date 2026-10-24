@@ -359,6 +359,7 @@ class Simple_Location_Plugin {
 			'class-map-provider-geoapify.php', // Geoapify.
 			'class-map-provider-tomtom.php', // Tom Tom.
 			'class-map-provider-stadia.php', // Stadia Maps.
+			'class-map-provider-tileserver.php', // TileServer GL, self-hosted.
 			'class-map-provider-staticmap.php', // Custom Provider.
 		);
 
