@@ -105,6 +105,7 @@ timezone. Nominatim venues reuse `geo/nominatim-reverse.json`, since it is the s
 | File | Request | Status |
 |---|---|---|
 | `google-places-nearby.json` | `POST https://places.googleapis.com/v1/places:searchNearby` with `X-Goog-FieldMask: places.id,places.displayName,places.formattedAddress,places.addressComponents,places.location,places.types,places.primaryType,places.plusCode,places.viewport,places.googleMapsUri` and the body `{"locationRestriction":{"circle":{"center":{"latitude":39.9524,"longitude":-75.1636},"radius":250}},"maxResultCount":10,"rankPreference":"DISTANCE","languageCode":"en-US"}` | Hand-built from docs |
+| `overpass-nearby.json` | `GET https://overpass-api.de/api/interpreter?data=…` with the query from `Venue_Provider_Overpass::query()` around City Hall | Hand-built from docs |
 | `locationiq-nearby.json` | `GET https://us1.locationiq.com/v1/nearby?key=…&lat=39.9524&lon=-75.1636` | Hand-built from docs |
 
 ## Map providers (`map/`)
