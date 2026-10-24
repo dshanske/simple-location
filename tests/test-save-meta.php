@@ -344,6 +344,60 @@ class SaveMetaTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Weather fields left empty, and the condition set to None, remove what was stored, as clearing the location in
+	 * the editor does (#743).
+	 */
+	public function test_save_meta_weather_cleared() {
+		update_option( 'sloc_measurements', 'metric' );
+		$post_id = self::factory()->post->create();
+		set_post_weatherdata(
+			$post_id,
+			'',
+			array(
+				'temperature' => 20.5,
+				'humidity'    => 50,
+				'pressure'    => 1013,
+				'code'        => 800,
+				'summary'     => 'Clear',
+				'icon'        => 'wi-day-sunny',
+				'provider'    => 'openmeteo',
+			)
+		);
+
+		// One field emptied: only it is removed.
+		$_POST = array(
+			'temperature'  => '20.5',
+			'humidity'     => '',
+			'pressure'     => '1013',
+			'weather_code' => '800',
+		);
+		Geo_Base::save_meta( 'post', $post_id );
+		$weather = get_post_weatherdata( $post_id );
+		$this->assertArrayNotHasKey( 'humidity', $weather );
+		$this->assertEquals( 20.5, $weather['temperature'] );
+		$this->assertSame( 'Clear', $weather['summary'] );
+
+		// Everything cleared, as the editor's clear button leaves the form.
+		$_POST = array(
+			'temperature'        => '',
+			'humidity'           => '',
+			'pressure'           => ' ',
+			'windspeed'          => '',
+			'weather_visibility' => '',
+			'weather_code'       => 'none',
+			'weather_provider'   => '',
+			'weather_exact'      => array( 'temperature' => '' ),
+		);
+		Geo_Base::save_meta( 'post', $post_id );
+		$this->assertSame( array(), array_intersect_key( get_post_weatherdata( $post_id ), array_flip( array( 'temperature', 'pressure', 'code', 'summary', 'icon', 'provider' ) ) ) );
+
+		// A zero is a value.
+		$_POST = array( 'humidity' => '0' );
+		Geo_Base::save_meta( 'post', $post_id );
+		$this->assertEquals( 0, get_post_weatherdata( $post_id, 'humidity' ) );
+	}
+
+	/**
 	 * The save_post handler requires a valid nonce and permission to edit the post.
 	 */
 	public function test_save_post_meta_requires_nonce_and_capability() {
