@@ -45,6 +45,7 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 	 * Return an address.
 	 *
 	 * @since 6.0.0 Returns an error without an API key or for an error response.
+	 * @since 6.1.0 Searches the venue search radius, for up to the most venues set.
 	 *
 	 * @return array|WP_Error $reverse microformats2 address elements in an array.
 	 */
@@ -53,9 +54,11 @@ class Venue_Provider_LocationIQ extends Venue_Provider {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Location IQ', 'simple-location' ) );
 		}
 		$args = array(
-			'key' => $this->api,
-			'lat' => $this->latitude,
-			'lon' => $this->longitude,
+			'key'    => $this->api,
+			'lat'    => $this->latitude,
+			'lon'    => $this->longitude,
+			'radius' => $this->radius,
+			'limit'  => $this->limit,
 		);
 		$url  = 'https://us1.locationiq.com/v1/nearby';
 

@@ -47,6 +47,7 @@ class Venue_Provider_Google extends Venue_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 Returns the venues under 'items', like the other venue providers, and an empty list when there are none.
+	 * @since 6.1.0 Searches the venue search radius, not 200 meters.
 	 *
 	 * @return array|WP_Error h-cards under 'items', or an error.
 	 */
@@ -56,7 +57,7 @@ class Venue_Provider_Google extends Venue_Provider {
 		}
 		$args = array(
 			'location' => $this->latitude . ',' . $this->longitude,
-			'radius'   => 200,
+			'radius'   => $this->radius,
 			'type'     => 'establishment',
 			'language' => get_bloginfo( 'language' ),
 			'key'      => $this->api,

@@ -573,7 +573,7 @@ class REST_Geo {
 				return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
 			}
 			$venue->set( $params );
-			return $venue->reverse_lookup();
+			return $venue->nearby();
 		}
 		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
 	}
