@@ -334,6 +334,24 @@ class SaveMetaTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Saving a venue with the suggested type checked gives it that type (#729).
+	 */
+	public function test_save_post_meta_venue_type_suggestion() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		update_post_meta( $venue_id, 'venue_category', 'lodging' );
+		$_POST = array(
+			'location_metabox_nonce' => wp_create_nonce( 'location_metabox' ),
+		);
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertSame( array(), wp_get_object_terms( $venue_id, 'venue_type', array( 'fields' => 'names' ) ), 'Not unless checked.' );
+
+		$_POST['venue_type_suggestion'] = '1';
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertSame( array( 'Lodging' ), wp_get_object_terms( $venue_id, 'venue_type', array( 'fields' => 'names' ) ) );
+	}
+
+	/**
 	 * Saving a venue stores its other pages, one per line; an empty field removes them, and a form without the field
 	 * leaves them (#729).
 	 */

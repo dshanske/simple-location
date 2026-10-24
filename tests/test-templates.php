@@ -137,6 +137,27 @@ class TemplatesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The venue editor offers the type of the venue's category, as new or existing (#729).
+	 */
+	public function test_location_metabox_suggested_type() {
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		$this->edit_post( $venue_id );
+		$this->assertStringNotContainsString( 'venue_type_suggestion', $this->render( 'loc-metabox.php' ) );
+
+		update_post_meta( $venue_id, 'venue_category', 'food' );
+		$this->assertStringContainsString( 'Add the new type Food', $this->render( 'loc-metabox.php' ) );
+		self::factory()->term->create(
+			array(
+				'taxonomy' => 'venue_type',
+				'name'     => 'Food',
+			)
+		);
+		$output = $this->render( 'loc-metabox.php' );
+		$this->assertStringContainsString( 'name="venue_type_suggestion"', $output );
+		$this->assertStringContainsString( 'Add the type Food', $output );
+	}
+
+	/**
 	 * Without a stored visibility, the location metabox selects the site's default visibility.
 	 */
 	public function test_location_metabox_default_visibility() {
