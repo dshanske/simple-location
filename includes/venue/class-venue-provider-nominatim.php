@@ -246,6 +246,7 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 			// The place's own coordinates, not the search point's.
 			'latitude'         => isset( $json['lat'] ) && is_numeric( $json['lat'] ) ? (float) $json['lat'] : null,
 			'longitude'        => isset( $json['lon'] ) && is_numeric( $json['lon'] ) ? (float) $json['lon'] : null,
+			'uid'              => self::osm_uid( $json['osm_type'] ?? '', $json['osm_id'] ?? '' ),
 			'raw'              => $json,
 		);
 		if ( is_null( $addr['country-name'] ) ) {

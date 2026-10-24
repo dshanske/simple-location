@@ -234,6 +234,7 @@ class Venue_Provider_Overpass extends Venue_Provider {
 			'category'       => '' === $key ? null : $tags[ $key ],
 			'latitude'       => (float) $latitude,
 			'longitude'      => (float) $longitude,
+			'uid'            => self::osm_uid( $element['type'] ?? '', $element['id'] ?? '' ),
 		);
 		if ( WP_DEBUG ) {
 			$card['raw'] = $element;

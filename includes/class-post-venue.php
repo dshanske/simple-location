@@ -18,6 +18,23 @@ add_action( 'init', array( 'Post_Venue', 'register' ), 1 );
  * @since 5.0.0
  */
 class Post_Venue {
+
+	/**
+	 * Smallest distance in meters within which a venue with the same name is the same venue.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const MATCH_RADIUS = 100;
+
+	/**
+	 * Meta key holding each identifier of a venue, one per row, so venues can be found by it.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const UID_KEY = '_venue_uid';
+
 	/**
 	 * Register the meta for venues.
 	 *
@@ -55,6 +72,18 @@ class Post_Venue {
 						),
 					),
 				),
+			)
+		);
+
+		register_meta(
+			'post',
+			'venue_sources',
+			array(
+				'object_subtype' => 'venue',
+				'type'           => 'array',
+				'description'    => __( 'Venue providers the venue was found with', 'simple-location' ),
+				'single'         => true,
+				'show_in_rest'   => false,
 			)
 		);
 
@@ -229,6 +258,7 @@ class Post_Venue {
 		register_taxonomy( 'venue_type', 'venue', $args );
 
 		add_filter( 'manage_venue_posts_columns', array( __CLASS__, 'remove_date_admin_column' ) );
+		add_filter( 'rest_prepare_venue', array( __CLASS__, 'rest_prepare_venue' ), 10, 2 );
 		add_filter( 'manage_venue_posts_columns', array( 'Geo_Base', 'add_location_admin_column' ) );
 		add_filter( 'manage_venue_posts_columns', array( __CLASS__, 'add_checkins_admin_column' ) );
 		add_action( 'manage_venue_posts_custom_column', array( 'Geo_Base', 'manage_location_admin_column' ), 10, 2 );
@@ -580,11 +610,12 @@ class Post_Venue {
 	/**
 	 * Returns the venue matching a check-in, creating one if there is none.
 	 *
-	 * A venue matches when the check-in URL is a local venue, or is the URL or an alternate URL of
-	 * a venue. A new venue is published with public visibility, and its location term is found
-	 * or created from the address.
+	 * A venue matches when the check-in URL is a local venue, or as find_venue() finds it. A matched venue
+	 * gains the check-in's identifier and alternate URLs. A new venue is published with public visibility,
+	 * and its location term is found or created from the address.
 	 *
 	 * @since 5.0.0
+	 * @since 6.1.0 Matches by identifier and by name nearby, and keeps the identifier and provider pages (#729).
 	 *
 	 * @param array $venue Check-in or address properties. Needs a name or label.
 	 * @return int|WP_Error|false The venue ID, or false without a name.
@@ -599,54 +630,27 @@ class Post_Venue {
 			return false;
 		}
 
-		$meta = array();
-
-		if ( array_key_exists( 'url', $venue ) ) {
-			// Temporary fix just in case multiple arrays exists
-			if ( is_array( $venue['url'] ) ) {
-				$venue['url'] = $venue['url'][0];
-			}
-			$meta['venue_url'] = $venue['url'];
-			// If the URL in the check-in property is local, then return the existing URL.
-			$id = url_to_postid( $venue['url'] );
+		$urls = self::venue_urls( $venue );
+		// A check-in URL that is a local venue is that venue.
+		if ( '' !== $urls['url'] ) {
+			$id = url_to_postid( $urls['url'] );
 			if ( $id ) {
 				return $id;
 			}
+		}
 
-			$match = get_posts(
-				array(
-					'post_type'  => 'venue',
-					'fields'     => 'ids',
-					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are matched by their URL.
-					'meta_query' => array(
-						array(
-							'key'   => 'venue_url',
-							'value' => $venue['url'],
-						),
-					),
-				)
-			);
-			if ( ! empty( $match ) ) {
-				return $match[0];
-			}
+		$id = self::find_venue( $venue, $urls );
+		if ( $id ) {
+			self::add_venue_sources( $id, $venue, $urls );
+			return $id;
+		}
 
-			$match = get_posts(
-				array(
-					'post_type'  => 'venue',
-					'fields'     => 'ids',
-					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are matched by their URL.
-					'meta_query' => array(
-						array(
-							'compare' => 'LIKE',
-							'key'     => 'venue_alternate',
-							'value'   => $venue['url'],
-						),
-					),
-				)
-			);
-			if ( ! empty( $match ) ) {
-				return $match[0];
-			}
+		$meta = array();
+		if ( '' !== $urls['url'] ) {
+			$meta['venue_url'] = $urls['url'];
+		}
+		if ( ! empty( $urls['alternate'] ) ) {
+			$meta['venue_alternate'] = $urls['alternate'];
 		}
 
 		if ( array_key_exists( 'street-address', $venue ) ) {
@@ -674,6 +678,7 @@ class Post_Venue {
 
 		$id = wp_insert_post( $wp, true );
 		if ( ! is_wp_error( $id ) ) {
+			self::add_venue_sources( $id, $venue, array() );
 			if ( $location ) {
 				Location_Taxonomy::set_location( $id, $location );
 			}
@@ -687,6 +692,289 @@ class Post_Venue {
 		}
 
 		return $id;
+	}
+
+	/**
+	 * Leaves a venue's alternate URLs out of REST responses unless its location is public or the user can edit it.
+	 *
+	 * Alternate URLs include map pages, such as an OpenStreetMap or Google Maps link, that give away where a
+	 * private venue is.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param WP_REST_Response $response Response.
+	 * @param WP_Post          $post     Venue.
+	 * @return WP_REST_Response Response.
+	 */
+	public static function rest_prepare_venue( $response, $post ) {
+		$data = $response->get_data();
+		if ( ! isset( $data['meta']['venue_alternate'] ) || current_user_can( 'edit_post', $post->ID ) || 'public' === get_post_geodata( $post->ID, 'visibility' ) ) {
+			return $response;
+		}
+		unset( $data['meta']['venue_alternate'] );
+		$response->set_data( $data );
+		return $response;
+	}
+
+	/**
+	 * Returns the hosts of sites with pages about places, such as map and listing sites.
+	 *
+	 * A link to one of them is a page about the venue, not the venue's own website.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Hosts. Subdomains of each host match too.
+	 */
+	public static function alternate_hosts() {
+		$hosts = array(
+			'openstreetmap.org',
+			'osm.org',
+			'google.com',
+			'maps.app.goo.gl',
+			'maps.apple.com',
+			'bing.com',
+			'here.com',
+			'foursquare.com',
+			'4sq.com',
+			'swarmapp.com',
+			'wikipedia.org',
+			'wikidata.org',
+			'yelp.com',
+			'tripadvisor.com',
+		);
+		/**
+		 * Filters the hosts of sites with pages about places.
+		 *
+		 * A check-in URL on one of these hosts is kept as an alternate URL of the venue, not its website.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param string[] $hosts Hosts, such as 'openstreetmap.org'. Subdomains match too.
+		 */
+		return (array) apply_filters( 'sloc_venue_alternate_hosts', $hosts );
+	}
+
+	/**
+	 * Returns whether a URL is a page about a place on another site, such as a map or listing.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $url URL.
+	 * @return bool True for a URL on one of alternate_hosts().
+	 */
+	public static function is_alternate_url( $url ) {
+		$host = is_string( $url ) ? wp_parse_url( $url, PHP_URL_HOST ) : null;
+		if ( ! is_string( $host ) || '' === $host ) {
+			return false;
+		}
+		$host = strtolower( $host );
+		foreach ( self::alternate_hosts() as $match ) {
+			$match = strtolower( (string) $match );
+			if ( '' !== $match && ( $host === $match || substr( $host, -strlen( $match ) - 1 ) === '.' . $match ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Sorts a check-in's URLs into the venue's website and pages about it on other sites.
+	 *
+	 * The first URL that isn't on alternate_hosts() is the website; every other URL, and the identifier if it
+	 * is a web address, is an alternate URL.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $venue Check-in or venue properties, with 'url' as a string or a list, and 'uid'.
+	 * @return array Array with 'url', a string that can be empty, and 'alternate', a list of URLs.
+	 */
+	public static function venue_urls( $venue ) {
+		$uid  = $venue['uid'] ?? null;
+		$list = (array) ( $venue['url'] ?? array() );
+		// Only an identifier that is a web address is a page about the venue.
+		if ( is_string( $uid ) && preg_match( '#^https?://#i', $uid ) ) {
+			$list[] = $uid;
+		}
+		$urls = array(
+			'url'       => '',
+			'alternate' => array(),
+		);
+		foreach ( $list as $url ) {
+			$url = is_string( $url ) ? esc_url_raw( trim( $url ), array( 'http', 'https' ) ) : '';
+			if ( '' === $url ) {
+				continue;
+			}
+			if ( '' === $urls['url'] && ! self::is_alternate_url( $url ) && $uid !== $url ) {
+				$urls['url'] = $url;
+			} elseif ( $url !== $urls['url'] && ! in_array( $url, $urls['alternate'], true ) ) {
+				$urls['alternate'][] = $url;
+			}
+		}
+		return $urls;
+	}
+
+	/**
+	 * Returns the venue a check-in is at, if there is one.
+	 *
+	 * In order: a venue with the check-in's identifier ('uid'); a venue with one of its URLs as its URL or an
+	 * alternate URL; a venue with the same name whose radius, or MATCH_RADIUS if larger, includes the check-in.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $venue Check-in or venue properties: 'name' or 'label', 'uid', 'url', 'latitude' and 'longitude'.
+	 * @param array $urls  Optional. URLs, as venue_urls() returns. Default the check-in's.
+	 * @return int|false Venue ID, or false if there is none.
+	 */
+	public static function find_venue( $venue, $urls = null ) {
+		$urls     = is_array( $urls ) ? $urls : self::venue_urls( $venue );
+		$venue_id = false;
+		$uid      = ( isset( $venue['uid'] ) && is_string( $venue['uid'] ) ) ? trim( $venue['uid'] ) : '';
+		if ( '' !== $uid ) {
+			$venue_id = self::first_venue(
+				array(
+					array(
+						'key'   => self::UID_KEY,
+						'value' => $uid,
+					),
+				)
+			);
+		}
+
+		foreach ( array_filter( array_merge( array( $urls['url'] ), $urls['alternate'] ) ) as $url ) {
+			if ( $venue_id ) {
+				break;
+			}
+			$venue_id = self::first_venue(
+				array(
+					'relation' => 'OR',
+					array(
+						'key'   => 'venue_url',
+						'value' => $url,
+					),
+					// A list is stored serialized, with each URL in quotes.
+					array(
+						'key'     => 'venue_alternate',
+						'compare' => 'LIKE',
+						'value'   => '"' . $url . '"',
+					),
+					array(
+						'key'   => 'venue_alternate',
+						'value' => $url,
+					),
+				)
+			);
+		}
+
+		$name = $venue['name'] ?? $venue['label'] ?? '';
+		if ( ! $venue_id && is_string( $name ) && '' !== $name && is_numeric( $venue['latitude'] ?? null ) && is_numeric( $venue['longitude'] ?? null ) ) {
+			$named = get_posts(
+				array(
+					'post_type'   => 'venue',
+					'post_status' => 'any',
+					'fields'      => 'ids',
+					'title'       => $name,
+				)
+			);
+			foreach ( $named as $id ) {
+				$geo = get_post_geodata( $id );
+				if ( ! is_array( $geo ) || ! is_numeric( $geo['latitude'] ?? null ) || ! is_numeric( $geo['longitude'] ?? null ) ) {
+					continue;
+				}
+				$radius = max( self::MATCH_RADIUS, (int) get_post_meta( $id, 'venue_radius', true ) );
+				if ( geo_in_radius( $geo['latitude'], $geo['longitude'], $venue['latitude'], $venue['longitude'], $radius ) ) {
+					$venue_id = $id;
+					break;
+				}
+			}
+		}
+
+		/**
+		 * Filters the venue a check-in is at.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param int|false $venue_id Venue ID, or false to create a venue.
+		 * @param array     $venue    Check-in or venue properties.
+		 */
+		$venue_id = apply_filters( 'sloc_find_venue', $venue_id, $venue );
+		return $venue_id ? (int) $venue_id : false;
+	}
+
+	/**
+	 * Returns the first venue matching a meta query.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $meta_query Meta query.
+	 * @return int|false Venue ID, or false if none match.
+	 */
+	protected static function first_venue( $meta_query ) {
+		$match = get_posts(
+			array(
+				'post_type'      => 'venue',
+				'post_status'    => 'any',
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+				'orderby'        => 'ID',
+				'order'          => 'ASC',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are matched by their identifiers and URLs.
+				'meta_query'     => $meta_query,
+			)
+		);
+		return empty( $match ) ? false : (int) $match[0];
+	}
+
+	/**
+	 * Returns the venue providers and identifiers a venue was found with.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int $venue_id Venue ID.
+	 * @return array[] Sources, each with 'provider', the venue provider's slug or an empty string; 'uid'; and
+	 *                 'retrieved', when it was found, in ISO 8601.
+	 */
+	public static function get_venue_sources( $venue_id ) {
+		$sources = get_post_meta( $venue_id, 'venue_sources', true );
+		return is_array( $sources ) ? array_values( array_filter( $sources, 'is_array' ) ) : array();
+	}
+
+	/**
+	 * Adds a check-in's identifier and alternate URLs to a venue.
+	 *
+	 * The venue's own URL is set only if it has none, so a URL the user set is kept.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int   $venue_id Venue ID.
+	 * @param array $venue    Check-in or venue properties, with 'uid' and 'provider'.
+	 * @param array $urls     URLs, as venue_urls() returns, to add to the venue. An empty array adds none.
+	 */
+	public static function add_venue_sources( $venue_id, $venue, $urls ) {
+		$uid = ( isset( $venue['uid'] ) && is_string( $venue['uid'] ) ) ? trim( $venue['uid'] ) : '';
+		if ( '' !== $uid && ! in_array( $uid, get_post_meta( $venue_id, self::UID_KEY ), true ) ) {
+			add_post_meta( $venue_id, self::UID_KEY, $uid );
+			$sources   = self::get_venue_sources( $venue_id );
+			$sources[] = array(
+				'provider'  => ( isset( $venue['provider'] ) && is_string( $venue['provider'] ) ) ? sanitize_key( $venue['provider'] ) : '',
+				'uid'       => $uid,
+				'retrieved' => gmdate( 'c' ),
+			);
+			update_post_meta( $venue_id, 'venue_sources', $sources );
+		}
+
+		if ( ! empty( $urls['url'] ) && '' === (string) get_post_meta( $venue_id, 'venue_url', true ) ) {
+			update_post_meta( $venue_id, 'venue_url', $urls['url'] );
+		}
+		$add = array_merge( empty( $urls['url'] ) ? array() : array( $urls['url'] ), $urls['alternate'] ?? array() );
+		if ( ! empty( $add ) ) {
+			$current   = get_post_meta( $venue_id, 'venue_alternate', true );
+			$current   = array_values( array_filter( (array) $current ) );
+			$own       = (string) get_post_meta( $venue_id, 'venue_url', true );
+			$alternate = array_values( array_unique( array_merge( $current, array_diff( $add, array( $own ) ) ) ) );
+			if ( $alternate !== $current ) {
+				update_post_meta( $venue_id, 'venue_alternate', $alternate );
+			}
+		}
 	}
 
 	/**

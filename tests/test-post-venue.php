@@ -171,7 +171,7 @@ class PostVenueTest extends WP_UnitTestCase {
 			'country-name' => 'United States',
 			'country-code' => 'US',
 		);
-		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		$venue_id                        = self::factory()->post->create( array( 'post_type' => 'venue' ) );
 		update_post_meta( $venue_id, 'venue_post_visibility', 'private' );
 		$at_venue = function () use ( $venue_id ) {
 			return $venue_id;
@@ -656,6 +656,187 @@ class PostVenueTest extends WP_UnitTestCase {
 				)
 			)
 		);
+	}
+
+	/**
+	 * A check-in with the identifier of a venue is that venue, whatever its name; the venue keeps where it came from (#729).
+	 */
+	public function test_add_new_venue_uid() {
+		$card     = array(
+			'name'      => 'Philadelphia City Hall',
+			'uid'       => 'here:pds:place:840dr4ux-cityhall',
+			'provider'  => 'here',
+			'latitude'  => 39.9524,
+			'longitude' => -75.1636,
+		);
+		$venue_id = Post_Venue::add_new_venue( $card );
+		$this->assertIsInt( $venue_id );
+		$sources = Post_Venue::get_venue_sources( $venue_id );
+		$this->assertCount( 1, $sources );
+		$this->assertSame( 'here', $sources[0]['provider'] );
+		$this->assertSame( 'here:pds:place:840dr4ux-cityhall', $sources[0]['uid'] );
+		$this->assertNotFalse( strtotime( $sources[0]['retrieved'] ) );
+		$this->assertSame( '', get_post_meta( $venue_id, 'venue_alternate', true ), 'An identifier that is not a web address is not a link.' );
+
+		$this->assertSame(
+			$venue_id,
+			Post_Venue::add_new_venue(
+				array(
+					'name'      => 'City Hall',
+					'latitude'  => 40,
+					'longitude' => -75,
+				) + $card
+			)
+		);
+		$this->assertCount( 1, Post_Venue::get_venue_sources( $venue_id ), 'The same identifier is kept once.' );
+	}
+
+	/**
+	 * Pages about a venue on map and listing sites are alternate URLs; the first other URL is its website (#729).
+	 */
+	public function test_venue_urls() {
+		$this->assertSame(
+			array(
+				'url'       => 'https://cafe.example.com/',
+				'alternate' => array( 'https://foursquare.com/v/cafe/123', 'https://cafe.example.org/', 'https://www.openstreetmap.org/node/1' ),
+			),
+			Post_Venue::venue_urls(
+				array(
+					'url' => array( 'https://foursquare.com/v/cafe/123', 'https://cafe.example.com/', 'https://cafe.example.org/', 'https://cafe.example.com/', 'javascript:alert(1)' ),
+					'uid' => 'https://www.openstreetmap.org/node/1',
+				)
+			)
+		);
+		$this->assertSame(
+			array(
+				'url'       => '',
+				'alternate' => array( 'https://en.wikipedia.org/wiki/Cafe' ),
+			),
+			Post_Venue::venue_urls(
+				array(
+					'url' => 'https://en.wikipedia.org/wiki/Cafe',
+					'uid' => 'tomtom:abc',
+				)
+			)
+		);
+		$this->assertSame(
+			array(
+				'url'       => '',
+				'alternate' => array(),
+			),
+			Post_Venue::venue_urls( array( 'uid' => '123' ) ),
+			'An identifier without a scheme is not a URL.'
+		);
+
+		$this->assertTrue( Post_Venue::is_alternate_url( 'https://www.google.com/maps/place/?q=place_id:X' ) );
+		$this->assertTrue( Post_Venue::is_alternate_url( 'https://WEGO.HERE.COM/p/x' ) );
+		$this->assertFalse( Post_Venue::is_alternate_url( 'https://notgoogle.com/' ) );
+		$this->assertFalse( Post_Venue::is_alternate_url( 'not a url' ) );
+		add_filter( 'sloc_venue_alternate_hosts', fn( $hosts ) => array_merge( $hosts, array( 'untappd.com' ) ) );
+		$this->assertTrue( Post_Venue::is_alternate_url( 'https://untappd.com/v/cafe/1' ) );
+	}
+
+	/**
+	 * A check-in matches a venue with one of its URLs, as a whole URL among the alternates (#729).
+	 */
+	public function test_find_venue_by_url() {
+		$venue_id = $this->venue();
+		update_post_meta( $venue_id, 'venue_alternate', array( 'https://foursquare.com/v/cafe/1234' ) );
+		$this->assertFalse( Post_Venue::find_venue( array( 'url' => 'https://foursquare.com/v/cafe/123' ) ), 'Not a part of another URL.' );
+		$this->assertSame( $venue_id, Post_Venue::find_venue( array( 'url' => 'https://foursquare.com/v/cafe/1234' ) ) );
+		$this->assertSame( $venue_id, Post_Venue::find_venue( array( 'uid' => 'https://foursquare.com/v/cafe/1234' ) ) );
+	}
+
+	/**
+	 * A check-in matches a venue with the same name within the venue's radius, or MATCH_RADIUS (#729).
+	 */
+	public function test_find_venue_by_name() {
+		$venue_id = $this->venue( 40.7128, -74.006 );
+		$checkin  = array(
+			'name'      => 'Corner Cafe',
+			'latitude'  => 40.7133,
+			'longitude' => -74.006,
+		);
+		$this->assertSame( $venue_id, Post_Venue::find_venue( $checkin ), 'About 55 meters away.' );
+		$this->assertFalse( Post_Venue::find_venue( array( 'name' => 'Other Cafe' ) + $checkin ) );
+		$this->assertFalse( Post_Venue::find_venue( array( 'latitude' => 40.72 ) + $checkin ), 'About 800 meters away.' );
+		update_post_meta( $venue_id, 'venue_radius', 1000 );
+		$this->assertSame( $venue_id, Post_Venue::find_venue( array( 'latitude' => 40.72 ) + $checkin ), 'Within a larger venue radius.' );
+		$this->assertFalse( Post_Venue::find_venue( array( 'name' => 'Corner Cafe' ) ), 'A name alone is not enough.' );
+
+		add_filter( 'sloc_find_venue', fn() => 42 );
+		$this->assertSame( 42, Post_Venue::find_venue( array() ) );
+	}
+
+	/**
+	 * A matched venue gains the check-in's identifier and pages, and keeps the website the user set (#729).
+	 */
+	public function test_add_new_venue_adds_sources() {
+		$venue_id = $this->venue();
+		update_post_meta( $venue_id, 'venue_url', 'https://mine.example.com/' );
+		$this->assertSame(
+			$venue_id,
+			Post_Venue::add_new_venue(
+				array(
+					'name'      => 'Corner Cafe',
+					'url'       => array( 'https://cafe.example.com/', 'https://foursquare.com/v/cafe/1' ),
+					'uid'       => 'https://www.openstreetmap.org/node/1',
+					'provider'  => 'overpass',
+					'latitude'  => 40.7128,
+					'longitude' => -74.006,
+				)
+			)
+		);
+		$this->assertSame( 'https://mine.example.com/', get_post_meta( $venue_id, 'venue_url', true ) );
+		$this->assertSame(
+			array( 'https://cafe.example.com/', 'https://foursquare.com/v/cafe/1', 'https://www.openstreetmap.org/node/1' ),
+			get_post_meta( $venue_id, 'venue_alternate', true )
+		);
+		$this->assertSame( 'overpass', Post_Venue::get_venue_sources( $venue_id )[0]['provider'] );
+		$this->assertSame( $venue_id, Post_Venue::find_venue( array( 'uid' => 'https://www.openstreetmap.org/node/1' ) ) );
+
+		// A venue without a website gets one.
+		delete_post_meta( $venue_id, 'venue_url' );
+		Post_Venue::add_venue_sources( $venue_id, array(), Post_Venue::venue_urls( array( 'url' => 'https://cafe.example.com/' ) ) );
+		$this->assertSame( 'https://cafe.example.com/', get_post_meta( $venue_id, 'venue_url', true ) );
+	}
+
+	/**
+	 * A venue's alternate URLs, which can be map links, are in REST only when its location is public, or to its
+	 * editors (#729).
+	 */
+	public function test_rest_alternates_follow_visibility() {
+		// The test framework unregisters meta keys after each test, so register again.
+		Post_Venue::register_meta();
+		$venue_id = $this->venue();
+		update_post_meta( $venue_id, 'venue_alternate', array( 'https://www.openstreetmap.org/node/1' ) );
+		$request = new WP_REST_Request( 'GET', '/wp/v2/venue/' . $venue_id );
+		$this->assertSame( array( 'https://www.openstreetmap.org/node/1' ), rest_do_request( $request )->get_data()['meta']['venue_alternate'] );
+
+		set_post_geodata( $venue_id, 'visibility', 'private' );
+		$this->assertArrayNotHasKey( 'venue_alternate', rest_do_request( $request )->get_data()['meta'] );
+		set_post_geodata( $venue_id, 'visibility', 'protected' );
+		$this->assertArrayNotHasKey( 'venue_alternate', rest_do_request( $request )->get_data()['meta'] );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( array( 'https://www.openstreetmap.org/node/1' ), rest_do_request( $request )->get_data()['meta']['venue_alternate'] );
+	}
+
+	/**
+	 * A new venue keeps its website and its pages on other sites apart (#729).
+	 */
+	public function test_add_new_venue_alternates() {
+		$venue_id = Post_Venue::add_new_venue(
+			array(
+				'name'      => 'Swarm Cafe',
+				'url'       => 'https://foursquare.com/v/swarm-cafe/abc',
+				'latitude'  => 40.7128,
+				'longitude' => -74.006,
+			)
+		);
+		$this->assertSame( '', get_post_meta( $venue_id, 'venue_url', true ) );
+		$this->assertSame( array( 'https://foursquare.com/v/swarm-cafe/abc' ), get_post_meta( $venue_id, 'venue_alternate', true ) );
+		$this->assertSame( array(), Post_Venue::get_venue_sources( $venue_id ) );
 	}
 
 	/**
