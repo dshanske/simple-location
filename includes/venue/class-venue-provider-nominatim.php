@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 class Venue_Provider_Nominatim extends Venue_Provider {
+	use Sloc_API_Nominatim;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -41,6 +42,7 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 	 * Return an address.
 	 *
 	 * @since 6.0.0 An error response is an error, or an empty list when there is nothing at the point.
+	 * @since 6.1.0 Asks the Nominatim server setting's server (#233).
 	 *
 	 * @return array|WP_Error $reverse microformats2 address elements in an array.
 	 */
@@ -55,9 +57,7 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 			'zoom'            => 18,
 			'accept-language' => get_bloginfo( 'language' ),
 		);
-		$url  = 'https://nominatim.openstreetmap.org/reverse';
-
-		$json = $this->fetch_json( $url, $args );
+		$json = $this->nominatim_json( 'reverse', $args );
 
 		if ( is_wp_error( $json ) ) {
 			return $json;

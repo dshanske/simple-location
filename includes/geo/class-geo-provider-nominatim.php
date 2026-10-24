@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 class Geo_Provider_Nominatim extends Geo_Provider {
+	use Sloc_API_Nominatim;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -40,6 +41,9 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	/**
 	 * Return an address.
 	 *
+	 * @since 1.0.0
+	 * @since 6.1.0 Asks the Nominatim server setting's server (#233).
+	 *
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
 	public function reverse_lookup() {
@@ -53,9 +57,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			'zoom'            => $this->reverse_zoom,
 			'accept-language' => get_bloginfo( 'language' ),
 		);
-		$url  = 'https://nominatim.openstreetmap.org/reverse';
-
-		$json = $this->fetch_json( $url, $args );
+		$json = $this->nominatim_json( 'reverse', $args );
 
 		if ( is_wp_error( $json ) ) {
 			return $json;
@@ -244,6 +246,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 The address is parsed, and a search with no results returns an error.
+	 * @since 6.1.0 Asks the Nominatim server setting's server (#233).
 	 *
 	 * @param  string $address String representation of location.
 	 * @return array|WP_Error $reverse microformats2 address elements in an array.
@@ -257,9 +260,7 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 			'namedetails'     => '1',
 			'accept-language' => get_bloginfo( 'language' ),
 		);
-		$url  = 'https://nominatim.openstreetmap.org/search';
-
-		$json = $this->fetch_json( $url, $args );
+		$json = $this->nominatim_json( 'search', $args );
 
 		if ( is_wp_error( $json ) ) {
 			return $json;

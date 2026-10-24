@@ -112,14 +112,14 @@ class ApiSettingsTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'name="sloc_weatherbit_api"', $html );
 
 		preg_match_all( '#<details class="sloc-api-group" id="sloc-api-([a-z]+)"( open)?><summary>([^<]+)#', $html, $matches );
-		$this->assertSame( 'weatherbit', $matches[1][0], 'In use first.' );
-		$names = array_map( 'trim', array_slice( $matches[3], 1 ) );
-		$this->assertSame( array( 'WeatherBit' ), array_map( 'trim', array_slice( $matches[3], 0, 1 ) ) );
+		$this->assertSame( array( 'nominatim', 'weatherbit' ), array_slice( $matches[1], 0, 2 ), 'In use first.' );
+		$names = array_map( 'trim', array_slice( $matches[3], 2 ) );
+		$this->assertSame( array( 'OpenStreetMap Nominatim', 'WeatherBit' ), array_map( 'trim', array_slice( $matches[3], 0, 2 ) ) );
 		$sorted = $names;
 		usort( $sorted, fn( $a, $b ) => strcmp( strtolower( $a ), strtolower( $b ) ) );
 		$this->assertSame( $sorted, $names, 'The others by name.' );
 		$this->assertSame( count( $matches[1] ), count( array_unique( $matches[1] ) ), 'One section per service.' );
-		$this->assertSame( 1, substr_count( $html, ' open>' ), 'Only the services in use are open.' );
+		$this->assertSame( 2, substr_count( $html, ' open>' ), 'Only the services in use are open.' );
 
 		// Every API field is inside a section, so every registered API setting is in the form and saved.
 		$this->assertSame( substr_count( $html, '<details' ), substr_count( $html, '</details>' ) );
@@ -145,6 +145,21 @@ class ApiSettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Nominatim's server URL and public fallback are in its section, and saved with the API settings (#233).
+	 */
+	public function test_nominatim_settings() {
+		$html = $this->render();
+		preg_match( '#<details class="sloc-api-group" id="sloc-api-nominatim" open>.*?</details>#s', $html, $nominatim );
+		$this->assertNotEmpty( $nominatim, 'In use, so open.' );
+		$this->assertStringContainsString( 'name="sloc_nominatim_url"', $nominatim[0] );
+		$this->assertStringContainsString( 'name="sloc_nominatim_fallback"', $nominatim[0] );
+		$settings = get_registered_settings();
+		$this->assertSame( 'sloc_api', $settings['sloc_nominatim_url']['group'] );
+		$this->assertSame( 'sloc_api', $settings['sloc_nominatim_fallback']['group'] );
+		$this->assertSame( '', sanitize_option( 'sloc_nominatim_url', 'ftp://example.com' ) );
+	}
+
+	/**
 	 * A service is in use when any provider in use is from it, such as Google for maps but not geocoding.
 	 */
 	public function test_in_use() {
@@ -152,7 +167,7 @@ class ApiSettingsTest extends WP_UnitTestCase {
 		$html = $this->render();
 		$this->assertStringContainsString( 'id="sloc-api-google" open><summary>Google <span class="sloc-api-in-use">', $html );
 		$this->assertStringContainsString( 'id="sloc-api-weatherbit" open>', $html );
-		$this->assertSame( 2, substr_count( $html, ' open>' ) );
+		$this->assertSame( 3, substr_count( $html, ' open>' ) );
 	}
 
 	/**
