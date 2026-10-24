@@ -177,20 +177,110 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 			$conditions
 		);
 		$this->assertEquals( $current['rain']['1h'], $conditions['rain'] );
+		$this->assertSame( 3.6, $conditions['windspeed'], 'Wind speed to one decimal place (#348).' );
 
 		$this->assertSame( $conditions['temperature'], $provider->get_conditions()['temperature'] );
 		$this->assertCount( 1, $this->http_requests, 'The second call is served from the cache.' );
 	}
 
 	/**
-	 * OpenWeatherMap passes on request failures and returns nothing for a body without current conditions.
+	 * OpenWeatherMap passes on request failures, returns an error with the status when it refuses a request, and
+	 * no_results for a body without current conditions (#692).
 	 */
 	public function test_openweathermap_errors() {
 		$this->mock_http( array( 'openweathermap' => new WP_Error( 'http_request_failed', 'Timed out' ) ) );
 		$this->assertWPError( $this->provider( 'Weather_Provider_OpenWeatherMap', array( 'api' => 'owm-key' ) )->get_conditions() );
 
-		$this->mock_http( array( 'openweathermap' => array( 'body' => array( 'cod' => 401 ) ) ) );
-		$this->assertSame( array(), array_diff_key( $this->provider( 'Weather_Provider_OpenWeatherMap', array( 'api' => 'owm-key' ) )->get_conditions(), array( 'raw' => 1 ) ) );
+		$this->mock_http(
+			array(
+				'openweathermap' => array(
+					'code' => 401,
+					'body' => array(
+						'cod'     => 401,
+						'message' => 'Invalid API key.',
+					),
+				),
+			)
+		);
+		$provider = $this->provider( 'Weather_Provider_OpenWeatherMap', array( 'api' => 'owm-key' ) );
+		$error    = $provider->get_conditions();
+		$this->assertWPError( $error );
+		$this->assertSame( 401, $error->get_error_data()['status'] );
+		$this->assertStringNotContainsString( 'owm-key', $error->get_error_message() );
+		$this->assertTrue( Sloc_Provider_Errors::is_actionable( $error, $provider ) );
+
+		$this->mock_http( array( 'openweathermap' => array( 'body' => array( 'lat' => self::LAT ) ) ) );
+		$this->assertSame( 'no_results', $this->provider( 'Weather_Provider_OpenWeatherMap', array( 'api' => 'owm-key' ) )->get_conditions()->get_error_code() );
+	}
+
+	/**
+	 * OpenWeatherMap stations: the last hour's measurement over HTTPS, with wind as windspeed and winddegree (#348).
+	 */
+	public function test_openweathermap_station() {
+		$this->mock_http(
+			array(
+				'api.openweathermap.org/data/3.0/measurements' => array(
+					'body' => array(
+						array(
+							'type'       => 'h',
+							'date'       => time() - 600,
+							'station_id' => 'owm-station',
+							'temp'       => array(
+								'max'     => 21.4,
+								'min'     => 19.2,
+								'average' => 20.26,
+							),
+							'humidity'   => array( 'average' => 61.04 ),
+							'wind'       => array(
+								'deg'   => 225.33,
+								'speed' => 3.46,
+							),
+							'pressure'   => array( 'average' => 1013.27 ),
+						),
+					),
+				),
+			)
+		);
+		$provider = $this->provider(
+			'Weather_Provider_OpenWeatherMap',
+			array(
+				'api'        => 'owm-key',
+				'cache_time' => 600,
+			)
+		);
+		$provider->set( array( 'station_id' => 'owm-station' ) );
+		$conditions = array_diff_key( $provider->get_conditions(), array( 'raw' => 1 ) );
+
+		$request = $this->last_request();
+		$this->assertStringStartsWith( 'https://', $request['url'] );
+		$this->assertSame( 'owm-station', $request['query']['station_id'] );
+		$this->assertSame( 'owm-key', $request['query']['appid'] );
+		$this->assertSame( 'Simple Location for WordPress', $request['args']['user-agent'] );
+		$this->assertSame(
+			array(
+				'temperature' => 20.3,
+				'humidity'    => 61.0,
+				'pressure'    => 1013.3,
+				'windspeed'   => 3.5,
+				'winddegree'  => 225.3,
+			),
+			$conditions
+		);
+		$this->assertArrayNotHasKey( 'wind', $conditions );
+
+		$provider->get_conditions();
+		$this->assertCount( 1, $this->http_requests, 'The second call is served from the cache.' );
+
+		// No measurement in the last hour.
+		$this->mock_http( array( 'api.openweathermap.org/data/3.0/measurements' => array( 'body' => '[]' ) ) );
+		$provider = $this->provider( 'Weather_Provider_OpenWeatherMap', array( 'api' => 'owm-key' ) );
+		$provider->set( array( 'station_id' => 'owm-station' ) );
+		$this->assertSame( 'no_results', $provider->get_conditions()->get_error_code() );
+
+		$this->mock_http( array( 'api.openweathermap.org/data/3.0/measurements' => array( 'code' => 401 ) ) );
+		$provider = $this->provider( 'Weather_Provider_OpenWeatherMap', array( 'api' => 'owm-key' ) );
+		$provider->set( array( 'station_id' => 'owm-station' ) );
+		$this->assertSame( 401, $provider->get_conditions()->get_error_data()['status'] );
 	}
 
 	/**

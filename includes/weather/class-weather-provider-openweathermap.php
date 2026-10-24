@@ -77,6 +77,8 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	 * Return array of current conditions
 	 *
 	 * @since 6.0.0 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
+	 * @since 6.1.0 Returns an error when OpenWeatherMap refuses the request (#692), or no_results without current conditions.
+	 *              Wind speed is rounded to one decimal place.
 	 *
 	 * @param int $time Time. Optional.
 	 * @return array|WP_Error Current Conditions in Array, or an error.
@@ -103,34 +105,18 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				return $conditions;
 			}
 
-			$url         = 'https://api.openweathermap.org/data/3.0/onecall?';
 			$data['lat'] = $this->latitude;
 			$data['lon'] = $this->longitude;
-			$url         = add_query_arg( $data, $url );
-			$args        = array(
-				'headers'             => array(
-					'Accept' => 'application/json',
-				),
-				'timeout'             => 10,
-				'limit_response_size' => 1048576,
-				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location.
-				'user-agent'          => 'Simple Location for WordPress',
-			);
-
-			$return = array();
-
-			$response = wp_remote_get( $url, $args );
+			$response    = $this->fetch_json( 'https://api.openweathermap.org/data/3.0/onecall', $data );
 			if ( is_wp_error( $response ) ) {
 				return $response;
 			}
-			$response = wp_remote_retrieve_body( $response );
-			$response = json_decode( $response, true );
+			if ( ! isset( $response['current'] ) ) {
+				return $this->no_results_error();
+			}
+			$return = array();
 			if ( WP_DEBUG ) {
 				$return['raw'] = $response;
-			}
-			if ( ! isset( $response['current'] ) ) {
-				return $return;
 			}
 			$current = $response['current'];
 
@@ -150,7 +136,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 				$return['snow'] = round( $current['snow']['1h'], 2 );
 			}
 
-			$return['windspeed']  = round( $current['wind_speed'] );
+			$return['windspeed']  = round( $current['wind_speed'], 1 );
 			$return['winddegree'] = round( $current['wind_deg'], 1 );
 			$return['windgust']   = self::round_value( $current['wind_gust'] ?? null, 1 );
 
@@ -175,60 +161,58 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 	/**
 	 * Return info on the current station.
 	 *
-	 * @return array Info on Site.
+	 * @since 6.1.0 Requests over HTTPS with fetch_json(), returns wind as windspeed and winddegree, and returns errors (#348).
+	 *
+	 * @return array|WP_Error Conditions, or an error, such as no_results without a measurement in the last hour.
 	 */
 	public function get_station_data() {
-		$data = array(
-			'appid' => $this->api,
-			'units' => 'metric',
-		);
-		if ( ! empty( $this->station_id ) ) {
-			$conditions = $this->get_cache();
-			if ( $conditions ) {
-				return $conditions;
-			}
-
-			$url                = 'http://api.openweathermap.org/data/3.0/measurements?';
-			$data['station_id'] = $this->station_id;
-			$data['type']       = 'h';
-			// An hour ago.
-			$data['from']  = time() - 3600;
-			$data['to']    = time();
-			$data['limit'] = '1';
-			$url           = add_query_arg( $data, $url );
-			$return        = array();
-			$response      = wp_remote_get( $url );
-			if ( is_wp_error( $response ) ) {
-				return $response;
-			}
-			$response = wp_remote_retrieve_body( $response );
-			$response = json_decode( $response, true );
-			if ( WP_DEBUG ) {
-				$return['raw'] = $response;
-			}
-			if ( wp_is_numeric_array( $response ) ) {
-				$response = $response[0];
-			}
-			if ( isset( $response['temp'] ) ) {
-				$return['temperature'] = round( $response['temp']['average'], 1 );
-			}
-			if ( isset( $response['humidity'] ) ) {
-				$return['humidity'] = round( $response['humidity']['average'], 1 );
-			}
-			if ( isset( $response['wind'] ) ) {
-				$return['wind']           = array();
-				$return['wind']['speed']  = round( $response['wind']['speed'], 1 );
-				$return['wind']['degree'] = round( $response['wind']['deg'], 1 );
-			}
-			if ( isset( $response['pressure'] ) ) {
-				$return['pressure'] = round( $response['pressure']['average'], 1 );
-			}
-			$return = self::filter_weather( $return );
-			$this->set_cache( $return );
-
-			return $return;
+		if ( empty( $this->station_id ) ) {
+			return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
 		}
-		return new WP_Error( 'unable_to_retrieve', __( 'Unable to Retrieve', 'simple-location' ) );
+		$conditions = $this->get_cache();
+		if ( $conditions ) {
+			return $conditions;
+		}
+		$response = $this->fetch_json(
+			'https://api.openweathermap.org/data/3.0/measurements',
+			array(
+				'appid'      => $this->api,
+				'units'      => 'metric',
+				'station_id' => $this->station_id,
+				'type'       => 'h',
+				// An hour ago.
+				'from'       => time() - HOUR_IN_SECONDS,
+				'to'         => time(),
+				'limit'      => 1,
+			)
+		);
+		// A station with no measurements in the last hour returns an empty list.
+		if ( is_wp_error( $response ) && 'not_json_response' === $response->get_error_code() && '[]' === trim( (string) ( $response->get_error_data()['body'] ?? '' ) ) ) {
+			return $this->no_results_error();
+		}
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+		if ( wp_is_numeric_array( $response ) ) {
+			$response = $response[0];
+		}
+		if ( ! is_array( $response ) ) {
+			return $this->no_results_error();
+		}
+		$return = array(
+			'temperature' => self::round_value( $response['temp']['average'] ?? null, 1 ),
+			'humidity'    => self::round_value( $response['humidity']['average'] ?? null, 1 ),
+			'pressure'    => self::round_value( $response['pressure']['average'] ?? null, 1 ),
+			'windspeed'   => self::round_value( $response['wind']['speed'] ?? null, 1 ),
+			'winddegree'  => self::round_value( $response['wind']['deg'] ?? null, 1 ),
+		);
+		if ( WP_DEBUG ) {
+			$return['raw'] = $response;
+		}
+		$return = self::filter_weather( $return );
+		$this->set_cache( $return );
+
+		return $return;
 	}
 
 	/**
