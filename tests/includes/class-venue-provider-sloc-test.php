@@ -32,12 +32,20 @@ class Venue_Provider_Sloc_Test extends Venue_Provider {
 	public static $storage = Venue_Provider::STORAGE_FULL;
 
 	/**
+	 * Seconds returned by cache_time(). Not cached by default, so tests can change the result.
+	 *
+	 * @var int
+	 */
+	public static $cache_time = 0;
+
+	/**
 	 * Restore the default response.
 	 */
 	public static function reset() {
-		static::$result  = null;
-		static::$calls   = 0;
-		static::$storage = Venue_Provider::STORAGE_FULL;
+		static::$result     = null;
+		static::$calls      = 0;
+		static::$storage    = Venue_Provider::STORAGE_FULL;
+		static::$cache_time = 0;
 	}
 
 	/**
@@ -58,6 +66,15 @@ class Venue_Provider_Sloc_Test extends Venue_Provider {
 	 */
 	public function storage() {
 		return static::$storage;
+	}
+
+	/**
+	 * Returns the cache time set for the test.
+	 *
+	 * @return int
+	 */
+	public function cache_time() {
+		return static::$cache_time;
 	}
 
 	/**

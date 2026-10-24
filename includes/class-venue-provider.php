@@ -72,6 +72,16 @@ abstract class Venue_Provider extends Sloc_Provider {
 	const STORAGE_REFERENCE = 'reference';
 
 	/**
+	 * Seconds a provider's search results are cached, when its terms allow.
+	 *
+	 * Check-in apps ask for the venues at the same place again and again.
+	 *
+	 * @since 6.1.0
+	 * @var int
+	 */
+	const CACHE_TIME = 600;
+
+	/**
 	 * Search radius in meters.
 	 *
 	 * @since 6.1.0
@@ -226,6 +236,48 @@ abstract class Venue_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns how long this provider's search results may be cached, in seconds.
+	 *
+	 * A provider whose places may be kept caches them for CACHE_TIME; one that allows keeping only references
+	 * doesn't cache, unless it overrides this because its terms allow keeping results for a time.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return int Seconds, or 0 not to cache.
+	 */
+	public function cache_time() {
+		$seconds = self::STORAGE_FULL === $this->storage() ? self::CACHE_TIME : 0;
+		/**
+		 * Filters how long a venue provider's search results are cached, in seconds.
+		 *
+		 * Check a provider's terms before caching its results longer, or caching those of a provider that doesn't.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param int            $seconds  Seconds, or 0 not to cache.
+		 * @param Venue_Provider $provider Venue provider.
+		 */
+		return max( 0, (int) apply_filters( 'sloc_venue_cache_time', $seconds, $this ) );
+	}
+
+	/**
+	 * Returns the transient key of this provider's search at its location.
+	 *
+	 * Searches within about 10 meters of each other share a key.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string|false Key, or false when the search isn't cached or has no location.
+	 */
+	protected function cache_key() {
+		if ( ! is_numeric( $this->latitude ) || ! is_numeric( $this->longitude ) || 0 === $this->cache_time() ) {
+			return false;
+		}
+		$search = array( $this->slug, round( (float) $this->latitude, 4 ), round( (float) $this->longitude, 4 ), $this->radius, $this->limit, get_bloginfo( 'language' ) );
+		return 'sloc_venues_' . md5( wp_json_encode( $search ) );
+	}
+
+	/**
 	 * Returns the identifier of an OpenStreetMap place: its page on openstreetmap.org.
 	 *
 	 * Providers whose places come from OpenStreetMap use it as a venue's 'uid', so the same place matches
@@ -312,16 +364,25 @@ abstract class Venue_Provider extends Sloc_Provider {
 	 * Each venue with coordinates gets its distance from the location, in meters, as 'distance'. Venues without
 	 * coordinates come last. Each venue names the provider that found it as 'provider'.
 	 *
+	 * The provider's venues are cached for cache_time() seconds, and sorted and limited for each request.
+	 *
 	 * @since 6.1.0
 	 *
 	 * @return array|WP_Error Array with the venues as h-cards under 'items', or an error.
 	 */
 	public function nearby() {
-		$result = $this->reverse_lookup();
-		if ( is_wp_error( $result ) ) {
-			return $result;
+		$key   = $this->cache_key();
+		$items = $key ? get_transient( $key ) : false;
+		if ( ! is_array( $items ) ) {
+			$result = $this->reverse_lookup();
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+			$items = ( is_array( $result ) && isset( $result['items'] ) && is_array( $result['items'] ) ) ? $result['items'] : array();
+			if ( $key ) {
+				set_transient( $key, $items, $this->cache_time() );
+			}
 		}
-		$items = ( is_array( $result ) && isset( $result['items'] ) && is_array( $result['items'] ) ) ? $result['items'] : array();
 		foreach ( $items as $key => $item ) {
 			if ( is_array( $item ) && ! empty( $item ) && empty( $item['provider'] ) ) {
 				$items[ $key ]['provider'] = $this->slug;

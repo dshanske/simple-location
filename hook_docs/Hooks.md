@@ -77,6 +77,10 @@
 
 - [`sloc_google_venue_fields`](sloc_google_venue_fields) Filters the place fields asked of Google. Fields beyond Nearby Search Pro, such as websiteUri, cost more.
 
+## class-venue-provider-here.php
+
+- [`sloc_venue_cache_time`](sloc_venue_cache_time) Filters how long a venue provider's search results are cached, in seconds.
+
 ## class-venue-provider.php
 
 - [`sloc_venue_category`](sloc_venue_category) Filters the shared category and location icon a provider's venue is given.

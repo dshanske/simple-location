@@ -876,6 +876,86 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A provider whose places may be kept has its search cached, shared by searches within about 10 meters, and
+	 * sorted for each search; others aren't cached (#716).
+	 */
+	public function test_cache() {
+		$fixture = $this->fixture( 'venue/locationiq-nearby.json' );
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => $fixture ) ) );
+		$provider = $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) );
+		$this->assertSame( Venue_Provider::CACHE_TIME, $provider->cache_time() );
+		$first = $provider->nearby();
+		$this->assertCount( 1, $this->http_requests );
+
+		$near = $this->provider(
+			'Venue_Provider_LocationIQ',
+			array(
+				'api'       => 'KEY',
+				'latitude'  => self::LAT + 0.00002,
+				'longitude' => self::LNG,
+			)
+		);
+		$this->assertSame( wp_list_pluck( $first['items'], 'name' ), wp_list_pluck( $near->nearby()['items'], 'name' ) );
+		$this->assertCount( 1, $this->http_requests, 'About 2 meters away: cached.' );
+		$this->assertNotSame( $first['items'][0]['distance'], $near->nearby()['items'][0]['distance'], 'Distances are from each search.' );
+
+		$this->provider(
+			'Venue_Provider_LocationIQ',
+			array(
+				'api'    => 'KEY',
+				'radius' => 500,
+			)
+		)->nearby();
+		$this->assertCount( 2, $this->http_requests, 'Another radius is another search.' );
+		$this->provider(
+			'Venue_Provider_LocationIQ',
+			array(
+				'api'       => 'KEY',
+				'latitude'  => self::LAT + 0.001,
+				'longitude' => self::LNG,
+			)
+		)->nearby();
+		$this->assertCount( 3, $this->http_requests, 'About 110 meters away: another search.' );
+
+		// Errors aren't cached.
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => new WP_Error( 'http_request_failed', 'Down' ) ) );
+		$far = $this->provider(
+			'Venue_Provider_LocationIQ',
+			array(
+				'api'       => 'KEY',
+				'latitude'  => 40,
+				'longitude' => -75,
+			)
+		);
+		$this->assertWPError( $far->nearby() );
+		$this->assertWPError( $far->nearby() );
+		$this->assertCount( 2, $this->http_requests );
+	}
+
+	/**
+	 * Providers that allow keeping only references don't cache, except HERE, whose terms allow keeping results for a
+	 * time; the time can be filtered (#716).
+	 */
+	public function test_cache_time() {
+		$this->assertSame( 0, $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) )->cache_time() );
+		$this->assertSame( 0, $this->provider( 'Venue_Provider_TomTom', array( 'api' => 'KEY' ) )->cache_time() );
+		$this->assertSame( Venue_Provider::CACHE_TIME, $this->provider( 'Venue_Provider_HERE', array( 'api' => 'KEY' ) )->cache_time() );
+
+		$this->mock_http( array( 'places.googleapis.com' => array( 'body' => $this->fixture( 'venue/google-places-nearby.json' ) ) ) );
+		$google = $this->provider( 'Venue_Provider_Google', array( 'api' => 'KEY' ) );
+		$google->nearby();
+		$google->nearby();
+		$this->assertCount( 2, $this->http_requests, 'Google results are not cached.' );
+
+		add_filter( 'sloc_venue_cache_time', fn( $seconds, $provider ) => 'google' === $provider->get_slug() ? 60 : -5, 10, 2 );
+		$this->assertSame( 60, $google->cache_time() );
+		$this->assertSame( 0, $this->provider( 'Venue_Provider_Overpass' )->cache_time(), 'Never negative.' );
+		$google->nearby();
+		$google->nearby();
+		$this->assertCount( 3, $this->http_requests, 'Cached once filtered.' );
+	}
+
+	/**
 	 * Nearby venues name the provider that found them (#729).
 	 */
 	public function test_nearby_provider() {
