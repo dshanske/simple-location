@@ -943,6 +943,60 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Clear-sky radiation in Philadelphia: about 950 W/m² at a summer noon, half that in winter, none at night (#204).
+	 */
+	public function test_clear_sky_radiation() {
+		$calc = new Astronomical_Calculator( 39.9524, -75.1636, 12 );
+		$this->assertEqualsWithDelta( 950, Weather_Provider::clear_sky_radiation( $calc, strtotime( '2025-06-21T17:00:00Z' ) ), 10 );
+		$this->assertEqualsWithDelta( 474, Weather_Provider::clear_sky_radiation( $calc, strtotime( '2025-12-21T17:00:00Z' ) ), 10 );
+		$this->assertEquals( 0, Weather_Provider::clear_sky_radiation( $calc, strtotime( '2025-06-21T03:00:00Z' ) ) );
+	}
+
+	/**
+	 * The sky is estimated from the radiation, or illuminance, measured against a clear sky's; not with the sun low,
+	 * and not without a measurement (#204).
+	 */
+	public function test_condition_from_sunlight() {
+		$calc = new Astronomical_Calculator( 39.9524, -75.1636, 12 );
+		$noon = strtotime( '2025-06-21T17:00:00Z' );
+		$this->assertSame( 800, Weather_Provider::condition_from_sunlight( 900, null, $calc, $noon ) );
+		$this->assertSame( 800, Weather_Provider::condition_from_sunlight( 1100, null, $calc, $noon ), 'Clouds can add reflected light.' );
+		$this->assertSame( 801, Weather_Provider::condition_from_sunlight( 700, null, $calc, $noon ) );
+		$this->assertSame( 802, Weather_Provider::condition_from_sunlight( 550, null, $calc, $noon ) );
+		$this->assertSame( 803, Weather_Provider::condition_from_sunlight( 400, null, $calc, $noon ) );
+		$this->assertSame( 804, Weather_Provider::condition_from_sunlight( 150, null, $calc, $noon ) );
+		$this->assertSame( 800, Weather_Provider::condition_from_sunlight( null, 110000, $calc, $noon ), 'From lux, without radiation.' );
+		$this->assertSame( 804, Weather_Provider::condition_from_sunlight( '150', 110000, $calc, new DateTime( '@' . $noon ) ), 'The radiation first.' );
+		$this->assertNull( Weather_Provider::condition_from_sunlight( 100, null, $calc, strtotime( '2025-06-21T10:15:00Z' ) ), 'The sun is too low.' );
+		$this->assertNull( Weather_Provider::condition_from_sunlight( null, null, $calc, $noon ) );
+		$this->assertNull( Weather_Provider::condition_from_sunlight( -5, null, $calc, $noon ) );
+
+		add_filter( 'sloc_condition_from_sunlight', fn( $code, $index ) => $index > 0.9 ? 800 : 803, 10, 2 );
+		$this->assertSame( 803, Weather_Provider::condition_from_sunlight( 800, null, $calc, $noon ) );
+	}
+
+	/**
+	 * Conditions without a condition get one estimated from the sunlight by day; a provider's own is kept (#204).
+	 */
+	public function test_condition_from_sunlight_in_conditions() {
+		$provider = $this->provider( 'Weather_Provider_Sloc_Test' );
+		$noon     = strtotime( '2025-06-21T17:00:00Z' );
+		$this->assertSame( 802, $provider->extra_data( array( 'radiation' => 550 ), $noon )['code'] );
+		$this->assertSame(
+			500,
+			$provider->extra_data(
+				array(
+					'radiation' => 550,
+					'code'      => 500,
+				),
+				$noon
+			)['code']
+		);
+		$this->assertArrayNotHasKey( 'code', $provider->extra_data( array( 'radiation' => 0 ), strtotime( '2025-06-21T04:00:00Z' ) ), 'Not at night.' );
+		$this->assertArrayNotHasKey( 'code', $provider->extra_data( array( 'temperature' => 20 ), $noon ) );
+	}
+
+	/**
 	 * Conditions get a dew point or humidity when only the other is given, which also gives a heat index, and a
 	 * provider's own values are kept.
 	 */
