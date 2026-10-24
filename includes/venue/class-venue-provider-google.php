@@ -82,6 +82,66 @@ class Venue_Provider_Google extends Venue_Provider {
 	}
 
 	/**
+	 * Returns the shared category and location icon of a place's Google types, from the most specific type.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string[] $types Google place types, most specific first.
+	 * @return array Array with 'category', a key of Venue_Provider::categories(), and 'icon'.
+	 */
+	public static function google_category( $types ) {
+		$icons      = array(
+			'airport'            => 'fa-plane',
+			'train_station'      => 'fa-train',
+			'subway_station'     => 'fa-subway',
+			'light_rail_station' => 'fa-tram',
+			'bus_station'        => 'fa-bus',
+			'taxi_stand'         => 'fa-taxi',
+			'car_rental'         => 'fa-car',
+			'gas_station'        => 'fa-car',
+			'parking'            => 'fa-car',
+			'ferry_terminal'     => 'fa-ship',
+		);
+		$categories = array(
+			'food'          => array( 'restaurant', 'meal_takeaway', 'meal_delivery', 'bakery', 'cafe', 'coffee_shop', 'fast_food_restaurant' ),
+			'drink'         => array( 'bar', 'pub', 'wine_bar' ),
+			'lodging'       => array( 'lodging', 'hotel', 'motel', 'hostel', 'bed_and_breakfast', 'campground' ),
+			'transport'     => array_merge( array_keys( $icons ), array( 'transit_station' ) ),
+			'entertainment' => array( 'night_club', 'movie_theater', 'amusement_park', 'bowling_alley', 'casino', 'zoo', 'aquarium' ),
+			'culture'       => array( 'museum', 'art_gallery', 'library', 'tourist_attraction', 'performing_arts_theater', 'historical_landmark' ),
+			'outdoors'      => array( 'park', 'natural_feature', 'hiking_area', 'beach' ),
+			'sport'         => array( 'gym', 'stadium', 'sports_complex', 'golf_course', 'swimming_pool' ),
+			'health'        => array( 'hospital', 'doctor', 'dentist', 'pharmacy', 'physiotherapist', 'drugstore' ),
+			'education'     => array( 'school', 'primary_school', 'secondary_school', 'university' ),
+			'worship'       => array( 'place_of_worship', 'church', 'mosque', 'synagogue', 'hindu_temple' ),
+			'government'    => array( 'city_hall', 'courthouse', 'police', 'fire_station', 'post_office', 'local_government_office', 'embassy' ),
+			'office'        => array( 'accounting', 'lawyer', 'insurance_agency', 'real_estate_agency', 'bank', 'corporate_office' ),
+			'shop'          => array( 'shopping_mall', 'supermarket', 'grocery_store', 'convenience_store', 'liquor_store', 'florist' ),
+		);
+		foreach ( (array) $types as $type ) {
+			foreach ( $categories as $category => $list ) {
+				if ( in_array( $type, $list, true ) ) {
+					return array(
+						'category' => $category,
+						'icon'     => $icons[ $type ] ?? ( 'lodging' === $category ? 'fa-suitcase' : '' ),
+					);
+				}
+			}
+			// Google names every kind of shop with _store.
+			if ( is_string( $type ) && '_store' === substr( $type, -6 ) ) {
+				return array(
+					'category' => 'shop',
+					'icon'     => '',
+				);
+			}
+		}
+		return array(
+			'category' => 'other',
+			'icon'     => '',
+		);
+	}
+
+	/**
 	 * Convert address properties to mf2
 	 *
 	 * @param  array $data Raw JSON.
@@ -103,6 +163,7 @@ class Venue_Provider_Google extends Venue_Provider {
 			$card['boundingbox'] = $data['geometry']['viewport'] ?? null;
 		}
 		$card['category'] = $data['types'] ?? null;
+		$card             = self::add_category( $card, self::google_category( is_array( $card['category'] ) ? $card['category'] : array() ) );
 
 		$tz = $this->timezone();
 		if ( $tz ) {

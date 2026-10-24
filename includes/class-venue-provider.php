@@ -299,6 +299,147 @@ abstract class Venue_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Returns the venue categories every provider's categories are mapped to, with their names.
+	 *
+	 * Each venue keeps its provider's own categories as 'category'; its shared category is 'venue-category'.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @return string[] Names, keyed by category.
+	 */
+	public static function categories() {
+		return array(
+			'food'          => __( 'Food', 'simple-location' ),
+			'drink'         => __( 'Drink', 'simple-location' ),
+			'lodging'       => __( 'Lodging', 'simple-location' ),
+			'shop'          => __( 'Shop', 'simple-location' ),
+			'transport'     => __( 'Transport', 'simple-location' ),
+			'culture'       => __( 'Culture', 'simple-location' ),
+			'entertainment' => __( 'Entertainment', 'simple-location' ),
+			'outdoors'      => __( 'Outdoors', 'simple-location' ),
+			'sport'         => __( 'Sport', 'simple-location' ),
+			'health'        => __( 'Health', 'simple-location' ),
+			'education'     => __( 'Education', 'simple-location' ),
+			'worship'       => __( 'Worship', 'simple-location' ),
+			'government'    => __( 'Government', 'simple-location' ),
+			'office'        => __( 'Office', 'simple-location' ),
+			'other'         => __( 'Other', 'simple-location' ),
+		);
+	}
+
+	/**
+	 * Returns the shared category and location icon of an OpenStreetMap tag, such as amenity=cafe.
+	 *
+	 * Used by the providers whose places come from OpenStreetMap.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $key   Tag key, such as 'amenity'.
+	 * @param string $value Tag value, such as 'cafe'.
+	 * @return array Array with 'category', a key of categories(), and 'icon', a location icon or an empty string.
+	 */
+	public static function osm_category( $key, $value ) {
+		$key    = strtolower( (string) $key );
+		$value  = strtolower( (string) $value );
+		$icons  = array(
+			'aeroway=aerodrome'              => 'fa-plane',
+			'aeroway=terminal'               => 'fa-plane',
+			'railway=station'                => 'fa-train',
+			'railway=halt'                   => 'fa-train',
+			'railway=subway_entrance'        => 'fa-subway',
+			'railway=tram_stop'              => 'fa-tram',
+			'amenity=bus_station'            => 'fa-bus',
+			'highway=bus_stop'               => 'fa-bus',
+			'amenity=ferry_terminal'         => 'fa-ship',
+			'amenity=taxi'                   => 'fa-taxi',
+			'amenity=bicycle_rental'         => 'fa-biking',
+			'amenity=car_rental'             => 'fa-car',
+			'amenity=fuel'                   => 'fa-car',
+			'amenity=parking'                => 'fa-car',
+			'public_transport=station'       => 'fa-train',
+			'public_transport=stop_position' => 'fa-bus',
+		);
+		$values = array(
+			'amenity' => array(
+				'food'          => array( 'restaurant', 'fast_food', 'food_court', 'cafe', 'ice_cream' ),
+				'drink'         => array( 'bar', 'pub', 'biergarten' ),
+				'entertainment' => array( 'cinema', 'theatre', 'nightclub', 'casino' ),
+				'culture'       => array( 'arts_centre', 'library' ),
+				'education'     => array( 'school', 'college', 'university', 'kindergarten' ),
+				'health'        => array( 'hospital', 'clinic', 'doctors', 'dentist', 'pharmacy' ),
+				'worship'       => array( 'place_of_worship' ),
+				'transport'     => array( 'bus_station', 'ferry_terminal', 'taxi', 'bicycle_rental', 'car_rental', 'fuel', 'parking' ),
+				'government'    => array( 'townhall', 'courthouse', 'police', 'fire_station', 'post_office', 'embassy' ),
+				'office'        => array( 'bank' ),
+			),
+			'tourism' => array(
+				'lodging'       => array( 'hotel', 'motel', 'hostel', 'guest_house', 'apartment', 'chalet', 'alpine_hut' ),
+				'outdoors'      => array( 'camp_site', 'caravan_site', 'viewpoint', 'picnic_site' ),
+				'entertainment' => array( 'zoo', 'theme_park', 'aquarium' ),
+				'culture'       => array( 'museum', 'gallery', 'artwork', 'attraction' ),
+			),
+			'leisure' => array(
+				'outdoors'      => array( 'park', 'garden', 'nature_reserve', 'beach_resort', 'playground', 'dog_park' ),
+				'sport'         => array( 'sports_centre', 'stadium', 'pitch', 'fitness_centre', 'swimming_pool', 'golf_course', 'track', 'ice_rink' ),
+				'entertainment' => array( 'water_park', 'bowling_alley', 'amusement_arcade' ),
+			),
+		);
+		// Whole keys, whatever their value.
+		$keys     = array(
+			'shop'             => 'shop',
+			'craft'            => 'shop',
+			'office'           => 'office',
+			'historic'         => 'culture',
+			'natural'          => 'outdoors',
+			'aeroway'          => 'transport',
+			'railway'          => 'transport',
+			'public_transport' => 'transport',
+		);
+		$category = 'other';
+		foreach ( $values[ $key ] ?? array() as $shared => $list ) {
+			if ( in_array( $value, $list, true ) ) {
+				$category = $shared;
+				break;
+			}
+		}
+		if ( 'other' === $category && isset( $keys[ $key ] ) ) {
+			$category = $keys[ $key ];
+		}
+		return array(
+			'category' => $category,
+			'icon'     => $icons[ $key . '=' . $value ] ?? ( 'lodging' === $category ? 'fa-suitcase' : '' ),
+		);
+	}
+
+	/**
+	 * Adds a shared category, and a location icon if one fits, to a venue.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param array $card  Venue as an h-card.
+	 * @param array $match Array with 'category' and 'icon', as osm_category() returns.
+	 * @return array Venue with 'venue-category', and 'icon' if there is one.
+	 */
+	protected static function add_category( $card, $match ) {
+		/**
+		 * Filters the shared category and location icon a provider's venue is given.
+		 *
+		 * @since 6.1.0
+		 *
+		 * @param array $match Array with 'category', a key of Venue_Provider::categories(), and 'icon'.
+		 * @param array $card  Venue as an h-card, with the provider's own categories as 'category'.
+		 */
+		$match = apply_filters( 'sloc_venue_category', $match, $card );
+		if ( ! empty( $match['category'] ) && isset( self::categories()[ $match['category'] ] ) ) {
+			$card['venue-category'] = $match['category'];
+		}
+		if ( ! empty( $match['icon'] ) ) {
+			$card['icon'] = $match['icon'];
+		}
+		return $card;
+	}
+
+	/**
 	 * Returns a list of one or more possible venues in h-card jf2 format.
 	 *
 	 * Callers use nearby(), which sorts and limits the venues.

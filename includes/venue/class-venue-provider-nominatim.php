@@ -89,6 +89,7 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 	 * Convert address properties to hcard
 	 *
 	 * @since 6.0.0 Handles Wikipedia tags without a language prefix.
+	 * @since 6.1.0 Uses the place's own coordinates (#720), and adds the shared venue category and a location icon (#707).
 	 *
 	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.
@@ -242,9 +243,9 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 				)
 			),
 
-			'latitude'         => $this->latitude,
-			'longitude'        => $this->longitude,
-			'altitude'         => $this->altitude,
+			// The place's own coordinates, not the search point's.
+			'latitude'         => isset( $json['lat'] ) && is_numeric( $json['lat'] ) ? (float) $json['lat'] : null,
+			'longitude'        => isset( $json['lon'] ) && is_numeric( $json['lon'] ) ? (float) $json['lon'] : null,
 			'raw'              => $json,
 		);
 		if ( is_null( $addr['country-name'] ) ) {
@@ -262,6 +263,7 @@ class Venue_Provider_Nominatim extends Venue_Provider {
 			$addr['boundingbox'] = $json['boundingbox'];
 		}
 		$addr = array_filter( $addr );
+		$addr = self::add_category( $addr, self::osm_category( $json['category'] ?? $json['class'] ?? '', $json['type'] ?? '' ) );
 		$tz   = $this->timezone();
 		if ( $tz ) {
 			$addr = array_merge( $addr, $tz );
