@@ -40,6 +40,7 @@ class WeatherAttributionTest extends WP_UnitTestCase {
 	public function data_credits() {
 		return array(
 			'Open-Meteo'     => array( 'openmeteo', '<a href="https://open-meteo.com/">Weather data by Open-Meteo.com</a>', true ),
+			'MET Norway'     => array( 'metno', '<a href="https://www.met.no/en">Weather data from MET Norway</a>', true ),
 			'OpenWeather'    => array( 'openweathermap', '<a href="https://openweathermap.org/">Weather data provided by OpenWeather</a>', false ),
 			'Xweather'       => array( 'aeris', '<a href="https://www.xweather.com/">Powered by Vaisala Xweather</a>', false ),
 			'Weatherbit'     => array( 'weatherbit', '<a href="https://www.weatherbit.io/">Weather data by Weatherbit.io</a>', false ),
