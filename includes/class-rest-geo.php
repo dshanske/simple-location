@@ -750,6 +750,8 @@ class REST_Geo {
 		if ( ! $weather ) {
 			return new WP_Error( 'no_provider', __( 'No Weather Provider Set', 'simple-location' ) );
 		}
+		// A copy, so the lookup leaves the shared provider as it was (#681).
+		$weather = clone $weather;
 		if ( ! empty( $params['station'] ) ) {
 			$weather->set( array( 'station_id' => $params['station'] ) );
 			$conditions = $weather->get_conditions( $time );

@@ -622,7 +622,8 @@ class RestGeoTest extends WP_UnitTestCase {
 		$data = $this->request( '/weather', array( 'station' => 'KJFK' ) )->get_data();
 		$this->assertSame( 20, $data['temperature'] );
 		$this->assertArrayNotHasKey( 'latitude', $data );
-		$this->assertSame( 'KJFK', Loc_Config::weather_provider()->get_station_id() );
+		$this->assertSame( 'KJFK', Weather_Provider_Sloc_Test::$station );
+		$this->assertEmpty( Loc_Config::weather_provider()->get_station_id(), 'The shared provider is left as it was (#681).' );
 	}
 
 	/**

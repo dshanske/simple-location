@@ -46,6 +46,13 @@ class Weather_Provider_Sloc_Test extends Weather_Provider {
 	public static $location;
 
 	/**
+	 * Station of the last get_conditions() call.
+	 *
+	 * @var string|null
+	 */
+	public static $station;
+
+	/**
 	 * Whether a provider slug has weather for any time. Default true.
 	 *
 	 * @var bool[]
@@ -75,6 +82,7 @@ class Weather_Provider_Sloc_Test extends Weather_Provider {
 		static::$responses  = array();
 		static::$calls      = array();
 		static::$location   = null;
+		static::$station    = null;
 		static::$supports   = array();
 	}
 
@@ -116,6 +124,7 @@ class Weather_Provider_Sloc_Test extends Weather_Provider {
 		static::$time     = $time;
 		static::$calls[]  = $this->slug;
 		static::$location = $this->get();
+		static::$station  = $this->station_id;
 		return array_key_exists( $this->slug, static::$responses ) ? static::$responses[ $this->slug ] : static::$conditions;
 	}
 }

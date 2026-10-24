@@ -429,7 +429,8 @@ class WidgetsTest extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<section class="widget"><h2 class="widget-title">Backyard</h2>', $html );
 		$this->assertStringContainsString( 'Clear', $html );
 		$this->assertStringEndsWith( '</section>', $html, 'The widget wrapper is closed.' );
-		$this->assertSame( 'backyard', Loc_Config::weather_provider( 'sloc_test' )->get_station_id() );
+		$this->assertSame( 'backyard', Weather_Provider_Sloc_Test::$station );
+		$this->assertEmpty( Loc_Config::weather_provider( 'sloc_test' )->get_station_id(), 'The shared provider is left as it was (#681).' );
 	}
 
 	/**

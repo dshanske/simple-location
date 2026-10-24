@@ -857,6 +857,7 @@ class Sloc_Weather_Data {
 	 * Looks up the current weather at a weather station.
 	 *
 	 * @since 3.5.0
+	 * @since 6.1.0 Looks up with a copy of the provider, leaving the shared one as it was (#681).
 	 *
 	 * @param string      $station    Station ID.
 	 * @param string|null $provider   Weather provider slug. Optional; defaults to the active provider.
@@ -868,6 +869,7 @@ class Sloc_Weather_Data {
 		if ( ! $provider ) {
 			return self::no_provider_error();
 		}
+		$provider = clone $provider;
 		$provider->set( array( 'station_id' => $station ) );
 
 		if ( is_numeric( $cache_time ) ) {
