@@ -981,6 +981,73 @@ final class Location_Taxonomy {
 	}
 
 	/**
+	 * Merges locations of the same kind into one.
+	 *
+	 * The posts in each duplicate, and its child locations, move to the location kept. The duplicate's codes or
+	 * names (its country, region or locality term meta) are added to the kept location, so lookups that matched the
+	 * duplicate find it. The duplicates are deleted, and their addresses redirect to the kept location; see
+	 * Sloc_Merge.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int   $keep       Location to keep.
+	 * @param int[] $duplicates Locations to merge into it. The kept location, and any that isn't a location of the
+	 *                          same kind, is skipped.
+	 * @return int Number of locations merged.
+	 */
+	public static function merge_locations( $keep, $duplicates ) {
+		$keep     = (int) $keep;
+		$taxonomy = get_taxonomy( 'location' );
+		$type     = self::get_location_type( $keep );
+		if ( ! $taxonomy || ! $type || ! current_user_can( $taxonomy->cap->edit_terms ) || ! current_user_can( $taxonomy->cap->delete_terms ) ) {
+			return 0;
+		}
+		$count = 0;
+		foreach ( array_unique( array_map( 'intval', (array) $duplicates ) ) as $duplicate ) {
+			if ( $duplicate === $keep || self::get_location_type( $duplicate ) !== $type ) {
+				continue;
+			}
+			$link = get_term_link( $duplicate, 'location' );
+			Sloc_Merge::add_redirects( 'term', $keep, $duplicate, is_wp_error( $link ) ? '' : $link );
+
+			// The codes or names lookups match.
+			$current = get_term_meta( $keep, $type );
+			foreach ( get_term_meta( $duplicate, $type ) as $value ) {
+				if ( ! in_array( $value, $current, true ) ) {
+					add_term_meta( $keep, $type, $value );
+					$current[] = $value;
+				}
+			}
+
+			$children = get_terms(
+				array(
+					'taxonomy'   => 'location',
+					'hide_empty' => false,
+					'parent'     => $duplicate,
+					'fields'     => 'ids',
+				)
+			);
+			foreach ( is_array( $children ) ? $children : array() as $child ) {
+				wp_update_term( $child, 'location', array( 'parent' => $keep ) );
+			}
+
+			// Every post in the duplicate is put in the kept location.
+			$deleted = wp_delete_term(
+				$duplicate,
+				'location',
+				array(
+					'default'       => $keep,
+					'force_default' => true,
+				)
+			);
+			if ( true === $deleted ) {
+				++$count;
+			}
+		}
+		return $count;
+	}
+
+	/**
 	 * Sets the location term of a post.
 	 *
 	 * @since 6.0.0 Works when passed a WP_Post.
