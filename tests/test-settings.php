@@ -228,6 +228,7 @@ class SettingsTest extends WP_UnitTestCase {
 			'sloc_map_provider'         => 'none',
 			'sloc_geolocation_provider' => 'HTML5',
 			'sloc_zoom'                 => 14,
+			'sloc_zoom_always'          => false,
 		);
 		foreach ( $expected as $name => $default ) {
 			$this->assertArrayHasKey( $name, $settings, $name );
@@ -447,7 +448,16 @@ class SettingsTest extends WP_UnitTestCase {
 		update_option( 'sloc_test_option', '1' );
 		$html = $this->capture( array( 'Loc_Config', 'checkbox_callback' ), array( 'label_for' => 'sloc_test_option' ) );
 		$this->assertStringContainsString( '<input name="sloc_test_option" type="hidden" value="0" />', $html );
-		$this->assertMatchesRegularExpression( '/<input name="sloc_test_option" type="checkbox" value="1"\s+checked/', $html );
+		$this->assertMatchesRegularExpression( '/<input name="sloc_test_option" id="sloc_test_option" type="checkbox" value="1"\s+checked/', $html, 'The id matches the label.' );
+		$this->assertStringNotContainsString( 'description', $html );
+		$html = $this->capture(
+			array( 'Loc_Config', 'checkbox_callback' ),
+			array(
+				'label_for'   => 'sloc_test_option',
+				'description' => 'Say <b>why</b>.',
+			)
+		);
+		$this->assertStringContainsString( '<p class="description">Say &lt;b&gt;why&lt;/b&gt;.</p>', $html );
 
 		update_option( 'sloc_test_option', 42 );
 		$this->assertSame( '<input name="sloc_test_option" type="number" min="0" step="1" size="4" class="small-text" value="42" />', $this->capture( array( 'Loc_Config', 'number_callback' ), array( 'label_for' => 'sloc_test_option' ) ) );
