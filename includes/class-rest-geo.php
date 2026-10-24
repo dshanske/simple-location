@@ -149,14 +149,16 @@ class REST_Geo {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'user' ),
+					// The location can also be a geo URI or a GeoJSON body; see user_location().
 					'args'                => array(
 						'longitude'  => array(
-							'required'          => true,
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
 						'latitude'   => array(
-							'required'          => true,
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
+						'geo'        => array(
+							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'altitude'   => array(
 							'sanitize_callback' => array( $this, 'sanitize_float' ),
@@ -477,30 +479,93 @@ class REST_Geo {
 	}
 
 	/**
+	 * Returns the location sent to the user endpoint.
+	 *
+	 * The location is one of, in order:
+	 * - a GeoJSON body: a Feature with a Point geometry, a Point, or either as `{"locations": …}`; a Feature's
+	 *   accuracy, speed and heading properties are kept;
+	 * - a geo URI as the `geo` parameter, such as geo:45.01,-75.44;u=10;
+	 * - the latitude, longitude, altitude, accuracy, speed and heading parameters.
+	 *
+	 * A visibility parameter can come with any of them, or alone.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return array|WP_Error Location, or an error without one, or with a coordinate that isn't valid.
+	 */
+	public static function user_location( $request ) {
+		$location = array();
+		$json     = $request->get_json_params();
+		$geometry = null;
+		if ( is_array( $json ) ) {
+			$feature    = ( isset( $json['locations'] ) && is_array( $json['locations'] ) ) ? $json['locations'] : $json;
+			$properties = ( 'Feature' === ( $feature['type'] ?? null ) && is_array( $feature['properties'] ?? null ) ) ? $feature['properties'] : array();
+			$geometry   = 'Feature' === ( $feature['type'] ?? null ) ? ( $feature['geometry'] ?? null ) : $feature;
+			if ( is_array( $geometry ) && 'Point' === ( $geometry['type'] ?? null ) && is_array( $geometry['coordinates'] ?? null ) && count( $geometry['coordinates'] ) >= 2 ) {
+				$coordinates = array_values( $geometry['coordinates'] );
+				$location    = array(
+					'longitude' => $coordinates[0],
+					'latitude'  => $coordinates[1],
+					'altitude'  => $coordinates[2] ?? null,
+				);
+				foreach ( array( 'accuracy', 'speed', 'heading' ) as $key ) {
+					$location[ $key ] = $properties[ $key ] ?? null;
+				}
+			} elseif ( isset( $json['locations'] ) || isset( $json['type'] ) ) {
+				return new WP_Error( 'rest_invalid_param', __( 'The location must be a GeoJSON Point, or a Feature with a Point geometry.', 'simple-location' ), array( 'status' => 400 ) );
+			}
+		}
+		if ( empty( $location ) && is_string( $request->get_param( 'geo' ) ) && '' !== $request->get_param( 'geo' ) ) {
+			$geo = Geo_Data::parse_geo_uri( $request->get_param( 'geo' ) );
+			if ( ! is_array( $geo ) ) {
+				return new WP_Error( 'rest_invalid_param', __( 'geo is not a valid geo URI.', 'simple-location' ), array( 'status' => 400 ) );
+			}
+			$location = wp_array_slice_assoc( $geo, array( 'latitude', 'longitude', 'altitude', 'accuracy' ) );
+		}
+		if ( empty( $location ) ) {
+			$location = wp_array_slice_assoc( $request->get_params(), array( 'latitude', 'longitude', 'altitude', 'accuracy', 'speed', 'heading' ) );
+		}
+
+		// Coordinates from a body or a geo URI haven't been checked yet. Both or neither.
+		if ( isset( $location['latitude'] ) || isset( $location['longitude'] ) ) {
+			foreach ( array( 'latitude', 'longitude' ) as $key ) {
+				$coordinate = clean_coordinate( $location[ $key ] ?? '', $key );
+				if ( false === $coordinate ) {
+					/* translators: %s: Parameter name. */
+					return new WP_Error( 'rest_invalid_param', sprintf( __( '%s is not a valid coordinate.', 'simple-location' ), $key ), array( 'status' => 400 ) );
+				}
+				$location[ $key ] = $coordinate;
+			}
+		}
+		foreach ( array( 'altitude', 'accuracy', 'speed', 'heading' ) as $key ) {
+			if ( isset( $location[ $key ] ) ) {
+				$location[ $key ] = is_numeric( $location[ $key ] ) ? (float) $location[ $key ] : null;
+			}
+		}
+		$visibility = $request->get_param( 'visibility' );
+		if ( is_string( $visibility ) && '' !== $visibility ) {
+			$location['visibility'] = $visibility;
+		}
+		$location = array_filter( $location, fn( $value ) => null !== $value && '' !== $value );
+		if ( empty( $location ) ) {
+			return new WP_Error( 'missing_location', __( 'Send a latitude and longitude, a geo URI, or a GeoJSON location.', 'simple-location' ), array( 'status' => 400 ) );
+		}
+		return $location;
+	}
+
+	/**
 	 * Callback handler for updating user location.
+	 *
+	 * @since 6.1.0 Takes a GeoJSON Point or Feature, with or without "locations", or a geo URI (#407).
 	 *
 	 * @param WP_Rest_Request $request REST Request.
 	 */
 	public static function user( $request ) {
-		$json = $request->get_json_params();
-		if ( is_array( $json ) && array_key_exists( 'locations', $json ) ) {
-			$location = array();
-			$json     = $json['locations'];
-			if ( isset( $json['geometry'] ) && isset( $json['properties'] ) ) {
-				$coord                 = $json['geometry']['coordinates'];
-				$location['longitude'] = $coord[0];
-				$location['latitude']  = $coord[1];
-				$location['altitude']  = isset( $coord[2] ) ? $coord[2] : null;
-				$properties            = $json['properties'];
-				$location['accuracy']  = isset( $properties['accuracy'] ) ? $properties['accuracy'] : null;
-				$location['speed']     = isset( $properties['speed'] ) ? $properties['speed'] : null;
-				$location['heading']   = isset( $properties['heading'] ) ? $properties['heading'] : null;
-			}
-		} else {
-			$params   = $request->get_params();
-			$location = wp_array_slice_assoc( $params, array( 'latitude', 'longitude', 'altitude', 'accuracy', 'speed', 'heading', 'visibility' ) );
+		$location = self::user_location( $request );
+		if ( is_wp_error( $location ) ) {
+			return $location;
 		}
-		$location = array_filter( $location );
 		if ( isset( $location['latitude'] ) && isset( $location['longitude'] ) ) {
 			if ( ! Loc_Config::geo_provider() ) {
 				return __( 'Provider Not Available', 'simple-location' );
