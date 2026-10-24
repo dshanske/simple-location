@@ -70,7 +70,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::weather_providers();
-		foreach ( array( 'openweathermap', 'pirateweather', 'weatherbit', 'weatherstack', 'visualcrossing', 'aeris', 'nwsus', 'meteostat', 'here', 'station', 'openmeteo' ) as $slug ) {
+		foreach ( array( 'openweathermap', 'pirateweather', 'weatherbit', 'weatherstack', 'visualcrossing', 'aeris', 'nwsus', 'meteostat', 'here', 'station', 'openmeteo', 'metno' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers, $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 		}
@@ -98,7 +98,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	 * Providers with only current weather say so, so the weather chain skips them for other times (#490).
 	 */
 	public function test_supports_time() {
-		foreach ( array( 'OpenWeatherMap', 'Weatherbit', 'Weatherstack', 'HERE', 'NWSUS', 'Station', 'Weewx' ) as $name ) {
+		foreach ( array( 'OpenWeatherMap', 'Weatherbit', 'Weatherstack', 'HERE', 'NWSUS', 'Station', 'Weewx', 'Metno' ) as $name ) {
 			$provider = $this->provider( 'Weather_Provider_' . $name );
 			$this->assertTrue( $provider->supports_time(), $name );
 			$this->assertTrue( $provider->supports_time( time() - 1800 ), $name );
@@ -556,6 +556,117 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		);
 		$this->assertSame( 'Partly cloudy', $conditions['summary'] );
 		$this->assertSame( 802, $conditions['code'] );
+	}
+
+	/**
+	 * Returns the MET Norway fixture, with its first entry at the nearest hour and the next an hour later.
+	 *
+	 * @return array Fixture.
+	 */
+	protected function metno_fixture() {
+		$fixture = $this->fixture( 'weather/metno-complete.json' );
+		$hour    = (int) ( round( time() / HOUR_IN_SECONDS ) * HOUR_IN_SECONDS );
+		foreach ( $fixture['properties']['timeseries'] as $index => $entry ) {
+			$fixture['properties']['timeseries'][ $index ]['time'] = gmdate( 'Y-m-d\TH:i:s\Z', $hour + $index * HOUR_IN_SECONDS );
+		}
+		return $fixture;
+	}
+
+	/**
+	 * MET Norway: the forecast for the nearest hour, asked for with four decimals, the altitude and the site's
+	 * User-Agent (#153).
+	 */
+	public function test_metno_current() {
+		$fixture = $this->metno_fixture();
+		$this->mock_http( array( 'api.met.no' => array( 'body' => $fixture ) ) );
+		$provider = $this->provider( 'Weather_Provider_Metno', array( 'cache_time' => 600 ) );
+		$provider->set( 39.95241234, -75.16361234, 12.6 );
+		$conditions = $provider->get_conditions();
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://api.met.no/weatherapi/locationforecast/2.0/complete', $request['base'] );
+		$this->assertSame( '39.9524', $request['query']['lat'] );
+		$this->assertSame( '-75.1636', $request['query']['lon'] );
+		$this->assertSame( '13', $request['query']['altitude'] );
+		$this->assertSame( 'Simple Location for WordPress (' . home_url( '/' ) . ')', $request['args']['headers']['User-Agent'] );
+
+		$now  = $fixture['properties']['timeseries'][0]['data'];
+		$here = $now['instant']['details'];
+		$this->assertConditions(
+			array(
+				'temperature' => $here['air_temperature'],
+				'dewpoint'    => $here['dew_point_temperature'],
+				'humidity'    => $here['relative_humidity'],
+				'pressure'    => $here['air_pressure_at_sea_level'],
+				'cloudiness'  => $here['cloud_area_fraction'],
+				'windspeed'   => $here['wind_speed'],
+				'windgust'    => $here['wind_speed_of_gust'],
+				'winddegree'  => $here['wind_from_direction'],
+				'uv'          => $here['ultraviolet_index_clear_sky'],
+				'rain'        => $now['next_1_hours']['details']['precipitation_amount'],
+				'code'        => 520,
+				'summary'     => 'Light rain showers',
+			),
+			$conditions
+		);
+		$this->assertSame( 62, $conditions['cloudiness'] );
+
+		$provider->get_conditions();
+		$this->assertCount( 1, $this->http_requests, 'The second call is served from the cache.' );
+	}
+
+	/**
+	 * MET Norway: only current weather; refused requests and responses without a forecast are errors (#153).
+	 */
+	public function test_metno_errors() {
+		$this->mock_http( array() );
+		$provider = $this->provider( 'Weather_Provider_Metno' );
+		$this->assertSame( 'historic_unsupported', $provider->get_conditions( strtotime( '-2 days' ) )->get_error_code() );
+		$this->assertTrue( $provider->supports_time() );
+		$this->assertFalse( $provider->supports_time( strtotime( '+2 days' ) ) );
+		$this->assertSame( array(), $this->http_requests );
+
+		$this->mock_http( array( 'api.met.no' => array( 'code' => 403 ) ) );
+		$this->assertSame( 403, $this->provider( 'Weather_Provider_Metno' )->get_conditions()->get_error_data()['status'] );
+
+		$this->mock_http( array( 'api.met.no' => array( 'body' => array( 'type' => 'Feature' ) ) ) );
+		$this->assertSame( 'no_results', $this->provider( 'Weather_Provider_Metno' )->get_conditions()->get_error_code() );
+	}
+
+	/**
+	 * MET Norway's weather symbols are described and given condition codes, whatever the time of day (#153).
+	 */
+	public function test_metno_symbols() {
+		$this->assertSame( 'clearsky', Weather_Provider_Metno::symbol( 'clearsky_polartwilight' ) );
+		$this->assertSame( '', Weather_Provider_Metno::symbol( null ) );
+		$this->assertSame( 800, Weather_Provider_Metno::code_map( 'clearsky' ) );
+		$this->assertSame( 804, Weather_Provider_Metno::code_map( 'cloudy' ) );
+		$this->assertSame( 200, Weather_Provider_Metno::code_map( 'lightrainshowersandthunder' ) );
+		$this->assertSame( 201, Weather_Provider_Metno::code_map( 'rainandthunder' ) );
+		$this->assertSame( 202, Weather_Provider_Metno::code_map( 'heavyrainandthunder' ) );
+		$this->assertSame( 211, Weather_Provider_Metno::code_map( 'lightssnowshowersandthunder' ) );
+		$this->assertSame( '', Weather_Provider_Metno::code_map( 'unknownandthunder' ) );
+		$this->assertSame( 'Heavy snow showers', Weather_Provider_Metno::symbol_summary( 'heavysnowshowers' ) );
+
+		// Every symbol has a code, and snow is counted as snow.
+		$reflection = new ReflectionMethod( 'Weather_Provider_Metno', 'symbols' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
+		foreach ( array_keys( $reflection->invoke( null ) ) as $symbol ) {
+			$this->assertIsInt( Weather_Provider_Metno::code_map( $symbol ), $symbol );
+		}
+		$snow = ( new Weather_Provider_Metno() )->convert_data(
+			array(
+				'instant'      => array( 'details' => array( 'air_temperature' => -2 ) ),
+				'next_1_hours' => array(
+					'summary' => array( 'symbol_code' => 'snow_night' ),
+					'details' => array( 'precipitation_amount' => 1.2 ),
+				),
+			)
+		);
+		$this->assertSame( 1.2, $snow['snow'] );
+		$this->assertArrayNotHasKey( 'rain', $snow );
 	}
 
 	/**

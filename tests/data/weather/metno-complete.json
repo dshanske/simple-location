@@ -1,0 +1,88 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      -75.1636,
+      39.9524,
+      12
+    ]
+  },
+  "properties": {
+    "meta": {
+      "updated_at": "TIME0",
+      "units": {
+        "air_pressure_at_sea_level": "hPa",
+        "air_temperature": "celsius",
+        "cloud_area_fraction": "%",
+        "dew_point_temperature": "celsius",
+        "precipitation_amount": "mm",
+        "relative_humidity": "%",
+        "ultraviolet_index_clear_sky": "1",
+        "wind_from_direction": "degrees",
+        "wind_speed": "m/s",
+        "wind_speed_of_gust": "m/s"
+      }
+    },
+    "timeseries": [
+      {
+        "time": "TIME0",
+        "data": {
+          "instant": {
+            "details": {
+              "air_pressure_at_sea_level": 1012.36,
+              "air_temperature": 14.27,
+              "cloud_area_fraction": 61.7,
+              "dew_point_temperature": 8.94,
+              "fog_area_fraction": 0.0,
+              "relative_humidity": 70.15,
+              "ultraviolet_index_clear_sky": 2.04,
+              "wind_from_direction": 214.62,
+              "wind_speed": 3.46,
+              "wind_speed_of_gust": 6.78
+            }
+          },
+          "next_1_hours": {
+            "summary": {
+              "symbol_code": "lightrainshowers_day"
+            },
+            "details": {
+              "precipitation_amount": 0.4
+            }
+          },
+          "next_6_hours": {
+            "summary": {
+              "symbol_code": "rain"
+            },
+            "details": {
+              "precipitation_amount": 3.1
+            }
+          }
+        }
+      },
+      {
+        "time": "TIME1",
+        "data": {
+          "instant": {
+            "details": {
+              "air_pressure_at_sea_level": 1011.9,
+              "air_temperature": 15.1,
+              "cloud_area_fraction": 80.0,
+              "relative_humidity": 66.0,
+              "wind_from_direction": 220.0,
+              "wind_speed": 4.0
+            }
+          },
+          "next_1_hours": {
+            "summary": {
+              "symbol_code": "cloudy"
+            },
+            "details": {
+              "precipitation_amount": 0.0
+            }
+          }
+        }
+      }
+    ]
+  }
+}

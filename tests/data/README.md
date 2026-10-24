@@ -67,6 +67,7 @@ Current conditions are for Philadelphia (`39.9524,-75.1636`); station requests u
 | `openmeteo-current.json` | `GET https://api.open-meteo.com/v1/forecast?latitude=39.9524&longitude=-75.1636&wind_speed_unit=ms&timeformat=unixtime&current={Weather_Provider_OpenMeteo::VARIABLES}` | Captured 2026-10-22 |
 | `openmeteo-archive.json` | `GET https://archive-api.open-meteo.com/v1/archive?latitude=39.9524&longitude=-75.1636&wind_speed_unit=ms&timeformat=unixtime&hourly={VARIABLES}&start_date=2025-07-01&end_date=2025-07-01` | Captured 2026-10-22 |
 | `openmeteo-error.json` | `GET https://api.open-meteo.com/v1/forecast?latitude=39.9524&longitude=-75.1636&current=nonsense` (HTTP 400) | Captured 2026-10-22 |
+| `metno-complete.json` | `GET https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=39.9524&lon=-75.1636` with an identifying `User-Agent` (`TIME0` and `TIME1` are set by the test to the nearest hour and the one after) | Hand-built from docs |
 | `here-observation.json` | `GET https://weather.hereapi.com/v3/report?apiKey=…&products=observation&location=39.9524,-75.1636&units=metric&oneObservation=true` | Hand-built from docs |
 | `weatherbit-current.json` | `GET https://api.weatherbit.io/v2.0/current?key=…&lat=39.9524&lon=-75.1636&units=M` | Hand-built from docs |
 | `weatherstack-current.json` | `GET https://api.weatherstack.com/current?access_key=…&query=39.9524,-75.1636&units=m` (free plans: `http://`) | Hand-built from docs |
