@@ -396,6 +396,8 @@ class Simple_Location_Plugin {
 			'class-venue-provider-geoapify.php', // Geoapify.
 			'class-venue-provider-here.php', // HERE.
 			'class-venue-provider-tomtom.php', // TomTom.
+			'class-venue-provider-pelias.php', // Pelias.
+			'class-venue-provider-stadia.php', // Stadia Maps, a Pelias server.
 		);
 		self::register_providers( $providers, 'includes/venue/' );
 	}

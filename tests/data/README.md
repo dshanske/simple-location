@@ -111,6 +111,7 @@ timezone. Nominatim venues reuse `geo/nominatim-reverse.json`, since it is the s
 | `geoapify-places.json` | `GET https://api.geoapify.com/v2/places?categories=…&filter=circle:-75.1636,39.9524,250&bias=proximity:-75.1636,39.9524&limit=10&lang=en&apiKey=…` | Hand-built from docs |
 | `here-browse.json` | `GET https://browse.search.hereapi.com/v1/browse?at=39.9524,-75.1636&in=circle:39.9524,-75.1636;r=250&limit=10&lang=en-US&apiKey=…` | Hand-built from docs |
 | `tomtom-nearby.json` | `GET https://api.tomtom.com/search/2/nearbySearch/.json?key=…&lat=39.9524&lon=-75.1636&radius=250&limit=10&language=en-US` | Hand-built from docs |
+| `pelias-reverse.json` | `GET https://pelias.example.com/v1/reverse?point.lat=39.9524&point.lon=-75.1636&layers=venue&size=10&boundary.circle.radius=0.25&lang=en` (Stadia Maps reuses it: `https://api.stadiamaps.com/geocoding/v1/reverse?…&api_key=…`) | Hand-built from docs |
 | `locationiq-nearby.json` | `GET https://us1.locationiq.com/v1/nearby?key=…&lat=39.9524&lon=-75.1636` | Hand-built from docs |
 
 ## Map providers (`map/`)

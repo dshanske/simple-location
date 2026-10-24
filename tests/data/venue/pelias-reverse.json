@@ -1,0 +1,104 @@
+{
+  "geocoding": {
+    "version": "0.2",
+    "attribution": "https://pelias.example.com/attribution",
+    "query": {
+      "size": 10,
+      "layers": ["venue"],
+      "point.lat": 39.9524,
+      "point.lon": -75.1636,
+      "boundary.circle.radius": 0.25
+    },
+    "engine": { "name": "Pelias", "author": "Mapzen", "version": "1.0" }
+  },
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-75.1635, 39.9527] },
+      "properties": {
+        "id": "way/31414402",
+        "gid": "openstreetmap:venue:way/31414402",
+        "layer": "venue",
+        "source": "openstreetmap",
+        "source_id": "way/31414402",
+        "name": "Philadelphia City Hall",
+        "housenumber": "1400",
+        "street": "John F. Kennedy Boulevard",
+        "postalcode": "19107",
+        "distance": 0.034,
+        "accuracy": "point",
+        "country": "United States",
+        "country_a": "USA",
+        "region": "Pennsylvania",
+        "region_a": "PA",
+        "county": "Philadelphia County",
+        "locality": "Philadelphia",
+        "neighbourhood": "Center City",
+        "category": ["government"],
+        "addendum": {
+          "osm": {
+            "website": "https://www.phila.gov/",
+            "wikipedia": "en:Philadelphia City Hall"
+          }
+        },
+        "label": "Philadelphia City Hall, Philadelphia, PA, USA"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-75.1641, 39.9531] },
+      "properties": {
+        "id": "4b0a1f7cf964a520a52123e3",
+        "gid": "foursquare:venue:4b0a1f7cf964a520a52123e3",
+        "layer": "venue",
+        "source": "foursquare",
+        "source_id": "4b0a1f7cf964a520a52123e3",
+        "name": "Rival Bros Coffee",
+        "housenumber": "1100",
+        "street": "Arch Street",
+        "postalcode": "19107",
+        "distance": 0.09,
+        "country": "United States",
+        "country_a": "USA",
+        "region": "Pennsylvania",
+        "region_a": "PA",
+        "locality": "Philadelphia",
+        "category": ["food", "food:cafe"],
+        "label": "Rival Bros Coffee, Philadelphia, PA, USA"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-75.1672, 39.9541] },
+      "properties": {
+        "id": "102087579",
+        "gid": "whosonfirst:venue:102087579",
+        "layer": "venue",
+        "source": "whosonfirst",
+        "source_id": "102087579",
+        "name": "Suburban Station",
+        "postalcode": "19103",
+        "distance": 0.31,
+        "country": "United States",
+        "country_a": "USA",
+        "region": "Pennsylvania",
+        "region_a": "PA",
+        "locality": "Philadelphia",
+        "category": ["transport", "transport:rail"],
+        "label": "Suburban Station, Philadelphia, PA, USA"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-75.1636, 39.9524] },
+      "properties": {
+        "gid": "openstreetmap:venue:node/1",
+        "layer": "venue",
+        "source": "openstreetmap",
+        "source_id": "node/1",
+        "country_a": "USA"
+      }
+    }
+  ]
+}

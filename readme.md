@@ -69,11 +69,11 @@ A new venue gets one of your venue types when one fits, such as Food for a resta
 
 Venue providers have different terms on what a site may keep. The plugin follows the maintainers' reading of them, below. It is your site and your decision: if you read a provider's terms differently, or aren't comfortable with them, choose another provider.
 
-* OpenStreetMap Overpass, Nominatim, LocationIQ and Geoapify - the place's details are kept: address, phone, categories and links. OpenStreetMap data is under the Open Database License, which allows this with credit to OpenStreetMap contributors.
-* Google, HERE and TomTom - only the place's identifier and links are kept, such as its Google Maps link and its own website. The name is the one you checked in with, the coordinates are your own, and the address is looked up with your geocoding providers. Their phone numbers, categories and addresses are not stored.
+* OpenStreetMap Overpass, Nominatim, LocationIQ, Geoapify and your own Pelias server - the place's details are kept: address, phone, categories and links. OpenStreetMap data is under the Open Database License, which allows this with credit to OpenStreetMap contributors; a Pelias server's other sources, such as Who's On First and Foursquare's open places, are open data too.
+* Google, HERE, TomTom and Stadia Maps - only the place's identifier and links are kept, such as its Google Maps link and its own website. The name is the one you checked in with, the coordinates are your own, and the address is looked up with your geocoding providers. Their phone numbers, categories and addresses are not stored.
 * A check-in from a Micropub client that doesn't name a venue provider is your own, and is kept as sent.
 
-A search for venues is remembered for 10 minutes, so a check-in app asking again from the same place doesn't use up your quota. This applies to the OpenStreetMap-based providers, Geoapify and HERE, whose terms allow it, but not to Google or TomTom.
+A search for venues is remembered for 10 minutes, so a check-in app asking again from the same place doesn't use up your quota. This applies to the OpenStreetMap-based providers, Geoapify, Pelias and HERE, whose terms allow it, but not to Google, TomTom or Stadia Maps.
 
 ## Weather
 
@@ -129,7 +129,7 @@ The plugin is designed to be extensible and anyone could write a plugin that wou
 
 * Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, TomTom, and Stadia Maps.
 * Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, which can use the public OpenStreetMap server, your own server or another host, Photon, HERE, MapQuest, Google, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses. Photon needs no key, and you can use komoot's public server or run your own
-* Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues. Providers include Google, HERE, TomTom, LocationIQ, Geoapify, Nominatim and OpenStreetMap Overpass, which needs no key.
+* Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues. Providers include Google, HERE, TomTom, LocationIQ, Geoapify, Stadia Maps, Nominatim, OpenStreetMap Overpass, which needs no key, and your own Pelias server.
 * Elevation Providers optionally derive the elevation from an API when not available. Elevation is used to estimate altitude and adjust estimated sunrise/sunset levels accordingly. Providers include GeoNames, Google, OpenRoute and Open Topo Data, whose public API needs no key and which you can also host yourself.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
 location of a three letter airport code, and three self-hosted location history services: [Compass](https://github.com/aaronpk/Compass), [Dawarich](https://dawarich.app/) and [GeoPulse](https://github.com/tess1o/geopulse).
@@ -158,10 +158,10 @@ Sign up with the service, create an API key, and enter it in the service's secti
 * [MapQuest](https://developer.mapquest.com/) - one API key for maps and addresses.
 * [Geoapify](https://www.geoapify.com/) - one API key for maps and addresses.
 * [TomTom](https://developer.tomtom.com/) - maps.
-* [Stadia Maps](https://stadiamaps.com/) - static maps need a paid plan.
+* [Stadia Maps](https://stadiamaps.com/) - static maps need a paid plan. The same key finds venues.
 * [OpenRouteService](https://openrouteservice.org/) - one API key for addresses and elevation.
 * [GeoNames](https://www.geonames.org/login) - addresses and elevation, with your username instead of a key. After signing up, enable the free web services on your GeoNames account page, or every lookup is refused.
-* [Pelias](https://pelias.io/) - addresses from a Pelias server: enter its URL, and its API key if it needs one.
+* [Pelias](https://pelias.io/) - addresses and venues from a Pelias server: enter its URL, and its API key if it needs one.
 * [OpenWeatherMap](https://openweathermap.org/api/one-call-3) - the plugin uses One Call API 3.0, which needs its own "One Call by Call" subscription, with a payment card, even for the free daily calls. A key without it is refused.
 * [Weatherbit](https://www.weatherbit.io/), [Weatherstack](https://weatherstack.com/), [Visual Crossing](https://www.visualcrossing.com/) and [Pirate Weather](https://pirateweather.net/) - an API key each.
 * [Xweather](https://www.xweather.com/) - a client ID and client secret. People who share their personal weather station with PWSWeather.com get a free contributor account. You can choose whether personal weather stations are used.
