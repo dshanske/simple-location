@@ -927,6 +927,53 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		);
 		$this->assertSame( 'Pennsylvania', $provider->display_name( array( 'region' => 'Pennsylvania' ) ) );
 
+		// A city that is its own region is named once (#240), as is a name repeated by the next part.
+		$this->assertSame(
+			'Berlin, DE',
+			$provider->display_name(
+				array(
+					'locality'     => 'Berlin',
+					'region'       => 'Berlin',
+					'region-code'  => 'BE',
+					'country-code' => 'DE',
+				)
+			)
+		);
+		$this->assertSame(
+			'Singapore',
+			$provider->display_name(
+				array(
+					'locality'     => 'Singapore',
+					'region'       => ' singapore',
+					'country-name' => 'Singapore',
+				)
+			)
+		);
+		$this->assertSame(
+			'Philadelphia, PA',
+			$provider->display_name(
+				array(
+					'name'         => 'Philadelphia',
+					'locality'     => 'Philadelphia',
+					'region'       => 'Pennsylvania',
+					'region-code'  => 'PA',
+					'country-code' => 'US',
+				)
+			)
+		);
+		$this->assertSame(
+			'Quebec, CA',
+			$provider->display_name(
+				array(
+					'locality'     => 'Quebec',
+					'region'       => 'Québec',
+					'region-code'  => 'QC',
+					'country-code' => 'CA',
+				)
+			),
+			'Accents are ignored.'
+		);
+
 		$filter = function ( $name ) {
 			return strtoupper( $name );
 		};

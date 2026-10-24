@@ -363,6 +363,44 @@ class LocationTaxonomyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A region with the same name as its locality, such as Berlin, is named once, in display names and links (#240).
+	 */
+	public function test_display_name_same_region() {
+		$terms = $this->hierarchy(
+			array(
+				'country-name' => 'Germany',
+				'country-code' => 'DE',
+				'region'       => 'Berlin',
+				'region-code'  => 'BE',
+				'locality'     => 'Berlin',
+			)
+		);
+		$this->assertSame(
+			'Berlin, Germany',
+			Location_Taxonomy::display_name(
+				$terms['locality'],
+				array(
+					'links' => false,
+					'flag'  => false,
+				)
+			)
+		);
+		$this->assertSame(
+			'Berlin, Germany',
+			Location_Taxonomy::display_name(
+				$terms['region'],
+				array(
+					'links' => false,
+					'flag'  => false,
+				)
+			),
+			'The region alone is still named.'
+		);
+		$link = Location_Taxonomy::get_location_link( $terms['locality'] );
+		$this->assertSame( 1, substr_count( $link, 'Berlin' ), $link );
+	}
+
+	/**
 	 * Term names are escaped in display names and links.
 	 */
 	public function test_display_name_escaped() {
