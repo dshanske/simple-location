@@ -36,6 +36,14 @@ class Post_Venue {
 	const UID_KEY = '_venue_uid';
 
 	/**
+	 * Meta key holding each other name of a venue, such as that of a venue merged into it, one per row.
+	 *
+	 * @since 6.1.0
+	 * @var string
+	 */
+	const ALIAS_KEY = '_venue_alias';
+
+	/**
 	 * Register the meta for venues.
 	 *
 	 * @since 5.0.0
@@ -1145,7 +1153,8 @@ class Post_Venue {
 	 * Returns the venue a check-in is at, if there is one.
 	 *
 	 * In order: a venue with the check-in's identifier ('uid'); a venue with one of its URLs as its URL or an
-	 * alternate URL; a venue with the same name whose radius, or MATCH_RADIUS if larger, includes the check-in.
+	 * alternate URL; a venue with the same name, or other name, whose radius, or MATCH_RADIUS if larger, includes
+	 * the check-in.
 	 *
 	 * @since 6.1.0
 	 *
@@ -1203,7 +1212,22 @@ class Post_Venue {
 					'title'       => $name,
 				)
 			);
-			foreach ( $named as $id ) {
+			// Other names, such as those of venues merged into one.
+			$aliased = get_posts(
+				array(
+					'post_type'   => 'venue',
+					'post_status' => 'any',
+					'fields'      => 'ids',
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are matched by their other names.
+					'meta_query'  => array(
+						array(
+							'key'   => self::ALIAS_KEY,
+							'value' => $name,
+						),
+					),
+				)
+			);
+			foreach ( array_unique( array_merge( $named, $aliased ) ) as $id ) {
 				$geo = get_post_geodata( $id );
 				if ( ! is_array( $geo ) || ! is_numeric( $geo['latitude'] ?? null ) || ! is_numeric( $geo['longitude'] ?? null ) ) {
 					continue;
@@ -1250,6 +1274,140 @@ class Post_Venue {
 			)
 		);
 		return empty( $match ) ? false : (int) $match[0];
+	}
+
+	/**
+	 * Merges venues into one.
+	 *
+	 * The posts and photos at each duplicate, and its child venues, move to the venue kept. The kept venue gains the
+	 * duplicates' identifiers, sources, URLs, names (as other names, for matching) and venue types, and keeps its own
+	 * title, website and location. The duplicates are deleted, and their addresses redirect to the kept venue; see
+	 * Sloc_Merge.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param int   $keep       Venue to keep.
+	 * @param int[] $duplicates Venues to merge into it. The kept venue, and anything that isn't a venue the user can
+	 *                          delete, is skipped.
+	 * @return int Number of venues merged.
+	 */
+	public static function merge_venues( $keep, $duplicates ) {
+		$keep = (int) $keep;
+		if ( 'venue' !== get_post_type( $keep ) || ! current_user_can( 'edit_post', $keep ) ) {
+			return 0;
+		}
+		$count = 0;
+		foreach ( array_unique( array_map( 'intval', (array) $duplicates ) ) as $duplicate ) {
+			if ( $duplicate === $keep || 'venue' !== get_post_type( $duplicate ) || ! current_user_can( 'delete_post', $duplicate ) ) {
+				continue;
+			}
+			$old_link = get_permalink( $duplicate );
+			$new_link = get_permalink( $keep );
+			Sloc_Merge::add_redirects( 'post', $keep, $duplicate, $old_link );
+
+			// Posts and photos at the duplicate, and the venue named in their check-ins.
+			$posts = get_posts(
+				array(
+					'post_type'   => get_post_types(),
+					'post_status' => 'any',
+					'numberposts' => -1,
+					'fields'      => 'ids',
+					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Run only when merging venues.
+					'meta_query'  => array(
+						array(
+							'key'   => 'venue_id',
+							'value' => $duplicate,
+						),
+					),
+				)
+			);
+			foreach ( $posts as $post_id ) {
+				update_post_meta( $post_id, 'venue_id', $keep );
+				$checkin = get_post_meta( $post_id, 'mf2_checkin', true );
+				if ( is_array( $checkin ) && isset( $checkin['properties']['url'] ) && in_array( $old_link, (array) $checkin['properties']['url'], true ) ) {
+					$checkin['properties']['url'] = array( $new_link );
+					if ( isset( $checkin['properties']['name'] ) ) {
+						$checkin['properties']['name'] = array( get_the_title( $keep ) );
+					}
+					update_post_meta( $post_id, 'mf2_checkin', $checkin );
+				}
+			}
+
+			// Child venues. A kept venue inside the duplicate takes the duplicate's place.
+			if ( (int) wp_get_post_parent_id( $keep ) === $duplicate ) {
+				wp_update_post(
+					array(
+						'ID'          => $keep,
+						'post_parent' => wp_get_post_parent_id( $duplicate ),
+					)
+				);
+			}
+			$children = get_posts(
+				array(
+					'post_type'   => 'venue',
+					'post_status' => 'any',
+					'numberposts' => -1,
+					'fields'      => 'ids',
+					'post_parent' => $duplicate,
+				)
+			);
+			foreach ( $children as $child ) {
+				if ( (int) $child !== $keep ) {
+					wp_update_post(
+						array(
+							'ID'          => $child,
+							'post_parent' => $keep,
+						)
+					);
+				}
+			}
+
+			// Identifiers and sources.
+			foreach ( get_post_meta( $duplicate, self::UID_KEY ) as $uid ) {
+				if ( ! in_array( $uid, get_post_meta( $keep, self::UID_KEY ), true ) ) {
+					add_post_meta( $keep, self::UID_KEY, $uid );
+				}
+			}
+			$sources = self::get_venue_sources( $keep );
+			$known   = wp_list_pluck( $sources, 'uid' );
+			foreach ( self::get_venue_sources( $duplicate ) as $source ) {
+				if ( ! in_array( $source['uid'] ?? null, $known, true ) ) {
+					$sources[] = $source;
+				}
+			}
+			if ( ! empty( $sources ) ) {
+				update_post_meta( $keep, 'venue_sources', $sources );
+			}
+
+			// The duplicate's website and other pages become other pages of the kept venue.
+			$urls = self::sanitize_alternate( array_merge( array( (string) get_post_meta( $duplicate, 'venue_url', true ) ), (array) get_post_meta( $duplicate, 'venue_alternate', true ) ) );
+			self::add_venue_sources(
+				$keep,
+				array(),
+				array(
+					'url'       => '',
+					'alternate' => $urls,
+				)
+			);
+
+			// The duplicate's names, so check-ins by them find the kept venue.
+			$aliases = get_post_meta( $keep, self::ALIAS_KEY );
+			foreach ( array_merge( array( get_the_title( $duplicate ) ), get_post_meta( $duplicate, self::ALIAS_KEY ) ) as $alias ) {
+				if ( is_string( $alias ) && '' !== $alias && get_the_title( $keep ) !== $alias && ! in_array( $alias, $aliases, true ) ) {
+					add_post_meta( $keep, self::ALIAS_KEY, $alias );
+					$aliases[] = $alias;
+				}
+			}
+
+			$types = wp_get_object_terms( $duplicate, 'venue_type', array( 'fields' => 'ids' ) );
+			if ( is_array( $types ) && ! empty( $types ) ) {
+				wp_set_object_terms( $keep, $types, 'venue_type', true );
+			}
+
+			wp_delete_post( $duplicate, true );
+			++$count;
+		}
+		return $count;
 	}
 
 	/**

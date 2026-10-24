@@ -64,6 +64,8 @@ A venue's website is shown on its page. Its pages on other sites, such as OpenSt
 
 A new venue gets one of your venue types when one fits, such as Food for a restaurant, but Simple Location doesn't create types. When a venue has no type, the venue editor offers one, which you can add.
 
+To combine duplicate venues, select them in the Venues list and choose Merge. On the next screen, pick the venue to keep; the oldest is picked by default. Its posts, photos, child venues, links and types then include those of the others, check-ins by the others' names or links find it, and the others are deleted, with their addresses redirecting to it.
+
 = What is kept from venue providers =
 
 Venue providers have different terms on what a site may keep. The plugin follows the maintainers' reading of them, below. It is your site and your decision: if you read a provider's terms differently, or aren't comfortable with them, choose another provider.
