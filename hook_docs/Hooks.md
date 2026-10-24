@@ -63,6 +63,10 @@
 - [`sloc_provider_error_message`](sloc_provider_error_message) Filters the one-line message about a provider error, or the provider's recovery.
 - [`sloc_provider_error_resolved`](sloc_provider_error_resolved) Fires when a provider with a recorded error answers again.
 
+## class-venue-provider-google.php
+
+- [`sloc_google_venue_fields`](sloc_google_venue_fields) Filters the place fields asked of Google. Fields beyond Nearby Search Pro, such as websiteUri, cost more.
+
 ## class-venue-provider.php
 
 - [`sloc_venue_category`](sloc_venue_category) Filters the shared category and location icon a provider's venue is given.

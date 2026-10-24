@@ -1,0 +1,215 @@
+{
+  "places": [
+    {
+      "id": "ChIJ-0aoJS7GxokRkHmKyYQ5yX0",
+      "types": [
+        "city_hall",
+        "tourist_attraction",
+        "local_government_office",
+        "point_of_interest",
+        "establishment"
+      ],
+      "formattedAddress": "1400 John F Kennedy Blvd, Philadelphia, PA 19107, USA",
+      "addressComponents": [
+        {
+          "longText": "1400",
+          "shortText": "1400",
+          "types": [
+            "street_number"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "John F Kennedy Boulevard",
+          "shortText": "John F Kennedy Blvd",
+          "types": [
+            "route"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "Center City",
+          "shortText": "Center City",
+          "types": [
+            "neighborhood",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "Philadelphia",
+          "shortText": "Philadelphia",
+          "types": [
+            "locality",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "Philadelphia County",
+          "shortText": "Philadelphia County",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "Pennsylvania",
+          "shortText": "PA",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "United States",
+          "shortText": "US",
+          "types": [
+            "country",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "19107",
+          "shortText": "19107",
+          "types": [
+            "postal_code"
+          ],
+          "languageCode": "en"
+        }
+      ],
+      "plusCode": {
+        "globalCode": "87F6XR3P+2H",
+        "compoundCode": "XR3P+2H Philadelphia, PA, USA"
+      },
+      "location": {
+        "latitude": 39.9526,
+        "longitude": -75.1635
+      },
+      "viewport": {
+        "low": {
+          "latitude": 39.95125,
+          "longitude": -75.16485
+        },
+        "high": {
+          "latitude": 39.95395,
+          "longitude": -75.16215
+        }
+      },
+      "googleMapsUri": "https://maps.google.com/?cid=9064283063419664784",
+      "displayName": {
+        "text": "Philadelphia City Hall",
+        "languageCode": "en"
+      },
+      "primaryType": "city_hall"
+    },
+    {
+      "id": "ChIJBVNy2S_GxokR1vB7SrIoCUo",
+      "types": [
+        "park",
+        "tourist_attraction",
+        "point_of_interest",
+        "establishment"
+      ],
+      "formattedAddress": "1 S 15th St, Philadelphia, PA 19102, USA",
+      "addressComponents": [
+        {
+          "longText": "1",
+          "shortText": "1",
+          "types": [
+            "street_number"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "South 15th Street",
+          "shortText": "S 15th St",
+          "types": [
+            "route"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "Center City",
+          "shortText": "Center City",
+          "types": [
+            "neighborhood",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "Philadelphia",
+          "shortText": "Philadelphia",
+          "types": [
+            "locality",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "Philadelphia County",
+          "shortText": "Philadelphia County",
+          "types": [
+            "administrative_area_level_2",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "Pennsylvania",
+          "shortText": "PA",
+          "types": [
+            "administrative_area_level_1",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "United States",
+          "shortText": "US",
+          "types": [
+            "country",
+            "political"
+          ],
+          "languageCode": "en"
+        },
+        {
+          "longText": "19102",
+          "shortText": "19102",
+          "types": [
+            "postal_code"
+          ],
+          "languageCode": "en"
+        }
+      ],
+      "plusCode": {
+        "globalCode": "87F6XR3P+5R",
+        "compoundCode": "XR3P+5R Philadelphia, PA, USA"
+      },
+      "location": {
+        "latitude": 39.9529,
+        "longitude": -75.1647
+      },
+      "viewport": {
+        "low": {
+          "latitude": 39.95155,
+          "longitude": -75.16605
+        },
+        "high": {
+          "latitude": 39.95425,
+          "longitude": -75.16335
+        }
+      },
+      "googleMapsUri": "https://maps.google.com/?cid=5352461837373378774",
+      "displayName": {
+        "text": "Dilworth Park",
+        "languageCode": "en"
+      },
+      "primaryType": "park"
+    }
+  ]
+}

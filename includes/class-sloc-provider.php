@@ -159,7 +159,47 @@ abstract class Sloc_Provider {
 		}
 
 		/* Disable development sites for now */
-		$response = wp_safe_remote_get( $fetch, $args );
+		return $this->parse_json( wp_safe_remote_get( $fetch, $args ), $query );
+	}
+
+	/**
+	 * Posts JSON to a remote endpoint and returns the JSON response, as fetch_json() does for a GET.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $url     URL.
+	 * @param array  $body    Request body, sent as JSON.
+	 * @param array  $headers Headers. Optional.
+	 * @return array|WP_Error Decoded response, or an error as fetch_json() returns them.
+	 */
+	public function post_json( $url, $body, $headers = array() ) {
+		$args = array(
+			'headers'             => array_merge(
+				array(
+					'Accept'       => 'application/json',
+					'Content-Type' => 'application/json',
+				),
+				(array) $headers
+			),
+			'body'                => wp_json_encode( $body ),
+			'timeout'             => 10,
+			'limit_response_size' => 1048576,
+			'redirection'         => 1,
+			'user-agent'          => 'Simple Location for WordPress',
+		);
+		return $this->parse_json( wp_safe_remote_post( $url, $args ), array() );
+	}
+
+	/**
+	 * Returns the decoded JSON of a response, or an error for a failed, refused or non-JSON response.
+	 *
+	 * @since 6.1.0 Split from fetch_json().
+	 *
+	 * @param array|WP_Error $response Response.
+	 * @param array          $query    Query parameters sent, whose credentials are removed from errors.
+	 * @return array|WP_Error Decoded response, or an error.
+	 */
+	protected function parse_json( $response, $query ) {
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
