@@ -1210,6 +1210,20 @@ class Geo_Base {
 	}
 
 	/**
+	 * Returns whether a value, rounded for display, is the value submitted.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param float|string $value     Value.
+	 * @param float|string $submitted Value submitted.
+	 * @param int          $precision Decimal places shown.
+	 * @return bool True if they are the same when rounded.
+	 */
+	public static function shown_as( $value, $submitted, $precision ) {
+		return abs( round( (float) $value, $precision ) - round( (float) $submitted, $precision ) ) < 1e-9;
+	}
+
+	/**
 	 * Saves the location and weather fields submitted from a metabox or the user profile.
 	 *
 	 * Callers verify the nonce and capability first.
@@ -1326,9 +1340,30 @@ class Geo_Base {
 			$weather['icon'] = basename( sanitize_text_field( $_POST['weather_icon'] ) );
 		}
 
-		if ( 'imperial' === $units && $convert ) {
+		// The editor shows each field rounded (#741). A field that wasn't changed keeps the value it was shown from: the
+		// stored one, or the exact one a lookup gave. So does a rounded value converted back from imperial units.
+		$imperial = ( 'imperial' === $units && $convert );
+		$stored   = Sloc_Weather_Data::get_object_weatherdata( $meta_type, $object_id );
+		$stored   = is_array( $stored ) ? $stored : array();
+		$shown    = $imperial ? Weather_Provider::metric_to_imperial( $stored ) : $stored;
+		$exact    = ( isset( $_POST['weather_exact'] ) && is_array( $_POST['weather_exact'] ) ) ? wp_unslash( $_POST['weather_exact'] ) : array();
+		$kept     = array();
+		foreach ( array_keys( Weather_Provider::FIELD_PRECISION ) as $field ) {
+			if ( ! isset( $weather[ $field ] ) ) {
+				continue;
+			}
+			$precision = Weather_Provider::field_precision( $field, $imperial );
+			if ( isset( $shown[ $field ], $stored[ $field ] ) && is_numeric( $shown[ $field ] ) && self::shown_as( $shown[ $field ], $weather[ $field ], $precision ) ) {
+				$kept[ $field ] = (float) $stored[ $field ];
+			} elseif ( isset( $exact[ $field ] ) && is_numeric( $exact[ $field ] ) && self::shown_as( $exact[ $field ], $weather[ $field ], $precision ) ) {
+				$weather[ $field ] = (float) $exact[ $field ];
+			}
+		}
+
+		if ( $imperial ) {
 			$weather = Weather_Provider::imperial_to_metric( $weather );
 		}
+		$weather = array_merge( $weather, $kept );
 
 		// The provider the weather was looked up from, for its credit. An empty or unknown provider removes it.
 		if ( ! empty( $weather ) && array_key_exists( 'weather_provider', $_POST ) ) {

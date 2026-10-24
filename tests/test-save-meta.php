@@ -256,6 +256,94 @@ class SaveMetaTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Weather fields shown rounded and saved unchanged keep their stored precision; a changed field is saved as
+	 * entered (#741).
+	 */
+	public function test_save_meta_weather_keeps_unchanged_precision() {
+		update_option( 'sloc_measurements', 'metric' );
+		$post_id = self::factory()->post->create();
+		set_post_weatherdata(
+			$post_id,
+			'',
+			array(
+				'temperature' => 12.34567,
+				'humidity'    => 55.55,
+				'winddegree'  => 247.567,
+				'visibility'  => 9876.54,
+			)
+		);
+		// As the editor shows them.
+		$_POST = array(
+			'temperature'        => '12.3',
+			'humidity'           => '56',
+			'winddegree'         => '248',
+			'weather_visibility' => '9877',
+		);
+		Geo_Base::save_meta( 'post', $post_id );
+		$weather = get_post_weatherdata( $post_id );
+		$this->assertEquals( 12.34567, $weather['temperature'] );
+		$this->assertEquals( 55.55, $weather['humidity'] );
+		$this->assertEquals( 247.567, $weather['winddegree'] );
+		$this->assertEquals( 9876.54, $weather['visibility'] );
+
+		$_POST['humidity'] = '60';
+		Geo_Base::save_meta( 'post', $post_id );
+		$this->assertEquals( 60, get_post_weatherdata( $post_id, 'humidity' ), 'Changed.' );
+		$this->assertEquals( 12.34567, get_post_weatherdata( $post_id, 'temperature' ) );
+	}
+
+	/**
+	 * In imperial units, unchanged fields aren't converted back from their rounded values, so they don't drift (#741).
+	 */
+	public function test_save_meta_weather_imperial_keeps_stored() {
+		update_option( 'sloc_measurements', 'imperial' );
+		$post_id = self::factory()->post->create();
+		set_post_weatherdata(
+			$post_id,
+			'',
+			array(
+				'temperature' => 21.37,
+				'pressure'    => 1013.25,
+			)
+		);
+		$shown = Weather_Provider::metric_to_imperial( get_post_weatherdata( $post_id ) );
+		$_POST = array(
+			'temperature' => (string) round( $shown['temperature'], 1 ),
+			'pressure'    => (string) round( $shown['pressure'], 2 ),
+		);
+		for ( $i = 0; $i < 3; $i++ ) {
+			Geo_Base::save_meta( 'post', $post_id );
+		}
+		$this->assertEquals( 21.37, get_post_weatherdata( $post_id, 'temperature' ) );
+		$this->assertEquals( 1013.25, get_post_weatherdata( $post_id, 'pressure' ) );
+	}
+
+	/**
+	 * A looked-up value is saved exactly, unless the rounded value shown for it was changed (#741).
+	 */
+	public function test_save_meta_weather_exact_lookup() {
+		update_option( 'sloc_measurements', 'metric' );
+		$post_id = self::factory()->post->create();
+		$_POST   = array(
+			'humidity'      => '55',
+			'windspeed'     => '3.1',
+			'weather_exact' => array(
+				'humidity'  => '55.4',
+				'windspeed' => '4.444',
+				'pressure'  => 'not a number',
+			),
+		);
+		Geo_Base::save_meta( 'post', $post_id );
+		$this->assertEquals( 55.4, get_post_weatherdata( $post_id, 'humidity' ) );
+		$this->assertEquals( 3.1, get_post_weatherdata( $post_id, 'windspeed' ), 'Changed from the 4.4 shown.' );
+		$this->assertArrayNotHasKey( 'pressure', get_post_weatherdata( $post_id ) );
+
+		$this->assertTrue( Geo_Base::shown_as( 55.4, '55', 0 ) );
+		$this->assertFalse( Geo_Base::shown_as( 55.5, '55', 0 ) );
+		$this->assertTrue( Geo_Base::shown_as( '29.921', 29.92, 2 ) );
+	}
+
+	/**
 	 * The save_post handler requires a valid nonce and permission to edit the post.
 	 */
 	public function test_save_post_meta_requires_nonce_and_capability() {

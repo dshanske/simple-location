@@ -43,14 +43,16 @@ if ( $imperial ) {
 			<label for="temperature">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'temperature', $imperial ) ); ?>
 			</label>
-			<input type="number" name="temperature" step="0.01" id="temperature" value="<?php echo esc_attr( sloc_round_value( $weather['temperature'] ?? '', 2 ) ); ?>" class="widefat" />
+			<input type="number" name="temperature" step="<?php echo esc_attr( Weather_Provider::field_step( 'temperature', $imperial ) ); ?>" id="temperature" value="<?php echo esc_attr( sloc_round_value( $weather['temperature'] ?? '', Weather_Provider::field_precision( 'temperature', $imperial ) ) ); ?>" class="widefat" />
+			<input type="hidden" name="weather_exact[temperature]" id="temperature_exact" value="" />
 		</p>
 
 		<p class="field-row">
 			<label for="humidity">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'humidity', $imperial ) ); ?>
 			</label>
-			<input type="number" min="0" max="100" name="humidity" id="humidity" step="0.01" value="<?php echo esc_attr( sloc_round_value( $weather['humidity'] ?? '', 2 ) ); ?>" class="widefat" />
+			<input type="number" min="0" max="100" name="humidity" id="humidity" step="<?php echo esc_attr( Weather_Provider::field_step( 'humidity', $imperial ) ); ?>" value="<?php echo esc_attr( sloc_round_value( $weather['humidity'] ?? '', Weather_Provider::field_precision( 'humidity', $imperial ) ) ); ?>" class="widefat" />
+			<input type="hidden" name="weather_exact[humidity]" id="humidity_exact" value="" />
 		</p>
 
 		<p class="field-row">
@@ -66,49 +68,56 @@ if ( $imperial ) {
 			<label for="winddegree">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'winddegree', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" max="360" name="winddegree" id="winddegree" step="0.01" value="<?php echo esc_attr( sloc_round_value( $weather['winddegree'] ?? '', 2 ) ); ?>" />
+			<input class="widefat" type="number" min="0" max="360" name="winddegree" id="winddegree" step="<?php echo esc_attr( Weather_Provider::field_step( 'winddegree', $imperial ) ); ?>" value="<?php echo esc_attr( sloc_round_value( $weather['winddegree'] ?? '', Weather_Provider::field_precision( 'winddegree', $imperial ) ) ); ?>" />
+			<input type="hidden" name="weather_exact[winddegree]" id="winddegree_exact" value="" />
 		</p>
 
 		<p class="field-row">
 			<label for="windspeed">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'windspeed', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" name="windspeed" id="windspeed" step="0.01" value="<?php echo esc_attr( sloc_round_value( $weather['windspeed'] ?? '', 2 ) ); ?>" />
+			<input class="widefat" type="number" min="0" name="windspeed" id="windspeed" step="<?php echo esc_attr( Weather_Provider::field_step( 'windspeed', $imperial ) ); ?>" value="<?php echo esc_attr( sloc_round_value( $weather['windspeed'] ?? '', Weather_Provider::field_precision( 'windspeed', $imperial ) ) ); ?>" />
+			<input type="hidden" name="weather_exact[windspeed]" id="windspeed_exact" value="" />
 		</p>
 
 		<p class="field-row">
 			<label for="pressure">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'pressure', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" name="pressure" id="pressure" step="0.01" value="<?php echo esc_attr( sloc_round_value( $weather['pressure'] ?? '', 2 ) ); ?>" />
+			<input class="widefat" type="number" name="pressure" id="pressure" step="<?php echo esc_attr( Weather_Provider::field_step( 'pressure', $imperial ) ); ?>" value="<?php echo esc_attr( sloc_round_value( $weather['pressure'] ?? '', Weather_Provider::field_precision( 'pressure', $imperial ) ) ); ?>" />
+			<input type="hidden" name="weather_exact[pressure]" id="pressure_exact" value="" />
 		</p>
 
 		<p class="field-row">
 			<label for="weather_visibility">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'visibility', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" name="weather_visibility" id="weather_visibility" step="0.01" value="<?php echo esc_attr( sloc_round_value( $weather['visibility'] ?? '', 2 ) ); ?>" />
+			<input class="widefat" type="number" min="0" name="weather_visibility" id="weather_visibility" step="<?php echo esc_attr( Weather_Provider::field_step( 'visibility', $imperial ) ); ?>" value="<?php echo esc_attr( sloc_round_value( $weather['visibility'] ?? '', Weather_Provider::field_precision( 'visibility', $imperial ) ) ); ?>" />
+			<input type="hidden" name="weather_exact[visibility]" id="weather_visibility_exact" value="" />
 		</p>
 
 		<p class="field-row">
 			<label for="cloudiness">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'cloudiness', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" max="100" name="cloudiness" id="cloudiness" step="0.01" value="<?php echo esc_attr( sloc_round_value( $weather['cloudiness'] ?? '', 2 ) ); ?>" />
+			<input class="widefat" type="number" min="0" max="100" name="cloudiness" id="cloudiness" step="<?php echo esc_attr( Weather_Provider::field_step( 'cloudiness', $imperial ) ); ?>" value="<?php echo esc_attr( sloc_round_value( $weather['cloudiness'] ?? '', Weather_Provider::field_precision( 'cloudiness', $imperial ) ) ); ?>" />
+			<input type="hidden" name="weather_exact[cloudiness]" id="cloudiness_exact" value="" />
 		</p>
 
 		<p class="field-row">
 			<label for="rain">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'rain', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" name="rain" step="0.01" id="rain" value="<?php echo esc_attr( sloc_round_value( $weather['rain'] ?? '', 2 ) ); ?>" />
+			<input class="widefat" type="number" min="0" name="rain" step="<?php echo esc_attr( Weather_Provider::field_step( 'rain', $imperial ) ); ?>" id="rain" value="<?php echo esc_attr( sloc_round_value( $weather['rain'] ?? '', Weather_Provider::field_precision( 'rain', $imperial ) ) ); ?>" />
+			<input type="hidden" name="weather_exact[rain]" id="rain_exact" value="" />
 		</p>
 
 		<p class="field-row">
 			<label for="snow">
 				<?php echo wp_kses_post( Weather_Provider::get_form_label( 'snow', $imperial ) ); ?>
 			</label>
-			<input class="widefat" type="number" min="0" name="snow" step="0.01" id="snow" value="<?php echo esc_attr( sloc_round_value( $weather['snow'] ?? '', 2 ) ); ?>" />
+			<input class="widefat" type="number" min="0" name="snow" step="<?php echo esc_attr( Weather_Provider::field_step( 'snow', $imperial ) ); ?>" id="snow" value="<?php echo esc_attr( sloc_round_value( $weather['snow'] ?? '', Weather_Provider::field_precision( 'snow', $imperial ) ) ); ?>" />
+			<input type="hidden" name="weather_exact[snow]" id="snow_exact" value="" />
 		</p>
 
 		<p>

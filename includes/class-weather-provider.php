@@ -904,6 +904,55 @@ abstract class Weather_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Decimal places the editor shows of each weather field, in metric and imperial units: those weather stations
+	 * usually report.
+	 *
+	 * Stored values keep their precision; see Geo_Base::save_meta().
+	 *
+	 * @since 6.1.0
+	 * @var int[][]
+	 */
+	const FIELD_PRECISION = array(
+		'temperature' => array( 1, 1 ), // 0.1 °C or °F.
+		'humidity'    => array( 0, 0 ), // 1 %.
+		'pressure'    => array( 1, 2 ), // 0.1 hPa or 0.01 inHg.
+		'winddegree'  => array( 0, 0 ), // 1 degree.
+		'windspeed'   => array( 1, 1 ), // 0.1 m/s or mph.
+		'windgust'    => array( 1, 1 ),
+		'cloudiness'  => array( 0, 0 ), // 1 %.
+		'visibility'  => array( 0, 1 ), // 1 m or 0.1 mile.
+		'rain'        => array( 1, 2 ), // 0.1 mm or 0.01 inch.
+		'snow'        => array( 1, 1 ), // 0.1 mm or inch.
+	);
+
+	/**
+	 * Returns the decimal places the editor shows of a weather field.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $field    Field, such as 'humidity'.
+	 * @param bool   $imperial Whether the units are imperial.
+	 * @return int Decimal places. Default 2.
+	 */
+	public static function field_precision( $field, $imperial = false ) {
+		return self::FIELD_PRECISION[ $field ][ $imperial ? 1 : 0 ] ?? 2;
+	}
+
+	/**
+	 * Returns the step of a weather field's number input, for its decimal places.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $field    Field, such as 'humidity'.
+	 * @param bool   $imperial Whether the units are imperial.
+	 * @return string Step, such as '1' or '0.1'.
+	 */
+	public static function field_step( $field, $imperial = false ) {
+		$precision = self::field_precision( $field, $imperial );
+		return 0 === $precision ? '1' : '0.' . str_repeat( '0', $precision - 1 ) . '1';
+	}
+
+	/**
 	 * Convert array of metric to Imperial Measurements.
 	 *
 	 * @since 6.1.0 Converts the rain rate too.

@@ -179,9 +179,20 @@ class TemplatesTest extends WP_UnitTestCase {
 		$this->edit_post( $post_id );
 		$weather = $this->render( 'weather-metabox.php' );
 		$this->assertValuesFitSteps( $weather );
-		$this->assertStringContainsString( 'value="247.57"', $weather );
-		$this->assertStringContainsString( 'value="33.33"', $weather );
-		$this->assertStringContainsString( 'value="12.35"', $weather );
+		// Each at the precision weather stations usually report.
+		$this->assertStringContainsString( 'name="winddegree" id="winddegree" step="1" value="248"', $weather );
+		$this->assertStringContainsString( 'name="cloudiness" id="cloudiness" step="1" value="33"', $weather );
+		$this->assertStringContainsString( 'name="humidity" id="humidity" step="1" value="56"', $weather );
+		$this->assertStringContainsString( 'step="0.1" id="temperature" value="12.3"', $weather );
+		$this->assertStringContainsString( 'step="0.1" value="1013.3"', $weather );
+		$this->assertStringContainsString( 'name="weather_exact[humidity]"', $weather );
+
+		update_option( 'sloc_measurements', 'imperial' );
+		$imperial = $this->render( 'weather-metabox.php' );
+		$this->assertValuesFitSteps( $imperial );
+		$this->assertStringContainsString( 'step="0.01" value="29.92"', $imperial, 'Pressure in inHg.' );
+		$this->assertSame( '0.01', Weather_Provider::field_step( 'dewpoint' ), 'Two places for fields without a precision.' );
+		$this->assertSame( 2, Weather_Provider::field_precision( 'pressure', true ) );
 
 		$location = $this->render( 'loc-metabox.php' );
 		$this->assertValuesFitSteps( $location );

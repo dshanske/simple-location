@@ -3,14 +3,33 @@ jQuery( document ).ready( function( $ ) {
 	let weather = 1;
 
 	/**
-	 * Rounds a looked-up number to the two decimal places the editor's number fields allow (#741).
+	 * Rounds a looked-up number to the decimal places its field's step allows (#741).
 	 *
-	 * @param {*} value Value from a lookup.
+	 * @param {*}      value  Value from a lookup.
+	 * @param {Object} $field Number field.
 	 * @return {*} The number, rounded, or the value unchanged if it isn't a number.
 	 */
-	function fieldValue( value ) {
+	function fieldValue( value, $field ) {
 		const number = parseFloat( value );
-		return isNaN( number ) ? value : Math.round( number * 100 ) / 100;
+		if ( isNaN( number ) ) {
+			return value;
+		}
+		const step = String( $field.attr( 'step' ) || '1' );
+		const point = step.indexOf( '.' );
+		return number.toFixed( -1 === point ? 0 : step.length - point - 1 );
+	}
+
+	/**
+	 * Fills a weather field with a looked-up value, rounded for display, and keeps the exact value, which is
+	 * saved unless the field is changed (#741).
+	 *
+	 * @param {string} id    Field ID.
+	 * @param {*}      value Value from a lookup.
+	 */
+	function setWeatherField( id, value ) {
+		const $field = $( '#' + id );
+		$field.val( fieldValue( value, $field ) );
+		$( '#' + id + '_exact' ).val( isNaN( parseFloat( value ) ) ? '' : value );
 	}
 	const originalDate = DateTime.fromObject(
 		{
@@ -220,7 +239,7 @@ jQuery( document ).ready( function( $ ) {
 						$( '#hide-map' ).html( response.map_return );
 					}
 					if ( 'altitude' in response && ( '' === $( '#altitude' ).val() ) ) {
-						$( '#altitude' ).val( fieldValue( response.altitude ) );
+						$( '#altitude' ).val( fieldValue( response.altitude, $( '#altitude' ) ) );
 					}
 
 					if ( 'venue_id' in response && ( '' === $( '#venue_id' ).val() ) ) {
@@ -247,35 +266,35 @@ jQuery( document ).ready( function( $ ) {
 					if ( 'weather' in response ) {
 						weather = response.weather;
 						if ( ( 'temperature' in weather ) && ( '' === $( '#temperature' ).val() ) ) {
-							$( '#temperature' ).val( fieldValue( weather.temperature ) );
+							setWeatherField( 'temperature', weather.temperature );
 						}
 						if ( ( 'humidity' in weather ) && ( '' === $( '#humidity' ).val() ) ) {
-							$( '#humidity' ).val( fieldValue( weather.humidity ) );
+							setWeatherField( 'humidity', weather.humidity );
 						}
 						if ( ( 'code' in weather ) && ( 'none' === $( '#weather_code' ).val() ) ) {
 							$( '#weather_code' ).val( weather.code ).change();
 							$( '#weather-label' ).text( weather.summary );
 						}
 						if ( ( 'pressure' in weather ) && ( '' === $( '#pressure' ).val() ) ) {
-							$( '#pressure' ).val( fieldValue( weather.pressure ) );
+							setWeatherField( 'pressure', weather.pressure );
 						}
 						if ( ( 'cloudiness' in weather ) && ( '' === $( '#cloudiness' ).val() ) ) {
-							$( '#cloudiness' ).val( fieldValue( weather.cloudiness ) );
+							setWeatherField( 'cloudiness', weather.cloudiness );
 						}
 						if ( ( 'rain' in weather ) && ( '' === $( '#rain' ).val() ) ) {
-							$( '#rain' ).val( fieldValue( weather.rain ) );
+							setWeatherField( 'rain', weather.rain );
 						}
 						if ( ( 'snow' in weather ) && ( '' === $( '#snow' ).val() ) ) {
-							$( '#snow' ).val( fieldValue( weather.snow ) );
+							setWeatherField( 'snow', weather.snow );
 						}
 						if ( ( 'visibility' in weather ) && ( '' === $( '#weather_visibility' ).val() ) ) {
-							$( '#weather_visibility' ).val( fieldValue( weather.visibility ) );
+							setWeatherField( 'weather_visibility', weather.visibility );
 						}
 						if ( 'windspeed' in weather && ( '' === $( '#windspeed' ).val() ) ) {
-							$( '#windspeed' ).val( fieldValue( weather.windspeed ) );
+							setWeatherField( 'windspeed', weather.windspeed );
 						}
 						if ( 'winddegree' in weather && ( '' === $( '#winddegree' ).val() ) ) {
-							$( '#winddegree' ).val( fieldValue( weather.winddegree ) );
+							setWeatherField( 'winddegree', weather.winddegree );
 						}
 						if ( 'units' in weather ) {
 							$( '#units' ).val( weather.units );
