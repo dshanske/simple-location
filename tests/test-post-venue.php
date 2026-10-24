@@ -562,7 +562,7 @@ class PostVenueTest extends WP_UnitTestCase {
 		$this->assertSame( 'venue', $venue->post_type );
 		$this->assertSame( 'publish', $venue->post_status );
 		$this->assertSame( 'Corner Cafe', $venue->post_title );
-		$this->assertStringStartsWith( 'corner-cafe-new-york-new-york-', $venue->post_name );
+		$this->assertStringStartsWith( 'corner-cafe-new-york-united-states', $venue->post_name, 'New York is named once (#240).' );
 		$this->assertStringNotContainsString( '%', $venue->post_name, 'No encoded flag emoji.' );
 		$this->assertSame( 'https://cafe.example.com/', get_post_meta( $venue_id, 'venue_url', true ) );
 		$this->assertSame( '1 Main St', get_post_meta( $venue_id, 'venue_street_address', true ) );

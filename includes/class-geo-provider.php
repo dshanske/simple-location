@@ -130,7 +130,25 @@ abstract class Geo_Provider extends Sloc_Provider {
 	abstract public function geocode( $address );
 
 	/**
+	 * Returns whether two place names are the same, ignoring case and surrounding spaces, such as a city and its region.
+	 *
+	 * @since 6.1.0
+	 *
+	 * @param string $name  Name.
+	 * @param string $other Other name.
+	 * @return bool Whether they are the same.
+	 */
+	public static function same_name( $name, $other ) {
+		$name  = trim( (string) $name );
+		$other = trim( (string) $other );
+		return '' !== $name && 0 === strcasecmp( remove_accents( $name ), remove_accents( $other ) );
+	}
+
+	/**
 	 * Generate Display Name for a Reverse Address Lookup.
+	 *
+	 * @since 1.0.0
+	 * @since 6.1.0 A region with the same name as the locality, such as Berlin, and repeated names are left out (#240).
 	 *
 	 * @param array $reverse Array of MF2 Address Properties.
 	 * @return string|boolean Return Display Name or False if Failed.
@@ -164,6 +182,9 @@ abstract class Geo_Provider extends Sloc_Provider {
 		$text   = array_filter( $text );
 		if ( empty( $text ) ) {
 			$text[] = $reverse['region'] ?? '';
+		} elseif ( self::same_name( $reverse['locality'] ?? '', $reverse['region'] ?? '' ) ) {
+			// A city that is its own region, such as Berlin, is named once.
+			$text[] = '';
 		} elseif ( array_key_exists( 'region-code', $reverse ) ) {
 				$text[] = $reverse['region-code'];
 		} else {
@@ -176,8 +197,15 @@ abstract class Geo_Provider extends Sloc_Provider {
 		} else {
 			$text[] = $reverse['country-name'] ?? '';
 		}
-		$text   = array_filter( $text );
-		$return = join( ', ', $text );
+		$text = array_filter( $text );
+		// Leave out a name that repeats the one before it, such as a venue named for its city.
+		$names = array();
+		foreach ( $text as $name ) {
+			if ( empty( $names ) || ! self::same_name( $name, end( $names ) ) ) {
+				$names[] = $name;
+			}
+		}
+		$return = join( ', ', $names );
 		/** This filter is documented in includes/class-geo-provider.php */
 		return apply_filters( 'location_display_name', $return, $reverse ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
 	}

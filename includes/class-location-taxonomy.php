@@ -1122,6 +1122,7 @@ final class Location_Taxonomy {
 	 *
 	 * @since 4.4.0
 	 * @since 6.0.0 Term names and links are escaped.
+	 * @since 6.1.0 A parent with the same name as its child, such as the region of Berlin, is left out (#240).
 	 *
 	 * @param int|WP_Term $term_id Term ID or object.
 	 * @param array       $args {
@@ -1156,9 +1157,13 @@ final class Location_Taxonomy {
 			$return[] = esc_html( $term->name );
 		}
 		while ( 0 !== $term->parent ) {
-			$term = get_term( $term->parent, 'location' );
+			$child = $term->name;
+			$term  = get_term( $term->parent, 'location' );
 			if ( ! $term instanceof WP_Term ) {
 				break;
+			}
+			if ( Geo_Provider::same_name( $term->name, $child ) ) {
+				continue;
 			}
 			if ( 0 === $term->parent ) {
 				$country = get_term_meta( $term->term_id, 'country', true );
@@ -1188,6 +1193,7 @@ final class Location_Taxonomy {
 	 *
 	 * @since 4.4.14
 	 * @since 6.0.0 Term names and the link are escaped.
+	 * @since 6.1.0 A parent with the same name as its child is left out (#240).
 	 *
 	 * @param int|WP_Term $term_id Term ID or object.
 	 * @return string|WP_Error HTML link, an empty string if there is no term, or an error.
@@ -1210,9 +1216,13 @@ final class Location_Taxonomy {
 			$return[] = esc_html( $term->name );
 		}
 		while ( 0 !== $term->parent ) {
-			$term = get_term( $term->parent, 'location' );
+			$child = $term->name;
+			$term  = get_term( $term->parent, 'location' );
 			if ( ! $term instanceof WP_Term ) {
 				break;
+			}
+			if ( Geo_Provider::same_name( $term->name, $child ) ) {
+				continue;
 			}
 			if ( 0 === $term->parent ) {
 				$country = get_term_meta( $term->term_id, 'country', true );
