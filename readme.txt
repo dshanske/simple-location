@@ -3,7 +3,7 @@ Contributors: dshanske
 Tags: geolocation, timezones, maps, location, weather
 Requires at least: 6.2
 Tested up to: 7.1
-Stable tag: 6.0.0
+Stable tag: 6.1.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -463,11 +463,36 @@ Developers can refresh the station, airport and airline files with `composer upd
 
 == Upgrade Notice ==
 
+= 6.1.0 =
+
+The Met Office provider has been removed; if you used it, choose another weather provider. Venues found with Google, HERE, TomTom, Foursquare or Stadia Maps now keep only their identifier and links, as those providers' terms require. Many new providers, fallback providers, and venue and location merging.
+
 = 6.0.0 =
 
 Requires PHP 7.4, WordPress 6.2 or ClassicPress 2.7. The Bing providers and MapQuest elevation have been removed because their services were retired; if you used one, choose another provider in Settings. Many fixes to location visibility and permissions.
 
 == Changelog ==
+
+= 6.1.0 ( 2026-10-24 ) =
+* Add weather providers: Open-Meteo, MET Norway, Environment Canada and WeeWX stations (beta); remove the Met Office provider
+* Add Photon geocoding, Open Topo Data elevation, Stadia Maps and TileServer GL maps, and Dawarich and GeoPulse location providers; set your own Nominatim server
+* Try fallback weather, geocoding, elevation and venue providers in order, and tell administrators when a provider fails
+* Credit weather providers where their weather is shown
+* Calculate wind chill, heat index, dew point or humidity, and cloud cover when a provider doesn't give them, and estimate the sky from a station's sunlight
+* Custom static maps: choose provider and style, sign URLs, store images on the site, and set format, markers, scale bar, overlays and credit
+* Every map provider: image format and marker settings, high-density archive maps, clickable archive markers, map style families and dark mode
+* Add the [sloc_map] shortcode for maps of several places and tracks, and Tools > Location Track
+* Add temperature and weather views of archives, and a GeoJSON feed of post locations
+* Venues: search within a set radius, nearest first, with shared categories; new providers Overpass, Geoapify, HERE, TomTom, Pelias, Stadia Maps and Foursquare; Google uses Places API (New)
+* Venues: match check-ins to existing venues by identifier, address or name, keep only what each provider's terms allow, show and edit a venue's website and other pages, suggest venue types, and cache searches
+* Merge duplicate venues and locations from their lists
+* Let a venue set the visibility of posts made there, and add an about URL to locations
+* Enter Plus Codes in the location box, and accept GeoJSON and geo URIs on the user location endpoint
+* Look up the typed address when the browser doesn't give its location
+* Show weather in the editor at the precision stations report, keeping stored values
+* Fix clearing the location in the editor, keep the chosen venue after a lookup, and keep the loading spinner until a lookup ends
+* Save and read a latitude, longitude, altitude, speed or heading of 0
+* Fix distances for identical points, keep New York, NY, and name a locality and region once
 
 = 6.0.0 ( 2026-10-18 ) =
 * Requires ClassicPress 2.7; tested with WordPress 7.1
