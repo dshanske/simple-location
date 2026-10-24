@@ -845,7 +845,7 @@ class PostVenueTest extends WP_UnitTestCase {
 	public function test_storage() {
 		Venue_Provider_Sloc_Test::reset();
 		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array() ), 'A check-in without a provider is the user\'s own.' );
-		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array( 'provider' => 'foursquare' ) ), 'An unknown provider.' );
+		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array( 'provider' => 'no_such_provider' ) ), 'An unknown provider.' );
 		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array( 'provider' => array( 'google' ) ) ) );
 		$this->assertSame( Venue_Provider::STORAGE_FULL, Post_Venue::storage( array( 'provider' => 'sloc_test' ) ) );
 		Venue_Provider_Sloc_Test::$storage = Venue_Provider::STORAGE_REFERENCE;
