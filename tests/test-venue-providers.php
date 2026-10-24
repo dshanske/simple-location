@@ -71,7 +71,7 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	 */
 	public function test_providers_registered() {
 		$providers = Loc_Config::venue_providers();
-		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass' ) as $slug ) {
+		foreach ( array( 'google', 'locationiq', 'nominatim', 'overpass', 'geoapify' ) as $slug ) {
 			$this->assertArrayHasKey( $slug, $providers );
 			$this->assertNotEmpty( $providers[ $slug ]['name'], $slug );
 			$this->assertNotEmpty( $providers[ $slug ]['url'], $slug );
@@ -638,6 +638,70 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array() );
 		$this->assertSame( array( 'items' => array() ), ( new Venue_Provider_Overpass() )->reverse_lookup(), 'No request without a location.' );
 		$this->assertEmpty( $this->http_requests );
+	}
+
+	/**
+	 * Geoapify's Places API finds places within the radius, with their addresses and categories (#710).
+	 */
+	public function test_geoapify() {
+		$fixture = $this->fixture( 'venue/geoapify-places.json' );
+		$this->mock_http( array( 'api.geoapify.com/v2/places' => array( 'body' => $fixture ) ) );
+		$result = $this->provider( 'Venue_Provider_Geoapify', array( 'api' => 'KEY' ) )->reverse_lookup();
+
+		$request = $this->last_request();
+		$this->assertSame( 'https://api.geoapify.com/v2/places', $request['base'] );
+		$this->assertSame( 'KEY', $request['query']['apiKey'] );
+		$this->assertSame( 'circle:-75.1636,39.9524,' . Venue_Provider::DEFAULT_RADIUS, $request['query']['filter'], 'Longitude first.' );
+		$this->assertSame( 'proximity:-75.1636,39.9524', $request['query']['bias'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_LIMIT, $request['query']['limit'] );
+		$this->assertStringContainsString( 'catering', $request['query']['categories'] );
+		$this->assertSame( 'en', $request['query']['lang'] );
+
+		$items = $result['items'];
+		$this->assertSame( array( 'Philadelphia City Hall', 'Rival Bros Coffee', 'Suburban Station' ), wp_list_pluck( $items, 'name' ), 'Places without a name are left out.' );
+		$this->assertPhiladelphia( $items[0] );
+		$this->assertEasternTime( $items[0] );
+		$this->assertSame( '1400 John F. Kennedy Boulevard', $items[0]['street-address'] );
+		$this->assertSame( 'Center City', $items[0]['extended-address'] );
+		$this->assertSame( 'https://www.phila.gov/', $items[0]['url'] );
+		$this->assertSame( 39.9527, $items[0]['latitude'] );
+		$this->assertSame( array( 'government', 'food', 'transport' ), wp_list_pluck( $items, 'venue-category' ) );
+		$this->assertSame( 'fa-train', $items[2]['icon'] );
+		$this->assertSame( '+1 215 555 0100', $items[1]['tel'] );
+		$this->assertContains( 'catering.cafe', $items[1]['category'] );
+	}
+
+	/**
+	 * Geoapify needs a key, passes on refused requests, and maps its categories from the most specific (#710).
+	 */
+	public function test_geoapify_errors_and_categories() {
+		$this->mock_http( array() );
+		$this->assertSame( 'missing_api_key', $this->provider( 'Venue_Provider_Geoapify', array( 'api' => '' ) )->reverse_lookup()->get_error_code() );
+		$this->assertEmpty( $this->http_requests );
+
+		$this->mock_http(
+			array(
+				'api.geoapify.com' => array(
+					'code' => 401,
+					'body' => array(
+						'statusCode' => 401,
+						'error'      => 'Unauthorized',
+						'message'    => 'Invalid apiKey',
+					),
+				),
+			)
+		);
+		$error = $this->provider( 'Venue_Provider_Geoapify', array( 'api' => 'KEY' ) )->reverse_lookup();
+		$this->assertSame( 401, $error->get_error_data()['status'] );
+		$this->assertStringNotContainsString( 'KEY', $error->get_error_message() );
+
+		$this->mock_http( array( 'api.geoapify.com' => array( 'body' => array( 'features' => array() ) ) ) );
+		$this->assertSame( array( 'items' => array() ), $this->provider( 'Venue_Provider_Geoapify', array( 'api' => 'KEY' ) )->reverse_lookup() );
+
+		$this->assertSame( 'drink', Venue_Provider_Geoapify::geoapify_category( array( 'catering', 'catering.pub' ) )['category'] );
+		$this->assertSame( 'lodging', Venue_Provider_Geoapify::geoapify_category( array( 'accommodation.hotel' ) )['category'] );
+		$this->assertSame( 'fa-plane', Venue_Provider_Geoapify::geoapify_category( array( 'airport.international' ) )['icon'] );
+		$this->assertSame( 'other', Venue_Provider_Geoapify::geoapify_category( array( 'building', 'officer' ) )['category'], 'Whole keys only.' );
 	}
 
 	/**

@@ -1,0 +1,147 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Philadelphia City Hall",
+        "country": "United States",
+        "country_code": "us",
+        "state": "Pennsylvania",
+        "state_code": "PA",
+        "county": "Philadelphia County",
+        "city": "Philadelphia",
+        "postcode": "19107",
+        "district": "Center City",
+        "street": "John F. Kennedy Boulevard",
+        "housenumber": "1400",
+        "lon": -75.1635,
+        "lat": 39.9527,
+        "formatted": "Philadelphia City Hall, 1400 John F. Kennedy Boulevard, Philadelphia, PA 19107, United States of America",
+        "address_line1": "Philadelphia City Hall",
+        "address_line2": "1400 John F. Kennedy Boulevard, Philadelphia, PA 19107, United States of America",
+        "categories": [
+          "building",
+          "building.public_and_civil",
+          "office",
+          "office.government",
+          "tourism",
+          "tourism.sights"
+        ],
+        "details": [
+          "details.wiki_and_media"
+        ],
+        "datasource": {
+          "sourcename": "openstreetmap",
+          "attribution": "© OpenStreetMap contributors",
+          "license": "Open Database License",
+          "url": "https://www.openstreetmap.org/copyright",
+          "raw": {
+            "name": "Philadelphia City Hall",
+            "osm_id": 31414402,
+            "osm_type": "w",
+            "website": "https://www.phila.gov/"
+          }
+        },
+        "website": "https://www.phila.gov/",
+        "distance": 34,
+        "place_id": "51a3…city-hall"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.1635,
+          39.9527
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rival Bros Coffee",
+        "country": "United States",
+        "country_code": "us",
+        "state": "Pennsylvania",
+        "state_code": "PA",
+        "city": "Philadelphia",
+        "postcode": "19102",
+        "street": "Sansom Street",
+        "housenumber": "1528",
+        "lon": -75.1642,
+        "lat": 39.9531,
+        "formatted": "Rival Bros Coffee, 1528 Sansom Street, Philadelphia, PA 19102, United States of America",
+        "categories": [
+          "catering",
+          "catering.cafe",
+          "catering.cafe.coffee_shop"
+        ],
+        "contact": {
+          "phone": "+1 215 555 0100"
+        },
+        "datasource": {
+          "sourcename": "openstreetmap",
+          "raw": {
+            "osm_id": 4567890123,
+            "osm_type": "n"
+          }
+        },
+        "distance": 92,
+        "place_id": "51b4…coffee"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.1642,
+          39.9531
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Suburban Station",
+        "country": "United States",
+        "country_code": "us",
+        "state": "Pennsylvania",
+        "state_code": "PA",
+        "city": "Philadelphia",
+        "postcode": "19103",
+        "lon": -75.167,
+        "lat": 39.9539,
+        "categories": [
+          "public_transport",
+          "public_transport.train"
+        ],
+        "distance": 330,
+        "place_id": "51c5…station"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.167,
+          39.9539
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "country": "United States",
+        "country_code": "us",
+        "lon": -75.1636,
+        "lat": 39.9524,
+        "categories": [
+          "leisure"
+        ],
+        "place_id": "unnamed"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.1636,
+          39.9524
+        ]
+      }
+    }
+  ]
+}
