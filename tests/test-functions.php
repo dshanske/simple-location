@@ -108,14 +108,25 @@ class FunctionsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The distance from a point to itself is effectively zero, never NAN.
-	 *
-	 * The spherical law of cosines loses precision at short distances, so allow up to a meter.
+	 * The distance from a point to itself is zero, never NAN, anywhere (#717), and short distances are accurate.
 	 */
 	public function test_geo_distance_same_point() {
 		$distance = geo_distance( 39.9526, -75.1652, 39.9526, -75.1652 );
 		$this->assertFalse( is_nan( $distance ), 'geo_distance returned NAN for identical points' );
 		$this->assertEqualsWithDelta( 0, $distance, 1 );
+
+		// Points where the law of cosines gave NAN.
+		mt_srand( 717 );
+		for ( $i = 0; $i < 2000; $i++ ) {
+			$lat = mt_rand( -8999999, 8999999 ) / 100000;
+			$lng = mt_rand( -17999999, 17999999 ) / 100000;
+			$this->assertSame( 0.0, geo_distance( $lat, $lng, $lat, $lng ), "$lat, $lng" );
+			$this->assertTrue( geo_in_radius( $lat, $lng, $lat, $lng, 1 ), "$lat, $lng" );
+		}
+
+		// About 1.1 meters: 0.00001 degrees of latitude.
+		$this->assertEqualsWithDelta( 1.11, geo_distance( 40.0, -75.0, 40.00001, -75.0 ), 0.01 );
+		$this->assertEqualsWithDelta( M_PI * 6378100, geo_distance( 0, 0, 0, 180 ), 1, 'Half the world.' );
 	}
 
 	/**

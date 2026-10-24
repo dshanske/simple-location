@@ -289,13 +289,16 @@ function sloc_get_type_from_object( $object ) {
  * @return float $meters Distance in meters between the two points.
  *
  * @since 1.0.0
+ * @since 6.1.0 Uses the haversine formula, so identical or very close points don't give NaN (#717).
  */
 function geo_distance( $lat1, $lng1, $lat2, $lng2 ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- Public API that predates the prefix rule; renaming it would break sites that use it. To be revisited with namespacing.
-		$lat1 = floatval( $lat1 );
-		$lng1 = floatval( $lng1 );
-		$lat2 = floatval( $lat2 );
-		$lng2 = floatval( $lng2 );
-		return ( 6378100 * acos( cos( deg2rad( $lat1 ) ) * cos( deg2rad( $lat2 ) ) * cos( deg2rad( $lng2 ) - deg2rad( $lng1 ) ) + sin( deg2rad( $lat1 ) ) * sin( deg2rad( $lat2 ) ) ) );
+		$lat1 = deg2rad( floatval( $lat1 ) );
+		$lat2 = deg2rad( floatval( $lat2 ) );
+		$dlat = $lat2 - $lat1;
+		$dlng = deg2rad( floatval( $lng2 ) - floatval( $lng1 ) );
+		// The haversine formula, which stays accurate for points close together or the same.
+		$a = pow( sin( $dlat / 2 ), 2 ) + cos( $lat1 ) * cos( $lat2 ) * pow( sin( $dlng / 2 ), 2 );
+		return 6378100 * 2 * atan2( sqrt( $a ), sqrt( max( 0, 1 - $a ) ) );
 }
 
 /**
