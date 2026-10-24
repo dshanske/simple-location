@@ -350,6 +350,8 @@ However, now that the WordPress apps no longer support location, this may be moo
 
 Chrome Users: Retrieves the location using the HTML5 geolocation API(available in your browser) will not work on Chrome if your website is not secure(https). This is a Chrome decision to ensure safe control of personal data.
 
+When your browser doesn't give its location, because it can't or you didn't allow it, the address you typed in the location box is looked up instead. Type an address, or the latitude and longitude, and look it up again.
+
 You can take advantage of the other built-in location providers, for example, one uses the location of the user or create your own location provider as a separate plugin.
 
 = How can I update the location of my user profile? =

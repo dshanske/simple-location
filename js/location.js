@@ -100,9 +100,9 @@ jQuery( document ).ready( function( $ ) {
 		if ( 'HTML5' === slocOptions.lookup ) { // eslint-disable-line camelcase
 			if ( ( '' === $( '#latitude' ).val() ) && ( '' === $( '#longitude' ).val() ) ) {
 				if ( navigator.geolocation ) {
-					navigator.geolocation.getCurrentPosition( setLocation, error, options );
+					navigator.geolocation.getCurrentPosition( setLocation, geolocationFailed, options );
 				} else {
-					alert( 'Geolocation is not supported by this browser.' );
+					geolocationFailed( null );
 				}
 			} else {
 				reverseLookup();
@@ -383,6 +383,53 @@ jQuery( document ).ready( function( $ ) {
 
 	function error( err ) {
 		alert( err.message );
+	}
+
+	/**
+	 * Looks up the address typed when the browser doesn't give its location, because it can't or wasn't allowed to (#99).
+	 *
+	 * @param {?Object} err The browser's error, or null if it has no geolocation.
+	 */
+	function geolocationFailed( err ) {
+		const address = $.trim( $( '#address' ).val() || '' );
+		if ( '' === address ) {
+			hideLoadingSpinner();
+			alert( ( err && err.message ? err.message + ' ' : '' ) + 'Your browser did not give its location. Type an address, or the latitude and longitude, and look it up again.' );
+			return;
+		}
+		geocodeAddress( address );
+	}
+
+	/**
+	 * Finds the coordinates of an address, then looks up the rest of the location from them, keeping the address.
+	 *
+	 * @param {string} address Address.
+	 */
+	function geocodeAddress( address ) {
+		$.ajax( {
+			type: 'GET',
+			url: slocOptions.api_url + 'geocode/',
+			beforeSend( xhr ) {
+				xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
+			},
+			data: {
+				address,
+			},
+			success( response ) {
+				if ( response && ( 'latitude' in response ) && ( 'longitude' in response ) ) {
+					$( '#latitude' ).val( response.latitude );
+					$( '#longitude' ).val( response.longitude );
+					reverseLookup();
+				} else {
+					hideLoadingSpinner();
+					alert( 'The address was not found.' );
+				}
+			},
+			error( request ) {
+				hideLoadingSpinner();
+				alert( request.responseJSON && request.responseJSON.message ? request.responseJSON.message : 'The address was not found.' );
+			},
+		} );
 	}
 
 	$( document )
