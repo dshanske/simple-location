@@ -1582,8 +1582,8 @@ class MapProvidersTest extends WP_UnitTestCase {
 		);
 		$map   = $this->provider( 'Map_Provider_StaticMap', array( 'api' => 'https://maps.example.org/' ) );
 		$posts = array(
-			self::factory()->post->create( array( 'post_title' => 'City Hall' ) ),
-			self::factory()->post->create( array( 'post_title' => 'Independence "Hall" & Park' ) ),
+			$this->post_at_venue( 'City Hall' ),
+			$this->post_at_venue( 'Independence "Hall" & Park' ),
 		);
 		$html = $map->get_archive_map_html( $this->locations, $posts );
 		$this->assertMatchesRegularExpression( '#^<div class="sloc-archive-map"><img class="archive-map sloc-map" src="[^"]+" srcset="[^"]+ 1x, [^"]+ 2x" alt="Map of the locations listed on this page" /><a [^>]+></a><a [^>]+></a></div>$#', $html );
@@ -1707,13 +1707,93 @@ class MapProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Creates an untitled post at a published venue.
+	 *
+	 * @param string $venue Venue name.
+	 * @return int Post ID.
+	 */
+	protected function post_at_venue( $venue ) {
+		$post_id = self::factory()->post->create( array( 'post_title' => '' ) );
+		Post_Venue::set_post_venue(
+			$post_id,
+			self::factory()->post->create(
+				array(
+					'post_type'  => 'venue',
+					'post_title' => $venue,
+				)
+			)
+		);
+		return $post_id;
+	}
+
+	/**
+	 * Archive map markers are labeled with where the post is, not its title: its venue, when the venue is public, or
+	 * else its location, address or coordinates (#760).
+	 */
+	public function test_marker_title() {
+		$point   = $this->locations[0];
+		$post_id = self::factory()->post->create( array( 'post_title' => 'Morning walk' ) );
+		$this->assertSame( '39° 57.144′ N 75° 9.816′ W', Map_Provider::get_marker_title( $post_id, $point ), 'Coordinates, never the title or "Untitled".' );
+
+		set_post_geodata( $post_id, 'address', 'Broad & Market Streets' );
+		$this->assertSame( 'Broad & Market Streets', Map_Provider::get_marker_title( $post_id, $point ) );
+
+		$country = self::factory()->term->create(
+			array(
+				'taxonomy' => 'location',
+				'name'     => 'United States',
+			)
+		);
+		$city    = self::factory()->term->create(
+			array(
+				'taxonomy' => 'location',
+				'name'     => 'Philadelphia',
+				'parent'   => $country,
+			)
+		);
+		Location_Taxonomy::set_location( $post_id, $city );
+		$label = Map_Provider::get_marker_title( $post_id, $point );
+		$this->assertStringStartsWith( 'Philadelphia', $label );
+		$this->assertStringNotContainsString( '<', $label, 'The location is plain text.' );
+
+		// A private venue, such as home, isn't named.
+		$venue = self::factory()->post->create(
+			array(
+				'post_type'   => 'venue',
+				'post_title'  => 'Home',
+				'post_status' => 'private',
+			)
+		);
+		Post_Venue::set_post_venue( $post_id, $venue );
+		$this->assertSame( $label, Map_Provider::get_marker_title( $post_id, $point ) );
+
+		wp_update_post(
+			array(
+				'ID'          => $venue,
+				'post_title'  => 'Reading Terminal Market',
+				'post_status' => 'publish',
+			)
+		);
+		$this->assertSame( 'Reading Terminal Market', Map_Provider::get_marker_title( $post_id, $point ) );
+
+		$filter = function ( $title, $id, $location ) use ( $post_id, $point ) {
+			$this->assertSame( $post_id, $id );
+			$this->assertSame( $point, $location );
+			return 'Lunch at ' . $title;
+		};
+		add_filter( 'sloc_archive_marker_title', $filter, 10, 3 );
+		$this->assertSame( 'Lunch at Reading Terminal Market', Map_Provider::get_marker_title( $post_id, $point ) );
+		remove_filter( 'sloc_archive_marker_title', $filter, 10 );
+	}
+
+	/**
 	 * Google archive maps link their markers to their posts, like the custom static map.
 	 */
 	public function test_archive_map_html_links_google() {
 		$map   = $this->provider( 'Map_Provider_Google' );
 		$posts = array(
-			self::factory()->post->create( array( 'post_title' => 'City Hall' ) ),
-			self::factory()->post->create( array( 'post_title' => 'Independence Hall' ) ),
+			$this->post_at_venue( 'City Hall' ),
+			$this->post_at_venue( 'Independence Hall' ),
 		);
 		$html  = $map->get_archive_map_html( $this->locations, $posts );
 		$this->assertMatchesRegularExpression( '#^<div class="sloc-archive-map"><img class="archive-map sloc-map" src="https://maps\.googleapis\.com/[^"]+" srcset="[^"]+" alt="[^"]+" /><a [^>]+></a><a [^>]+></a></div>$#', $html );

@@ -34,6 +34,7 @@
 
 ## class-map-provider.php
 
+- [`sloc_archive_marker_title`](sloc_archive_marker_title) Filters the label of an archive map marker, shown when hovering over it and read by screen readers.
 - [`sloc_map_alt`](sloc_map_alt) Filters the alternative text of a static map image.
 - [`sloc_map_language`](sloc_map_language) Filters the language of map labels, for map providers that can translate them.
 

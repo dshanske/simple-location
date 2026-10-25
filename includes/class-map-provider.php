@@ -1333,18 +1333,69 @@ abstract class Map_Provider extends Sloc_Provider {
 			if ( ! isset( $post_ids[ $index ] ) ) {
 				continue;
 			}
-			$title   = wp_strip_all_tags( get_the_title( $post_ids[ $index ] ) );
+			$title   = self::get_marker_title( $post_ids[ $index ], $locations[ $index ] );
 			$links[] = sprintf(
 				'<a class="sloc-archive-map-marker" href="%1$s" style="%2$s" title="%3$s" aria-label="%3$s"></a>',
 				esc_url( get_permalink( $post_ids[ $index ] ) ),
 				esc_attr( sprintf( 'left:%1$s%%;top:%2$s%%;width:%3$s%%;height:%4$s%%', round( $box[0], 3 ), round( $box[1], 3 ), round( $box[2] - $box[0], 3 ), round( $box[3] - $box[1], 3 ) ) ),
-				esc_attr( '' === $title ? __( 'Untitled', 'simple-location' ) : $title )
+				esc_attr( $title )
 			);
 		}
 		if ( empty( $links ) ) {
 			return $html;
 		}
 		return '<div class="sloc-archive-map">' . $html . implode( '', $links ) . '</div>';
+	}
+
+	/**
+	 * Returns the label of an archive map marker: where the post is.
+	 *
+	 * That is the post's venue, when the venue is publicly viewable; otherwise its location, address or coordinates,
+	 * as the location is displayed on the post.
+	 *
+	 * @since 6.1.1
+	 *
+	 * @param int   $post_id  Post ID.
+	 * @param array $location Array( latitude, longitude ) of the marker.
+	 * @return string Plain text label.
+	 */
+	public static function get_marker_title( $post_id, $location ) {
+		$title = '';
+		$venue = (int) Post_Venue::get_post_venue( $post_id );
+		if ( $venue > 0 && is_post_publicly_viewable( $venue ) ) {
+			$title = get_the_title( $venue );
+		}
+		if ( '' === $title ) {
+			$term = Location_Taxonomy::get_post_location( $post_id );
+			if ( $term ) {
+				$title = Location_Taxonomy::display_name(
+					$term,
+					array(
+						'links' => false,
+						'flag'  => false,
+					)
+				);
+			}
+		}
+		if ( '' === $title ) {
+			$address = get_post_geodata( $post_id, 'address' );
+			$title   = is_string( $address ) ? $address : '';
+		}
+		if ( '' === $title && isset( $location[0], $location[1] ) ) {
+			$title = dec_to_dms( $location[0], $location[1] );
+		}
+		$title = trim( wp_specialchars_decode( wp_strip_all_tags( $title ), ENT_QUOTES ) );
+
+		/**
+		 * Filters the label of an archive map marker, shown when hovering over it and read by screen readers.
+		 *
+		 * @since 6.1.1
+		 *
+		 * @param string $title    Plain text label: the post's venue, or else its location, address or coordinates.
+		 * @param int    $post_id  Post ID.
+		 * @param array  $location Array( latitude, longitude ) of the marker.
+		 */
+		return (string) apply_filters( 'sloc_archive_marker_title', $title, $post_id, $location );
 	}
 
 
