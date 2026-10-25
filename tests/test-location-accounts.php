@@ -34,15 +34,9 @@ class LocationAccountsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Removes the profile hooks a test added by making a provider active.
+	 * Clears the form.
 	 */
 	public function tear_down() {
-		foreach ( array( 'Location_Provider_Dawarich', 'Location_Provider_GeoPulse' ) as $class ) {
-			remove_action( 'show_user_profile', array( $class, 'user_profile' ), 13 );
-			remove_action( 'edit_user_profile', array( $class, 'user_profile' ), 13 );
-			remove_action( 'personal_options_update', array( $class, 'save_user_profile' ), 13 );
-			remove_action( 'edit_user_profile_update', array( $class, 'save_user_profile' ), 13 );
-		}
 		$_POST = array();
 		parent::tear_down();
 	}
@@ -280,18 +274,65 @@ class LocationAccountsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The profile fields appear only for the chosen provider, and never print the saved key.
+	 * Every account provider is on the profile, the one in use first and open, the others closed (#762).
+	 */
+	public function test_profile_all_accounts() {
+		foreach ( array( 'show_user_profile', 'edit_user_profile' ) as $hook ) {
+			$this->assertSame( 13, has_action( $hook, array( 'Location_Provider_Account', 'user_profiles' ) ) );
+		}
+		foreach ( array( 'personal_options_update', 'edit_user_profile_update' ) as $hook ) {
+			$this->assertSame( 13, has_action( $hook, array( 'Location_Provider_Account', 'save_user_profiles' ) ) );
+		}
+		$user = get_userdata( $this->user_id );
+
+		update_option( 'sloc_geolocation_provider', 'geopulse' );
+		$this->assertSame( array( 'geopulse', 'dawarich' ), array_map( fn( $provider ) => $provider->get_slug(), Location_Provider_Account::account_providers() ) );
+		ob_start();
+		Location_Provider_Account::user_profiles( $user );
+		$html = ob_get_clean();
+		$this->assertSame( 1, substr_count( $html, '<h2>Location History</h2>' ) );
+		$this->assertMatchesRegularExpression( '#<details class="sloc-api-group" id="sloc-account-geopulse" open>\s*<summary>\s*GeoPulse\s*<span class="sloc-api-in-use">In use</span>#', $html );
+		$this->assertMatchesRegularExpression( '#<details class="sloc-api-group" id="sloc-account-dawarich">\s*<summary>\s*Dawarich\s*</summary>#', $html );
+		$this->assertLessThan( strpos( $html, 'sloc-account-dawarich' ), strpos( $html, 'sloc-account-geopulse' ) );
+		$this->assertStringContainsString( 'name="dawarich_account_nonce"', $html );
+		$this->assertStringContainsString( 'name="geopulse_account_nonce"', $html );
+		$this->assertStringNotContainsString( 'DAWARICHKEY', $html );
+
+		// With neither in use, both are closed, by name.
+		update_option( 'sloc_geolocation_provider', 'HTML5' );
+		ob_start();
+		Location_Provider_Account::user_profiles( $user );
+		$html = ob_get_clean();
+		$this->assertStringNotContainsString( ' open>', $html );
+		$this->assertStringNotContainsString( 'In use', $html );
+		$this->assertLessThan( strpos( $html, 'sloc-account-geopulse' ), strpos( $html, 'sloc-account-dawarich' ) );
+
+		// Saving the profile saves each account shown.
+		$_POST = array(
+			'dawarich_account_nonce' => wp_create_nonce( 'dawarich_account' ),
+			'dawarich_url'           => 'https://dawarich.example.net',
+			'geopulse_account_nonce' => wp_create_nonce( 'geopulse_account' ),
+			'geopulse_url'           => 'https://pulse.example.net',
+			'geopulse_api'           => 'gp_sa_SAVED',
+		);
+		Location_Provider_Account::save_user_profiles( $this->user_id );
+		$_POST = array();
+		$this->assertSame( 'https://dawarich.example.net', get_user_meta( $this->user_id, 'dawarich_url', true ) );
+		$this->assertSame( 'DAWARICHKEY', get_user_meta( $this->user_id, 'dawarich_api', true ), 'An empty key field keeps the key.' );
+		$this->assertSame( 'https://pulse.example.net', get_user_meta( $this->user_id, 'geopulse_url', true ) );
+		$this->assertSame( 'gp_sa_SAVED', get_user_meta( $this->user_id, 'geopulse_api', true ) );
+
+		// Nothing for a user the current user can't edit.
+		ob_start();
+		Location_Provider_Account::user_profiles( get_userdata( self::factory()->user->create( array( 'role' => 'author' ) ) ) );
+		$this->assertSame( '', ob_get_clean() );
+	}
+
+	/**
+	 * A provider's profile fields never print the saved key.
 	 */
 	public function test_profile_fields() {
-		new Location_Provider_Dawarich();
-		$this->assertFalse( has_action( 'show_user_profile', array( 'Location_Provider_Dawarich', 'user_profile' ) ) );
-
 		update_option( 'sloc_geolocation_provider', 'dawarich' );
-		new Location_Provider_Dawarich();
-		$this->assertSame( 13, has_action( 'show_user_profile', array( 'Location_Provider_Dawarich', 'user_profile' ) ) );
-		$this->assertSame( 13, has_action( 'personal_options_update', array( 'Location_Provider_Dawarich', 'save_user_profile' ) ) );
-		$this->assertFalse( has_action( 'show_user_profile', array( 'Location_Provider_GeoPulse', 'user_profile' ) ) );
-
 		$user = get_userdata( $this->user_id );
 		ob_start();
 		Location_Provider_Dawarich::user_profile( $user );
