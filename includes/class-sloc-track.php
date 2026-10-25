@@ -66,6 +66,41 @@ class Sloc_Track {
 	}
 
 	/**
+	 * Escapes an encoded polyline for a shortcode attribute.
+	 *
+	 * Polylines can contain `[` and `]`, which end a shortcode, `\`, which shortcode attributes strip, and `` ` ``, which
+	 * wptexturize() can turn into quotes. They are percent-encoded; `%` never appears in a polyline.
+	 *
+	 * @since 6.1.1
+	 *
+	 * @param string $polyline Encoded polyline.
+	 * @return string Polyline safe to put in a shortcode attribute.
+	 */
+	public static function to_attribute( $polyline ) {
+		return strtr(
+			(string) $polyline,
+			array(
+				'['  => '%5B',
+				']'  => '%5D',
+				'\\' => '%5C',
+				'`'  => '%60',
+			)
+		);
+	}
+
+	/**
+	 * Reads an encoded polyline from a shortcode attribute, escaped by to_attribute() or not.
+	 *
+	 * @since 6.1.1
+	 *
+	 * @param mixed $attribute Attribute value.
+	 * @return string Encoded polyline.
+	 */
+	public static function from_attribute( $attribute ) {
+		return is_string( $attribute ) ? rawurldecode( trim( $attribute ) ) : '';
+	}
+
+	/**
 	 * Simplifies a track to at most a number of points, keeping its shape, with the Douglas-Peucker algorithm.
 	 *
 	 * The tolerance grows until the track is short enough. The first and last points are always kept.

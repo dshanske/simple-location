@@ -163,7 +163,7 @@ class Sloc_Track_Tool {
 			'private'   => count( $points ) - count( $public ),
 			'kept'      => count( $kept ),
 			'polyline'  => $polyline,
-			'shortcode' => sprintf( '[sloc_map track="%1$s"%2$s]', $polyline, 'none' === $markers ? ' markers="none"' : '' ),
+			'shortcode' => sprintf( '[sloc_map track="%1$s"%2$s]', Sloc_Track::to_attribute( $polyline ), 'none' === $markers ? ' markers="none"' : '' ),
 		);
 	}
 

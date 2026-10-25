@@ -45,7 +45,8 @@ class Sloc_Map_Shortcode {
 	 * @param array|string $atts {
 	 *     Shortcode attributes.
 	 *
-	 *     @type string $track   A route as an encoded polyline, drawn as a line, simplified to Sloc_Track::MAX_POINTS.
+	 *     @type string $track   A route as an encoded polyline, drawn as a line, simplified to Sloc_Track::MAX_POINTS. Its
+	 *                          brackets, backslashes and backticks are percent-encoded, as Sloc_Track::to_attribute() does.
 	 *     @type string $markers Markers of a track: 'ends' (default) for its start and end, or 'none'.
 	 *     @type string $points Points as "latitude,longitude", separated by `|`, such as "39.95,-75.16|40.71,-74.01".
 	 *     @type string $ids    Post or attachment IDs, separated by commas.
@@ -70,7 +71,7 @@ class Sloc_Map_Shortcode {
 
 		$track = '' !== trim( (string) $atts['track'] );
 		if ( $track ) {
-			$locations = Sloc_Track::simplify( Sloc_Track::decode( $atts['track'] ) );
+			$locations = Sloc_Track::simplify( Sloc_Track::decode( Sloc_Track::from_attribute( $atts['track'] ) ) );
 			// A line needs two points.
 			if ( count( $locations ) < 2 ) {
 				$locations = array();
