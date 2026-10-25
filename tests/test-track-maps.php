@@ -25,6 +25,20 @@ class TrackMapsTest extends WP_UnitTestCase {
 	);
 
 	/**
+	 * A track whose polyline has every character that breaks a shortcode: [, ], \ and `.
+	 *
+	 * @var array
+	 */
+	protected $bracket_track = array(
+		array( 39.95, -75.16 ),
+		array( 39.9374, -75.1647 ),
+		array( 39.9166, -75.1458 ),
+		array( 39.912, -75.141 ),
+		array( 39.9378, -75.1181 ),
+		array( 39.9565, -75.1456 ),
+	);
+
+	/**
 	 * Known map settings, without requests or maps served from the site.
 	 */
 	public function set_up() {
@@ -124,6 +138,24 @@ class TrackMapsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Polylines are escaped for shortcode attributes and read back, escaped or not (#756).
+	 */
+	public function test_attribute() {
+		$encoded = Sloc_Track::encode( $this->bracket_track );
+		$this->assertSame( 'ovyrF~tviMvmAj\\~`CcuBv[_]g`DcnC{sBzjD', $encoded );
+		$escaped = Sloc_Track::to_attribute( $encoded );
+		$this->assertSame( 'ovyrF~tviMvmAj%5C~%60CcuBv%5B_%5Dg%60DcnC{sBzjD', $escaped );
+		$this->assertSame( $encoded, Sloc_Track::from_attribute( $escaped ) );
+		$this->assertSame( $this->bracket_track, Sloc_Track::decode( Sloc_Track::from_attribute( $escaped ) ) );
+
+		// Polylines without those characters are unchanged both ways.
+		$plain = '_p~iF~ps|U_ulLnnqC';
+		$this->assertSame( $plain, Sloc_Track::to_attribute( $plain ) );
+		$this->assertSame( $plain, Sloc_Track::from_attribute( ' ' . $plain . ' ' ) );
+		$this->assertSame( '', Sloc_Track::from_attribute( array( 'x' ) ) );
+	}
+
+	/**
 	 * Long tracks are simplified to the limit, keeping their ends and corners.
 	 */
 	public function test_simplify() {
@@ -168,6 +200,17 @@ class TrackMapsTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'path=', do_shortcode( '[sloc_map track="' . $encoded . '" points="40.7128,-74.006"]' ) );
 		$this->assertSame( '', do_shortcode( '[sloc_map track="not a polyline!"]' ) );
 		$this->assertSame( '', do_shortcode( '[sloc_map track="' . Sloc_Track::encode( array( $this->track[0] ) ) . '"]' ) );
+
+		// An escaped polyline with brackets, backslashes and backticks draws its track, in post content too (#756).
+		$escaped = Sloc_Track::to_attribute( Sloc_Track::encode( $this->bracket_track ) );
+		$html    = do_shortcode( '[sloc_map track="' . $escaped . '"]' );
+		$this->assertStringStartsWith( '<div class="sloc-map-shortcode"><img class="archive-map sloc-map"', $html );
+		$this->assertStringContainsString( 'path=', $html );
+		$this->assertStringEndsWith( '</div>', $html );
+		$post_id = self::factory()->post->create( array( 'post_content' => 'Walk: [sloc_map track="' . $escaped . '"] Done.' ) );
+		$content = apply_filters( 'the_content', get_post_field( 'post_content', $post_id ) );
+		$this->assertStringContainsString( 'path=', $content );
+		$this->assertStringNotContainsString( 'zjD', wp_strip_all_tags( $content ), 'No polyline is printed as text.' );
 
 		if ( $registered ) {
 			Loc_Config::register_provider( $registered );

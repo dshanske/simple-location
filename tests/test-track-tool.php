@@ -142,9 +142,9 @@ class TrackToolTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $result['private'] );
 		$this->assertSame( 5, $result['kept'] );
 		$this->assertSame( $this->points, Sloc_Track::decode( $result['polyline'] ) );
-		$this->assertSame( '[sloc_map track="' . $result['polyline'] . '"]', $result['shortcode'] );
+		$this->assertSame( '[sloc_map track="' . Sloc_Track::to_attribute( $result['polyline'] ) . '"]', $result['shortcode'] );
 
-		$this->assertSame( '[sloc_map track="' . $result['polyline'] . '" markers="none"]', Sloc_Track_Tool::build( $start, $end, 'none' )['shortcode'] );
+		$this->assertSame( '[sloc_map track="' . Sloc_Track::to_attribute( $result['polyline'] ) . '" markers="none"]', Sloc_Track_Tool::build( $start, $end, 'none' )['shortcode'] );
 	}
 
 	/**
@@ -234,6 +234,25 @@ class TrackToolTest extends WP_UnitTestCase {
 		Loc_Config::register_provider( $google );
 		$this->assertMatchesRegularExpression( '#<div class="sloc-track-preview">\s*<div class="sloc-map-shortcode"><img class="archive-map sloc-map" src="https://maps\.googleapis\.com/[^"]+path=#', $html );
 		$this->assertStringNotContainsString( 'Choose a map provider', $html );
+
+		// A track whose polyline has brackets, backslashes and backticks is escaped, so the preview is still a map (#756).
+		$this->mock_dawarich(
+			array(
+				array( 39.95, -75.16 ),
+				array( 39.9374, -75.1647 ),
+				array( 39.9166, -75.1458 ),
+				array( 39.912, -75.141 ),
+				array( 39.9378, -75.1181 ),
+				array( 39.9565, -75.1456 ),
+			)
+		);
+		Loc_Config::register_provider( new Map_Provider_Google( array( 'api' => 'KEY' ) ) );
+		ob_start();
+		Sloc_Track_Tool::page();
+		$html = ob_get_clean();
+		Loc_Config::register_provider( $google );
+		$this->assertStringContainsString( 'track=&quot;ovyrF~tviMvmAj%5C~%60CcuBv%5B_%5Dg%60DcnC{sBzjD&quot;', $html );
+		$this->assertMatchesRegularExpression( '#<div class="sloc-track-preview">\s*<div class="sloc-map-shortcode"><img class="archive-map sloc-map" src="https://maps\.googleapis\.com/[^"]+path=#', $html );
 
 		// A bad nonce does nothing, and an error is shown for missing times.
 		$_POST['sloc_track_nonce'] = 'bad';
