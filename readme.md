@@ -4,7 +4,7 @@
 **Tags:** geolocation, timezones, maps, location, weather \
 **Requires at least:** 6.2 \
 **Tested up to:** 7.1 \
-**Stable tag:** 6.1.0 \
+**Stable tag:** 6.1.1 \
 **Requires PHP:** 7.4 \
 **License:** GPLv2 or later \
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
@@ -464,6 +464,10 @@ Developers can refresh the station, airport and airline files with `composer upd
 
 ## Upgrade Notice
 
+### 6.1.1
+
+Track maps made with Tools > Location Track in 6.1.0 show text instead of a map; make their shortcodes again. The GeoPulse provider needs GeoPulse 2.1.0 or later.
+
 ### 6.1.0
 
 The Met Office provider has been removed; if you used it, choose another weather provider. Venues found with Google, HERE, TomTom, Foursquare or Stadia Maps now keep only their identifier and links, as those providers' terms require. Many new providers, fallback providers, and venue and location merging.
@@ -473,6 +477,13 @@ The Met Office provider has been removed; if you used it, choose another weather
 Requires PHP 7.4, WordPress 6.2 or ClassicPress 2.7. The Bing providers and MapQuest elevation have been removed because their services were retired; if you used one, choose another provider in Settings. Many fixes to location visibility and permissions.
 
 ## Changelog
+
+### 6.1.1 ( 2026-10-25 )
+
+* Fix track maps showing the route as text: [sloc_map track] shortcodes from Tools > Location Track now escape the route
+* Say when a GeoPulse server is older than 2.1.0, or where it found nothing, instead of "Resource not found"
+* Label archive map markers with the post's venue or location instead of its title
+* Show every location history account, such as Dawarich and GeoPulse, on the user profile, with the one in use open
 
 ### 6.1.0 ( 2026-10-24 )
 
