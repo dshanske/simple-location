@@ -220,6 +220,66 @@ class LocationAccountsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * GeoPulse: a server older than 2.1.0 says which version it is, and a URL that doesn't reach the API says where it
+	 * looked (#758).
+	 */
+	public function test_geopulse_not_found() {
+		$provider  = new Location_Provider_GeoPulse();
+		$not_found = array(
+			'code' => 404,
+			'body' => array(
+				'title'  => 'Not Found',
+				'status' => 404,
+				'detail' => 'Resource not found',
+			),
+		);
+
+		// GeoPulse 1.x has its version at /api/version, and no /api/v1.
+		$this->mock_http(
+			array(
+				'/api/version' => array( 'body' => array( 'version' => '1.39.0' ) ),
+				''             => $not_found,
+			)
+		);
+		$error = $provider->query( '2025-07-01T12:00:00Z', '2025-07-01T13:00:00Z' );
+		$this->assertSame( 'geopulse_version', $error->get_error_code() );
+		$this->assertSame( 'GeoPulse 1.39.0 found. Simple Location needs GeoPulse 2.1.0 or later.', $error->get_error_message() );
+		$this->assertSame( '1.39.0', $error->get_error_data()['version'] );
+		$version_requests = array_slice( $this->http_requests, -2 );
+		$this->assertSame( 'https://geopulse.example.com/api/v1/system/version', $version_requests[0]['url'] );
+		$this->assertSame( 'https://geopulse.example.com/api/version', $version_requests[1]['url'] );
+		$this->assertArrayNotHasKey( 'Authorization', $version_requests[1]['args']['headers'], 'The token is only sent to the API.' );
+
+		// 2.0.0 has /api/v1, but no API tokens.
+		$this->mock_http(
+			array(
+				'/api/v1/system/version' => array( 'body' => array( 'version' => 'v2.0.0' ) ),
+				''                       => $not_found,
+			)
+		);
+		$this->assertSame( 'GeoPulse 2.0.0 found. Simple Location needs GeoPulse 2.1.0 or later.', $provider->retrieve()->get_error_message() );
+
+		// A new enough server keeps GeoPulse's own explanation.
+		$this->mock_http(
+			array(
+				'/api/v1/system/version' => array( 'body' => array( 'version' => '2.1.0' ) ),
+				''                       => $not_found,
+			)
+		);
+		$error = $provider->retrieve();
+		$this->assertSame( 'geopulse_error', $error->get_error_code() );
+		$this->assertSame( 'Resource not found', $error->get_error_message() );
+
+		// Without a version, the error names the address, and a URL ending in /api is pointed out.
+		$this->mock_http( array( '' => $not_found ) );
+		$error = $provider->retrieve();
+		$this->assertSame( 'geopulse_not_found', $error->get_error_code() );
+		$this->assertSame( 'GeoPulse has nothing at https://geopulse.example.com/api/v1/gps/points.', $error->get_error_message() );
+		update_user_meta( $this->user_id, 'geopulse_url', 'https://geopulse.example.com/api' );
+		$this->assertSame( 'GeoPulse has nothing at https://geopulse.example.com/api/api/v1/gps/points. On your profile, enter the address you open GeoPulse at, without /api.', $provider->retrieve()->get_error_message() );
+	}
+
+	/**
 	 * GeoPulse queries return GeoPulse's simplified path between two times.
 	 */
 	public function test_geopulse_query() {
