@@ -34,11 +34,69 @@ abstract class Location_Provider_Account extends Location_Provider {
 	public function __construct( $args = array() ) {
 		parent::__construct( $args );
 		$this->background = true;
-		if ( $this->is_active() ) {
-			add_action( 'show_user_profile', array( static::class, 'user_profile' ), 13 );
-			add_action( 'edit_user_profile', array( static::class, 'user_profile' ), 13 );
-			add_action( 'personal_options_update', array( static::class, 'save_user_profile' ), 13 );
-			add_action( 'edit_user_profile_update', array( static::class, 'save_user_profile' ), 13 );
+		// Every account is on the profile, so a user can set one up before the site uses it.
+		add_action( 'show_user_profile', array( __CLASS__, 'user_profiles' ), 13 );
+		add_action( 'edit_user_profile', array( __CLASS__, 'user_profiles' ), 13 );
+		add_action( 'personal_options_update', array( __CLASS__, 'save_user_profiles' ), 13 );
+		add_action( 'edit_user_profile_update', array( __CLASS__, 'save_user_profiles' ), 13 );
+	}
+
+	/**
+	 * Returns the registered account providers: the one in use first, then the others by name.
+	 *
+	 * @since 6.1.1
+	 *
+	 * @return Location_Provider_Account[] Providers.
+	 */
+	public static function account_providers() {
+		$providers = array();
+		foreach ( array_keys( Loc_Config::geolocation_providers() ) as $slug ) {
+			$provider = Loc_Config::geolocation_provider( (string) $slug );
+			if ( $provider instanceof self ) {
+				$providers[] = $provider;
+			}
+		}
+		usort(
+			$providers,
+			fn( $a, $b ) => array( ! $a->is_active(), strtolower( $a->get_name() ) ) <=> array( ! $b->is_active(), strtolower( $b->get_name() ) )
+		);
+		return $providers;
+	}
+
+	/**
+	 * Prints every account provider's fields on a user's profile, under one heading.
+	 *
+	 * @since 6.1.1
+	 *
+	 * @param WP_User $user User being edited.
+	 */
+	public static function user_profiles( $user ) {
+		if ( ! $user instanceof WP_User || ! current_user_can( 'edit_user', $user->ID ) ) {
+			return;
+		}
+		$providers = self::account_providers();
+		if ( empty( $providers ) ) {
+			return;
+		}
+		?>
+		<h2><?php esc_html_e( 'Location History', 'simple-location' ); ?></h2>
+		<p><?php esc_html_e( 'Your accounts on location history services. The site reads your location from the one in use.', 'simple-location' ); ?></p>
+		<?php
+		foreach ( $providers as $provider ) {
+			$provider::user_profile( $user );
+		}
+	}
+
+	/**
+	 * Saves every account provider's fields from a user's profile.
+	 *
+	 * @since 6.1.1
+	 *
+	 * @param int $user_id User ID.
+	 */
+	public static function save_user_profiles( $user_id ) {
+		foreach ( self::account_providers() as $provider ) {
+			$provider::save_user_profile( $user_id );
 		}
 	}
 
@@ -58,6 +116,7 @@ abstract class Location_Provider_Account extends Location_Provider {
 	 * Prints the account fields on a user's profile.
 	 *
 	 * @since 6.1.0
+	 * @since 6.1.1 In a section that opens and closes, open for the provider in use.
 	 *
 	 * @param WP_User $user User being edited.
 	 */
@@ -69,8 +128,15 @@ abstract class Location_Provider_Account extends Location_Provider {
 		$url_key  = $provider->meta_key( 'url' );
 		$api_key  = $provider->meta_key( 'api' );
 		$has_key  = '' !== (string) get_user_meta( $user->ID, $api_key, true );
+		$in_use   = $provider->is_active();
 		?>
-		<h2><?php echo esc_html( $provider->get_name() ); ?></h2>
+		<details class="sloc-api-group" id="<?php echo esc_attr( 'sloc-account-' . $provider->slug ); ?>"<?php echo $in_use ? ' open' : ''; ?>>
+		<summary>
+			<?php echo esc_html( $provider->get_name() ); ?>
+			<?php if ( $in_use ) : ?>
+				<span class="sloc-api-in-use"><?php esc_html_e( 'In use', 'simple-location' ); ?></span>
+			<?php endif; ?>
+		</summary>
 		<?php wp_nonce_field( $provider->slug . '_account', $provider->slug . '_account_nonce' ); ?>
 		<table class="form-table" role="presentation">
 			<tr>
@@ -109,6 +175,7 @@ abstract class Location_Provider_Account extends Location_Provider {
 				</td>
 			</tr>
 		</table>
+		</details>
 		<?php
 	}
 
