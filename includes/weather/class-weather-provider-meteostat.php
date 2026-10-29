@@ -314,6 +314,7 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 	 * Convert Data into common format
 	 *
 	 * @since 6.0.0 The summary is the condition's name, not its numeric code.
+	 * @since 6.2.0 Meteostat's snow is the snow depth, in mm, stored as snowdepth, not as snowfall ten times too large.
 	 *
 	 * @param string $json Raw JSON.
 	 * @return array Current Conditions in Array
@@ -329,7 +330,8 @@ class Weather_Provider_Meteostat extends Weather_Provider {
 		$return['windgust']   = self::round_value( self::kmh_to_ms( $json['wpgt'] ?? null ), 1 );
 		$return['winddegree'] = self::round_value( $json['wdir'] ?? null, 1 );
 		$return['rain']       = self::round_value( $json['prcp'] ?? null, 2 );
-		$return['snow']       = self::cm_to_mm( self::round_value( $json['snow'] ?? null, 2 ) );
+		// Meteostat's snow is the snow on the ground, already in millimeters.
+		$return['snowdepth']  = self::round_value( $json['snow'] ?? null, 2 );
 		$coco                 = $json['coco'] ?? null;
 		if ( is_numeric( $coco ) ) {
 			$return['summary'] = self::get_status( (int) $coco );

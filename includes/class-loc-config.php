@@ -32,12 +32,24 @@ class Loc_Config {
 	const DATA_CLEANUP_HOOK = 'sloc_data_cleanup';
 
 	/**
-	 * Option set once the data cleanup has finished.
+	 * Option set once the data cleanup has finished, to the DATA_CLEANUP_VERSION it ran.
 	 *
 	 * @since 6.0.0
+	 * @since 6.2.0 Holds the version of the cleanup, not 1.
 	 * @var string
 	 */
 	const DATA_CLEANUP_OPTION = 'sloc_data_cleanup_done';
+
+	/**
+	 * Version of the data cleanup. A site whose cleanup ran an earlier version runs it again.
+	 *
+	 * 1: weather in the old single-array format, and visibility without a location (6.0.0).
+	 * 2: also snow depth stored as snowfall by the Meteostat and Xweather providers (6.2.0).
+	 *
+	 * @since 6.2.0
+	 * @var int
+	 */
+	const DATA_CLEANUP_VERSION = 2;
 
 	/**
 	 * Posts, and comments, processed per data cleanup run.
@@ -811,7 +823,7 @@ class Loc_Config {
 	 * @since 6.0.0
 	 */
 	public static function schedule_data_cleanup() {
-		if ( get_option( self::DATA_CLEANUP_OPTION ) || wp_next_scheduled( self::DATA_CLEANUP_HOOK ) ) {
+		if ( (int) get_option( self::DATA_CLEANUP_OPTION ) >= self::DATA_CLEANUP_VERSION || wp_next_scheduled( self::DATA_CLEANUP_HOOK ) ) {
 			return;
 		}
 		wp_schedule_single_event( time(), self::DATA_CLEANUP_HOOK );
@@ -825,18 +837,20 @@ class Loc_Config {
 	 * every visit to the settings page.
 	 *
 	 * @since 6.0.0
+	 * @since 6.2.0 Also moves snow depth stored as snowfall; see Sloc_Weather_Data::migrate_snow_depth().
 	 */
 	public static function run_data_cleanup() {
 		$weather = Sloc_Weather_Data::bulk_migrate_weather( self::DATA_CLEANUP_BATCH );
 		$stray   = self::remove_stray_visibility( self::DATA_CLEANUP_BATCH );
+		$snow    = Sloc_Weather_Data::migrate_snow_depth( self::DATA_CLEANUP_BATCH );
 
 		// A full batch means there may be more. Stop if none of the weather could be migrated, so it can't repeat forever.
-		$more = ( self::DATA_CLEANUP_BATCH <= $stray ) || ( 0 < $weather['migrated'] && self::DATA_CLEANUP_BATCH <= $weather['found'] );
+		$more = ( self::DATA_CLEANUP_BATCH <= $stray ) || ( self::DATA_CLEANUP_BATCH <= $snow ) || ( 0 < $weather['migrated'] && self::DATA_CLEANUP_BATCH <= $weather['found'] );
 		if ( $more ) {
 			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, self::DATA_CLEANUP_HOOK );
 			return;
 		}
-		update_option( self::DATA_CLEANUP_OPTION, 1 );
+		update_option( self::DATA_CLEANUP_OPTION, self::DATA_CLEANUP_VERSION );
 	}
 
 	/**

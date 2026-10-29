@@ -142,6 +142,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	 * Convert Data into common format
 	 *
 	 * @since 6.0.0 Visibility is converted to meters before it is rounded.
+	 * @since 6.2.0 Includes the snow depth.
 	 *
 	 * @param string $json Raw JSON.
 	 * @return array Current Conditions in Array
@@ -161,6 +162,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 		$return['winddegree'] = self::round_value( $json['winddir'] ?? null, 1 );
 		$return['rain']       = self::round_value( $json['precip'] ?? null, 2 );
 		$return['snow']       = self::cm_to_mm( self::round_value( $json['snow'] ?? null, 2 ) );
+		$return['snowdepth']  = self::cm_to_mm( self::round_value( $json['snowdepth'] ?? null, 2 ) );
 		$return['radiation']  = self::round_value( $json['solarradiation'] ?? null, 2 );
 		// Convert before rounding, so visibility under 1 km isn't rounded away.
 		if ( isset( $json['visibility'] ) && is_numeric( $json['visibility'] ) ) {

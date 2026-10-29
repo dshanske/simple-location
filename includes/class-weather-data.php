@@ -24,6 +24,7 @@ class Sloc_Weather_Data {
 	 *
 	 * @since 1.0.0
 	 * @since 6.2.0 Adds voc_index and nox_index, the VOC and NOx indices of a Sensirion gas sensor.
+	 * @since 6.2.0 Adds snowdepth, the snow on the ground, apart from snow, the snowfall, and snowrate.
 	 * @var string[]
 	 */
 	public static $properties = array(
@@ -36,6 +37,7 @@ class Sloc_Weather_Data {
 		'cloudiness',
 		'rain',
 		'snow',
+		'snowdepth',
 		'visibility',
 		'radiation',
 		'illuminance',
@@ -60,6 +62,7 @@ class Sloc_Weather_Data {
 		'code',
 		'provider',
 		'rainrate',
+		'snowrate',
 		'attribution',
 		'attribution_url',
 	);
@@ -123,7 +126,7 @@ class Sloc_Weather_Data {
 	 *
 	 * @since 1.0.0
 	 * @since 6.1.0 Registers the rain rate and a weather station's credit.
-	 * @since 6.2.0 Registers the VOC and NOx indices.
+	 * @since 6.2.0 Registers the VOC and NOx indices, the snow depth and the snow rate.
 	 */
 	public static function register_meta() {
 		// Legacy Weather Storage
@@ -149,7 +152,9 @@ class Sloc_Weather_Data {
 			'cloudiness'  => __( 'Cloudiness', 'simple-location' ),
 			'rain'        => __( 'Rainfall', 'simple-location' ),
 			'rainrate'    => __( 'Rain Rate', 'simple-location' ),
+			'snowrate'    => __( 'Snow Rate', 'simple-location' ),
 			'snow'        => __( 'Snowfall', 'simple-location' ),
+			'snowdepth'   => __( 'Snow Depth', 'simple-location' ),
 			'visibility'  => __( 'Visibility', 'simple-location' ),
 			'radiation'   => __( 'Radiation', 'simple-location' ),
 			'illuminance' => __( 'Illuminance', 'simple-location' ),
@@ -584,6 +589,78 @@ class Sloc_Weather_Data {
 		return false;
 	}
 
+
+	/**
+	 * Moves snow depth stored as snowfall to snowdepth, for posts and comments.
+	 *
+	 * Before 6.2.0 the Meteostat provider stored its snow depth, in millimeters, as snowfall in centimeters, so ten
+	 * times too large, and the Xweather provider stored its snow depth as snowfall. Weather from them, which says so in
+	 * its provider, has its snow moved to snowdepth, and Meteostat's divided by ten. A snowdepth already set is kept.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param int $limit Optional. Most posts, and most comments, to process. Default -1, all.
+	 * @return int The larger of the number of posts and of comments processed, so a full batch means there may be more.
+	 */
+	public static function migrate_snow_depth( $limit = -1 ) {
+		$meta_query = array(
+			'relation' => 'AND',
+			array(
+				'key'     => 'weather_snow',
+				'compare' => 'EXISTS',
+			),
+			array(
+				'key'     => 'weather_provider',
+				'value'   => array( 'meteostat', 'aeris' ),
+				'compare' => 'IN',
+			),
+		);
+		$posts    = get_posts(
+			array(
+				'post_type'      => 'any',
+				'post_status'    => 'any',
+				'posts_per_page' => (int) $limit,
+				'fields'         => 'ids',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- A one-time migration, in batches.
+				'meta_query'     => $meta_query,
+			)
+		);
+		$comments = get_comments(
+			array(
+				'number'     => ( $limit > 0 ) ? (int) $limit : '',
+				'fields'     => 'ids',
+				'status'     => 'all',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- A one-time migration, in batches.
+				'meta_query' => $meta_query,
+			)
+		);
+		foreach ( $posts as $post_id ) {
+			self::move_snow_depth( 'post', (int) $post_id );
+		}
+		foreach ( $comments as $comment_id ) {
+			self::move_snow_depth( 'comment', (int) $comment_id );
+		}
+		return max( count( $posts ), count( $comments ) );
+	}
+
+	/**
+	 * Moves one object's snow depth from snowfall to snowdepth. See migrate_snow_depth().
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param string $type Object type: post or comment.
+	 * @param int    $id   Object ID.
+	 */
+	protected static function move_snow_depth( $type, $id ) {
+		$snow     = get_metadata( $type, $id, 'weather_snow', true );
+		$provider = get_metadata( $type, $id, 'weather_provider', true );
+		$existing = get_metadata( $type, $id, 'weather_snowdepth', true );
+		if ( is_numeric( $snow ) && ! is_numeric( $existing ) ) {
+			$depth = ( 'meteostat' === $provider ) ? (float) $snow / 10 : (float) $snow;
+			update_metadata( $type, $id, 'weather_snowdepth', round( $depth, 2 ) );
+		}
+		delete_metadata( $type, $id, 'weather_snow' );
+	}
 
 	/**
 	 * Migrate Meta Data from Array to Individual Keys

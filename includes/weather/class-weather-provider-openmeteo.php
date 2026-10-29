@@ -38,6 +38,7 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 		'rain',
 		'showers',
 		'snowfall',
+		'snow_depth',
 		'weather_code',
 		'cloud_cover',
 		'pressure_msl',
@@ -294,9 +295,10 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 	/**
 	 * Convert Data into common format
 	 *
-	 * Wind is asked for in meters per second; Open-Meteo gives snowfall in centimeters.
+	 * Wind is asked for in meters per second; Open-Meteo gives snowfall in centimeters and snow depth in meters.
 	 *
 	 * @since 6.1.0
+	 * @since 6.2.0 Includes the snow depth.
 	 *
 	 * @param array $json Values keyed by Open-Meteo variable.
 	 * @return array Conditions.
@@ -320,6 +322,9 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 			$return['rain'] = round( (float) ( $json['rain'] ?? 0 ) + (float) ( $json['showers'] ?? 0 ), 2 );
 		}
 		$return['snow'] = self::cm_to_mm( $json['snowfall'] ?? null );
+		if ( is_numeric( $json['snow_depth'] ?? null ) ) {
+			$return['snowdepth'] = round( (float) $json['snow_depth'] * 1000, 1 );
+		}
 
 		if ( is_numeric( $json['weather_code'] ?? null ) ) {
 			$wmo               = (int) $json['weather_code'];
