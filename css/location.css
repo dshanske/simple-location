@@ -3,7 +3,6 @@
 .sloc-display {
   display: block;
 }
-
 .sloc-location-icon {
   vertical-align: middle;
   display: inline-block;
@@ -13,46 +12,37 @@
   fill: currentColor;
   top: -0.0625em;
 }
-
 .sloc-map {
   max-width: 100%;
 }
-
 .sloc-map-attribution {
   font-size: 0.75em;
   margin-top: 0.25em;
 }
-
 .sloc-archive-map {
   position: relative;
   display: inline-block;
   max-width: 100%;
 }
-
 .sloc-archive-map .sloc-map {
   display: block;
   height: auto;
 }
-
 .sloc-archive-map-marker {
   position: absolute;
 }
-
 ul.sloc-lastseen-data {
   list-style-position: inside;
   list-style: none;
 }
-
 .sloc-weather {
   display: block;
 }
-
 .sloc-weather-attribution {
   display: block;
   font-size: 0.75em;
   margin-top: 0.25em;
 }
-
 .sloc-weather-icon {
   vertical-align: middle;
   display: inline-block;
@@ -64,24 +54,18 @@ ul.sloc-lastseen-data {
   height: 1.5em;
   width: 1.5em;
 }
-
 .sloc-weather-display {
   list-style-position: inside;
   list-style: none;
 }
-
-/*# sourceMappingURL=location.css.map */
-
-.sloc-temperature-chart {
+.sloc-temperature-chart, .sloc-precipitation-chart {
   display: block;
   width: 100%;
   height: auto;
   font-size: 12px;
   fill: currentColor;
 }
-
-.sloc-temperature-list,
-.sloc-weather-list {
+.sloc-temperature-list, .sloc-precipitation-list, .sloc-weather-list {
   list-style: none;
   padding-left: 0;
 }

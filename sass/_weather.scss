@@ -25,7 +25,8 @@
 	list-style: none;
 }
 
-.sloc-temperature-chart {
+.sloc-temperature-chart,
+.sloc-precipitation-chart {
 	display: block;
 	width: 100%;
 	height: auto;
@@ -34,6 +35,7 @@
 }
 
 .sloc-temperature-list,
+.sloc-precipitation-list,
 .sloc-weather-list {
 	list-style: none;
 	padding-left: 0;

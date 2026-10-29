@@ -758,6 +758,7 @@ class Geo_Base {
 	 *
 	 * @since 1.0.0
 	 * @since 6.1.0 Adds the temperature and weather archive views.
+	 * @since 6.1.2 Adds the rain and snow archive views.
 	 */
 	public static function rewrite() {
 		global $wp_rewrite;
@@ -767,11 +768,15 @@ class Geo_Base {
 		add_rewrite_endpoint( 'map', EP_ALL_ARCHIVES );
 		// The weather views' query variables are prefixed, so they can't clash with other plugins'.
 		add_rewrite_endpoint( 'temperature', EP_ALL_ARCHIVES, 'sloc_temperature' );
+		add_rewrite_endpoint( 'rain', EP_ALL_ARCHIVES, 'sloc_rain' );
+		add_rewrite_endpoint( 'snow', EP_ALL_ARCHIVES, 'sloc_snow' );
 		add_rewrite_endpoint( 'weather', EP_ALL_ARCHIVES, 'sloc_weather' );
 
 		$views = array(
 			'map'         => 'map',
 			'temperature' => 'sloc_temperature',
+			'rain'        => 'sloc_rain',
+			'snow'        => 'sloc_snow',
 			'weather'     => 'sloc_weather',
 		);
 		foreach ( $views as $view => $query_var ) {

@@ -10,12 +10,13 @@ defined( 'ABSPATH' ) || exit;
 add_action( 'init', array( 'Sloc_Weather_Archive', 'init' ) );
 
 /**
- * Weather views of archives, like the map view: a temperature chart at `…/temperature/`, and the weather of each post
- * at `…/weather/`.
+ * Weather views of archives, like the map view: a temperature chart at `…/temperature/`, rain and snow charts at
+ * `…/rain/` and `…/snow/`, and the weather of each post at `…/weather/`.
  *
  * Each view has a template, which a theme can override with a file of the same name.
  *
  * @since 6.1.0
+ * @since 6.1.2 Adds the rain and snow views.
  */
 class Sloc_Weather_Archive {
 
@@ -23,11 +24,26 @@ class Sloc_Weather_Archive {
 	 * Templates of the views, keyed by query variable.
 	 *
 	 * @since 6.1.0
+	 * @since 6.1.2 Adds the rain and snow views.
 	 * @var string[]
 	 */
 	const VIEWS = array(
 		'sloc_temperature' => 'temperature-archive.php',
+		'sloc_rain'        => 'rain-archive.php',
+		'sloc_snow'        => 'snow-archive.php',
 		'sloc_weather'     => 'weather-archive.php',
+	);
+
+	/**
+	 * The weather property each chart view shows, keyed by query variable.
+	 *
+	 * @since 6.1.2
+	 * @var string[]
+	 */
+	const CHARTS = array(
+		'sloc_temperature' => 'temperature',
+		'sloc_rain'        => 'rain',
+		'sloc_snow'        => 'snow',
 	);
 
 	/**
@@ -70,6 +86,7 @@ class Sloc_Weather_Archive {
 	 * A private location hides the post's weather too, so those posts are left out.
 	 *
 	 * @since 6.1.0
+	 * @since 6.1.2 The rain and snow views have posts with a rain or snow reading, including 0.
 	 *
 	 * @param WP_Query $query Query.
 	 */
@@ -81,9 +98,9 @@ class Sloc_Weather_Archive {
 		if ( '' === $view ) {
 			return;
 		}
-		$weather = ( 'sloc_temperature' === $view )
+		$weather = isset( self::CHARTS[ $view ] )
 			? array(
-				'key'     => 'weather_temperature',
+				'key'     => 'weather_' . self::CHARTS[ $view ],
 				'compare' => 'EXISTS',
 			)
 			: array(
@@ -148,23 +165,38 @@ class Sloc_Weather_Archive {
 	 * @return array[] Arrays with 'time' (Unix timestamp) and 'temperature' (Celsius), keyed by post ID, in the query's order.
 	 */
 	public static function get_temperatures() {
+		return self::get_readings( 'temperature' );
+	}
+
+	/**
+	 * Returns a weather reading of each post in the main query, for a chart view.
+	 *
+	 * Posts without the reading, without a date, or whose location is private are left out.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param string $property Weather property, such as 'temperature', 'rain' or 'snow'.
+	 * @return array[] Arrays with 'time' (Unix timestamp) and the property (in metric units), keyed by post ID, in the
+	 *                 query's order.
+	 */
+	public static function get_readings( $property ) {
 		global $wp_query;
-		$temperatures = array();
+		$readings = array();
 		if ( empty( $wp_query->posts ) ) {
-			return $temperatures;
+			return $readings;
 		}
 		foreach ( $wp_query->posts as $post ) {
-			$temperature = get_post_weatherdata( $post->ID, 'temperature' );
-			$time        = get_post_timestamp( $post );
-			if ( ! is_numeric( $temperature ) || ! $time || 'private' === get_post_geodata( $post->ID, 'visibility' ) ) {
+			$value = get_post_weatherdata( $post->ID, $property );
+			$time  = get_post_timestamp( $post );
+			if ( ! is_numeric( $value ) || ! $time || 'private' === get_post_geodata( $post->ID, 'visibility' ) ) {
 				continue;
 			}
-			$temperatures[ $post->ID ] = array(
-				'time'        => $time,
-				'temperature' => (float) $temperature,
+			$readings[ $post->ID ] = array(
+				'time'    => $time,
+				$property => (float) $value,
 			);
 		}
-		return $temperatures;
+		return $readings;
 	}
 
 	/**
@@ -188,6 +220,29 @@ class Sloc_Weather_Archive {
 	 */
 	public static function display_temperature( $celsius ) {
 		return round( self::is_imperial() ? Weather_Provider::celsius_to_fahrenheit( $celsius ) : (float) $celsius, 1 );
+	}
+
+	/**
+	 * Returns a rain or snow amount in the site's units: millimeters to one decimal place, or inches to two.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param float $mm Amount in millimeters.
+	 * @return float Amount.
+	 */
+	public static function display_precipitation( $mm ) {
+		return self::is_imperial() ? round( Weather_Provider::mm_to_inches( (float) $mm ), 2 ) : round( (float) $mm, 1 );
+	}
+
+	/**
+	 * Returns the unit of rain and snow amounts in the site's units.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @return string 'in' or 'mm', translated.
+	 */
+	public static function precipitation_unit() {
+		return self::is_imperial() ? __( 'in', 'simple-location' ) : __( 'mm', 'simple-location' );
 	}
 
 	/**
@@ -255,6 +310,88 @@ class Sloc_Weather_Archive {
 			sprintf( $text, $left, $height - 8, 'start', esc_html( wp_date( $format, $first ) ) ) . sprintf( $text, $width - $right, $height - 8, 'end', esc_html( wp_date( $format, $last ) ) ),
 			esc_attr( implode( ' ', $points ) ),
 			implode( '', $dots )
+		);
+	}
+
+	/**
+	 * Returns a bar chart of rain or snow amounts over time, as an SVG drawn on the server.
+	 *
+	 * Each bar has a title with its date and amount, and the chart is labeled with the largest amount and the first
+	 * and last dates. A reading of 0 has no bar.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param array[] $readings Readings, from get_readings().
+	 * @param string  $property 'rain' or 'snow'.
+	 * @return string SVG markup, escaped, or an empty string without readings.
+	 */
+	public static function get_precipitation_chart( $readings, $property ) {
+		if ( empty( $readings ) || ! is_array( $readings ) || ! in_array( $property, array( 'rain', 'snow' ), true ) ) {
+			return '';
+		}
+		$width   = 600;
+		$height  = 240;
+		$left    = 56;
+		$right   = 16;
+		$top     = 16;
+		$bottom  = 32;
+		$unit    = self::precipitation_unit();
+		$format  = get_option( 'date_format' );
+		$values  = array_map( array( __CLASS__, 'display_precipitation' ), array_column( $readings, $property ) );
+		$times   = array_column( $readings, 'time' );
+		$max     = max( $values );
+		$first   = min( $times );
+		$last    = max( $times );
+		$t_range = max( 1, $last - $first );
+		$plot_w  = $width - $left - $right;
+		$plot_h  = $height - $top - $bottom;
+		$bar     = max( 2, min( 12, $plot_w / count( $values ) * 0.6 ) );
+
+		$bars = array();
+		foreach ( array_values( $readings ) as $index => $reading ) {
+			// Bar centers are inset by half a bar, so the first and last bars stay inside the plot.
+			$x      = ( 1 === count( $readings ) ) ? $left + $plot_w / 2 : $left + $bar / 2 + ( $reading['time'] - $first ) / $t_range * ( $plot_w - $bar );
+			$h      = ( $max > 0 ) ? $values[ $index ] / $max * $plot_h : 0;
+			$bars[] = sprintf(
+				'<rect x="%1$s" y="%2$s" width="%3$s" height="%4$s"><title>%5$s</title></rect>',
+				esc_attr( round( $x - $bar / 2, 1 ) ),
+				esc_attr( round( $top + $plot_h - $h, 1 ) ),
+				esc_attr( round( $bar, 1 ) ),
+				esc_attr( round( $h, 1 ) ),
+				/* translators: 1: Date 2: Amount 3: Unit */
+				esc_html( sprintf( __( '%1$s: %2$s %3$s', 'simple-location' ), wp_date( $format, $reading['time'] ), $values[ $index ], $unit ) )
+			);
+		}
+
+		$count = count( $values );
+		$label = ( 'rain' === $property )
+			? sprintf(
+				/* translators: 1: Number of posts 2: Largest amount 3: Unit */
+				_n( 'Rainfall of %1$s post, up to %2$s %3$s', 'Rainfall of %1$s posts, up to %2$s %3$s', $count, 'simple-location' ),
+				number_format_i18n( $count ),
+				$max,
+				$unit
+			)
+			: sprintf(
+				/* translators: 1: Number of posts 2: Largest amount 3: Unit */
+				_n( 'Snowfall of %1$s post, up to %2$s %3$s', 'Snowfall of %1$s posts, up to %2$s %3$s', $count, 'simple-location' ),
+				number_format_i18n( $count ),
+				$max,
+				$unit
+			);
+		$text = '<text x="%1$s" y="%2$s" text-anchor="%3$s">%4$s</text>';
+		return sprintf(
+			'<svg class="sloc-precipitation-chart sloc-%1$s-chart" viewBox="0 0 %2$s %3$s" role="img" aria-label="%4$s"><title>%4$s</title>%5$s%6$s<line x1="%7$s" y1="%8$s" x2="%9$s" y2="%8$s" stroke="currentColor" />%10$s</svg>',
+			esc_attr( $property ),
+			esc_attr( $width ),
+			esc_attr( $height ),
+			esc_attr( $label ),
+			sprintf( $text, $left - 8, $top + 4, 'end', esc_html( $max . ' ' . $unit ) ) . sprintf( $text, $left - 8, $height - $bottom, 'end', esc_html( '0 ' . $unit ) ),
+			sprintf( $text, $left, $height - 8, 'start', esc_html( wp_date( $format, $first ) ) ) . sprintf( $text, $width - $right, $height - 8, 'end', esc_html( wp_date( $format, $last ) ) ),
+			esc_attr( $left ),
+			esc_attr( $top + $plot_h ),
+			esc_attr( $width - $right ),
+			implode( '', $bars )
 		);
 	}
 }
