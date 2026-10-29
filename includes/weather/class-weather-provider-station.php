@@ -452,6 +452,7 @@ class Weather_Provider_Station extends Weather_Provider {
 	 * Reads a station's JSON: the current conditions format, version 1, or the earlier format.
 	 *
 	 * @since 6.1.0
+	 * @since 6.2.0 An AQI whose `derived.aqi` scale isn't us_epa isn't stored.
 	 *
 	 * @param mixed $json Decoded JSON.
 	 * @return array|WP_Error Conditions in the plugin's units, with 'timestamp', and the station's 'station_id', 'name',
@@ -482,6 +483,11 @@ class Weather_Provider_Station extends Weather_Provider {
 			if ( isset( $observations[ $key ] ) && is_numeric( $observations[ $key ] ) ) {
 				$return[ $key ] = (float) $observations[ $key ];
 			}
+		}
+		// The plugin's AQI is on the US EPA scale; an index on another scale isn't stored as one.
+		$derived = ( isset( $json['derived'] ) && is_array( $json['derived'] ) ) ? $json['derived'] : array();
+		if ( isset( $derived['aqi'] ) && 'us_epa' !== $derived['aqi'] ) {
+			unset( $return['aqi'] );
 		}
 		if ( isset( $json['units'] ) && 'us' === $json['units'] ) {
 			$return = self::imperial_to_metric( $return );

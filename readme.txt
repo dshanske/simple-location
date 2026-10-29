@@ -329,6 +329,8 @@ get_post_map() returns the map, for a public location. The map is still added to
 
 The location is wrapped in a div with the class sloc-display, for styling. get_post_geodata() and get_post_weatherdata() return the raw data. Check the 'visibility' they return before showing coordinates.
 
+For places other than a web page, such as email: get_post_static_map() returns the map as data (image URL, link, size, alternative text and credit) instead of HTML, and takes `durable => true` for image URLs that keep working, and `dark`, `srcset` and `loading` set to false for a plain image. get_post_weather_text() returns the weather as plain text, such as "72°F Clear". get_post_aqi() shows the air quality index with its US EPA category and color, such as a yellow "AQI 72 Moderate", or as plain text with `array( 'style' => 'text' )`.
+
 = How do my profile location and my posts' locations relate? =
 
 Each user has a location in their profile, set under Users > Profile or with the user REST endpoint (see "How can I update the location of my user profile?"). The Last Seen widget shows it, and the weather widget can show the weather there.
