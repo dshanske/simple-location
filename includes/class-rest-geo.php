@@ -421,7 +421,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Map Retrieval
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function map( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
@@ -458,7 +458,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Geolocation Retrieval.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function lookup( $request ) {
 		$params      = $request->get_params();
@@ -563,7 +563,7 @@ class REST_Geo {
 	 *
 	 * @since 6.1.0 Takes a GeoJSON Point or Feature, with or without "locations", or a geo URI (#407).
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function user( $request ) {
 		$location = self::user_location( $request );
@@ -599,7 +599,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Venue Retrieval.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function venue( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
@@ -656,7 +656,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Elevation Retrieval.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function elevation( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
@@ -684,7 +684,7 @@ class REST_Geo {
 	 * @since 6.1.0 A plus_code is decoded and looked up in place of the coordinates, which are used to find a short
 	 *              code without a place (#197). The response then has the code's latitude, longitude and plus_code.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function geocode( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
@@ -831,7 +831,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Weather Retrieval.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function weather( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
@@ -882,7 +882,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Airport Lookup.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function airport( $request ) {
 		$params = $request->get_params();
@@ -906,7 +906,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Looking Up Timezone Information.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function timezone( $request ) {
 		$params = $request->get_params();
