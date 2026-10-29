@@ -63,17 +63,21 @@ class SaveMetaTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Only a file name is stored for the icon, never a path.
+	 * Only a file name is stored for the icon, never a path, and only for an icon that exists (#769).
 	 */
 	public function test_save_meta_icon_basename() {
 		$post_id = self::factory()->post->create();
 		$_POST   = array(
 			'latitude'      => '45.01',
 			'longitude'     => '-75.44',
-			'location_icon' => '../../../wp-config',
+			'location_icon' => '../../../fa-plane',
 		);
 		Geo_Base::save_meta( 'post', $post_id );
-		$this->assertSame( 'wp-config', get_post_meta( $post_id, 'geo_icon', true ) );
+		$this->assertSame( 'fa-plane', get_post_meta( $post_id, 'geo_icon', true ) );
+
+		$_POST['location_icon'] = '../../../wp-config';
+		Geo_Base::save_meta( 'post', $post_id );
+		$this->assertSame( '', get_post_meta( $post_id, 'geo_icon', true ) );
 	}
 
 	/**

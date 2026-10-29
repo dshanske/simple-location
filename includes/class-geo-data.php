@@ -622,6 +622,66 @@ class Geo_Data {
 	}
 
 	/**
+	 * Sanitizes the geo_address meta value.
+	 *
+	 * Strips markup, which the address is never displayed with. Entities are left alone, so an
+	 * address such as "Barnes & Noble" is stored as written.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value The address.
+	 * @return string The address without tags or surrounding whitespace.
+	 */
+	public static function sanitize_address( $value ) {
+		if ( ! is_scalar( $value ) ) {
+			return '';
+		}
+		return trim( wp_strip_all_tags( (string) $value ) );
+	}
+
+	/**
+	 * Sanitizes the geo_public meta value.
+	 *
+	 * Stores 0 (private), 1 (public) or 2 (protected). The names are accepted too. An empty value
+	 * stays empty, which means the default visibility; anything else is stored as private.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value 0, 1 or 2, or private, public or protected.
+	 * @return string '0', '1' or '2', or an empty string.
+	 */
+	public static function sanitize_visibility( $value ) {
+		if ( '' === $value || null === $value ) {
+			return '';
+		}
+		return (string) self::sanitize_default_visibility( $value );
+	}
+
+	/**
+	 * Sanitizes the geo_icon meta value.
+	 *
+	 * Accepts 'none', an icon from get_iconlist(), or the name of another icon file in svgs/.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Icon name.
+	 * @return string The icon name, or an empty string if there is no such icon.
+	 */
+	public static function sanitize_icon( $value ) {
+		if ( ! is_string( $value ) ) {
+			return '';
+		}
+		$icon = sanitize_key( basename( $value ) );
+		if ( '' === $icon ) {
+			return '';
+		}
+		if ( 'none' === $icon || array_key_exists( $icon, self::get_iconlist() ) ) {
+			return $icon;
+		}
+		return sloc_file_exists( sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), $icon ) ) ? $icon : '';
+	}
+
+	/**
 	 * Registers a meta key for the terms of each taxonomy, or for all terms.
 	 *
 	 * @since 5.0.0
@@ -742,6 +802,7 @@ class Geo_Data {
 		 * Registers Geo Metadata.
 		 *
 		 * @since 1.0.0
+		 * @since 6.1.2 The geo_address, geo_public and geo_icon sanitizers run; geo_public is registered once.
 		 */
 	public static function register_meta() {
 		/**
@@ -801,7 +862,7 @@ class Geo_Data {
 		self::register_terms_meta( $taxonomies, 'geo_address', $args );
 
 		$args = array(
-			'sanitize_callback' => array( __CLASS__, 'sanitize_address' ),
+			'sanitize_callback' => array( __CLASS__, 'sanitize_visibility' ),
 			'type'              => 'number',
 			'description'       => __( 'Geodata Public', 'simple-location' ),
 			'single'            => true,
@@ -813,7 +874,7 @@ class Geo_Data {
 		self::register_terms_meta( $taxonomies, 'geo_public', $args );
 
 		$args = array(
-			'sanitize_callback' => array( __CLASS__, 'esc_attr' ),
+			'sanitize_callback' => array( __CLASS__, 'sanitize_icon' ),
 			'type'              => 'string',
 			'description'       => __( 'Geodata Icon', 'simple-location' ),
 			'single'            => true,
@@ -838,11 +899,6 @@ class Geo_Data {
 		$numerics = array(
 			'altitude' => __( 'Altitude', 'simple-location' ),
 			'zoom'     => __( 'Geodata Zoom for Map Display', 'simple-location' ),
-			/*
-			 * Officially 0 is private 1 is public and absence or non-zero is assumed public.
-			 * Therefore any non-zero number could be used to specify different display options.
-			 */
-			'public'   => __( 'Geodata Public', 'simple-location' ),
 		);
 		foreach ( $numerics as $prop => $description ) {
 			$args = array(
