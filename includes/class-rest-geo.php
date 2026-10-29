@@ -388,13 +388,18 @@ class REST_Geo {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'map' ),
 					'args'                => array(
-						'longitude' => array(
-							'required'          => true,
+						// Coordinates, or a post or comment whose location to draw.
+						'longitude'  => array(
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
 						),
-						'latitude'  => array(
-							'required'          => true,
+						'latitude'   => array(
 							'sanitize_callback' => array( $this, 'sanitize_coordinates' ),
+						),
+						'post_id'    => array(
+							'sanitize_callback' => 'absint',
+						),
+						'comment_id' => array(
+							'sanitize_callback' => 'absint',
 						),
 						'height'    => array(
 							'sanitize_callback' => array( $this, 'sanitize_int' ),
@@ -419,22 +424,81 @@ class REST_Geo {
 
 
 	/**
+	 * Returns the geo data of the post or comment a map request names, if the user may see its map.
+	 *
+	 * Someone who can edit the post or comment gets its location whatever its visibility, as they can see it in the
+	 * editor; someone who can only read it gets a public location only.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param array $params Request parameters, with 'post_id' or 'comment_id'.
+	 * @return array|WP_Error Geo data, with the saved zoom as 'map_zoom', or an error.
+	 */
+	protected static function object_location( $params ) {
+		if ( ! empty( $params['comment_id'] ) ) {
+			$type    = 'comment';
+			$id      = (int) $params['comment_id'];
+			$comment = get_comment( $id );
+			$exists  = $comment instanceof WP_Comment;
+			$edit    = $exists && current_user_can( 'edit_comment', $id );
+			$read    = $exists && ( $edit || ( '1' === (string) $comment->comment_approved && current_user_can( 'read_post', (int) $comment->comment_post_ID ) ) );
+		} else {
+			$type   = 'post';
+			$id     = (int) $params['post_id'];
+			$exists = (bool) get_post( $id );
+			$edit   = $exists && current_user_can( 'edit_post', $id );
+			$read   = $exists && ( $edit || current_user_can( 'read_post', $id ) );
+		}
+		if ( ! $read ) {
+			return new WP_Error( 'rest_forbidden', __( 'Sorry, you are not allowed to see this map.', 'simple-location' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		$loc = Geo_Data::get_geodata( $type, $id );
+		// A location the user may not see is reported as no location, so its existence isn't revealed.
+		if ( ! is_array( $loc ) || ! isset( $loc['latitude'], $loc['longitude'] ) || ( ! $edit && 'public' !== ( $loc['visibility'] ?? '' ) ) ) {
+			return new WP_Error( 'no_location', __( 'There is no location to show on a map.', 'simple-location' ), array( 'status' => 404 ) );
+		}
+		$loc['map_zoom'] = Geo_Data::map_zoom( $loc );
+		return $loc;
+	}
+
+	/**
 	 * Callback handler for Map Retrieval
+	 *
+	 * @since 6.2.0 Takes `style_family`, and `post_id` or `comment_id` in place of coordinates, for that object's map
+	 *              at its saved zoom and style family.
 	 *
 	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function map( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
 		$params = $request->get_params();
+		$object = null;
+		if ( ! empty( $params['post_id'] ) || ! empty( $params['comment_id'] ) ) {
+			$object = self::object_location( $params );
+			if ( is_wp_error( $object ) ) {
+				return $object;
+			}
+			$params['latitude']  = $object['latitude'];
+			$params['longitude'] = $object['longitude'];
+		}
 		if ( is_numeric( $params['longitude'] ?? null ) && is_numeric( $params['latitude'] ?? null ) ) {
 			$args = array(
 				'latitude'  => $params['latitude'],
 				'longitude' => $params['longitude'],
 			);
+			if ( $object ) {
+				// The object's saved zoom and style, which the request can override.
+				$args['map_zoom']     = $object['map_zoom'];
+				$args['style_family'] = $object['map_style'] ?? '';
+				$args['location']     = ( 'public' === ( $object['visibility'] ?? '' ) ) ? ( $object['address'] ?? '' ) : '';
+			}
 			if ( ! empty( $params['zoom'] ) ) {
 				$args['map_zoom'] = $params['zoom'];
 			}
-			$args['style_family'] = Map_Provider::sanitize_map_style( $params['style_family'] ?? '' );
+			if ( isset( $params['style_family'] ) ) {
+				$args['style_family'] = $params['style_family'];
+			}
+			$args['style_family'] = Map_Provider::sanitize_map_style( $args['style_family'] ?? '' );
 			if ( ! empty( $params['height'] ) ) {
 				$args['height'] = $params['height'];
 			}

@@ -299,7 +299,103 @@ class RestGeoTest extends WP_UnitTestCase {
 	 * /map requires coordinates.
 	 */
 	public function test_map_missing_coordinates() {
-		$this->assertErrorResponse( 'rest_missing_callback_param', $this->request( '/map' ), 400 );
+		$this->assertErrorResponse( 'missing_geo', $this->request( '/map' ), 400 );
+	}
+
+	/**
+	 * Creates a published post with a location.
+	 *
+	 * @param string $visibility Location visibility.
+	 * @param int    $author     Author. Default the test author.
+	 * @return int Post ID.
+	 */
+	protected function located_post( $visibility, $author = 0 ) {
+		$post_id = self::factory()->post->create( array( 'post_author' => $author ? $author : self::$author ) );
+		set_post_geodata(
+			$post_id,
+			'',
+			array(
+				'latitude'   => 45.01,
+				'longitude'  => -75.44,
+				'address'    => 'Ottawa',
+				'visibility' => $visibility,
+				'map_zoom'   => 9,
+			)
+		);
+		return $post_id;
+	}
+
+	/**
+	 * /map draws a post's map from its ID, at its saved zoom, with its visibility respected (#118).
+	 */
+	public function test_map_by_post() {
+		$data = $this->request( '/map', array( 'post_id' => $this->located_post( 'public' ) ) )->get_data();
+		$this->assertStringStartsWith( 'https://maps.example.com/static?c=45.01,-75.44&z=9&', $data['map'], 'The post\'s place and saved zoom.' );
+		$this->assertStringContainsString( '<img', $data['return'] );
+
+		// The request can override the saved zoom.
+		$data = $this->request(
+			'/map',
+			array(
+				'post_id' => $this->located_post( 'public' ),
+				'zoom'    => '15',
+			)
+		)->get_data();
+		$this->assertStringContainsString( 'z=15', $data['map'] );
+
+		// Its author can see the map of their own private location; another author can't.
+		$private = $this->located_post( 'private' );
+		$this->assertSame( 200, $this->request( '/map', array( 'post_id' => $private ) )->get_status() );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
+		$this->assertErrorResponse( 'no_location', $this->request( '/map', array( 'post_id' => $private ) ), 404 );
+		$this->assertErrorResponse( 'no_location', $this->request( '/map', array( 'post_id' => $this->located_post( 'protected', self::$author ) ) ), 404 );
+		$this->assertSame( 200, $this->request( '/map', array( 'post_id' => $this->located_post( 'public', self::$author ) ) )->get_status() );
+	}
+
+	/**
+	 * /map by ID needs a post the user can read, with a location.
+	 */
+	public function test_map_by_post_errors() {
+		$this->assertSame( 'rest_forbidden', $this->request( '/map', array( 'post_id' => PHP_INT_MAX ) )->as_error()->get_error_code() );
+
+		$draft = self::factory()->post->create(
+			array(
+				'post_status' => 'draft',
+				'post_author' => self::factory()->user->create( array( 'role' => 'editor' ) ),
+			)
+		);
+		set_post_geodata( $draft, '', array( 'latitude' => 1, 'longitude' => 2, 'visibility' => 'public' ) );
+		$this->assertSame( 'rest_forbidden', $this->request( '/map', array( 'post_id' => $draft ) )->as_error()->get_error_code(), 'Someone else\'s draft.' );
+
+		$this->assertErrorResponse( 'no_location', $this->request( '/map', array( 'post_id' => self::factory()->post->create() ) ), 404 );
+	}
+
+	/**
+	 * /map draws a comment's map from its ID.
+	 */
+	public function test_map_by_comment() {
+		$comment_id = self::factory()->comment->create( array( 'comment_post_ID' => self::factory()->post->create() ) );
+		set_comment_geodata(
+			$comment_id,
+			'',
+			array(
+				'latitude'   => 40.7,
+				'longitude'  => -74.01,
+				'visibility' => 'public',
+			)
+		);
+		$data = $this->request( '/map', array( 'comment_id' => $comment_id ) )->get_data();
+		$this->assertStringContainsString( 'c=40.7,-74.01', $data['map'] );
+
+		$others  = self::factory()->post->create( array( 'post_author' => self::factory()->user->create( array( 'role' => 'editor' ) ) ) );
+		$pending = self::factory()->comment->create(
+			array(
+				'comment_approved' => '0',
+				'comment_post_ID'  => $others,
+			)
+		);
+		set_comment_geodata( $pending, '', array( 'latitude' => 1, 'longitude' => 2, 'visibility' => 'public' ) );
+		$this->assertSame( 'rest_forbidden', $this->request( '/map', array( 'comment_id' => $pending ) )->as_error()->get_error_code(), 'An unapproved comment.' );
 	}
 
 	/**
