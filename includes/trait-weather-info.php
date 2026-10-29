@@ -219,7 +219,7 @@ trait Weather_Info_Trait {
 	/**
 	 * Returns the unit, name and description based on the requested property.
 	 *
-	 * @since 6.2.0 Adds the VOC and NOx indices.
+	 * @since 6.2.0 Adds the VOC and NOx indices, the snow depth and the snow rate.
 	 *
 	 * @param string|null $property Property to return. Null will return entire array.
 	 * @param boolean     $imperial Whether imperial or default units.
@@ -311,11 +311,23 @@ trait Weather_Info_Trait {
 				'name'  => __( 'Rain Rate', 'simple-location' ),
 				'icon'  => 'wi-raindrops',
 			),
+			'snowrate'    => array(
+				'unit'  => __( 'mm/h', 'simple-location' ),
+				'label' => __( 'millimeters per hour', 'simple-location' ),
+				'name'  => __( 'Snow Rate', 'simple-location' ),
+				'icon'  => 'wi-snow',
+			),
 			'snow'        => array(
 				'unit'  => __( 'mm', 'simple-location' ),
 				'label' => __( 'millimeters in the last hour', 'simple-location' ),
 				'name'  => __( 'Snowfall', 'simple-location' ),
 				'icon'  => 'wi-snow',
+			),
+			'snowdepth'   => array(
+				'unit'  => __( 'mm', 'simple-location' ),
+				'label' => __( 'millimeters on the ground', 'simple-location' ),
+				'name'  => __( 'Snow Depth', 'simple-location' ),
+				'icon'  => 'wi-snowflake-cold',
 			),
 			'visibility'  => array(
 				'unit'  => __( 'm', 'simple-location' ),
@@ -473,11 +485,23 @@ trait Weather_Info_Trait {
 					'name'  => __( 'Rain Rate', 'simple-location' ),
 					'icon'  => 'wi-raindrops',
 				),
+				'snowrate'    => array(
+					'unit'  => __( 'in/h', 'simple-location' ),
+					'label' => __( 'inches per hour', 'simple-location' ),
+					'name'  => __( 'Snow Rate', 'simple-location' ),
+					'icon'  => 'wi-snow',
+				),
 				'snow'        => array(
 					'unit'  => __( 'in', 'simple-location' ),
 					'label' => __( 'inches in the last hour', 'simple-location' ),
 					'name'  => __( 'Snowfall', 'simple-location' ),
 					'icon'  => 'wi-snow',
+				),
+				'snowdepth'   => array(
+					'unit'  => __( 'in', 'simple-location' ),
+					'label' => __( 'inches on the ground', 'simple-location' ),
+					'name'  => __( 'Snow Depth', 'simple-location' ),
+					'icon'  => 'wi-snowflake-cold',
 				),
 				'visibility'  => array(
 					'unit'  => __( 'mi', 'simple-location' ),

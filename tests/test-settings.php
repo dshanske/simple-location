@@ -384,7 +384,7 @@ class SettingsTest extends WP_UnitTestCase {
 		Loc_Config::run_data_cleanup();
 		$this->assertSame( '', get_post_meta( $orphan, 'geo_public', true ), 'Drafts are cleaned up too.' );
 		$this->assertSame( '1', get_post_meta( $kept, 'geo_public', true ) );
-		$this->assertEquals( 1, get_option( Loc_Config::DATA_CLEANUP_OPTION ) );
+		$this->assertEquals( Loc_Config::DATA_CLEANUP_VERSION, get_option( Loc_Config::DATA_CLEANUP_OPTION ) );
 		$this->assertFalse( wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ) );
 	}
 
@@ -402,9 +402,15 @@ class SettingsTest extends WP_UnitTestCase {
 		$this->assertSame( $scheduled, wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ), 'Not scheduled twice.' );
 
 		wp_clear_scheduled_hook( Loc_Config::DATA_CLEANUP_HOOK );
-		update_option( Loc_Config::DATA_CLEANUP_OPTION, 1 );
+		update_option( Loc_Config::DATA_CLEANUP_OPTION, Loc_Config::DATA_CLEANUP_VERSION );
 		Loc_Config::schedule_data_cleanup();
 		$this->assertFalse( wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ), 'Not scheduled once finished.' );
+
+		// A site that finished an earlier version of the cleanup runs it again.
+		update_option( Loc_Config::DATA_CLEANUP_OPTION, 1 );
+		Loc_Config::schedule_data_cleanup();
+		$this->assertNotFalse( wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ), 'Scheduled after an earlier version.' );
+		wp_clear_scheduled_hook( Loc_Config::DATA_CLEANUP_HOOK );
 	}
 
 	/**
@@ -428,7 +434,7 @@ class SettingsTest extends WP_UnitTestCase {
 
 		wp_clear_scheduled_hook( Loc_Config::DATA_CLEANUP_HOOK );
 		Loc_Config::run_data_cleanup();
-		$this->assertEquals( 1, get_option( Loc_Config::DATA_CLEANUP_OPTION ) );
+		$this->assertEquals( Loc_Config::DATA_CLEANUP_VERSION, get_option( Loc_Config::DATA_CLEANUP_OPTION ) );
 		$this->assertFalse( wp_next_scheduled( Loc_Config::DATA_CLEANUP_HOOK ) );
 	}
 

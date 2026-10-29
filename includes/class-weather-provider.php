@@ -1065,8 +1065,12 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type int $windgust Wind Gust in miles per hour.
 	 *  @type float $rain Rainfall in inches for the last hour.
 	 *  @type float $snow Snowfall in inches for the last hour.
+	 *  @type float $snowdepth Snow on the ground in inches.
+	 *  @type float $snowrate Snow rate in inches per hour.
 	 *  @type float $visibility Visibility in miles.
 	 * }
+	 *
+	 * @since 6.2.0 Converts the snow depth and snow rate.
 	 */
 	public static function metric_to_imperial( $conditions ) {
 		if ( ! is_array( $conditions ) ) {
@@ -1092,7 +1096,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 
 		// A rate per hour converts like an amount.
-		foreach ( array( 'rain', 'snow', 'rainrate' ) as $fall ) {
+		foreach ( array( 'rain', 'snow', 'snowdepth', 'rainrate', 'snowrate' ) as $fall ) {
 			if ( array_key_exists( $fall, $conditions ) && is_numeric( $conditions[ $fall ] ) ) {
 				$conditions[ $fall ] = self::mm_to_inches( $conditions[ $fall ] );
 			}
@@ -1133,7 +1137,7 @@ abstract class Weather_Provider extends Sloc_Provider {
 		}
 
 		// A rate per hour converts like an amount.
-		foreach ( array( 'rain', 'snow', 'rainrate' ) as $fall ) {
+		foreach ( array( 'rain', 'snow', 'snowdepth', 'rainrate', 'snowrate' ) as $fall ) {
 			if ( array_key_exists( $fall, $conditions ) ) {
 				$conditions[ $fall ] = self::inches_to_mm( $conditions[ $fall ] );
 			}

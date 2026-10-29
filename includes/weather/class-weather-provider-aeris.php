@@ -156,6 +156,8 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	/**
 	 * Convert Data into common format
 	 *
+	 * @since 6.2.0 The snow depth is stored as snowdepth, not as snowfall.
+	 *
 	 * @param string $json Raw JSON.
 	 * @return array Current Conditions in Array
 	 */
@@ -190,7 +192,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$return['windgust']   = self::kmh_to_ms( self::round_value( $observation['windGustKPH'] ?? null ) );
 		$return['winddegree'] = self::round_value( $observation['windDirDEG'] ?? null, 1 );
 		$return['rain']       = self::round_value( $observation['precipMM'] ?? null, 2 );
-		$return['snow']       = self::cm_to_mm( self::round_value( $observation['snowDepthCM'] ?? null, 2 ) );
+		$return['snowdepth']  = self::cm_to_mm( self::round_value( $observation['snowDepthCM'] ?? null, 2 ) );
 		$return['radiation']  = self::round_value( $observation['solradWM2'] ?? null, 2 );
 		$return['uv']         = self::round_value( $observation['uvi'] ?? null, 2 );
 		$visibility           = $observation['visibilityKM'] ?? null;
