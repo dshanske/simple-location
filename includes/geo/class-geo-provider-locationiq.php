@@ -45,6 +45,8 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 	/**
 	 * Return an address.
 	 *
+	 * @since 6.2.0 Uses the current /v1/reverse endpoint, not the legacy reverse.php.
+	 *
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
 	public function reverse_lookup() {
@@ -62,7 +64,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 			'addressdetails'  => 1,
 		);
 
-		$json = $this->fetch_json( 'https://us1.locationiq.com/v1/reverse.php', $args );
+		$json = $this->fetch_json( 'https://us1.locationiq.com/v1/reverse', $args );
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
@@ -80,6 +82,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 	 *
 	 * @since 1.0.0
 	 * @since 6.0.0 The address is parsed, and a search with no results returns an error.
+	 * @since 6.2.0 Uses the current /v1/search endpoint, not the legacy search.php.
 	 *
 	 * @param  string $address String representation of location.
 	 * @return array|WP_Error $reverse microformats2 address elements in an array.
@@ -100,7 +103,7 @@ class Geo_Provider_LocationIQ extends Geo_Provider_Nominatim {
 			'accept-language' => get_bloginfo( 'language' ),
 		);
 
-		$json = $this->fetch_json( 'https://us1.locationiq.com/v1/search.php', $args );
+		$json = $this->fetch_json( 'https://us1.locationiq.com/v1/search', $args );
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
