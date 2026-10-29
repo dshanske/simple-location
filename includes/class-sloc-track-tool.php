@@ -187,6 +187,7 @@ class Sloc_Track_Tool {
 	 * Prints the page.
 	 *
 	 * @since 6.1.0
+	 * @since 6.2.0 The notice is printed with wp_admin_notice().
 	 */
 	public static function page() {
 		if ( ! current_user_can( 'edit_posts' ) ) {
@@ -242,7 +243,13 @@ class Sloc_Track_Tool {
 			</form>
 			<?php
 			if ( is_wp_error( $result ) ) {
-				printf( '<div class="notice notice-error inline"><p>%s</p></div>', esc_html( $result->get_error_message() ) );
+				wp_admin_notice(
+					esc_html( $result->get_error_message() ),
+					array(
+						'type'               => 'error',
+						'additional_classes' => array( 'inline' ),
+					)
+				);
 			} elseif ( is_array( $result ) ) {
 				self::print_result( $result );
 			}

@@ -689,15 +689,19 @@ class Sloc_Weather_Fill {
 			<h1><?php esc_html_e( 'Weather Fill', 'simple-location' ); ?></h1>
 			<p><?php esc_html_e( 'Fill in weather readings that posts are missing, such as the conditions, snow or cloud cover that a weather station has no sensor for, from Open-Meteo. Only missing readings are filled in. Locations are rounded to about a kilometer before they are sent.', 'simple-location' ); ?></p>
 			<?php if ( empty( $readings ) ) { ?>
-				<div class="notice notice-warning inline"><p>
-					<?php
-					printf(
+				<?php
+				wp_admin_notice(
+					sprintf(
 						/* translators: %s: Link to the settings. */
 						esc_html__( 'Choose the readings to fill in under Fill In Missing Readings in the %s first.', 'simple-location' ),
 						'<a href="' . esc_url( admin_url( 'admin.php?page=simloc&tab=providers' ) ) . '">' . esc_html__( 'provider settings', 'simple-location' ) . '</a>'
-					);
-					?>
-				</p></div>
+					),
+					array(
+						'type'               => 'warning',
+						'additional_classes' => array( 'inline' ),
+					)
+				);
+				?>
 			<?php } else { ?>
 				<p>
 					<?php

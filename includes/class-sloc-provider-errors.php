@@ -242,6 +242,7 @@ class Sloc_Provider_Errors {
 	 * Shows administrators the errors they haven't dismissed, on the Dashboard and the Simple Location settings.
 	 *
 	 * @since 6.1.0
+	 * @since 6.2.0 The notice is printed with wp_admin_notice().
 	 */
 	public static function admin_notice() {
 		if ( ! current_user_can( 'manage_options' ) ) {
@@ -255,19 +256,25 @@ class Sloc_Provider_Errors {
 		if ( empty( $errors ) ) {
 			return;
 		}
-		echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Simple Location providers need attention', 'simple-location' ) . '</strong></p><ul>';
+		$items = '';
 		foreach ( $errors as $record ) {
-			printf( '<li>%s</li>', esc_html( self::describe( $record ) ) );
+			$items .= sprintf( '<li>%s</li>', esc_html( self::describe( $record ) ) );
 		}
-		echo '</ul><p>';
-		printf(
-			'<a href="%1$s">%2$s</a> | <a href="%3$s">%4$s</a>',
-			esc_url( admin_url( 'admin.php?page=simloc&tab=api' ) ),
-			esc_html__( 'Check the settings', 'simple-location' ),
-			esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sloc_dismiss_provider_errors' ), 'sloc_dismiss_provider_errors' ) ),
-			esc_html__( 'Dismiss', 'simple-location' )
+		wp_admin_notice(
+			sprintf(
+				'<p><strong>%1$s</strong></p><ul>%2$s</ul><p><a href="%3$s">%4$s</a> | <a href="%5$s">%6$s</a></p>',
+				esc_html__( 'Simple Location providers need attention', 'simple-location' ),
+				$items,
+				esc_url( admin_url( 'admin.php?page=simloc&tab=api' ) ),
+				esc_html__( 'Check the settings', 'simple-location' ),
+				esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=sloc_dismiss_provider_errors' ), 'sloc_dismiss_provider_errors' ) ),
+				esc_html__( 'Dismiss', 'simple-location' )
+			),
+			array(
+				'type'           => 'error',
+				'paragraph_wrap' => false,
+			)
 		);
-		echo '</p></div>';
 	}
 
 	/**

@@ -274,6 +274,7 @@ class Sloc_Map_Cache {
 	 * Shows how many map images were cleared, after the Clear stored maps button.
 	 *
 	 * @since 6.0.0
+	 * @since 6.2.0 The notice is printed with wp_admin_notice().
 	 */
 	public static function cleared_notice() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only shows a count; the clearing itself checked a nonce.
@@ -282,14 +283,17 @@ class Sloc_Map_Cache {
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- See above.
 		$count = absint( $_GET['sloc_maps_cleared'] );
-		printf(
-			'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+		wp_admin_notice(
 			esc_html(
 				sprintf(
 					// translators: Number of deleted map images.
 					_n( 'Deleted %d stored map image.', 'Deleted %d stored map images.', $count, 'simple-location' ),
 					$count
 				)
+			),
+			array(
+				'type'        => 'success',
+				'dismissible' => true,
 			)
 		);
 	}
