@@ -261,24 +261,31 @@ class WeatherArchiveTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The rain view has posts with a rain reading, including 0, whose location isn't private, oldest first.
+	 * The rain view has posts with more than 0 rain whose location isn't private, oldest first.
 	 */
 	public function test_precipitation_query() {
 		$wet     = $this->precipitation_post( array( 'rain' => 2.5 ), '2025-07-03 12:00:00' );
-		$dry     = $this->precipitation_post( array( 'rain' => 0 ), '2025-07-01 12:00:00', 'protected' );
+		$drizzle = $this->precipitation_post( array( 'rain' => 0.1 ), '2025-07-01 12:00:00', 'protected' );
+		$dry     = $this->precipitation_post( array( 'rain' => 0 ), '2025-07-01 18:00:00' );
 		$private = $this->precipitation_post( array( 'rain' => 4 ), '2025-07-02 12:00:00', 'private' );
 		$snowy   = $this->precipitation_post( array( 'snow' => 10 ), '2025-07-02 13:00:00' );
 		$this->weather_post( 20, 'public', '2025-07-02 14:00:00' );
 
 		$this->go_to( $this->archive( 'rain' ) );
-		$this->assertSame( array( $dry, $wet ), wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ) );
+		$this->assertSame( array( $drizzle, $wet ), wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ), 'A post with 0 rain is left out.' );
 		$readings = Sloc_Weather_Archive::get_readings( 'rain' );
-		$this->assertSame( array( $dry, $wet ), array_keys( $readings ) );
+		$this->assertSame( array( $drizzle, $wet ), array_keys( $readings ) );
+		$this->assertNotContains( $dry, array_keys( $readings ) );
 		$this->assertSame( 2.5, $readings[ $wet ]['rain'] );
 		$this->assertNotContains( $private, array_keys( $readings ) );
 
 		$this->go_to( $this->archive( 'snow' ) );
 		$this->assertSame( array( $snowy ), wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ) );
+
+		// get_readings() leaves out 0 itself, for queries that didn't filter it.
+		$this->go_to( $this->archive( 'weather' ) );
+		$this->assertNotContains( $dry, array_keys( Sloc_Weather_Archive::get_readings( 'rain' ) ) );
+		$this->assertContains( $dry, wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ), 'The weather view still lists it.' );
 
 		// The temperature readings are unchanged.
 		$this->go_to( $this->archive( 'temperature' ) );
@@ -289,7 +296,8 @@ class WeatherArchiveTest extends WP_UnitTestCase {
 	 * The bar chart has a bar per reading, scaled to the largest, labeled with the amounts and dates.
 	 */
 	public function test_precipitation_chart() {
-		$this->precipitation_post( array( 'rain' => 0 ), '2025-07-01 12:00:00' );
+		$this->precipitation_post( array( 'rain' => 1 ), '2025-07-01 12:00:00' );
+		$this->precipitation_post( array( 'rain' => 0 ), '2025-07-05 12:00:00' );
 		$this->precipitation_post( array( 'rain' => 5 ), '2025-07-11 12:00:00' );
 		$this->precipitation_post( array( 'rain' => 2.5 ), '2025-07-21 12:00:00' );
 		$this->go_to( $this->archive( 'rain' ) );
@@ -297,9 +305,10 @@ class WeatherArchiveTest extends WP_UnitTestCase {
 
 		$this->assertStringStartsWith( '<svg class="sloc-precipitation-chart sloc-rain-chart" viewBox="0 0 600 240" role="img" aria-label="Rainfall of 3 posts, up to 5 mm">', $chart );
 		$this->assertSame( 3, substr_count( $chart, '<rect ' ) );
-		// Bars stay inside the plot, from x 56 to 584. The dry post has no height; the largest fills the plot, from y 16
+		// The dry post isn't charted. Bars stay inside the plot, from x 56 to 584; the largest fills the plot, from y 16
 		// to the axis at 208.
-		$this->assertStringContainsString( '<rect x="56" y="208" width="12" height="0"><title>2025-07-01: 0 mm</title></rect>', $chart );
+		$this->assertStringNotContainsString( '2025-07-05', $chart );
+		$this->assertStringContainsString( '<rect x="56" y="169.6" width="12" height="38.4"><title>2025-07-01: 1 mm</title></rect>', $chart );
 		$this->assertStringContainsString( '<rect x="314" y="16" width="12" height="192"><title>2025-07-11: 5 mm</title></rect>', $chart );
 		$this->assertStringContainsString( '<rect x="572" y="112" width="12" height="96"><title>2025-07-21: 2.5 mm</title></rect>', $chart );
 		$this->assertStringContainsString( '>5 mm</text>', $chart );
