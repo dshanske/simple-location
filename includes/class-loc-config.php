@@ -140,7 +140,7 @@ class Loc_Config {
 	 * Register General Settings.
 	 *
 	 * @since 1.0.0
-	 * @since 6.1.2 Every setting has a sanitize callback.
+	 * @since 6.2.0 Every setting has a sanitize callback.
 	 */
 	public static function register_general_settings() {
 		register_setting(
@@ -247,7 +247,7 @@ class Loc_Config {
 	 * Register Provider Settings.
 	 *
 	 * @since 1.0.0
-	 * @since 6.1.2 Every setting has a sanitize callback.
+	 * @since 6.2.0 Every setting has a sanitize callback.
 	 */
 	public static function register_provider_settings() {
 		register_setting(
@@ -414,7 +414,7 @@ class Loc_Config {
 	 * @since 6.1.0 Registers the marker, scale bar and attribution settings, used by every map provider.
 	 * @since 6.1.0 Registers the Map Style and Dark Mode Maps settings.
 
-	 * @since 6.1.2 Every setting has a sanitize callback.
+	 * @since 6.2.0 Every setting has a sanitize callback.
 	 */
 	public static function register_map_settings() {
 		self::migrate_map_settings();
@@ -594,7 +594,7 @@ class Loc_Config {
 	 * never turns on a service the site didn't choose. While no provider of the type is registered yet,
 	 * the value is kept, so it isn't lost before the providers load.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value     Provider slug.
 	 * @param array $providers Registered providers, keyed by slug.
@@ -614,7 +614,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the map provider setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Provider slug.
 	 * @return string The provider slug, or 'none' if it isn't one.
@@ -626,7 +626,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the geo lookup provider setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Provider slug.
 	 * @return string The provider slug, or 'none' if it isn't one.
@@ -638,7 +638,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the location provider setting. The browser (HTML5) is also accepted.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Provider slug.
 	 * @return string The provider slug, or 'none' if it isn't one.
@@ -650,7 +650,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the elevation provider setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Provider slug.
 	 * @return string The provider slug, or 'none' if it isn't one.
@@ -662,7 +662,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the venue provider setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Provider slug.
 	 * @return string The provider slug, or 'none' if it isn't one.
@@ -674,7 +674,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the weather provider setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Provider slug.
 	 * @return string The provider slug, or 'none' if it isn't one.
@@ -686,7 +686,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the home country setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value ISO 3166-1 alpha-2 country code, or empty for none.
 	 * @return string The code in upper case, an empty string for none, or US if it isn't a known code.
@@ -710,7 +710,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the units setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value si (or metric) or imperial.
 	 * @return string si, metric or imperial, or the locale's default.
@@ -722,7 +722,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the map width setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Width in pixels.
 	 * @return int A positive width, or the default width.
@@ -735,7 +735,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the map aspect ratio setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Ratio of width to height.
 	 * @return string A positive ratio, or the first ratio from get_default_aspect_ratio().
@@ -751,7 +751,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the default map zoom setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Zoom level.
 	 * @return int A zoom level from 0 to 20, or 14.
@@ -766,7 +766,7 @@ class Loc_Config {
 	/**
 	 * Sanitizes the altitude display setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Height in meters.
 	 * @return int A height of 0 or more, or 500.

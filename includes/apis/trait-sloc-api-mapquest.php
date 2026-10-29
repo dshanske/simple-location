@@ -48,7 +48,7 @@ trait Sloc_API_MapQuest {
 	 * @since 6.0.0 Registers the map API key setting for the map provider.
 	 * @since 6.1.0 Registers the image format setting for the map provider.
 	 * @since 6.1.0 The style setting is empty by default, to use the Map Style setting.
-	 * @since 6.1.2 The style setting is sanitized.
+	 * @since 6.2.0 The style setting is sanitized.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'MapQuest', 'simple-location' ), 'sloc_mapquest_api' );

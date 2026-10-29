@@ -469,7 +469,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Styles are IDs, such as mapbox/streets-v12, or empty to use the Map Style setting. They aren't checked
 	 * against the provider's list, which for some providers is fetched from the provider.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Style ID.
 	 * @return string The style ID without markup, or an empty string.

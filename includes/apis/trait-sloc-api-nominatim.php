@@ -81,7 +81,7 @@ trait Sloc_API_Nominatim {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 6.1.0
-	 * @since 6.1.2 The fallback setting is sanitized.
+	 * @since 6.2.0 The fallback setting is sanitized.
 	 */
 	public static function init() {
 		register_setting(

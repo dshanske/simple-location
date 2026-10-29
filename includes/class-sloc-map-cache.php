@@ -107,7 +107,7 @@ class Sloc_Map_Cache {
 	 * Registers the settings.
 	 *
 	 * @since 6.0.0
-	 * @since 6.1.2 The setting is sanitized.
+	 * @since 6.2.0 The setting is sanitized.
 	 */
 	public static function init() {
 		register_setting(
