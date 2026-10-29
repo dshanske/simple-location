@@ -27,7 +27,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-map-provider.php:1398](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L1398)
+- [includes/class-map-provider.php:1456](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L1456)
 ```php
 apply_filters( 'sloc_archive_marker_title', $title, $post_id, $location )
 ```

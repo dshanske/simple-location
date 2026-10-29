@@ -923,6 +923,7 @@ class Geo_Data {
 	 *
 	 * @since 2.0.0
 	 * @since 6.1.0 The map is drawn at the object's saved zoom or the default zoom, see map_zoom().
+	 * @since 6.1.2 Accepts the output arguments `durable`, `dark`, `srcset` and `loading`; see Map_Provider::OUTPUT_DEFAULTS.
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.
@@ -930,20 +931,48 @@ class Geo_Data {
 	 * @return string Map markup, or an empty string if there is no public location or no map provider.
 	 */
 	public static function get_map( $type, $id, $args = array() ) {
+		$map = self::map_provider_for( $type, $id, $args );
+		return $map ? $map->get_the_map() : '';
+	}
+
+	/**
+	 * Returns the static map for an object with public location as data, for callers that build their own markup.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @param array  $args Arguments passed to the map provider, overriding the stored geo data, as for get_map(). Optional.
+	 * @return array|string|WP_Error Static map data, see Map_Provider::get_static_map_data(); an empty string if there is
+	 *                               no public location or no map provider; or an error if the map can't be built.
+	 */
+	public static function get_static_map( $type, $id, $args = array() ) {
+		$map = self::map_provider_for( $type, $id, $args );
+		return $map ? $map->get_static_map_data() : '';
+	}
+
+	/**
+	 * Returns the map provider, set to an object's public location.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @param array  $args Arguments passed to the map provider, overriding the stored geo data.
+	 * @return Map_Provider|null The map provider, or null if there is no public location or no map provider.
+	 */
+	protected static function map_provider_for( $type, $id, $args ) {
 		$loc = self::get_geodata( $type, $id );
-		if ( is_array( $loc ) && ( 'public' === $loc['visibility'] ) ) {
-			$map = Loc_Config::map_provider();
-			if ( ! $map instanceof Map_Provider ) {
-				return '';
-			}
-			if ( isset( $loc['latitude'] ) && ( isset( $loc['longitude'] ) ) ) {
-				$loc['map_zoom'] = self::map_zoom( $loc );
-				$loc             = array_merge( $loc, $args );
-				$map->set( $loc );
-				return $map->get_the_map();
-			}
+		if ( ! is_array( $loc ) || 'public' !== $loc['visibility'] || ! isset( $loc['latitude'], $loc['longitude'] ) ) {
+			return null;
 		}
-		return '';
+		$map = Loc_Config::map_provider();
+		if ( ! $map instanceof Map_Provider ) {
+			return null;
+		}
+		$loc['map_zoom'] = self::map_zoom( $loc );
+		$map->set( array_merge( $loc, (array) $args ) );
+		return $map;
 	}
 
 	/**
