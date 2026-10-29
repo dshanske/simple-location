@@ -81,6 +81,7 @@ trait Sloc_API_Nominatim {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 6.1.0
+	 * @since 6.1.2 The fallback setting is sanitized.
 	 */
 	public static function init() {
 		register_setting(
@@ -98,10 +99,11 @@ trait Sloc_API_Nominatim {
 			'sloc_api',
 			'sloc_nominatim_fallback',
 			array(
-				'type'         => 'boolean',
-				'description'  => 'Use the Public Nominatim Server When Yours Finds Nothing',
-				'show_in_rest' => false,
-				'default'      => false,
+				'type'              => 'boolean',
+				'description'       => 'Use the Public Nominatim Server When Yours Finds Nothing',
+				'show_in_rest'      => false,
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
 			)
 		);
 	}

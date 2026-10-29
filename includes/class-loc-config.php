@@ -140,6 +140,7 @@ class Loc_Config {
 	 * Register General Settings.
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.2 Every setting has a sanitize callback.
 	 */
 	public static function register_general_settings() {
 		register_setting(
@@ -158,11 +159,12 @@ class Loc_Config {
 			'simloc', // option group.
 			'sloc_last_report', // option name.
 			array(
-				'type'         => 'boolean',
-				'description'  => 'Update Authors Last Reported Location on New Post',
-				'show_in_rest' => true,
-				'default'      => true,
+				'type'              => 'boolean',
+				'description'       => 'Update Authors Last Reported Location on New Post',
+				'show_in_rest'      => true,
+				'default'           => true,
 				// If this is true then each time a post is made with location properties it will update the user location.
+				'sanitize_callback' => 'rest_sanitize_boolean',
 			)
 		);
 
@@ -170,11 +172,12 @@ class Loc_Config {
 			'simloc', // option group.
 			'sloc_auto_micropub', // option name.
 			array(
-				'type'         => 'boolean',
-				'description'  => 'Add Location from Geolocation Provider Automatically on Micropub Posts',
-				'show_in_rest' => true,
-				'default'      => false,
+				'type'              => 'boolean',
+				'description'       => 'Add Location from Geolocation Provider Automatically on Micropub Posts',
+				'show_in_rest'      => true,
+				'default'           => false,
 				// If this is true then each time a post is made without location it will add it set automatically to private.
+				'sanitize_callback' => 'rest_sanitize_boolean',
 			)
 		);
 
@@ -182,11 +185,12 @@ class Loc_Config {
 			'simloc', // option group.
 			'sloc_taxonomy_display', // option name.
 			array(
-				'type'         => 'boolean',
-				'description'  => 'Show Taxonomy instead of Address Field',
-				'show_in_rest' => true,
-				'default'      => false,
+				'type'              => 'boolean',
+				'description'       => 'Show Taxonomy instead of Address Field',
+				'show_in_rest'      => true,
+				'default'           => false,
 				// If this is true then each time a post is made without location it will add it set automatically to private.
+				'sanitize_callback' => 'rest_sanitize_boolean',
 			)
 		);
 
@@ -194,10 +198,11 @@ class Loc_Config {
 			'simloc', // option group.
 			'sloc_country', // option name.
 			array(
-				'type'         => 'string',
-				'description'  => 'Home Country',
-				'show_in_rest' => true,
-				'default'      => 'US',
+				'type'              => 'string',
+				'description'       => 'Home Country',
+				'show_in_rest'      => true,
+				'default'           => 'US',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_country' ),
 			)
 		);
 
@@ -205,10 +210,11 @@ class Loc_Config {
 			'simloc', // option group.
 			'sloc_map_display', // option name.
 			array(
-				'type'         => 'boolean',
-				'description'  => 'Show Maps on Home and Archive Pages. Only on single if false',
-				'show_in_rest' => true,
-				'default'      => false,
+				'type'              => 'boolean',
+				'description'       => 'Show Maps on Home and Archive Pages. Only on single if false',
+				'show_in_rest'      => true,
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
 			)
 		);
 
@@ -228,10 +234,11 @@ class Loc_Config {
 			'simloc', // option group.
 			'sloc_measurements', // option name.
 			array(
-				'type'         => 'string',
-				'description'  => 'Units to Display',
-				'show_in_rest' => true,
-				'default'      => self::measurement_default(),
+				'type'              => 'string',
+				'description'       => 'Units to Display',
+				'show_in_rest'      => true,
+				'default'           => self::measurement_default(),
+				'sanitize_callback' => array( __CLASS__, 'sanitize_measurements' ),
 			)
 		);
 	}
@@ -240,36 +247,40 @@ class Loc_Config {
 	 * Register Provider Settings.
 	 *
 	 * @since 1.0.0
+	 * @since 6.1.2 Every setting has a sanitize callback.
 	 */
 	public static function register_provider_settings() {
 		register_setting(
 			'sloc_providers', // option group.
 			'sloc_map_provider', // option name.
 			array(
-				'type'         => 'string',
-				'description'  => 'Map Provider',
-				'show_in_rest' => false,
-				'default'      => 'none',
+				'type'              => 'string',
+				'description'       => 'Map Provider',
+				'show_in_rest'      => false,
+				'default'           => 'none',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_map_provider' ),
 			)
 		);
 		register_setting(
 			'sloc_providers', // option group.
 			'sloc_geo_provider', // option name.
 			array(
-				'type'         => 'string',
-				'description'  => 'Geo Lookup Provider',
-				'show_in_rest' => false,
-				'default'      => 'nominatim',
+				'type'              => 'string',
+				'description'       => 'Geo Lookup Provider',
+				'show_in_rest'      => false,
+				'default'           => 'nominatim',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_geo_provider' ),
 			)
 		);
 		register_setting(
 			'sloc_providers', // option group.
 			'sloc_geolocation_provider', // option name.
 			array(
-				'type'         => 'string',
-				'description'  => 'Geolocation Provider',
-				'show_in_rest' => false,
-				'default'      => 'HTML5',
+				'type'              => 'string',
+				'description'       => 'Geolocation Provider',
+				'show_in_rest'      => false,
+				'default'           => 'HTML5',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_geolocation_provider' ),
 			)
 		);
 
@@ -277,10 +288,11 @@ class Loc_Config {
 			'sloc_providers', // option group.
 			'sloc_elevation_provider', // option name.
 			array(
-				'type'         => 'string',
-				'description'  => 'Elevation Provider',
-				'show_in_rest' => false,
-				'default'      => 'none',
+				'type'              => 'string',
+				'description'       => 'Elevation Provider',
+				'show_in_rest'      => false,
+				'default'           => 'none',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_elevation_provider' ),
 			)
 		);
 
@@ -288,10 +300,11 @@ class Loc_Config {
 			'sloc_providers', // option group.
 			'sloc_venue_provider', // option name.
 			array(
-				'type'         => 'string',
-				'description'  => 'Venue Provider',
-				'show_in_rest' => false,
-				'default'      => 'nominatim',
+				'type'              => 'string',
+				'description'       => 'Venue Provider',
+				'show_in_rest'      => false,
+				'default'           => 'nominatim',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_venue_provider' ),
 			)
 		);
 
@@ -335,10 +348,11 @@ class Loc_Config {
 			'sloc_providers', // option group.
 			'sloc_weather_provider', // option name.
 			array(
-				'type'         => 'string',
-				'description'  => 'Weather Provider',
-				'show_in_rest' => false,
-				'default'      => 'none',
+				'type'              => 'string',
+				'description'       => 'Weather Provider',
+				'show_in_rest'      => false,
+				'default'           => 'none',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_weather_provider' ),
 			)
 		);
 		Sloc_Provider_Chain::migrate();
@@ -399,6 +413,8 @@ class Loc_Config {
 	 * @since 6.0.0 The default width comes from get_default_map_width().
 	 * @since 6.1.0 Registers the marker, scale bar and attribution settings, used by every map provider.
 	 * @since 6.1.0 Registers the Map Style and Dark Mode Maps settings.
+
+	 * @since 6.1.2 Every setting has a sanitize callback.
 	 */
 	public static function register_map_settings() {
 		self::migrate_map_settings();
@@ -418,10 +434,11 @@ class Loc_Config {
 			'simloc',
 			'sloc_map_dark_mode',
 			array(
-				'type'         => 'boolean',
-				'description'  => 'Simple Location Dark Mode Maps',
-				'show_in_rest' => false,
-				'default'      => false,
+				'type'              => 'boolean',
+				'description'       => 'Simple Location Dark Mode Maps',
+				'show_in_rest'      => false,
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
 			)
 		);
 
@@ -429,41 +446,45 @@ class Loc_Config {
 			'simloc', // option group.
 			'sloc_width', // option name.
 			array(
-				'type'         => 'number',
-				'description'  => 'Simple Location Map Width',
-				'show_in_rest' => true,
-				'default'      => self::get_default_map_width(),
+				'type'              => 'number',
+				'description'       => 'Simple Location Map Width',
+				'show_in_rest'      => true,
+				'default'           => self::get_default_map_width(),
+				'sanitize_callback' => array( __CLASS__, 'sanitize_width' ),
 			)
 		);
 		register_setting(
 			'simloc', // option group.
 			'sloc_aspect', // option name.
 			array(
-				'type'         => 'number',
-				'description'  => 'Simple Location Map Aspect Ratio',
-				'show_in_rest' => true,
+				'type'              => 'number',
+				'description'       => 'Simple Location Map Aspect Ratio',
+				'show_in_rest'      => true,
 				// The first ratio in the list (widescreen), not the whole list.
-				'default'      => array_key_first( self::get_default_aspect_ratio() ) ?? '1.77777777778',
+				'default'           => array_key_first( self::get_default_aspect_ratio() ) ?? '1.77777777778',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_aspect' ),
 			)
 		);
 		register_setting(
 			'simloc', // option group.
 			'sloc_zoom', // option name.
 			array(
-				'type'         => 'number',
-				'description'  => 'Simple Location Map Zoom',
-				'show_in_rest' => true,
-				'default'      => 14,
+				'type'              => 'number',
+				'description'       => 'Simple Location Map Zoom',
+				'show_in_rest'      => true,
+				'default'           => 14,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_zoom' ),
 			)
 		);
 		register_setting(
 			'simloc', // option group.
 			'sloc_zoom_always', // option name.
 			array(
-				'type'         => 'boolean',
-				'description'  => 'Simple Location Always Use the Default Map Zoom',
-				'show_in_rest' => true,
-				'default'      => false,
+				'type'              => 'boolean',
+				'description'       => 'Simple Location Always Use the Default Map Zoom',
+				'show_in_rest'      => true,
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
 			)
 		);
 		$markers = array(
@@ -492,10 +513,11 @@ class Loc_Config {
 			'simloc', // option group.
 			'sloc_altitude', // option name.
 			array(
-				'type'         => 'number',
-				'description'  => 'Simple Location Height After Which Altitude would be displayed(in meters)',
-				'show_in_rest' => true,
-				'default'      => 500,
+				'type'              => 'number',
+				'description'       => 'Simple Location Height After Which Altitude would be displayed(in meters)',
+				'show_in_rest'      => true,
+				'default'           => 500,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_altitude' ),
 			)
 		);
 	}
@@ -563,6 +585,197 @@ class Loc_Config {
 			return 'imperial';
 		}
 		return 'si';
+	}
+
+	/**
+	 * Sanitizes a provider setting.
+	 *
+	 * Accepts 'none' or the slug of a registered provider. Anything else becomes 'none', so a bad value
+	 * never turns on a service the site didn't choose. While no provider of the type is registered yet,
+	 * the value is kept, so it isn't lost before the providers load.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value     Provider slug.
+	 * @param array $providers Registered providers, keyed by slug.
+	 * @return string The provider slug, or 'none'.
+	 */
+	protected static function sanitize_provider( $value, $providers ) {
+		if ( ! is_string( $value ) ) {
+			return 'none';
+		}
+		$value = trim( $value );
+		if ( 'none' === $value || array_key_exists( $value, $providers ) ) {
+			return $value;
+		}
+		return empty( $providers ) ? sanitize_text_field( $value ) : 'none';
+	}
+
+	/**
+	 * Sanitizes the map provider setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Provider slug.
+	 * @return string The provider slug, or 'none' if it isn't one.
+	 */
+	public static function sanitize_map_provider( $value ) {
+		return self::sanitize_provider( $value, self::map_providers() );
+	}
+
+	/**
+	 * Sanitizes the geo lookup provider setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Provider slug.
+	 * @return string The provider slug, or 'none' if it isn't one.
+	 */
+	public static function sanitize_geo_provider( $value ) {
+		return self::sanitize_provider( $value, self::geo_providers() );
+	}
+
+	/**
+	 * Sanitizes the location provider setting. The browser (HTML5) is also accepted.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Provider slug.
+	 * @return string The provider slug, or 'none' if it isn't one.
+	 */
+	public static function sanitize_geolocation_provider( $value ) {
+		return self::sanitize_provider( $value, self::geolocation_providers() );
+	}
+
+	/**
+	 * Sanitizes the elevation provider setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Provider slug.
+	 * @return string The provider slug, or 'none' if it isn't one.
+	 */
+	public static function sanitize_elevation_provider( $value ) {
+		return self::sanitize_provider( $value, self::elevation_providers() );
+	}
+
+	/**
+	 * Sanitizes the venue provider setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Provider slug.
+	 * @return string The provider slug, or 'none' if it isn't one.
+	 */
+	public static function sanitize_venue_provider( $value ) {
+		return self::sanitize_provider( $value, self::venue_providers() );
+	}
+
+	/**
+	 * Sanitizes the weather provider setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Provider slug.
+	 * @return string The provider slug, or 'none' if it isn't one.
+	 */
+	public static function sanitize_weather_provider( $value ) {
+		return self::sanitize_provider( $value, self::weather_providers() );
+	}
+
+	/**
+	 * Sanitizes the home country setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value ISO 3166-1 alpha-2 country code, or empty for none.
+	 * @return string The code in upper case, an empty string for none, or US if it isn't a known code.
+	 */
+	public static function sanitize_country( $value ) {
+		$value = is_string( $value ) ? strtoupper( trim( $value ) ) : '';
+		if ( '' === $value ) {
+			// No home country: the country is always shown.
+			return '';
+		}
+		if ( ! preg_match( '/^[A-Z]{2}$/', $value ) ) {
+			return 'US';
+		}
+		$codes = json_decode( (string) sloc_get_contents( trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-1.json' ), true );
+		if ( ! is_array( $codes ) || empty( $codes['3166-1'] ) ) {
+			return $value;
+		}
+		return in_array( $value, array_column( $codes['3166-1'], 'alpha_2' ), true ) ? $value : 'US';
+	}
+
+	/**
+	 * Sanitizes the units setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value si (or metric) or imperial.
+	 * @return string si, metric or imperial, or the locale's default.
+	 */
+	public static function sanitize_measurements( $value ) {
+		return in_array( $value, array( 'si', 'metric', 'imperial' ), true ) ? $value : self::measurement_default();
+	}
+
+	/**
+	 * Sanitizes the map width setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Width in pixels.
+	 * @return int A positive width, or the default width.
+	 */
+	public static function sanitize_width( $value ) {
+		$width = is_numeric( $value ) ? (int) round( (float) $value ) : 0;
+		return ( 0 < $width ) ? $width : self::get_default_map_width();
+	}
+
+	/**
+	 * Sanitizes the map aspect ratio setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Ratio of width to height.
+	 * @return string A positive ratio, or the first ratio from get_default_aspect_ratio().
+	 */
+	public static function sanitize_aspect( $value ) {
+		if ( is_numeric( $value ) && 0 < (float) $value ) {
+			// A string, so it still matches the keys of get_default_aspect_ratio().
+			return trim( (string) $value );
+		}
+		return (string) ( array_key_first( self::get_default_aspect_ratio() ) ?? '1.77777777778' );
+	}
+
+	/**
+	 * Sanitizes the default map zoom setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Zoom level.
+	 * @return int A zoom level from 0 to 20, or 14.
+	 */
+	public static function sanitize_zoom( $value ) {
+		if ( ! is_numeric( $value ) ) {
+			return 14;
+		}
+		return max( 0, min( 20, (int) round( (float) $value ) ) );
+	}
+
+	/**
+	 * Sanitizes the altitude display setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Height in meters.
+	 * @return int A height of 0 or more, or 500.
+	 */
+	public static function sanitize_altitude( $value ) {
+		if ( ! is_numeric( $value ) ) {
+			return 500;
+		}
+		return max( 0, (int) round( (float) $value ) );
 	}
 
 	/**

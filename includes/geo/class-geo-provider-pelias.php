@@ -45,30 +45,11 @@ class Geo_Provider_Pelias extends Geo_Provider {
 	 * Init Function To Register Settings.
 	 *
 	 * @since 4.0.0
+	 * @since 6.1.2 The key and URL are registered once, on the API settings page.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Pelias Service API Key', 'simple-location' ), 'sloc_pelias_api' );
 		self::register_settings_api( __( 'Pelias Service URL', 'simple-location' ), 'sloc_pelias_url' );
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_pelias_api', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Pelias Service API Key',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
-		register_setting(
-			'sloc_providers', // Option group.
-			'sloc_pelias_url', // Option name.
-			array(
-				'type'         => 'string',
-				'description'  => 'Pelias Service URL',
-				'show_in_rest' => false,
-				'default'      => '',
-			)
-		);
 	}
 
 	/**

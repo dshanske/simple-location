@@ -46,6 +46,7 @@ trait Sloc_API_GeoApify {
 	 * @since 4.0.0
 	 * @since 6.1.0 Registers the image format setting for the map provider.
 	 * @since 6.1.0 The style setting is empty by default, to use the Map Style setting.
+	 * @since 6.1.2 The style setting is sanitized.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'GeoApify', 'simple-location' ), 'sloc_geoapify_api' );
@@ -55,10 +56,11 @@ trait Sloc_API_GeoApify {
 				'simloc',
 				'sloc_geoapify_style',
 				array(
-					'type'         => 'string',
-					'description'  => 'Geoapify Map Style',
-					'show_in_rest' => false,
-					'default'      => '',
+					'type'              => 'string',
+					'description'       => 'Geoapify Map Style',
+					'show_in_rest'      => false,
+					'default'           => '',
+					'sanitize_callback' => array( 'Map_Provider', 'sanitize_style' ),
 				)
 			);
 

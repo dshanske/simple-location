@@ -61,6 +61,7 @@ trait Sloc_API_Google {
 	 * @since 6.0.0 Registers the URL signing secret setting for the map provider.
 	 * @since 6.1.0 Registers the image format setting for the map provider.
 	 * @since 6.1.0 The style setting is empty by default, to use the Map Style setting.
+	 * @since 6.1.2 The style setting is sanitized.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Google Maps', 'simple-location' ), 'sloc_google_api' );
@@ -71,10 +72,11 @@ trait Sloc_API_Google {
 				'simloc',
 				'sloc_google_style',
 				array(
-					'type'         => 'string',
-					'description'  => 'Google Map Style',
-					'show_in_rest' => false,
-					'default'      => '',
+					'type'              => 'string',
+					'description'       => 'Google Map Style',
+					'show_in_rest'      => false,
+					'default'           => '',
+					'sanitize_callback' => array( 'Map_Provider', 'sanitize_style' ),
 				)
 			);
 

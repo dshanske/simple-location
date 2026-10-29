@@ -464,6 +464,21 @@ abstract class Map_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Sanitizes a provider's map style setting.
+	 *
+	 * Styles are IDs, such as mapbox/streets-v12, or empty to use the Map Style setting. They aren't checked
+	 * against the provider's list, which for some providers is fetched from the provider.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Style ID.
+	 * @return string The style ID without markup, or an empty string.
+	 */
+	public static function sanitize_style( $value ) {
+		return is_string( $value ) ? sanitize_text_field( $value ) : '';
+	}
+
+	/**
 	 * Returns the provider's style for each style family.
 	 *
 	 * @since 6.1.0
