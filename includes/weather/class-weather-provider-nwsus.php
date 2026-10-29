@@ -58,6 +58,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 * @since 6.0.0 Uses the fallback weather provider when a location lookup finds no observation.
 	 * @since 6.0.0 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
 	 * @since 6.1.0 Returns the error, or a `no_results` error, instead of using the fallback provider.
+	 * @since 6.2.0 Requests go through fetch_json().
 	 *
 	 * @param int $time Time. Optional.
 	 * @return array|WP_Error|false Current conditions, an error when NWS has none for the location, or false without a location.
@@ -77,35 +78,22 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			if ( $conditions ) {
 				return $conditions;
 			}
-			$url  = sprintf( 'https://api.weather.gov/points/%1$s,%2$s', $this->latitude, $this->longitude );
-			$args = array(
-				'headers'             => array(
-					'Accept' => 'application/json',
-				),
-				'timeout'             => 10,
-				'limit_response_size' => 1048576,
-				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location.
-				'user-agent'          => 'Simple Location for WordPress',
-			);
-
-			$response = wp_remote_get( $url, $args );
+			$url      = sprintf( 'https://api.weather.gov/points/%1$s,%2$s', $this->latitude, $this->longitude );
+			$response = $this->fetch_json( $url, array() );
+			// NWS has no grid point outside the US; it answers 404.
+			if ( is_wp_error( $response ) && 404 === (int) ( $response->get_error_data()['status'] ?? 0 ) ) {
+				return $this->no_results_error();
+			}
 			if ( is_wp_error( $response ) ) {
 				return $response;
 			}
-			$response = wp_remote_retrieve_body( $response );
-			$response = json_decode( $response, true );
-			// NWS has no grid point outside the US.
 			if ( ! isset( $response['properties']['observationStations'] ) ) {
 				return $this->no_results_error();
 			}
-			$url      = $response['properties']['observationStations'];
-			$response = wp_remote_get( $url, $args );
+			$response = $this->fetch_json( $response['properties']['observationStations'], array() );
 			if ( is_wp_error( $response ) ) {
 				return $response;
 			}
-			$response = wp_remote_retrieve_body( $response );
-			$response = json_decode( $response, true );
 			if ( empty( $response['features'] ) || ! is_array( $response['features'] ) ) {
 				return $this->no_results_error();
 			}
@@ -173,30 +161,22 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 	 * Return info on the current station.
 	 *
 	 * @since 6.1.0 Includes the cloud cover, from the cloud layers.
+	 * @since 6.2.0 Requests go through fetch_json(); a station without a recent observation has no weather.
 	 *
 	 * @return array Info on Site.
 	 */
 	public function get_station_data() {
 		$return = array( 'station_id' => $this->station_id );
 
-		$url  = sprintf( 'https://api.weather.gov/stations/%1$s/observations/latest', $this->station_id );
-		$args = array(
-			'headers'             => array(
-				'Accept' => 'application/json',
-			),
-			'timeout'             => 10,
-			'limit_response_size' => 1048576,
-			'redirection'         => 1,
-			// Use an explicit user-agent for Simple Location.
-			'user-agent'          => 'Simple Location for WordPress',
-		);
-
-		$response = wp_remote_get( $url, $args );
+		$url      = sprintf( 'https://api.weather.gov/stations/%1$s/observations/latest', $this->station_id );
+		$response = $this->fetch_json( $url, array() );
+		// A station without a recent observation answers 404, which is no weather rather than a failure.
+		if ( is_wp_error( $response ) && 404 === (int) ( $response->get_error_data()['status'] ?? 0 ) ) {
+			return array();
+		}
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
-		$response   = wp_remote_retrieve_body( $response );
-		$response   = json_decode( $response, true );
 		$properties = $response['properties'] ?? null;
 		if ( isset( $response['geometry'] ) ) {
 			$return['latitude']  = $response['geometry']['coordinates'][1];
@@ -232,13 +212,10 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			$return['code'] = self::cloud_code_map( $properties['cloudLayers'] ?? null );
 		}
 
-		$url      = sprintf( 'https://api.weather.gov/stations/%1$s', $this->station_id );
-		$response = wp_remote_get( $url, $args );
+		$response = $this->fetch_json( sprintf( 'https://api.weather.gov/stations/%1$s', $this->station_id ), array() );
 		if ( is_wp_error( $response ) ) {
 			return self::filter_weather( $return );
 		}
-		$response = wp_remote_retrieve_body( $response );
-		$response = json_decode( $response, true );
 		if ( isset( $response['properties'] ) ) {
 			$return['name']     = $response['properties']['name'] ?? null;
 			$return['timezone'] = $response['properties']['timeZone'] ?? null;

@@ -78,6 +78,7 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 	 * Return array of current conditions
 	 *
 	 * @since 6.0.0 A time more than an hour from now uses the fallback provider, or returns a `historic_unsupported` error.
+	 * @since 6.2.0 Requests go through fetch_json(); a refused request, such as with a bad key, is an error.
 	 *
 	 * @param int $time Time. Optional.
 	 * @return array|WP_Error Current Conditions in Array, or an error.
@@ -107,24 +108,14 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 				'units' => 'M',
 
 			);
-			$url  = 'https://api.weatherbit.io/v2.0/current';
-			$url  = add_query_arg( $data, $url );
-			$args = array(
-				'headers'             => array(
-					'Accept' => 'application/json',
-				),
-				'timeout'             => 10,
-				'limit_response_size' => 1048576,
-				'redirection'         => 1,
-				// Use an explicit user-agent for Simple Location.
-				'user-agent'          => 'Simple Location for WordPress',
-			);
-			$response = wp_remote_get( $url, $args );
+			$response = $this->fetch_json( 'https://api.weatherbit.io/v2.0/current', $data );
+			// Weatherbit answers 204, with nothing, when it has no data; that is no weather rather than a failure.
+			if ( is_wp_error( $response ) && 'not_json_response' === $response->get_error_code() && '' === trim( (string) ( $response->get_error_data()['body'] ?? '' ) ) ) {
+				return $return;
+			}
 			if ( is_wp_error( $response ) ) {
 				return $response;
 			}
-			$response = wp_remote_retrieve_body( $response );
-			$response = json_decode( $response, true );
 			if ( WP_DEBUG ) {
 				$return['raw'] = $response;
 			}
