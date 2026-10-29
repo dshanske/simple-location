@@ -219,6 +219,8 @@ trait Weather_Info_Trait {
 	/**
 	 * Returns the unit, name and description based on the requested property.
 	 *
+	 * @since 6.2.0 Adds the VOC and NOx indices.
+	 *
 	 * @param string|null $property Property to return. Null will return entire array.
 	 * @param boolean     $imperial Whether imperial or default units.
 	 *
@@ -393,6 +395,19 @@ trait Weather_Info_Trait {
 				'unit'  => __( 'ppm', 'simple-location' ),
 				'label' => __( 'parts per million', 'simple-location' ),
 				'name'  => __( 'Sulfur Dioxide', 'simple-location' ),
+			),
+			// Sensirion gas indices, 1 to 500: for VOC, 100 is the sensor's recent average; for NOx, 1 is the baseline.
+			'voc_index'   => array(
+				'unit'  => '',
+				'label' => __( 'index', 'simple-location' ),
+				'name'  => __( 'VOC Index', 'simple-location' ),
+				'icon'  => 'md-aqi',
+			),
+			'nox_index'   => array(
+				'unit'  => '',
+				'label' => __( 'index', 'simple-location' ),
+				'name'  => __( 'NOx Index', 'simple-location' ),
+				'icon'  => 'md-aqi',
 			),
 		);
 
