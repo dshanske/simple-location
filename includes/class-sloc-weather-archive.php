@@ -86,7 +86,7 @@ class Sloc_Weather_Archive {
 	 * A private location hides the post's weather too, so those posts are left out.
 	 *
 	 * @since 6.1.0
-	 * @since 6.2.0 The rain and snow views have posts with a rain or snow reading, including 0.
+	 * @since 6.2.0 The rain and snow views have posts with rain or snow, more than 0.
 	 *
 	 * @param WP_Query $query Query.
 	 */
@@ -98,12 +98,21 @@ class Sloc_Weather_Archive {
 		if ( '' === $view ) {
 			return;
 		}
-		$weather = isset( self::CHARTS[ $view ] )
-			? array(
+		if ( isset( self::CHARTS[ $view ] ) && self::is_precipitation( self::CHARTS[ $view ] ) ) {
+			// Only posts with some rain or snow; a reading of 0 isn't listed.
+			$weather = array(
+				'key'     => 'weather_' . self::CHARTS[ $view ],
+				'value'   => 0,
+				'type'    => 'DECIMAL(10,3)',
+				'compare' => '>',
+			);
+		} elseif ( isset( self::CHARTS[ $view ] ) ) {
+			$weather = array(
 				'key'     => 'weather_' . self::CHARTS[ $view ],
 				'compare' => 'EXISTS',
-			)
-			: array(
+			);
+		} else {
+			$weather = array(
 				'relation' => 'OR',
 				array(
 					'key'     => 'weather_temperature',
@@ -118,6 +127,7 @@ class Sloc_Weather_Archive {
 					'compare' => 'EXISTS',
 				),
 			);
+		}
 		$query->set(
 			'meta_query',
 			array(
@@ -171,7 +181,8 @@ class Sloc_Weather_Archive {
 	/**
 	 * Returns a weather reading of each post in the main query, for a chart view.
 	 *
-	 * Posts without the reading, without a date, or whose location is private are left out.
+	 * Posts without the reading, without a date, or whose location is private are left out, and for rain and snow,
+	 * posts with none.
 	 *
 	 * @since 6.2.0
 	 *
@@ -191,12 +202,28 @@ class Sloc_Weather_Archive {
 			if ( ! is_numeric( $value ) || ! $time || 'private' === get_post_geodata( $post->ID, 'visibility' ) ) {
 				continue;
 			}
+			// A post with no rain or snow isn't charted or listed.
+			if ( self::is_precipitation( $property ) && (float) $value <= 0 ) {
+				continue;
+			}
 			$readings[ $post->ID ] = array(
 				'time'    => $time,
 				$property => (float) $value,
 			);
 		}
 		return $readings;
+	}
+
+	/**
+	 * Returns whether a weather property is an amount of precipitation, rain or snow.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param string $property Weather property.
+	 * @return bool
+	 */
+	public static function is_precipitation( $property ) {
+		return in_array( $property, array( 'rain', 'snow' ), true );
 	}
 
 	/**
@@ -317,7 +344,7 @@ class Sloc_Weather_Archive {
 	 * Returns a bar chart of rain or snow amounts over time, as an SVG drawn on the server.
 	 *
 	 * Each bar has a title with its date and amount, and the chart is labeled with the largest amount and the first
-	 * and last dates. A reading of 0 has no bar.
+	 * and last dates. get_readings() leaves out readings of 0; one passed in anyway has no bar.
 	 *
 	 * @since 6.2.0
 	 *
