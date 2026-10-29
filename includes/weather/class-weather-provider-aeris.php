@@ -35,6 +35,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 *
 	 * @since 4.0.0
 	 * @since 6.1.0 The personal weather stations setting is saved with the API settings (#686).
+	 * @since 6.1.2 The personal weather stations setting is sanitized.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Xweather Client ID', 'simple-location' ), 'sloc_aeris_client_id' );
@@ -43,12 +44,25 @@ class Weather_Provider_Aeris extends Weather_Provider {
 			'sloc_api', // Option group.
 			'sloc_aeris_pws', // Option name.
 			array(
-				'type'         => 'number',
-				'description'  => 'Include Personal Weather Stations in Xweather Data',
-				'show_in_rest' => false,
-				'default'      => 0,
+				'type'              => 'number',
+				'description'       => 'Include Personal Weather Stations in Xweather Data',
+				'show_in_rest'      => false,
+				'default'           => 0,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_pws' ),
 			)
 		);
+	}
+
+	/**
+	 * Sanitizes the Include Personal Weather Stations setting.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value Checkbox value.
+	 * @return int 1 to include personal weather stations, otherwise 0.
+	 */
+	public static function sanitize_pws( $value ) {
+		return rest_sanitize_boolean( $value ) ? 1 : 0;
 	}
 
 	/**

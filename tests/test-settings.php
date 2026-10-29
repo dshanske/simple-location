@@ -521,6 +521,8 @@ class SettingsTest extends WP_UnitTestCase {
 	 * A provider's description is escaped.
 	 */
 	public function test_provider_callback_escapes_description() {
+		// Not a registered provider, so the setting's sanitizer would replace it.
+		remove_all_filters( 'sanitize_option_sloc_map_provider' );
 		update_option( 'sloc_map_provider', 'evil' );
 		$html = $this->capture(
 			array( 'Loc_Config', 'provider_callback' ),
