@@ -40,7 +40,7 @@ class WeewxProviderTest extends WP_UnitTestCase {
 	public function test_registered() {
 		$providers = Loc_Config::weather_providers( true );
 		$this->assertArrayHasKey( 'weewx', $providers );
-		$this->assertSame( 'WeeWX (beta)', $providers['weewx']['name'] );
+		$this->assertSame( 'WeeWX', $providers['weewx']['name'] );
 		$this->assertTrue( ( new Weather_Provider_Weewx() )->is_station() );
 	}
 

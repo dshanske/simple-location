@@ -362,7 +362,7 @@ class ProviderChainTest extends WP_UnitTestCase {
 
 		$this->assertSame( 'sloc_test_fallback', $conditions['provider'] );
 		$this->assertArrayHasKey( 'weather:weewx', Sloc_Provider_Errors::get_errors() );
-		$this->assertSame( 'Simple Location: WeeWX (beta) weather lookups are failing: cURL error 7: Failed to connect', $this->notifications[0][1] );
+		$this->assertSame( 'Simple Location: WeeWX weather lookups are failing: cURL error 7: Failed to connect', $this->notifications[0][1] );
 	}
 
 	/**
