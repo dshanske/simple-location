@@ -360,6 +360,60 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Weatherbit goes through fetch_json() (#776): a refused request is an error without the key, and no data is no
+	 * weather.
+	 */
+	public function test_weatherbit_errors() {
+		$this->mock_http(
+			array(
+				'api.weatherbit.io/v2.0/current' => array(
+					'code' => 403,
+					'body' => array( 'error' => 'API key not valid, or not yet activated.' ),
+				),
+			)
+		);
+		$error = $this->provider( 'Weather_Provider_Weatherbit', array( 'api' => 'wb-secret' ) )->get_conditions();
+		$this->assertWPError( $error );
+		$this->assertSame( 403, $error->get_error_data()['status'] );
+		$this->assertStringNotContainsString( 'wb-secret', $error->get_error_message() );
+		$this->assertTrue( $this->last_request()['args']['reject_unsafe_urls'], 'Requested with wp_safe_remote_get().' );
+
+		$this->mock_http(
+			array(
+				'api.weatherbit.io/v2.0/current' => array(
+					'code' => 204,
+					'body' => '',
+				),
+			)
+		);
+		$this->assertSame( array(), $this->provider( 'Weather_Provider_Weatherbit', array( 'api' => 'wb-key' ) )->get_conditions() );
+	}
+
+	/**
+	 * NWS goes through fetch_json() (#776): a station without a recent observation, which NWS answers with 404, has no
+	 * weather rather than an error.
+	 */
+	public function test_nws_fetch_json() {
+		$this->mock_http(
+			array(
+				'api.weather.gov/stations/KXYZ/observations/latest' => array(
+					'code' => 404,
+					'body' => array( 'title' => 'Not Found' ),
+				),
+			)
+		);
+		$provider = new Weather_Provider_NWSUS();
+		$provider->set( array( 'station_id' => 'KXYZ' ) );
+		$this->assertSame( array(), $provider->get_conditions() );
+		$this->assertTrue( $this->last_request()['args']['reject_unsafe_urls'], 'Requested with wp_safe_remote_get().' );
+
+		$this->mock_http( array( 'api.weather.gov/stations/KXYZ/observations/latest' => new WP_Error( 'http_request_failed', 'Down' ) ) );
+		$provider = new Weather_Provider_NWSUS();
+		$provider->set( array( 'station_id' => 'KXYZ' ) );
+		$this->assertWPError( $provider->get_conditions() );
+	}
+
+	/**
 	 * Weatherbit: current conditions, with visibility converted from kilometers.
 	 */
 	public function test_weatherbit() {
