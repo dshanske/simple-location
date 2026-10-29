@@ -356,7 +356,7 @@ function get_user_weatherdata( $user, $key = '' ) {
 /**
  * Returns the weather of a post as plain text, such as "72°F Clear".
  *
- * @since 6.1.2
+ * @since 6.2.0
  *
  * @param int|WP_Post|null $post Optional. Post ID or object. Default the current post.
  * @return string Plain text, not escaped, or an empty string without weather.
@@ -372,7 +372,7 @@ function get_post_weather_text( $post = null ) {
 /**
  * Returns the weather of a comment as plain text, such as "72°F Clear".
  *
- * @since 6.1.2
+ * @since 6.2.0
  *
  * @param int $comment_id Comment ID.
  * @return string Plain text, not escaped, or an empty string without weather.
