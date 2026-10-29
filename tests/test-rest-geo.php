@@ -276,6 +276,26 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The location box redraws its map preview from /map when only the zoom changes (#795).
+	 */
+	public function test_map_redraw_at_new_zoom() {
+		$params = array(
+			'latitude'  => '45.01',
+			'longitude' => '-75.44',
+			'height'    => '200',
+			'width'     => '200',
+		);
+		$near   = $this->request( '/map', array_merge( $params, array( 'zoom' => '14' ) ) )->get_data();
+		$far    = $this->request( '/map', array_merge( $params, array( 'zoom' => '10' ) ) )->get_data();
+		$this->assertStringContainsString( 'z=14', $near['return'] );
+		$this->assertStringContainsString( 'z=10', $far['return'] );
+
+		// Contributors can't publish, so they don't get maps, as with the lookups.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'contributor' ) ) );
+		$this->assertTrue( $this->request( '/map', array_merge( $params, array( 'zoom' => '10' ) ) )->is_error() );
+	}
+
+	/**
 	 * /map requires coordinates.
 	 */
 	public function test_map_missing_coordinates() {
