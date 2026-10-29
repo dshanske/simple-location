@@ -404,12 +404,13 @@ Only published posts and images with a public location are drawn, and images tak
 
 ### Can I see the weather of an archive?
 
-Yes. Like `/map/` for a map, add `/temperature/` or `/weather/` to any archive, such as a year, category, author or location: for example `/2025/temperature/`. For a location, use `/temperature/location/pennsylvania/` or `/weather/location/pennsylvania/`, as with `/map/location/pennsylvania/`.
+Yes. Like `/map/` for a map, add `/temperature/`, `/rain/`, `/snow/` or `/weather/` to any archive, such as a year, category, author or location: for example `/2025/temperature/`. For a location, use `/temperature/location/pennsylvania/` or `/rain/location/pennsylvania/`, as with `/map/location/pennsylvania/`.
 * `/temperature/` shows a chart of the temperatures of the archive's posts, in your site's units, followed by a list of them.
+* `/rain/` and `/snow/` show a bar chart of the rain or snow in the hour before each post, in millimeters or inches, followed by a list of them. Posts whose weather recorded none are included, with no bar.
 * `/weather/` lists each post with its weather icon, summary and temperature.
 
-Only posts with weather are shown, and only when their location isn't private, as their weather isn't shown otherwise. Both are drawn without JavaScript.
-A theme can change either view with its own `temperature-archive.php` or `weather-archive.php`, as it can the map view with `map-archive.php`.
+Only posts with weather are shown, and only when their location isn't private, as their weather isn't shown otherwise. All are drawn without JavaScript.
+A theme can change any view with its own `temperature-archive.php`, `rain-archive.php`, `snow-archive.php` or `weather-archive.php`, as it can the map view with `map-archive.php`.
 
 ### How can I show a list of posts tagged with a location?
 
