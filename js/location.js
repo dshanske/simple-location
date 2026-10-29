@@ -228,6 +228,7 @@ jQuery( document ).ready( function( $ ) {
 				term: true,
 				weather: slocOptions.weather,
 				map_zoom: $( '#map_zoom' ).val(), // eslint-disable-line camelcase
+				map_style: $( '#map_style' ).val(), // eslint-disable-line camelcase
 				height: 200,
 				width: 200,
 				time,
@@ -340,6 +341,41 @@ jQuery( document ).ready( function( $ ) {
 		} );
 	}
 
+	let mapTimer;
+
+	// Redraws the map preview, at the zoom in the form, without looking the location up again (#795).
+	function redrawMap() {
+		if ( ! $( '#hide-map' ).length || '' === $( '#latitude' ).val() || '' === $( '#longitude' ).val() ) {
+			return;
+		}
+		$.ajax( {
+			type: 'GET',
+			url: slocOptions.api_url + 'map/',
+			beforeSend( xhr ) {
+				xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
+			},
+			data: {
+				latitude: $( '#latitude' ).val(),
+				longitude: $( '#longitude' ).val(),
+				zoom: $( '#map_zoom' ).val(),
+				style_family: $( '#map_style' ).val(), // eslint-disable-line camelcase
+				height: 200,
+				width: 200,
+			},
+			success( response ) {
+				if ( response && 'return' in response ) {
+					$( '#hide-map' ).html( response.return );
+				}
+			},
+		} );
+	}
+
+	// Waits until typing stops, so a zoom of 12 is one request, not two.
+	function scheduleMapRedraw() {
+		clearTimeout( mapTimer );
+		mapTimer = setTimeout( redrawMap, 500 );
+	}
+
 	function clearLocation() {
 		// The location and weather fields; a screen may have only some of them (#743).
 		const fieldIds = [
@@ -349,6 +385,7 @@ jQuery( document ).ready( function( $ ) {
 			'altitude',
 			'accuracy',
 			'map_zoom',
+			'map_style',
 			'speed',
 			'heading',
 			'plus_code',
@@ -445,6 +482,9 @@ jQuery( document ).ready( function( $ ) {
 			clearLocation();
 			event.preventDefault();
 		} )
+		.on( 'input change', '#map_zoom', scheduleMapRedraw )
+		.on( 'change', '#map_style', scheduleMapRedraw )
+		.on( 'change', '#latitude, #longitude', scheduleMapRedraw )
 		.on( 'change', '#location_dropdown', function( event ) {
 			updateVenues();
 			event.preventDefault();

@@ -402,8 +402,11 @@ class REST_Geo {
 						'width'     => array(
 							'sanitize_callback' => array( $this, 'sanitize_int' ),
 						),
-						'zoom'      => array(
+						'zoom'         => array(
 							'sanitize_callback' => array( $this, 'sanitize_int' ),
+						),
+						'style_family' => array(
+							'sanitize_callback' => array( 'Map_Provider', 'sanitize_map_style' ),
 						),
 					),
 					'permission_callback' => function ( $request ) {
@@ -418,7 +421,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Map Retrieval
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function map( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
@@ -431,6 +434,7 @@ class REST_Geo {
 			if ( ! empty( $params['zoom'] ) ) {
 				$args['map_zoom'] = $params['zoom'];
 			}
+			$args['style_family'] = Map_Provider::sanitize_map_style( $params['style_family'] ?? '' );
 			if ( ! empty( $params['height'] ) ) {
 				$args['height'] = $params['height'];
 			}
@@ -457,7 +461,7 @@ class REST_Geo {
 	 * @since 6.2.0 Without a server-side provider, including the browser (HTML5) one, returns the no_provider error
 	 *              directly; the branches that could never run are removed.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function lookup( $request ) {
 		$params      = $request->get_params();
@@ -556,7 +560,7 @@ class REST_Geo {
 	 *
 	 * @since 6.1.0 Takes a GeoJSON Point or Feature, with or without "locations", or a geo URI (#407).
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function user( $request ) {
 		$location = self::user_location( $request );
@@ -592,7 +596,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Venue Retrieval.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function venue( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
@@ -649,7 +653,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Elevation Retrieval.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function elevation( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
@@ -677,7 +681,7 @@ class REST_Geo {
 	 * @since 6.1.0 A plus_code is decoded and looked up in place of the coordinates, which are used to find a short
 	 *              code without a place (#197). The response then has the code's latitude, longitude and plus_code.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function geocode( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
@@ -698,10 +702,12 @@ class REST_Geo {
 			$map = Loc_Config::map_provider();
 			if ( is_object( $map ) ) {
 				$map_args = array(
-					'latitude'  => $params['latitude'],
-					'longitude' => $params['longitude'],
-					'height'    => $params['height'] ?? null,
-					'width'     => $params['width'] ?? null,
+					'latitude'     => $params['latitude'],
+					'longitude'    => $params['longitude'],
+					'height'       => $params['height'] ?? null,
+					'width'        => $params['width'] ?? null,
+					'map_zoom'     => is_numeric( $params['map_zoom'] ?? null ) ? (int) $params['map_zoom'] : null,
+					'style_family' => Map_Provider::sanitize_map_style( $params['map_style'] ?? '' ),
 				);
 				$map->set( array_filter( $map_args ) );
 			}
@@ -822,7 +828,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Weather Retrieval.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function weather( $request ) {
 		// We don't need to specifically check the nonce like with admin-ajax. It is handled by the API.
@@ -873,7 +879,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Airport Lookup.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function airport( $request ) {
 		$params = $request->get_params();
@@ -897,7 +903,7 @@ class REST_Geo {
 	/**
 	 * Callback handler for Looking Up Timezone Information.
 	 *
-	 * @param WP_Rest_Request $request REST Request.
+	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function timezone( $request ) {
 		$params = $request->get_params();

@@ -35,6 +35,7 @@ class Geo_Data {
 		'visibility', // Can either be public, private, or protected.
 		'timezone', // Timezone String
 		'icon', // Icon representing location
+		'map_style', // The map's own style family, such as satellite, or empty for the Map Style setting.
 		'day', // Boolean identifying if it is daytime or not
 	);
 
@@ -803,6 +804,7 @@ class Geo_Data {
 		 *
 		 * @since 1.0.0
 		 * @since 6.2.0 The geo_address, geo_public and geo_icon sanitizers run; geo_public is registered once.
+		 * @since 6.2.0 Registers geo_map_style, the map's own style family.
 		 */
 	public static function register_meta() {
 		/**
@@ -884,6 +886,18 @@ class Geo_Data {
 		register_meta( 'comment', 'geo_icon', $args );
 		register_meta( 'user', 'geo_icon', $args );
 		self::register_terms_meta( $taxonomies, 'geo_icon', $args );
+
+		$args = array(
+			'sanitize_callback' => array( 'Map_Provider', 'sanitize_map_style' ),
+			'type'              => 'string',
+			'description'       => __( 'Map Style Family', 'simple-location' ),
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		register_meta( 'post', 'geo_map_style', $args );
+		register_meta( 'comment', 'geo_map_style', $args );
+		register_meta( 'user', 'geo_map_style', $args );
+		self::register_terms_meta( $taxonomies, 'geo_map_style', $args );
 
 		// This parameter only applies to datestamped content like posts or comments.
 		$args = array(

@@ -55,6 +55,7 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 		'height'    => 200,
 		'width'     => 200,
 		'map_zoom'  => $geodata['map_zoom'] ?? '',
+		'map_style' => $geodata['map_style'] ?? '',
 	);
 	if ( $map_provider ) {
 		$map_provider->set( array_filter( $map_args ) );
@@ -191,6 +192,23 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 
 		<label for="map_zoom"><?php esc_html_e( 'Map Zoom:', 'simple-location' ); ?></label>
 		<input type="number" name="map_zoom" id="map_zoom" class="widefat" max="20" min="1" value="<?php echo esc_attr( $geodata['map_zoom'] ?? '' ); ?>" />
+
+		<label for="map_style"><?php esc_html_e( 'Map Style:', 'simple-location' ); ?></label>
+		<select name="map_style" id="map_style" class="widefat">
+			<?php
+			$sloc_families = Map_Provider::get_style_family_names();
+			$sloc_style    = Map_Provider::sanitize_map_style( $geodata['map_style'] ?? '' );
+			printf(
+				'<option value="" %1$s>%2$s</option>',
+				selected( $sloc_style, '', false ),
+				/* translators: %s: The Map Style setting's style family, such as Standard. */
+				esc_html( sprintf( __( 'Default (%s)', 'simple-location' ), $sloc_families[ Map_Provider::sanitize_style_family( get_option( 'sloc_map_style', 'standard' ) ) ] ) )
+			);
+			foreach ( $sloc_families as $sloc_family => $sloc_name ) {
+				printf( '<option value="%1$s" %2$s>%3$s</option>', esc_attr( $sloc_family ), selected( $sloc_style, $sloc_family, false ), esc_html( $sloc_name ) );
+			}
+			?>
+		</select>
 
 	<span id="hide-map"><?php echo wp_kses_post( $map_return ); ?></span>
 		<input type="hidden" name="accuracy" id="accuracy" step="0.01" value="<?php echo esc_attr( sloc_round_value( $geodata['accuracy'] ?? '', 2 ) ); ?>" />

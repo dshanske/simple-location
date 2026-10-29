@@ -71,24 +71,6 @@ if ( ! function_exists( 'array_key_last_index' ) ) {
 	}
 }
 
-if ( ! function_exists( 'str_contains' ) ) {
-	/**
-	 * Returns whether haystack contains needle.
-	 *
-	 * Polyfill for PHP 8.0. WordPress 5.9 and later have their own; remove with this one when the
-	 * minimum PHP is 8.0.
-	 *
-	 * @since 4.4.2
-	 *
-	 * @param string $haystack String.
-	 * @param string $needle   String to find within haystack.
-	 * @return boolean Whether it was found.
-	 */
-	function str_contains( $haystack, $needle ) {
-			return '' === $needle || false !== strpos( $haystack, $needle );
-	}
-}
-
 if ( ! function_exists( 'wp_trigger_error' ) ) {
 	/**
 	 * Generates a user-level error/warning/notice/deprecation message.

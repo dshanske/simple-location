@@ -320,6 +320,23 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $style;
 
 	/**
+	 * The style the provider draws without a map's own style family: its style setting, or the Map Style setting's.
+	 *
+	 * @since 6.2.0
+	 * @var string
+	 */
+	protected $default_style = '';
+
+	/**
+	 * The current map's own style family, such as a post's, or an empty string for the default style. A family the
+	 * provider has no style for is empty here, and the default style is drawn.
+	 *
+	 * @since 6.2.0
+	 * @var string
+	 */
+	protected $style_family = '';
+
+	/**
 	 * Username if appropriate.
 	 *
 	 * @since 1.0.0
@@ -419,6 +436,8 @@ abstract class Map_Provider extends Sloc_Provider {
 		$this->map_zoom = $r['map_zoom'];
 		$this->user     = $r['user'];
 		$this->style    = $r['style'];
+		// Kept, so each map can choose its own style family and the next map gets this one back.
+		$this->default_style = (string) $this->style;
 		$this->api      = $r['api'];
 		$this->format   = static::sanitize_format( $r['format'] );
 
@@ -498,6 +517,35 @@ abstract class Map_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Sanitizes a map's own style family, such as a post's.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param mixed $value Style family.
+	 * @return string One of STYLE_FAMILIES, or an empty string for the default style.
+	 */
+	public static function sanitize_map_style( $value ) {
+		return in_array( $value, self::STYLE_FAMILIES, true ) ? $value : '';
+	}
+
+	/**
+	 * Returns the names of the style families.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @return string[] Translated names, keyed by family.
+	 */
+	public static function get_style_family_names() {
+		return array(
+			'standard'  => __( 'Standard', 'simple-location' ),
+			'light'     => __( 'Light', 'simple-location' ),
+			'dark'      => __( 'Dark', 'simple-location' ),
+			'satellite' => __( 'Satellite', 'simple-location' ),
+			'terrain'   => __( 'Terrain', 'simple-location' ),
+		);
+	}
+
+	/**
 	 * Sanitizes a provider's map style setting.
 	 *
 	 * Styles are IDs, such as mapbox/streets-v12, or empty to use the Map Style setting. They aren't checked
@@ -560,12 +608,18 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.1.0
 	 *
 	 * @since 6.2.0 Null when the map's `dark` argument is false.
+	 * @since 6.2.0 Null when the map has its own style family other than standard, such as a post set to satellite.
 	 *
 	 * @return Map_Provider|null The copy, or null if the Dark Mode Maps setting is off, the map's `dark` argument is
-	 *                           false, the provider has no dark style, or the map already uses it.
+	 *                           false, the map has its own style family other than standard, the provider has no dark
+	 *                           style, or the map already uses it.
 	 */
 	public function get_dark_variant() {
 		if ( ! $this->output['dark'] || ! get_option( 'sloc_map_dark_mode' ) ) {
+			return null;
+		}
+		// A map with its own look, such as satellite, keeps it in dark mode.
+		if ( '' !== $this->style_family && 'standard' !== $this->style_family ) {
 			return null;
 		}
 		$styles = $this->get_family_styles();
@@ -967,6 +1021,9 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.2.0 An array sets the output options too, from the `durable`, `dark`, `srcset` and `loading` keys;
 	 *              missing keys use OUTPUT_DEFAULTS.
 	 *
+	 * @since 6.2.0 An array's `style_family` (or a post's saved `map_style`) chooses the map's style family; see
+	 *              set_style_family().
+	 *
 	 * @param array|float $args Latitude or array of all three properties.
 	 * @param float       $lng Longitude. Optional if first property is an array.
 	 * @param float       $alt Altitude. Optional.
@@ -987,9 +1044,48 @@ abstract class Map_Provider extends Sloc_Provider {
 			$location       = $args['location'] ?? $args['address'] ?? '';
 			$this->location = is_scalar( $location ) ? (string) $location : '';
 			$this->output   = self::output_options( $args );
+			$this->set_style_family( $args['style_family'] ?? $args['map_style'] ?? '' );
 			$this->fit_size();
 		}
 		return parent::set( $args, $lng, $alt );
+	}
+
+	/**
+	 * Draws the current map in the provider's style for a style family, or in the default style.
+	 *
+	 * A family the provider has no style for, such as satellite for a provider without satellite maps, draws the
+	 * default style instead. The family isn't changed wherever it was chosen, so it applies again with a provider that
+	 * has that style.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param string $family One of STYLE_FAMILIES, or an empty string for the default style.
+	 * @return bool Whether the provider has a style for the family; true for the default style, false for an unknown family.
+	 */
+	public function set_style_family( $family ) {
+		$asked  = is_string( $family ) ? $family : '';
+		$family = self::sanitize_map_style( $family );
+		$styles = $this->get_family_styles();
+		if ( '' !== $family && isset( $styles[ $family ] ) && '' !== $styles[ $family ] ) {
+			$this->style        = $styles[ $family ];
+			$this->style_family = $family;
+			return true;
+		}
+		$this->style        = $this->default_style;
+		$this->style_family = '';
+		// The default is always there; an unknown family isn't.
+		return '' === $asked;
+	}
+
+	/**
+	 * Returns the current map's own style family, if the provider has a style for it.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @return string One of STYLE_FAMILIES, or an empty string for the default style.
+	 */
+	public function get_style_family() {
+		return $this->style_family;
 	}
 
 	/**

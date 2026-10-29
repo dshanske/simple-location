@@ -274,6 +274,16 @@ class GeoBaseTest extends WP_UnitTestCase {
 
 		Geo_Base::enqueue( 'profile.php' );
 		$this->assertTrue( wp_script_is( 'sloc_location', 'enqueued' ) );
+		wp_dequeue_script( 'sloc_location' );
+		wp_dequeue_style( 'sloc_admin' );
+
+		// Another user's profile, edited by an administrator (#768).
+		set_current_screen( 'user-edit' );
+		Geo_Base::enqueue( 'user-edit.php' );
+		$this->assertTrue( wp_script_is( 'sloc_location', 'enqueued' ) );
+		$this->assertTrue( wp_style_is( 'sloc_admin', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'moment-timezone', 'enqueued' ) );
+		$this->assertSame( 'no', $this->localized_options()['weather'] );
 	}
 
 	/**

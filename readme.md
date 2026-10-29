@@ -187,6 +187,7 @@ The software uses two custom features to declare that the post type supports the
 
 The Map Style setting, under Map Settings, chooses a family: Standard, Light, Dark, Satellite or Terrain. Each map provider draws its closest style, so maps keep their look when you change providers. A provider without that kind of style, such as Geoapify for satellite, draws its standard style.
 Each provider also has its own style setting, with all its styles. It is empty by default, which uses the Map Style setting; choosing a style there uses that style instead. Sites that chose a provider style before version 6.1.0 keep it.
+A post can have its own style family too, chosen under Map Style in its location box, such as Satellite for a hike while the site's maps stay Standard. If the map provider has no style of that kind, the post's map uses the site's style, and the post keeps its choice for a provider that has one. A post with its own style other than Standard keeps it in dark mode. Theme functions take it as an argument too, for example `get_post_map( $post, array( 'style_family' => 'satellite' ) )`.
 Google's light and dark styles are its road map recolored with Google's silver and night styling.
 
 With Dark Mode Maps on, maps also have the provider's dark style for visitors whose system is set to dark mode. Browsers only load the one they show. For providers served from your site, the dark style is stored as its own image.
