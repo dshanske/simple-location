@@ -354,6 +354,34 @@ function get_user_weatherdata( $user, $key = '' ) {
 }
 
 /**
+ * Returns the weather of a post as plain text, such as "72°F Clear".
+ *
+ * @since 6.1.2
+ *
+ * @param int|WP_Post|null $post Optional. Post ID or object. Default the current post.
+ * @return string Plain text, not escaped, or an empty string without weather.
+ */
+function get_post_weather_text( $post = null ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return '';
+	}
+	return Sloc_Weather_Data::get_the_weather_text( 'post', $post->ID );
+}
+
+/**
+ * Returns the weather of a comment as plain text, such as "72°F Clear".
+ *
+ * @since 6.1.2
+ *
+ * @param int $comment_id Comment ID.
+ * @return string Plain text, not escaped, or an empty string without weather.
+ */
+function get_comment_weather_text( $comment_id ) {
+	return Sloc_Weather_Data::get_the_weather_text( 'comment', (int) $comment_id );
+}
+
+/**
  * Returns the map for a post with a public location.
  *
  * @since 5.0.0

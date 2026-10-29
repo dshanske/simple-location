@@ -87,6 +87,10 @@
 - [`sloc_venue_category`](sloc_venue_category) Filters the shared category and location icon a provider's venue is given.
 - [`sloc_venue_provider_defaults`](sloc_venue_provider_defaults) Filters the default arguments of venue providers.
 
+## class-weather-data.php
+
+- [`sloc_weather_text`](sloc_weather_text) Filters the weather of an object as plain text.
+
 ## class-weather-provider.php
 
 - [`sloc_condition_from_sunlight`](sloc_condition_from_sunlight) Filters the condition estimated from the sunlight measured.

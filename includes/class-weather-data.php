@@ -656,6 +656,7 @@ class Sloc_Weather_Data {
 	 *
 	 * @since 3.3.0
 	 * @since 6.1.0 Followed by the weather provider's credit, unless the Weather Credits setting puts it in the footer.
+	 * @since 6.1.2 Added the 'text' style.
 	 *
 	 * @param string     $type Object type.
 	 * @param int        $id   Object ID.
@@ -663,7 +664,9 @@ class Sloc_Weather_Data {
 	 *     Optional. Display arguments.
 	 *
 	 *     @type string   $style         'simple' (icon, temperature and summary), 'complete' (adds humidity,
-	 *                                   cloudiness and visibility) or 'graphic' (icon only). Default 'simple'.
+	 *                                   cloudiness and visibility), 'graphic' (icon only) or 'text' (plain text
+	 *                                   from get_the_weather_text(), without markup; the other arguments are
+	 *                                   ignored). Default 'simple'.
 	 *     @type string   $description   Label. Default 'Weather: '.
 	 *     @type string[] $wrapper-class Classes for the wrapper. Default 'sloc-weather'.
 	 *     @type string   $wrapper-type  Wrapper element. Default 'p'.
@@ -679,6 +682,9 @@ class Sloc_Weather_Data {
 			'wrapper-type'  => 'p', // HTML type to wrap the weather in
 		);
 		$args     = wp_parse_args( $args, $defaults );
+		if ( 'text' === $args['style'] ) {
+			return self::get_the_weather_text( $type, $id );
+		}
 		// The provider alone isn't weather.
 		if ( ! is_array( $weather ) || empty( array_diff_key( $weather, array_flip( self::SOURCE_PROPERTIES ) ) ) ) {
 			return '';
@@ -712,6 +718,58 @@ class Sloc_Weather_Data {
 		}
 		$return[] = self::get_weather_credit_markup( $weather );
 		return sprintf( '<%1$s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], esc_attr( $class ), implode( PHP_EOL, array_filter( $return ) ) );
+	}
+
+	/**
+	 * Returns the weather for an object as plain text: the temperature and the summary, such as "72°F Clear".
+	 *
+	 * For places that can't show the icon or markup, such as email and plain-text feeds. Like the other weather
+	 * output it has no coordinates or station name, so it is the same for every location visibility.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @return string Plain text, not escaped, or an empty string without a temperature or summary.
+	 */
+	public static function get_the_weather_text( $type, $id ) {
+		$weather = self::get_object_weatherdata( $type, $id );
+		if ( ! is_array( $weather ) ) {
+			return '';
+		}
+		if ( isset( $weather['code'] ) ) {
+			$weather['summary'] = self::weather_condition_codes( $weather['code'] );
+		}
+		$text = array();
+		if ( isset( $weather['temperature'] ) && is_numeric( $weather['temperature'] ) ) {
+			$units = $weather['units'] ?? null;
+			if ( ! $units ) {
+				$units = get_query_var( 'sloc_units', get_option( 'sloc_measurements' ) );
+			}
+			$imperial = ( 'imperial' === $units );
+			if ( $imperial ) {
+				$weather = Weather_Provider::metric_to_imperial( $weather );
+			}
+			$names  = Weather_Provider::get_names( 'temperature', $imperial );
+			$unit   = is_array( $names ) ? html_entity_decode( (string) $names['unit'], ENT_QUOTES, 'UTF-8' ) : '';
+			$text[] = round( (float) $weather['temperature'] ) . $unit;
+		}
+		if ( ! empty( $weather['summary'] ) && is_string( $weather['summary'] ) ) {
+			$text[] = trim( html_entity_decode( wp_strip_all_tags( $weather['summary'] ), ENT_QUOTES, 'UTF-8' ) );
+		}
+		$text = implode( ' ', array_filter( $text, 'strlen' ) );
+
+		/**
+		 * Filters the weather of an object as plain text.
+		 *
+		 * @since 6.1.2
+		 *
+		 * @param string $text    Plain text, such as "72°F Clear", or an empty string.
+		 * @param array  $weather Weather data.
+		 * @param string $type    Object type.
+		 * @param int    $id      Object ID.
+		 */
+		return (string) apply_filters( 'sloc_weather_text', $text, $weather, $type, $id );
 	}
 
 	/**
