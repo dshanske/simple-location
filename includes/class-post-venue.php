@@ -48,7 +48,7 @@ class Post_Venue {
 	 *
 	 * @since 5.0.0
 	 * @since 6.1.0 Registers the visibility for posts made at the venue.
-	 * @since 6.1.2 venue_url is sanitized as a URL.
+	 * @since 6.2.0 venue_url is sanitized as a URL.
 	 */
 	public static function register_meta() {
 		register_meta(
@@ -814,7 +814,7 @@ class Post_Venue {
 	/**
 	 * Sanitizes the venue_url meta value.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value URL.
 	 * @return string An HTTP or HTTPS URL, or an empty string.

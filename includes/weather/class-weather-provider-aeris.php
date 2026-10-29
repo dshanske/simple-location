@@ -35,7 +35,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	 *
 	 * @since 4.0.0
 	 * @since 6.1.0 The personal weather stations setting is saved with the API settings (#686).
-	 * @since 6.1.2 The personal weather stations setting is sanitized.
+	 * @since 6.2.0 The personal weather stations setting is sanitized.
 	 */
 	public static function init() {
 		self::register_settings_api( __( 'Xweather Client ID', 'simple-location' ), 'sloc_aeris_client_id' );
@@ -56,7 +56,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 	/**
 	 * Sanitizes the Include Personal Weather Stations setting.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Checkbox value.
 	 * @return int 1 to include personal weather stations, otherwise 0.

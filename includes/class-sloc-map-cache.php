@@ -107,7 +107,7 @@ class Sloc_Map_Cache {
 	 * Registers the settings.
 	 *
 	 * @since 6.0.0
-	 * @since 6.1.2 The setting is sanitized.
+	 * @since 6.2.0 The setting is sanitized.
 	 */
 	public static function init() {
 		register_setting(
@@ -375,7 +375,7 @@ class Sloc_Map_Cache {
 	 * Returns the URL a page should use for a map image.
 	 *
 	 * @since 6.0.0
-	 * @since 6.1.2 Added the `$durable` parameter.
+	 * @since 6.2.0 Added the `$durable` parameter.
 	 *
 	 * @param Map_Provider $map       Map provider, set to the map's location, size and pixel density.
 	 * @param array|null   $locations Optional. List of array( latitude, longitude ) points for an archive map.

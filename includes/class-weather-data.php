@@ -656,7 +656,7 @@ class Sloc_Weather_Data {
 	 *
 	 * @since 3.3.0
 	 * @since 6.1.0 Followed by the weather provider's credit, unless the Weather Credits setting puts it in the footer.
-	 * @since 6.1.2 Added the 'text' style.
+	 * @since 6.2.0 Added the 'text' style.
 	 *
 	 * @param string     $type Object type.
 	 * @param int        $id   Object ID.
@@ -726,7 +726,7 @@ class Sloc_Weather_Data {
 	 * For places that can't show the icon or markup, such as email and plain-text feeds. Like the other weather
 	 * output it has no coordinates or station name, so it is the same for every location visibility.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.
@@ -762,7 +762,7 @@ class Sloc_Weather_Data {
 		/**
 		 * Filters the weather of an object as plain text.
 		 *
-		 * @since 6.1.2
+		 * @since 6.2.0
 		 *
 		 * @param string $text    Plain text, such as "72°F Clear", or an empty string.
 		 * @param array  $weather Weather data.
