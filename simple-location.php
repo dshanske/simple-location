@@ -272,6 +272,7 @@ class Simple_Location_Plugin {
 			'class-sloc-provider-errors.php', // Provider errors for administrators.
 			'class-loc-config.php', // Configuration and Settings Page.
 			'class-sloc-track-tool.php', // Tools > Location Track.
+			'class-sloc-weather-fill.php', // Readings filled in from Open-Meteo, and Tools > Weather Fill.
 			'class-timezone-result.php',
 			'class-astronomical-calculator.php', // Calculates sunrise sunset etc.
 			'class-location-plugins.php',

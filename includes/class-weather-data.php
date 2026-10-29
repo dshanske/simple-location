@@ -25,6 +25,7 @@ class Sloc_Weather_Data {
 	 * @since 1.0.0
 	 * @since 6.2.0 Adds voc_index and nox_index, the VOC and NOx indices of a Sensirion gas sensor.
 	 * @since 6.2.0 Adds snowdepth, the snow on the ground, apart from snow, the snowfall, and snowrate.
+	 * @since 6.2.0 Adds supplement, the provider that filled in readings; see Sloc_Weather_Fill.
 	 * @var string[]
 	 */
 	public static $properties = array(
@@ -61,6 +62,7 @@ class Sloc_Weather_Data {
 		'icon',
 		'code',
 		'provider',
+		'supplement',
 		'rainrate',
 		'snowrate',
 		'attribution',
@@ -73,7 +75,7 @@ class Sloc_Weather_Data {
 	 * @since 6.1.0
 	 * @var string[]
 	 */
-	const SOURCE_PROPERTIES = array( 'provider', 'attribution', 'attribution_url' );
+	const SOURCE_PROPERTIES = array( 'provider', 'supplement', 'attribution', 'attribution_url' );
 
 	/**
 	 * Credits to print in the page footer, keyed by provider slug.
@@ -279,13 +281,17 @@ class Sloc_Weather_Data {
 		if ( ! is_array( $weather ) ) {
 			return '';
 		}
-		$text = isset( $weather['attribution'] ) && is_string( $weather['attribution'] ) ? trim( $weather['attribution'] ) : '';
+		// The provider that filled in readings is credited too.
+		$supplement = ( isset( $weather['supplement'] ) && is_string( $weather['supplement'] ) && ( $weather['provider'] ?? '' ) !== $weather['supplement'] )
+			? self::get_attribution_markup( $weather['supplement'] )
+			: '';
+		$text       = isset( $weather['attribution'] ) && is_string( $weather['attribution'] ) ? trim( $weather['attribution'] ) : '';
 		if ( '' === $text ) {
-			return self::get_attribution_markup( $weather['provider'] ?? '' );
+			return self::get_attribution_markup( $weather['provider'] ?? '' ) . $supplement;
 		}
 		$url  = isset( $weather['attribution_url'] ) && is_string( $weather['attribution_url'] ) ? esc_url( $weather['attribution_url'] ) : '';
 		$html = '' === $url ? esc_html( $text ) : sprintf( '<a href="%1$s">%2$s</a>', $url, esc_html( $text ) );
-		return self::place_credit( 'station:' . md5( $text . '|' . $url ), $html, false );
+		return self::place_credit( 'station:' . md5( $text . '|' . $url ), $html, false ) . $supplement;
 	}
 
 	/**

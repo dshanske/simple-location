@@ -30,6 +30,8 @@ unless removed. For all other data, it is provided by the user, who decides its 
 HTML5 browser geolocation, for which the user must give consent to share). Other information is secured through use of third-party APIs to identify a
 location, calculate elevation, display maps, and weather conditions.
 
+If you choose readings under Fill In Missing Readings, the location of each post whose weather is missing them, including posts at a private location, is sent to Open-Meteo, rounded to about a kilometer, to fill them in.
+
 == Locations and Venues ==
 
 Locations uses WordPress taxonomies to allow you to generate an archive page of all posts from that location and giving it a permalink on your site. Locations are meant to reflect a more general
@@ -295,6 +297,14 @@ Weather is looked up with up to three providers, tried in order: the weather pro
 A provider is skipped, without asking it, where it can't have weather: outside the country it covers, such as the National Weather Service outside the US; more than 10 km from your stations, for Custom Station and WeeWX; or for a time it has no weather for. If a provider fails with an error, the next one is tried.
 
 Geocoding, elevation and venues work the same way, with Fallback Geo Providers, Fallback Elevation Providers and Fallback Venue Providers, tried when a provider finds nothing or fails, such as when its quota runs out. Venues are searched for within the Venue Search Radius and listed nearest first. Maps have no fallback, because the map provider decides how your maps look.
+
+= Can readings my weather provider doesn't give be filled in? =
+
+Yes. A weather station, for example, may have no sensor for the conditions, snow or cloud cover. Choose the readings under Fill In Missing Readings in the weather provider settings, and Open-Meteo fills in whatever the provider didn't give: the conditions (summary and icon), snowfall, snow depth, cloud cover, solar radiation, and, for about the last three months only, the UV index and visibility. The provider's own readings, including 0, are kept, and Open-Meteo is credited alongside it. A condition that only describes the sky, such as one a station works out from its sunlight sensor, is replaced when Open-Meteo reports rain, snow, fog or a thunderstorm.
+
+Tools > Weather Fill does the same for existing posts, in the background. Posts at the same place within a month share one request to Open-Meteo, whose free service allows 10,000 a day. It can be stopped and continued, and if Open-Meteo refuses, such as for its daily limit, it stops and says why.
+
+Locations are rounded to about a kilometer before they are sent; Open-Meteo's weather is for an area of one to eleven kilometers, so nothing is lost.
 
 = Can I enter a Plus Code? =
 
