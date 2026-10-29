@@ -46,6 +46,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 	 * Return an address.
 	 *
 	 * @since 6.0.0 Returns an error without a username, or when GeoNames reports one.
+	 * @since 6.2.0 Uses HTTPS, so the username isn't sent in clear text.
 	 *
 	 * @return array|WP_Error $reverse microformats2 address elements in an array, or an error.
 	 */
@@ -58,7 +59,7 @@ class Geo_Provider_Geonames extends Geo_Provider {
 			'lat'      => $this->latitude,
 			'lng'      => $this->longitude,
 		);
-		$url  = 'http://api.geonames.org/extendedFindNearbyJSON';
+		$url  = 'https://secure.geonames.org/extendedFindNearbyJSON';
 		$json = $this->fetch_json( $url, $args );
 		if ( is_wp_error( $json ) ) {
 			return $json;

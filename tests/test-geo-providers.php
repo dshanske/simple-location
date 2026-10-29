@@ -601,6 +601,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->mock_http( array( 'locationiq.com/v1/search' => array( 'body' => $this->fixture( 'geo/nominatim-search.json' ) ) ) );
 		$result = ( new Geo_Provider_LocationIQ( array( 'api' => 'liq-key' ) ) )->geocode( 'Philadelphia City Hall' );
 		$this->assertSame( 'liq-key', $this->last_request()['query']['key'] );
+		$this->assertSame( 'https://us1.locationiq.com/v1/search', $this->last_request()['base'], 'The current endpoint, not search.php (#775).' );
 		$this->assertCityHall( $result );
 
 		$this->mock_http( array( 'locationiq.com/v1/search' => array( 'body' => array( 'error' => 'Unable to geocode' ) ) ) );
@@ -619,6 +620,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$addr    = $this->provider( 'Geo_Provider_LocationIQ', array( 'api' => 'liq-key' ) )->reverse_lookup();
 		$request = $this->last_request();
 		$this->assertSame( 'liq-key', $request['query']['key'] );
+		$this->assertSame( 'https://us1.locationiq.com/v1/reverse', $request['base'], 'The current endpoint, not reverse.php (#775).' );
 		$this->assertSame( '1', $request['query']['statecode'] );
 		$this->assertCityHall( $addr );
 	}
@@ -984,10 +986,11 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		$this->assertSame( 'no_username_set', $this->provider( 'Geo_Provider_Geonames', array( 'user' => '' ) )->reverse_lookup()->get_error_code() );
 
 		$fixture = $this->fixture( 'geo/geonames-reverse.json' );
-		$this->mock_http( array( 'api.geonames.org/extendedFindNearbyJSON' => array( 'body' => $fixture ) ) );
+		$this->mock_http( array( 'secure.geonames.org/extendedFindNearbyJSON' => array( 'body' => $fixture ) ) );
 		$addr    = $this->provider( 'Geo_Provider_Geonames', array( 'user' => 'demo' ) )->reverse_lookup();
 		$request = $this->last_request();
 		$this->assertSame( 'demo', $request['query']['username'] );
+		$this->assertSame( 'https://secure.geonames.org/extendedFindNearbyJSON', $request['base'], 'HTTPS, so the username isn\'t sent in clear text (#775).' );
 		$this->assertEquals( self::LAT, $request['query']['lat'] );
 
 		$this->assertCityHall( $addr );
@@ -997,7 +1000,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 		// The place name is the locality, not the county.
 		$fixture['address']['placename']  = 'Menlo Park';
 		$fixture['address']['adminName2'] = 'San Mateo';
-		$this->mock_http( array( 'api.geonames.org/extendedFindNearbyJSON' => array( 'body' => $fixture ) ) );
+		$this->mock_http( array( 'secure.geonames.org/extendedFindNearbyJSON' => array( 'body' => $fixture ) ) );
 		$addr = $this->provider( 'Geo_Provider_Geonames', array( 'user' => 'demo' ) )->reverse_lookup();
 		$this->assertSame( 'Menlo Park', $addr['locality'] );
 	}
@@ -1006,7 +1009,7 @@ class GeoProvidersTest extends WP_UnitTestCase {
 	 * GeoNames account errors in a reverse lookup become WP_Errors.
 	 */
 	public function test_geonames_reverse_status_error() {
-		$this->mock_http( array( 'api.geonames.org/extendedFindNearbyJSON' => array( 'body' => $this->fixture( 'geo/geonames-error.json' ) ) ) );
+		$this->mock_http( array( 'secure.geonames.org/extendedFindNearbyJSON' => array( 'body' => $this->fixture( 'geo/geonames-error.json' ) ) ) );
 		$error = $this->provider( 'Geo_Provider_Geonames', array( 'user' => 'demo' ) )->reverse_lookup();
 		$this->assertWPError( $error );
 		$this->assertSame( 'unknown_error', $error->get_error_code() );
