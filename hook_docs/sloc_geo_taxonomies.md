@@ -19,7 +19,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-geo-data.php:755](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-data.php#L755)
+- [includes/class-geo-data.php:816](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-data.php#L816)
 ```php
 apply_filters( 'sloc_geo_taxonomies', array() )
 ```

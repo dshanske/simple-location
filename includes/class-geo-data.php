@@ -627,7 +627,7 @@ class Geo_Data {
 	 * Strips markup, which the address is never displayed with. Entities are left alone, so an
 	 * address such as "Barnes & Noble" is stored as written.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value The address.
 	 * @return string The address without tags or surrounding whitespace.
@@ -645,7 +645,7 @@ class Geo_Data {
 	 * Stores 0 (private), 1 (public) or 2 (protected). The names are accepted too. An empty value
 	 * stays empty, which means the default visibility; anything else is stored as private.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value 0, 1 or 2, or private, public or protected.
 	 * @return string '0', '1' or '2', or an empty string.
@@ -662,7 +662,7 @@ class Geo_Data {
 	 *
 	 * Accepts 'none', an icon from get_iconlist(), or the name of another icon file in svgs/.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param mixed $value Icon name.
 	 * @return string The icon name, or an empty string if there is no such icon.
@@ -802,7 +802,7 @@ class Geo_Data {
 		 * Registers Geo Metadata.
 		 *
 		 * @since 1.0.0
-		 * @since 6.1.2 The geo_address, geo_public and geo_icon sanitizers run; geo_public is registered once.
+		 * @since 6.2.0 The geo_address, geo_public and geo_icon sanitizers run; geo_public is registered once.
 		 */
 	public static function register_meta() {
 		/**
@@ -979,7 +979,7 @@ class Geo_Data {
 	 *
 	 * @since 2.0.0
 	 * @since 6.1.0 The map is drawn at the object's saved zoom or the default zoom, see map_zoom().
-	 * @since 6.1.2 Accepts the output arguments `durable`, `dark`, `srcset` and `loading`; see Map_Provider::OUTPUT_DEFAULTS.
+	 * @since 6.2.0 Accepts the output arguments `durable`, `dark`, `srcset` and `loading`; see Map_Provider::OUTPUT_DEFAULTS.
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.
@@ -994,7 +994,7 @@ class Geo_Data {
 	/**
 	 * Returns the static map for an object with public location as data, for callers that build their own markup.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.
@@ -1010,7 +1010,7 @@ class Geo_Data {
 	/**
 	 * Returns the map provider, set to an object's public location.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.
