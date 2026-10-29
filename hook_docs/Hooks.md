@@ -97,6 +97,10 @@
 - [`sloc_weather_credit`](sloc_weather_credit) Filters the credit shown with a weather provider's weather.
 - [`sloc_weather_provider_defaults`](sloc_weather_provider_defaults) Filters the default arguments of weather providers.
 
+## simple-location.php
+
+- [`sloc_enqueue_styles`](sloc_enqueue_styles) Filters whether the front-end stylesheet is enqueued in the head of the current page.
+
 ## trait-weather-info.php
 
 - [`sloc_aqi_category`](sloc_aqi_category) Filters the category of an air quality index, such as for another scale or other colors.

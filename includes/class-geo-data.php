@@ -1258,6 +1258,7 @@ class Geo_Data {
 	 * @since 5.0.0
 	 * @since 6.0.0 The address, link, description and wrapper are escaped.
 	 * @since 6.1.0 The map link uses the saved zoom or the default zoom, see map_zoom().
+	 * @since 6.2.0 Enqueues the front-end stylesheet; see Simple_Location_Plugin::enqueue_styles().
 	 *
 	 * @param string $type Object type: post, comment, term or user.
 	 * @param int    $id   Object ID.
@@ -1265,6 +1266,7 @@ class Geo_Data {
 	 * @return string HTML, or an empty string if there is no location to show.
 	 */
 	public static function get_location( $type, $id, $args = array() ) {
+		Simple_Location_Plugin::enqueue_styles();
 		$loc = self::get_geodata( $type, $id );
 		if ( ! is_array( $loc ) ) {
 			return '';
