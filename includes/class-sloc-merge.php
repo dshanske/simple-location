@@ -285,6 +285,7 @@ class Sloc_Merge {
 	 * Shows how many were merged.
 	 *
 	 * @since 6.1.0
+	 * @since 6.2.0 The notice is printed with wp_admin_notice().
 	 */
 	public static function admin_notices() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the count the merge redirect added, to show a notice.
@@ -300,7 +301,13 @@ class Sloc_Merge {
 			/* translators: %s: Number merged. */
 			$message = sprintf( _n( 'Merged %s into the one you kept.', 'Merged %s into the one you kept.', (int) $count, 'simple-location' ), number_format_i18n( (int) $count ) );
 		}
-		printf( '<div class="notice notice-info is-dismissible"><p>%s</p></div>', esc_html( $message ) );
+		wp_admin_notice(
+			esc_html( $message ),
+			array(
+				'type'        => 'info',
+				'dismissible' => true,
+			)
+		);
 	}
 
 	/**

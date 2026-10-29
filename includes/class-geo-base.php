@@ -377,6 +377,8 @@ class Geo_Base {
 
 	/**
 	 * Add Notice when Bulk Action is run with results.
+	 *
+	 * @since 6.2.0 The notice is printed with wp_admin_notice().
 	 */
 	public static function bulk_action_admin_notices() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only reads the count that the bulk action redirect added, to show a notice.
@@ -388,7 +390,14 @@ class Geo_Base {
 				/* translators: Count of posts updated. */
 				$string = sprintf( _n( 'Updated %s post.', 'Updated %s posts.', $count, 'simple-location' ), $count );
 			}
-			printf( '<div id="message" class="updated fade">%1$s</div>', esc_html( $string ) );
+			wp_admin_notice(
+				esc_html( $string ),
+				array(
+					'type'        => 'success',
+					'id'          => 'message',
+					'dismissible' => true,
+				)
+			);
 		}
 	}
 
