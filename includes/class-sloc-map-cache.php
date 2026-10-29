@@ -375,15 +375,25 @@ class Sloc_Map_Cache {
 	 * Returns the URL a page should use for a map image.
 	 *
 	 * @since 6.0.0
+	 * @since 6.1.2 Added the `$durable` parameter.
 	 *
 	 * @param Map_Provider $map       Map provider, set to the map's location, size and pixel density.
 	 * @param array|null   $locations Optional. List of array( latitude, longitude ) points for an archive map.
+	 * @param bool         $durable   Optional. Always return the signed URL of the map image route, for copies read
+	 *                                outside the site, such as emails and feeds. It keeps working after the stored file
+	 *                                is replaced or the cache cleared, and never holds the provider's API key. An image
+	 *                                the provider doesn't allow storing is still a redirect to the provider's URL when
+	 *                                it is loaded. Default false.
 	 * @return string URL of the stored image; the provider's URL while the provider's image can't be stored; or a signed URL
-	 *                of the map image route if it isn't stored or is due for a refresh.
+	 *                of the map image route if it isn't stored, is due for a refresh, or `$durable` is true.
 	 */
-	public static function get_url( $map, $locations = null ) {
-		$args    = $map->get_cache_args( $locations );
-		$sig     = self::sign( $args );
+	public static function get_url( $map, $locations = null, $durable = false ) {
+		$args = $map->get_cache_args( $locations );
+		$sig  = self::sign( $args );
+		if ( $durable ) {
+			$args['sig'] = $sig;
+			return add_query_arg( array_map( 'rawurlencode', $args ), rest_url( self::REST_NAMESPACE . self::ROUTE ) );
+		}
 		$passing = get_transient( self::PASSTHROUGH . $sig );
 		if ( is_string( $passing ) && '' !== $passing ) {
 			return $passing;

@@ -144,6 +144,33 @@ abstract class Map_Provider extends Sloc_Provider {
 	protected $max_cache_age = 0;
 
 	/**
+	 * Default output options of a static map, for the arguments of the same names.
+	 *
+	 * - 'durable': for a provider whose images the site stores, use the signed map image route, which keeps working
+	 *   after the stored file is replaced or the cache cleared, instead of the stored file's URL.
+	 * - 'dark': add the dark style for visitors in dark mode, with a `<picture>`, when the Dark Mode Maps setting is on.
+	 * - 'srcset': add the provider's high-density images.
+	 * - 'loading': add `loading="lazy"` to the image.
+	 *
+	 * @since 6.1.2
+	 * @var bool[]
+	 */
+	const OUTPUT_DEFAULTS = array(
+		'durable' => false,
+		'dark'    => true,
+		'srcset'  => true,
+		'loading' => true,
+	);
+
+	/**
+	 * Output options of the current map, from OUTPUT_DEFAULTS and the arguments.
+	 *
+	 * @since 6.1.2
+	 * @var bool[]
+	 */
+	protected $output = self::OUTPUT_DEFAULTS;
+
+	/**
 	 * Image formats the provider can be asked for: 'png' (full color), 'png8' (256 colors), 'jpg', 'webp' or 'gif'.
 	 *
 	 * Providers without a choice of format leave this empty.
@@ -328,6 +355,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.1.0 Added the `marker`, `marker_color` and `marker_size` arguments.
 	 * @since 6.1.0 Added the `scalebar` and `scalebar_position` arguments.
 	 * @since 6.1.0 Added the `attribution` and `attribution_position` arguments.
+	 * @since 6.1.2 Added the `durable`, `dark`, `srcset` and `loading` arguments.
 	 *
 	 * @param array $args {
 	 *  Arguments.
@@ -349,6 +377,11 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *  @type string $attribution Where the credit goes, one of ATTRIBUTIONS. Default the sloc_attribution setting.
 	 *  @type string $attribution_position Corner of the credit on the image, one of POSITIONS. Default the
 	 *                                     sloc_attribution_position setting.
+	 *  @type bool   $durable Use an image URL that keeps working, for copies read outside the site. See
+	 *                        OUTPUT_DEFAULTS. Default false.
+	 *  @type bool   $dark    Add the dark mode image. Default true.
+	 *  @type bool   $srcset  Add the high-density images. Default true.
+	 *  @type bool   $loading Add loading="lazy". Default true.
 	 */
 	public function __construct( $args = array() ) {
 		// The setting's registered default is the content width, but it isn't registered before init.
@@ -398,6 +431,7 @@ abstract class Map_Provider extends Sloc_Provider {
 
 		$this->attribution          = self::sanitize_attribution( $r['attribution'] );
 		$this->attribution_position = self::sanitize_attribution_position( $r['attribution_position'] );
+		$this->output               = self::output_options( $r );
 		$this->set( $r['latitude'], $r['longitude'], $r['altitude'] );
 		$this->fit_size();
 
@@ -525,11 +559,13 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * @since 6.1.0
 	 *
-	 * @return Map_Provider|null The copy, or null if the Dark Mode Maps setting is off, the provider has no dark style,
-	 *                           or the map already uses it.
+	 * @since 6.1.2 Null when the map's `dark` argument is false.
+	 *
+	 * @return Map_Provider|null The copy, or null if the Dark Mode Maps setting is off, the map's `dark` argument is
+	 *                           false, the provider has no dark style, or the map already uses it.
 	 */
 	public function get_dark_variant() {
-		if ( ! get_option( 'sloc_map_dark_mode' ) ) {
+		if ( ! $this->output['dark'] || ! get_option( 'sloc_map_dark_mode' ) ) {
 			return null;
 		}
 		$styles = $this->get_family_styles();
@@ -928,6 +964,9 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * @since 6.0.0 An array sets the map's description from 'location' or 'address', and clears it otherwise.
 	 *
+	 * @since 6.1.2 An array sets the output options too, from the `durable`, `dark`, `srcset` and `loading` keys;
+	 *              missing keys use OUTPUT_DEFAULTS.
+	 *
 	 * @param array|float $args Latitude or array of all three properties.
 	 * @param float       $lng Longitude. Optional if first property is an array.
 	 * @param float       $alt Altitude. Optional.
@@ -944,12 +983,31 @@ abstract class Map_Provider extends Sloc_Provider {
 			if ( isset( $args['map_zoom'] ) ) {
 				$this->map_zoom = $args['map_zoom'];
 			}
-			// One provider draws many maps, so each map's description replaces the last one.
+			// One provider draws many maps, so each map's description and output options replace the last ones.
 			$location       = $args['location'] ?? $args['address'] ?? '';
 			$this->location = is_scalar( $location ) ? (string) $location : '';
+			$this->output   = self::output_options( $args );
 			$this->fit_size();
 		}
 		return parent::set( $args, $lng, $alt );
+	}
+
+	/**
+	 * Returns the output options from map arguments.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param array $args Map arguments, with any of the keys of OUTPUT_DEFAULTS.
+	 * @return bool[] Output options, with every key of OUTPUT_DEFAULTS.
+	 */
+	protected static function output_options( $args ) {
+		$output = self::OUTPUT_DEFAULTS;
+		foreach ( $output as $key => $default ) {
+			if ( isset( $args[ $key ] ) ) {
+				$output[ $key ] = rest_sanitize_boolean( $args[ $key ] );
+			}
+		}
+		return $output;
 	}
 
 	/**
@@ -1500,6 +1558,9 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.0.0 Providers whose terms allow it are served from the site, so the API key isn't in the page.
 	 * @since 6.0.0 The image has alternative text.
 	 * @since 6.1.0 With the Dark Mode Maps setting on, a `<picture>` adds the provider's dark style for visitors in dark mode.
+	 * @since 6.1.2 The map's `dark`, `srcset`, `loading` and `durable` arguments can turn the `<picture>`, srcset and
+	 *              lazy loading off, and use image URLs that keep working; with the first three off it is a plain
+	 *              `<a><img></a>`.
 	 *
 	 * @param bool $srcset Optional. Add a srcset with the provider's high-density maps. Default false.
 	 * @return string HTML.
@@ -1510,21 +1571,89 @@ abstract class Map_Provider extends Sloc_Provider {
 			return $this->static_map_error( $images );
 		}
 		$img = sprintf(
-			'<img class="sloc-map" src="%1$s"%2$s width="%3$s" height="%4$s" alt="%5$s" loading="lazy" />',
+			'<img class="sloc-map" src="%1$s"%2$s width="%3$s" height="%4$s" alt="%5$s"%6$s />',
 			esc_url( $images['src'] ),
-			'' === $images['srcset'] ? '' : sprintf( ' srcset="%s"', esc_attr( $images['srcset'] ) ),
+			empty( $images['candidates'] ) ? '' : sprintf( ' srcset="%s"', esc_attr( self::srcset( $images['candidates'], true ) ) ),
 			esc_attr( $this->width ),
 			esc_attr( $this->height ),
-			esc_attr( $this->get_alt_text() )
+			esc_attr( $this->get_alt_text() ),
+			$this->output['loading'] ? ' loading="lazy"' : ''
 		);
 		$dark = $this->get_dark_variant();
 		if ( $dark ) {
 			$dark_images = $dark->get_static_images( $srcset );
 			if ( ! is_wp_error( $dark_images ) ) {
-				$img = '<picture>' . self::dark_source( '' === $dark_images['srcset'] ? esc_url( $dark_images['src'] ) : $dark_images['srcset'] ) . $img . '</picture>';
+				$img = '<picture>' . self::dark_source( empty( $dark_images['candidates'] ) ? esc_url( $dark_images['src'] ) : self::srcset( $dark_images['candidates'], true ) ) . $img . '</picture>';
 			}
 		}
 		return sprintf( '<a target="_blank" href="%1$s">%2$s</a>', esc_url( $this->get_the_map_url() ), $img );
+	}
+
+	/**
+	 * Returns the static map as data, for callers that build their own markup, such as emails and feeds.
+	 *
+	 * Uses the same images, and the same output options from the map's arguments, as get_the_static_map_html().
+	 * The URLs aren't escaped.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @return array|WP_Error {
+	 *     Static map, or an error if the map can't be built, such as without an API key.
+	 *
+	 *     @type string $src         Image URL.
+	 *     @type string $srcset      High-density image candidates, or an empty string.
+	 *     @type string $dark_src    Image URL of the dark style, or an empty string without a dark mode image.
+	 *     @type string $dark_srcset High-density candidates of the dark style, or an empty string.
+	 *     @type string $link        URL of the full map.
+	 *     @type string $alt         Alternative text.
+	 *     @type int    $width       Width in pixels.
+	 *     @type int    $height      Height in pixels.
+	 *     @type string $attribution The provider's credit as HTML, when the Map Attribution setting puts it under the
+	 *                               map, or an empty string when it is drawn on the image.
+	 * }
+	 */
+	public function get_static_map_data() {
+		$images = $this->get_static_images( true );
+		if ( is_wp_error( $images ) ) {
+			return $images;
+		}
+		$data = array(
+			'src'         => (string) $images['src'],
+			'srcset'      => self::srcset( $images['candidates'], false ),
+			'dark_src'    => '',
+			'dark_srcset' => '',
+			'link'        => (string) $this->get_the_map_url(),
+			'alt'         => $this->get_alt_text(),
+			'width'       => (int) $this->width,
+			'height'      => (int) $this->height,
+			'attribution' => (string) $this->get_attribution_html(),
+		);
+		$dark = $this->get_dark_variant();
+		if ( $dark ) {
+			$dark_images = $dark->get_static_images( true );
+			if ( ! is_wp_error( $dark_images ) ) {
+				$data['dark_src']    = (string) $dark_images['src'];
+				$data['dark_srcset'] = self::srcset( $dark_images['candidates'], false );
+			}
+		}
+		return $data;
+	}
+
+	/**
+	 * Returns image candidates as a srcset value.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param array $candidates Image URLs keyed by pixel density.
+	 * @param bool  $escape     Whether to escape the URLs with esc_url(), for HTML.
+	 * @return string Image candidates, such as "https://… 1x,https://… 2x", or an empty string.
+	 */
+	protected static function srcset( $candidates, $escape ) {
+		$list = array();
+		foreach ( $candidates as $density => $url ) {
+			$list[] = sprintf( '%1$s %2$sx', $escape ? esc_url( $url ) : $url, $density );
+		}
+		return implode( ',', $list );
 	}
 
 	/**
@@ -1533,24 +1662,27 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Providers whose terms allow it are served from the site.
 	 *
 	 * @since 6.1.0
+	 * @since 6.1.2 Returns 'candidates', not escaped, in place of 'srcset'. Follows the map's `srcset` and `durable`
+	 *              arguments.
 	 *
 	 * @param bool $srcset Whether to include the provider's high-density maps.
-	 * @return array|WP_Error Array with 'src', and 'srcset' (image candidates with escaped URLs, or an empty string), or
-	 *                        an error if the map can't be built.
+	 * @return array|WP_Error Array with 'src' and 'candidates' (image URLs keyed by pixel density, or empty), or an
+	 *                        error if the map can't be built.
 	 */
 	protected function get_static_images( $srcset ) {
 		$src = $this->get_the_static_map();
 		if ( is_wp_error( $src ) ) {
 			return $src;
 		}
-		if ( Sloc_Map_Cache::is_enabled( $this ) ) {
-			$src = Sloc_Map_Cache::get_url( $this );
+		$cached = Sloc_Map_Cache::is_enabled( $this );
+		if ( $cached ) {
+			$src = Sloc_Map_Cache::get_url( $this, null, $this->output['durable'] );
 		}
 		$scales = $this->get_scales();
-		if ( ! $srcset || count( $scales ) < 2 ) {
+		if ( ! $srcset || ! $this->output['srcset'] || count( $scales ) < 2 ) {
 			return array(
-				'src'    => $src,
-				'srcset' => '',
+				'src'        => $src,
+				'candidates' => array(),
 			);
 		}
 		$candidates = array();
@@ -1562,15 +1694,15 @@ abstract class Map_Provider extends Sloc_Provider {
 				$this->scale = $scale;
 				return $image;
 			}
-			if ( Sloc_Map_Cache::is_enabled( $this ) ) {
-				$image = Sloc_Map_Cache::get_url( $this );
+			if ( $cached ) {
+				$image = Sloc_Map_Cache::get_url( $this, null, $this->output['durable'] );
 			}
-			$candidates[] = sprintf( '%1$s %2$sx', esc_url( $image ), $density );
+			$candidates[ $density ] = $image;
 		}
 		$this->scale = $scale;
 		return array(
-			'src'    => $src,
-			'srcset' => implode( ',', $candidates ),
+			'src'        => $src,
+			'candidates' => $candidates,
 		);
 	}
 

@@ -30,7 +30,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-map-provider.php:761](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L761)
+- [includes/class-map-provider.php:797](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L797)
 ```php
 apply_filters( 'sloc_map_language', get_bloginfo( 'language' ), $this )
 ```

@@ -385,6 +385,7 @@ function get_comment_weather_text( $comment_id ) {
  * Returns the map for a post with a public location.
  *
  * @since 5.0.0
+ * @since 6.1.2 Accepts the output arguments `durable`, `dark`, `srcset` and `loading`; see Map_Provider::OUTPUT_DEFAULTS.
  *
  * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
  * @param array            $args Arguments passed to the map provider. Optional.
@@ -439,6 +440,71 @@ function get_comment_map( $comment_id, $args = array() ) {
  */
 function get_term_map( $term_id, $args = array() ) {
 	return Geo_Data::get_map( 'term', $term_id, $args );
+}
+
+/**
+ * Returns the static map for a post with a public location as data, for building your own markup.
+ *
+ * Takes the same arguments as get_post_map(), including the output arguments `durable` (image URLs that keep
+ * working, for emails and feeds), `dark`, `srcset` and `loading`.
+ *
+ * @since 6.1.2
+ *
+ * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
+ * @param array            $args Arguments passed to the map provider. Optional.
+ * @return array|string|false|WP_Error Static map data, see Map_Provider::get_static_map_data(); an empty string if there
+ *                                     is no public location or no map provider; false if there is no post; or an error
+ *                                     if the map can't be built.
+ */
+function get_post_static_map( $post = null, $args = array() ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return false;
+	}
+	return Geo_Data::get_static_map( 'post', $post->ID, $args );
+}
+
+/**
+ * Returns the static map for a user with a public location as data.
+ *
+ * @since 6.1.2
+ *
+ * @param int|WP_User $user User ID or object.
+ * @param array       $args Arguments passed to the map provider. Optional.
+ * @return array|string|false|WP_Error See get_post_static_map(); false if there is no user.
+ */
+function get_user_static_map( $user, $args = array() ) {
+	$user = sloc_get_user( $user );
+	if ( ! $user ) {
+		return false;
+	}
+	return Geo_Data::get_static_map( 'user', $user->ID, $args );
+}
+
+/**
+ * Returns the static map for a comment with a public location as data.
+ *
+ * @since 6.1.2
+ *
+ * @param int   $comment_id Comment ID.
+ * @param array $args       Arguments passed to the map provider. Optional.
+ * @return array|string|WP_Error See get_post_static_map().
+ */
+function get_comment_static_map( $comment_id, $args = array() ) {
+	return Geo_Data::get_static_map( 'comment', $comment_id, $args );
+}
+
+/**
+ * Returns the static map for a term with a public location as data.
+ *
+ * @since 6.1.2
+ *
+ * @param int   $term_id Term ID.
+ * @param array $args    Arguments passed to the map provider. Optional.
+ * @return array|string|WP_Error See get_post_static_map().
+ */
+function get_term_static_map( $term_id, $args = array() ) {
+	return Geo_Data::get_static_map( 'term', $term_id, $args );
 }
 
 /**

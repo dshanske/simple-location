@@ -25,7 +25,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-map-provider.php:1465](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L1465)
+- [includes/class-map-provider.php:1523](https://github.com/dshanske/simple-location/blob/trunk/includes/class-map-provider.php#L1523)
 ```php
 apply_filters( 'sloc_map_alt', $alt, $this )
 ```
