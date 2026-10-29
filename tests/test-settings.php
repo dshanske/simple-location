@@ -178,8 +178,27 @@ class SettingsTest extends WP_UnitTestCase {
 	 * The front-end stylesheet is enqueued with the plugin version.
 	 */
 	public function test_style_load() {
+		// Registered everywhere, enqueued only where needed (#772).
+		$this->go_to( get_permalink( self::factory()->post->create() ) );
 		Simple_Location_Plugin::style_load();
+		$this->assertTrue( wp_style_is( 'simple-location', 'registered' ) );
+		$this->assertFalse( wp_style_is( 'simple-location', 'enqueued' ), 'Not on a post without a location.' );
+
+		// Output from the plugin enqueues it.
+		Simple_Location_Plugin::enqueue_styles();
 		$this->assertTrue( wp_style_is( 'simple-location', 'enqueued' ) );
+		wp_dequeue_style( 'simple-location' );
+
+		$post_id = self::factory()->post->create( array( 'meta_input' => array( 'geo_latitude' => 40.7 ) ) );
+		$this->go_to( get_permalink( $post_id ) );
+		Simple_Location_Plugin::style_load();
+		$this->assertTrue( wp_style_is( 'simple-location', 'enqueued' ), 'A post with a location.' );
+		wp_dequeue_style( 'simple-location' );
+
+		add_filter( 'sloc_enqueue_styles', '__return_true' );
+		$this->go_to( home_url( '/?p=0' ) );
+		Simple_Location_Plugin::style_load();
+		$this->assertTrue( wp_style_is( 'simple-location', 'enqueued' ), 'The filter loads it everywhere.' );
 		$this->assertStringEndsWith( 'css/location.min.css', wp_styles()->registered['simple-location']->src );
 		$this->assertSame( Simple_Location_Plugin::$version, wp_styles()->registered['simple-location']->ver );
 	}

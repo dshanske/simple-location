@@ -747,6 +747,7 @@ class Sloc_Weather_Data {
 	 * @since 6.1.0 Followed by the weather provider's credit, unless the Weather Credits setting puts it in the footer.
 	 * @since 6.2.0 Added the 'text' style.
 	 * @since 6.2.0 The 'complete' style adds the air quality index, as get_the_aqi() shows it.
+	 * @since 6.2.0 Enqueues the front-end stylesheet; see Simple_Location_Plugin::enqueue_styles().
 	 *
 	 * @param string     $type Object type.
 	 * @param int        $id   Object ID.
@@ -764,6 +765,7 @@ class Sloc_Weather_Data {
 	 * @return string Weather markup, or an empty string without weather data.
 	 */
 	public static function get_the_weather( $type, $id, $args = null ) {
+		Simple_Location_Plugin::enqueue_styles();
 		$weather  = self::get_object_weatherdata( $type, $id );
 		$defaults = array(
 			'style'         => 'simple', // Options are simple, complete, graphic (only)
@@ -818,6 +820,7 @@ class Sloc_Weather_Data {
 	 * as text, so it isn't shown by color alone.
 	 *
 	 * @since 6.2.0
+	 * @since 6.2.0 Enqueues the front-end stylesheet; see Simple_Location_Plugin::enqueue_styles().
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.
@@ -831,6 +834,7 @@ class Sloc_Weather_Data {
 	 * @return string Markup or text, or an empty string without an air quality index.
 	 */
 	public static function get_the_aqi( $type, $id, $args = array() ) {
+		Simple_Location_Plugin::enqueue_styles();
 		$args     = wp_parse_args(
 			$args,
 			array(

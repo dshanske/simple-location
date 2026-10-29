@@ -29,7 +29,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-weather-data.php:912](https://github.com/dshanske/simple-location/blob/trunk/includes/class-weather-data.php#L912)
+- [includes/class-weather-data.php:916](https://github.com/dshanske/simple-location/blob/trunk/includes/class-weather-data.php#L916)
 ```php
 apply_filters( 'sloc_weather_text', $text, $weather, $type, $id )
 ```

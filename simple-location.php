@@ -433,14 +433,81 @@ class Simple_Location_Plugin {
 	}
 
 	/**
-	 * Stylesheet Load Function.
+	 * Registers the front-end stylesheet, and enqueues it on pages that show location, weather or maps.
 	 *
-	 * Meant to be attached to plugins_loaded hook.
+	 * Output that turns up anyway, such as from a theme's template, enqueues it with enqueue_styles(), and it is then
+	 * printed in the footer.
 	 *
 	 * @since 1.0.0
+	 * @since 6.2.0 Enqueued only on pages that need it; see needs_styles().
 	 */
 	public static function style_load() {
-		wp_enqueue_style( 'simple-location', plugin_dir_url( __FILE__ ) . 'css/location.min.css', array(), self::$version );
+		wp_register_style( 'simple-location', plugin_dir_url( __FILE__ ) . 'css/location.min.css', array(), self::$version );
+		if ( self::needs_styles() ) {
+			wp_enqueue_style( 'simple-location' );
+		}
+	}
+
+	/**
+	 * Enqueues the front-end stylesheet, from code that prints location, weather or maps. Hooked nowhere.
+	 *
+	 * @since 6.2.0
+	 */
+	public static function enqueue_styles() {
+		if ( is_admin() || ! wp_style_is( 'simple-location', 'registered' ) ) {
+			return;
+		}
+		wp_enqueue_style( 'simple-location' );
+	}
+
+	/**
+	 * Whether the current page shows the plugin's location, weather or maps, so the stylesheet goes in the head.
+	 *
+	 * True for the plugin's archive views (map, temperature, rain, snow and weather), for pages with one of the
+	 * plugin's widgets, and for pages whose posts have a location or weather.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @return bool
+	 */
+	public static function needs_styles() {
+		global $wp_query, $wp_widget_factory;
+		$needs = false;
+		if ( $wp_query instanceof WP_Query && ( '' !== Sloc_Weather_Archive::get_view() || array_key_exists( 'map', $wp_query->query_vars ) ) ) {
+			$needs = true;
+		}
+		if ( ! $needs && $wp_widget_factory instanceof WP_Widget_Factory ) {
+			foreach ( array( 'Sloc_Weather_Widget', 'Sloc_Station_Widget', 'Sloc_Lastseen_Widget', 'Sloc_Airport_Widget' ) as $class ) {
+				if ( isset( $wp_widget_factory->widgets[ $class ] ) && is_active_widget( false, false, $wp_widget_factory->widgets[ $class ]->id_base, true ) ) {
+					$needs = true;
+					break;
+				}
+			}
+		}
+		if ( ! $needs && $wp_query instanceof WP_Query && ! empty( $wp_query->posts ) ) {
+			// The query has loaded the posts' meta, so this doesn't query the database again.
+			foreach ( $wp_query->posts as $post ) {
+				$id = is_object( $post ) ? $post->ID : (int) $post;
+				foreach ( array( 'geo_latitude', 'geo_address', 'weather_temperature', 'weather_code' ) as $key ) {
+					if ( '' !== get_post_meta( $id, $key, true ) ) {
+						$needs = true;
+						break 2;
+					}
+				}
+			}
+		}
+
+		/**
+		 * Filters whether the front-end stylesheet is enqueued in the head of the current page.
+		 *
+		 * Return true to load it on every page, as before 6.2.0, such as for a theme that shows locations in ways the
+		 * plugin can't detect. Output from the plugin's functions enqueues it anyway, printed in the footer.
+		 *
+		 * @since 6.2.0
+		 *
+		 * @param bool $needs Whether the page shows location, weather or maps.
+		 */
+		return (bool) apply_filters( 'sloc_enqueue_styles', $needs );
 	}
 
 	/**

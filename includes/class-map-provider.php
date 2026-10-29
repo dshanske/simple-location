@@ -1470,12 +1470,14 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * pixel density in its srcset.
 	 *
 	 * @since 6.1.0
+	 * @since 6.2.0 Enqueues the front-end stylesheet; see Simple_Location_Plugin::enqueue_styles().
 	 *
 	 * @param array $locations List of array( latitude, longitude ) points.
 	 * @param int[] $post_ids  Optional. The post of each location, in the same order. Default empty, for no links.
 	 * @return string HTML.
 	 */
 	public function get_archive_map_html( $locations, $post_ids = array() ) {
+		Simple_Location_Plugin::enqueue_styles();
 		$src    = $this->get_archive_map_src( $locations );
 		$srcset = '' === $src ? '' : $this->get_archive_srcset( $locations );
 		$html   = sprintf(
@@ -1657,11 +1659,13 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.2.0 The map's `dark`, `srcset`, `loading` and `durable` arguments can turn the `<picture>`, srcset and
 	 *              lazy loading off, and use image URLs that keep working; with the first three off it is a plain
 	 *              `<a><img></a>`.
+	 * @since 6.2.0 Enqueues the front-end stylesheet; see Simple_Location_Plugin::enqueue_styles().
 	 *
 	 * @param bool $srcset Optional. Add a srcset with the provider's high-density maps. Default false.
 	 * @return string HTML.
 	 */
 	public function get_the_static_map_html( $srcset = false ) {
+		Simple_Location_Plugin::enqueue_styles();
 		$images = $this->get_static_images( $srcset );
 		if ( is_wp_error( $images ) ) {
 			return $this->static_map_error( $images );
