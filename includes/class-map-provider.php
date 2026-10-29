@@ -152,7 +152,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * - 'srcset': add the provider's high-density images.
 	 * - 'loading': add `loading="lazy"` to the image.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 * @var bool[]
 	 */
 	const OUTPUT_DEFAULTS = array(
@@ -165,7 +165,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	/**
 	 * Output options of the current map, from OUTPUT_DEFAULTS and the arguments.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 * @var bool[]
 	 */
 	protected $output = self::OUTPUT_DEFAULTS;
@@ -355,7 +355,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.1.0 Added the `marker`, `marker_color` and `marker_size` arguments.
 	 * @since 6.1.0 Added the `scalebar` and `scalebar_position` arguments.
 	 * @since 6.1.0 Added the `attribution` and `attribution_position` arguments.
-	 * @since 6.1.2 Added the `durable`, `dark`, `srcset` and `loading` arguments.
+	 * @since 6.2.0 Added the `durable`, `dark`, `srcset` and `loading` arguments.
 	 *
 	 * @param array $args {
 	 *  Arguments.
@@ -544,7 +544,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * @since 6.1.0
 	 *
-	 * @since 6.1.2 Null when the map's `dark` argument is false.
+	 * @since 6.2.0 Null when the map's `dark` argument is false.
 	 *
 	 * @return Map_Provider|null The copy, or null if the Dark Mode Maps setting is off, the map's `dark` argument is
 	 *                           false, the provider has no dark style, or the map already uses it.
@@ -949,7 +949,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 *
 	 * @since 6.0.0 An array sets the map's description from 'location' or 'address', and clears it otherwise.
 	 *
-	 * @since 6.1.2 An array sets the output options too, from the `durable`, `dark`, `srcset` and `loading` keys;
+	 * @since 6.2.0 An array sets the output options too, from the `durable`, `dark`, `srcset` and `loading` keys;
 	 *              missing keys use OUTPUT_DEFAULTS.
 	 *
 	 * @param array|float $args Latitude or array of all three properties.
@@ -980,7 +980,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	/**
 	 * Returns the output options from map arguments.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param array $args Map arguments, with any of the keys of OUTPUT_DEFAULTS.
 	 * @return bool[] Output options, with every key of OUTPUT_DEFAULTS.
@@ -1543,7 +1543,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * @since 6.0.0 Providers whose terms allow it are served from the site, so the API key isn't in the page.
 	 * @since 6.0.0 The image has alternative text.
 	 * @since 6.1.0 With the Dark Mode Maps setting on, a `<picture>` adds the provider's dark style for visitors in dark mode.
-	 * @since 6.1.2 The map's `dark`, `srcset`, `loading` and `durable` arguments can turn the `<picture>`, srcset and
+	 * @since 6.2.0 The map's `dark`, `srcset`, `loading` and `durable` arguments can turn the `<picture>`, srcset and
 	 *              lazy loading off, and use image URLs that keep working; with the first three off it is a plain
 	 *              `<a><img></a>`.
 	 *
@@ -1580,7 +1580,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Uses the same images, and the same output options from the map's arguments, as get_the_static_map_html().
 	 * The URLs aren't escaped.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @return array|WP_Error {
 	 *     Static map, or an error if the map can't be built, such as without an API key.
@@ -1627,7 +1627,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	/**
 	 * Returns image candidates as a srcset value.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param array $candidates Image URLs keyed by pixel density.
 	 * @param bool  $escape     Whether to escape the URLs with esc_url(), for HTML.
@@ -1647,7 +1647,7 @@ abstract class Map_Provider extends Sloc_Provider {
 	 * Providers whose terms allow it are served from the site.
 	 *
 	 * @since 6.1.0
-	 * @since 6.1.2 Returns 'candidates', not escaped, in place of 'srcset'. Follows the map's `srcset` and `durable`
+	 * @since 6.2.0 Returns 'candidates', not escaped, in place of 'srcset'. Follows the map's `srcset` and `durable`
 	 *              arguments.
 	 *
 	 * @param bool $srcset Whether to include the provider's high-density maps.

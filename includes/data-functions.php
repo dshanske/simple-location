@@ -357,7 +357,7 @@ function get_user_weatherdata( $user, $key = '' ) {
  * Returns the map for a post with a public location.
  *
  * @since 5.0.0
- * @since 6.1.2 Accepts the output arguments `durable`, `dark`, `srcset` and `loading`; see Map_Provider::OUTPUT_DEFAULTS.
+ * @since 6.2.0 Accepts the output arguments `durable`, `dark`, `srcset` and `loading`; see Map_Provider::OUTPUT_DEFAULTS.
  *
  * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
  * @param array            $args Arguments passed to the map provider. Optional.
@@ -420,7 +420,7 @@ function get_term_map( $term_id, $args = array() ) {
  * Takes the same arguments as get_post_map(), including the output arguments `durable` (image URLs that keep
  * working, for emails and feeds), `dark`, `srcset` and `loading`.
  *
- * @since 6.1.2
+ * @since 6.2.0
  *
  * @param int|WP_Post|null $post Post ID or object. Defaults to the current post.
  * @param array            $args Arguments passed to the map provider. Optional.
@@ -439,7 +439,7 @@ function get_post_static_map( $post = null, $args = array() ) {
 /**
  * Returns the static map for a user with a public location as data.
  *
- * @since 6.1.2
+ * @since 6.2.0
  *
  * @param int|WP_User $user User ID or object.
  * @param array       $args Arguments passed to the map provider. Optional.
@@ -456,7 +456,7 @@ function get_user_static_map( $user, $args = array() ) {
 /**
  * Returns the static map for a comment with a public location as data.
  *
- * @since 6.1.2
+ * @since 6.2.0
  *
  * @param int   $comment_id Comment ID.
  * @param array $args       Arguments passed to the map provider. Optional.
@@ -469,7 +469,7 @@ function get_comment_static_map( $comment_id, $args = array() ) {
 /**
  * Returns the static map for a term with a public location as data.
  *
- * @since 6.1.2
+ * @since 6.2.0
  *
  * @param int   $term_id Term ID.
  * @param array $args    Arguments passed to the map provider. Optional.

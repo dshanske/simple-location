@@ -923,7 +923,7 @@ class Geo_Data {
 	 *
 	 * @since 2.0.0
 	 * @since 6.1.0 The map is drawn at the object's saved zoom or the default zoom, see map_zoom().
-	 * @since 6.1.2 Accepts the output arguments `durable`, `dark`, `srcset` and `loading`; see Map_Provider::OUTPUT_DEFAULTS.
+	 * @since 6.2.0 Accepts the output arguments `durable`, `dark`, `srcset` and `loading`; see Map_Provider::OUTPUT_DEFAULTS.
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.
@@ -938,7 +938,7 @@ class Geo_Data {
 	/**
 	 * Returns the static map for an object with public location as data, for callers that build their own markup.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.
@@ -954,7 +954,7 @@ class Geo_Data {
 	/**
 	 * Returns the map provider, set to an object's public location.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param string $type Object type.
 	 * @param int    $id   Object ID.

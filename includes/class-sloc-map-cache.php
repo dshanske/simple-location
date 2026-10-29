@@ -373,7 +373,7 @@ class Sloc_Map_Cache {
 	 * Returns the URL a page should use for a map image.
 	 *
 	 * @since 6.0.0
-	 * @since 6.1.2 Added the `$durable` parameter.
+	 * @since 6.2.0 Added the `$durable` parameter.
 	 *
 	 * @param Map_Provider $map       Map provider, set to the map's location, size and pixel density.
 	 * @param array|null   $locations Optional. List of array( latitude, longitude ) points for an archive map.
