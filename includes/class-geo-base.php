@@ -268,13 +268,15 @@ class Geo_Base {
 	 * Enqueues the location editing styles and scripts on the post, comment and profile screens.
 	 *
 	 * @since 3.0.1
+	 * @since 6.2.0 Also on another user's profile (user-edit.php), not only on your own.
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public static function enqueue( $hook_suffix ) {
 		$screens   = self::screens();
 		$screens[] = 'comment';
-		$hooks     = array( 'profile.php' );
+		// Your own profile, and another user's.
+		$hooks     = array( 'profile.php', 'user-edit.php' );
 		$screen    = get_current_screen();
 		if ( in_array( $screen->id, $screens, true ) || in_array( $hook_suffix, $hooks, true ) ) {
 			wp_enqueue_style(
