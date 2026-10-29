@@ -217,15 +217,17 @@ class Sloc_Provider_Chain {
 	 * Looks up the weather at a location with the weather chain.
 	 *
 	 * @since 6.1.0
+	 * @since 6.2.0 Fills in readings the provider didn't give, from Open-Meteo, when chosen.
 	 *
 	 * @param float               $latitude   Latitude.
 	 * @param float               $longitude  Longitude.
 	 * @param int|string|DateTime $time       Time to look up. Optional; defaults to now.
 	 * @param int|null            $cache_time Seconds to cache the result. Optional; defaults to each provider's setting.
 	 * @return array|WP_Error Conditions, with the slug of the provider that answered as 'provider', or the last error.
+	 *                        Readings it didn't give are filled in from Open-Meteo when chosen; see Sloc_Weather_Fill.
 	 */
 	public static function weather( $latitude, $longitude, $time = null, $cache_time = null ) {
-		return self::run(
+		$weather = self::run(
 			'weather',
 			function ( $provider ) use ( $time, $cache_time ) {
 				if ( is_numeric( $cache_time ) ) {
@@ -243,6 +245,8 @@ class Sloc_Provider_Chain {
 				'time'      => $time instanceof DateTimeInterface ? $time->getTimestamp() : $time,
 			)
 		);
+		// Readings the provider didn't give can be filled in from Open-Meteo.
+		return Sloc_Weather_Fill::fill( $weather, $latitude, $longitude, $time );
 	}
 
 	/**

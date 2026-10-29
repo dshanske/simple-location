@@ -253,6 +253,56 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 	}
 
 	/**
+	 * Fetches the hourly weather between two times, in one request, at the provider's location.
+	 *
+	 * Used to fill in readings for many posts at one place: each post then takes its hour with conditions_at(). The
+	 * archive is used when the whole range is older than ARCHIVE_AFTER days, and the forecast API's hourly data
+	 * otherwise.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param int $start Unix timestamp of the first hour.
+	 * @param int $end   Unix timestamp of the last hour.
+	 * @return array|WP_Error Hourly response, for conditions_at(), or an error.
+	 */
+	public function fetch_range( $start, $end ) {
+		if ( ! is_numeric( $this->latitude ) || ! is_numeric( $this->longitude ) ) {
+			return new WP_Error( 'no_location', __( 'A location is needed for the weather', 'simple-location' ) );
+		}
+		$args = array(
+			'latitude'        => $this->latitude,
+			'longitude'       => $this->longitude,
+			'wind_speed_unit' => 'ms',
+			'timeformat'      => 'unixtime',
+			'hourly'          => implode( ',', self::VARIABLES ),
+			'start_date'      => gmdate( 'Y-m-d', (int) $start ),
+			'end_date'        => gmdate( 'Y-m-d', (int) $end ),
+		);
+		if ( ! empty( $this->api ) ) {
+			$args['apikey'] = $this->api;
+		}
+		$api  = ( time() - (int) $end > self::ARCHIVE_AFTER * DAY_IN_SECONDS ) ? 'archive' : 'forecast';
+		$json = $this->fetch_json( $this->get_endpoint( $api ), $args );
+		return is_wp_error( $json ) ? self::api_error( $json ) : $json;
+	}
+
+	/**
+	 * Returns the conditions of the hour nearest a time, from a response of fetch_range().
+	 *
+	 * Only what Open-Meteo gives, without the values extra_data() works out, such as a condition from the sunlight.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param array $json      Response from fetch_range().
+	 * @param int   $timestamp Unix timestamp.
+	 * @return array Conditions, or an empty array if the response doesn't have that hour.
+	 */
+	public function conditions_at( $json, $timestamp ) {
+		$values = self::hour_values( $json, (int) ( round( (int) $timestamp / HOUR_IN_SECONDS ) * HOUR_IN_SECONDS ) );
+		return empty( $values ) ? array() : $this->convert_data( $values );
+	}
+
+	/**
 	 * Returns Open-Meteo's explanation of a refused request, when the response has one.
 	 *
 	 * @since 6.1.0
