@@ -23,6 +23,7 @@ class Sloc_Weather_Data {
 	 * Weather properties that can be stored, each as `weather_{property}` meta.
 	 *
 	 * @since 1.0.0
+	 * @since 6.2.0 Adds voc_index and nox_index, the VOC and NOx indices of a Sensirion gas sensor.
 	 * @var string[]
 	 */
 	public static $properties = array(
@@ -49,6 +50,8 @@ class Sloc_Weather_Data {
 		'o3',
 		'pb',
 		'so2',
+		'voc_index',
+		'nox_index',
 		'windspeed',
 		'winddegree',
 		'windgust',
@@ -120,6 +123,7 @@ class Sloc_Weather_Data {
 	 *
 	 * @since 1.0.0
 	 * @since 6.1.0 Registers the rain rate and a weather station's credit.
+	 * @since 6.2.0 Registers the VOC and NOx indices.
 	 */
 	public static function register_meta() {
 		// Legacy Weather Storage
@@ -160,6 +164,8 @@ class Sloc_Weather_Data {
 			'o3'          => __( 'Ozone', 'simple-location' ),
 			'pb'          => __( 'Lead', 'simple-location' ),
 			'so2'         => __( 'Sulfur Dioxide', 'simple-location' ),
+			'voc_index'   => __( 'VOC Index', 'simple-location' ),
+			'nox_index'   => __( 'NOx Index', 'simple-location' ),
 			'windspeed'   => __( 'Wind Speed', 'simple-location' ),
 			'winddegree'  => __( 'Wind Degree', 'simple-location' ),
 			'windgust'    => __( 'Wind Gust', 'simple-location' ),
