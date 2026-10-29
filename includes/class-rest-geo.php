@@ -458,28 +458,25 @@ class REST_Geo {
 	/**
 	 * Callback handler for Geolocation Retrieval.
 	 *
+	 * @since 6.2.0 Without a server-side provider, including the browser (HTML5) one, returns the no_provider error
+	 *              directly; the branches that could never run are removed.
+	 *
 	 * @param WP_REST_Request $request REST Request.
 	 */
 	public static function lookup( $request ) {
 		$params      = $request->get_params();
 		$time        = $params['time'] ?? null;
 		$geolocation = Loc_Config::geolocation_provider();
-		if ( is_object( $geolocation ) ) {
-			if ( 'HTML5' === $geolocation->get_slug() ) {
-				$geolocation = Loc_Config::geolocation_provider( 'dummy' );
-			}
-			$geolocation->set_user( get_current_user_id() );
-			$return = $geolocation->retrieve( $time, $params );
-
-			if ( is_wp_error( $return ) ) {
-				return $return;
-			}
-
-			return $geolocation->get();
-		} elseif ( 'null' === $geolocation ) {
-			return $geolocation;
+		// The browser (HTML5) provider runs in the browser and has nothing here, so it is an error, like no provider.
+		if ( ! $geolocation instanceof Location_Provider ) {
+			return new WP_Error( 'no_provider', __( 'No Geolocation Provider Available', 'simple-location' ), array( 'status' => 400 ) );
 		}
-		return new WP_Error( 'no_provider', __( 'No Geolocation Provider Available', 'simple-location' ), array( 'status' => 400 ) );
+		$geolocation->set_user( get_current_user_id() );
+		$return = $geolocation->retrieve( $time, $params );
+		if ( is_wp_error( $return ) ) {
+			return $return;
+		}
+		return $geolocation->get();
 	}
 
 	/**

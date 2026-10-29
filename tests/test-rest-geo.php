@@ -735,6 +735,11 @@ class RestGeoTest extends WP_UnitTestCase {
 	public function test_lookup_without_provider() {
 		update_option( 'sloc_geolocation_provider', 'HTML5' );
 		$this->assertErrorResponse( 'no_provider', $this->request( '/lookup' ), 400 );
+
+		// A provider that isn't registered, such as one that was removed, is the same error (#771).
+		remove_all_filters( 'sanitize_option_sloc_geolocation_provider' );
+		update_option( 'sloc_geolocation_provider', 'removed-provider' );
+		$this->assertErrorResponse( 'no_provider', $this->request( '/lookup' ), 400 );
 	}
 
 	/**
