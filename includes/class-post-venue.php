@@ -48,6 +48,7 @@ class Post_Venue {
 	 *
 	 * @since 5.0.0
 	 * @since 6.1.0 Registers the visibility for posts made at the venue.
+	 * @since 6.1.2 venue_url is sanitized as a URL.
 	 */
 	public static function register_meta() {
 		register_meta(
@@ -58,7 +59,7 @@ class Post_Venue {
 				'type'              => 'string',
 				'description'       => __( 'URL of Venue', 'simple-location' ),
 				'single'            => true,
-				'sanitize_callback' => 'sanitize_text_field',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_url' ),
 				'show_in_rest'      => true,
 			)
 		);
@@ -811,6 +812,20 @@ class Post_Venue {
 	}
 
 	/**
+	 * Sanitizes the venue_url meta value.
+	 *
+	 * @since 6.1.2
+	 *
+	 * @param mixed $value URL.
+	 * @return string An HTTP or HTTPS URL, or an empty string.
+	 */
+	public static function sanitize_url( $value ) {
+		$url = is_string( $value ) ? trim( $value ) : '';
+		// Only web addresses; esc_url_raw() would make one of a word.
+		return preg_match( '#^https?://#i', $url ) ? esc_url_raw( $url, array( 'http', 'https' ) ) : '';
+	}
+
+	/**
 	 * Sanitizes a venue's alternate URLs.
 	 *
 	 * @since 6.1.0
@@ -822,9 +837,7 @@ class Post_Venue {
 		$list = is_string( $value ) ? preg_split( '/[\r\n]+/', $value ) : (array) $value;
 		$urls = array();
 		foreach ( $list as $url ) {
-			$url = is_string( $url ) ? trim( $url ) : '';
-			// Only web addresses; esc_url_raw() would make one of a word.
-			$url = preg_match( '#^https?://#i', $url ) ? esc_url_raw( $url, array( 'http', 'https' ) ) : '';
+			$url = self::sanitize_url( $url );
 			if ( '' !== $url && ! in_array( $url, $urls, true ) ) {
 				$urls[] = $url;
 			}
