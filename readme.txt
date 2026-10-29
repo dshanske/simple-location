@@ -3,7 +3,7 @@ Contributors: dshanske
 Tags: geolocation, timezones, maps, location, weather
 Requires at least: 6.2
 Tested up to: 7.1
-Stable tag: 6.1.1
+Stable tag: 6.2.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -477,6 +477,10 @@ Developers can refresh the station, airport and airline files with `composer upd
 
 == Upgrade Notice ==
 
+= 6.2.0 =
+
+Snow depth that Meteostat and Xweather stored as snowfall (Meteostat's ten times too large) is moved to the new snow depth reading in the background. The front-end stylesheet now loads only on pages that show locations, weather or maps; a theme that shows them some other way can load it everywhere with the sloc_enqueue_styles filter. Settings are now checked when saved, so an unknown provider becomes None.
+
 = 6.1.1 =
 
 Track maps made with Tools > Location Track in 6.1.0 show text instead of a map; make their shortcodes again. The GeoPulse provider needs GeoPulse 2.1.0 or later.
@@ -490,6 +494,21 @@ The Met Office provider has been removed; if you used it, choose another weather
 Requires PHP 7.4, WordPress 6.2 or ClassicPress 2.7. The Bing providers and MapQuest elevation have been removed because their services were retired; if you used one, choose another provider in Settings. Many fixes to location visibility and permissions.
 
 == Changelog ==
+
+= 6.2.0 ( 2026-10-29 ) =
+* Add rain and snow archive views, like the temperature view, with a bar chart of the posts with some rain or snow
+* Fill in weather readings the provider doesn't give, such as a station's conditions, snow or cloud cover, from Open-Meteo, and fill in existing posts with Tools > Weather Fill
+* Add snow depth and snow rate readings; Meteostat and Xweather snow depth is no longer stored as snowfall
+* Show the air quality index with its category and color, and store the VOC and NOx indices of gas sensors
+* Choose a map style family, such as Satellite, for each post
+* Get maps and weather for places outside a web page, such as email: map data with durable image URLs, plain maps without dark mode or high-density images, and plain-text weather
+* Get a post's or comment's map from the map REST route by its ID
+* Redraw the editor's map preview when the zoom or style changes
+* Load the location styles and script when editing another user's profile
+* Load the front-end stylesheet only on pages that need it
+* Check every setting and location field when it is saved
+* Use LocationIQ's current endpoints, HTTPS for GeoNames, and the shared request handling for NWS and Weatherbit
+* The WeeWX provider is no longer in beta
 
 = 6.1.1 ( 2026-10-25 ) =
 * Fix track maps showing the route as text: [sloc_map track] shortcodes from Tools > Location Track now escape the route

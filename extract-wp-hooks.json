@@ -11,6 +11,9 @@
 		"widget_title",
 		"wp_read_image_metadata_types",
 		"wp_date",
-		"wp_trigger_error_run"
+		"wp_trigger_error_run",
+		"wp_admin_notice",
+		"wp_admin_notice_args",
+		"wp_admin_notice_markup"
 	]
 }
