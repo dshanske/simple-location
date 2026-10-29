@@ -96,3 +96,7 @@
 - [`sloc_condition_from_sunlight`](sloc_condition_from_sunlight) Filters the condition estimated from the sunlight measured.
 - [`sloc_weather_credit`](sloc_weather_credit) Filters the credit shown with a weather provider's weather.
 - [`sloc_weather_provider_defaults`](sloc_weather_provider_defaults) Filters the default arguments of weather providers.
+
+## trait-weather-info.php
+
+- [`sloc_aqi_category`](sloc_aqi_category) Filters the category of an air quality index, such as for another scale or other colors.

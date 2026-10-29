@@ -382,6 +382,36 @@ function get_comment_weather_text( $comment_id ) {
 }
 
 /**
+ * Returns the air quality index of a post, shown with its category's name and color.
+ *
+ * @since 6.2.0
+ *
+ * @param int|WP_Post|null $post Optional. Post ID or object. Default the current post.
+ * @param array            $args Optional. Display arguments; see Sloc_Weather_Data::get_the_aqi().
+ * @return string Markup or text, or an empty string without an air quality index.
+ */
+function get_post_aqi( $post = null, $args = array() ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return '';
+	}
+	return Sloc_Weather_Data::get_the_aqi( 'post', $post->ID, $args );
+}
+
+/**
+ * Returns the air quality index of a comment, shown with its category's name and color.
+ *
+ * @since 6.2.0
+ *
+ * @param int   $comment_id Comment ID.
+ * @param array $args       Optional. Display arguments; see Sloc_Weather_Data::get_the_aqi().
+ * @return string Markup or text, or an empty string without an air quality index.
+ */
+function get_comment_aqi( $comment_id, $args = array() ) {
+	return Sloc_Weather_Data::get_the_aqi( 'comment', (int) $comment_id, $args );
+}
+
+/**
  * Returns the map for a post with a public location.
  *
  * @since 5.0.0

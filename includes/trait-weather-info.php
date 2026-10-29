@@ -523,6 +523,61 @@ trait Weather_Info_Trait {
 	}
 
 	/**
+	 * Returns the category of an air quality index on the US EPA scale: its name and colors.
+	 *
+	 * The US EPA's categories and colors, as AirNow shows them. The text color is black on the three lightest
+	 * colors and white on the others, so the name stays readable on its category's color.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param mixed $aqi Air quality index.
+	 * @return array|null {
+	 *     The category, or null without an index.
+	 *
+	 *     @type string $slug       Category slug, such as 'moderate', for a CSS class.
+	 *     @type string $name       Category name, translated.
+	 *     @type string $color      Category color, as #rrggbb.
+	 *     @type string $text_color Readable text color on the category color, as #rrggbb.
+	 * }
+	 */
+	public static function aqi_category( $aqi ) {
+		if ( ! is_numeric( $aqi ) || $aqi < 0 ) {
+			return null;
+		}
+		$aqi        = (int) round( (float) $aqi );
+		$categories = array(
+			array( 50, 'good', __( 'Good', 'simple-location' ), '#00e400', '#000000' ),
+			array( 100, 'moderate', __( 'Moderate', 'simple-location' ), '#ffff00', '#000000' ),
+			array( 150, 'unhealthy-sensitive', __( 'Unhealthy for Sensitive Groups', 'simple-location' ), '#ff7e00', '#000000' ),
+			array( 200, 'unhealthy', __( 'Unhealthy', 'simple-location' ), '#ff0000', '#ffffff' ),
+			array( 300, 'very-unhealthy', __( 'Very Unhealthy', 'simple-location' ), '#8f3f97', '#ffffff' ),
+			array( PHP_INT_MAX, 'hazardous', __( 'Hazardous', 'simple-location' ), '#7e0023', '#ffffff' ),
+		);
+		foreach ( $categories as $category ) {
+			if ( $aqi <= $category[0] ) {
+				break;
+			}
+		}
+		$category = array(
+			'slug'       => $category[1],
+			'name'       => $category[2],
+			'color'      => $category[3],
+			'text_color' => $category[4],
+		);
+
+		/**
+		 * Filters the category of an air quality index, such as for another scale or other colors.
+		 *
+		 * @since 6.2.0
+		 *
+		 * @param array|null $category Category, with 'slug', 'name', 'color' and 'text_color', or null to show no category.
+		 * @param int        $aqi      Air quality index, rounded.
+		 */
+		$category = apply_filters( 'sloc_aqi_category', $category, $aqi );
+		return is_array( $category ) ? $category : null;
+	}
+
+	/**
 	 * Returns the description of a weather condition code, or all of them.
 	 *
 	 * An adaptation of the OpenWeatherMap weather condition codes, replacing the use of icon mapping.

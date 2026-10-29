@@ -740,6 +740,7 @@ class Sloc_Weather_Data {
 	 * @since 3.3.0
 	 * @since 6.1.0 Followed by the weather provider's credit, unless the Weather Credits setting puts it in the footer.
 	 * @since 6.2.0 Added the 'text' style.
+	 * @since 6.2.0 The 'complete' style adds the air quality index, as get_the_aqi() shows it.
 	 *
 	 * @param string     $type Object type.
 	 * @param int        $id   Object ID.
@@ -747,7 +748,7 @@ class Sloc_Weather_Data {
 	 *     Optional. Display arguments.
 	 *
 	 *     @type string   $style         'simple' (icon, temperature and summary), 'complete' (adds humidity,
-	 *                                   cloudiness and visibility), 'graphic' (icon only) or 'text' (plain text
+	 *                                   cloudiness, visibility and the AQI), 'graphic' (icon only) or 'text' (plain text
 	 *                                   from get_the_weather_text(), without markup; the other arguments are
 	 *                                   ignored). Default 'simple'.
 	 *     @type string   $description   Label. Default 'Weather: '.
@@ -793,6 +794,7 @@ class Sloc_Weather_Data {
 		}
 		if ( 'complete' === $args['style'] ) {
 			$return[] = self::get_weather_extras( $weather );
+			$return[] = self::get_the_aqi( $type, $id );
 		}
 		if ( isset( $weather['station_id'] ) ) {
 			if ( isset( $weather['name'] ) ) {
@@ -801,6 +803,55 @@ class Sloc_Weather_Data {
 		}
 		$return[] = self::get_weather_credit_markup( $weather );
 		return sprintf( '<%1$s class="%2$s">%3$s</%1$s>', $args['wrapper-type'], esc_attr( $class ), implode( PHP_EOL, array_filter( $return ) ) );
+	}
+
+	/**
+	 * Returns the air quality index of an object, shown with its category's name and color.
+	 *
+	 * The category follows the US EPA scale; see Weather_Info_Trait::aqi_category(). The badge has the category's name
+	 * as text, so it isn't shown by color alone.
+	 *
+	 * @since 6.2.0
+	 *
+	 * @param string $type Object type.
+	 * @param int    $id   Object ID.
+	 * @param array  $args {
+	 *     Optional. Display arguments.
+	 *
+	 *     @type string $style 'badge' (the index and category on the category's color) or 'text' (plain text, such as
+	 *                         "AQI 72 Moderate", not escaped). Default 'badge'.
+	 *     @type string $label Label before the index. Default 'AQI'.
+	 * }
+	 * @return string Markup or text, or an empty string without an air quality index.
+	 */
+	public static function get_the_aqi( $type, $id, $args = array() ) {
+		$args     = wp_parse_args(
+			$args,
+			array(
+				'style' => 'badge',
+				'label' => __( 'AQI', 'simple-location' ),
+			)
+		);
+		$aqi      = self::get_object_weatherdata( $type, $id, 'aqi' );
+		$category = self::aqi_category( $aqi );
+		if ( ! $category ) {
+			return '';
+		}
+		$index = (int) round( (float) $aqi );
+		if ( 'text' === $args['style'] ) {
+			return trim( sprintf( '%1$s %2$d %3$s', $args['label'], $index, $category['name'] ) );
+		}
+		return sprintf(
+			'<span class="sloc-aqi sloc-aqi-%1$s" style="background-color:%2$s;color:%3$s" title="%4$s"><span class="sloc-aqi-label">%5$s</span> <data class="p-aqi" value="%6$d">%6$d</data> <span class="sloc-aqi-category">%7$s</span></span>',
+			esc_attr( $category['slug'] ),
+			esc_attr( $category['color'] ),
+			esc_attr( $category['text_color'] ),
+			/* translators: 1: Air quality index 2: Its category, such as Moderate. */
+			esc_attr( sprintf( __( 'Air Quality Index %1$d: %2$s', 'simple-location' ), $index, $category['name'] ) ),
+			esc_html( $args['label'] ),
+			$index,
+			esc_html( $category['name'] )
+		);
 	}
 
 	/**
