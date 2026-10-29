@@ -27,7 +27,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-sloc-map-cache.php:352](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-map-cache.php#L352)
+- [includes/class-sloc-map-cache.php:356](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-map-cache.php#L356)
 ```php
 apply_filters( 'sloc_map_cache_max_age', $days, $map )
 ```

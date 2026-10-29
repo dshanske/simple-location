@@ -2,22 +2,23 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Location 6.0.0\n"
+"Project-Id-Version: Simple Location 6.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/simple-location\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-18T22:06:29+00:00\n"
+"POT-Creation-Date: 2026-10-29T11:27:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: simple-location\n"
 
 #. Plugin Name of the plugin
 #: simple-location.php:3
-#: includes/class-loc-config.php:423
-#: includes/class-loc-config.php:522
+#: includes/class-loc-config.php:803
+#: includes/class-loc-config.php:904
+#: includes/class-sloc-provider-errors.php:358
 msgid "Simple Location"
 msgstr ""
 
@@ -41,15 +42,21 @@ msgstr ""
 msgid "https://david.shanske.com"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-geoapify.php:22
-#: includes/apis/trait-sloc-api-geoapify.php:46
+#: includes/apis/trait-sloc-api-geoapify.php:23
+#: includes/apis/trait-sloc-api-geoapify.php:52
 #: includes/geo/class-geo-provider-geoapify.php:34
-#: includes/map/class-map-provider-geoapify.php:35
+#: includes/map/class-map-provider-geoapify.php:59
+#: includes/venue/class-venue-provider-geoapify.php:81
 msgid "GeoApify"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-geoapify.php:27
+#: includes/apis/trait-sloc-api-geoapify.php:28
 msgid "Geoapify Style"
+msgstr ""
+
+#: includes/apis/trait-sloc-api-geoapify.php:38
+#: includes/apis/trait-sloc-api-geoapify.php:67
+msgid "Geoapify"
 msgstr ""
 
 #: includes/apis/trait-sloc-api-geonames.php:22
@@ -67,88 +74,121 @@ msgstr ""
 msgid "GeoNames"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-google.php:24
-#: includes/apis/trait-sloc-api-google.php:26
-#: includes/apis/trait-sloc-api-google.php:63
+#: includes/apis/trait-sloc-api-google.php:25
+#: includes/apis/trait-sloc-api-google.php:27
+#: includes/apis/trait-sloc-api-google.php:52
+#: includes/apis/trait-sloc-api-google.php:69
+#: includes/apis/trait-sloc-api-google.php:83
 #: includes/elevation/class-elevation-provider-google.php:34
 #: includes/geo/class-geo-provider-google.php:34
 #: includes/venue/class-venue-provider-google.php:34
 msgid "Google"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-google.php:29
+#: includes/apis/trait-sloc-api-google.php:30
 msgid "Google Maps URL Signing Secret"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-google.php:36
+#: includes/apis/trait-sloc-api-google.php:37
 msgid "Optional. Signed map URLs can't be changed to request other maps, even though the key is visible. Copy the secret from the Secret Generator on the Google Cloud console's Credentials page, in the same project as the map key. Then set the Maps Static API quota \"Unsigned requests per day\" to 0, so Google refuses unsigned requests."
 msgstr ""
 
-#: includes/apis/trait-sloc-api-google.php:41
+#: includes/apis/trait-sloc-api-google.php:42
 msgid "Google Style"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-google.php:61
-#: includes/apis/trait-sloc-api-google.php:64
-#: includes/map/class-map-provider-google.php:46
+#: includes/apis/trait-sloc-api-google.php:67
+#: includes/apis/trait-sloc-api-google.php:70
+#: includes/map/class-map-provider-google.php:78
 msgid "Google Maps"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-google.php:64
+#: includes/apis/trait-sloc-api-google.php:70
 msgid "URL Signing Secret"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-here.php:23
-#: includes/apis/trait-sloc-api-here.php:25
-#: includes/apis/trait-sloc-api-here.php:48
-#: includes/apis/trait-sloc-api-here.php:50
+#: includes/apis/trait-sloc-api-here.php:24
+#: includes/apis/trait-sloc-api-here.php:26
+#: includes/apis/trait-sloc-api-here.php:40
+#: includes/apis/trait-sloc-api-here.php:54
+#: includes/apis/trait-sloc-api-here.php:56
+#: includes/apis/trait-sloc-api-here.php:70
 #: includes/geo/class-geo-provider-here.php:35
+#: includes/venue/class-venue-provider-here.php:59
 #: includes/weather/class-weather-provider-here.php:26
 msgid "HERE"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-here.php:29
+#: includes/apis/trait-sloc-api-here.php:30
 msgid "HERE Style"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-locationiq.php:23
-#: includes/apis/trait-sloc-api-locationiq.php:25
-#: includes/apis/trait-sloc-api-locationiq.php:36
-#: includes/apis/trait-sloc-api-locationiq.php:38
+#: includes/apis/trait-sloc-api-locationiq.php:24
+#: includes/apis/trait-sloc-api-locationiq.php:26
+#: includes/apis/trait-sloc-api-locationiq.php:28
+#: includes/apis/trait-sloc-api-locationiq.php:40
+#: includes/apis/trait-sloc-api-locationiq.php:42
+#: includes/apis/trait-sloc-api-locationiq.php:44
 #: includes/geo/class-geo-provider-locationiq.php:34
-#: includes/map/class-map-provider-locationiq.php:28
+#: includes/map/class-map-provider-locationiq.php:60
 #: includes/venue/class-venue-provider-locationiq.php:33
 msgid "LocationIQ"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-mapbox.php:22
-#: includes/apis/trait-sloc-api-mapbox.php:46
-#: includes/map/class-map-provider-mapbox.php:26
+#: includes/apis/trait-sloc-api-mapbox.php:23
+#: includes/apis/trait-sloc-api-mapbox.php:27
+#: includes/apis/trait-sloc-api-mapbox.php:45
+#: includes/apis/trait-sloc-api-mapbox.php:58
+#: includes/apis/trait-sloc-api-mapbox.php:62
+#: includes/apis/trait-sloc-api-mapbox.php:76
+#: includes/map/class-map-provider-mapbox.php:80
 msgid "Mapbox"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-mapbox.php:23
-#: includes/apis/trait-sloc-api-mapbox.php:47
+#: includes/apis/trait-sloc-api-mapbox.php:24
+#: includes/apis/trait-sloc-api-mapbox.php:59
 msgid "Mapbox User"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-mapbox.php:23
+#: includes/apis/trait-sloc-api-mapbox.php:24
 msgid "Username"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-mapbox.php:27
+#: includes/apis/trait-sloc-api-mapbox.php:29
+msgid "Optional. A public token (starting pk.) for map images, which show it to every visitor, so restrict it to this site's URL. Leave empty to use the Mapbox API key, unless that is a secret token (starting sk.), which is only used to list your styles and never shown."
+msgstr ""
+
+#: includes/apis/trait-sloc-api-mapbox.php:34
 msgid "Mapbox Style"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-mapquest.php:23
-#: includes/apis/trait-sloc-api-mapquest.php:26
-#: includes/apis/trait-sloc-api-mapquest.php:48
-#: includes/apis/trait-sloc-api-mapquest.php:50
+#: includes/apis/trait-sloc-api-mapquest.php:24
+#: includes/apis/trait-sloc-api-mapquest.php:27
+#: includes/apis/trait-sloc-api-mapquest.php:40
+#: includes/apis/trait-sloc-api-mapquest.php:54
+#: includes/apis/trait-sloc-api-mapquest.php:56
+#: includes/apis/trait-sloc-api-mapquest.php:69
 msgid "MapQuest"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-mapquest.php:29
+#: includes/apis/trait-sloc-api-mapquest.php:30
 msgid "MapQuest Style"
+msgstr ""
+
+#: includes/apis/trait-sloc-api-nominatim.php:119
+msgid "Nominatim Server URL"
+msgstr ""
+
+#: includes/apis/trait-sloc-api-nominatim.php:126
+msgid "Optional. The address of your own Nominatim server, or another hosted one, such as https://nominatim.example.com. Leave empty to use the public OpenStreetMap server, which is for light use only."
+msgstr ""
+
+#: includes/apis/trait-sloc-api-nominatim.php:131
+msgid "Nominatim Public Fallback"
+msgstr ""
+
+#: includes/apis/trait-sloc-api-nominatim.php:137
+msgid "When your server finds nothing or can't be reached, ask the public OpenStreetMap server, for example if your server only has data for your own area. The location is then sent to the public server."
 msgstr ""
 
 #: includes/apis/trait-sloc-api-openroute.php:22
@@ -158,12 +198,28 @@ msgstr ""
 msgid "OpenRoute"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-tomtom.php:22
-#: includes/apis/trait-sloc-api-tomtom.php:45
+#: includes/apis/trait-sloc-api-stadia.php:22
+#: includes/apis/trait-sloc-api-stadia.php:37
+#: includes/apis/trait-sloc-api-stadia.php:49
+#: includes/apis/trait-sloc-api-stadia.php:64
+#: includes/map/class-map-provider-stadia.php:70
+#: includes/venue/class-venue-provider-stadia.php:29
+msgid "Stadia Maps"
+msgstr ""
+
+#: includes/apis/trait-sloc-api-stadia.php:27
+msgid "Stadia Maps Style"
+msgstr ""
+
+#: includes/apis/trait-sloc-api-tomtom.php:23
+#: includes/apis/trait-sloc-api-tomtom.php:38
+#: includes/apis/trait-sloc-api-tomtom.php:51
+#: includes/apis/trait-sloc-api-tomtom.php:66
+#: includes/venue/class-venue-provider-tomtom.php:79
 msgid "TomTom"
 msgstr ""
 
-#: includes/apis/trait-sloc-api-tomtom.php:27
+#: includes/apis/trait-sloc-api-tomtom.php:28
 msgid "TomTom Style"
 msgstr ""
 
@@ -184,7 +240,7 @@ msgid "First Quarter"
 msgstr ""
 
 #: includes/class-astronomical-calculator.php:457
-#: includes/class-weather-provider.php:670
+#: includes/class-weather-provider.php:938
 msgid "Full Moon"
 msgstr ""
 
@@ -210,11 +266,11 @@ msgstr ""
 
 #: includes/class-geo-base.php:123
 #: includes/class-geo-base.php:135
-#: includes/class-geo-base.php:444
-#: includes/class-geo-base.php:817
-#: includes/class-loc-config.php:424
-#: includes/class-sloc-media-metadata.php:208
-#: templates/loc-metabox.php:66
+#: includes/class-geo-base.php:455
+#: includes/class-geo-base.php:847
+#: includes/class-loc-config.php:804
+#: includes/class-sloc-media-metadata.php:211
+#: templates/loc-metabox.php:70
 msgid "Location"
 msgstr ""
 
@@ -222,79 +278,82 @@ msgstr ""
 msgid "Show:"
 msgstr ""
 
-#: includes/class-geo-base.php:370
+#: includes/class-geo-base.php:372
 msgid "Public Location"
 msgstr ""
 
-#: includes/class-geo-base.php:371
+#: includes/class-geo-base.php:373
 msgid "Private Location"
 msgstr ""
 
-#: includes/class-geo-base.php:372
+#: includes/class-geo-base.php:374
 msgid "Lookup Location"
 msgstr ""
 
-#: includes/class-geo-base.php:384
+#: includes/class-geo-base.php:388
 msgid "None of the Posts Were Updated."
 msgstr ""
 
 #. translators: Count of posts updated.
-#: includes/class-geo-base.php:387
+#: includes/class-geo-base.php:391
 #, php-format
 msgid "Updated %s post."
 msgid_plural "Updated %s posts."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-geo-base.php:460
-#: includes/class-loc-config.php:980
-#: includes/class-location-taxonomy.php:954
-#: includes/class-post-venue.php:263
-#: includes/class-post-venue.php:451
-#: includes/class-weather-provider.php:715
-#: includes/trait-weather-info.php:369
-#: includes/widgets/class-sloc-weather-widget.php:297
-#: templates/loc-metabox.php:67
+#: includes/class-geo-base.php:471
+#: includes/class-loc-config.php:1361
+#: includes/class-loc-config.php:1599
+#: includes/class-location-taxonomy.php:1120
+#: includes/class-post-venue.php:364
+#: includes/class-post-venue.php:561
+#: includes/class-sloc-provider-chain.php:458
+#: includes/class-sloc-track-tool.php:237
+#: includes/class-weather-provider.php:983
+#: includes/trait-weather-info.php:592
+#: includes/widgets/class-sloc-weather-widget.php:296
+#: templates/loc-metabox.php:71
 #: templates/weather-metabox.php:26
 msgid "None"
 msgstr ""
 
-#: includes/class-geo-base.php:499
-#: includes/class-geo-base.php:595
-#: includes/class-geo-base.php:624
+#: includes/class-geo-base.php:510
+#: includes/class-geo-base.php:606
+#: includes/class-geo-base.php:635
 msgid "Private"
 msgstr ""
 
-#: includes/class-geo-base.php:500
-#: includes/class-geo-base.php:596
-#: includes/class-geo-base.php:625
+#: includes/class-geo-base.php:511
+#: includes/class-geo-base.php:607
+#: includes/class-geo-base.php:636
 msgid "Public"
 msgstr ""
 
-#: includes/class-geo-base.php:501
-#: includes/class-geo-base.php:597
-#: includes/class-geo-base.php:626
+#: includes/class-geo-base.php:512
+#: includes/class-geo-base.php:608
+#: includes/class-geo-base.php:637
 msgid "Protected"
 msgstr ""
 
 #. translators: %s: The visibility the attachment currently inherits, such as Public.
-#: includes/class-geo-base.php:537
+#: includes/class-geo-base.php:548
 #, php-format
 msgid "Inherit (currently %s)"
 msgstr ""
 
-#: includes/class-geo-base.php:594
-#: includes/class-geo-base.php:623
+#: includes/class-geo-base.php:605
+#: includes/class-geo-base.php:634
 msgid "With Location"
 msgstr ""
 
-#: includes/class-geo-base.php:622
+#: includes/class-geo-base.php:633
 msgid "All Comments"
 msgstr ""
 
-#: includes/class-geo-base.php:807
-#: includes/class-geo-data.php:756
-#: includes/weather/class-weather-provider-station.php:150
+#: includes/class-geo-base.php:837
+#: includes/class-geo-data.php:822
+#: includes/weather/class-weather-provider-station.php:216
 #: templates/elevation-form.php:16
 #: templates/geocode-form.php:16
 #: templates/loc-user-metabox.php:27
@@ -304,9 +363,9 @@ msgstr ""
 msgid "Latitude"
 msgstr ""
 
-#: includes/class-geo-base.php:812
-#: includes/class-geo-data.php:768
-#: includes/weather/class-weather-provider-station.php:151
+#: includes/class-geo-base.php:842
+#: includes/class-geo-data.php:834
+#: includes/weather/class-weather-provider-station.php:217
 #: templates/elevation-form.php:17
 #: templates/geocode-form.php:17
 #: templates/loc-user-metabox.php:34
@@ -316,534 +375,778 @@ msgstr ""
 msgid "Longitude"
 msgstr ""
 
-#: includes/class-geo-base.php:822
+#: includes/class-geo-base.php:852
 msgid "Last Reported Timezone"
 msgstr ""
 
-#: includes/class-geo-data.php:779
+#: includes/class-geo-data.php:845
 msgid "Timezone of Location"
 msgstr ""
 
-#: includes/class-geo-data.php:791
+#: includes/class-geo-data.php:857
 msgid "Geodata Address"
 msgstr ""
 
-#: includes/class-geo-data.php:803
-#: includes/class-geo-data.php:842
+#: includes/class-geo-data.php:869
 msgid "Geodata Public"
 msgstr ""
 
-#: includes/class-geo-data.php:815
+#: includes/class-geo-data.php:881
 msgid "Geodata Icon"
 msgstr ""
 
-#: includes/class-geo-data.php:827
+#: includes/class-geo-data.php:893
+msgid "Map Style Family"
+msgstr ""
+
+#: includes/class-geo-data.php:905
 msgid "Is it Day Time"
 msgstr ""
 
-#: includes/class-geo-data.php:836
+#: includes/class-geo-data.php:914
 #: templates/loc-user-metabox.php:50
 #: templates/loc-user-metabox.php:54
 msgid "Altitude"
 msgstr ""
 
-#: includes/class-geo-data.php:837
+#: includes/class-geo-data.php:915
 msgid "Geodata Zoom for Map Display"
 msgstr ""
 
-#: includes/class-geo-data.php:1011
+#: includes/class-geo-data.php:1134
 msgid "Location Arrow"
 msgstr ""
 
-#: includes/class-geo-data.php:1012
+#: includes/class-geo-data.php:1135
 #: includes/location/class-location-provider-compass.php:26
 msgid "Compass"
 msgstr ""
 
-#: includes/class-geo-data.php:1013
+#: includes/class-geo-data.php:1136
 msgid "Map"
 msgstr ""
 
-#: includes/class-geo-data.php:1014
+#: includes/class-geo-data.php:1137
+#: includes/class-loc-config.php:1310
 msgid "Map Marker"
 msgstr ""
 
-#: includes/class-geo-data.php:1015
+#: includes/class-geo-data.php:1138
 msgid "Passport"
 msgstr ""
 
-#: includes/class-geo-data.php:1016
+#: includes/class-geo-data.php:1139
 msgid "Home"
 msgstr ""
 
-#: includes/class-geo-data.php:1017
+#: includes/class-geo-data.php:1140
 msgid "Globe - Asia"
 msgstr ""
 
-#: includes/class-geo-data.php:1018
+#: includes/class-geo-data.php:1141
 msgid "Globe - Americas"
 msgstr ""
 
-#: includes/class-geo-data.php:1019
+#: includes/class-geo-data.php:1142
 msgid "Globe - Europe"
 msgstr ""
 
-#: includes/class-geo-data.php:1020
+#: includes/class-geo-data.php:1143
 msgid "Globe - Africa"
 msgstr ""
 
-#: includes/class-geo-data.php:1021
+#: includes/class-geo-data.php:1144
 #: includes/class-location-provider.php:375
 msgid "Plane"
 msgstr ""
 
-#: includes/class-geo-data.php:1022
+#: includes/class-geo-data.php:1145
 #: includes/class-location-provider.php:372
 msgid "Train"
 msgstr ""
 
-#: includes/class-geo-data.php:1023
+#: includes/class-geo-data.php:1146
 #: includes/class-location-provider.php:378
 msgid "Taxi"
 msgstr ""
 
-#: includes/class-geo-data.php:1024
+#: includes/class-geo-data.php:1147
 msgid "Tram"
 msgstr ""
 
-#: includes/class-geo-data.php:1025
+#: includes/class-geo-data.php:1148
 msgid "Biking"
 msgstr ""
 
-#: includes/class-geo-data.php:1026
+#: includes/class-geo-data.php:1149
 #: includes/class-location-provider.php:371
 msgid "Bus"
 msgstr ""
 
-#: includes/class-geo-data.php:1027
+#: includes/class-geo-data.php:1150
 msgid "Bus (Alt)"
 msgstr ""
 
-#: includes/class-geo-data.php:1028
+#: includes/class-geo-data.php:1151
 #: includes/class-location-provider.php:370
 msgid "Car"
 msgstr ""
 
-#: includes/class-geo-data.php:1029
+#: includes/class-geo-data.php:1152
 msgid "Helicopter"
 msgstr ""
 
-#: includes/class-geo-data.php:1030
+#: includes/class-geo-data.php:1153
 #: includes/class-location-provider.php:379
 msgid "Horse"
 msgstr ""
 
-#: includes/class-geo-data.php:1031
+#: includes/class-geo-data.php:1154
 msgid "Ship"
 msgstr ""
 
-#: includes/class-geo-data.php:1032
+#: includes/class-geo-data.php:1155
 #: includes/class-location-provider.php:377
 msgid "Running"
 msgstr ""
 
-#: includes/class-geo-data.php:1033
+#: includes/class-geo-data.php:1156
 msgid "Shuttle Van"
 msgstr ""
 
-#: includes/class-geo-data.php:1034
+#: includes/class-geo-data.php:1157
 #: includes/class-location-provider.php:373
 msgid "Subway"
 msgstr ""
 
-#: includes/class-geo-data.php:1035
+#: includes/class-geo-data.php:1158
 msgid "Suitcase"
 msgstr ""
 
-#: includes/class-geo-data.php:1036
+#: includes/class-geo-data.php:1159
 msgid "Suitcase - Rolling"
 msgstr ""
 
-#: includes/class-geo-data.php:1037
+#: includes/class-geo-data.php:1160
 #: includes/class-location-provider.php:376
 msgid "Walking"
 msgstr ""
 
-#: includes/class-geo-data.php:1038
+#: includes/class-geo-data.php:1161
 msgid "American Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1039
+#: includes/class-geo-data.php:1162
 msgid "S7 Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1040
+#: includes/class-geo-data.php:1163
 msgid "United Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1041
+#: includes/class-geo-data.php:1164
 msgid "Pegasus Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1042
+#: includes/class-geo-data.php:1165
 msgid "Ethiopian Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1043
+#: includes/class-geo-data.php:1166
 msgid "Southwest Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1044
+#: includes/class-geo-data.php:1167
 msgid "Lot Polish Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1045
+#: includes/class-geo-data.php:1168
 msgid "China Eastern Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1046
+#: includes/class-geo-data.php:1169
 msgid "China Southern Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1047
+#: includes/class-geo-data.php:1170
 msgid "Aer Lingus"
 msgstr ""
 
-#: includes/class-geo-data.php:1048
+#: includes/class-geo-data.php:1171
 msgid "Aeroflot"
 msgstr ""
 
-#: includes/class-geo-data.php:1049
+#: includes/class-geo-data.php:1172
 msgid "Aeromexico"
 msgstr ""
 
-#: includes/class-geo-data.php:1050
+#: includes/class-geo-data.php:1173
 msgid "Air Canada"
 msgstr ""
 
-#: includes/class-geo-data.php:1051
+#: includes/class-geo-data.php:1174
 msgid "Air China"
 msgstr ""
 
-#: includes/class-geo-data.php:1052
+#: includes/class-geo-data.php:1175
 msgid "Air France"
 msgstr ""
 
-#: includes/class-geo-data.php:1053
+#: includes/class-geo-data.php:1176
 msgid "Air Asia"
 msgstr ""
 
-#: includes/class-geo-data.php:1054
+#: includes/class-geo-data.php:1177
 msgid "Airbus"
 msgstr ""
 
-#: includes/class-geo-data.php:1055
+#: includes/class-geo-data.php:1178
 msgid "Boeing"
 msgstr ""
 
-#: includes/class-geo-data.php:1056
+#: includes/class-geo-data.php:1179
 msgid "Emirates"
 msgstr ""
 
-#: includes/class-geo-data.php:1057
+#: includes/class-geo-data.php:1180
 msgid "Etihad Airways"
 msgstr ""
 
-#: includes/class-geo-data.php:1058
+#: includes/class-geo-data.php:1181
 msgid "Qatar Airways"
 msgstr ""
 
-#: includes/class-geo-data.php:1059
+#: includes/class-geo-data.php:1182
 msgid "Ryanair"
 msgstr ""
 
-#: includes/class-geo-data.php:1060
+#: includes/class-geo-data.php:1183
 msgid "San Francisco Municipal Railway"
 msgstr ""
 
-#: includes/class-geo-data.php:1061
+#: includes/class-geo-data.php:1184
 msgid "Shanghai Metro"
 msgstr ""
 
-#: includes/class-geo-data.php:1062
+#: includes/class-geo-data.php:1185
 msgid "Turkish Airlines"
 msgstr ""
 
-#: includes/class-geo-data.php:1063
+#: includes/class-geo-data.php:1186
 msgid "Wizz Air"
 msgstr ""
 
-#: includes/class-geo-data.php:1064
+#: includes/class-geo-data.php:1187
 msgid "Alitalia"
 msgstr ""
 
-#: includes/class-geo-data.php:1065
+#: includes/class-geo-data.php:1188
 msgid "ANA"
 msgstr ""
 
-#: includes/class-geo-data.php:1066
+#: includes/class-geo-data.php:1189
 msgid "Delta"
 msgstr ""
 
-#: includes/class-geo-data.php:1067
+#: includes/class-geo-data.php:1190
 msgid "easyJet"
 msgstr ""
 
-#: includes/class-geo-data.php:1068
+#: includes/class-geo-data.php:1191
 msgid "Lufthansa"
 msgstr ""
 
-#: includes/class-geo-data.php:1069
+#: includes/class-geo-data.php:1192
 msgid "British Airways"
 msgstr ""
 
 #. translators: Prefaces the address 1. with the private status
-#: includes/class-geo-data.php:1165
+#: includes/class-geo-data.php:1291
 #, php-format
 msgid "Hidden: %1$s"
 msgstr ""
 
-#: includes/class-geo-data.php:1185
+#: includes/class-geo-data.php:1311
 msgid "Location: "
 msgstr ""
 
-#: includes/class-geo-provider.php:113
-#: includes/class-venue-provider.php:103
-msgid "No elevation provider is set"
-msgstr ""
-
-#: includes/class-loc-config.php:525
+#: includes/class-loc-config.php:907
 msgid "General"
 msgstr ""
 
-#: includes/class-loc-config.php:526
+#: includes/class-loc-config.php:908
 msgid "Providers"
 msgstr ""
 
-#: includes/class-loc-config.php:527
-#: includes/weather/class-weather-provider-station.php:67
+#: includes/class-loc-config.php:909
+#: includes/weather/class-weather-provider-station.php:134
 msgid "Stations"
 msgstr ""
 
-#: includes/class-loc-config.php:528
-#: includes/class-loc-config.php:828
+#: includes/class-loc-config.php:910
+#: includes/class-loc-config.php:1437
+#: includes/class-loc-config.php:2002
 msgid "API Keys"
 msgstr ""
 
-#: includes/class-loc-config.php:531
+#: includes/class-loc-config.php:913
 msgid "Debug"
 msgstr ""
 
-#: includes/class-loc-config.php:540
+#: includes/class-loc-config.php:922
 msgid "Test the raw responses from the lookup features. This feature only appears if you have WP_DEBUG enabled."
 msgstr ""
 
-#: includes/class-loc-config.php:601
+#: includes/class-loc-config.php:984
 msgid "General Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:607
+#: includes/class-loc-config.php:990
 msgid "Default Visibility for Location"
 msgstr ""
 
-#: includes/class-loc-config.php:617
+#: includes/class-loc-config.php:1000
 msgid "Update the Author with Posts Location when Saving a Post"
 msgstr ""
 
-#: includes/class-loc-config.php:628
+#: includes/class-loc-config.php:1011
 msgid "Show Maps on Home and Archive Pages Not Just Single Posts"
 msgstr ""
 
-#: includes/class-loc-config.php:639
+#: includes/class-loc-config.php:1022
 msgid "Automatically lookup location from supported geolocation provider for Micropub posts"
 msgstr ""
 
-#: includes/class-loc-config.php:650
+#: includes/class-loc-config.php:1033
 msgid "Show location taxonomy instead of address field"
 msgstr ""
 
-#: includes/class-loc-config.php:661
+#: includes/class-loc-config.php:1044
 msgid "Home Country"
 msgstr ""
 
-#: includes/class-loc-config.php:671
+#: includes/class-loc-config.php:1054
 msgid "Unit of Measure"
 msgstr ""
 
-#: includes/class-loc-config.php:681
+#: includes/class-loc-config.php:1064
+msgid "Weather Credits"
+msgstr ""
+
+#: includes/class-loc-config.php:1071
+msgid "Next to the weather"
+msgstr ""
+
+#: includes/class-loc-config.php:1072
+msgid "Once in the page footer, where the provider allows it"
+msgstr ""
+
+#: includes/class-loc-config.php:1074
+msgid "Weather providers' terms ask for a credit where their weather is shown. Some, such as Open-Meteo, require it next to the weather, so theirs stays there either way. The footer needs a theme that calls wp_footer(). Weather saved before version 6.1.0 doesn't record its provider, so it has no credit."
+msgstr ""
+
+#: includes/class-loc-config.php:1079
 msgid "Provider Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:688
+#: includes/class-loc-config.php:1086
 msgid "Map Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:694
+#: includes/class-loc-config.php:1092
 msgid "Provides maps to display on posts and pages"
 msgstr ""
 
-#: includes/class-loc-config.php:700
+#: includes/class-loc-config.php:1098
 msgid "Geo Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:706
+#: includes/class-loc-config.php:1104
 msgid "Services that Look up an address from coordinates or vice versa"
 msgstr ""
 
-#: includes/class-loc-config.php:712
+#: includes/class-loc-config.php:1110
+msgid "Fallback Geo Providers"
+msgstr ""
+
+#: includes/class-loc-config.php:1117
+msgid "Tried in order when the geo provider finds nothing or fails, such as when its quota runs out. Errors you can fix are shown on the Dashboard."
+msgstr ""
+
+#: includes/class-loc-config.php:1122
 msgid "Geolocation Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:718
+#: includes/class-loc-config.php:1128
 msgid "Services that allow your site to figure out your location"
 msgstr ""
 
-#: includes/class-loc-config.php:725
+#: includes/class-loc-config.php:1135
 #: templates/venue-form.php:18
 msgid "Venue Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:731
+#: includes/class-loc-config.php:1141
 msgid "Services that Look up One or More Venues from coordinates or description"
 msgstr ""
 
-#: includes/class-loc-config.php:737
+#: includes/class-loc-config.php:1147
+msgid "Fallback Venue Providers"
+msgstr ""
+
+#: includes/class-loc-config.php:1154
+msgid "Tried in order when the venue provider finds no venues or fails, such as when its quota runs out. Errors you can fix are shown on the Dashboard."
+msgstr ""
+
+#: includes/class-loc-config.php:1159
+msgid "Venue Search Radius"
+msgstr ""
+
+#. translators: 1: Smallest radius in meters. 2: Largest radius in meters.
+#: includes/class-loc-config.php:1166
+#, php-format
+msgid "In meters, from %1$d to %2$d. Venues are listed nearest first."
+msgstr ""
+
+#: includes/class-loc-config.php:1171
+msgid "Most Venues Found"
+msgstr ""
+
+#. translators: %d: Largest number of venues.
+#: includes/class-loc-config.php:1178
+#, php-format
+msgid "Up to %d."
+msgstr ""
+
+#: includes/class-loc-config.php:1183
 #: templates/elevation-form.php:18
 msgid "Elevation Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:743
+#: includes/class-loc-config.php:1189
 msgid "Services that allow your site to determine elevation for a set of coordinates"
 msgstr ""
 
-#: includes/class-loc-config.php:749
+#: includes/class-loc-config.php:1195
+msgid "Fallback Elevation Providers"
+msgstr ""
+
+#: includes/class-loc-config.php:1202
+msgid "Tried in order when the elevation provider has no elevation or fails. Errors you can fix are shown on the Dashboard."
+msgstr ""
+
+#: includes/class-loc-config.php:1207
+#: includes/class-weather-data.php:221
 #: templates/weather-form.php:21
 msgid "Weather Provider"
 msgstr ""
 
-#: includes/class-loc-config.php:755
+#: includes/class-loc-config.php:1213
 msgid "Retrieves Weather Data about a Location"
 msgstr ""
 
-#: includes/class-loc-config.php:761
-msgid "Fallback Weather Provider"
+#: includes/class-loc-config.php:1219
+msgid "Fallback Weather Providers"
 msgstr ""
 
-#: includes/class-loc-config.php:767
-msgid "Fallback Option if the Primary Provider Fails"
+#: includes/class-loc-config.php:1226
+msgid "Tried in order when the weather provider has no weather, such as outside the area it covers, for a time it has no weather for, or after an error. Errors you can fix, such as a rejected API key, are shown on the Dashboard."
 msgstr ""
 
-#: includes/class-loc-config.php:775
+#: includes/class-loc-config.php:1232
 msgid "Map Settings"
 msgstr ""
 
-#: includes/class-loc-config.php:782
+#: includes/class-loc-config.php:1239
 msgid "Default Map Width"
 msgstr ""
 
-#: includes/class-loc-config.php:793
+#: includes/class-loc-config.php:1250
 msgid "Default Map Aspect Ratio"
 msgstr ""
 
-#: includes/class-loc-config.php:805
+#: includes/class-loc-config.php:1262
 msgid "Default Map Zoom Level"
 msgstr ""
 
-#: includes/class-loc-config.php:817
-msgid "Altitude will Display if Above This Height(in meters)"
+#: includes/class-loc-config.php:1274
+msgid "Always Use the Default Zoom"
 msgstr ""
 
-#: includes/class-loc-config.php:843
-msgid "Building"
+#: includes/class-loc-config.php:1280
+msgid "Draw every map at the default zoom level, rather than the zoom saved with each post, such as the closer zoom of a check-in."
 msgstr ""
 
-#: includes/class-loc-config.php:844
-msgid "Block"
+#: includes/class-loc-config.php:1286
+msgid "Map Style"
 msgstr ""
 
-#: includes/class-loc-config.php:845
-msgid "Street"
-msgstr ""
-
-#: includes/class-loc-config.php:846
-msgid "Village"
-msgstr ""
-
-#: includes/class-loc-config.php:847
-msgid "Town"
-msgstr ""
-
-#: includes/class-loc-config.php:848
-msgid "Metropolitan Area"
-msgstr ""
-
-#: includes/class-loc-config.php:849
-msgid "State"
-msgstr ""
-
-#: includes/class-loc-config.php:850
-msgid "Large European Country"
-msgstr ""
-
-#: includes/class-loc-config.php:851
-msgid "Largest Country"
-msgstr ""
-
-#: includes/class-loc-config.php:852
-msgid "Subcontinent"
-msgstr ""
-
-#: includes/class-loc-config.php:875
-msgid "Widescreen"
-msgstr ""
-
-#: includes/class-loc-config.php:876
-msgid "Square"
-msgstr ""
-
-#: includes/class-loc-config.php:877
-msgid "Medium Format"
-msgstr ""
-
-#: includes/class-loc-config.php:878
-msgid "Panorama"
-msgstr ""
-
-#: includes/class-loc-config.php:879
-msgid "Circle-Vision 360"
-msgstr ""
-
-#: includes/class-loc-config.php:1101
-msgid "Ask your Web Browser for Your Location(requires HTTPS)"
-msgstr ""
-
-#: includes/class-loc-config.php:1161
-msgid "International(SI)"
-msgstr ""
-
-#: includes/class-loc-config.php:1162
-msgid "Imperial"
-msgstr ""
-
-#: includes/class-loc-config.php:1287
-msgid "Simple Location Depends on Third Party Services"
-msgstr ""
-
-#: includes/class-loc-config.php:1288
-msgid "Many of these services require you to sign up for an account and provide an API key below. Many have free and paid tiers. For this reason, the plugin offers multiple providers. At this moment, Nominatim, and the US National Weather Service can be used without API keys and there is no map service that does not require an API key. Geonames requires an account, but is otherwise free to use. If you are uncertain of which to try, start with the defaults."
+#: includes/class-loc-config.php:1293
+msgid "Each map provider draws its closest style, so maps keep their look when you change providers. A provider without that style draws its standard style. A provider's own style setting, if set, is used instead."
 msgstr ""
 
 #: includes/class-loc-config.php:1299
+msgid "Dark Mode Maps"
+msgstr ""
+
+#: includes/class-loc-config.php:1317
+msgid "Pin"
+msgstr ""
+
+#: includes/class-loc-config.php:1318
+msgid "Dot"
+msgstr ""
+
+#: includes/class-loc-config.php:1320
+msgid "Map providers draw the nearest marker they have: those without a dot draw a small pin, and some offer only a few colors. Archive maps use small markers in this color."
+msgstr ""
+
+#: includes/class-loc-config.php:1326
+msgid "Map Marker Size"
+msgstr ""
+
+#: includes/class-loc-config.php:1333
+msgid "Small"
+msgstr ""
+
+#: includes/class-loc-config.php:1334
+msgid "Medium"
+msgstr ""
+
+#: includes/class-loc-config.php:1335
+msgid "Large"
+msgstr ""
+
+#: includes/class-loc-config.php:1342
+msgid "Map Marker Color"
+msgstr ""
+
+#: includes/class-loc-config.php:1354
+msgid "Map Scale Bar"
+msgstr ""
+
+#: includes/class-loc-config.php:1362
+msgid "In the units the site displays"
+msgstr ""
+
+#: includes/class-loc-config.php:1363
+msgid "Metric"
+msgstr ""
+
+#: includes/class-loc-config.php:1364
+#: includes/class-loc-config.php:1781
+msgid "Imperial"
+msgstr ""
+
+#: includes/class-loc-config.php:1365
+msgid "Metric and imperial"
+msgstr ""
+
+#: includes/class-loc-config.php:1367
+msgid "Drawn by the custom static map, HERE and MapQuest; other providers have no scale bar. MapQuest chooses its own units."
+msgstr ""
+
+#: includes/class-loc-config.php:1373
+msgid "Map Scale Bar Position"
+msgstr ""
+
+#: includes/class-loc-config.php:1380
+#: includes/class-loc-config.php:1416
+msgid "Bottom left"
+msgstr ""
+
+#: includes/class-loc-config.php:1381
+#: includes/class-loc-config.php:1415
+msgid "Bottom right"
+msgstr ""
+
+#: includes/class-loc-config.php:1382
+#: includes/class-loc-config.php:1418
+msgid "Top left"
+msgstr ""
+
+#: includes/class-loc-config.php:1383
+#: includes/class-loc-config.php:1417
+msgid "Top right"
+msgstr ""
+
+#: includes/class-loc-config.php:1385
+msgid "HERE places its scale bar itself, and MapQuest only at the top or bottom."
+msgstr ""
+
+#: includes/class-loc-config.php:1391
+msgid "Map Attribution"
+msgstr ""
+
+#: includes/class-loc-config.php:1398
+msgid "On the map, as the provider draws it"
+msgstr ""
+
+#: includes/class-loc-config.php:1399
+msgid "On the map, as text only, without logos (custom static map only)"
+msgstr ""
+
+#: includes/class-loc-config.php:1400
+msgid "Under the map, with links"
+msgstr ""
+
+#: includes/class-loc-config.php:1402
+msgid "Map providers' terms require their credit. The custom static map, HERE and Mapbox can print it under the map; Mapbox keeps its logo on the map, and HERE archive maps keep their credit on the map. Other providers, and any credit that can't be fetched, stay on the map. Check the terms of the providers you use: some, such as Esri, require their logo."
+msgstr ""
+
+#: includes/class-loc-config.php:1408
+msgid "Map Attribution Position"
+msgstr ""
+
+#: includes/class-loc-config.php:1420
+msgid "For a credit drawn on the map by the custom static map."
+msgstr ""
+
+#: includes/class-loc-config.php:1426
+msgid "Altitude will Display if Above This Height(in meters)"
+msgstr ""
+
+#: includes/class-loc-config.php:1452
+msgid "Building"
+msgstr ""
+
+#: includes/class-loc-config.php:1453
+msgid "Block"
+msgstr ""
+
+#: includes/class-loc-config.php:1454
+msgid "Street"
+msgstr ""
+
+#: includes/class-loc-config.php:1455
+msgid "Village"
+msgstr ""
+
+#: includes/class-loc-config.php:1456
+msgid "Town"
+msgstr ""
+
+#: includes/class-loc-config.php:1457
+msgid "Metropolitan Area"
+msgstr ""
+
+#: includes/class-loc-config.php:1458
+msgid "State"
+msgstr ""
+
+#: includes/class-loc-config.php:1459
+msgid "Large European Country"
+msgstr ""
+
+#: includes/class-loc-config.php:1460
+msgid "Largest Country"
+msgstr ""
+
+#: includes/class-loc-config.php:1461
+msgid "Subcontinent"
+msgstr ""
+
+#: includes/class-loc-config.php:1484
+msgid "Widescreen"
+msgstr ""
+
+#: includes/class-loc-config.php:1485
+msgid "Square"
+msgstr ""
+
+#: includes/class-loc-config.php:1486
+msgid "Medium Format"
+msgstr ""
+
+#: includes/class-loc-config.php:1487
+msgid "Panorama"
+msgstr ""
+
+#: includes/class-loc-config.php:1488
+msgid "Circle-Vision 360"
+msgstr ""
+
+#: includes/class-loc-config.php:1720
+msgid "Ask your Web Browser for Your Location(requires HTTPS)"
+msgstr ""
+
+#: includes/class-loc-config.php:1780
+msgid "International(SI)"
+msgstr ""
+
+#: includes/class-loc-config.php:1830
+msgid "Use the Map Style setting"
+msgstr ""
+
+#: includes/class-loc-config.php:1914
+msgid "Simple Location Depends on Third Party Services"
+msgstr ""
+
+#: includes/class-loc-config.php:1915
+msgid "Many of these services require you to sign up for an account and provide an API key below. Many have free and paid tiers. For this reason, the plugin offers multiple providers. At this moment, Nominatim, and the US National Weather Service can be used without API keys and there is no map service that does not require an API key. Geonames requires an account, but is otherwise free to use. If you are uncertain of which to try, start with the defaults."
+msgstr ""
+
+#: includes/class-loc-config.php:1926
 msgid "These settings dictate the display of maps"
 msgstr ""
 
-#: includes/class-loc-config.php:1308
-msgid "In order for a specific service to work, you must add their API key below"
+#: includes/class-loc-config.php:1936
+msgid "In order for a specific service to work, you must add their API key below. Each service has its own section: the ones in use are open and listed first, and the others can be opened to set them up ahead of time."
+msgstr ""
+
+#: includes/class-loc-config.php:2034
+#: includes/class-location-provider-account.php:137
+msgid "In use"
 msgstr ""
 
 #. translators: Post time format. See https://www.php.net/manual/datetime.format.php
 #: includes/class-loc-timezone.php:731
 msgid "g:i a T"
+msgstr ""
+
+#: includes/class-location-provider-account.php:82
+msgid "Location History"
+msgstr ""
+
+#: includes/class-location-provider-account.php:83
+msgid "Your accounts on location history services. The site reads your location from the one in use."
+msgstr ""
+
+#. translators: %s: Service name.
+#: includes/class-location-provider-account.php:146
+#, php-format
+msgid "%s URL"
+msgstr ""
+
+#: includes/class-location-provider-account.php:151
+msgid "The address of your server, such as https://location.example.com"
+msgstr ""
+
+#. translators: %s: Service name.
+#: includes/class-location-provider-account.php:158
+#, php-format
+msgid "%s API Key"
+msgstr ""
+
+#: includes/class-location-provider-account.php:167
+msgid "A key is saved. Enter a new key to replace it, or leave this empty to keep it."
+msgstr ""
+
+#: includes/class-location-provider-account.php:173
+msgid "Remove the saved key"
+msgstr ""
+
+#. translators: %s: Service name.
+#: includes/class-location-provider-account.php:254
+#, php-format
+msgid "You cannot look up another user's location in %s"
+msgstr ""
+
+#: includes/class-location-provider-account.php:307
+#: includes/class-location-provider-account.php:310
+#: includes/location/class-location-provider-compass.php:115
+#: includes/location/class-location-provider-compass.php:118
+msgid "Invalid time"
 msgstr ""
 
 #: includes/class-location-provider.php:368
@@ -863,416 +1166,534 @@ msgid "Bike"
 msgstr ""
 
 #. translators: 1. Location Type. 2: Location Name
-#: includes/class-location-taxonomy.php:103
+#: includes/class-location-taxonomy.php:107
 #, php-format
 msgid "%1$1s: %2$2s"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:115
+#. translators: %s: Location name.
+#: includes/class-location-taxonomy.php:160
+#, php-format
+msgid "About %s"
+msgstr ""
+
+#: includes/class-location-taxonomy.php:173
 msgid "Type"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:242
+#: includes/class-location-taxonomy.php:300
 msgid "Locations allow for 3 levels of hierarchy: Country, region, and locality. Countries have no parent. Regions have a country as a parent. Localities have regions are their parent."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:254
+#: includes/class-location-taxonomy.php:313
 msgid "Location Code:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:256
+#: includes/class-location-taxonomy.php:315
 msgid "Required. The code for this location. If no code, you can use the location."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:276
+#: includes/class-location-taxonomy.php:318
+#: includes/class-location-taxonomy.php:372
+msgid "About URL:"
+msgstr ""
+
+#: includes/class-location-taxonomy.php:320
+msgid "Optional. A page about this location, such as its Wikipedia article."
+msgstr ""
+
+#: includes/class-location-taxonomy.php:341
 msgid "Country:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:278
+#: includes/class-location-taxonomy.php:343
 msgid "Country."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:284
+#: includes/class-location-taxonomy.php:349
 msgid "Region:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:287
+#: includes/class-location-taxonomy.php:352
 msgid "The state, county, or province code for the location(attempts to use ISO3166-2 coding for regions). This can be different than than the name of the region, but is usually the same as the slug(accounting for multiple places with the same name"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:293
+#: includes/class-location-taxonomy.php:358
 msgid "Locality:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:295
+#: includes/class-location-taxonomy.php:360
 msgid "The city, village, or town for the location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:301
+#: includes/class-location-taxonomy.php:366
 msgid "Error: Cannot Identify Type. This likely means the parent of this term is a locality. Localities can have no child. Change Parent to Country, Region, or None."
 msgstr ""
 
-#: includes/class-location-taxonomy.php:360
+#: includes/class-location-taxonomy.php:374
+msgid "Optional. A page about this location, such as its Wikipedia article. It is linked from the location archive."
+msgstr ""
+
+#: includes/class-location-taxonomy.php:446
 msgctxt "taxonomy general name"
 msgid "Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:361
+#: includes/class-location-taxonomy.php:447
 msgctxt "taxonomy singular name"
 msgid "Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:362
+#: includes/class-location-taxonomy.php:448
 msgctxt "search locations"
 msgid "Search Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:363
+#: includes/class-location-taxonomy.php:449
 msgctxt "popular locations"
 msgid "Popular Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:364
+#: includes/class-location-taxonomy.php:450
 msgctxt "all taxonomy items"
 msgid "All Locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:365
+#: includes/class-location-taxonomy.php:451
 msgctxt "taxonomy parent item"
 msgid "Parent Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:366
+#: includes/class-location-taxonomy.php:452
 msgctxt "taxonomy parent item with colon"
 msgid "Parent Location:"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:367
+#: includes/class-location-taxonomy.php:453
 msgctxt "edit taxonomy item"
 msgid "Edit Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:368
+#: includes/class-location-taxonomy.php:454
 msgctxt "view taxonomy item"
 msgid "View Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:369
+#: includes/class-location-taxonomy.php:455
 msgctxt "update taxonomy item"
 msgid "Update Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:370
+#: includes/class-location-taxonomy.php:456
 msgctxt "add taxonomy item"
 msgid "Add New Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:371
+#: includes/class-location-taxonomy.php:457
 msgctxt "new taxonomy item"
 msgid "New Location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:372
+#: includes/class-location-taxonomy.php:458
 msgctxt "separate kinds with commas"
 msgid "Separate locations with commas"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:373
+#: includes/class-location-taxonomy.php:459
 msgctxt "add or remove items"
 msgid "Add or remove location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:374
+#: includes/class-location-taxonomy.php:460
 msgctxt "choose most used"
 msgid "Choose from the most used location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:375
+#: includes/class-location-taxonomy.php:461
 msgctxt "no locations found"
 msgid "No locations found"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:376
+#: includes/class-location-taxonomy.php:462
 msgctxt "no locations"
 msgid "No locations"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:377
+#: includes/class-location-taxonomy.php:463
 msgid "The name of the location"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:378
+#: includes/class-location-taxonomy.php:464
 msgid "Localities should have a Region as a Parent, and Regions should have a Country as their Parent"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:379
+#: includes/class-location-taxonomy.php:465
 msgid "The slug field contains the ISO 3166-1 code for country(such as US) or region(such as NY) or the locality name. In the event of duplication, may use something else"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:380
-#: includes/class-post-venue.php:169
+#: includes/class-location-taxonomy.php:466
+#: includes/class-post-venue.php:265
 msgid "Will display on location archive pages if set"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:408
+#: includes/class-location-taxonomy.php:494
 msgid "Country Code"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:420
+#: includes/class-location-taxonomy.php:506
 msgid "Region Code or name if code not available"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:433
+#: includes/class-location-taxonomy.php:519
 msgid "Locality Name"
 msgstr ""
 
+#: includes/class-location-taxonomy.php:532
+msgid "Link to a page about the location, such as its Wikipedia article"
+msgstr ""
+
 #. translators: 1. Taxonomy Label
-#: includes/class-location-taxonomy.php:561
+#: includes/class-location-taxonomy.php:660
 #, php-format
 msgid "No %1$s"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:947
+#: includes/class-location-taxonomy.php:1113
 msgid "Country"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:948
+#: includes/class-location-taxonomy.php:1114
 msgid "Region"
 msgstr ""
 
-#: includes/class-location-taxonomy.php:949
+#: includes/class-location-taxonomy.php:1115
 msgid "Locality"
 msgstr ""
 
-#: includes/class-map-provider.php:213
+#: includes/class-map-provider.php:540
+msgid "Standard"
+msgstr ""
+
+#: includes/class-map-provider.php:541
+#: includes/map/class-map-provider-mapquest.php:103
+msgid "Light"
+msgstr ""
+
+#: includes/class-map-provider.php:542
+#: includes/map/class-map-provider-mapquest.php:104
+msgid "Dark"
+msgstr ""
+
+#: includes/class-map-provider.php:543
+#: includes/map/class-map-provider-google.php:133
+#: includes/map/class-map-provider-mapquest.php:102
+msgid "Satellite"
+msgstr ""
+
+#: includes/class-map-provider.php:544
+#: includes/map/class-map-provider-google.php:134
+msgid "Terrain"
+msgstr ""
+
+#: includes/class-map-provider.php:675
 msgid "Map API Key"
 msgstr ""
 
 #. translators: Name of the map vendor.
-#: includes/class-map-provider.php:228
-#, php-format
-msgid "%s Map API Key"
-msgstr ""
-
-#. translators: Name of the map vendor.
-#: includes/class-map-provider.php:237
+#: includes/class-map-provider.php:693
 #, php-format
 msgid "Optional. Map images show this key to every visitor, so use a key that only allows static maps and is restricted to this site. Leave empty to use the %s API key."
 msgstr ""
 
-#: includes/class-map-provider.php:447
+#. translators: Name of the map vendor.
+#: includes/class-map-provider.php:700
+#, php-format
+msgid "%s Map API Key"
+msgstr ""
+
+#: includes/class-map-provider.php:942
+#: includes/map/class-map-provider-staticmap.php:461
+msgid "PNG"
+msgstr ""
+
+#: includes/class-map-provider.php:943
+msgid "PNG with 256 colors"
+msgstr ""
+
+#: includes/class-map-provider.php:944
+#: includes/map/class-map-provider-staticmap.php:463
+msgid "JPEG"
+msgstr ""
+
+#: includes/class-map-provider.php:945
+msgid "WebP"
+msgstr ""
+
+#: includes/class-map-provider.php:946
+msgid "GIF"
+msgstr ""
+
+#. translators: Name of the image format used by default.
+#. translators: %s: The Map Style setting's style family, such as Standard.
+#: includes/class-map-provider.php:951
+#: templates/loc-metabox.php:205
+#, php-format
+msgid "Default (%s)"
+msgstr ""
+
+#: includes/class-map-provider.php:952
+msgid "Default of the provider"
+msgstr ""
+
+#. translators: Name of the map provider.
+#: includes/class-map-provider.php:996
+#, php-format
+msgid "%s Image Format"
+msgstr ""
+
+#: includes/class-map-provider.php:1003
+msgid "JPEG suits satellite maps. PNG keeps lines and labels sharp."
+msgstr ""
+
+#: includes/class-map-provider.php:1245
+#: includes/class-sloc-map-cache.php:478
+msgid "This map is not available."
+msgstr ""
+
+#: includes/class-map-provider.php:1487
+msgid "Map of the locations listed on this page"
+msgstr ""
+
+#: includes/class-map-provider.php:1624
 msgid "Map showing this location"
 msgstr ""
 
 #. translators: %s: Address of the location.
-#: includes/class-map-provider.php:449
+#: includes/class-map-provider.php:1626
 #, php-format
 msgid "Map showing %s"
 msgstr ""
 
-#: includes/class-post-venue.php:31
+#: includes/class-post-venue.php:60
 msgid "URL of Venue"
 msgstr ""
 
-#: includes/class-post-venue.php:44
+#: includes/class-post-venue.php:73
 msgid "Alternate URLs for Venue"
 msgstr ""
 
-#: includes/class-post-venue.php:64
-msgid "Street Address of Venue"
+#: includes/class-post-venue.php:94
+msgid "Venue providers the venue was found with"
 msgstr ""
 
-#: includes/class-post-venue.php:77
-#: includes/class-post-venue.php:89
-msgid "Venue Post ID"
-msgstr ""
-
-#: includes/class-post-venue.php:101
-msgid "Radius around the Venue in meters"
-msgstr ""
-
-#: includes/class-post-venue.php:114
-#: includes/class-post-venue.php:136
-msgid "Venues"
-msgstr ""
-
-#: includes/class-post-venue.php:115
-msgid "Venue"
-msgstr ""
-
-#: includes/class-post-venue.php:116
-msgid "Add New"
-msgstr ""
-
-#: includes/class-post-venue.php:117
-msgid "Edit Venue"
-msgstr ""
-
-#: includes/class-post-venue.php:118
-msgid "New Venue"
+#: includes/class-post-venue.php:106
+msgid "Shared category of the venue, such as food"
 msgstr ""
 
 #: includes/class-post-venue.php:119
+msgid "Street Address of Venue"
+msgstr ""
+
+#: includes/class-post-venue.php:132
+#: includes/class-post-venue.php:144
+msgid "Venue Post ID"
+msgstr ""
+
+#: includes/class-post-venue.php:156
+msgid "Radius around the Venue in meters"
+msgstr ""
+
+#: includes/class-post-venue.php:169
+msgid "Visibility of the location of posts made at the venue"
+msgstr ""
+
+#: includes/class-post-venue.php:210
+#: includes/class-post-venue.php:232
+msgid "Venues"
+msgstr ""
+
+#: includes/class-post-venue.php:211
+msgid "Venue"
+msgstr ""
+
+#: includes/class-post-venue.php:212
+msgid "Add New"
+msgstr ""
+
+#: includes/class-post-venue.php:213
+msgid "Edit Venue"
+msgstr ""
+
+#: includes/class-post-venue.php:214
+msgid "New Venue"
+msgstr ""
+
+#: includes/class-post-venue.php:215
 msgid "View Venue"
 msgstr ""
 
-#: includes/class-post-venue.php:120
+#: includes/class-post-venue.php:216
 msgid "View Venues"
 msgstr ""
 
-#: includes/class-post-venue.php:121
+#: includes/class-post-venue.php:217
 msgid "Search Venues"
 msgstr ""
 
-#: includes/class-post-venue.php:122
+#: includes/class-post-venue.php:218
 msgid "No Venues Found"
 msgstr ""
 
-#: includes/class-post-venue.php:123
+#: includes/class-post-venue.php:219
 msgid "No venues found in Trash"
 msgstr ""
 
-#: includes/class-post-venue.php:124
+#: includes/class-post-venue.php:220
 msgid "All Venues"
 msgstr ""
 
-#: includes/class-post-venue.php:125
+#: includes/class-post-venue.php:221
 msgid "Insert into Venue"
 msgstr ""
 
-#: includes/class-post-venue.php:126
+#: includes/class-post-venue.php:222
 msgid "Uploaded to this venue"
 msgstr ""
 
-#: includes/class-post-venue.php:127
+#: includes/class-post-venue.php:223
 msgid "Venue Image"
 msgstr ""
 
-#: includes/class-post-venue.php:128
+#: includes/class-post-venue.php:224
 msgid "Set Venue Image"
 msgstr ""
 
-#: includes/class-post-venue.php:129
+#: includes/class-post-venue.php:225
 msgid "Remove Venue Image"
 msgstr ""
 
-#: includes/class-post-venue.php:130
+#: includes/class-post-venue.php:226
 msgid "Use Venue Image"
 msgstr ""
 
-#: includes/class-post-venue.php:138
+#: includes/class-post-venue.php:234
 msgid "Represents a place"
 msgstr ""
 
-#: includes/class-post-venue.php:153
+#: includes/class-post-venue.php:249
 msgctxt "taxonomy general name"
 msgid "Types"
 msgstr ""
 
-#: includes/class-post-venue.php:154
+#: includes/class-post-venue.php:250
 msgctxt "taxonomy singular name"
 msgid "Type"
 msgstr ""
 
-#: includes/class-post-venue.php:155
+#: includes/class-post-venue.php:251
 msgctxt "search locations"
 msgid "Search Types"
 msgstr ""
 
-#: includes/class-post-venue.php:156
+#: includes/class-post-venue.php:252
 msgctxt "popular locations"
 msgid "Popular Types"
 msgstr ""
 
-#: includes/class-post-venue.php:157
+#: includes/class-post-venue.php:253
 msgctxt "all taxonomy items"
 msgid "All Type"
 msgstr ""
 
-#: includes/class-post-venue.php:158
+#: includes/class-post-venue.php:254
 msgctxt "edit taxonomy item"
 msgid "Edit Type"
 msgstr ""
 
-#: includes/class-post-venue.php:159
+#: includes/class-post-venue.php:255
 msgctxt "view taxonomy item"
 msgid "View Type"
 msgstr ""
 
-#: includes/class-post-venue.php:160
+#: includes/class-post-venue.php:256
 msgctxt "update taxonomy item"
 msgid "Update Type"
 msgstr ""
 
-#: includes/class-post-venue.php:161
+#: includes/class-post-venue.php:257
 msgctxt "add taxonomy item"
 msgid "Add New Type"
 msgstr ""
 
-#: includes/class-post-venue.php:162
+#: includes/class-post-venue.php:258
 msgctxt "new taxonomy item"
 msgid "New Type"
 msgstr ""
 
-#: includes/class-post-venue.php:163
+#: includes/class-post-venue.php:259
 msgctxt "separate kinds with commas"
 msgid "Separate types with commas"
 msgstr ""
 
-#: includes/class-post-venue.php:164
+#: includes/class-post-venue.php:260
 msgctxt "add or remove items"
 msgid "Add or remove type"
 msgstr ""
 
-#: includes/class-post-venue.php:165
+#: includes/class-post-venue.php:261
 msgctxt "choose most used"
 msgid "Choose from the most used type"
 msgstr ""
 
-#: includes/class-post-venue.php:166
+#: includes/class-post-venue.php:262
 msgctxt "no types found"
 msgid "No types found"
 msgstr ""
 
-#: includes/class-post-venue.php:167
+#: includes/class-post-venue.php:263
 msgctxt "no types"
 msgid "No types"
 msgstr ""
 
-#: includes/class-post-venue.php:168
+#: includes/class-post-venue.php:264
 msgid "The name of the venut type"
 msgstr ""
 
-#: includes/class-post-venue.php:174
+#: includes/class-post-venue.php:270
 msgid "Allows for categorization of venues"
 msgstr ""
 
-#: includes/class-post-venue.php:240
+#: includes/class-post-venue.php:341
 msgid "Checkins"
 msgstr ""
 
-#: includes/class-post-venue.php:279
+#: includes/class-post-venue.php:380
 msgid "Update Venue from Its Checkins"
 msgstr ""
 
-#: includes/class-post-venue.php:331
+#: includes/class-post-venue.php:434
 msgid "None of the Venues Were Updated."
 msgstr ""
 
 #. translators: Count of posts updated.
-#: includes/class-post-venue.php:334
+#: includes/class-post-venue.php:437
 #, php-format
 msgid "Updated %s venue."
 msgid_plural "Updated %s venues."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-post-venue.php:371
+#: includes/class-post-venue.php:481
 msgid "All Types"
+msgstr ""
+
+#: includes/class-post-venue.php:907
+msgid "Website"
 msgstr ""
 
 #. translators: %s: Parameter name.
 #: includes/class-rest-geo.php:40
+#: includes/class-rest-geo.php:537
 #, php-format
 msgid "%s is not a valid coordinate."
 msgstr ""
@@ -1283,147 +1704,162 @@ msgstr ""
 msgid "Invalid %s."
 msgstr ""
 
-#: includes/class-rest-geo.php:438
+#: includes/class-rest-geo.php:447
 msgid "No Map Provider Set"
 msgstr ""
 
-#: includes/class-rest-geo.php:446
+#: includes/class-rest-geo.php:455
 msgid "Missing Coordinates for Reverse Lookup"
 msgstr ""
 
-#: includes/class-rest-geo.php:473
+#: includes/class-rest-geo.php:472
 msgid "No Geolocation Provider Available"
 msgstr ""
 
-#: includes/class-rest-geo.php:504
-msgid "Provider Not Available"
+#: includes/class-rest-geo.php:517
+msgid "The location must be a GeoJSON Point, or a Feature with a Point geometry."
 msgstr ""
 
-#: includes/class-rest-geo.php:525
-msgid "Updated"
+#: includes/class-rest-geo.php:523
+msgid "geo is not a valid geo URI."
 msgstr ""
 
-#: includes/class-rest-geo.php:544
-#: templates/loc-metabox.php:109
-msgid "No Venue"
-msgstr ""
-
-#: includes/class-rest-geo.php:567
-msgid "Venues Not Found"
+#: includes/class-rest-geo.php:553
+msgid "Send a latitude and longitude, a geo URI, or a GeoJSON location."
 msgstr ""
 
 #: includes/class-rest-geo.php:572
-#: includes/class-rest-geo.php:594
-#: includes/class-rest-geo.php:657
+msgid "Provider Not Available"
+msgstr ""
+
+#: includes/class-rest-geo.php:592
+msgid "Updated"
+msgstr ""
+
+#: includes/class-rest-geo.php:611
+#: templates/loc-metabox.php:140
+msgid "No Venue"
+msgstr ""
+
+#: includes/class-rest-geo.php:634
+msgid "Venues Not Found"
+msgstr ""
+
+#: includes/class-rest-geo.php:639
+#: includes/class-rest-geo.php:669
+#: includes/class-rest-geo.php:752
 msgid "Provider Not Found"
 msgstr ""
 
-#: includes/class-rest-geo.php:577
-#: includes/class-rest-geo.php:599
-#: includes/class-rest-geo.php:725
+#: includes/class-rest-geo.php:648
+#: includes/class-rest-geo.php:674
+#: includes/class-rest-geo.php:825
 msgid "Missing Arguments"
 msgstr ""
 
-#: includes/class-rest-geo.php:643
-#: includes/class-rest-geo.php:684
-#: templates/loc-metabox.php:85
+#: includes/class-rest-geo.php:734
+#: includes/class-rest-geo.php:784
+#: templates/loc-metabox.php:89
 msgid "No Location"
 msgstr ""
 
-#: includes/class-rest-geo.php:721
+#: includes/class-rest-geo.php:820
 msgid "Reverse Geolocation Provider Not Set"
 msgstr ""
 
-#: includes/class-rest-geo.php:744
-#: includes/class-weather-data.php:682
+#: includes/class-rest-geo.php:844
+#: includes/class-weather-data.php:1018
 msgid "No Weather Provider Set"
 msgstr ""
 
-#: includes/class-rest-geo.php:755
+#: includes/class-rest-geo.php:864
 msgid "Missing Coordinates or Station for Weather Lookup"
 msgstr ""
 
-#: includes/class-rest-geo.php:792
-#: includes/class-rest-geo.php:806
+#: includes/class-rest-geo.php:900
+#: includes/class-rest-geo.php:914
 msgid "This Airport Code was Not Found"
 msgstr ""
 
-#: includes/class-rest-geo.php:814
+#: includes/class-rest-geo.php:922
 msgid "No location data was provided"
 msgstr ""
 
-#: includes/class-rest-geo.php:819
+#: includes/class-rest-geo.php:927
 msgid "Could Not Determine Timezone"
 msgstr ""
 
-#: includes/class-sloc-map-cache.php:143
+#: includes/class-sloc-geojson.php:185
+msgid "Locations (GeoJSON)"
+msgstr ""
+
+#: includes/class-sloc-map-cache.php:163
 msgid "Serve Maps From This Site"
 msgstr ""
 
-#: includes/class-sloc-map-cache.php:154
+#: includes/class-sloc-map-cache.php:174
 msgid "Refresh Stored Maps After (Days)"
 msgstr ""
 
 #. translators: Name of the map provider.
-#: includes/class-sloc-map-cache.php:183
+#: includes/class-sloc-map-cache.php:203
 #, php-format
 msgid "%s allows its map images to be stored, so this site can fetch them and serve them itself. Your API key stays on the server, and visitors never contact the provider. When off, map images load from the provider and the API key is part of the image link."
 msgstr ""
 
-#: includes/class-sloc-map-cache.php:203
+#: includes/class-sloc-map-cache.php:223
 msgid "A stored map is fetched again from the provider after this many days. 0 never fetches it again. Pages cached with the old image keep working."
 msgstr ""
 
 #. translators: 1. Name of the map provider 2. Number of days.
-#: includes/class-sloc-map-cache.php:208
+#: includes/class-sloc-map-cache.php:228
 #, php-format
 msgid "%1$s allows storing a map for at most %2$d day, so its maps are refreshed at least that often."
 msgid_plural "%1$s allows storing a map for at most %2$d days, so its maps are refreshed at least that often."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-sloc-map-cache.php:219
+#: includes/class-sloc-map-cache.php:239
 msgid "Clear Stored Maps"
 msgstr ""
 
 #. translators: Number of stored map images.
-#: includes/class-sloc-map-cache.php:223
+#: includes/class-sloc-map-cache.php:243
 #, php-format
 msgid "%d map image is stored."
 msgid_plural "%d map images are stored."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-sloc-map-cache.php:230
+#: includes/class-sloc-map-cache.php:250
 msgid "Clearing deletes every stored map image. Pages show their maps again once they are rebuilt, but pages kept by a page cache may show broken images until their cache expires."
 msgstr ""
 
-#: includes/class-sloc-map-cache.php:242
+#: includes/class-sloc-map-cache.php:262
 msgid "You are not allowed to clear stored maps."
 msgstr ""
 
 #. translators: Number of deleted map images.
-#: includes/class-sloc-map-cache.php:270
+#: includes/class-sloc-map-cache.php:290
 #, php-format
 msgid "Deleted %d stored map image."
 msgid_plural "Deleted %d stored map images."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-sloc-map-cache.php:420
+#: includes/class-sloc-map-cache.php:459
 msgid "This map image link is not valid."
 msgstr ""
 
-#: includes/class-sloc-map-cache.php:437
-#: includes/class-sloc-map-cache.php:503
-msgid "This map is not available."
-msgstr ""
-
-#: includes/class-sloc-map-cache.php:516
+#: includes/class-sloc-map-cache.php:613
 msgid "The map could not be loaded."
 msgstr ""
 
-#: includes/class-sloc-map-cache.php:618
+#: includes/class-sloc-map-cache.php:620
+msgid "The map provider does not allow storing this map."
+msgstr ""
+
+#: includes/class-sloc-map-cache.php:729
 msgid "The map could not be stored."
 msgstr ""
 
@@ -1451,775 +1887,1333 @@ msgstr ""
 msgid "Created on: %s"
 msgstr ""
 
-#: includes/class-sloc-media-metadata.php:216
+#: includes/class-sloc-media-metadata.php:219
 msgid "Geo Coordinates"
 msgstr ""
 
-#: includes/class-sloc-media-metadata.php:227
+#: includes/class-sloc-media-metadata.php:230
 msgid "Creation Time"
 msgstr ""
 
+#: includes/class-sloc-merge.php:82
+#: includes/class-sloc-merge.php:83
+#: includes/class-sloc-merge.php:99
+#: includes/class-sloc-merge.php:196
+#: includes/class-sloc-merge.php:225
+msgid "Merge"
+msgstr ""
+
+#: includes/class-sloc-merge.php:193
+#: includes/class-sloc-merge.php:237
+msgid "This link has expired. Choose what to merge again."
+msgstr ""
+
+#: includes/class-sloc-merge.php:198
+msgid "Choose two or more that you can edit to merge."
+msgstr ""
+
+#: includes/class-sloc-merge.php:201
+msgid "Choose the one to keep. The others are merged into it and deleted, and their addresses redirect to it. This cannot be undone."
+msgstr ""
+
+#: includes/class-sloc-merge.php:207
+msgid "Keep"
+msgstr ""
+
+#. translators: 1: Date or other detail, 2: Number of posts.
+#: includes/class-sloc-merge.php:217
+#, php-format
+msgid "%1$s, %2$s post"
+msgid_plural "%1$s, %2$s posts"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-sloc-merge.php:297
+msgid "Choose two or more to merge."
+msgstr ""
+
+#: includes/class-sloc-merge.php:299
+msgid "Nothing was merged."
+msgstr ""
+
+#. translators: %s: Number merged.
+#: includes/class-sloc-merge.php:302
+#, php-format
+msgid "Merged %s into the one you kept."
+msgid_plural "Merged %s into the one you kept."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-sloc-plus-code.php:179
+msgid "A Plus Code has 2, 4, 6, 8, or 10 to 15 digits."
+msgstr ""
+
+#: includes/class-sloc-plus-code.php:230
+msgid "This is not a full Plus Code."
+msgstr ""
+
+#: includes/class-sloc-plus-code.php:295
+#: includes/class-sloc-plus-code.php:337
+msgid "This is not a valid Plus Code."
+msgstr ""
+
+#. translators: %s: Short Plus Code.
+#: includes/class-sloc-plus-code.php:353
+#, php-format
+msgid "%s is a short Plus Code. Add the town or city after it, such as \"XR2P+WH Philadelphia\"."
+msgstr ""
+
+#: includes/class-sloc-provider-chain.php:167
+msgid "No provider is set."
+msgstr ""
+
+#: includes/class-sloc-provider-chain.php:213
+msgid "No provider covers this location and time."
+msgstr ""
+
+#: includes/class-sloc-provider-chain.php:321
+msgid "No elevation provider is set"
+msgstr ""
+
+#: includes/class-sloc-provider-chain.php:324
+msgid "No elevation was found"
+msgstr ""
+
+#: includes/class-sloc-provider-chain.php:452
+msgid "2nd"
+msgstr ""
+
+#: includes/class-sloc-provider-chain.php:453
+msgid "3rd"
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:214
+msgid "weather"
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:215
+msgid "geocoding"
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:216
+msgid "elevation"
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:217
+msgid "venue"
+msgstr ""
+
+#. translators: 1: Provider name 2: Kind of lookup, such as weather.
+#: includes/class-sloc-provider-errors.php:222
+#, php-format
+msgid "Simple Location: %1$s %2$s lookups work again."
+msgstr ""
+
+#. translators: 1: Provider name 2: Kind of lookup, such as weather 3: Error message.
+#: includes/class-sloc-provider-errors.php:225
+#, php-format
+msgid "Simple Location: %1$s %2$s lookups are failing: %3$s"
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:266
+#: includes/class-sloc-provider-errors.php:372
+msgid "Simple Location providers need attention"
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:269
+#: includes/class-sloc-provider-errors.php:376
+msgid "Check the settings"
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:271
+msgid "Dismiss"
+msgstr ""
+
+#. translators: 1: One-line error message 2: Times seen 3: Date and time first seen 4: Date and time last seen.
+#: includes/class-sloc-provider-errors.php:292
+#, php-format
+msgid "%1$s (%2$d time, from %3$s to %4$s)"
+msgid_plural "%1$s (%2$d times, from %3$s to %4$s)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-sloc-provider-errors.php:308
+msgid "You are not allowed to dismiss this notice."
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:339
+msgid "Simple Location providers"
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:355
+msgid "Simple Location providers are working"
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:361
+msgid "No provider has failed with an error that needs your attention."
+msgstr ""
+
+#: includes/class-sloc-provider-errors.php:375
+msgid "These providers failed with errors you can fix, such as a missing or rejected API key. Other providers in the chain were tried instead. Each one clears when the provider works again."
+msgstr ""
+
 #. translators: %d: HTTP status code.
-#: includes/class-sloc-provider.php:173
+#: includes/class-sloc-provider.php:215
 #, php-format
 msgid "The service returned HTTP status %d."
 msgstr ""
 
 #. translators: 1: HTTP status code 2: Start of the response.
-#: includes/class-sloc-provider.php:175
+#: includes/class-sloc-provider.php:217
 #, php-format
 msgid "The service returned HTTP status %1$d: %2$s"
 msgstr ""
 
-#: includes/class-sloc-provider.php:189
+#: includes/class-sloc-provider.php:231
 msgid "The service did not return JSON."
 msgstr ""
 
 #. translators: %s: Start of the response.
-#: includes/class-sloc-provider.php:191
+#: includes/class-sloc-provider.php:233
 #, php-format
 msgid "The service did not return JSON: %s"
 msgstr ""
 
-#: includes/class-sloc-provider.php:201
+#: includes/class-sloc-provider.php:243
 msgid "The service returned a response the plugin could not use."
 msgstr ""
 
-#: includes/class-sloc-provider.php:356
-#: includes/class-sloc-provider.php:414
+#: includes/class-sloc-provider.php:420
+#: includes/class-sloc-provider.php:481
 msgid "API Key"
 msgstr ""
 
 #. translators: 1. Name of Service 2. Type of Property
-#: includes/class-sloc-provider.php:362
-#: includes/class-sloc-provider.php:390
-#: includes/class-sloc-provider.php:420
+#: includes/class-sloc-provider.php:427
+#: includes/class-sloc-provider.php:457
+#: includes/class-sloc-provider.php:487
 #, php-format
 msgid "%1$s %2$s"
 msgstr ""
 
-#: includes/class-sloc-provider.php:384
+#: includes/class-sloc-provider.php:450
 msgid "Service URL"
 msgstr ""
 
-#: includes/class-weather-data.php:118
-#: includes/trait-weather-info.php:126
-#: includes/trait-weather-info.php:280
-msgid "Temperature"
+#: includes/class-sloc-track-tool.php:46
+#: includes/class-sloc-track-tool.php:47
+#: includes/class-sloc-track-tool.php:212
+msgid "Location Track"
 msgstr ""
 
-#: includes/class-weather-data.php:119
-#: includes/class-weather-provider.php:653
-#: includes/trait-weather-info.php:150
-msgid "Humidity"
+#: includes/class-sloc-track-tool.php:130
+msgid "The end must be after the start."
 msgstr ""
 
-#: includes/class-weather-data.php:120
-#: includes/trait-weather-info.php:138
-#: includes/trait-weather-info.php:292
-msgid "Heat Index"
+#: includes/class-sloc-track-tool.php:134
+msgid "The location provider can't give tracks. Compass, Dawarich and GeoPulse can."
 msgstr ""
 
-#: includes/class-weather-data.php:121
-#: includes/trait-weather-info.php:132
-#: includes/trait-weather-info.php:286
-msgid "Wind Chill"
+#: includes/class-sloc-track-tool.php:142
+msgid "Set up your location provider account on your profile first."
 msgstr ""
 
-#: includes/class-weather-data.php:122
-#: includes/trait-weather-info.php:144
-#: includes/trait-weather-info.php:298
-msgid "Dewpoint"
+#: includes/class-sloc-track-tool.php:152
+msgid "The location provider has no track between those times."
 msgstr ""
 
-#: includes/class-weather-data.php:123
-msgid "Atmospheric Pressure"
+#: includes/class-sloc-track-tool.php:156
+msgid "The whole track is inside private places, so there is nothing to show."
 msgstr ""
 
-#: includes/class-weather-data.php:124
-#: includes/trait-weather-info.php:162
-msgid "Cloudiness"
+#: includes/class-sloc-track-tool.php:207
+msgid "Enter a start and an end."
 msgstr ""
 
-#: includes/class-weather-data.php:125
-#: includes/trait-weather-info.php:186
-#: includes/trait-weather-info.php:329
-msgid "Rainfall"
+#: includes/class-sloc-track-tool.php:213
+msgid "Get your route between two times from your location provider, and make a map of it to paste into a post. Points inside venues whose posts are private or protected, such as home, are left out."
 msgstr ""
 
-#: includes/class-weather-data.php:126
-#: includes/trait-weather-info.php:192
-#: includes/trait-weather-info.php:335
-#: includes/weather/class-weather-provider-meteostat.php:364
+#: includes/class-sloc-track-tool.php:218
+#: includes/class-sloc-weather-fill.php:747
+msgid "Start"
+msgstr ""
+
+#: includes/class-sloc-track-tool.php:222
+msgid "End"
+msgstr ""
+
+#. translators: %s: Timezone name.
+#: includes/class-sloc-track-tool.php:227
+#, php-format
+msgid "Times are in the site's timezone, %s."
+msgstr ""
+
+#: includes/class-sloc-track-tool.php:233
+msgid "Markers"
+msgstr ""
+
+#: includes/class-sloc-track-tool.php:236
+msgid "At the start and end"
+msgstr ""
+
+#: includes/class-sloc-track-tool.php:242
+msgid "Get Track"
+msgstr ""
+
+#: includes/class-sloc-track-tool.php:270
+msgid "Track"
+msgstr ""
+
+#. translators: 1: Points found 2: Points in private places 3: Points kept
+#: includes/class-sloc-track-tool.php:276
+#, php-format
+msgid "%1$s points found, %2$s left out in private places, %3$s kept for the map."
+msgstr ""
+
+#: includes/class-sloc-track-tool.php:284
+msgid "Preview"
+msgstr ""
+
+#: includes/class-sloc-track-tool.php:289
+msgid "Choose a map provider in Settings to see the map here."
+msgstr ""
+
+#: includes/class-sloc-track-tool.php:295
+msgid "Paste this into a post:"
+msgstr ""
+
+#: includes/class-sloc-track-tool.php:297
+msgid "Copy"
+msgstr ""
+
+#: includes/class-sloc-weather-archive.php:272
+#: includes/trait-weather-info.php:477
+#: includes/trait-weather-info.php:495
+#: includes/trait-weather-info.php:501
+msgid "in"
+msgstr ""
+
+#: includes/class-sloc-weather-archive.php:272
+#: includes/trait-weather-info.php:303
+#: includes/trait-weather-info.php:321
+#: includes/trait-weather-info.php:327
+msgid "mm"
+msgstr ""
+
+#: includes/class-sloc-weather-archive.php:296
+#: templates/temperature-archive.php:19
+msgid "°F"
+msgstr ""
+
+#: includes/class-sloc-weather-archive.php:296
+#: templates/temperature-archive.php:19
+msgid "°C"
+msgstr ""
+
+#. translators: 1: Date 2: Temperature 3: Unit
+#: includes/class-sloc-weather-archive.php:318
+#, php-format
+msgid "%1$s: %2$s%3$s"
+msgstr ""
+
+#. translators: 1: Number of posts 2: Lowest temperature 3: Highest temperature 4: Unit
+#: includes/class-sloc-weather-archive.php:324
+#, php-format
+msgid "Temperature of %1$s post, from %2$s%4$s to %3$s%4$s"
+msgid_plural "Temperatures of %1$s posts, from %2$s%4$s to %3$s%4$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: Date 2: Amount 3: Unit
+#: includes/class-sloc-weather-archive.php:389
+#, php-format
+msgid "%1$s: %2$s %3$s"
+msgstr ""
+
+#. translators: 1: Number of posts 2: Largest amount 3: Unit
+#: includes/class-sloc-weather-archive.php:397
+#, php-format
+msgid "Rainfall of %1$s post, up to %2$s %3$s"
+msgid_plural "Rainfall of %1$s posts, up to %2$s %3$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: Number of posts 2: Largest amount 3: Unit
+#: includes/class-sloc-weather-archive.php:404
+#, php-format
+msgid "Snowfall of %1$s post, up to %2$s %3$s"
+msgid_plural "Snowfall of %1$s posts, up to %2$s %3$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-sloc-weather-fill.php:131
+msgid "Conditions (summary and icon)"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:135
+#: includes/class-weather-data.php:158
+#: includes/trait-weather-info.php:323
+#: includes/trait-weather-info.php:497
+#: includes/weather/class-weather-provider-meteostat.php:366
 msgid "Snowfall"
 msgstr ""
 
-#: includes/class-weather-data.php:127
-#: includes/trait-weather-info.php:198
-#: includes/trait-weather-info.php:341
-#: templates/loc-metabox.php:174
+#: includes/class-sloc-weather-fill.php:139
+msgid "Snow depth"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:143
+msgid "Cloud cover"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:147
+msgid "Solar radiation"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:151
+msgid "UV index (only for about the last three months)"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:155
+msgid "Visibility (only for about the last three months)"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:500
+msgid "No readings are chosen to fill in."
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:536
+msgid "Open-Meteo is not available."
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:582
+msgid "Fill In Missing Readings"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:609
+msgid "Readings the weather provider doesn't give, such as those a weather station has no sensor for, are filled in from Open-Meteo, which is credited with the weather. The provider's own readings are kept. Locations are rounded to about a kilometer before they are sent. Tools → Weather Fill fills in existing posts."
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:620
+#: includes/class-sloc-weather-fill.php:621
+#: includes/class-sloc-weather-fill.php:689
+msgid "Weather Fill"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:646
+#: includes/class-sloc-weather-fill.php:661
+msgid "Sorry, you are not allowed to do that."
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:682
+msgid "Not started"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:683
+msgid "Running in the background"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:684
+msgid "Stopped"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:685
+msgid "Done"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:690
+msgid "Fill in weather readings that posts are missing, such as the conditions, snow or cloud cover that a weather station has no sensor for, from Open-Meteo. Only missing readings are filled in. Locations are rounded to about a kilometer before they are sent."
+msgstr ""
+
+#. translators: %s: Link to the settings.
+#: includes/class-sloc-weather-fill.php:696
+#, php-format
+msgid "Choose the readings to fill in under Fill In Missing Readings in the %s first."
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:697
+msgid "provider settings"
+msgstr ""
+
+#. translators: %s: List of readings.
+#: includes/class-sloc-weather-fill.php:709
+#, php-format
+msgid "Readings to fill in: %s."
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:715
+msgid "Status"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:723
+msgid "Checked"
+msgstr ""
+
+#. translators: 1: Posts checked 2: Posts filled in.
+#: includes/class-sloc-weather-fill.php:727
+#, php-format
+msgid "%1$s posts checked, %2$s filled in"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:732
+msgid "Left to check"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:740
+msgid "Stop"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:746
+msgid "Also check again the posts checked before, such as after choosing more readings"
+msgstr ""
+
+#: includes/class-sloc-weather-fill.php:747
+msgid "Continue"
+msgstr ""
+
+#: includes/class-venue-provider.php:439
+msgid "Food"
+msgstr ""
+
+#: includes/class-venue-provider.php:440
+msgid "Drink"
+msgstr ""
+
+#: includes/class-venue-provider.php:441
+msgid "Lodging"
+msgstr ""
+
+#: includes/class-venue-provider.php:442
+msgid "Shop"
+msgstr ""
+
+#: includes/class-venue-provider.php:443
+msgid "Transport"
+msgstr ""
+
+#: includes/class-venue-provider.php:444
+msgid "Culture"
+msgstr ""
+
+#: includes/class-venue-provider.php:445
+msgid "Entertainment"
+msgstr ""
+
+#: includes/class-venue-provider.php:446
+msgid "Outdoors"
+msgstr ""
+
+#: includes/class-venue-provider.php:447
+msgid "Sport"
+msgstr ""
+
+#: includes/class-venue-provider.php:448
+msgid "Health"
+msgstr ""
+
+#: includes/class-venue-provider.php:449
+msgid "Education"
+msgstr ""
+
+#: includes/class-venue-provider.php:450
+msgid "Worship"
+msgstr ""
+
+#: includes/class-venue-provider.php:451
+msgid "Government"
+msgstr ""
+
+#: includes/class-venue-provider.php:452
+msgid "Office"
+msgstr ""
+
+#: includes/class-venue-provider.php:453
+msgid "Other"
+msgstr ""
+
+#: includes/class-weather-data.php:148
+#: includes/trait-weather-info.php:245
+#: includes/trait-weather-info.php:430
+msgid "Temperature"
+msgstr ""
+
+#: includes/class-weather-data.php:149
+#: includes/class-weather-provider.php:921
+#: includes/trait-weather-info.php:269
+msgid "Humidity"
+msgstr ""
+
+#: includes/class-weather-data.php:150
+#: includes/trait-weather-info.php:257
+#: includes/trait-weather-info.php:442
+msgid "Heat Index"
+msgstr ""
+
+#: includes/class-weather-data.php:151
+#: includes/trait-weather-info.php:251
+#: includes/trait-weather-info.php:436
+msgid "Wind Chill"
+msgstr ""
+
+#: includes/class-weather-data.php:152
+#: includes/trait-weather-info.php:263
+#: includes/trait-weather-info.php:448
+msgid "Dewpoint"
+msgstr ""
+
+#: includes/class-weather-data.php:153
+msgid "Atmospheric Pressure"
+msgstr ""
+
+#: includes/class-weather-data.php:154
+#: includes/trait-weather-info.php:281
+msgid "Cloudiness"
+msgstr ""
+
+#: includes/class-weather-data.php:155
+#: includes/trait-weather-info.php:305
+#: includes/trait-weather-info.php:479
+msgid "Rainfall"
+msgstr ""
+
+#: includes/class-weather-data.php:156
+#: includes/trait-weather-info.php:311
+#: includes/trait-weather-info.php:485
+msgid "Rain Rate"
+msgstr ""
+
+#: includes/class-weather-data.php:157
+#: includes/trait-weather-info.php:317
+#: includes/trait-weather-info.php:491
+msgid "Snow Rate"
+msgstr ""
+
+#: includes/class-weather-data.php:159
+#: includes/trait-weather-info.php:329
+#: includes/trait-weather-info.php:503
+msgid "Snow Depth"
+msgstr ""
+
+#: includes/class-weather-data.php:160
+#: includes/trait-weather-info.php:335
+#: includes/trait-weather-info.php:509
+#: templates/loc-metabox.php:228
 msgid "Visibility"
 msgstr ""
 
-#: includes/class-weather-data.php:128
+#: includes/class-weather-data.php:161
 msgid "Radiation"
 msgstr ""
 
-#: includes/class-weather-data.php:129
-#: includes/trait-weather-info.php:210
+#: includes/class-weather-data.php:162
+#: includes/trait-weather-info.php:347
 msgid "Illuminance"
 msgstr ""
 
-#: includes/class-weather-data.php:130
-#: includes/trait-weather-info.php:216
+#: includes/class-weather-data.php:163
+#: includes/trait-weather-info.php:353
 msgid "UV Index"
 msgstr ""
 
-#: includes/class-weather-data.php:131
-#: includes/trait-weather-info.php:222
+#: includes/class-weather-data.php:164
+#: includes/trait-weather-info.php:359
 msgid "Air Quality Index"
 msgstr ""
 
-#: includes/class-weather-data.php:132
+#: includes/class-weather-data.php:165
 msgid "Particulate Matter 1.0"
 msgstr ""
 
-#: includes/class-weather-data.php:133
+#: includes/class-weather-data.php:166
 msgid "Particulate Matter 2.5"
 msgstr ""
 
-#: includes/class-weather-data.php:134
+#: includes/class-weather-data.php:167
 msgid "Particulate Matter 10.0"
 msgstr ""
 
-#: includes/class-weather-data.php:135
-#: includes/trait-weather-info.php:247
+#: includes/class-weather-data.php:168
+#: includes/trait-weather-info.php:384
 msgid "Carbon Monoxide"
 msgstr ""
 
-#: includes/class-weather-data.php:136
-#: includes/trait-weather-info.php:252
+#: includes/class-weather-data.php:169
+#: includes/trait-weather-info.php:389
 msgid "Carbon Dioxide"
 msgstr ""
 
-#: includes/class-weather-data.php:137
-#: includes/trait-weather-info.php:257
+#: includes/class-weather-data.php:170
+#: includes/trait-weather-info.php:394
 msgid "Ammonia"
 msgstr ""
 
-#: includes/class-weather-data.php:138
-#: includes/trait-weather-info.php:262
+#: includes/class-weather-data.php:171
+#: includes/trait-weather-info.php:399
 msgid "Ozone"
 msgstr ""
 
-#: includes/class-weather-data.php:139
-#: includes/trait-weather-info.php:267
+#: includes/class-weather-data.php:172
+#: includes/trait-weather-info.php:404
 msgid "Lead"
 msgstr ""
 
-#: includes/class-weather-data.php:140
-#: includes/trait-weather-info.php:272
+#: includes/class-weather-data.php:173
+#: includes/trait-weather-info.php:409
 msgid "Sulfur Dioxide"
 msgstr ""
 
-#: includes/class-weather-data.php:141
-#: includes/trait-weather-info.php:168
-#: includes/trait-weather-info.php:310
+#: includes/class-weather-data.php:174
+#: includes/trait-weather-info.php:415
+msgid "VOC Index"
+msgstr ""
+
+#: includes/class-weather-data.php:175
+#: includes/trait-weather-info.php:421
+msgid "NOx Index"
+msgstr ""
+
+#: includes/class-weather-data.php:176
+#: includes/trait-weather-info.php:287
+#: includes/trait-weather-info.php:460
 msgid "Wind Speed"
 msgstr ""
 
-#: includes/class-weather-data.php:142
+#: includes/class-weather-data.php:177
 msgid "Wind Degree"
 msgstr ""
 
-#: includes/class-weather-data.php:143
-#: includes/trait-weather-info.php:174
-#: includes/trait-weather-info.php:316
+#: includes/class-weather-data.php:178
+#: includes/trait-weather-info.php:293
+#: includes/trait-weather-info.php:466
 msgid "Wind Gust"
 msgstr ""
 
-#: includes/class-weather-data.php:144
+#: includes/class-weather-data.php:179
 msgid "Weather Condition Code"
 msgstr ""
 
-#: includes/class-weather-data.php:162
+#: includes/class-weather-data.php:197
 msgid "Weather Summary"
 msgstr ""
 
-#: includes/class-weather-data.php:174
+#: includes/class-weather-data.php:209
 msgid "Weather Icon"
 msgstr ""
 
-#: includes/class-weather-data.php:540
+#: includes/class-weather-data.php:231
+msgid "Weather Credit"
+msgstr ""
+
+#: includes/class-weather-data.php:232
+msgid "Weather Credit Link"
+msgstr ""
+
+#: includes/class-weather-data.php:329
+#: templates/weather-metabox.php:36
+msgid "Weather:"
+msgstr ""
+
+#: includes/class-weather-data.php:772
 msgid "Weather: "
 msgstr ""
 
+#: includes/class-weather-data.php:842
+msgid "AQI"
+msgstr ""
+
+#. translators: 1: Air quality index 2: Its category, such as Moderate.
+#: includes/class-weather-data.php:860
+#, php-format
+msgid "Air Quality Index %1$d: %2$s"
+msgstr ""
+
 #. translators: 1. Property Name 2. Units
-#: includes/class-weather-provider.php:424
+#: includes/class-weather-provider.php:644
 #, php-format
 msgid "%1$s measured in %2$s"
 msgstr ""
 
-#: includes/class-weather-provider.php:457
-#: includes/weather/class-weather-provider-metoffice.php:143
-msgid "Failure"
+#. translators: %s: Weather provider name.
+#: includes/class-weather-provider.php:679
+#, php-format
+msgid "%s has no weather for this location and time."
 msgstr ""
 
 #. translators: %s: Weather provider name.
-#: includes/class-weather-provider.php:478
+#: includes/class-weather-provider.php:694
+#, php-format
+msgid "You have not set an API key for %s"
+msgstr ""
+
+#. translators: %s: Weather provider name.
+#: includes/class-weather-provider.php:726
 #, php-format
 msgid "%s only provides current weather."
 msgstr ""
 
-#: includes/class-weather-provider.php:556
+#: includes/class-weather-provider.php:824
 msgid "Cloud"
 msgstr ""
 
-#: includes/class-weather-provider.php:557
-#: includes/weather/class-weather-provider-meteostat.php:352
+#: includes/class-weather-provider.php:825
+#: includes/weather/class-weather-provider-meteostat.php:354
+#: includes/weather/class-weather-provider-metno.php:215
 msgid "Cloudy"
 msgstr ""
 
-#: includes/class-weather-provider.php:558
+#: includes/class-weather-provider.php:826
 msgid "Cloudy with Gusts"
 msgstr ""
 
-#: includes/class-weather-provider.php:559
+#: includes/class-weather-provider.php:827
 msgid "Cloudy with Wind"
 msgstr ""
 
-#: includes/class-weather-provider.php:560
+#: includes/class-weather-provider.php:828
 msgid "Showers"
 msgstr ""
 
-#: includes/class-weather-provider.php:561
+#: includes/class-weather-provider.php:829
 msgid "Rain-Mix"
 msgstr ""
 
-#: includes/class-weather-provider.php:562
-#: includes/weather/class-weather-provider-meteostat.php:357
-#: includes/weather/class-weather-provider-visualcrossing.php:201
+#: includes/class-weather-provider.php:830
+#: includes/weather/class-weather-provider-meteostat.php:359
+#: includes/weather/class-weather-provider-metno.php:218
+#: includes/weather/class-weather-provider-visualcrossing.php:203
 msgid "Rain"
 msgstr ""
 
-#: includes/class-weather-provider.php:563
+#: includes/class-weather-provider.php:831
 msgid "Rain and Windy"
 msgstr ""
 
-#: includes/class-weather-provider.php:564
-#: includes/trait-weather-info.php:410
-#: includes/weather/class-weather-provider-visualcrossing.php:211
+#: includes/class-weather-provider.php:832
+#: includes/trait-weather-info.php:633
+#: includes/weather/class-weather-provider-metno.php:242
+#: includes/weather/class-weather-provider-visualcrossing.php:213
 msgid "Snow"
 msgstr ""
 
-#: includes/class-weather-provider.php:565
-#: includes/trait-weather-info.php:423
+#: includes/class-weather-provider.php:833
+#: includes/trait-weather-info.php:646
 msgid "Snow and Wind"
 msgstr ""
 
-#: includes/class-weather-provider.php:566
-#: includes/weather/class-weather-provider-meteostat.php:354
-#: includes/weather/class-weather-provider-visualcrossing.php:188
+#: includes/class-weather-provider.php:834
+#: includes/weather/class-weather-provider-meteostat.php:356
+#: includes/weather/class-weather-provider-metno.php:216
+#: includes/weather/class-weather-provider-openmeteo.php:402
+#: includes/weather/class-weather-provider-visualcrossing.php:190
 msgid "Fog"
 msgstr ""
 
-#: includes/class-weather-provider.php:567
+#: includes/class-weather-provider.php:835
 msgid "Hot"
 msgstr ""
 
-#: includes/class-weather-provider.php:568
-#: includes/weather/class-weather-provider-meteostat.php:372
+#: includes/class-weather-provider.php:836
+#: includes/weather/class-weather-provider-meteostat.php:374
 msgid "Lightning"
 msgstr ""
 
-#: includes/class-weather-provider.php:569
+#: includes/class-weather-provider.php:837
 msgid "Sandstorm"
 msgstr ""
 
-#: includes/class-weather-provider.php:570
-#: includes/trait-weather-info.php:413
-#: includes/weather/class-weather-provider-meteostat.php:361
+#: includes/class-weather-provider.php:838
+#: includes/trait-weather-info.php:636
+#: includes/weather/class-weather-provider-meteostat.php:363
+#: includes/weather/class-weather-provider-metno.php:230
 msgid "Sleet"
 msgstr ""
 
-#: includes/class-weather-provider.php:571
+#: includes/class-weather-provider.php:839
 msgid "Smog"
 msgstr ""
 
-#: includes/class-weather-provider.php:572
-#: includes/trait-weather-info.php:429
+#: includes/class-weather-provider.php:840
+#: includes/trait-weather-info.php:652
 msgid "Smoke"
 msgstr ""
 
-#: includes/class-weather-provider.php:573
+#: includes/class-weather-provider.php:841
 msgid "Snowflake-Cold"
 msgstr ""
 
-#: includes/class-weather-provider.php:574
+#: includes/class-weather-provider.php:842
 msgid "Solar Eclipse"
 msgstr ""
 
-#: includes/class-weather-provider.php:575
+#: includes/class-weather-provider.php:843
 msgid "Sprinkles"
 msgstr ""
 
-#: includes/class-weather-provider.php:576
+#: includes/class-weather-provider.php:844
 msgid "Stars"
 msgstr ""
 
-#: includes/class-weather-provider.php:577
+#: includes/class-weather-provider.php:845
 msgid "Storm Showers"
 msgstr ""
 
-#: includes/class-weather-provider.php:578
+#: includes/class-weather-provider.php:846
 msgid "Storm Warning"
 msgstr ""
 
-#: includes/class-weather-provider.php:579
+#: includes/class-weather-provider.php:847
 msgid "Strong Winds"
 msgstr ""
 
-#: includes/class-weather-provider.php:580
-#: includes/weather/class-weather-provider-meteostat.php:374
-#: includes/weather/class-weather-provider-visualcrossing.php:217
+#: includes/class-weather-provider.php:848
+#: includes/weather/class-weather-provider-meteostat.php:376
+#: includes/weather/class-weather-provider-openmeteo.php:423
+#: includes/weather/class-weather-provider-visualcrossing.php:219
 msgid "Thunderstorm"
 msgstr ""
 
-#: includes/class-weather-provider.php:581
-#: includes/trait-weather-info.php:394
+#: includes/class-weather-provider.php:849
+#: includes/trait-weather-info.php:617
 msgid "Windy"
 msgstr ""
 
-#: includes/class-weather-provider.php:582
+#: includes/class-weather-provider.php:850
 msgid "Gale Warning"
 msgstr ""
 
-#: includes/class-weather-provider.php:583
-#: includes/trait-weather-info.php:422
-#: includes/weather/class-weather-provider-meteostat.php:373
-#: includes/weather/class-weather-provider-visualcrossing.php:220
+#: includes/class-weather-provider.php:851
+#: includes/trait-weather-info.php:645
+#: includes/weather/class-weather-provider-meteostat.php:375
+#: includes/weather/class-weather-provider-visualcrossing.php:222
 msgid "Hail"
 msgstr ""
 
-#: includes/class-weather-provider.php:584
+#: includes/class-weather-provider.php:852
 msgid "Hurricane"
 msgstr ""
 
-#: includes/class-weather-provider.php:585
+#: includes/class-weather-provider.php:853
 msgid "Hurricane Warning"
 msgstr ""
 
-#: includes/class-weather-provider.php:586
+#: includes/class-weather-provider.php:854
 msgid "Dust"
 msgstr ""
 
-#: includes/class-weather-provider.php:587
+#: includes/class-weather-provider.php:855
 msgid "Earthquake"
 msgstr ""
 
-#: includes/class-weather-provider.php:588
+#: includes/class-weather-provider.php:856
 msgid "Fire"
 msgstr ""
 
-#: includes/class-weather-provider.php:589
+#: includes/class-weather-provider.php:857
 msgid "Flood"
 msgstr ""
 
-#: includes/class-weather-provider.php:590
+#: includes/class-weather-provider.php:858
 msgid "Cloudy with a Chance of Meatballs"
 msgstr ""
 
-#: includes/class-weather-provider.php:591
-#: includes/trait-weather-info.php:428
+#: includes/class-weather-provider.php:859
+#: includes/trait-weather-info.php:651
 msgid "Icy"
 msgstr ""
 
-#: includes/class-weather-provider.php:592
+#: includes/class-weather-provider.php:860
 msgid "Smog( Alt )"
 msgstr ""
 
-#: includes/class-weather-provider.php:596
+#: includes/class-weather-provider.php:864
 msgid "Sunny"
 msgstr ""
 
-#: includes/class-weather-provider.php:597
+#: includes/class-weather-provider.php:865
 msgid "Sunny and Overcast"
 msgstr ""
 
-#: includes/class-weather-provider.php:598
+#: includes/class-weather-provider.php:866
 msgid "Cloudy - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:599
+#: includes/class-weather-provider.php:867
 msgid "Cloudy with Gusts - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:600
+#: includes/class-weather-provider.php:868
 msgid "Cloudy High Winds - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:601
+#: includes/class-weather-provider.php:869
 msgid "Cloudy and Windy - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:602
+#: includes/class-weather-provider.php:870
 msgid "Fog - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:603
+#: includes/class-weather-provider.php:871
 msgid "Hail - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:604
+#: includes/class-weather-provider.php:872
 msgid "Haze - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:605
+#: includes/class-weather-provider.php:873
 msgid "Lightning - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:606
+#: includes/class-weather-provider.php:874
 msgid "Lighting and Wind - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:607
+#: includes/class-weather-provider.php:875
 msgid "Rainy Mix - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:608
+#: includes/class-weather-provider.php:876
 msgid "Rain - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:609
+#: includes/class-weather-provider.php:877
 msgid "Rain and Wind - Daytime"
 msgstr ""
 
-#: includes/class-weather-provider.php:610
+#: includes/class-weather-provider.php:878
 msgid "Showers - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:611
+#: includes/class-weather-provider.php:879
 msgid "Sleet Storm - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:612
+#: includes/class-weather-provider.php:880
 msgid "Sleet - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:613
+#: includes/class-weather-provider.php:881
 msgid "Snow - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:614
+#: includes/class-weather-provider.php:882
 msgid "Snow and Thunderstorms - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:615
+#: includes/class-weather-provider.php:883
 msgid "Snow and Wind - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:616
+#: includes/class-weather-provider.php:884
 msgid "Sprinkles - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:617
+#: includes/class-weather-provider.php:885
 msgid "Storm Showers - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:618
+#: includes/class-weather-provider.php:886
 msgid "Thunderstorm - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:619
+#: includes/class-weather-provider.php:887
 msgid "Windy - Day"
 msgstr ""
 
-#: includes/class-weather-provider.php:622
+#: includes/class-weather-provider.php:890
 msgid "Clear Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:623
+#: includes/class-weather-provider.php:891
 msgid "Cloudy - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:624
+#: includes/class-weather-provider.php:892
 msgid "Cloudy with Gusts - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:625
+#: includes/class-weather-provider.php:893
 msgid "Cloudy with High Winds - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:626
+#: includes/class-weather-provider.php:894
 msgid "Cloudy and Windy - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:627
+#: includes/class-weather-provider.php:895
 msgid "Fog - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:628
+#: includes/class-weather-provider.php:896
 msgid "Hail - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:629
+#: includes/class-weather-provider.php:897
 msgid "Lightning - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:630
+#: includes/class-weather-provider.php:898
 msgid "Partly Cloudy - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:631
+#: includes/class-weather-provider.php:899
 msgid "Rainy Mix - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:632
+#: includes/class-weather-provider.php:900
 msgid "Rain - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:633
+#: includes/class-weather-provider.php:901
 msgid "Rain and Wind - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:634
+#: includes/class-weather-provider.php:902
 msgid "Showers - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:635
+#: includes/class-weather-provider.php:903
 msgid "Sleet Storm - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:636
+#: includes/class-weather-provider.php:904
 msgid "Sleet - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:637
+#: includes/class-weather-provider.php:905
 msgid "Snow - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:638
+#: includes/class-weather-provider.php:906
 msgid "Snow and Thunderstorm - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:639
+#: includes/class-weather-provider.php:907
 msgid "Snow and Wind - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:640
+#: includes/class-weather-provider.php:908
 msgid "Sprinkles - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:641
+#: includes/class-weather-provider.php:909
 msgid "Storm Showers - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:642
+#: includes/class-weather-provider.php:910
 msgid "Thunderstorms - Night"
 msgstr ""
 
-#: includes/class-weather-provider.php:643
+#: includes/class-weather-provider.php:911
 msgid "Lunar Eclipse"
 msgstr ""
 
-#: includes/class-weather-provider.php:646
+#: includes/class-weather-provider.php:914
 msgid "Barometer"
 msgstr ""
 
-#: includes/class-weather-provider.php:647
+#: includes/class-weather-provider.php:915
 msgid "Barometer(Sea Level)"
 msgstr ""
 
-#: includes/class-weather-provider.php:648
+#: includes/class-weather-provider.php:916
 msgid "Thermometer"
 msgstr ""
 
-#: includes/class-weather-provider.php:649
+#: includes/class-weather-provider.php:917
 msgid "Thermometer - Exterior"
 msgstr ""
 
-#: includes/class-weather-provider.php:650
+#: includes/class-weather-provider.php:918
 msgid "Thermometer - Internal"
 msgstr ""
 
-#: includes/class-weather-provider.php:651
+#: includes/class-weather-provider.php:919
 msgid "Celsius"
 msgstr ""
 
-#: includes/class-weather-provider.php:652
+#: includes/class-weather-provider.php:920
 msgid "Fahrenheit"
 msgstr ""
 
-#: includes/class-weather-provider.php:654
+#: includes/class-weather-provider.php:922
 msgid "Degrees"
 msgstr ""
 
-#: includes/class-weather-provider.php:655
+#: includes/class-weather-provider.php:923
 msgid "Raindrops"
 msgstr ""
 
-#: includes/class-weather-provider.php:656
+#: includes/class-weather-provider.php:924
 msgid "Raindrop"
 msgstr ""
 
-#: includes/class-weather-provider.php:657
+#: includes/class-weather-provider.php:925
 msgid "Horizon"
 msgstr ""
 
-#: includes/class-weather-provider.php:658
+#: includes/class-weather-provider.php:926
 msgid "N/A"
 msgstr ""
 
-#: includes/class-weather-provider.php:659
-#: includes/widgets/class-sloc-weather-widget.php:152
-#: includes/widgets/class-sloc-weather-widget.php:153
+#: includes/class-weather-provider.php:927
+#: includes/widgets/class-sloc-weather-widget.php:149
+#: includes/widgets/class-sloc-weather-widget.php:150
 msgid "Sunrise"
 msgstr ""
 
-#: includes/class-weather-provider.php:660
-#: includes/widgets/class-sloc-weather-widget.php:159
-#: includes/widgets/class-sloc-weather-widget.php:160
+#: includes/class-weather-provider.php:928
+#: includes/widgets/class-sloc-weather-widget.php:156
+#: includes/widgets/class-sloc-weather-widget.php:157
 msgid "Sunset"
 msgstr ""
 
-#: includes/class-weather-provider.php:661
+#: includes/class-weather-provider.php:929
 msgid "Umbrella"
 msgstr ""
 
-#: includes/class-weather-provider.php:662
+#: includes/class-weather-provider.php:930
 msgid "Meteor"
 msgstr ""
 
-#: includes/class-weather-provider.php:663
+#: includes/class-weather-provider.php:931
 msgid "Tornado"
 msgstr ""
 
-#: includes/class-weather-provider.php:664
+#: includes/class-weather-provider.php:932
 msgid "Tsunami"
 msgstr ""
 
-#: includes/class-weather-provider.php:665
+#: includes/class-weather-provider.php:933
 msgid "Volcano"
 msgstr ""
 
-#: includes/class-weather-provider.php:669
+#: includes/class-weather-provider.php:937
 msgid "First Quarter Moon"
 msgstr ""
 
-#: includes/class-weather-provider.php:671
+#: includes/class-weather-provider.php:939
 msgid "New Moon"
 msgstr ""
 
-#: includes/class-weather-provider.php:672
-#: includes/widgets/class-sloc-weather-widget.php:166
-#: includes/widgets/class-sloc-weather-widget.php:167
+#: includes/class-weather-provider.php:940
+#: includes/widgets/class-sloc-weather-widget.php:163
+#: includes/widgets/class-sloc-weather-widget.php:164
 msgid "Moonrise"
 msgstr ""
 
-#: includes/class-weather-provider.php:673
-#: includes/widgets/class-sloc-weather-widget.php:173
-#: includes/widgets/class-sloc-weather-widget.php:174
+#: includes/class-weather-provider.php:941
+#: includes/widgets/class-sloc-weather-widget.php:170
+#: includes/widgets/class-sloc-weather-widget.php:171
 msgid "Moonset"
 msgstr ""
 
-#: includes/class-weather-provider.php:674
+#: includes/class-weather-provider.php:942
 msgid "Third Quarter Moon"
 msgstr ""
 
-#: includes/class-weather-provider.php:675
+#: includes/class-weather-provider.php:943
 msgid "Waning Crescent 1"
 msgstr ""
 
-#: includes/class-weather-provider.php:676
+#: includes/class-weather-provider.php:944
 msgid "Waning Crescent 2"
 msgstr ""
 
-#: includes/class-weather-provider.php:677
+#: includes/class-weather-provider.php:945
 msgid "Waning Crescent 3"
 msgstr ""
 
-#: includes/class-weather-provider.php:678
+#: includes/class-weather-provider.php:946
 msgid "Waning Crescent 4"
 msgstr ""
 
-#: includes/class-weather-provider.php:679
+#: includes/class-weather-provider.php:947
 msgid "Waning Crescent 5"
 msgstr ""
 
-#: includes/class-weather-provider.php:680
+#: includes/class-weather-provider.php:948
 msgid "Waning Crescent 6"
 msgstr ""
 
-#: includes/class-weather-provider.php:681
+#: includes/class-weather-provider.php:949
 msgid "Waning Gibbous 1"
 msgstr ""
 
-#: includes/class-weather-provider.php:682
+#: includes/class-weather-provider.php:950
 msgid "Waning Gibbous 2"
 msgstr ""
 
-#: includes/class-weather-provider.php:683
+#: includes/class-weather-provider.php:951
 msgid "Waning Gibbous 3"
 msgstr ""
 
-#: includes/class-weather-provider.php:684
+#: includes/class-weather-provider.php:952
 msgid "Waning Gibbous 4"
 msgstr ""
 
-#: includes/class-weather-provider.php:685
+#: includes/class-weather-provider.php:953
 msgid "Waning Gibbous 5"
 msgstr ""
 
-#: includes/class-weather-provider.php:686
+#: includes/class-weather-provider.php:954
 msgid "Waning Gibbous 6"
 msgstr ""
 
-#: includes/class-weather-provider.php:687
+#: includes/class-weather-provider.php:955
 msgid "Waxing Crescent 1"
 msgstr ""
 
-#: includes/class-weather-provider.php:688
+#: includes/class-weather-provider.php:956
 msgid "Waxing Crescent 2"
 msgstr ""
 
-#: includes/class-weather-provider.php:689
+#: includes/class-weather-provider.php:957
 msgid "Waxing Crescent 3"
 msgstr ""
 
-#: includes/class-weather-provider.php:690
+#: includes/class-weather-provider.php:958
 msgid "Waxing Crescent 4"
 msgstr ""
 
-#: includes/class-weather-provider.php:691
+#: includes/class-weather-provider.php:959
 msgid "Waxing Crescent 5"
 msgstr ""
 
-#: includes/class-weather-provider.php:692
+#: includes/class-weather-provider.php:960
 msgid "Waxing Crescent 6"
 msgstr ""
 
-#: includes/class-weather-provider.php:693
+#: includes/class-weather-provider.php:961
 msgid "Waxing Gibbous 1"
 msgstr ""
 
-#: includes/class-weather-provider.php:694
+#: includes/class-weather-provider.php:962
 msgid "Waxing Gibbous 2"
 msgstr ""
 
-#: includes/class-weather-provider.php:695
+#: includes/class-weather-provider.php:963
 msgid "Waxing Gibbous 3"
 msgstr ""
 
-#: includes/class-weather-provider.php:696
+#: includes/class-weather-provider.php:964
 msgid "Waxing Gibbous 4"
 msgstr ""
 
-#: includes/class-weather-provider.php:697
+#: includes/class-weather-provider.php:965
 msgid "Waxing Gibbous 5"
 msgstr ""
 
-#: includes/class-weather-provider.php:698
+#: includes/class-weather-provider.php:966
 msgid "Waxing Gibbous 6"
+msgstr ""
+
+#. translators: %s: The "type" key.
+#: includes/compat-functions.php:131
+#, php-format
+msgid "The %s key must be a string without spaces."
 msgstr ""
 
 #: includes/elevation/class-elevation-provider-geonames.php:45
@@ -2240,27 +3234,25 @@ msgid "Unknown Geonames Error"
 msgstr ""
 
 #: includes/elevation/class-elevation-provider-google.php:36
-#: includes/geo/class-geo-provider-google.php:36
-#: includes/venue/class-venue-provider-google.php:36
-msgid "Google Maps Platform API key is required, however Google offers a $200 per month credit, which is the equivalent of 28,000 queries. Click Get Started. Make sure to enable the Geocoding API. Follow the tutorial"
+msgid "Google Maps Platform needs an API key and a billing account, and gives each API a monthly free allowance. Enable the Elevation API."
 msgstr ""
 
 #: includes/elevation/class-elevation-provider-google.php:55
 #: includes/geo/class-geo-provider-google.php:52
 #: includes/geo/class-geo-provider-google.php:163
-#: includes/venue/class-venue-provider-google.php:55
+#: includes/venue/class-venue-provider-google.php:64
 msgid "You have not set an API key for Google"
 msgstr ""
 
 #: includes/elevation/class-elevation-provider-google.php:68
 #: includes/geo/class-geo-provider-google.php:67
 #: includes/geo/class-geo-provider-google.php:176
-#: includes/venue/class-venue-provider-google.php:72
 msgid "Error Returning Results from Google"
 msgstr ""
 
 #: includes/elevation/class-elevation-provider-google.php:72
 #: includes/elevation/class-elevation-provider-openroute.php:68
+#: includes/elevation/class-elevation-provider-opentopodata.php:208
 msgid "No elevation found"
 msgstr ""
 
@@ -2275,19 +3267,49 @@ msgstr ""
 msgid "You have not set an API key for OpenRoute"
 msgstr ""
 
+#: includes/elevation/class-elevation-provider-opentopodata.php:62
+msgid "Open Topo Data"
+msgstr ""
+
+#: includes/elevation/class-elevation-provider-opentopodata.php:65
+msgid "Open Topo Data is an open source elevation API. Its public API needs no key, and allows 1,000 requests a day. You can also run your own server with your own elevation data."
+msgstr ""
+
+#: includes/elevation/class-elevation-provider-opentopodata.php:154
+msgid "Open Topo Data Server URL"
+msgstr ""
+
+#: includes/elevation/class-elevation-provider-opentopodata.php:161
+msgid "Optional. The address of your own Open Topo Data server. Leave empty to use the public API."
+msgstr ""
+
+#: includes/elevation/class-elevation-provider-opentopodata.php:166
+msgid "Open Topo Data Dataset"
+msgstr ""
+
+#. translators: %s: Default dataset name.
+#: includes/elevation/class-elevation-provider-opentopodata.php:175
+#, php-format
+msgid "Optional. Default %s, which covers the whole world. The public API also has srtm30m, aster30m, ned10m (USA), eudem25m (Europe) and others. Separate several with commas to try each in turn until one has data for the location."
+msgstr ""
+
+#: includes/elevation/class-elevation-provider-opentopodata.php:214
+msgid "The elevation dataset has no data for this location"
+msgstr ""
+
 #: includes/functions.php:80
-#: includes/trait-weather-info.php:196
+#: includes/trait-weather-info.php:333
 msgid "m"
 msgstr ""
 
 #: includes/geo/class-geo-provider-geoapify.php:37
-#: includes/map/class-map-provider-geoapify.php:38
+#: includes/map/class-map-provider-geoapify.php:62
 msgid "GeoApify offers Maps and Geocoding APIs with a free tier of 3000 credits for requests per day. API Key required."
 msgstr ""
 
 #: includes/geo/class-geo-provider-geoapify.php:52
 #: includes/geo/class-geo-provider-geoapify.php:166
-#: includes/map/class-map-provider-geoapify.php:102
+#: includes/map/class-map-provider-geoapify.php:147
 msgid "You have not set an API key for GeoApify"
 msgstr ""
 
@@ -2298,22 +3320,28 @@ msgstr ""
 msgid "No results"
 msgstr ""
 
-#: includes/geo/class-geo-provider-geonames.php:54
-#: includes/geo/class-geo-provider-geonames.php:154
+#: includes/geo/class-geo-provider-geonames.php:55
+#: includes/geo/class-geo-provider-geonames.php:155
 msgid "No GeoNames Username Set"
 msgstr ""
 
-#: includes/geo/class-geo-provider-geonames.php:72
-#: includes/geo/class-geo-provider-geonames.php:174
-#: includes/geo/class-geo-provider-locationiq.php:73
+#: includes/geo/class-geo-provider-geonames.php:73
+#: includes/geo/class-geo-provider-geonames.php:175
+#: includes/geo/class-geo-provider-locationiq.php:75
 #: includes/geo/class-geo-provider-mapquest.php:89
-#: includes/geo/class-geo-provider-nominatim.php:66
-#: includes/geo/class-geo-provider-pelias.php:128
+#: includes/geo/class-geo-provider-nominatim.php:68
+#: includes/geo/class-geo-provider-pelias.php:109
+#: includes/geo/class-geo-provider-photon.php:162
 msgid "No Results Found"
 msgstr ""
 
+#: includes/geo/class-geo-provider-google.php:36
+msgid "Google Maps Platform needs an API key and a billing account, and gives each API a monthly free allowance. Enable the Geocoding API."
+msgstr ""
+
 #: includes/geo/class-geo-provider-google.php:179
-#: includes/geo/class-geo-provider-nominatim.php:280
+#: includes/geo/class-geo-provider-nominatim.php:281
+#: includes/geo/class-geo-provider-photon.php:182
 msgid "No results found"
 msgstr ""
 
@@ -2323,17 +3351,18 @@ msgstr ""
 
 #: includes/geo/class-geo-provider-here.php:53
 #: includes/geo/class-geo-provider-here.php:161
+#: includes/venue/class-venue-provider-here.php:90
 msgid "You have not set an API key for HERE"
 msgstr ""
 
 #: includes/geo/class-geo-provider-locationiq.php:37
-#: includes/map/class-map-provider-locationiq.php:31
+#: includes/map/class-map-provider-locationiq.php:63
 #: includes/venue/class-venue-provider-locationiq.php:36
 msgid "LocationIQ offers Geocoding and Static maps, with a free tier of 5000 requests/day. Sign up for an API key"
 msgstr ""
 
-#: includes/geo/class-geo-provider-locationiq.php:52
-#: includes/geo/class-geo-provider-locationiq.php:89
+#: includes/geo/class-geo-provider-locationiq.php:54
+#: includes/geo/class-geo-provider-locationiq.php:92
 msgid "You have not set an API key for LocationIQ"
 msgstr ""
 
@@ -2342,7 +3371,7 @@ msgid "Mapquest"
 msgstr ""
 
 #: includes/geo/class-geo-provider-mapquest.php:37
-#: includes/map/class-map-provider-mapquest.php:31
+#: includes/map/class-map-provider-mapquest.php:55
 msgid "Yes, MapQuest still exists. It offers Geocoding and a Static Map API. Offers a free tier with 15,000 transactions per month. Sign up for an API key"
 msgstr ""
 
@@ -2355,19 +3384,20 @@ msgstr ""
 msgid "MapQuest returned an error."
 msgstr ""
 
-#: includes/geo/class-geo-provider-nominatim.php:33
-#: includes/venue/class-venue-provider-nominatim.php:33
+#: includes/geo/class-geo-provider-nominatim.php:34
+#: includes/venue/class-venue-provider-nominatim.php:34
 msgid "OpenStreetMap Nominatim"
 msgstr ""
 
-#: includes/geo/class-geo-provider-nominatim.php:36
-#: includes/venue/class-venue-provider-nominatim.php:36
+#: includes/geo/class-geo-provider-nominatim.php:37
+#: includes/venue/class-venue-provider-nominatim.php:37
 msgid "Nominatim uses OpenStreetMap Data for geocoding/reverse geocoding. OSM offers a free service for infrequent use."
 msgstr ""
 
 #: includes/geo/class-geo-provider-pelias.php:33
-#: includes/geo/class-geo-provider-pelias.php:80
-#: includes/geo/class-geo-provider-pelias.php:81
+#: includes/geo/class-geo-provider-pelias.php:61
+#: includes/geo/class-geo-provider-pelias.php:62
+#: includes/venue/class-venue-provider-pelias.php:62
 msgid "Pelias"
 msgstr ""
 
@@ -2375,24 +3405,41 @@ msgstr ""
 msgid "Pelias is an open source geocoder. To use this, a Pelias server is required"
 msgstr ""
 
-#: includes/geo/class-geo-provider-pelias.php:50
+#: includes/geo/class-geo-provider-pelias.php:51
 msgid "Pelias Service API Key"
 msgstr ""
 
-#: includes/geo/class-geo-provider-pelias.php:51
+#: includes/geo/class-geo-provider-pelias.php:52
 msgid "Pelias Service URL"
 msgstr ""
 
-#: includes/geo/class-geo-provider-pelias.php:91
+#: includes/geo/class-geo-provider-pelias.php:72
 msgid "You have not set an API key for this Pelias instance"
 msgstr ""
 
-#: includes/geo/class-geo-provider-pelias.php:94
+#: includes/geo/class-geo-provider-pelias.php:75
+#: includes/venue/class-venue-provider-pelias.php:114
 msgid "You did not provide a Pelias URL"
 msgstr ""
 
-#: includes/geo/class-geo-provider-pelias.php:285
+#: includes/geo/class-geo-provider-pelias.php:266
 msgid "You have not set an API key for this Pelias Instance"
+msgstr ""
+
+#: includes/geo/class-geo-provider-photon.php:56
+msgid "Photon"
+msgstr ""
+
+#: includes/geo/class-geo-provider-photon.php:59
+msgid "Photon is an open source geocoder for OpenStreetMap data. komoot's public server needs no key and is for reasonable use; heavy use is throttled or banned. You can also run your own server, which is lighter than running Nominatim."
+msgstr ""
+
+#: includes/geo/class-geo-provider-photon.php:111
+msgid "Photon Server URL"
+msgstr ""
+
+#: includes/geo/class-geo-provider-photon.php:118
+msgid "Optional. The address of your own Photon server. Leave empty to use komoot's public server."
 msgstr ""
 
 #: includes/location/class-location-provider-address.php:26
@@ -2415,7 +3462,7 @@ msgstr ""
 msgid "Non String Passed Through"
 msgstr ""
 
-#: includes/location/class-location-provider-address.php:53
+#: includes/location/class-location-provider-address.php:52
 msgid "No Item Found"
 msgstr ""
 
@@ -2457,9 +3504,16 @@ msgstr ""
 msgid "You cannot look up another user's location in Compass"
 msgstr ""
 
-#: includes/location/class-location-provider-compass.php:115
-#: includes/location/class-location-provider-compass.php:118
-msgid "Invalid time"
+#: includes/location/class-location-provider-dawarich.php:42
+msgid "Dawarich"
+msgstr ""
+
+#: includes/location/class-location-provider-dawarich.php:45
+msgid "If you run Dawarich, the site can read your current or past location from it. Each user enters their Dawarich URL and API key on their profile."
+msgstr ""
+
+#: includes/location/class-location-provider-dawarich.php:57
+msgid "Your API key, from the Account page in Dawarich."
 msgstr ""
 
 #: includes/location/class-location-provider-dummy.php:25
@@ -2470,769 +3524,1053 @@ msgstr ""
 msgid "This will always set the location of posts to the location set in the profile of the author"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:61
+#: includes/location/class-location-provider-geopulse.php:36
+msgid "GeoPulse"
+msgstr ""
+
+#: includes/location/class-location-provider-geopulse.php:39
+msgid "If you run GeoPulse 2.1.0 or later, the site can read your current or past location from it. Each user enters their GeoPulse URL and an API token on their profile."
+msgstr ""
+
+#: includes/location/class-location-provider-geopulse.php:51
+msgid "An API token from GeoPulse, created with only the read scope."
+msgstr ""
+
+#. translators: 1: Version of the GeoPulse server 2: Oldest version that works
+#: includes/location/class-location-provider-geopulse.php:107
+#, php-format
+msgid "GeoPulse %1$s found. Simple Location needs GeoPulse %2$s or later."
+msgstr ""
+
+#. translators: %s: URL requested
+#: includes/location/class-location-provider-geopulse.php:115
+#, php-format
+msgid "GeoPulse has nothing at %s."
+msgstr ""
+
+#: includes/location/class-location-provider-geopulse.php:117
+msgid "On your profile, enter the address you open GeoPulse at, without /api."
+msgstr ""
+
+#: includes/map/class-map-provider-geoapify.php:103
 msgid "OSM Carto"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:62
+#: includes/map/class-map-provider-geoapify.php:104
+#: includes/map/class-map-provider-stadia.php:119
 msgid "OSM Bright"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:63
+#: includes/map/class-map-provider-geoapify.php:105
 msgid "OSM Bright Grey"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:64
+#: includes/map/class-map-provider-geoapify.php:106
 msgid "OSM Bright Smooth"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:65
+#: includes/map/class-map-provider-geoapify.php:107
 msgid "Klokantech Basic"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:66
+#: includes/map/class-map-provider-geoapify.php:108
 msgid "OSM Liberty"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:67
+#: includes/map/class-map-provider-geoapify.php:109
 msgid "Maptiler 3D"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:68
+#: includes/map/class-map-provider-geoapify.php:110
 msgid "Toner"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:69
+#: includes/map/class-map-provider-geoapify.php:111
 msgid "Toner Grey"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:70
+#: includes/map/class-map-provider-geoapify.php:112
 msgid "Positron"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:71
+#: includes/map/class-map-provider-geoapify.php:113
 msgid "Positron Blue"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:72
+#: includes/map/class-map-provider-geoapify.php:114
 msgid "Positron Red"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:73
+#: includes/map/class-map-provider-geoapify.php:115
 msgid "Dark Matter"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:74
+#: includes/map/class-map-provider-geoapify.php:116
 msgid "Dark Matter Brown"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:75
+#: includes/map/class-map-provider-geoapify.php:117
 msgid "Dark Matter Dark Grey"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:76
+#: includes/map/class-map-provider-geoapify.php:118
 msgid "Dark Matter Dark Purple"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:77
+#: includes/map/class-map-provider-geoapify.php:119
 msgid "Dark Matter Purple Roads"
 msgstr ""
 
-#: includes/map/class-map-provider-geoapify.php:78
+#: includes/map/class-map-provider-geoapify.php:120
 msgid "Dark Matter Yellow Roads"
 msgstr ""
 
-#: includes/map/class-map-provider-google.php:48
-msgid "Google Maps Platform API key is required, however Google offers a $200 per month credit, which is the equivalent of 28,000 queries. Click Get Started. Make sure to enable the Static Map API. Follow the tutorial"
+#: includes/map/class-map-provider-google.php:80
+msgid "Google Maps Platform needs an API key and a billing account, and gives each API a monthly free allowance. Enable the Maps Static API."
 msgstr ""
 
-#: includes/map/class-map-provider-google.php:81
+#: includes/map/class-map-provider-google.php:132
 msgid "Roadmap"
 msgstr ""
 
-#: includes/map/class-map-provider-google.php:82
-#: includes/map/class-map-provider-mapquest.php:60
-msgid "Satellite"
-msgstr ""
-
-#: includes/map/class-map-provider-google.php:83
-msgid "Terrain"
-msgstr ""
-
-#: includes/map/class-map-provider-google.php:84
+#: includes/map/class-map-provider-google.php:135
 msgid "Satellite and Roadmap Hybrid"
 msgstr ""
 
-#: includes/map/class-map-provider-google.php:141
+#: includes/map/class-map-provider-google.php:136
+msgid "Light (styled roadmap)"
+msgstr ""
+
+#: includes/map/class-map-provider-google.php:137
+msgid "Dark (styled roadmap)"
+msgstr ""
+
+#: includes/map/class-map-provider-google.php:310
 msgid "The Google URL signing secret is not valid. Copy it again from the Google Cloud console."
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:36
+#: includes/map/class-map-provider-here.php:76
 msgid "HERE Maps"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:39
+#: includes/map/class-map-provider-here.php:79
 msgid "HERE offers a free limited plan for up to 30,000 map transactions per month"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:68
+#: includes/map/class-map-provider-here.php:125
 msgid "Explore (Day)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:69
+#: includes/map/class-map-provider-here.php:126
 msgid "Explore (Night)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:70
+#: includes/map/class-map-provider-here.php:127
 msgid "Explore Satellite (Day)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:71
+#: includes/map/class-map-provider-here.php:128
 msgid "Lite (Day)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:72
+#: includes/map/class-map-provider-here.php:129
 msgid "Lite (Night)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:73
+#: includes/map/class-map-provider-here.php:130
 msgid "Lite Satellite (Day)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:74
+#: includes/map/class-map-provider-here.php:131
 msgid "Logistics (Day)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:75
+#: includes/map/class-map-provider-here.php:132
 msgid "Logistics (Night)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:76
+#: includes/map/class-map-provider-here.php:133
 msgid "Logistics Satellite (Day)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:77
+#: includes/map/class-map-provider-here.php:134
 msgid "Satellite (Day)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:78
+#: includes/map/class-map-provider-here.php:135
 msgid "Topographic (Day)"
 msgstr ""
 
-#: includes/map/class-map-provider-here.php:79
+#: includes/map/class-map-provider-here.php:136
 msgid "Topographic (Night)"
 msgstr ""
 
-#: includes/map/class-map-provider-locationiq.php:62
-#: includes/venue/class-venue-provider-locationiq.php:53
+#. translators: Year.
+#: includes/map/class-map-provider-here.php:371
+#, php-format
+msgid "© %s HERE"
+msgstr ""
+
+#: includes/map/class-map-provider-locationiq.php:96
+#: includes/venue/class-venue-provider-locationiq.php:65
 msgid "You have not set an API key for Location IQ"
 msgstr ""
 
-#: includes/map/class-map-provider-mapbox.php:29
+#: includes/map/class-map-provider-mapbox.php:83
 msgid "Mapbox offers 50,000 Static Map Requests per month with a free API key."
 msgstr ""
 
 #. translators: %d: HTTP status code.
-#: includes/map/class-map-provider-mapbox.php:105
+#: includes/map/class-map-provider-mapbox.php:199
 #, php-format
 msgid "Mapbox styles could not be loaded (HTTP status %d)."
 msgstr ""
 
-#: includes/map/class-map-provider-mapquest.php:28
+#: includes/map/class-map-provider-mapbox.php:264
+msgid "© Mapbox"
+msgstr ""
+
+#: includes/map/class-map-provider-mapbox.php:265
+#: includes/map/class-map-provider-stadia.php:289
+msgid "© OpenStreetMap"
+msgstr ""
+
+#: includes/map/class-map-provider-mapbox.php:268
+msgid "© Maxar"
+msgstr ""
+
+#: includes/map/class-map-provider-mapbox.php:270
+msgid "Improve this map"
+msgstr ""
+
+#: includes/map/class-map-provider-mapbox.php:343
+msgid "The Mapbox API key is a secret token, which map images would show to every visitor. Enter a public token as the Mapbox Map API Key."
+msgstr ""
+
+#: includes/map/class-map-provider-mapbox.php:346
+msgid "You have not set an API key for Mapbox"
+msgstr ""
+
+#: includes/map/class-map-provider-mapquest.php:52
 msgid "Mapquest Maps"
 msgstr ""
 
-#: includes/map/class-map-provider-mapquest.php:58
+#: includes/map/class-map-provider-mapquest.php:100
 msgid "Basic Map"
 msgstr ""
 
-#: includes/map/class-map-provider-mapquest.php:59
+#: includes/map/class-map-provider-mapquest.php:101
 msgid "Hybrid"
 msgstr ""
 
-#: includes/map/class-map-provider-mapquest.php:61
-msgid "Light"
+#: includes/map/class-map-provider-stadia.php:73
+msgid "Stadia Maps' static maps need a paid plan. With an API key, maps are stored on this site from Stadia's cacheable endpoint, which costs more credits per map but may be kept while you have a paid subscription. Otherwise maps load from Stadia, without a key if you add this site's domain in Stadia's client dashboard."
 msgstr ""
 
-#: includes/map/class-map-provider-mapquest.php:62
-msgid "Dark"
+#: includes/map/class-map-provider-stadia.php:114
+msgid "Alidade Smooth"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:36
-msgid "Custom Static Map Provider"
+#: includes/map/class-map-provider-stadia.php:115
+msgid "Alidade Smooth Dark"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:39
-msgid "A hosted instance of a Static Map generator that uses tiles"
+#: includes/map/class-map-provider-stadia.php:116
+msgid "Alidade Bright"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:81
-msgid "Custom Static Map URL"
+#: includes/map/class-map-provider-stadia.php:117
+msgid "Alidade Satellite"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:101
-msgid "Custom Static Map"
+#: includes/map/class-map-provider-stadia.php:118
+msgid "Stadia Outdoors"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:105
-msgid "Static Map Style"
-msgstr ""
-
-#: includes/map/class-map-provider-staticmap.php:126
-msgid "OpenStreetMap"
-msgstr ""
-
-#: includes/map/class-map-provider-staticmap.php:127
-msgid "OpenTopoMap"
-msgstr ""
-
-#: includes/map/class-map-provider-staticmap.php:128
+#: includes/map/class-map-provider-stadia.php:120
 msgid "Stamen Toner"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:129
-msgid "Stamen Toner without Labels"
+#: includes/map/class-map-provider-stadia.php:121
+msgid "Stamen Toner Lite"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:130
-msgid "Stamen Toner Light with Labels"
+#: includes/map/class-map-provider-stadia.php:122
+msgid "Stamen Terrain"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:131
-msgid "Stamen Terrain with Labels"
-msgstr ""
-
-#: includes/map/class-map-provider-staticmap.php:132
-msgid "Stamen Terrain without Labels"
-msgstr ""
-
-#: includes/map/class-map-provider-staticmap.php:133
+#: includes/map/class-map-provider-stadia.php:123
 msgid "Stamen Watercolor"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:134
-msgid "Carto Light"
+#: includes/map/class-map-provider-stadia.php:280
+msgid "© Stadia Maps"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:135
-msgid "Carto Dark"
+#: includes/map/class-map-provider-stadia.php:283
+msgid "© Stamen Design"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:136
-msgid "Carto Voyager"
+#: includes/map/class-map-provider-stadia.php:287
+msgid "© OpenMapTiles"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:137
-msgid "Default Esri street basemap"
+#: includes/map/class-map-provider-stadia.php:291
+msgid "© CNES, Distribution Airbus DS, © Airbus DS, © PlanetObserver (Contains Copernicus Data)"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:138
-msgid "Esris satellite basemap"
+#: includes/map/class-map-provider-staticmap.php:272
+msgid "Custom Static Map Provider"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:139
-msgid "Satellite basemap with labels"
+#: includes/map/class-map-provider-staticmap.php:275
+msgid "A hosted instance of a Static Map generator that uses tiles"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:140
-msgid "Esri topographic map"
+#: includes/map/class-map-provider-staticmap.php:355
+msgid "Custom Static Map URL"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:141
-msgid "Esri gray canvas with labels"
+#: includes/map/class-map-provider-staticmap.php:356
+#: includes/map/class-map-provider-staticmap.php:357
+#: includes/map/class-map-provider-staticmap.php:358
+#: includes/map/class-map-provider-staticmap.php:410
+msgid "Custom Static Map"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:142
-msgid "Esri gray canvas without labels"
+#: includes/map/class-map-provider-staticmap.php:356
+#: includes/weather/class-weather-provider-aeris.php:75
+msgid "Client ID"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:143
-msgid "Esri ocean basemap"
+#: includes/map/class-map-provider-staticmap.php:357
+msgid "Signing Secret"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:144
-msgid "National Geographic basemap"
+#: includes/map/class-map-provider-staticmap.php:358
+msgid "Client Key"
 msgstr ""
 
-#: includes/map/class-map-provider-staticmap.php:176
+#: includes/map/class-map-provider-staticmap.php:414
+msgid "Custom Static Map Client ID"
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:416
+msgid "Optional. The client name given to bin/clients.php on the map server. With the signing secret, map URLs are signed, so they carry no secret and can be published."
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:419
+msgid "Custom Static Map Signing Secret"
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:421
+msgid "Optional. The signing secret bin/clients.php showed for the client. It never leaves this site."
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:424
+msgid "Custom Static Map Client Key"
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:426
+msgid "Optional, used only without a client ID and signing secret. The plain key appears in every map image URL, so anyone who views a page can copy it. Use a signing secret instead where you can."
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:446
+msgid "Static Map Style"
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:458
+msgid "Static Map Image Format"
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:460
+msgid "Default of the map server"
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:462
+msgid "PNG with 256 colors (smaller)"
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:464
+msgid "WebP (smallest, if the server supports it)"
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:485
+msgid "Static Map Overlays"
+msgstr ""
+
+#. translators: %s: Error message.
+#: includes/map/class-map-provider-staticmap.php:521
+#, php-format
+msgid "The custom map server refused the client ID, signing secret or client key, so the styles listed are the ones every server offers. Check them on the API settings page. %s"
+msgstr ""
+
+#. translators: %s: Error message.
+#: includes/map/class-map-provider-staticmap.php:524
+#, php-format
+msgid "The custom map server did not answer its query API, so the styles listed are the ones every server offers. This plugin needs version 1.0.0 or later of the server. %s"
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:634
+msgid "The map server offers no overlays."
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:648
+msgid "Transparent layers drawn on top of the map, with their credit added to the map's."
+msgstr ""
+
+#. translators: %d: Number of overlays.
+#: includes/map/class-map-provider-staticmap.php:651
+#, php-format
+msgid "The map server draws at most %d overlay."
+msgid_plural "The map server draws at most %d overlays."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/map/class-map-provider-staticmap.php:728
+#: includes/map/class-map-provider-staticmap.php:1033
 msgid "You have not set a URL for your custom map endpoint"
 msgstr ""
 
-#: includes/map/class-map-provider-tomtom.php:26
+#: includes/map/class-map-provider-staticmap.php:739
+msgid "The answer is not from a Static Maps API query API."
+msgstr ""
+
+#: includes/map/class-map-provider-staticmap.php:813
+msgid "Default map of the map server"
+msgstr ""
+
+#. translators: 1: Map provider name 2: Map style name
+#: includes/map/class-map-provider-staticmap.php:820
+#, php-format
+msgid "%1$s: %2$s"
+msgstr ""
+
+#: includes/map/class-map-provider-tileserver.php:122
+#: includes/map/class-map-provider-tileserver.php:173
+#: includes/map/class-map-provider-tileserver.php:182
+#: includes/map/class-map-provider-tileserver.php:206
+msgid "TileServer GL"
+msgstr ""
+
+#: includes/map/class-map-provider-tileserver.php:125
+msgid "Your own TileServer GL server (version 4.6 or later, not the light build) draws the maps from its styles, with no vendor terms or keys, so they can be stored on this site. Credit the map data, usually OpenStreetMap, as your server's styles require."
+msgstr ""
+
+#: includes/map/class-map-provider-tileserver.php:150
+msgid "TileServer GL URL"
+msgstr ""
+
+#: includes/map/class-map-provider-tileserver.php:185
+msgid "TileServer GL Style"
+msgstr ""
+
+#: includes/map/class-map-provider-tileserver.php:196
+msgid "TileServer GL Marker Icon"
+msgstr ""
+
+#: includes/map/class-map-provider-tileserver.php:203
+msgid "Optional. An icon in the server's icon folder, such as marker.png, drawn with its foot on each location. Without one, each location is a dot in the marker color."
+msgstr ""
+
+#: includes/map/class-map-provider-tileserver.php:252
+msgid "You have not set the address of your TileServer GL server"
+msgstr ""
+
+#: includes/map/class-map-provider-tileserver.php:261
+msgid "The server did not answer as TileServer GL does."
+msgstr ""
+
+#: includes/map/class-map-provider-tileserver.php:506
+msgid "© OpenStreetMap contributors"
+msgstr ""
+
+#: includes/map/class-map-provider-tomtom.php:42
 msgid "TomTom Maps"
 msgstr ""
 
-#: includes/map/class-map-provider-tomtom.php:29
+#: includes/map/class-map-provider-tomtom.php:45
 msgid "Offers a freemium option or pay as you go. Sign up for an API Key"
 msgstr ""
 
-#: includes/map/class-map-provider-tomtom.php:51
+#: includes/map/class-map-provider-tomtom.php:83
 msgid "Default"
 msgstr ""
 
-#: includes/map/class-map-provider-tomtom.php:52
+#: includes/map/class-map-provider-tomtom.php:84
 msgid "Night"
 msgstr ""
 
-#: includes/trait-weather-info.php:124
-#: includes/trait-weather-info.php:130
-#: includes/trait-weather-info.php:136
-#: includes/trait-weather-info.php:142
+#: includes/trait-weather-info.php:243
+#: includes/trait-weather-info.php:249
+#: includes/trait-weather-info.php:255
+#: includes/trait-weather-info.php:261
 msgid "&deg;C"
 msgstr ""
 
-#: includes/trait-weather-info.php:125
-#: includes/trait-weather-info.php:131
-#: includes/trait-weather-info.php:137
-#: includes/trait-weather-info.php:143
+#: includes/trait-weather-info.php:244
+#: includes/trait-weather-info.php:250
+#: includes/trait-weather-info.php:256
+#: includes/trait-weather-info.php:262
 msgid "degrees celsius"
 msgstr ""
 
-#: includes/trait-weather-info.php:148
-#: includes/trait-weather-info.php:160
+#: includes/trait-weather-info.php:267
+#: includes/trait-weather-info.php:279
 msgid "%"
 msgstr ""
 
-#: includes/trait-weather-info.php:149
-#: includes/trait-weather-info.php:161
+#: includes/trait-weather-info.php:268
+#: includes/trait-weather-info.php:280
 msgid "percent"
 msgstr ""
 
-#: includes/trait-weather-info.php:154
+#: includes/trait-weather-info.php:273
 msgid "hPa"
 msgstr ""
 
-#: includes/trait-weather-info.php:155
+#: includes/trait-weather-info.php:274
 msgid "hectopascals"
 msgstr ""
 
-#: includes/trait-weather-info.php:156
-#: includes/trait-weather-info.php:304
+#: includes/trait-weather-info.php:275
+#: includes/trait-weather-info.php:454
 msgid "Pressure"
 msgstr ""
 
-#: includes/trait-weather-info.php:166
-#: includes/trait-weather-info.php:172
+#: includes/trait-weather-info.php:285
+#: includes/trait-weather-info.php:291
 msgid "mps"
 msgstr ""
 
-#: includes/trait-weather-info.php:167
-#: includes/trait-weather-info.php:173
+#: includes/trait-weather-info.php:286
+#: includes/trait-weather-info.php:292
 msgid "meters per second"
 msgstr ""
 
-#: includes/trait-weather-info.php:178
-#: includes/trait-weather-info.php:320
+#: includes/trait-weather-info.php:297
+#: includes/trait-weather-info.php:470
 msgid "&deg;"
 msgstr ""
 
-#: includes/trait-weather-info.php:179
+#: includes/trait-weather-info.php:298
 msgid "degrees"
 msgstr ""
 
-#: includes/trait-weather-info.php:180
-#: includes/trait-weather-info.php:322
+#: includes/trait-weather-info.php:299
+#: includes/trait-weather-info.php:472
 msgid "Wind Direction"
 msgstr ""
 
-#: includes/trait-weather-info.php:184
-#: includes/trait-weather-info.php:190
-msgid "mm"
-msgstr ""
-
-#: includes/trait-weather-info.php:185
-#: includes/trait-weather-info.php:191
+#: includes/trait-weather-info.php:304
+#: includes/trait-weather-info.php:322
 msgid "millimeters in the last hour"
-msgstr ""
-
-#: includes/trait-weather-info.php:197
-msgid "meters"
-msgstr ""
-
-#: includes/trait-weather-info.php:202
-msgid "W/m^2"
-msgstr ""
-
-#: includes/trait-weather-info.php:203
-msgid "watts per square meter"
-msgstr ""
-
-#: includes/trait-weather-info.php:204
-msgid "Solar Radiation"
-msgstr ""
-
-#: includes/trait-weather-info.php:208
-msgid "lx"
-msgstr ""
-
-#: includes/trait-weather-info.php:209
-msgid "lux"
-msgstr ""
-
-#: includes/trait-weather-info.php:215
-#: includes/trait-weather-info.php:221
-msgid "index"
-msgstr ""
-
-#: includes/trait-weather-info.php:226
-#: includes/trait-weather-info.php:233
-#: includes/trait-weather-info.php:239
-msgid "µg/m3"
-msgstr ""
-
-#: includes/trait-weather-info.php:227
-#: includes/trait-weather-info.php:234
-#: includes/trait-weather-info.php:240
-msgid "micrograms per cubic meter of air"
-msgstr ""
-
-#: includes/trait-weather-info.php:228
-msgid "PM1.0"
-msgstr ""
-
-#: includes/trait-weather-info.php:235
-msgid "PM2.5"
-msgstr ""
-
-#: includes/trait-weather-info.php:241
-msgid "PM10"
-msgstr ""
-
-#: includes/trait-weather-info.php:245
-#: includes/trait-weather-info.php:250
-#: includes/trait-weather-info.php:255
-#: includes/trait-weather-info.php:260
-#: includes/trait-weather-info.php:265
-#: includes/trait-weather-info.php:270
-msgid "ppm"
-msgstr ""
-
-#: includes/trait-weather-info.php:246
-#: includes/trait-weather-info.php:251
-#: includes/trait-weather-info.php:256
-#: includes/trait-weather-info.php:261
-#: includes/trait-weather-info.php:266
-#: includes/trait-weather-info.php:271
-msgid "parts per million"
-msgstr ""
-
-#: includes/trait-weather-info.php:278
-#: includes/trait-weather-info.php:284
-#: includes/trait-weather-info.php:290
-#: includes/trait-weather-info.php:296
-msgid "&deg;F"
-msgstr ""
-
-#: includes/trait-weather-info.php:279
-#: includes/trait-weather-info.php:285
-#: includes/trait-weather-info.php:291
-#: includes/trait-weather-info.php:297
-msgid "degrees fahrenheit"
-msgstr ""
-
-#: includes/trait-weather-info.php:302
-msgid "inHg"
-msgstr ""
-
-#: includes/trait-weather-info.php:303
-msgid "inches of mercury"
-msgstr ""
-
-#: includes/trait-weather-info.php:308
-#: includes/trait-weather-info.php:314
-msgid "MPH"
 msgstr ""
 
 #: includes/trait-weather-info.php:309
 #: includes/trait-weather-info.php:315
-msgid "miles per hour"
+msgid "mm/h"
 msgstr ""
 
-#: includes/trait-weather-info.php:321
-msgid "degree"
-msgstr ""
-
-#: includes/trait-weather-info.php:327
-#: includes/trait-weather-info.php:333
-msgid "in"
+#: includes/trait-weather-info.php:310
+#: includes/trait-weather-info.php:316
+msgid "millimeters per hour"
 msgstr ""
 
 #: includes/trait-weather-info.php:328
+msgid "millimeters on the ground"
+msgstr ""
+
 #: includes/trait-weather-info.php:334
-msgid "inches in the last hour"
+msgid "meters"
 msgstr ""
 
 #: includes/trait-weather-info.php:339
-msgid "mi"
+msgid "W/m^2"
 msgstr ""
 
 #: includes/trait-weather-info.php:340
-msgid "miles"
+msgid "watts per square meter"
 msgstr ""
 
+#: includes/trait-weather-info.php:341
+msgid "Solar Radiation"
+msgstr ""
+
+#: includes/trait-weather-info.php:345
+msgid "lx"
+msgstr ""
+
+#: includes/trait-weather-info.php:346
+msgid "lux"
+msgstr ""
+
+#: includes/trait-weather-info.php:352
+#: includes/trait-weather-info.php:358
+#: includes/trait-weather-info.php:414
+#: includes/trait-weather-info.php:420
+msgid "index"
+msgstr ""
+
+#: includes/trait-weather-info.php:363
+#: includes/trait-weather-info.php:370
+#: includes/trait-weather-info.php:376
+msgid "µg/m3"
+msgstr ""
+
+#: includes/trait-weather-info.php:364
 #: includes/trait-weather-info.php:371
-msgid "thunderstorm with light rain"
+#: includes/trait-weather-info.php:377
+msgid "micrograms per cubic meter of air"
+msgstr ""
+
+#: includes/trait-weather-info.php:365
+msgid "PM1.0"
 msgstr ""
 
 #: includes/trait-weather-info.php:372
-msgid "thunderstorm with rain"
-msgstr ""
-
-#: includes/trait-weather-info.php:373
-msgid "thunderstorm with heavy rain"
-msgstr ""
-
-#: includes/trait-weather-info.php:374
-msgid "light thunderstorm"
-msgstr ""
-
-#: includes/trait-weather-info.php:375
-msgid "thunderstorm"
-msgstr ""
-
-#: includes/trait-weather-info.php:376
-msgid "heavy thunderstorm"
-msgstr ""
-
-#: includes/trait-weather-info.php:377
-msgid "ragged thunderstorm"
+msgid "PM2.5"
 msgstr ""
 
 #: includes/trait-weather-info.php:378
-msgid "thunderstorm with light drizzle"
+msgid "PM10"
 msgstr ""
 
-#: includes/trait-weather-info.php:379
-msgid "thunderstorm with drizzle"
-msgstr ""
-
-#: includes/trait-weather-info.php:380
-msgid "thunderstorm with heavy drizzle"
-msgstr ""
-
-#: includes/trait-weather-info.php:381
-msgid "thunderstorm with hail"
+#: includes/trait-weather-info.php:382
+#: includes/trait-weather-info.php:387
+#: includes/trait-weather-info.php:392
+#: includes/trait-weather-info.php:397
+#: includes/trait-weather-info.php:402
+#: includes/trait-weather-info.php:407
+msgid "ppm"
 msgstr ""
 
 #: includes/trait-weather-info.php:383
+#: includes/trait-weather-info.php:388
+#: includes/trait-weather-info.php:393
+#: includes/trait-weather-info.php:398
+#: includes/trait-weather-info.php:403
+#: includes/trait-weather-info.php:408
+msgid "parts per million"
+msgstr ""
+
+#: includes/trait-weather-info.php:428
+#: includes/trait-weather-info.php:434
+#: includes/trait-weather-info.php:440
+#: includes/trait-weather-info.php:446
+msgid "&deg;F"
+msgstr ""
+
+#: includes/trait-weather-info.php:429
+#: includes/trait-weather-info.php:435
+#: includes/trait-weather-info.php:441
+#: includes/trait-weather-info.php:447
+msgid "degrees fahrenheit"
+msgstr ""
+
+#: includes/trait-weather-info.php:452
+msgid "inHg"
+msgstr ""
+
+#: includes/trait-weather-info.php:453
+msgid "inches of mercury"
+msgstr ""
+
+#: includes/trait-weather-info.php:458
+#: includes/trait-weather-info.php:464
+msgid "MPH"
+msgstr ""
+
+#: includes/trait-weather-info.php:459
+#: includes/trait-weather-info.php:465
+msgid "miles per hour"
+msgstr ""
+
+#: includes/trait-weather-info.php:471
+msgid "degree"
+msgstr ""
+
+#: includes/trait-weather-info.php:478
+#: includes/trait-weather-info.php:496
+msgid "inches in the last hour"
+msgstr ""
+
+#: includes/trait-weather-info.php:483
+#: includes/trait-weather-info.php:489
+msgid "in/h"
+msgstr ""
+
+#: includes/trait-weather-info.php:484
+#: includes/trait-weather-info.php:490
+msgid "inches per hour"
+msgstr ""
+
+#: includes/trait-weather-info.php:502
+msgid "inches on the ground"
+msgstr ""
+
+#: includes/trait-weather-info.php:507
+msgid "mi"
+msgstr ""
+
+#: includes/trait-weather-info.php:508
+msgid "miles"
+msgstr ""
+
+#: includes/trait-weather-info.php:549
+msgid "Good"
+msgstr ""
+
+#: includes/trait-weather-info.php:550
+msgid "Moderate"
+msgstr ""
+
+#: includes/trait-weather-info.php:551
+msgid "Unhealthy for Sensitive Groups"
+msgstr ""
+
+#: includes/trait-weather-info.php:552
+msgid "Unhealthy"
+msgstr ""
+
+#: includes/trait-weather-info.php:553
+msgid "Very Unhealthy"
+msgstr ""
+
+#: includes/trait-weather-info.php:554
+msgid "Hazardous"
+msgstr ""
+
+#: includes/trait-weather-info.php:594
+msgid "thunderstorm with light rain"
+msgstr ""
+
+#: includes/trait-weather-info.php:595
+msgid "thunderstorm with rain"
+msgstr ""
+
+#: includes/trait-weather-info.php:596
+msgid "thunderstorm with heavy rain"
+msgstr ""
+
+#: includes/trait-weather-info.php:597
+msgid "light thunderstorm"
+msgstr ""
+
+#: includes/trait-weather-info.php:598
+msgid "thunderstorm"
+msgstr ""
+
+#: includes/trait-weather-info.php:599
+msgid "heavy thunderstorm"
+msgstr ""
+
+#: includes/trait-weather-info.php:600
+msgid "ragged thunderstorm"
+msgstr ""
+
+#: includes/trait-weather-info.php:601
+msgid "thunderstorm with light drizzle"
+msgstr ""
+
+#: includes/trait-weather-info.php:602
+msgid "thunderstorm with drizzle"
+msgstr ""
+
+#: includes/trait-weather-info.php:603
+msgid "thunderstorm with heavy drizzle"
+msgstr ""
+
+#: includes/trait-weather-info.php:604
+msgid "thunderstorm with hail"
+msgstr ""
+
+#: includes/trait-weather-info.php:606
 msgid "light intensity drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:384
+#: includes/trait-weather-info.php:607
 msgid "drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:385
+#: includes/trait-weather-info.php:608
 msgid "heavy intensity drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:386
+#: includes/trait-weather-info.php:609
 msgid "freezing drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:387
+#: includes/trait-weather-info.php:610
 msgid "light intensity drizzle rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:388
+#: includes/trait-weather-info.php:611
 msgid "drizzle rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:389
+#: includes/trait-weather-info.php:612
 msgid "heavy intensity drizzle rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:390
+#: includes/trait-weather-info.php:613
 msgid "shower rain and drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:391
+#: includes/trait-weather-info.php:614
 msgid "heavy shower rain and drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:392
+#: includes/trait-weather-info.php:615
 msgid "shower drizzle"
 msgstr ""
 
-#: includes/trait-weather-info.php:396
+#: includes/trait-weather-info.php:619
 msgid "light rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:397
+#: includes/trait-weather-info.php:620
 msgid "moderate rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:398
+#: includes/trait-weather-info.php:621
 msgid "extreme rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:399
+#: includes/trait-weather-info.php:622
 msgid "freezing rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:400
+#: includes/trait-weather-info.php:623
 msgid "rain and wind"
 msgstr ""
 
-#: includes/trait-weather-info.php:401
+#: includes/trait-weather-info.php:624
 msgid "ice"
 msgstr ""
 
-#: includes/trait-weather-info.php:402
+#: includes/trait-weather-info.php:625
 msgid "light intensity shower rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:403
+#: includes/trait-weather-info.php:626
 msgid "shower rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:404
+#: includes/trait-weather-info.php:627
 msgid "heavy intensity shower rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:405
+#: includes/trait-weather-info.php:628
 msgid "ragged shower rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:406
+#: includes/trait-weather-info.php:629
 msgid "flood"
 msgstr ""
 
-#: includes/trait-weather-info.php:407
+#: includes/trait-weather-info.php:630
 msgid "flash flooding"
 msgstr ""
 
-#: includes/trait-weather-info.php:409
+#: includes/trait-weather-info.php:632
 msgid "light snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:411
+#: includes/trait-weather-info.php:634
+#: includes/weather/class-weather-provider-metno.php:243
 msgid "Heavy snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:412
+#: includes/trait-weather-info.php:635
 msgid "Mix of Snow/Rain"
 msgstr ""
 
-#: includes/trait-weather-info.php:414
+#: includes/trait-weather-info.php:637
 msgid "Light shower sleet"
 msgstr ""
 
-#: includes/trait-weather-info.php:415
+#: includes/trait-weather-info.php:638
 msgid "Shower sleet"
 msgstr ""
 
-#: includes/trait-weather-info.php:416
+#: includes/trait-weather-info.php:639
 msgid "Light rain and snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:417
+#: includes/trait-weather-info.php:640
 msgid "Rain and snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:418
+#: includes/trait-weather-info.php:641
 msgid "Light shower snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:419
+#: includes/trait-weather-info.php:642
 msgid "Shower snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:420
+#: includes/trait-weather-info.php:643
 msgid "Heavy shower snow"
 msgstr ""
 
-#: includes/trait-weather-info.php:421
+#: includes/trait-weather-info.php:644
 msgid "Flurries"
 msgstr ""
 
-#: includes/trait-weather-info.php:424
+#: includes/trait-weather-info.php:647
 msgid "Diamond dust"
 msgstr ""
 
-#: includes/trait-weather-info.php:426
+#: includes/trait-weather-info.php:649
 msgid "mist"
 msgstr ""
 
-#: includes/trait-weather-info.php:427
+#: includes/trait-weather-info.php:650
 msgid "Frost"
 msgstr ""
 
-#: includes/trait-weather-info.php:430
+#: includes/trait-weather-info.php:653
 msgid "Haze"
 msgstr ""
 
-#: includes/trait-weather-info.php:431
+#: includes/trait-weather-info.php:654
 msgid "sand/dust"
 msgstr ""
 
-#: includes/trait-weather-info.php:432
+#: includes/trait-weather-info.php:655
 msgid "fog"
 msgstr ""
 
-#: includes/trait-weather-info.php:433
+#: includes/trait-weather-info.php:656
 msgid "sand"
 msgstr ""
 
-#: includes/trait-weather-info.php:434
+#: includes/trait-weather-info.php:657
 msgid "dust"
 msgstr ""
 
-#: includes/trait-weather-info.php:435
+#: includes/trait-weather-info.php:658
 msgid "volcanic ash"
 msgstr ""
 
-#: includes/trait-weather-info.php:436
+#: includes/trait-weather-info.php:659
 msgid "squalls"
 msgstr ""
 
-#: includes/trait-weather-info.php:437
+#: includes/trait-weather-info.php:660
 msgid "waterspouts"
 msgstr ""
 
-#: includes/trait-weather-info.php:438
+#: includes/trait-weather-info.php:661
 msgid "tornado"
 msgstr ""
 
-#: includes/trait-weather-info.php:439
+#: includes/trait-weather-info.php:662
 msgid "hurricane"
 msgstr ""
 
-#: includes/trait-weather-info.php:440
+#: includes/trait-weather-info.php:663
 msgid "lightning"
 msgstr ""
 
-#: includes/trait-weather-info.php:443
+#: includes/trait-weather-info.php:666
 msgid "Clear Sky"
 msgstr ""
 
-#: includes/trait-weather-info.php:444
+#: includes/trait-weather-info.php:667
 msgid "Few Clouds"
 msgstr ""
 
-#: includes/trait-weather-info.php:445
+#: includes/trait-weather-info.php:668
 msgid "Scattered Clouds"
 msgstr ""
 
-#: includes/trait-weather-info.php:446
+#: includes/trait-weather-info.php:669
 msgid "Broken Clouds"
 msgstr ""
 
-#: includes/trait-weather-info.php:447
+#: includes/trait-weather-info.php:670
 msgid "Overcast Clouds"
 msgstr ""
 
-#: includes/trait-weather-info.php:448
+#: includes/trait-weather-info.php:671
 msgid "Unknown Precipitation"
 msgstr ""
 
-#: includes/venue/class-venue-provider-locationiq.php:70
-#: includes/venue/class-venue-provider-nominatim.php:72
-#: includes/weather/class-weather-provider-aeris.php:233
-#: includes/weather/class-weather-provider-aeris.php:260
-#: includes/weather/class-weather-provider-openweathermap.php:219
+#: includes/venue/class-venue-provider-foursquare.php:124
+#: includes/venue/class-venue-provider-foursquare.php:140
+#: includes/venue/class-venue-provider-foursquare.php:149
+msgid "Foursquare"
+msgstr ""
+
+#: includes/venue/class-venue-provider-foursquare.php:127
+msgid "Finds places near you with the Foursquare Places API, using your Foursquare service API key."
+msgstr ""
+
+#: includes/venue/class-venue-provider-foursquare.php:161
+msgid "You have not set an API key for Foursquare"
+msgstr ""
+
+#: includes/venue/class-venue-provider-geoapify.php:84
+msgid "Finds places near you with the Geoapify Places API, using your Geoapify API key."
+msgstr ""
+
+#: includes/venue/class-venue-provider-geoapify.php:111
+msgid "You have not set an API key for Geoapify"
+msgstr ""
+
+#: includes/venue/class-venue-provider-google.php:36
+msgid "Google Maps Platform needs an API key and a billing account, and gives each API a monthly free allowance. Enable the Places API (New)."
+msgstr ""
+
+#: includes/venue/class-venue-provider-here.php:62
+msgid "Finds places near you with HERE Geocoding and Search, using your HERE API key."
+msgstr ""
+
+#: includes/venue/class-venue-provider-locationiq.php:84
+#: includes/venue/class-venue-provider-nominatim.php:83
+#: includes/weather/class-weather-provider-aeris.php:250
+#: includes/weather/class-weather-provider-aeris.php:277
+#: includes/weather/class-weather-provider-openweathermap.php:170
 #: includes/weather/class-weather-provider-visualcrossing.php:113
 msgid "Unable to Retrieve"
+msgstr ""
+
+#: includes/venue/class-venue-provider-overpass.php:64
+msgid "OpenStreetMap Overpass"
+msgstr ""
+
+#: includes/venue/class-venue-provider-overpass.php:67
+msgid "Finds the named places near you in OpenStreetMap, with no key. The public servers are for light use; heavy or commercial use should use another server, or your own."
+msgstr ""
+
+#: includes/venue/class-venue-provider-overpass.php:118
+msgid "Overpass Server URL"
+msgstr ""
+
+#: includes/venue/class-venue-provider-overpass.php:125
+msgid "Optional. The interpreter address of another Overpass server, or your own, such as https://overpass.example.com/api/interpreter. Leave empty to use the public server."
+msgstr ""
+
+#: includes/venue/class-venue-provider-pelias.php:65
+msgid "Finds places near you with your own Pelias server, or another you may use, from the Pelias Service URL setting. A key is sent only if one is set."
+msgstr ""
+
+#: includes/venue/class-venue-provider-stadia.php:32
+msgid "Finds places near you with Stadia Maps, using your Stadia Maps API key."
+msgstr ""
+
+#: includes/venue/class-venue-provider-stadia.php:61
+msgid "You have not set an API key for Stadia Maps"
+msgstr ""
+
+#: includes/venue/class-venue-provider-tomtom.php:82
+msgid "Finds places near you with TomTom's Search API, using your TomTom API key."
+msgstr ""
+
+#: includes/venue/class-venue-provider-tomtom.php:98
+msgid "You have not set an API key for TomTom"
 msgstr ""
 
 #: includes/weather/class-weather-provider-aeris.php:25
@@ -3243,37 +4581,49 @@ msgstr ""
 msgid "While Xweather does not offer a free tier, if you share your personal weather station with PWSWeather, this gives you free access to their API, which includes historic data."
 msgstr ""
 
-#: includes/weather/class-weather-provider-aeris.php:39
+#: includes/weather/class-weather-provider-aeris.php:41
 msgid "Xweather Client ID"
 msgstr ""
 
-#: includes/weather/class-weather-provider-aeris.php:40
+#: includes/weather/class-weather-provider-aeris.php:42
 msgid "Xweather Client Secret"
 msgstr ""
 
-#: includes/weather/class-weather-provider-aeris.php:59
-#: includes/weather/class-weather-provider-aeris.php:61
+#: includes/weather/class-weather-provider-aeris.php:75
+#: includes/weather/class-weather-provider-aeris.php:77
 msgid "Xweather"
 msgstr ""
 
-#: includes/weather/class-weather-provider-aeris.php:59
-msgid "Client ID"
-msgstr ""
-
-#: includes/weather/class-weather-provider-aeris.php:61
+#: includes/weather/class-weather-provider-aeris.php:77
 msgid "Client Secret"
 msgstr ""
 
-#: includes/weather/class-weather-provider-aeris.php:65
+#: includes/weather/class-weather-provider-aeris.php:81
 msgid "Include Personal Weather Stations in Xweather Provider"
 msgstr ""
 
-#: includes/weather/class-weather-provider-aeris.php:205
+#: includes/weather/class-weather-provider-aeris.php:222
 msgid "No Station ID Provided"
 msgstr ""
 
-#: includes/weather/class-weather-provider-aeris.php:268
+#: includes/weather/class-weather-provider-aeris.php:285
 msgid "No Observation Found"
+msgstr ""
+
+#: includes/weather/class-weather-provider-aeris.php:388
+msgid "Powered by Vaisala Xweather"
+msgstr ""
+
+#: includes/weather/class-weather-provider-eccc.php:106
+msgid "Environment Canada"
+msgstr ""
+
+#: includes/weather/class-weather-provider-eccc.php:108
+msgid "Environment and Climate Change Canada reports the current conditions for Canadian cities and towns, and needs no key. Only in Canada, and only current conditions. Licensed under the Open Government Licence – Canada."
+msgstr ""
+
+#: includes/weather/class-weather-provider-eccc.php:314
+msgid "Weather data from Environment and Climate Change Canada"
 msgstr ""
 
 #: includes/weather/class-weather-provider-here.php:28
@@ -3301,107 +4651,246 @@ msgstr ""
 msgid "Station ID Not Set"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:350
-#: includes/weather/class-weather-provider-visualcrossing.php:223
-#: templates/loc-metabox.php:166
+#: includes/weather/class-weather-provider-meteostat.php:352
+#: includes/weather/class-weather-provider-visualcrossing.php:225
+#: templates/loc-metabox.php:220
 msgid "Clear"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:351
+#: includes/weather/class-weather-provider-meteostat.php:353
+#: includes/weather/class-weather-provider-metno.php:213
 msgid "Fair"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:353
-#: includes/weather/class-weather-provider-visualcrossing.php:221
+#: includes/weather/class-weather-provider-meteostat.php:355
+#: includes/weather/class-weather-provider-openmeteo.php:401
+#: includes/weather/class-weather-provider-visualcrossing.php:223
 msgid "Overcast"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:355
-#: includes/weather/class-weather-provider-visualcrossing.php:192
+#: includes/weather/class-weather-provider-meteostat.php:357
+#: includes/weather/class-weather-provider-visualcrossing.php:194
 msgid "Freezing Fog"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:356
-#: includes/weather/class-weather-provider-visualcrossing.php:206
+#: includes/weather/class-weather-provider-meteostat.php:358
+#: includes/weather/class-weather-provider-visualcrossing.php:208
 msgid "Light Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:358
-#: includes/weather/class-weather-provider-visualcrossing.php:205
+#: includes/weather/class-weather-provider-meteostat.php:360
+#: includes/weather/class-weather-provider-visualcrossing.php:207
 msgid "Heavy Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:359
+#: includes/weather/class-weather-provider-meteostat.php:361
 msgid "Freezing Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:360
-#: includes/weather/class-weather-provider-visualcrossing.php:193
+#: includes/weather/class-weather-provider-meteostat.php:362
+#: includes/weather/class-weather-provider-visualcrossing.php:195
 msgid "Heavy Freezing Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:362
+#: includes/weather/class-weather-provider-meteostat.php:364
 msgid "Heavy Sleet"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:363
+#: includes/weather/class-weather-provider-meteostat.php:365
 msgid "Light Snowfall"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:365
+#: includes/weather/class-weather-provider-meteostat.php:367
 msgid "Heavy Snowfall"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:366
+#: includes/weather/class-weather-provider-meteostat.php:368
 msgid "Rain Shower"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:367
+#: includes/weather/class-weather-provider-meteostat.php:369
 msgid "Heavy Rain Shower"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:368
+#: includes/weather/class-weather-provider-meteostat.php:370
 msgid "Sleet Shower"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:369
+#: includes/weather/class-weather-provider-meteostat.php:371
 msgid "Heavy Sleet Shower"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:370
+#: includes/weather/class-weather-provider-meteostat.php:372
 msgid "Snow Shower"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:371
+#: includes/weather/class-weather-provider-meteostat.php:373
 msgid "Heavy Snow Shower"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:375
+#: includes/weather/class-weather-provider-meteostat.php:377
 msgid "Heavy Thunderstorm"
 msgstr ""
 
-#: includes/weather/class-weather-provider-meteostat.php:376
+#: includes/weather/class-weather-provider-meteostat.php:378
 msgid "Storm"
 msgstr ""
 
-#: includes/weather/class-weather-provider-metoffice.php:25
-msgid "Met Office(UK)"
+#: includes/weather/class-weather-provider-meteostat.php:439
+msgid "Source: Meteostat and its data providers"
 msgstr ""
 
-#: includes/weather/class-weather-provider-metoffice.php:28
-msgid "Limited to data for the UK only, and requires a free API key for unlimited access. Historical data is not available."
+#: includes/weather/class-weather-provider-metno.php:37
+msgid "MET Norway"
 msgstr ""
 
-#: includes/weather/class-weather-provider-metoffice.php:42
-msgid "Met Office API"
+#: includes/weather/class-weather-provider-metno.php:39
+msgid "The Norwegian Meteorological Institute forecasts the weather anywhere in the world, and needs no key. Current conditions are its forecast for this hour. Data from MET Norway is licensed CC BY 4.0."
 msgstr ""
 
-#: includes/weather/class-weather-provider-metoffice.php:51
-msgid "Met Office"
+#: includes/weather/class-weather-provider-metno.php:212
+#: includes/weather/class-weather-provider-openmeteo.php:398
+msgid "Clear sky"
 msgstr ""
 
-#: includes/weather/class-weather-provider-metoffice.php:189
-msgid "not available"
+#: includes/weather/class-weather-provider-metno.php:214
+#: includes/weather/class-weather-provider-openmeteo.php:400
+#: includes/weather/class-weather-provider-visualcrossing.php:224
+msgid "Partly cloudy"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:217
+msgid "Light rain"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:219
+#: includes/weather/class-weather-provider-openmeteo.php:411
+msgid "Heavy rain"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:220
+msgid "Light rain showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:221
+msgid "Rain showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:222
+msgid "Heavy rain showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:223
+msgid "Light rain and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:224
+msgid "Rain and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:225
+msgid "Heavy rain and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:226
+msgid "Light rain showers and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:227
+msgid "Rain showers and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:228
+msgid "Heavy rain showers and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:229
+msgid "Light sleet"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:231
+msgid "Heavy sleet"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:232
+msgid "Light sleet showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:233
+msgid "Sleet showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:234
+msgid "Heavy sleet showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:235
+msgid "Light sleet and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:236
+msgid "Sleet and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:237
+msgid "Heavy sleet and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:238
+msgid "Light sleet showers and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:239
+msgid "Sleet showers and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:240
+msgid "Heavy sleet showers and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:241
+msgid "Light snow"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:244
+msgid "Light snow showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:245
+msgid "Snow showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:246
+#: includes/weather/class-weather-provider-openmeteo.php:422
+msgid "Heavy snow showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:247
+msgid "Light snow and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:248
+msgid "Snow and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:249
+msgid "Heavy snow and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:250
+msgid "Light snow showers and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:251
+msgid "Snow showers and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:252
+msgid "Heavy snow showers and thunder"
+msgstr ""
+
+#: includes/weather/class-weather-provider-metno.php:329
+msgid "Weather data from MET Norway"
 msgstr ""
 
 #: includes/weather/class-weather-provider-nwsus.php:25
@@ -3410,6 +4899,127 @@ msgstr ""
 
 #: includes/weather/class-weather-provider-nwsus.php:27
 msgid "Provided by the US National Weather service, and therefore limited to the United States. No API key or limit, other than rate limiting."
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:74
+#: includes/weather/class-weather-provider-openmeteo.php:107
+msgid "Open-Meteo"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:76
+msgid "Open-Meteo is an open source weather API with current and historical weather. Its free API needs no key for non-commercial use, up to 10,000 requests a day; commercial use needs an API key. You can also run your own server. Weather data by Open-Meteo.com is licensed CC BY 4.0."
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:129
+msgid "Open-Meteo API Key"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:136
+msgid "Optional. Only needed for commercial use. Leave empty to use the free API."
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:141
+msgid "Open-Meteo Server URL"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:148
+msgid "Optional. The address of your own Open-Meteo server. Leave empty to use Open-Meteo's API."
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:240
+msgid "Open-Meteo has no weather for this time and place"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:270
+msgid "A location is needed for the weather"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:399
+msgid "Mainly clear"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:403
+msgid "Depositing rime fog"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:404
+msgid "Light drizzle"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:405
+msgid "Moderate drizzle"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:406
+msgid "Dense drizzle"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:407
+msgid "Light freezing drizzle"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:408
+msgid "Dense freezing drizzle"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:409
+msgid "Slight rain"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:410
+msgid "Moderate rain"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:412
+msgid "Light freezing rain"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:413
+msgid "Heavy freezing rain"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:414
+msgid "Slight snow fall"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:415
+msgid "Moderate snow fall"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:416
+msgid "Heavy snow fall"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:417
+msgid "Snow grains"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:418
+msgid "Slight rain showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:419
+msgid "Moderate rain showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:420
+msgid "Violent rain showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:421
+msgid "Slight snow showers"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:424
+msgid "Thunderstorm with slight hail"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:425
+msgid "Thunderstorm with heavy hail"
+msgstr ""
+
+#: includes/weather/class-weather-provider-openmeteo.php:483
+msgid "Weather data by Open-Meteo.com"
 msgstr ""
 
 #: includes/weather/class-weather-provider-openweathermap.php:25
@@ -3425,6 +5035,10 @@ msgstr ""
 msgid "OpenWeatherMap API Key"
 msgstr ""
 
+#: includes/weather/class-weather-provider-openweathermap.php:229
+msgid "Weather data provided by OpenWeather"
+msgstr ""
+
 #: includes/weather/class-weather-provider-pirateweather.php:25
 #: includes/weather/class-weather-provider-pirateweather.php:52
 msgid "Pirate Weather"
@@ -3438,40 +5052,67 @@ msgstr ""
 msgid "PirateWeather API Key"
 msgstr ""
 
-#: includes/weather/class-weather-provider-station.php:23
+#: includes/weather/class-weather-provider-station.php:85
 msgid "Custom Station Provider"
 msgstr ""
 
-#: includes/weather/class-weather-provider-station.php:24
-msgid "A custom station provider is one coded by any party who wants to provide it in the correct format. This allows you to retrieve information from stations when within range"
+#: includes/weather/class-weather-provider-station.php:86
+msgid "Weather from your own stations: URLs that return the current conditions as JSON. When it is the weather provider, the nearest station within 10 km is used."
 msgstr ""
 
-#: includes/weather/class-weather-provider-station.php:61
+#: includes/weather/class-weather-provider-station.php:150
 msgid "Custom Station Data"
 msgstr ""
 
-#: includes/weather/class-weather-provider-station.php:81
-msgid "Enter Station ID, URL, latitude, and longitude for each station. The URL may contain a query string application key. When using the custom station provider as your default weather provider, it will look for a station within 10km of your current location. Provider expects a json return with the properties outlined in the code."
+#: includes/weather/class-weather-provider-station.php:160
+msgid "Enter an ID and URL for each station. The URL may contain a query string application key. It must return the station's current conditions as JSON, in the format described in the readme. The latitude and longitude are read from the station when it gives them; when this is the weather provider, the nearest station within 10 km of a post is used. The credit is shown with the station's weather, linked if you give a link, in place of any credit the station sends."
 msgstr ""
 
-#: includes/weather/class-weather-provider-station.php:99
-msgid "Enter ID and URL for this Station"
-msgstr ""
-
-#: includes/weather/class-weather-provider-station.php:110
-msgid "Add"
-msgstr ""
-
-#: includes/weather/class-weather-provider-station.php:111
-msgid "Remove"
-msgstr ""
-
-#: includes/weather/class-weather-provider-station.php:148
+#: includes/weather/class-weather-provider-station.php:214
 msgid "Station ID"
 msgstr ""
 
-#: includes/weather/class-weather-provider-station.php:149
+#: includes/weather/class-weather-provider-station.php:215
 msgid "URL"
+msgstr ""
+
+#: includes/weather/class-weather-provider-station.php:218
+#: includes/weather/class-weather-provider-weewx.php:77
+msgid "Credit"
+msgstr ""
+
+#: includes/weather/class-weather-provider-station.php:219
+#: includes/weather/class-weather-provider-weewx.php:78
+msgid "Credit Link"
+msgstr ""
+
+#: includes/weather/class-weather-provider-station.php:239
+#: includes/weather/class-weather-provider-weewx.php:100
+msgid "Remove"
+msgstr ""
+
+#. translators: %s: Provider name.
+#: includes/weather/class-weather-provider-station.php:354
+#, php-format
+msgid "The %s station has no reading from the last hour."
+msgstr ""
+
+#: includes/weather/class-weather-provider-station.php:448
+msgid "There is no station with that ID"
+msgstr ""
+
+#: includes/weather/class-weather-provider-station.php:464
+msgid "The station did not return a JSON object"
+msgstr ""
+
+#. translators: %s: Format identifier.
+#: includes/weather/class-weather-provider-station.php:471
+#, php-format
+msgid "The station uses an unknown format, %s"
+msgstr ""
+
+#: includes/weather/class-weather-provider-station.php:474
+msgid "The station uses a version of the current conditions format this plugin can't read"
 msgstr ""
 
 #: includes/weather/class-weather-provider-visualcrossing.php:25
@@ -3487,132 +5128,128 @@ msgstr ""
 msgid "Visual Crossing API Key"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:181
+#: includes/weather/class-weather-provider-visualcrossing.php:183
 msgid "Blowing Or Drifting Snow"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:182
+#: includes/weather/class-weather-provider-visualcrossing.php:184
 msgid "Drizzle"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:183
+#: includes/weather/class-weather-provider-visualcrossing.php:185
 msgid "Heavy Drizzle"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:184
+#: includes/weather/class-weather-provider-visualcrossing.php:186
 msgid "Light Drizzle"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:185
+#: includes/weather/class-weather-provider-visualcrossing.php:187
 msgid "Heavy Drizzle/Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:186
+#: includes/weather/class-weather-provider-visualcrossing.php:188
 msgid "Light Drizzle/Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:187
+#: includes/weather/class-weather-provider-visualcrossing.php:189
 msgid "Dust storm"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:189
+#: includes/weather/class-weather-provider-visualcrossing.php:191
 msgid "Freezing Drizzle/Freezing Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:190
+#: includes/weather/class-weather-provider-visualcrossing.php:192
 msgid "Heavy Freezing Drizzle/Freezing Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:191
+#: includes/weather/class-weather-provider-visualcrossing.php:193
 msgid "Light Freezing Drizzle/Freezing Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:194
+#: includes/weather/class-weather-provider-visualcrossing.php:196
 msgid "Light Freezing Rain"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:195
+#: includes/weather/class-weather-provider-visualcrossing.php:197
 msgid "Funnel Cloud/Tornado"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:196
+#: includes/weather/class-weather-provider-visualcrossing.php:198
 msgid "Hail Showers"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:197
+#: includes/weather/class-weather-provider-visualcrossing.php:199
 msgid "Ice"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:198
+#: includes/weather/class-weather-provider-visualcrossing.php:200
 msgid "Lightning Without Thunder"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:199
+#: includes/weather/class-weather-provider-visualcrossing.php:201
 msgid "Mist"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:200
+#: includes/weather/class-weather-provider-visualcrossing.php:202
 msgid "Precipitation In Vicinity"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:202
+#: includes/weather/class-weather-provider-visualcrossing.php:204
 msgid "Heavy Rain And Snow"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:203
+#: includes/weather/class-weather-provider-visualcrossing.php:205
 msgid "Light Rain And Snow"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:204
+#: includes/weather/class-weather-provider-visualcrossing.php:206
 msgid "Rain Showers"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:207
+#: includes/weather/class-weather-provider-visualcrossing.php:209
 msgid "Sky Coverage Decreasing"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:208
+#: includes/weather/class-weather-provider-visualcrossing.php:210
 msgid "Sky Coverage Increasing"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:209
+#: includes/weather/class-weather-provider-visualcrossing.php:211
 msgid "Sky Unchanged"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:210
+#: includes/weather/class-weather-provider-visualcrossing.php:212
 msgid "Smoke Or Haze"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:212
+#: includes/weather/class-weather-provider-visualcrossing.php:214
 msgid "Snow And Rain Showers"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:213
+#: includes/weather/class-weather-provider-visualcrossing.php:215
 msgid "Snow Showers"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:214
+#: includes/weather/class-weather-provider-visualcrossing.php:216
 msgid "Heavy Snow"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:215
+#: includes/weather/class-weather-provider-visualcrossing.php:217
 msgid "Light Snow"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:216
+#: includes/weather/class-weather-provider-visualcrossing.php:218
 msgid "Squalls"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:218
+#: includes/weather/class-weather-provider-visualcrossing.php:220
 msgid "Thunderstorm Without Precipitation"
 msgstr ""
 
-#: includes/weather/class-weather-provider-visualcrossing.php:219
+#: includes/weather/class-weather-provider-visualcrossing.php:221
 msgid "Diamond Dust"
-msgstr ""
-
-#: includes/weather/class-weather-provider-visualcrossing.php:222
-msgid "Partly cloudy"
 msgstr ""
 
 #: includes/weather/class-weather-provider-weatherbit.php:25
@@ -3628,6 +5265,10 @@ msgstr ""
 msgid "WeatherBit"
 msgstr ""
 
+#: includes/weather/class-weather-provider-weatherbit.php:162
+msgid "Weather data by Weatherbit.io"
+msgstr ""
+
 #: includes/weather/class-weather-provider-weatherstack.php:25
 #: includes/weather/class-weather-provider-weatherstack.php:53
 msgid "Weatherstack"
@@ -3641,8 +5282,38 @@ msgstr ""
 msgid "WeatherStack"
 msgstr ""
 
-#: includes/weather/class-weather-provider-weatherstack.php:110
+#: includes/weather/class-weather-provider-weatherstack.php:122
 msgid "Weatherstack returned an error"
+msgstr ""
+
+#: includes/weather/class-weather-provider-weewx.php:36
+msgid "WeeWX"
+msgstr ""
+
+#: includes/weather/class-weather-provider-weewx.php:38
+msgid "Weather from your WeeWX stations, with the weewx-current-json extension installed. When it is the weather provider, the nearest station within 10 km is used."
+msgstr ""
+
+#: includes/weather/class-weather-provider-weewx.php:50
+msgid "WeeWX Stations"
+msgstr ""
+
+#: includes/weather/class-weather-provider-weewx.php:59
+msgid "Enter the URL of the current.json file each WeeWX station writes with the weewx-current-json extension, such as https://weather.example.com/current.json. The station's ID, name and location are read from the file when you save. The credit is shown with the station's weather, in place of any credit the station sends."
+msgstr ""
+
+#: includes/weather/class-weather-provider-weewx.php:76
+msgid "URL of current.json"
+msgstr ""
+
+#. translators: 1: URL 2: Error message.
+#: includes/weather/class-weather-provider-weewx.php:177
+#, php-format
+msgid "Could not read the WeeWX station at %1$s: %2$s"
+msgstr ""
+
+#: includes/weather/class-weather-provider-weewx.php:200
+msgid "This is not a weewx-current-json file"
 msgstr ""
 
 #: includes/widgets/class-sloc-airport-widget.php:22
@@ -3660,7 +5331,7 @@ msgstr ""
 #: includes/widgets/class-sloc-airport-widget.php:124
 #: includes/widgets/class-sloc-lastseen-widget.php:141
 #: includes/widgets/class-sloc-station-widget.php:121
-#: includes/widgets/class-sloc-weather-widget.php:286
+#: includes/widgets/class-sloc-weather-widget.php:285
 msgid "Title: "
 msgstr ""
 
@@ -3675,13 +5346,13 @@ msgstr ""
 #: includes/widgets/class-sloc-airport-widget.php:132
 #: includes/widgets/class-sloc-lastseen-widget.php:163
 #: includes/widgets/class-sloc-station-widget.php:130
-#: includes/widgets/class-sloc-weather-widget.php:308
+#: includes/widgets/class-sloc-weather-widget.php:307
 msgid "Show Astronomical Info: "
 msgstr ""
 
 #: includes/widgets/class-sloc-airport-widget.php:136
 #: includes/widgets/class-sloc-station-widget.php:134
-#: includes/widgets/class-sloc-weather-widget.php:317
+#: includes/widgets/class-sloc-weather-widget.php:316
 msgid "Cache Time: "
 msgstr ""
 
@@ -3710,7 +5381,7 @@ msgid "Displays last reported user location. Reporting can be set manually in th
 msgstr ""
 
 #: includes/widgets/class-sloc-lastseen-widget.php:148
-#: includes/widgets/class-sloc-weather-widget.php:291
+#: includes/widgets/class-sloc-weather-widget.php:290
 msgid "User: "
 msgstr ""
 
@@ -3756,61 +5427,61 @@ msgstr ""
 msgid "No Weather Provider Set!"
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:73
+#: includes/widgets/class-sloc-weather-widget.php:70
 msgid "No Input Provided"
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:107
+#: includes/widgets/class-sloc-weather-widget.php:104
 msgid "Weather is not available right now."
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:181
-#: includes/widgets/class-sloc-weather-widget.php:182
+#: includes/widgets/class-sloc-weather-widget.php:178
+#: includes/widgets/class-sloc-weather-widget.php:179
 msgid "Moon Phase"
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:248
+#: includes/widgets/class-sloc-weather-widget.php:246
 msgid "Current Conditions Cache Expires At"
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:289
+#: includes/widgets/class-sloc-weather-widget.php:288
 msgid "Displays current weather based on user location set in user profile. If set for none will use latitude and longitude set"
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:303
+#: includes/widgets/class-sloc-weather-widget.php:302
 msgid "Latitude: "
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:305
+#: includes/widgets/class-sloc-weather-widget.php:304
 msgid "Longitude: "
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:312
+#: includes/widgets/class-sloc-weather-widget.php:311
 msgid "Show weather when the user's location is private: "
 msgstr ""
 
-#: includes/widgets/class-sloc-weather-widget.php:315
+#: includes/widgets/class-sloc-weather-widget.php:314
 msgid "The station name and astronomical information are left out, so only the conditions are shown."
 msgstr ""
 
 #. translators: %s: File path.
-#: simple-location.php:126
-#: simple-location.php:198
+#: simple-location.php:129
+#: simple-location.php:201
 #, php-format
 msgid "Cannot find %s."
 msgstr ""
 
 #. translators: %s: File path.
-#: simple-location.php:193
+#: simple-location.php:196
 #, php-format
 msgid "Cannot register a provider from %s: no class matches the file name."
 msgstr ""
 
-#: simple-location.php:398
+#: simple-location.php:430
 msgid "Settings"
 msgstr ""
 
-#: simple-location.php:423
+#: simple-location.php:522
 msgid ""
 "Location and weather data is optionally stored for all posts, attachments, and comments. Location data is extracted from uploaded images along with other metadata. This\n"
 "\t\t\t\tdata can be removed prior to uploading if tyou do not wish this to be stored. There are options to display this information or hide it."
@@ -3822,7 +5493,7 @@ msgstr ""
 
 #: templates/elevation-form.php:27
 #: templates/geocode-form.php:30
-#: templates/loc-metabox.php:165
+#: templates/loc-metabox.php:219
 #: templates/venue-form.php:27
 #: templates/weather-form.php:30
 msgid "Lookup"
@@ -3851,52 +5522,96 @@ msgstr ""
 msgid "Geocoding Provider"
 msgstr ""
 
-#: templates/loc-metabox.php:66
-#: templates/loc-metabox.php:73
+#: templates/loc-metabox.php:70
+#: templates/loc-metabox.php:77
 msgid "Location:"
 msgstr ""
 
-#: templates/loc-metabox.php:70
+#: templates/loc-metabox.php:74
 msgid "Textual Description:"
 msgstr ""
 
-#: templates/loc-metabox.php:93
+#: templates/loc-metabox.php:97
 msgid "Radius Around Venue:"
 msgstr ""
 
-#: templates/loc-metabox.php:97
-msgid "Venue URL:"
+#: templates/loc-metabox.php:101
+msgid "Website:"
 msgstr ""
 
-#: templates/loc-metabox.php:103
+#: templates/loc-metabox.php:105
+msgid "Other Pages:"
+msgstr ""
+
+#: templates/loc-metabox.php:108
+msgid "Pages about this venue on other sites, such as OpenStreetMap, Google Maps or Wikipedia, one per line. They are shown on the venue page when its location is public."
+msgstr ""
+
+#: templates/loc-metabox.php:110
+msgid "Visibility of Posts Here:"
+msgstr ""
+
+#: templates/loc-metabox.php:112
+msgid "No default"
+msgstr ""
+
+#: templates/loc-metabox.php:118
+msgid "The location visibility given to posts made here, such as Private at home. You can still change it on each post."
+msgstr ""
+
+#. translators: %s: Venue type, such as Food.
+#: templates/loc-metabox.php:125
+#, php-format
+msgid "Add the type %s"
+msgstr ""
+
+#. translators: %s: Venue type, such as Food.
+#: templates/loc-metabox.php:125
+#, php-format
+msgid "Add the new type %s"
+msgstr ""
+
+#: templates/loc-metabox.php:134
 msgid "Venue:"
 msgstr ""
 
-#: templates/loc-metabox.php:132
+#: templates/loc-metabox.php:163
+msgid "Plus Code:"
+msgstr ""
+
+#: templates/loc-metabox.php:165
+msgid "Optional. A Plus Code, such as 87F6XR2P+WH, or a short one with the town after it, such as XR2P+WH Philadelphia. Lookup replaces the location with it."
+msgstr ""
+
+#: templates/loc-metabox.php:169
 msgid "Latitude:"
 msgstr ""
 
-#: templates/loc-metabox.php:137
+#: templates/loc-metabox.php:174
 msgid "Longitude:"
 msgstr ""
 
-#: templates/loc-metabox.php:143
+#: templates/loc-metabox.php:180
 msgid "Altitude:"
 msgstr ""
 
-#: templates/loc-metabox.php:149
+#: templates/loc-metabox.php:186
 msgid "Icon:"
 msgstr ""
 
-#: templates/loc-metabox.php:156
+#: templates/loc-metabox.php:193
 msgid "Map Zoom:"
 msgstr ""
 
-#: templates/loc-metabox.php:167
+#: templates/loc-metabox.php:196
+msgid "Map Style:"
+msgstr ""
+
+#: templates/loc-metabox.php:221
 msgid "Minimize"
 msgstr ""
 
-#: templates/loc-metabox.php:174
+#: templates/loc-metabox.php:228
 msgid "Visibility:"
 msgstr ""
 
@@ -3917,8 +5632,16 @@ msgstr ""
 msgid "Time Zone"
 msgstr ""
 
-#: templates/map-archive.php:28
-msgid "Map of the locations listed on this page"
+#: templates/precipitation-archive.php:45
+msgid "There are no posts with snowfall here."
+msgstr ""
+
+#: templates/precipitation-archive.php:47
+msgid "There are no posts with rainfall here."
+msgstr ""
+
+#: templates/temperature-archive.php:41
+msgid "There are no posts with temperatures here."
 msgstr ""
 
 #: templates/timezone-metabox.php:37
@@ -3933,6 +5656,10 @@ msgstr ""
 msgid "Venue Lookup"
 msgstr ""
 
+#: templates/weather-archive.php:58
+msgid "There are no posts with weather here."
+msgstr ""
+
 #: templates/weather-form.php:15
 msgid "Weather Lookup"
 msgstr ""
@@ -3945,10 +5672,6 @@ msgstr ""
 msgid "Time"
 msgstr ""
 
-#: templates/weather-metabox.php:36
-msgid "Weather:"
-msgstr ""
-
-#: templates/weather-metabox.php:57
+#: templates/weather-metabox.php:60
 msgid "Condition"
 msgstr ""
