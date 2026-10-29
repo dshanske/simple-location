@@ -888,7 +888,7 @@ class Geo_Base {
 	 *
 	 * @param mixed           $object The object being acted on.
 	 * @param string          $attr Not Used but Required by Filter.
-	 * @param WP_Rest_Request $request REST Request Object.
+	 * @param WP_REST_Request $request REST Request Object.
 	 * @param string          $object_type Object Type.
 	 * @return float|string The coordinate, or an empty string if there is none or it isn't public.
 	 *
@@ -913,7 +913,7 @@ class Geo_Base {
 	 *
 	 * @param mixed           $object The object being acted on.
 	 * @param string          $attr Not used but required by filter.
-	 * @param WP_Rest_Request $request REST Request Object.
+	 * @param WP_REST_Request $request REST Request Object.
 	 * @param string          $object_type Object Type.
 	 * @return float|string The coordinate, or an empty string if there is none or it isn't public.
 	 *
@@ -939,7 +939,7 @@ class Geo_Base {
 	 *
 	 * @param mixed           $object Object.
 	 * @param string          $attr Not used but required by filter.
-	 * @param WP_Rest_Request $request REST Request Object.
+	 * @param WP_REST_Request $request REST Request Object.
 	 * @param string          $object_type Object Type.
 	 * @return string Return data.
 	 *
@@ -966,7 +966,7 @@ class Geo_Base {
 	 *
 	 * @param mixed           $object Object type.
 	 * @param string          $attr Not used but required by filter.
-	 * @param WP_Rest_Request $request REST Request Object.
+	 * @param WP_REST_Request $request REST Request Object.
 	 * @param string          $object_type Object type.
 	 * @return string Return data.
 	 *
