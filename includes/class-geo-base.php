@@ -1243,6 +1243,7 @@ class Geo_Base {
 	 *               saved, values of 0 are kept, and input is unslashed.
 	 * @since 6.1.0 Saves the provider the weather was looked up from, as `weather_provider`.
 	 * @since 6.1.0 Without coordinates, a Plus Code in `plus_code` gives them, such as when it wasn't looked up (#197).
+	 * @since 6.2.0 Saves the map's own style family, `map_style`.
 	 *
 	 * @param string  $meta_type Object type: post, comment or user.
 	 * @param int     $object_id Object ID.
@@ -1251,13 +1252,18 @@ class Geo_Base {
 	public static function save_meta( $meta_type, $object_id, $convert = true ) {
 		// phpcs:disable
 		$units              = get_option( 'sloc_measurements' );
-		$params = array( 'latitude', 'longitude', 'map_zoom', 'altitude', 'speed', 'heading', 'address','location_icon', 'timezone', 'geo_public' );
+		$params = array( 'latitude', 'longitude', 'map_zoom', 'map_style', 'altitude', 'speed', 'heading', 'address','location_icon', 'timezone', 'geo_public' );
 		$data = wp_array_slice_assoc( wp_unslash( $_POST ), $params );
 		$data = array_map( 'sanitize_text_field', $data );
 
 		if ( array_key_exists( 'map_zoom', $data ) ) {
 			$data['zoom'] = $data['map_zoom'];
 			unset( $data['map_zoom'] );
+		}
+
+		// Only a style family; empty, for the Map Style setting, removes it.
+		if ( array_key_exists( 'map_style', $data ) ) {
+			$data['map_style'] = Map_Provider::sanitize_map_style( $data['map_style'] );
 		}
 
 		// A Plus Code that wasn't looked up, such as without JavaScript, gives the coordinates.

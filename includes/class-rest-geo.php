@@ -402,8 +402,11 @@ class REST_Geo {
 						'width'     => array(
 							'sanitize_callback' => array( $this, 'sanitize_int' ),
 						),
-						'zoom'      => array(
+						'zoom'         => array(
 							'sanitize_callback' => array( $this, 'sanitize_int' ),
+						),
+						'style_family' => array(
+							'sanitize_callback' => array( 'Map_Provider', 'sanitize_map_style' ),
 						),
 					),
 					'permission_callback' => function ( $request ) {
@@ -431,6 +434,7 @@ class REST_Geo {
 			if ( ! empty( $params['zoom'] ) ) {
 				$args['map_zoom'] = $params['zoom'];
 			}
+			$args['style_family'] = Map_Provider::sanitize_map_style( $params['style_family'] ?? '' );
 			if ( ! empty( $params['height'] ) ) {
 				$args['height'] = $params['height'];
 			}
@@ -701,10 +705,12 @@ class REST_Geo {
 			$map = Loc_Config::map_provider();
 			if ( is_object( $map ) ) {
 				$map_args = array(
-					'latitude'  => $params['latitude'],
-					'longitude' => $params['longitude'],
-					'height'    => $params['height'] ?? null,
-					'width'     => $params['width'] ?? null,
+					'latitude'     => $params['latitude'],
+					'longitude'    => $params['longitude'],
+					'height'       => $params['height'] ?? null,
+					'width'        => $params['width'] ?? null,
+					'map_zoom'     => is_numeric( $params['map_zoom'] ?? null ) ? (int) $params['map_zoom'] : null,
+					'style_family' => Map_Provider::sanitize_map_style( $params['map_style'] ?? '' ),
 				);
 				$map->set( array_filter( $map_args ) );
 			}

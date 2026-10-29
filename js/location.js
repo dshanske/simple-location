@@ -228,6 +228,7 @@ jQuery( document ).ready( function( $ ) {
 				term: true,
 				weather: slocOptions.weather,
 				map_zoom: $( '#map_zoom' ).val(), // eslint-disable-line camelcase
+				map_style: $( '#map_style' ).val(), // eslint-disable-line camelcase
 				height: 200,
 				width: 200,
 				time,
@@ -357,6 +358,7 @@ jQuery( document ).ready( function( $ ) {
 				latitude: $( '#latitude' ).val(),
 				longitude: $( '#longitude' ).val(),
 				zoom: $( '#map_zoom' ).val(),
+				style_family: $( '#map_style' ).val(), // eslint-disable-line camelcase
 				height: 200,
 				width: 200,
 			},
@@ -383,6 +385,7 @@ jQuery( document ).ready( function( $ ) {
 			'altitude',
 			'accuracy',
 			'map_zoom',
+			'map_style',
 			'speed',
 			'heading',
 			'plus_code',
@@ -480,6 +483,7 @@ jQuery( document ).ready( function( $ ) {
 			event.preventDefault();
 		} )
 		.on( 'input change', '#map_zoom', scheduleMapRedraw )
+		.on( 'change', '#map_style', scheduleMapRedraw )
 		.on( 'change', '#latitude, #longitude', scheduleMapRedraw )
 		.on( 'change', '#location_dropdown', function( event ) {
 			updateVenues();

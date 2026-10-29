@@ -1289,13 +1289,7 @@ class Loc_Config {
 			'sloc_map',
 			array(
 				'label_for'   => 'sloc_map_style',
-				'list'        => array(
-					'standard'  => __( 'Standard', 'simple-location' ),
-					'light'     => __( 'Light', 'simple-location' ),
-					'dark'      => __( 'Dark', 'simple-location' ),
-					'satellite' => __( 'Satellite', 'simple-location' ),
-					'terrain'   => __( 'Terrain', 'simple-location' ),
-				),
+				'list'        => Map_Provider::get_style_family_names(),
 				'description' => __( 'Each map provider draws its closest style, so maps keep their look when you change providers. A provider without that style draws its standard style. A provider\'s own style setting, if set, is used instead.', 'simple-location' ),
 			)
 		);
