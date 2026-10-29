@@ -16,7 +16,7 @@ add_action( 'init', array( 'Sloc_Weather_Archive', 'init' ) );
  * Each view has a template, which a theme can override with a file of the same name.
  *
  * @since 6.1.0
- * @since 6.1.2 Adds the rain and snow views.
+ * @since 6.2.0 Adds the rain and snow views.
  */
 class Sloc_Weather_Archive {
 
@@ -24,7 +24,7 @@ class Sloc_Weather_Archive {
 	 * Templates of the views, keyed by query variable.
 	 *
 	 * @since 6.1.0
-	 * @since 6.1.2 Adds the rain and snow views.
+	 * @since 6.2.0 Adds the rain and snow views.
 	 * @var string[]
 	 */
 	const VIEWS = array(
@@ -37,7 +37,7 @@ class Sloc_Weather_Archive {
 	/**
 	 * The weather property each chart view shows, keyed by query variable.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 * @var string[]
 	 */
 	const CHARTS = array(
@@ -86,7 +86,7 @@ class Sloc_Weather_Archive {
 	 * A private location hides the post's weather too, so those posts are left out.
 	 *
 	 * @since 6.1.0
-	 * @since 6.1.2 The rain and snow views have posts with a rain or snow reading, including 0.
+	 * @since 6.2.0 The rain and snow views have posts with a rain or snow reading, including 0.
 	 *
 	 * @param WP_Query $query Query.
 	 */
@@ -173,7 +173,7 @@ class Sloc_Weather_Archive {
 	 *
 	 * Posts without the reading, without a date, or whose location is private are left out.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param string $property Weather property, such as 'temperature', 'rain' or 'snow'.
 	 * @return array[] Arrays with 'time' (Unix timestamp) and the property (in metric units), keyed by post ID, in the
@@ -225,7 +225,7 @@ class Sloc_Weather_Archive {
 	/**
 	 * Returns a rain or snow amount in the site's units: millimeters to one decimal place, or inches to two.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param float $mm Amount in millimeters.
 	 * @return float Amount.
@@ -237,7 +237,7 @@ class Sloc_Weather_Archive {
 	/**
 	 * Returns the unit of rain and snow amounts in the site's units.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @return string 'in' or 'mm', translated.
 	 */
@@ -319,7 +319,7 @@ class Sloc_Weather_Archive {
 	 * Each bar has a title with its date and amount, and the chart is labeled with the largest amount and the first
 	 * and last dates. A reading of 0 has no bar.
 	 *
-	 * @since 6.1.2
+	 * @since 6.2.0
 	 *
 	 * @param array[] $readings Readings, from get_readings().
 	 * @param string  $property 'rain' or 'snow'.

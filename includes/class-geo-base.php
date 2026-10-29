@@ -758,7 +758,7 @@ class Geo_Base {
 	 *
 	 * @since 1.0.0
 	 * @since 6.1.0 Adds the temperature and weather archive views.
-	 * @since 6.1.2 Adds the rain and snow archive views.
+	 * @since 6.2.0 Adds the rain and snow archive views.
 	 */
 	public static function rewrite() {
 		global $wp_rewrite;

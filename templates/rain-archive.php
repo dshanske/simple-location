@@ -6,7 +6,7 @@
  * rain-archive.php of its own.
  *
  * @package Simple_Location
- * @since 6.1.2
+ * @since 6.2.0
  */
 
 defined( 'ABSPATH' ) || exit;

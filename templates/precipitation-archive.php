@@ -6,7 +6,7 @@
  * snow-archive.php, which set $sloc_property to 'rain' or 'snow'.
  *
  * @package Simple_Location
- * @since 6.1.2
+ * @since 6.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
