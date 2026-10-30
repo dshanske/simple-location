@@ -253,6 +253,171 @@ class WeewxProviderTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The station's day is read for the widget: today, the trend, rain, the webcam and alerts, sanitized (#810).
+	 */
+	public function test_extras() {
+		$extras = Weather_Provider_Weewx::parse_extras(
+			array(
+				'today'    => array(
+					'temperature_max'      => 23.1,
+					'temperature_max_time' => 1761229800,
+					'temperature_min'      => '11.4',
+					'windgust_max'         => 'gusty',
+					'rain'                 => 3.05,
+				),
+				'trend'    => array(
+					'hours'    => 3,
+					'pressure' => -1.2,
+				),
+				'rain'     => array(
+					'last_24h'    => 3.05,
+					'storm'       => 3.05,
+					'storm_start' => 1761213600,
+					'last'        => 1761228000,
+				),
+				'station'  => array( 'webcam' => 'webcam.jpg' ),
+				'forecast' => array(
+					'alerts' => array(
+						array(
+							'event'    => 'Heat <b>Advisory</b>',
+							'headline' => 'Heat Advisory until 9 PM<script>alert(1)</script>',
+							'severity' => 'Moderate',
+							'ends'     => 1761264000,
+							'expires'  => 'soon',
+						),
+						array( 'headline' => 'No event' ),
+						'not an alert',
+					),
+				),
+			)
+		);
+		$this->assertSame(
+			array(
+				'temperature_max'      => 23.1,
+				'temperature_max_time' => 1761229800,
+				'temperature_min'      => 11.4,
+			),
+			$extras['today'],
+			'Only numbers, and only the keys the widget uses.'
+		);
+		$this->assertSame(
+			array(
+				'hours'    => 3.0,
+				'pressure' => -1.2,
+			),
+			$extras['trend']
+		);
+		$this->assertSame(
+			array(
+				'last_24h'    => 3.05,
+				'storm'       => 3.05,
+				'storm_start' => 1761213600,
+			),
+			$extras['rain']
+		);
+		$this->assertSame( 'webcam.jpg', $extras['webcam'] );
+		$this->assertCount( 1, $extras['alerts'] );
+		$this->assertSame( 'Heat Advisory', $extras['alerts'][0]['event'] );
+		$this->assertSame( 'Heat Advisory until 9 PM', $extras['alerts'][0]['headline'] );
+		$this->assertSame( 1761264000, $extras['alerts'][0]['ends'] );
+		$this->assertArrayNotHasKey( 'expires', $extras['alerts'][0] );
+
+		$this->assertSame( array(), Weather_Provider_Weewx::parse_extras( array() ) );
+		$this->assertArrayNotHasKey( 'webcam', Weather_Provider_Weewx::parse_extras( array( 'station' => array( 'webcam' => 'javascript:alert(1)' ) ) ) );
+		$this->assertArrayNotHasKey( 'trend', Weather_Provider_Weewx::parse_extras( array( 'trend' => array( 'hours' => 3 ) ) ), 'A trend without changes.' );
+
+		$many = array_fill( 0, 9, array( 'event' => 'Flood Watch' ) );
+		$this->assertCount( Weather_Provider_Weewx::MAX_ALERTS, Weather_Provider_Weewx::parse_extras( array( 'forecast' => array( 'alerts' => $many ) ) )['alerts'] );
+	}
+
+	/**
+	 * A file in US units has its day converted, a change without the scale's offset.
+	 */
+	public function test_extras_us_units() {
+		$extras = Weather_Provider_Weewx::parse_extras(
+			array(
+				'units' => 'us',
+				'today' => array(
+					'temperature_max' => 86,
+					'windgust_max'    => 10,
+				),
+				'trend' => array(
+					'hours'       => 3,
+					'pressure'    => -0.1,
+					'temperature' => 9,
+				),
+				'rain'  => array( 'storm' => 1 ),
+			)
+		);
+		$this->assertEqualsWithDelta( 30, $extras['today']['temperature_max'], 0.01 );
+		$this->assertEqualsWithDelta( 4.47, $extras['today']['windgust_max'], 0.01 );
+		$this->assertEqualsWithDelta( -3.39, $extras['trend']['pressure'], 0.01 );
+		$this->assertEqualsWithDelta( 5, $extras['trend']['temperature'], 0.01 );
+		$this->assertEqualsWithDelta( 25.4, $extras['rain']['storm'], 0.01 );
+	}
+
+	/**
+	 * Current conditions carry the extras, with the webcam made absolute, which aren't stored with a post (#810).
+	 */
+	public function test_extras_in_conditions() {
+		$document                      = $this->document();
+		$document['today']             = array( 'temperature_max' => 23.1 );
+		$document['station']['webcam'] = 'cam/latest.jpg';
+		$this->mock_http( array( 'weather.example.com/data/current.json' => array( 'body' => $document ) ) );
+		$conditions = $this->history_station()->get_conditions();
+		$this->assertSame( 23.1, $conditions['station_extras']['today']['temperature_max'] );
+		$this->assertSame( 'https://weather.example.com/data/cam/latest.jpg', $conditions['station_extras']['webcam'] );
+		$this->assertArrayNotHasKey( 'station_health', $conditions );
+
+		$post_id = self::factory()->post->create();
+		set_post_weatherdata( $post_id, '', $conditions );
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'weather_station_extras' ) );
+		$this->assertEquals( $conditions['temperature'], get_post_meta( $post_id, 'weather_temperature', true ) );
+	}
+
+	/**
+	 * A station's health warnings are shown to administrators as a provider error, and cleared when they go (#810).
+	 */
+	public function test_health_warnings() {
+		delete_option( Sloc_Provider_Errors::OPTION );
+		$this->assertSame(
+			array( 'Wind sensor battery low', 'Weak signal' ),
+			Weather_Provider_Weewx::health_warnings(
+				array(
+					'health' => array(
+						'warnings' => array(
+							array( 'message' => 'Wind sensor battery low' ),
+							array( 'message' => 'Weak signal' ),
+							array( 'message' => 'Weak signal' ),
+							array( 'field' => 'none' ),
+							'text',
+						),
+					),
+				)
+			)
+		);
+		$this->assertSame( array(), Weather_Provider_Weewx::health_warnings( array() ) );
+
+		$document           = $this->document();
+		$document['health'] = array( 'warnings' => array( array( 'message' => 'Wind sensor battery low' ) ) );
+		$this->mock_http( array( 'weather.example.com/data/current.json' => array( 'body' => $document ) ) );
+		$this->history_station()->get_conditions();
+		$errors = Sloc_Provider_Errors::get_errors();
+		$this->assertArrayHasKey( 'health:weewx', $errors );
+		$this->assertSame( 'station_health', $errors['health:weewx']['code'] );
+		$message = Sloc_Provider_Errors::message( $errors['health:weewx'] );
+		$this->assertStringContainsString( 'WeeWX station needs attention', $message );
+		$this->assertStringContainsString( 'Backyard Weather: Wind sensor battery low', $message );
+		$this->assertStringContainsString( 'warnings have cleared', Sloc_Provider_Errors::message( $errors['health:weewx'], true ) );
+
+		$this->mock_http( array( 'weather.example.com/data/current.json' => array( 'body' => $this->document() ) ) );
+		$provider = $this->history_station();
+		$provider->set_cache_time( 0 );
+		$provider->get_conditions();
+		$this->assertArrayNotHasKey( 'health:weewx', Sloc_Provider_Errors::get_errors() );
+	}
+
+	/**
 	 * The provider is registered as a station provider.
 	 */
 	public function test_registered() {

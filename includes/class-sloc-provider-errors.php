@@ -51,6 +51,7 @@ class Sloc_Provider_Errors {
 		'station_empty',
 		'station_not_found',
 		'station_stale',
+		'station_health',
 	);
 
 	/**
@@ -204,6 +205,7 @@ class Sloc_Provider_Errors {
 	 * Returns one line about a recorded error, or the provider's recovery from it.
 	 *
 	 * @since 6.1.0
+	 * @since 6.3.0 A station's health warnings, of type health, say so; see Weather_Provider_Weewx::record_health().
 	 *
 	 * @param array $record   Recorded error.
 	 * @param bool  $resolved Whether the provider works again. Default false.
@@ -217,7 +219,13 @@ class Sloc_Provider_Errors {
 			'venue'     => __( 'venue', 'simple-location' ),
 		);
 		$type  = $types[ $record['type'] ] ?? $record['type'];
-		if ( $resolved ) {
+		if ( 'health' === $record['type'] ) {
+			$message = $resolved
+				/* translators: %s: Provider name, such as WeeWX. */
+				? sprintf( __( 'Simple Location: the %s station warnings have cleared.', 'simple-location' ), $record['name'] )
+				/* translators: 1: Provider name, such as WeeWX 2: Station and its warnings, such as Backyard: Wind sensor battery low. */
+				: sprintf( __( 'Simple Location: a %1$s station needs attention: %2$s', 'simple-location' ), $record['name'], $record['message'] );
+		} elseif ( $resolved ) {
 			/* translators: 1: Provider name 2: Kind of lookup, such as weather. */
 			$message = sprintf( __( 'Simple Location: %1$s %2$s lookups work again.', 'simple-location' ), $record['name'], $type );
 		} else {
