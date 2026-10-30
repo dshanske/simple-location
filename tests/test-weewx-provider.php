@@ -35,6 +35,224 @@ class WeewxProviderTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Saves the station, and returns a provider for it.
+	 *
+	 * @return Weather_Provider_Weewx
+	 */
+	protected function history_station() {
+		update_option(
+			'sloc_weewx_stations',
+			array(
+				array(
+					'id'        => 'weewx',
+					'url'       => 'https://weather.example.com/data/current.json',
+					'latitude'  => 39.95,
+					'longitude' => -75.16,
+				),
+			)
+		);
+		$provider = new Weather_Provider_Weewx();
+		$provider->set( array( 'station_id' => 'weewx' ) );
+		return $provider;
+	}
+
+	/**
+	 * A current.json whose history covers the last day in 30-minute intervals, ending now.
+	 *
+	 * @param array $more Other keys.
+	 * @return array
+	 */
+	protected function document_with_history( $more = array() ) {
+		$document            = $this->document();
+		$start               = time() - DAY_IN_SECONDS;
+		$count               = 48;
+		$document['history'] = array(
+			'start'       => $start,
+			'interval'    => 1800,
+			'temperature' => array_map( fn( $i ) => 10 + $i / 2, range( 0, $count - 1 ) ),
+			'humidity'    => array_fill( 0, $count, 60 ),
+			'rain'        => array_fill( 0, $count, 0.5 ),
+			'windgust'    => array_fill( 0, $count, 4 ),
+		);
+		return array_merge( $document, $more );
+	}
+
+	/**
+	 * A past time within the day is read from current.json's history: the interval the time is in, rain over the
+	 * hour, the station and its credit, and no wind direction or AQI (#809).
+	 */
+	public function test_past_from_current_history() {
+		$document = $this->document_with_history();
+		$this->mock_http( array( 'weather.example.com/data/current.json' => array( 'body' => $document ) ) );
+		$provider   = $this->history_station();
+		$start      = $document['history']['start'];
+		$time       = $start + 10 * 1800 + 60;
+		$conditions = $provider->get_conditions( $time );
+
+		$this->assertSame( 15.0, $conditions['temperature'] );
+		$this->assertSame( 60.0, $conditions['humidity'] );
+		$this->assertSame( 1.0, $conditions['rain'], 'Two 30-minute intervals make the hour.' );
+		$this->assertSame( $start + 11 * 1800, $conditions['timestamp'], 'The end of the interval.' );
+		$this->assertSame( 'backyard', $conditions['station_id'] );
+		$this->assertSame( 'weewx', $conditions['provider'] );
+		$this->assertArrayNotHasKey( 'winddegree', $conditions );
+		$this->assertArrayNotHasKey( 'aqi', $conditions );
+		$this->assertArrayHasKey( 'attribution', $conditions );
+
+		// Another post at another time of the day doesn't fetch the file again.
+		$provider->get_conditions( $start + 3 * 1800 );
+		$this->assertCount( 1, $this->http_requests );
+	}
+
+	/**
+	 * Older times are read from history-week.json, which the file names relative to itself, in hourly intervals.
+	 */
+	public function test_past_from_week() {
+		$week_start = time() - WEEK_IN_SECONDS;
+		$week       = array(
+			'format'  => 'current-conditions-history',
+			'version' => 1,
+			'units'   => 'metric',
+			'history' => array(
+				'start'       => $week_start,
+				'interval'    => 3600,
+				'temperature' => array_fill( 0, 168, 8.5 ),
+				'rain'        => array_fill( 0, 168, 2 ),
+				'humidity'    => array_merge( array_fill( 0, 30, 70 ), array( null ), array_fill( 0, 137, 70 ) ),
+			),
+		);
+		$this->mock_http(
+			array(
+				'weather.example.com/data/history-week.json' => array( 'body' => $week ),
+				'weather.example.com/data/current.json' => array( 'body' => $this->document_with_history( array( 'archives' => array( 'week' => 'history-week.json' ) ) ) ),
+			)
+		);
+		$provider   = $this->history_station();
+		$conditions = $provider->get_conditions( $week_start + 30 * 3600 + 120 );
+		$this->assertSame( 8.5, $conditions['temperature'] );
+		$this->assertSame( 2.0, $conditions['rain'], 'One hourly interval is the hour.' );
+		$this->assertArrayNotHasKey( 'humidity', $conditions, 'A null interval is left out.' );
+		$this->assertSame( 'https://weather.example.com/data/history-week.json', $this->http_requests[1]['url'] );
+
+		$provider->get_conditions( $week_start + 3 * 3600 );
+		$this->assertCount( 2, $this->http_requests, 'Both files are kept.' );
+	}
+
+	/**
+	 * Without a week's history, an older time gives nothing, so the next provider is tried; no station is an error.
+	 */
+	public function test_past_without_history() {
+		$this->mock_http( array( 'weather.example.com/data/current.json' => array( 'body' => $this->document_with_history() ) ) );
+		$provider = $this->history_station();
+		$this->assertSame( array(), $provider->get_conditions( strtotime( '-3 days' ) ) );
+
+		$this->mock_http( array( 'weather.example.com/data/current.json' => array( 'body' => $this->document() ) ) );
+		delete_transient( 'sloc_weewx_' . md5( 'https://weather.example.com/data/current.json' ) );
+		$this->assertSame( array(), $provider->get_conditions( strtotime( '-5 hours' ) ), 'A file without history.' );
+
+		$this->assertWPError( $provider->get_conditions( strtotime( '-8 days' ) ), 'Beyond a week.' );
+
+		$other = new Weather_Provider_Weewx();
+		$other->set( array( 'station_id' => 'elsewhere' ) );
+		$this->assertSame( 'no_results', $other->get_conditions( strtotime( '-5 hours' ) )->get_error_code() );
+	}
+
+	/**
+	 * A week file that can't be read, or isn't one, is an error.
+	 */
+	public function test_past_week_errors() {
+		$current = $this->document_with_history( array( 'archives' => array( 'week' => 'history-week.json' ) ) );
+		$this->mock_http(
+			array(
+				'history-week.json'                     => array( 'body' => $this->document() ),
+				'weather.example.com/data/current.json' => array( 'body' => $current ),
+			)
+		);
+		$this->assertSame( 'station_format', $this->history_station()->get_conditions( strtotime( '-3 days' ) )->get_error_code() );
+
+		$this->mock_http(
+			array(
+				'history-week.json'                     => new WP_Error( 'http_request_failed', 'Timed out' ),
+				'weather.example.com/data/current.json' => array( 'body' => $current ),
+			)
+		);
+		delete_transient( 'sloc_weewx_' . md5( 'https://weather.example.com/data/history-week.json' ) );
+		$this->assertSame( 'http_request_failed', $this->history_station()->get_conditions( strtotime( '-4 days' ) )->get_error_code() );
+	}
+
+	/**
+	 * The nearest station is used for a location, with its distance.
+	 */
+	public function test_past_nearest_station() {
+		$this->mock_http( array( 'weather.example.com/data/current.json' => array( 'body' => $this->document_with_history() ) ) );
+		$this->history_station();
+		$provider = new Weather_Provider_Weewx();
+		$provider->set( 39.951, -75.161 );
+		$conditions = $provider->get_conditions( strtotime( '-5 hours' ) );
+		$this->assertArrayHasKey( 'temperature', $conditions );
+		$this->assertLessThan( 1000, $conditions['distance'] );
+	}
+
+	/**
+	 * Reading a history: the interval a time is in, totals over the hour, US units, and what isn't covered.
+	 */
+	public function test_history_conditions() {
+		$history  = array(
+			'start'             => 1000,
+			'interval'          => 600,
+			'temperature'       => array( 50, 59, 68, null ),
+			'rain'              => array( 0.1, null, 0.2, 0.3 ),
+			'lightning_strikes' => array( 0, 0, 0, 0 ),
+			'winddegree'        => array( 1, 2, 3, 4 ),
+			'not_weather'       => array( 1, 2, 3, 4 ),
+			'code'              => array( 800, 800, 800, 800 ),
+		);
+		$readings = Weather_Provider_Weewx::history_conditions( $history, 1000 + 2 * 600 + 5, 'us' );
+		$this->assertEqualsWithDelta( 20, $readings['temperature'], 0.01, 'Fahrenheit to Celsius.' );
+		$this->assertEqualsWithDelta( 7.62, $readings['rain'], 0.01, 'Six 10-minute intervals, but only three exist: 0.3 inches.' );
+		$this->assertSame( 1000 + 3 * 600, $readings['timestamp'] );
+		$this->assertArrayNotHasKey( 'lightning_strikes', $readings, 'No strikes.' );
+		$this->assertArrayNotHasKey( 'winddegree', $readings );
+		$this->assertArrayNotHasKey( 'not_weather', $readings );
+		$this->assertArrayNotHasKey( 'code', $readings );
+
+		$this->assertSame( array( 'rain', 'timestamp' ), array_keys( Weather_Provider_Weewx::history_conditions( $history, 1000 + 3 * 600 ) ), 'A null temperature is left out.' );
+		$this->assertNull( Weather_Provider_Weewx::history_conditions( $history, 999 ), 'Before the history.' );
+		$this->assertNull( Weather_Provider_Weewx::history_conditions( $history, 1000 + 4 * 600 ), 'After it.' );
+		$this->assertSame(
+			array(),
+			Weather_Provider_Weewx::history_conditions(
+				array(
+					'start'       => 0,
+					'interval'    => 60,
+					'temperature' => array( null, 'x' ),
+				),
+				61
+			)
+		);
+		foreach ( array(
+			null,
+			'history',
+			array( 'start' => 0 ),
+			array(
+				'start'       => 0,
+				'interval'    => 0,
+				'temperature' => array( 1 ),
+			),
+			array(
+				'start'    => 'x',
+				'interval' => 60,
+			),
+			array(
+				'start'    => 0,
+				'interval' => 60,
+			),
+		) as $invalid ) {
+			$this->assertNull( Weather_Provider_Weewx::history_conditions( $invalid, 30 ), wp_json_encode( $invalid ) );
+		}
+	}
+
+	/**
 	 * The provider is registered as a station provider.
 	 */
 	public function test_registered() {
