@@ -3,7 +3,7 @@ Contributors: dshanske
 Tags: geolocation, timezones, maps, location, weather
 Requires at least: 6.2
 Tested up to: 7.1
-Stable tag: 6.2.0
+Stable tag: 6.3.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -486,6 +486,10 @@ Developers can refresh the station, airport and airline files with `composer upd
 
 == Upgrade Notice ==
 
+= 6.3.0 =
+
+The experimental Micropub q=geo query is replaced by q=places, which lists your venues and your venue providers' places as h-cards. The sloc_geo/1.0/venue REST route returns the same places when given coordinates. Meteocons can be chosen for the weather condition icons under Weather Icons in the settings.
+
 = 6.2.0 =
 
 Snow depth that Meteostat and Xweather stored as snowfall (Meteostat's ten times too large) is moved to the new snow depth reading in the background. The front-end stylesheet now loads only on pages that show locations, weather or maps; a theme that shows them some other way can load it everywhere with the sloc_enqueue_styles filter. Settings are now checked when saved, so an unknown provider becomes None.
@@ -503,6 +507,21 @@ The Met Office provider has been removed; if you used it, choose another weather
 Requires PHP 7.4, WordPress 6.2 or ClassicPress 2.7. The Bing providers and MapQuest elevation have been removed because their services were retired; if you used one, choose another provider in Settings. Many fixes to location visibility and permissions.
 
 == Changelog ==
+
+= 6.3.0 ( 2026-10-30 ) =
+* Find venues in the post editor, from your own venues and your venue providers, shown apart, and use one as the post's venue
+* Replace the experimental Micropub q=geo query with q=places: your venues and your providers' places as h-cards, with a limit and an option for only your own; a private venue is only listed for users who can edit it
+* Link a Micropub check-in or location to a venue by its page or the provider's identifier, and with plain permalinks
+* Add a venue setting to leave it out of venue lists and check-in matching
+* Add apparent temperature, cloud base and lightning readings: from WeeWX stations, the apparent temperature from every provider that has it, and the cloud base from NWS
+* Get a WeeWX station's weather for posts from the last day, or the last week with its archives, from the station's history
+* Show a WeeWX station's high and low, trend, storm rain, webcam and alerts in the Weather Station widget, and its low battery and weak signal warnings to administrators
+* Credit a WeeWX station's condition or cloud cover from an airport's METAR or the National Weather Service
+* Say to enter current.json when a station's archive file is entered
+* Offer Meteocons for the weather condition icons
+* Add the sloc_content_location filter to leave the location and map out of post content
+* Fix a check-in whose link is another kind of post being linked to it as its venue
+* Remove the editor's unused save venue script
 
 = 6.2.0 ( 2026-10-29 ) =
 * Add rain and snow archive views, like the temperature view, with a bar chart of the posts with some rain or snow
