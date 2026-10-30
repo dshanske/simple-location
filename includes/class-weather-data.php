@@ -28,6 +28,7 @@ class Sloc_Weather_Data {
 	 * @since 6.2.0 Adds supplement, the provider that filled in readings; see Sloc_Weather_Fill.
 	 * @since 6.3.0 Adds apptemp, the apparent temperature; cloudbase, the height of the cloud base; and
 	 *              lightning_strikes and lightning_distance, the strikes in the last hour and how far the latest was.
+	 * @since 6.3.0 Adds derived_source, where a station took a reading it doesn't measure, such as an airport's METAR.
 	 * @var string[]
 	 */
 	public static $properties = array(
@@ -67,6 +68,7 @@ class Sloc_Weather_Data {
 		'code',
 		'provider',
 		'supplement',
+		'derived_source',
 		'rainrate',
 		'snowrate',
 		'lightning_strikes',
@@ -79,9 +81,10 @@ class Sloc_Weather_Data {
 	 * Properties that say where the weather came from, which aren't weather on their own.
 	 *
 	 * @since 6.1.0
+	 * @since 6.3.0 Adds derived_source.
 	 * @var string[]
 	 */
-	const SOURCE_PROPERTIES = array( 'provider', 'supplement', 'attribution', 'attribution_url' );
+	const SOURCE_PROPERTIES = array( 'provider', 'supplement', 'derived_source', 'attribution', 'attribution_url' );
 
 	/**
 	 * Credits to print in the page footer, keyed by provider slug.
@@ -136,6 +139,7 @@ class Sloc_Weather_Data {
 	 * @since 6.1.0 Registers the rain rate and a weather station's credit.
 	 * @since 6.2.0 Registers the VOC and NOx indices, the snow depth and the snow rate.
 	 * @since 6.3.0 Registers the apparent temperature, the cloud base, and the lightning strikes and their distance.
+	 * @since 6.3.0 Registers the source of readings a station took from elsewhere.
 	 */
 	public static function register_meta() {
 		// Legacy Weather Storage
@@ -237,6 +241,18 @@ class Sloc_Weather_Data {
 			register_meta( $type, 'weather_provider', $args );
 		}
 
+		// Where a station took a reading it doesn't measure, such as metar-kphl or nws.
+		$args = array(
+			'sanitize_callback' => 'sanitize_key',
+			'type'              => 'string',
+			'description'       => __( 'Source of Readings a Station Took from Elsewhere', 'simple-location' ),
+			'single'            => true,
+			'show_in_rest'      => false,
+		);
+		foreach ( array( 'post', 'comment', 'user', 'term' ) as $type ) {
+			register_meta( $type, 'weather_derived_source', $args );
+		}
+
 		// The credit of a weather station, stored with its weather.
 		$credits = array(
 			'attribution'     => array( 'sanitize_text_field', __( 'Weather Credit', 'simple-location' ) ),
@@ -284,6 +300,7 @@ class Sloc_Weather_Data {
 	 * Returns the credit to show with some weather: its station's own credit when it has one, otherwise its provider's.
 	 *
 	 * @since 6.1.0
+	 * @since 6.3.0 Credits where a station took readings from, such as an airport's METAR; see derived_credit().
 	 *
 	 * @param array $weather Weather data, with 'attribution' and 'attribution_url' for a station's credit, and 'provider'.
 	 * @return string HTML, or an empty string without a credit to show here.
@@ -292,10 +309,11 @@ class Sloc_Weather_Data {
 		if ( ! is_array( $weather ) ) {
 			return '';
 		}
-		// The provider that filled in readings is credited too.
+		// The provider that filled in readings is credited too, and where a station took readings from.
 		$supplement = ( isset( $weather['supplement'] ) && is_string( $weather['supplement'] ) && ( $weather['provider'] ?? '' ) !== $weather['supplement'] )
 			? self::get_attribution_markup( $weather['supplement'] )
 			: '';
+		$supplement = self::derived_credit( $weather['derived_source'] ?? null ) . $supplement;
 		$text       = isset( $weather['attribution'] ) && is_string( $weather['attribution'] ) ? trim( $weather['attribution'] ) : '';
 		if ( '' === $text ) {
 			return self::get_attribution_markup( $weather['provider'] ?? '' ) . $supplement;
@@ -303,6 +321,37 @@ class Sloc_Weather_Data {
 		$url  = isset( $weather['attribution_url'] ) && is_string( $weather['attribution_url'] ) ? esc_url( $weather['attribution_url'] ) : '';
 		$html = '' === $url ? esc_html( $text ) : sprintf( '<a href="%1$s">%2$s</a>', $url, esc_html( $text ) );
 		return self::place_credit( 'station:' . md5( $text . '|' . $url ), $html, false ) . $supplement;
+	}
+
+	/**
+	 * Returns the credit for where a station took readings it doesn't measure.
+	 *
+	 * An airport's METAR, metar or metar-{ICAO ID}, is credited to aviationweather.gov, with the airport; nws to the
+	 * National Weather Service. Both are public domain, so the credit says where the reading is from rather than
+	 * meeting terms; it follows the Weather Credits setting.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param mixed $source Source, such as metar-kphl or nws.
+	 * @return string HTML, or an empty string without a credit to show here.
+	 */
+	public static function derived_credit( $source ) {
+		if ( ! is_string( $source ) ) {
+			return '';
+		}
+		if ( 'nws' === $source ) {
+			return self::place_credit( 'nws', sprintf( '<a href="https://www.weather.gov/">%s</a>', esc_html__( 'National Weather Service', 'simple-location' ) ), false );
+		}
+		if ( preg_match( '/^metar(?:-([a-z0-9]{4}))?$/', $source, $matches ) ) {
+			$station = isset( $matches[1] ) ? strtoupper( $matches[1] ) : '';
+			$url     = '' === $station ? 'https://aviationweather.gov/' : 'https://aviationweather.gov/data/metar/?id=' . $station;
+			$text    = '' === $station
+				? __( 'aviationweather.gov', 'simple-location' )
+				/* translators: %s: Airport ICAO ID, such as KPHL. */
+				: sprintf( __( 'aviationweather.gov (%s)', 'simple-location' ), $station );
+			return self::place_credit( 'metar:' . $station, sprintf( '<a href="%1$s">%2$s</a>', esc_url( $url ), esc_html( $text ) ), false );
+		}
+		return '';
 	}
 
 	/**

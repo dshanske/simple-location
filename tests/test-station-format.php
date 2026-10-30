@@ -222,6 +222,127 @@ class StationFormatTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A condition or cloud cover from an airport's METAR or the NWS names its source; the station's own sensors, an
+	 * unknown source, or an invalid airport ID don't (#811).
+	 */
+	public function test_derived_source() {
+		$parse = function ( $derived ) {
+			$document            = $this->document();
+			$document['derived'] = $derived;
+			return Weather_Provider_Station::parse_document( $document );
+		};
+		$this->assertSame(
+			'metar-kphl',
+			$parse(
+				array(
+					'code'          => 'metar',
+					'metar_station' => 'KPHL',
+				)
+			)['derived_source']
+		);
+		$this->assertSame(
+			'metar-kphl',
+			$parse(
+				array(
+					'code'          => 'sensors_precipitation',
+					'cloudiness'    => 'metar',
+					'metar_station' => 'kphl',
+				)
+			)['derived_source'],
+			'The cloud cover\'s source.'
+		);
+		$this->assertSame( 'nws', $parse( array( 'code' => 'nws' ) )['derived_source'] );
+		$this->assertSame(
+			'nws',
+			$parse(
+				array(
+					'code'       => 'nws',
+					'cloudiness' => 'metar',
+				)
+			)['derived_source'],
+			'The condition\'s source first.'
+		);
+		foreach ( array( 'KPH', 'K PH', '<b>', array( 'KPHL' ), 12345 ) as $invalid ) {
+			$this->assertSame(
+				'metar',
+				$parse(
+					array(
+						'code'          => 'metar',
+						'metar_station' => $invalid,
+					)
+				)['derived_source']
+			);
+		}
+		$this->assertSame( 'metar', $parse( array( 'code' => 'metar' ) )['derived_source'], 'Without an airport.' );
+		foreach ( array( array( 'code' => 'sensors_air' ), array( 'cloudiness' => 'sensors_clouds' ), array( 'code' => 'satellite' ), array( 'code' => array( 'metar' ) ), array(), 'metar' ) as $derived ) {
+			$this->assertArrayNotHasKey( 'derived_source', $parse( $derived ), wp_json_encode( $derived ) );
+		}
+	}
+
+	/**
+	 * A METAR source is credited to aviationweather.gov with the airport, and the NWS by name; nothing else is (#811).
+	 */
+	public function test_derived_credit() {
+		$credit = Sloc_Weather_Data::get_weather_credit_markup(
+			array(
+				'provider'        => 'station',
+				'attribution'     => 'Weather from Backyard',
+				'attribution_url' => 'https://weather.example.com/',
+				'derived_source'  => 'metar-kphl',
+			)
+		);
+		$this->assertStringContainsString( 'Weather from Backyard', $credit );
+		$this->assertStringContainsString( '<a href="https://aviationweather.gov/data/metar/?id=KPHL">aviationweather.gov (KPHL)</a>', $credit );
+		$this->assertStringContainsString( '<a href="https://aviationweather.gov/">aviationweather.gov</a>', Sloc_Weather_Data::derived_credit( 'metar' ) );
+
+		$this->assertStringContainsString( '<a href="https://www.weather.gov/">National Weather Service</a>', Sloc_Weather_Data::derived_credit( 'nws' ) );
+		foreach ( array( null, '', array( 'metar' ), 'metar-<b>', 'metar-kphl1', 'nwsus', 'openmeteo' ) as $invalid ) {
+			$this->assertSame( '', Sloc_Weather_Data::derived_credit( $invalid ), wp_json_encode( $invalid ) );
+		}
+
+		// Stored with the weather, it is credited with the post's weather, and is no weather on its own.
+		$post_id = self::factory()->post->create();
+		set_post_weatherdata(
+			$post_id,
+			'',
+			array(
+				'temperature'    => 20,
+				'provider'       => 'station',
+				'derived_source' => 'metar-kphl',
+			)
+		);
+		$this->assertSame( 'metar-kphl', get_post_meta( $post_id, 'weather_derived_source', true ) );
+		$this->assertStringContainsString( 'aviationweather.gov (KPHL)', Sloc_Weather_Data::get_the_weather( 'post', $post_id ) );
+		$this->assertContains( 'derived_source', Sloc_Weather_Data::SOURCE_PROPERTIES );
+
+		update_option( 'sloc_weather_attribution', 'footer' );
+		$this->assertStringNotContainsString( 'aviationweather', Sloc_Weather_Data::get_the_weather( 'post', $post_id ) );
+		ob_start();
+		Sloc_Weather_Data::footer_credits();
+		$this->assertStringContainsString( 'aviationweather.gov (KPHL)', ob_get_clean() );
+	}
+
+	/**
+	 * Filling in readings from Open-Meteo leaves a station's METAR source, and both are credited.
+	 */
+	public function test_derived_source_with_fill() {
+		$weather = Sloc_Weather_Fill::merge(
+			array(
+				'temperature'    => 20,
+				'provider'       => 'station',
+				'derived_source' => 'metar-kphl',
+			),
+			array( 'snowdepth' => 10 ),
+			array( 'snowdepth' )
+		);
+		$this->assertSame( 'metar-kphl', $weather['derived_source'] );
+		$this->assertSame( 'openmeteo', $weather['supplement'] );
+		$credit = Sloc_Weather_Data::get_weather_credit_markup( $weather );
+		$this->assertStringContainsString( 'aviationweather.gov (KPHL)', $credit );
+		$this->assertStringContainsString( 'Open-Meteo', $credit );
+	}
+
+	/**
 	 * The rain rate has a name and units, metric and imperial.
 	 */
 	public function test_rain_rate() {

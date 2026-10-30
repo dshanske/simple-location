@@ -457,11 +457,43 @@ class Weather_Provider_Station extends Weather_Provider {
 	}
 
 	/**
+	 * Returns where a station took its condition or cloud cover from, when it isn't the station's own sensors.
+	 *
+	 * The file's `derived.code` and `derived.cloudiness` name the source of each. An airport's METAR is metar, with
+	 * the airport's ICAO ID from `derived.metar_station` when it is one; the National Weather Service forecast is
+	 * nws. The condition's source is used when both are from elsewhere. Other sources, such as the station's sensors,
+	 * aren't from elsewhere.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param mixed $derived The file's `derived` object.
+	 * @return string Source, such as metar-kphl, metar or nws; or an empty string.
+	 */
+	protected static function derived_source( $derived ) {
+		if ( ! is_array( $derived ) ) {
+			return '';
+		}
+		foreach ( array( 'code', 'cloudiness' ) as $reading ) {
+			$source = $derived[ $reading ] ?? null;
+			if ( 'metar' === $source ) {
+				$station = $derived['metar_station'] ?? null;
+				return ( is_string( $station ) && preg_match( '/^[A-Za-z0-9]{4}$/', $station ) ) ? 'metar-' . strtolower( $station ) : 'metar';
+			}
+			if ( 'nws' === $source ) {
+				return 'nws';
+			}
+		}
+		return '';
+	}
+
+	/**
 	 * Reads a station's JSON: the current conditions format, version 1, or the earlier format.
 	 *
 	 * @since 6.1.0
 	 * @since 6.2.0 An AQI whose `derived.aqi` scale isn't us_epa isn't stored.
 	 * @since 6.3.0 An archive file, such as history-week.json, is an error that says to use the current conditions file.
+	 * @since 6.3.0 A condition or cloud cover taken from an airport's METAR or the National Weather Service names
+	 *              it as 'derived_source'; see derived_source().
 	 *
 	 * @param mixed $json Decoded JSON.
 	 * @return array|WP_Error Conditions in the plugin's units, with 'timestamp', and the station's 'station_id', 'name',
@@ -500,6 +532,10 @@ class Weather_Provider_Station extends Weather_Provider {
 		$derived = ( isset( $json['derived'] ) && is_array( $json['derived'] ) ) ? $json['derived'] : array();
 		if ( isset( $derived['aqi'] ) && 'us_epa' !== $derived['aqi'] ) {
 			unset( $return['aqi'] );
+		}
+		$source = static::derived_source( $derived );
+		if ( '' !== $source ) {
+			$return['derived_source'] = $source;
 		}
 		if ( isset( $json['units'] ) && 'us' === $json['units'] ) {
 			$return = self::imperial_to_metric( $return );
