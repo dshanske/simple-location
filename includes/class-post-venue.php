@@ -28,6 +28,14 @@ class Post_Venue {
 	const MATCH_RADIUS = 100;
 
 	/**
+	 * Most of the site's venues read when listing the places near a location.
+	 *
+	 * @since 6.3.0
+	 * @var int
+	 */
+	const PLACES_SCAN = 100;
+
+	/**
 	 * Meta key holding each identifier of a venue, one per row, so venues can be found by it.
 	 *
 	 * @since 6.1.0
@@ -568,6 +576,319 @@ class Post_Venue {
 			echo $return; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Each part is escaped above as the list is built.
 		}
 		return $return;
+	}
+
+	/**
+	 * Returns the places near a location: the site's venues, then the venue providers', as mf2 h-cards.
+	 *
+	 * The site's venues within the sloc_venue_radius setting come first, nearest first, each with its page on the
+	 * site as 'url' and 'uid'. The venue providers' follow, without those the site already has, found by their
+	 * identifier or one of their links. Each place names where it came from as 'provider': 'local' for the site's,
+	 * or the provider's slug.
+	 *
+	 * A private, draft or password-protected venue, or one whose location is private, is left out unless the
+	 * current user can edit it. A venue whose location is protected shows without its coordinates, address or
+	 * distance.
+	 *
+	 * The providers aren't asked when the site's venues already fill the limit.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param float $lat  Latitude.
+	 * @param float $lng  Longitude.
+	 * @param array $args {
+	 *     Optional. Arguments.
+	 *
+	 *     @type int  $limit Most places. Default the sloc_venue_limit setting, at most Venue_Provider::MAX_LIMIT.
+	 *     @type bool $local Only the site's venues. Default false.
+	 * }
+	 * @return array[] Places as mf2 h-cards; empty for coordinates that aren't valid.
+	 */
+	public static function places( $lat, $lng, $args = array() ) {
+		$lat = clean_coordinate( $lat, 'latitude' );
+		$lng = clean_coordinate( $lng, 'longitude' );
+		if ( false === $lat || false === $lng ) {
+			return array();
+		}
+		$args  = wp_parse_args(
+			$args,
+			array(
+				'limit' => get_option( 'sloc_venue_limit', Venue_Provider::DEFAULT_LIMIT ),
+				'local' => false,
+			)
+		);
+		$limit = Venue_Provider::sanitize_limit( $args['limit'] );
+
+		$local = self::local_places( $lat, $lng );
+		$items = array();
+		if ( ! $args['local'] && count( $local ) < $limit && Loc_Config::venue_provider() ) {
+			$found = Sloc_Provider_Chain::venues( $lat, $lng, $limit );
+			$items = ( is_array( $found ) && is_array( $found['items'] ?? null ) ) ? array_filter( $found['items'], 'is_array' ) : array();
+		}
+
+		if ( ! empty( $items ) ) {
+			// Venues the site has that the providers found, though they aren't within the radius here.
+			$known = wp_list_pluck( wp_list_pluck( $local, 'venue' ), 'ID' );
+			foreach ( self::venues_by_uid( array_column( $items, 'uid' ) ) as $venue ) {
+				$access = self::place_access( $venue );
+				if ( $access && ! in_array( $venue->ID, $known, true ) ) {
+					$local[] = array(
+						'venue'    => $venue,
+						'access'   => $access,
+						'distance' => self::venue_distance( $venue, $lat, $lng ),
+					);
+				}
+			}
+
+			$links = array();
+			foreach ( $local as $place ) {
+				$links = array_merge( $links, self::venue_identifiers( $place['venue'] ) );
+			}
+			$items = array_filter(
+				$items,
+				function ( $item ) use ( $links ) {
+					$urls = self::venue_urls( $item );
+					$ids  = array_merge( array( $item['uid'] ?? '', $urls['url'] ), $urls['alternate'] );
+					return empty( array_intersect( array_filter( $ids, 'is_string' ), $links ) );
+				}
+			);
+		}
+
+		// Nearest first; a venue without coordinates last.
+		usort( $local, fn( $a, $b ) => ( $a['distance'] ?? PHP_INT_MAX ) <=> ( $b['distance'] ?? PHP_INT_MAX ) );
+		$cards = array_map( fn( $place ) => self::local_card( $place['venue'], $place['access'], $place['distance'] ), $local );
+		$cards = array_slice( array_merge( $cards, array_values( $items ) ), 0, $limit );
+
+		/**
+		 * Filters the places near a location.
+		 *
+		 * @since 6.3.0
+		 *
+		 * @param array[] $places Places as mf2 h-cards, the site's venues first.
+		 * @param float   $lat    Latitude.
+		 * @param float   $lng    Longitude.
+		 * @param array   $args   Arguments: 'limit' and 'local'.
+		 */
+		return apply_filters( 'sloc_places', array_map( array( __CLASS__, 'jf2_to_mf2' ), $cards ), $lat, $lng, $args );
+	}
+
+	/**
+	 * Returns the site's venues within the venue search radius that the current user may see.
+	 *
+	 * At most PLACES_SCAN venues in the box around the radius are read.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param float $lat Latitude.
+	 * @param float $lng Longitude.
+	 * @return array[] Each with 'venue', the post; 'access', as place_access() returns; and 'distance' in meters.
+	 */
+	protected static function local_places( $lat, $lng ) {
+		$radius = Venue_Provider::sanitize_radius( get_option( 'sloc_venue_radius', Venue_Provider::DEFAULT_RADIUS ) );
+		$box    = geo_radius_box( $lat, $lng, $radius );
+		$venues = get_posts(
+			array(
+				'post_type'      => 'venue',
+				'post_status'    => array( 'publish', 'private', 'draft', 'pending', 'future' ),
+				'posts_per_page' => self::PLACES_SCAN,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are found by their coordinates.
+				'meta_query'     => array(
+					array(
+						'key'     => 'geo_latitude',
+						'compare' => 'BETWEEN',
+						'type'    => 'DECIMAL(10,7)',
+						'value'   => array( $box[0], $box[2] ),
+					),
+					array(
+						'key'     => 'geo_longitude',
+						'compare' => 'BETWEEN',
+						'type'    => 'DECIMAL(10,7)',
+						'value'   => array( $box[1], $box[3] ),
+					),
+				),
+			)
+		);
+		$places = array();
+		foreach ( $venues as $venue ) {
+			$access   = self::place_access( $venue );
+			$distance = self::venue_distance( $venue, $lat, $lng );
+			if ( $access && null !== $distance && $distance <= $radius ) {
+				$places[] = array(
+					'venue'    => $venue,
+					'access'   => $access,
+					'distance' => $distance,
+				);
+			}
+		}
+		return $places;
+	}
+
+	/**
+	 * Returns the site's venues with any of a list of identifiers.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array $uids Identifiers; anything that isn't a string is skipped.
+	 * @return WP_Post[] Venues.
+	 */
+	protected static function venues_by_uid( $uids ) {
+		$uids = array_values( array_unique( array_filter( $uids, fn( $uid ) => is_string( $uid ) && '' !== $uid ) ) );
+		if ( empty( $uids ) ) {
+			return array();
+		}
+		return get_posts(
+			array(
+				'post_type'      => 'venue',
+				'post_status'    => array( 'publish', 'private', 'draft', 'pending', 'future' ),
+				'posts_per_page' => count( $uids ),
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are matched by their identifiers.
+				'meta_query'     => array(
+					array(
+						'key'     => self::UID_KEY,
+						'compare' => 'IN',
+						'value'   => $uids,
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Returns how much of a venue the current user may see in a list of places.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param WP_Post $venue Venue.
+	 * @return string|false 'full'; 'name' for a venue whose location is protected; false to leave it out.
+	 */
+	protected static function place_access( $venue ) {
+		if ( current_user_can( 'edit_post', $venue->ID ) ) {
+			return 'full';
+		}
+		if ( 'publish' !== $venue->post_status || '' !== $venue->post_password ) {
+			return false;
+		}
+		$visibility = get_post_geodata( $venue->ID, 'visibility' );
+		if ( 'public' === $visibility ) {
+			return 'full';
+		}
+		return 'protected' === $visibility ? 'name' : false;
+	}
+
+	/**
+	 * Returns a venue's distance from a location.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param WP_Post $venue Venue.
+	 * @param float   $lat   Latitude.
+	 * @param float   $lng   Longitude.
+	 * @return int|null Meters, or null if the venue has no coordinates.
+	 */
+	protected static function venue_distance( $venue, $lat, $lng ) {
+		$geo = get_post_geodata( $venue );
+		if ( ! is_array( $geo ) || ! is_numeric( $geo['latitude'] ?? null ) || ! is_numeric( $geo['longitude'] ?? null ) ) {
+			return null;
+		}
+		return (int) round( geo_distance( $lat, $lng, $geo['latitude'], $geo['longitude'] ) );
+	}
+
+	/**
+	 * Returns the identifiers and links a venue is known by: its page, identifiers, website and other pages.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param WP_Post $venue Venue.
+	 * @return string[] Identifiers and URLs.
+	 */
+	protected static function venue_identifiers( $venue ) {
+		return array_values(
+			array_filter(
+				array_merge(
+					array( get_permalink( $venue ), (string) get_post_meta( $venue->ID, 'venue_url', true ) ),
+					get_post_meta( $venue->ID, self::UID_KEY ),
+					(array) get_post_meta( $venue->ID, 'venue_alternate', true )
+				),
+				fn( $id ) => is_string( $id ) && '' !== $id
+			)
+		);
+	}
+
+	/**
+	 * Returns a site venue as a place, a jf2 h-card.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param WP_Post  $venue    Venue.
+	 * @param string   $access   'full', or 'name' for the name and links only.
+	 * @param int|null $distance Distance in meters, or null.
+	 * @return array h-card.
+	 */
+	protected static function local_card( $venue, $access, $distance ) {
+		$permalink = get_permalink( $venue );
+		$card      = array(
+			'type'     => 'card',
+			'name'     => $venue->post_title,
+			'url'      => array_values( array_unique( array_filter( array( $permalink, (string) get_post_meta( $venue->ID, 'venue_url', true ) ) ) ) ),
+			'uid'      => $permalink,
+			'provider' => 'local',
+		);
+		$types = get_the_terms( $venue, 'venue_type' );
+		if ( is_array( $types ) ) {
+			$card['category'] = wp_list_pluck( $types, 'name' );
+		}
+		if ( 'full' === $access ) {
+			$geo  = get_post_geodata( $venue );
+			$geo  = is_array( $geo ) ? $geo : array();
+			$card = array_merge(
+				$card,
+				array(
+					'latitude'       => is_numeric( $geo['latitude'] ?? null ) ? (float) $geo['latitude'] : null,
+					'longitude'      => is_numeric( $geo['longitude'] ?? null ) ? (float) $geo['longitude'] : null,
+					'altitude'       => is_numeric( $geo['altitude'] ?? null ) ? (float) $geo['altitude'] : null,
+					'street-address' => (string) get_post_meta( $venue->ID, 'venue_street_address', true ),
+					'label'          => $geo['address'] ?? null,
+					'distance'       => $distance,
+				)
+			);
+		}
+		return $card;
+	}
+
+	/**
+	 * Converts a jf2 object, such as a venue's h-card, to mf2 JSON.
+	 *
+	 * Each property becomes a list of values, and a nested object is converted too. Empty values, 'raw' and other
+	 * structures that aren't values are left out.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array $item jf2 object, with 'type' such as 'card'. Default type card.
+	 * @return array mf2 object, with 'type' such as array( 'h-card' ) and 'properties'.
+	 */
+	public static function jf2_to_mf2( $item ) {
+		$properties = array();
+		foreach ( (array) $item as $key => $value ) {
+			if ( 'type' === $key || 'raw' === $key ) {
+				continue;
+			}
+			$values = array();
+			foreach ( ( is_array( $value ) && wp_is_numeric_array( $value ) ) ? $value : array( $value ) as $one ) {
+				if ( is_array( $one ) && isset( $one['type'] ) ) {
+					$values[] = self::jf2_to_mf2( $one );
+				} elseif ( is_scalar( $one ) && '' !== $one ) {
+					$values[] = $one;
+				}
+			}
+			if ( ! empty( $values ) ) {
+				$properties[ $key ] = $values;
+			}
+		}
+		$type = ( isset( $item['type'] ) && is_string( $item['type'] ) && '' !== $item['type'] ) ? $item['type'] : 'card';
+		return array(
+			'type'       => array( 'h-' . $type ),
+			'properties' => $properties,
+		);
 	}
 
 	/**

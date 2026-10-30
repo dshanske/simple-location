@@ -22,7 +22,7 @@ class Location_Plugins {
 	public function __construct() {
 		add_filter( 'before_micropub', array( 'Location_Plugins', 'micropub_lookup_location' ), 10 );
 		add_action( 'after_micropub', array( 'Location_Plugins', 'micropub_set_location' ), 10, 2 );
-		add_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_geo' ), 10, 2 );
+		add_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_places' ), 10, 2 );
 		add_filter( 'webmention_handler_mf2_set_properties', array( 'Location_Plugins', 'webmention_handler_mf2_set_properties' ), 10, 2 );
 		add_filter( 'activitypub_post_location', array( 'Location_Plugins', 'activitypub_post_location' ), 10, 3 );
 		add_action( 'activitypub_before_get_content', array( 'Location_Plugins', 'activitypub_before_get_content' ) );
@@ -430,62 +430,74 @@ class Location_Plugins {
 	}
 
 	/**
-	 * Adds geo queries to the Micropub query handler.
+	 * Answers the experimental Micropub places query, and lists it in the configuration query.
 	 *
-	 * @param array $resp The response before filtering.
-	 * @param array $input The Micropub Input.
-	 * @return array Either the unmodified response or the geo response.
+	 * `q=places` takes the location as `lat` and `lon`, or as a geo URI in `uri`, and optionally `limit`, the most
+	 * places, and `local`, to list only the site's venues. It answers with the places as mf2 h-cards under `places`;
+	 * see Post_Venue::places().
+	 *
+	 * @since 6.3.0 Replaces the experimental `q=geo` query.
+	 *
+	 * @param array|WP_Error $resp  The response before filtering.
+	 * @param array          $input The Micropub input.
+	 * @return array|WP_Error The response, the places, or an error without a location.
 	 */
-	public static function micropub_query_geo( $resp, $input ) {
-		// Only modify geo.
-		if ( ! isset( $input['q'] ) || 'geo' !== $input['q'] ) {
+	public static function micropub_query_places( $resp, $input ) {
+		$query = $input['q'] ?? null;
+		if ( 'config' === $query && is_array( $resp ) ) {
+			$resp['q'] = is_array( $resp['q'] ?? null ) ? $resp['q'] : array();
+			if ( ! in_array( 'places', $resp['q'], true ) ) {
+				$resp['q'][] = 'places';
+			}
 			return $resp;
 		}
-		if ( isset( $input['uri'] ) && 'geo:' === substr( $input['uri'], 0, 4 ) ) {
-			/*
-			 *  Geo URI format:
-			 * http://en.wikipedia.org/wiki/Geo_URI#Example
-			 * e.g. geo:37.786971,-122.399677;u=35
-			 */
-			$geo    = explode( ':', substr( urldecode( $input['uri'] ), 4 ) );
-			$geo    = explode( ';', $geo[0] );
+		if ( 'places' !== $query ) {
+			return $resp;
+		}
+		$coords = self::micropub_coordinates( $input );
+		if ( ! $coords ) {
+			return new WP_Error( 'invalid_request', __( 'The places query needs a location, as lat and lon or a geo URI.', 'simple-location' ), array( 'status' => 400 ) );
+		}
+		$args = array(
+			'local' => is_scalar( $input['local'] ?? null ) && rest_sanitize_boolean( $input['local'] ),
+		);
+		if ( is_scalar( $input['limit'] ?? null ) && is_numeric( $input['limit'] ) ) {
+			$args['limit'] = $input['limit'];
+		}
+		return array(
+			'places' => Post_Venue::places( $coords[0], $coords[1], $args ),
+		);
+	}
+
+	/**
+	 * Returns the location a Micropub query asks about.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array $input The Micropub input, with `lat` and `lon`, or a geo URI in `uri` such as geo:37.786971,-122.399677;u=35.
+	 * @return float[]|false Latitude and longitude, rounded to 7 places, or false without a valid location.
+	 */
+	public static function micropub_coordinates( $input ) {
+		$lat = $input['lat'] ?? null;
+		$lon = $input['lon'] ?? null;
+		if ( is_string( $input['uri'] ?? null ) && 'geo:' === substr( $input['uri'], 0, 4 ) ) {
+			// See https://en.wikipedia.org/wiki/Geo_URI_scheme.
+			$geo    = explode( ';', substr( urldecode( $input['uri'] ), 4 ) );
 			$coords = explode( ',', $geo[0] );
 			if ( 2 <= count( $coords ) ) {
-				$input['lat'] = trim( $coords[0] );
-				$input['lon'] = trim( $coords[1] );
+				$lat = trim( $coords[0] );
+				$lon = trim( $coords[1] );
 			}
 		}
-		if ( ! isset( $input['lat'], $input['lon'] ) || ! is_numeric( $input['lat'] ) || ! is_numeric( $input['lon'] ) ) {
-			return $resp;
+		if ( ! is_scalar( $lat ) || ! is_scalar( $lon ) || ! is_numeric( $lat ) || ! is_numeric( $lon ) ) {
+			return false;
 		}
-		$lat = round( (float) $input['lat'], 7 );
-		$lon = round( (float) $input['lon'], 7 );
-
-		$venues      = array();
-		$reverse_adr = array();
-		if ( Loc_Config::geo_provider() ) {
-			$reverse_adr = Sloc_Provider_Chain::reverse_lookup( $lat, $lon );
+		$lat = clean_coordinate( $lat, 'latitude' );
+		$lon = clean_coordinate( $lon, 'longitude' );
+		if ( false === $lat || false === $lon ) {
+			return false;
 		}
-		if ( Loc_Config::venue_provider() ) {
-			$venues = Sloc_Provider_Chain::venues( $lat, $lon );
-		}
-
-		// Use the site default, but at a private venue show the place without the coordinates (see Geo_Data::get_attachment_visibility()).
-		$visibility = Geo_Data::get_default_visibility();
-		$venue_id   = Post_Venue::at_venue( $lat, $lon );
-		if ( $venue_id && 'public' === $visibility && 'private' === get_post_geodata( $venue_id, 'visibility' ) ) {
-			$visibility = 'protected';
-		}
-
-		return array(
-			'venues' => is_array( $venues ) ? $venues : array(),
-			'geo'    => array(
-				'label'      => is_array( $reverse_adr ) && isset( $reverse_adr['display-name'] ) ? $reverse_adr['display-name'] : null,
-				'latitude'   => $lat,
-				'longitude'  => $lon,
-				'visibility' => $visibility,
-			),
-		);
+		return array( round( (float) $lat, 7 ), round( (float) $lon, 7 ) );
 	}
 } // End Class Kind_Plugins
 
