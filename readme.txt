@@ -68,6 +68,8 @@ In the post editor, Find Venues lists the venues near the post's latitude and lo
 
 A Micropub post whose check-in or location is a place from `q=places` is linked to that venue: by its page on your site, or by the provider's identifier it was found with. A location links a venue you already have but never creates one. A private venue is only linked for users who can edit it.
 
+If a venue keeps being matched or listed when it shouldn't be, check "Leave out of venue lists and check-in matching" on the venue. Find Venues and Micropub clients then won't list it, and check-ins aren't matched to it by name, link or identifier. You can still choose it from the Venue list or link to its page, and posts at its location still find it.
+
 Micropub clients can ask for the places near a location with the experimental query `q=places`, giving `lat` and `lon` or a geo URI as `uri`. It returns `places`, a list of h-cards in mf2 JSON: your own venues first, then those of your venue providers, without the ones you already have. Each place says where it is from in `provider`, `local` for your own. `limit` sets the most places, and `local=1` lists only your own venues. A private venue is only listed for users who can edit it, and a venue whose location is protected is listed without it. This replaces the earlier experimental `q=geo` query.
 
 A venue's website is shown on its page. Its pages on other sites, such as OpenStreetMap, Google Maps, Foursquare or Wikipedia, are shown too when the venue's location is public, since a map link gives away where it is. You can edit both on the venue, under Website and Other Pages.

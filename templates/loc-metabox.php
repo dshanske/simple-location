@@ -22,6 +22,7 @@ if ( 'comment' === $screen->id ) {
 		$geodata['venue_alternate'] = Post_Venue::sanitize_alternate( get_post_meta( get_the_ID(), 'venue_alternate', true ) );
 		$geodata['post_visibility'] = Post_Venue::get_post_visibility( get_the_ID() );
 		$geodata['suggested_type']  = Post_Venue::suggested_type( get_the_ID() );
+		$geodata['venue_exclude']   = Post_Venue::is_excluded( get_the_ID() );
 	} else {
 		$geodata['venue_id'] = get_post_meta( get_the_ID(), 'venue_id', true );
 	}
@@ -116,6 +117,12 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			</select>
 		</label>
 		<p class="description"><?php esc_html_e( 'The location visibility given to posts made here, such as Private at home. You can still change it on each post.', 'simple-location' ); ?></p>
+		<label for="venue_exclude">
+			<input type="hidden" name="venue_exclude" value="0" />
+			<input type="checkbox" name="venue_exclude" id="venue_exclude" value="1" <?php checked( $geodata['venue_exclude'] ); ?> aria-describedby="venue-exclude-description" />
+			<?php esc_html_e( 'Leave out of venue lists and check-in matching', 'simple-location' ); ?>
+		</label>
+		<p class="description" id="venue-exclude-description"><?php esc_html_e( 'Find Venues and Micropub clients won\'t list this venue, and check-ins won\'t be matched to it by name, link or identifier. Posts can still be given it from the Venue list, a link to its page, or its location.', 'simple-location' ); ?></p>
 		<?php if ( ! empty( $geodata['suggested_type'] ) ) : ?>
 			<label for="venue_type_suggestion">
 				<input type="checkbox" name="venue_type_suggestion" id="venue_type_suggestion" value="1" />

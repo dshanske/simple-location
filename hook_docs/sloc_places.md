@@ -29,7 +29,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-post-venue.php:674](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L674)
+- [includes/class-post-venue.php:712](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L712)
 ```php
 apply_filters( 'sloc_places', array_map( array( __CLASS__, 'jf2_to_mf2' ), $cards ), $lat, $lng, $args )
 ```

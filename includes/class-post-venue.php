@@ -52,11 +52,20 @@ class Post_Venue {
 	const ALIAS_KEY = '_venue_alias';
 
 	/**
+	 * Meta key set to 1 to leave a venue out of venue lists and check-in matching.
+	 *
+	 * @since 6.3.0
+	 * @var string
+	 */
+	const EXCLUDE_KEY = 'venue_exclude';
+
+	/**
 	 * Register the meta for venues.
 	 *
 	 * @since 5.0.0
 	 * @since 6.1.0 Registers the visibility for posts made at the venue.
 	 * @since 6.2.0 venue_url is sanitized as a URL.
+	 * @since 6.3.0 Registers whether the venue is left out of venue lists and check-in matching.
 	 */
 	public static function register_meta() {
 		register_meta(
@@ -180,6 +189,35 @@ class Post_Venue {
 				'sanitize_callback' => array( __CLASS__, 'sanitize_post_visibility' ),
 			)
 		);
+
+		register_meta(
+			'post',
+			self::EXCLUDE_KEY,
+			array(
+				'object_subtype'    => 'venue',
+				'type'              => 'boolean',
+				'description'       => __( 'Whether the venue is left out of venue lists and check-in matching', 'simple-location' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+			)
+		);
+	}
+
+	/**
+	 * Returns whether a venue is left out of venue lists and check-in matching.
+	 *
+	 * Such a venue is still linked by its own page, chosen from the Venue list, and found by its coordinates.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param int|WP_Post $venue Venue ID or object.
+	 * @return bool Whether it is left out.
+	 */
+	public static function is_excluded( $venue ) {
+		$venue = get_post( $venue );
+		return $venue && rest_sanitize_boolean( get_post_meta( $venue->ID, self::EXCLUDE_KEY, true ) );
 	}
 
 	/**
@@ -588,7 +626,7 @@ class Post_Venue {
 	 *
 	 * A private, draft or password-protected venue, or one whose location is private, is left out unless the
 	 * current user can edit it. A venue whose location is protected shows without its coordinates, address or
-	 * distance.
+	 * distance. A venue excluded from venue lists is left out; see is_excluded().
 	 *
 	 * The providers aren't asked when the site's venues already fill the limit.
 	 *
@@ -632,7 +670,7 @@ class Post_Venue {
 			// Venues the site has that the providers found, though they aren't within the radius here.
 			$known = wp_list_pluck( wp_list_pluck( $local, 'venue' ), 'ID' );
 			foreach ( self::venues_by_uid( array_column( $items, 'uid' ) ) as $venue ) {
-				$access = self::place_access( $venue );
+				$access = self::is_excluded( $venue ) ? false : self::place_access( $venue );
 				if ( $access && ! in_array( $venue->ID, $known, true ) ) {
 					$local[] = array(
 						'venue'    => $venue,
@@ -738,6 +776,9 @@ class Post_Venue {
 		);
 		$places = array();
 		foreach ( $venues as $venue ) {
+			if ( self::is_excluded( $venue ) ) {
+				continue;
+			}
 			$access   = self::place_access( $venue );
 			$distance = self::venue_distance( $venue, $lat, $lng );
 			if ( $access && null !== $distance && $distance <= $radius ) {
@@ -1008,7 +1049,7 @@ class Post_Venue {
 	 * creating one.
 	 *
 	 * Unlike find_venue(), a place isn't matched by its name or other links. The venue must be one the current user
-	 * may use; see place_access().
+	 * may use; see place_access(). A venue excluded from matching is only found by its page; see is_excluded().
 	 *
 	 * @since 6.3.0
 	 *
@@ -1698,9 +1739,10 @@ class Post_Venue {
 	 *
 	 * In order: a venue with the check-in's identifier ('uid'); a venue with one of its URLs as its URL or an
 	 * alternate URL; a venue with the same name, or other name, whose radius, or MATCH_RADIUS if larger, includes
-	 * the check-in.
+	 * the check-in. A venue excluded from matching isn't found; see is_excluded().
 	 *
 	 * @since 6.1.0
+	 * @since 6.3.0 Leaves out venues excluded from matching.
 	 *
 	 * @param array $venue Check-in or venue properties: 'name' or 'label', 'uid', 'url', 'latitude' and 'longitude'.
 	 * @param array $urls  Optional. URLs, as venue_urls() returns. Default the check-in's.
@@ -1772,6 +1814,9 @@ class Post_Venue {
 				)
 			);
 			foreach ( array_unique( array_merge( $named, $aliased ) ) as $id ) {
+				if ( self::is_excluded( $id ) ) {
+					continue;
+				}
 				$geo = get_post_geodata( $id );
 				if ( ! is_array( $geo ) || ! is_numeric( $geo['latitude'] ?? null ) || ! is_numeric( $geo['longitude'] ?? null ) ) {
 					continue;
@@ -1797,9 +1842,10 @@ class Post_Venue {
 	}
 
 	/**
-	 * Returns the first venue matching a meta query.
+	 * Returns the first venue matching a meta query, leaving out venues excluded from matching.
 	 *
 	 * @since 6.1.0
+	 * @since 6.3.0 Leaves out venues excluded from matching; see is_excluded().
 	 *
 	 * @param array $meta_query Meta query.
 	 * @return int|false Venue ID, or false if none match.
@@ -1814,7 +1860,23 @@ class Post_Venue {
 				'orderby'        => 'ID',
 				'order'          => 'ASC',
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Venues are matched by their identifiers and URLs.
-				'meta_query'     => $meta_query,
+				'meta_query'     => array(
+					'relation' => 'AND',
+					$meta_query,
+					// Not a venue left out of matching.
+					array(
+						'relation' => 'OR',
+						array(
+							'key'     => self::EXCLUDE_KEY,
+							'compare' => 'NOT EXISTS',
+						),
+						array(
+							'key'     => self::EXCLUDE_KEY,
+							'value'   => '1',
+							'compare' => '!=',
+						),
+					),
+				),
 			)
 		);
 		return empty( $match ) ? false : (int) $match[0];

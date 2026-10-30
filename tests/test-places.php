@@ -547,7 +547,80 @@ class PlacesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A chosen place must have a name and can't be another kind of post on the site.	/**
+	 * A venue left out of lists isn't one of the places, nor hides the provider's place for it (#821).
+	 */
+	public function test_excluded_venue_places() {
+		$excluded = $this->venue( 'Old Cafe' );
+		add_post_meta( $excluded, Post_Venue::UID_KEY, 'here:pds:place:old' );
+		update_post_meta( $excluded, Post_Venue::EXCLUDE_KEY, true );
+		$this->venue( 'Kept Cafe' );
+		Venue_Provider_Sloc_Test::$result = array(
+			'items' => array(
+				array(
+					'name'      => 'Old Cafe at the provider',
+					'uid'       => 'here:pds:place:old',
+					'latitude'  => self::LAT,
+					'longitude' => self::LNG,
+				),
+			),
+		);
+		$this->assertSame( array( 'Kept Cafe', 'Old Cafe at the provider' ), $this->names( Post_Venue::places( self::LAT, self::LNG ) ) );
+		$this->assertSame( array( 'Kept Cafe' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'local' => true ) ) ) );
+
+		// Far away, it isn't brought in by the provider's identifier either.
+		set_post_geodata( $excluded, 'latitude', self::LAT + 0.01 );
+		$this->assertSame( array( 'Kept Cafe', 'Old Cafe at the provider' ), $this->names( Post_Venue::places( self::LAT, self::LNG ) ) );
+	}
+
+	/**
+	 * A venue left out of matching is only found by its own page and its coordinates (#821).
+	 */
+	public function test_excluded_venue_matching() {
+		$excluded = $this->venue( 'Old Cafe' );
+		add_post_meta( $excluded, Post_Venue::UID_KEY, 'here:pds:place:old' );
+		update_post_meta( $excluded, 'venue_url', 'https://old-cafe.example/' );
+		$card = array(
+			'name'      => 'Old Cafe',
+			'latitude'  => self::LAT,
+			'longitude' => self::LNG,
+		);
+		$this->assertSame( $excluded, Post_Venue::find_venue( $card + array( 'uid' => 'here:pds:place:old' ) ), 'Found before it is excluded.' );
+
+		update_post_meta( $excluded, Post_Venue::EXCLUDE_KEY, true );
+		$this->assertTrue( Post_Venue::is_excluded( $excluded ) );
+		$this->assertFalse( Post_Venue::find_venue( $card + array( 'uid' => 'here:pds:place:old' ) ) );
+		$this->assertFalse( Post_Venue::find_venue( $card + array( 'url' => 'https://old-cafe.example/' ) ) );
+		$this->assertFalse( Post_Venue::find_venue( $card ), 'Not by name nearby.' );
+		$this->assertFalse( Post_Venue::find_place( array( 'uid' => 'here:pds:place:old' ) ) );
+		$this->assertSame( $excluded, Post_Venue::find_place( array( 'url' => get_permalink( $excluded ) ) ), 'Its page is an exact reference.' );
+		$this->assertSame( $excluded, Post_Venue::at_venue( self::LAT, self::LNG ), 'Its coordinates still find it.' );
+
+		// A provider's place for it makes a new venue.
+		$chosen = Post_Venue::choose_place( $card + array( 'uid' => 'here:pds:place:old' ) );
+		$this->assertIsInt( $chosen );
+		$this->assertNotSame( $excluded, $chosen );
+		$this->assertFalse( Post_Venue::is_excluded( $chosen ) );
+		$this->assertFalse( Post_Venue::is_excluded( 0 ) );
+	}
+
+	/**
+	 * Whether a venue is left out is in the REST API.
+	 */
+	public function test_excluded_venue_rest() {
+		$venue_id = $this->venue( 'Old Cafe' );
+		update_post_meta( $venue_id, Post_Venue::EXCLUDE_KEY, true );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		// Other tests can leave the meta unregistered.
+		Post_Venue::register_meta();
+		global $wp_rest_server;
+		$wp_rest_server = new WP_REST_Server();
+		do_action( 'rest_api_init', $wp_rest_server );
+		$data           = rest_do_request( new WP_REST_Request( 'GET', '/wp/v2/venue/' . $venue_id ) )->get_data();
+		$wp_rest_server = null;
+		$this->assertTrue( $data['meta']['venue_exclude'] );
+	}
+
+	/**
 	 * A chosen place must have a name and can't be another kind of post on the site.
 	 */
 	public function test_choose_invalid_place() {

@@ -29,7 +29,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-post-venue.php:1110](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L1110)
+- [includes/class-post-venue.php:1151](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L1151)
 ```php
 apply_filters( 'pre_at_venue', null, $lat, $lng )
 ```

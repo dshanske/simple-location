@@ -1492,6 +1492,14 @@ class Geo_Base {
 			if ( ! empty( $_POST['venue_type_suggestion'] ) ) {
 				Post_Venue::add_suggested_type( $post_id );
 			}
+			// Left as it is when the form has no field for it; the form sends 0 when the box is unchecked.
+			if ( isset( $_POST[ Post_Venue::EXCLUDE_KEY ] ) ) {
+				if ( rest_sanitize_boolean( sanitize_key( wp_unslash( $_POST[ Post_Venue::EXCLUDE_KEY ] ) ) ) ) {
+					update_post_meta( $post_id, Post_Venue::EXCLUDE_KEY, true );
+				} else {
+					delete_post_meta( $post_id, Post_Venue::EXCLUDE_KEY );
+				}
+			}
 			$visibility = isset( $_POST['venue_post_visibility'] ) ? Post_Venue::sanitize_post_visibility( sanitize_key( wp_unslash( $_POST['venue_post_visibility'] ) ) ) : '';
 			if ( '' === $visibility ) {
 				delete_post_meta( $post_id, 'venue_post_visibility' );

@@ -480,6 +480,30 @@ class SaveMetaTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Saving a venue stores whether it is left out of lists and matching; a form without the field leaves it (#821).
+	 */
+	public function test_save_post_meta_venue_exclude() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		$_POST    = array(
+			'location_metabox_nonce' => wp_create_nonce( 'location_metabox' ),
+			'venue_exclude'          => '1',
+		);
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertTrue( Post_Venue::is_excluded( $venue_id ) );
+		$this->assertSame( '1', get_post_meta( $venue_id, 'venue_exclude', true ) );
+
+		unset( $_POST['venue_exclude'] );
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertTrue( Post_Venue::is_excluded( $venue_id ), 'Left as it is without the field.' );
+
+		$_POST['venue_exclude'] = '0';
+		Geo_Base::save_post_meta( $venue_id );
+		$this->assertFalse( Post_Venue::is_excluded( $venue_id ) );
+		$this->assertFalse( metadata_exists( 'post', $venue_id, 'venue_exclude' ), 'Removed when unchecked.' );
+	}
+
+	/**
 	 * Saving a venue with the suggested type checked gives it that type (#729).
 	 */
 	public function test_save_post_meta_venue_type_suggestion() {
