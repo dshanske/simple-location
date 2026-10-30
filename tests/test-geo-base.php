@@ -260,6 +260,8 @@ class GeoBaseTest extends WP_UnitTestCase {
 		$this->assertSame( 'yes', $options['weather'] );
 		$this->assertStringContainsString( 'sloc_geo/1.0', $options['api_url'] );
 		$this->assertSame( array( 'private', 'public', 'protected' ), array_keys( $options['visibility_options'] ) );
+		$this->assertSame( 'On this site', $options['places']['local'] );
+		$this->assertSame( 'From %s', $options['places']['provider'] );
 		wp_dequeue_script( 'sloc_location' );
 		wp_dequeue_style( 'sloc_admin' );
 

@@ -143,6 +143,147 @@ jQuery( document ).ready( function( $ ) {
 		}
 	}
 
+	// Places from the last venue search, as mf2 h-cards.
+	let foundPlaces = [];
+
+	/**
+	 * Returns the first value of a place's property.
+	 *
+	 * @param {Object} place Place, as an mf2 h-card.
+	 * @param {string} key   Property.
+	 * @return {*} Value, or an empty string.
+	 */
+	function placeValue( place, key ) {
+		if ( place && place.properties && Array.isArray( place.properties[ key ] ) && place.properties[ key ].length ) {
+			return place.properties[ key ][ 0 ];
+		}
+		return '';
+	}
+
+	/**
+	 * Lists the places near the latitude and longitude: the site's venues, then each provider's (#815).
+	 */
+	function findVenues() {
+		const $box = $( '#sloc-places' );
+		const latitude = $( '#latitude' ).val();
+		const longitude = $( '#longitude' ).val();
+		$box.prop( 'hidden', false );
+		if ( ! latitude || ! longitude ) {
+			$box.text( slocOptions.places.location );
+			return;
+		}
+		$box.text( slocOptions.places.searching );
+		$.ajax( {
+			type: 'GET',
+			url: slocOptions.api_url + 'venue/',
+			beforeSend( xhr ) {
+				xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
+			},
+			data: {
+				latitude,
+				longitude,
+			},
+			success( response ) {
+				renderPlaces( response );
+			},
+			error( request ) {
+				$box.text( request.responseJSON && request.responseJSON.message ? request.responseJSON.message : slocOptions.places.failed );
+			},
+		} );
+	}
+
+	/**
+	 * Shows the places found, in a group for the site's venues and one for each provider.
+	 *
+	 * @param {Object} response Response, with 'places' and the providers' names by slug as 'providers'.
+	 */
+	function renderPlaces( response ) {
+		const $box = $( '#sloc-places' ).empty();
+		const names = ( response && response.providers ) ? response.providers : {};
+		const groups = {};
+		const order = [];
+		foundPlaces = ( response && Array.isArray( response.places ) ) ? response.places : [];
+		if ( ! foundPlaces.length ) {
+			$box.text( slocOptions.places.none );
+			return;
+		}
+		foundPlaces.forEach( function( place, index ) {
+			const provider = placeValue( place, 'provider' ) || 'local';
+			if ( ! ( provider in groups ) ) {
+				groups[ provider ] = [];
+				order.push( provider );
+			}
+			groups[ provider ].push( index );
+		} );
+		order.forEach( function( provider ) {
+			const isLocal = 'local' === provider;
+			const $group = $( '<div class="sloc-places-group"></div>' ).addClass( isLocal ? 'is-local' : 'is-provider' );
+			$( '<h4></h4>' )
+				.text( isLocal ? slocOptions.places.local : slocOptions.places.provider.replace( '%s', names[ provider ] || provider ) )
+				.appendTo( $group );
+			const $list = $( '<ul></ul>' ).appendTo( $group );
+			groups[ provider ].forEach( function( index ) {
+				const place = foundPlaces[ index ];
+				const $item = $( '<li></li>' ).appendTo( $list );
+				$( '<span class="sloc-place-badge"></span>' )
+					.text( isLocal ? slocOptions.places.site : slocOptions.places.new )
+					.appendTo( $item );
+				$( '<span class="sloc-place-name"></span>' ).text( placeValue( place, 'name' ) ).appendTo( $item );
+				const details = [ placeValue( place, 'street-address' ) || placeValue( place, 'label' ) ];
+				if ( '' !== placeValue( place, 'distance' ) ) {
+					details.push( slocOptions.places.meters.replace( '%s', placeValue( place, 'distance' ) ) );
+				}
+				const detail = details.filter( Boolean ).join( ', ' );
+				if ( detail ) {
+					$( '<span class="sloc-place-detail description"></span>' ).text( detail ).appendTo( $item );
+				}
+				$( '<button type="button" class="button button-small choose-place-button"></button>' )
+					.attr( 'data-place', index )
+					.text( slocOptions.places.use )
+					.appendTo( $item );
+			} );
+			$box.append( $group );
+		} );
+	}
+
+	/**
+	 * Uses a place found for the post: its venue, which is created for a provider's place.
+	 *
+	 * @param {number} index Index of the place in foundPlaces.
+	 */
+	function choosePlace( index ) {
+		const place = foundPlaces[ index ];
+		if ( ! place ) {
+			return;
+		}
+		$.ajax( {
+			type: 'POST',
+			url: slocOptions.api_url + 'venue/',
+			contentType: 'application/json',
+			beforeSend( xhr ) {
+				xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
+			},
+			data: JSON.stringify( { place } ),
+			success( response ) {
+				if ( ! response || ! response.venue_id ) {
+					return;
+				}
+				const id = String( response.venue_id );
+				if ( 0 === $( '#venue_id option' ).filter( function() {
+					return $( this ).val() === id;
+				} ).length ) {
+					$( '<option></option>' ).val( id ).text( response.title ).appendTo( '#venue_id' );
+				}
+				$( '#venue_id' ).val( id ).trigger( 'change' );
+				$( '#sloc-places' ).prop( 'hidden', true ).empty();
+				foundPlaces = [];
+			},
+			error( request ) {
+				alert( request.responseJSON && request.responseJSON.message ? request.responseJSON.message : slocOptions.places.failed );
+			},
+		} );
+	}
+
 	function getCurrentPosition() {
 		let position;
 		$.ajax( {
@@ -487,6 +628,14 @@ jQuery( document ).ready( function( $ ) {
 		.on( 'change', '#latitude, #longitude', scheduleMapRedraw )
 		.on( 'change', '#location_dropdown', function( event ) {
 			updateVenues();
+			event.preventDefault();
+		} )
+		.on( 'click', '.find-venues-button', function( event ) {
+			findVenues();
+			event.preventDefault();
+		} )
+		.on( 'click', '.choose-place-button', function( event ) {
+			choosePlace( parseInt( $( this ).attr( 'data-place' ), 10 ) );
 			event.preventDefault();
 		} )
 		.on( 'click', '.save-venue-button', function() {

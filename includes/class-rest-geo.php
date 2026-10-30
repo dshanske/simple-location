@@ -328,6 +328,26 @@ class REST_Geo {
 						'select'    => array(
 							'sanitize_callback' => 'sanitize_text_field',
 						),
+						'limit'     => array(
+							'type' => 'integer',
+						),
+						'local'     => array(
+							'type'    => 'boolean',
+							'default' => false,
+						),
+					),
+					'permission_callback' => function ( $request ) {
+						return current_user_can( 'publish_posts' );
+					},
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'choose_venue' ),
+					'args'                => array(
+						'place' => array(
+							'type'     => 'object',
+							'required' => true,
+						),
 					),
 					'permission_callback' => function ( $request ) {
 						return current_user_can( 'publish_posts' );
@@ -660,7 +680,13 @@ class REST_Geo {
 	/**
 	 * Callback handler for Venue Retrieval.
 	 *
+	 * With 'select', a dropdown of the venues in the 'location' term. With coordinates, the places near them, as
+	 * Post_Venue::places() returns them, under 'places', and the venue providers' names by slug under 'providers'.
+	 *
+	 * @since 6.3.0 Returns places, the site's venues and the providers', with 'limit' and 'local'.
+	 *
 	 * @param WP_REST_Request $request REST Request.
+	 * @return array|WP_Error Response.
 	 */
 	public static function venue( $request ) {
 		// We dont need to check the nonce like with admin-ajax.
@@ -698,18 +724,43 @@ class REST_Geo {
 			return new WP_Error( 'no_venues_found', __( 'Venues Not Found', 'simple-location' ) );
 		}
 		if ( is_numeric( $params['longitude'] ?? null ) && is_numeric( $params['latitude'] ?? null ) ) {
-			$venue = Loc_Config::venue_provider( $provider );
-			if ( ! $venue ) {
+			// A provider asked for by name is the only one tried.
+			if ( $provider && ! Loc_Config::venue_provider( $provider ) ) {
 				return new WP_Error( 'not_found', __( 'Provider Not Found', 'simple-location' ), array( 'provider' => $provider ) );
 			}
-			// A provider asked for by name is the only one tried.
-			if ( $provider ) {
-				$venue->set( $params );
-				return $venue->nearby();
+			$args = array(
+				'local'    => (bool) ( $params['local'] ?? false ),
+				'provider' => (string) $provider,
+			);
+			if ( isset( $params['limit'] ) ) {
+				$args['limit'] = $params['limit'];
 			}
-			return Sloc_Provider_Chain::venues( $params['latitude'], $params['longitude'] );
+			return array(
+				'places'    => Post_Venue::places( $params['latitude'], $params['longitude'], $args ),
+				'providers' => wp_list_pluck( Loc_Config::venue_providers(), 'name' ),
+			);
 		}
 		return new WP_Error( 'missing_params', __( 'Missing Arguments', 'simple-location' ), array( 'status' => 400 ) );
+	}
+
+	/**
+	 * Callback handler for choosing a place for a post: returns its venue, creating one for a provider's place.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param WP_REST_Request $request REST Request, with the place as an mf2 h-card from a venue lookup as 'place'.
+	 * @return array|WP_Error The venue's 'venue_id', 'title' and 'url', or an error.
+	 */
+	public static function choose_venue( $request ) {
+		$venue_id = Post_Venue::choose_place( $request->get_param( 'place' ) );
+		if ( is_wp_error( $venue_id ) ) {
+			return $venue_id;
+		}
+		return array(
+			'venue_id' => $venue_id,
+			'title'    => get_the_title( $venue_id ),
+			'url'      => get_permalink( $venue_id ),
+		);
 	}
 
 

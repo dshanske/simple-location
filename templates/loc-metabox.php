@@ -156,6 +156,11 @@ if ( isset( $geodata['latitude'] ) && isset( $geodata['longitude'] ) ) {
 			?>
 
 		</label>
+		<p class="field-row sloc-find-venues">
+			<button type="button" class="button find-venues-button" aria-controls="sloc-places"><?php esc_html_e( 'Find Venues', 'simple-location' ); ?></button>
+			<span class="description"><?php esc_html_e( 'Venues near the latitude and longitude, on this site and from your venue providers.', 'simple-location' ); ?></span>
+		</p>
+		<div id="sloc-places" class="sloc-places" aria-live="polite" hidden></div>
 	<?php } ?>
 
 

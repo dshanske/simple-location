@@ -599,8 +599,9 @@ class Post_Venue {
 	 * @param array $args {
 	 *     Optional. Arguments.
 	 *
-	 *     @type int  $limit Most places. Default the sloc_venue_limit setting, at most Venue_Provider::MAX_LIMIT.
-	 *     @type bool $local Only the site's venues. Default false.
+	 *     @type int    $limit    Most places. Default the sloc_venue_limit setting, at most Venue_Provider::MAX_LIMIT.
+	 *     @type bool   $local    Only the site's venues. Default false.
+	 *     @type string $provider Slug of the only venue provider to ask, instead of the venue chain. Default empty.
 	 * }
 	 * @return array[] Places as mf2 h-cards; empty for coordinates that aren't valid.
 	 */
@@ -613,16 +614,17 @@ class Post_Venue {
 		$args  = wp_parse_args(
 			$args,
 			array(
-				'limit' => get_option( 'sloc_venue_limit', Venue_Provider::DEFAULT_LIMIT ),
-				'local' => false,
+				'limit'    => get_option( 'sloc_venue_limit', Venue_Provider::DEFAULT_LIMIT ),
+				'local'    => false,
+				'provider' => '',
 			)
 		);
 		$limit = Venue_Provider::sanitize_limit( $args['limit'] );
 
 		$local = self::local_places( $lat, $lng );
 		$items = array();
-		if ( ! $args['local'] && count( $local ) < $limit && Loc_Config::venue_provider() ) {
-			$found = Sloc_Provider_Chain::venues( $lat, $lng, $limit );
+		if ( ! $args['local'] && count( $local ) < $limit ) {
+			$found = self::provider_places( $lat, $lng, $limit, $args['provider'] );
 			$items = ( is_array( $found ) && is_array( $found['items'] ?? null ) ) ? array_filter( $found['items'], 'is_array' ) : array();
 		}
 
@@ -667,9 +669,35 @@ class Post_Venue {
 		 * @param array[] $places Places as mf2 h-cards, the site's venues first.
 		 * @param float   $lat    Latitude.
 		 * @param float   $lng    Longitude.
-		 * @param array   $args   Arguments: 'limit' and 'local'.
+		 * @param array   $args   Arguments: 'limit', 'local' and 'provider'.
 		 */
 		return apply_filters( 'sloc_places', array_map( array( __CLASS__, 'jf2_to_mf2' ), $cards ), $lat, $lng, $args );
+	}
+
+	/**
+	 * Returns the venues a venue provider, or the venue chain, finds near a location.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param float  $lat   Latitude.
+	 * @param float  $lng   Longitude.
+	 * @param int    $limit Most venues.
+	 * @param string $slug  Provider slug, or empty for the venue chain.
+	 * @return array|WP_Error Venues under 'items', or an error. Empty without a provider.
+	 */
+	protected static function provider_places( $lat, $lng, $limit, $slug ) {
+		if ( is_string( $slug ) && '' !== $slug ) {
+			$provider = Loc_Config::venue_provider( $slug );
+			if ( ! $provider instanceof Venue_Provider ) {
+				return array();
+			}
+			// A copy, so the request leaves the shared provider as it was.
+			$provider = clone $provider;
+			$provider->set( $lat, $lng );
+			$provider->set_limit( $limit );
+			return $provider->nearby();
+		}
+		return Loc_Config::venue_provider() ? Sloc_Provider_Chain::venues( $lat, $lng, $limit ) : array();
 	}
 
 	/**
@@ -754,14 +782,17 @@ class Post_Venue {
 	}
 
 	/**
-	 * Returns how much of a venue the current user may see in a list of places.
+	 * Returns how much of a venue the current user may see in a list of places, or use for a post.
+	 *
+	 * A private, draft or password-protected venue, or one whose location is private, is only for users who can
+	 * edit it.
 	 *
 	 * @since 6.3.0
 	 *
 	 * @param WP_Post $venue Venue.
 	 * @return string|false 'full'; 'name' for a venue whose location is protected; false to leave it out.
 	 */
-	protected static function place_access( $venue ) {
+	public static function place_access( $venue ) {
 		if ( current_user_can( 'edit_post', $venue->ID ) ) {
 			return 'full';
 		}
@@ -806,7 +837,7 @@ class Post_Venue {
 			array_filter(
 				array_merge(
 					array( get_permalink( $venue ), (string) get_post_meta( $venue->ID, 'venue_url', true ) ),
-					get_post_meta( $venue->ID, self::UID_KEY ),
+					get_post_meta( $venue->ID, self::UID_KEY, false ),
 					(array) get_post_meta( $venue->ID, 'venue_alternate', true )
 				),
 				fn( $id ) => is_string( $id ) && '' !== $id
@@ -833,6 +864,7 @@ class Post_Venue {
 			'uid'      => $permalink,
 			'provider' => 'local',
 		);
+
 		$types = get_the_terms( $venue, 'venue_type' );
 		if ( is_array( $types ) ) {
 			$card['category'] = wp_list_pluck( $types, 'name' );
@@ -889,6 +921,119 @@ class Post_Venue {
 			'type'       => array( 'h-' . $type ),
 			'properties' => $properties,
 		);
+	}
+
+	/**
+	 * Converts an mf2 JSON object, such as a place from places(), to jf2.
+	 *
+	 * A property with one value becomes that value, and one with several stays a list; a nested object is converted
+	 * too. Anything that isn't an mf2 object is returned unchanged.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param mixed $item mf2 object, with 'type' such as array( 'h-card' ) and 'properties'.
+	 * @return mixed jf2 object, with 'type' such as 'card'.
+	 */
+	public static function mf2_to_jf2( $item ) {
+		if ( ! is_array( $item ) || ! is_array( $item['properties'] ?? null ) ) {
+			return $item;
+		}
+		$type = ( is_array( $item['type'] ?? null ) && is_string( reset( $item['type'] ) ) ) ? reset( $item['type'] ) : 'h-card';
+		$jf2  = array( 'type' => preg_replace( '/^h-/', '', $type ) );
+		foreach ( $item['properties'] as $key => $values ) {
+			if ( ! is_string( $key ) || 'type' === $key ) {
+				continue;
+			}
+			$values = array_values( array_map( array( __CLASS__, 'mf2_to_jf2' ), (array) $values ) );
+			if ( ! empty( $values ) ) {
+				$jf2[ $key ] = 1 === count( $values ) ? $values[0] : $values;
+			}
+		}
+		return $jf2;
+	}
+
+	/**
+	 * Returns the post a URL on the site is for, including a venue's page with plain permalinks.
+	 *
+	 * Core's url_to_postid() doesn't find a post of a custom post type by its plain permalink, such as ?venue=cafe.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param mixed $url URL.
+	 * @return int Post ID, or 0.
+	 */
+	protected static function url_to_postid( $url ) {
+		if ( ! is_string( $url ) || '' === $url ) {
+			return 0;
+		}
+		$id = url_to_postid( $url );
+		if ( $id || wp_parse_url( $url, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
+			return $id;
+		}
+		$query = array();
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		if ( is_string( $query['venue'] ?? null ) && '' !== $query['venue'] ) {
+			$venue = get_page_by_path( $query['venue'], OBJECT, 'venue' );
+			return $venue ? $venue->ID : 0;
+		}
+		if ( 'venue' === ( $query['post_type'] ?? null ) && is_numeric( $query['p'] ?? null ) ) {
+			return (int) $query['p'];
+		}
+		return 0;
+	}
+
+	/**
+	 * Returns the venue for a place chosen from places(), creating one for a venue provider's place.
+	 *
+	 * A place that is one of the site's venues, by its page, is that venue. Another place is matched or created as a
+	 * check-in is; see add_new_venue(). Either way, the venue must be one the current user may use; see
+	 * place_access().
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array $place Place, as an mf2 h-card from places() or as jf2.
+	 * @return int|WP_Error Venue ID, or an error.
+	 */
+	public static function choose_place( $place ) {
+		$place = self::mf2_to_jf2( $place );
+		if ( ! is_array( $place ) ) {
+			return new WP_Error( 'invalid_place', __( 'This is not a place.', 'simple-location' ), array( 'status' => 400 ) );
+		}
+		// Only values, so the place is read as a check-in is.
+		$place = array_filter( $place, fn( $value ) => is_scalar( $value ) || ( is_array( $value ) && wp_is_numeric_array( $value ) && array_filter( $value, 'is_scalar' ) === $value ) );
+		if ( ! is_string( $place['name'] ?? null ) || '' === trim( $place['name'] ) ) {
+			return new WP_Error( 'invalid_place', __( 'A place needs a name.', 'simple-location' ), array( 'status' => 400 ) );
+		}
+
+		// A page on this site is only a venue's.
+		$venue_id = 0;
+		foreach ( array_merge( (array) ( $place['uid'] ?? array() ), (array) ( $place['url'] ?? array() ) ) as $url ) {
+			$id = self::url_to_postid( $url );
+			if ( $id && 'venue' !== get_post_type( $id ) ) {
+				return new WP_Error( 'invalid_place', __( 'This is not a place.', 'simple-location' ), array( 'status' => 400 ) );
+			}
+			$venue_id = $venue_id ? $venue_id : $id;
+		}
+		if ( ! $venue_id && 'local' === ( $place['provider'] ?? null ) ) {
+			return new WP_Error( 'not_found', __( 'Venue not found.', 'simple-location' ), array( 'status' => 404 ) );
+		}
+		if ( ! $venue_id ) {
+			unset( $place['distance'] );
+			// A venue the user may not use is left as it is.
+			$found = get_post( (int) self::find_venue( $place ) );
+			if ( $found && ! self::place_access( $found ) ) {
+				return new WP_Error( 'not_found', __( 'Venue not found.', 'simple-location' ), array( 'status' => 404 ) );
+			}
+			$venue_id = self::add_new_venue( $place );
+			if ( is_wp_error( $venue_id ) ) {
+				return $venue_id;
+			}
+		}
+		$venue = get_post( (int) $venue_id );
+		if ( ! $venue || 'venue' !== $venue->post_type || ! self::place_access( $venue ) ) {
+			return new WP_Error( 'not_found', __( 'Venue not found.', 'simple-location' ), array( 'status' => 404 ) );
+		}
+		return $venue->ID;
 	}
 
 	/**

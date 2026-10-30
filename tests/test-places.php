@@ -174,7 +174,7 @@ class PlacesTest extends WP_UnitTestCase {
 	 * Private venues are left out unless the user can edit them; protected venues show without their location.
 	 */
 	public function test_private_venues() {
-		$private   = $this->venue( 'Home', self::LAT, self::LNG, 'private' );
+		$private = $this->venue( 'Home', self::LAT, self::LNG, 'private' );
 		$this->venue( 'Office', self::LAT, self::LNG, 'protected' );
 		$this->venue( 'Secret', self::LAT, self::LNG, 'public', array( 'post_status' => 'private' ) );
 		$this->venue( 'Planned', self::LAT, self::LNG, 'public', array( 'post_status' => 'draft' ) );
@@ -270,7 +270,7 @@ class PlacesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * jf2 becomes mf2: values in lists, nested objects converted, empty values and raw data left out.
+	 * Converting jf2 to mf2 puts values in lists, nested objects converted, empty values and raw data left out.
 	 */
 	public function test_jf2_to_mf2() {
 		$this->assertSame(
@@ -308,6 +308,214 @@ class PlacesTest extends WP_UnitTestCase {
 			)
 		);
 		$this->assertSame( array( 'h-card' ), Post_Venue::jf2_to_mf2( array( 'name' => 'Untyped' ) )['type'] );
+	}
+
+	/**
+	 * A provider asked for by name is the only one asked; an unknown one, none.
+	 */
+	public function test_provider_argument() {
+		Venue_Provider_Sloc_Test_Fallback::reset();
+		update_option( 'sloc_venue_fallbacks', array( 'sloc_test_fallback' ) );
+		Venue_Provider_Sloc_Test::$result = array( 'items' => array() );
+		$this->assertSame( array( 'sloc_test_fallback' ), Post_Venue::places( self::LAT, self::LNG )[0]['properties']['provider'] );
+		$this->assertSame( array(), Post_Venue::places( self::LAT, self::LNG, array( 'provider' => 'sloc_test' ) ) );
+		Venue_Provider_Sloc_Test::reset();
+		$this->assertSame( array( 'sloc_test' ), Post_Venue::places( self::LAT, self::LNG, array( 'provider' => 'sloc_test' ) )[0]['properties']['provider'] );
+		$this->assertSame( array(), Post_Venue::places( self::LAT, self::LNG, array( 'provider' => 'no_such_provider' ) ) );
+		Venue_Provider_Sloc_Test::reset();
+		$places = Post_Venue::places(
+			self::LAT,
+			self::LNG,
+			array(
+				'provider' => 'sloc_test_fallback',
+				'limit'    => 1,
+			)
+		);
+		$this->assertSame( array( 'sloc_test_fallback' ), $places[0]['properties']['provider'] );
+		$this->assertSame( 0, Venue_Provider_Sloc_Test::$calls, 'Only the provider asked for.' );
+		$this->assertSame( Venue_Provider::DEFAULT_LIMIT, Loc_Config::venue_provider( 'sloc_test_fallback' )->get_limit(), 'The shared provider keeps its limit.' );
+	}
+
+	/**
+	 * Converting mf2 to jf2 gives one value as the value, several as a list, nested objects converted.
+	 */
+	public function test_mf2_to_jf2() {
+		$this->assertSame(
+			array(
+				'type'     => 'card',
+				'name'     => 'Cafe',
+				'url'      => array( 'https://a.example/', 'https://b.example/' ),
+				'adr'      => array(
+					'type'     => 'adr',
+					'locality' => 'Philadelphia',
+				),
+				'latitude' => 39.9,
+			),
+			Post_Venue::mf2_to_jf2(
+				array(
+					'type'       => array( 'h-card' ),
+					'properties' => array(
+						'name'     => array( 'Cafe' ),
+						'url'      => array( 'https://a.example/', 'https://b.example/' ),
+						'adr'      => array(
+							array(
+								'type'       => array( 'h-adr' ),
+								'properties' => array( 'locality' => array( 'Philadelphia' ) ),
+							),
+						),
+						'latitude' => array( 39.9 ),
+						'empty'    => array(),
+						'type'     => array( 'h-entry' ),
+						0          => array( 'numbered' ),
+					),
+				)
+			)
+		);
+		$this->assertSame( 'Cafe', Post_Venue::mf2_to_jf2( 'Cafe' ) );
+		$this->assertSame( array( 'name' => 'Cafe' ), Post_Venue::mf2_to_jf2( array( 'name' => 'Cafe' ) ), 'jf2 is left as it is.' );
+		$this->assertSame( array( 'type' => 'card' ), Post_Venue::mf2_to_jf2( array( 'properties' => array() ) ) );
+	}
+
+	/**
+	 * A place from the list is converted back to the card it came from.
+	 */
+	public function test_round_trip() {
+		$card = array(
+			'type'      => 'card',
+			'name'      => 'Cafe',
+			'category'  => array( 'food', 'cafe' ),
+			'latitude'  => 39.9,
+			'longitude' => -75.1,
+		);
+		$this->assertSame( $card, Post_Venue::mf2_to_jf2( Post_Venue::jf2_to_mf2( $card ) ) );
+	}
+
+	/**
+	 * A chosen place that is the site's venue is that venue, if the user may use it.
+	 */
+	public function test_choose_local_place() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
+		$public    = $this->venue( 'Public Cafe' );
+		$protected = $this->venue( 'Office', self::LAT, self::LNG, 'protected' );
+		$private   = $this->venue( 'Home', self::LAT, self::LNG, 'private' );
+		$card      = fn( $id ) => array(
+			'type'       => array( 'h-card' ),
+			'properties' => array(
+				'name'     => array( get_the_title( $id ) ),
+				'uid'      => array( get_permalink( $id ) ),
+				'url'      => array( get_permalink( $id ) ),
+				'provider' => array( 'local' ),
+			),
+		);
+		$this->assertSame( $public, Post_Venue::choose_place( $card( $public ) ) );
+		$this->assertSame( $protected, Post_Venue::choose_place( $card( $protected ) ), 'A protected venue can be used by name.' );
+		$this->assertSame( 'not_found', Post_Venue::choose_place( $card( $private ) )->get_error_code() );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$this->assertSame( $private, Post_Venue::choose_place( $card( $private ) ) );
+
+		$missing                      = $card( $public );
+		$missing['properties']['uid'] = array( 'https://elsewhere.example/' );
+		$missing['properties']['url'] = array();
+		$this->assertSame( 'not_found', Post_Venue::choose_place( $missing )->get_error_code(), 'A site venue that is not on the site.' );
+	}
+
+	/**
+	 * A site venue is found by its page with plain or pretty permalinks, and as a draft; not on another site.
+	 */
+	public function test_choose_by_permalink() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$parent = $this->venue( 'Market' );
+		$child  = $this->venue( 'Stall', self::LAT, self::LNG, 'public', array( 'post_parent' => $parent ) );
+		$draft  = $this->venue( 'Planned', self::LAT, self::LNG, 'public', array( 'post_status' => 'draft' ) );
+		$choose = fn( $url ) => Post_Venue::choose_place(
+			array(
+				'name'     => 'Place',
+				'uid'      => $url,
+				'provider' => 'local',
+			)
+		);
+		$this->assertStringContainsString( '?venue=', get_permalink( $child ) );
+		$this->assertSame( $child, $choose( get_permalink( $child ) ) );
+		$this->assertStringContainsString( 'post_type=venue', get_permalink( $draft ) );
+		$this->assertSame( $draft, $choose( get_permalink( $draft ) ) );
+		$this->assertSame( 'not_found', $choose( 'https://elsewhere.example/?venue=market' )->get_error_code() );
+		$this->assertSame( 'not_found', $choose( home_url( '/?venue=no-such-venue' ) )->get_error_code() );
+
+		$this->set_permalink_structure( '/%postname%/' );
+		// The post type's rewrite rules are only added with pretty permalinks.
+		Post_Venue::register();
+		flush_rewrite_rules( false );
+		$this->assertStringContainsString( '/venue/market/stall/', get_permalink( $child ) );
+		$this->assertSame( $child, $choose( get_permalink( $child ) ) );
+		$this->set_permalink_structure( '' );
+	}
+
+	/**
+	 * A chosen provider place becomes a venue, or is matched to the one the site has.
+	 */
+	public function test_choose_provider_place() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
+		$place    = array(
+			'type'       => array( 'h-card' ),
+			'properties' => array(
+				'name'      => array( 'Provider Diner' ),
+				'uid'       => array( 'here:pds:place:42' ),
+				'provider'  => array( 'sloc_test' ),
+				'latitude'  => array( self::LAT ),
+				'longitude' => array( self::LNG ),
+				'distance'  => array( 12 ),
+				'nested'    => array( array( 'not' => 'a value' ) ),
+			),
+		);
+		$venue_id = Post_Venue::choose_place( $place );
+		$this->assertSame( 'venue', get_post_type( $venue_id ) );
+		$this->assertSame( 'Provider Diner', get_the_title( $venue_id ) );
+		$this->assertContains( 'here:pds:place:42', get_post_meta( $venue_id, Post_Venue::UID_KEY, false ) );
+		$this->assertSame( $venue_id, Post_Venue::choose_place( $place ), 'The same place again is the same venue.' );
+
+		// jf2 works as well.
+		$this->assertSame( $venue_id, Post_Venue::choose_place( Post_Venue::mf2_to_jf2( $place ) ) );
+	}
+
+	/**
+	 * A chosen place that is a private venue the user may not use leaves the venue alone.
+	 */
+	public function test_choose_hidden_venue() {
+		$private = $this->venue( 'Home', self::LAT, self::LNG, 'private' );
+		add_post_meta( $private, Post_Venue::UID_KEY, 'here:pds:place:home' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
+		$result = Post_Venue::choose_place(
+			array(
+				'name'     => 'Home',
+				'uid'      => 'here:pds:place:home',
+				'url'      => 'https://home.example/',
+				'provider' => 'sloc_test',
+			)
+		);
+		$this->assertSame( 'not_found', $result->get_error_code() );
+		$this->assertSame( '', get_post_meta( $private, 'venue_url', true ), 'The venue gains nothing.' );
+	}
+
+	/**
+	 * A chosen place must have a name and can't be another kind of post on the site.
+	 */
+	public function test_choose_invalid_place() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$post_id = self::factory()->post->create();
+		$this->assertSame( 'invalid_place', Post_Venue::choose_place( 'Cafe' )->get_error_code() );
+		$this->assertSame( 'invalid_place', Post_Venue::choose_place( array( 'name' => '  ' ) )->get_error_code() );
+		$this->assertSame( 'invalid_place', Post_Venue::choose_place( array( 'name' => array( 'Cafe', 'Two' ) ) )->get_error_code() );
+		$this->assertSame(
+			'invalid_place',
+			Post_Venue::choose_place(
+				array(
+					'name' => 'Not a venue',
+					'url'  => get_permalink( $post_id ),
+				)
+			)->get_error_code()
+		);
+		$this->assertSame( 400, Post_Venue::choose_place( 'Cafe' )->get_error_data()['status'] );
 	}
 
 	/**

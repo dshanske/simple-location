@@ -40,3 +40,54 @@
 	}
 }
 
+
+// Venues found for a post (#815): the site's apart from the providers'.
+.sloc-places {
+	margin: 0 0 1em;
+
+	.sloc-places-group {
+		border-left: 4px solid #c3c4c7;
+		margin: 0.5em 0;
+		padding: 0 0 0 8px;
+
+		&.is-local {
+			border-left-color: #2271b1;
+		}
+
+		h4 {
+			margin: 0.5em 0 0.25em;
+		}
+
+		ul {
+			margin: 0;
+		}
+
+		li {
+			align-items: center;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.25em 0.5em;
+		}
+	}
+
+	.sloc-place-badge {
+		background: #f0f0f1;
+		border-radius: 3px;
+		font-size: 11px;
+		padding: 0 6px;
+		text-transform: uppercase;
+	}
+
+	.is-local .sloc-place-badge {
+		background: #2271b1;
+		color: #fff;
+	}
+
+	.sloc-place-name {
+		font-weight: 600;
+	}
+
+	.choose-place-button {
+		margin-left: auto;
+	}
+}
