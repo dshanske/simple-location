@@ -33,6 +33,7 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 	 */
 	const VARIABLES = array(
 		'temperature_2m',
+		'apparent_temperature',
 		'relative_humidity_2m',
 		'dew_point_2m',
 		'rain',
@@ -349,6 +350,7 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 	 *
 	 * @since 6.1.0
 	 * @since 6.2.0 Includes the snow depth.
+	 * @since 6.3.0 Includes the apparent temperature.
 	 *
 	 * @param array $json Values keyed by Open-Meteo variable.
 	 * @return array Conditions.
@@ -356,6 +358,7 @@ class Weather_Provider_OpenMeteo extends Weather_Provider {
 	public function convert_data( $json ) {
 		$return                = array();
 		$return['temperature'] = self::round_value( $json['temperature_2m'] ?? null, 1 );
+		$return['apptemp']     = self::round_value( $json['apparent_temperature'] ?? null, 1 );
 		$return['dewpoint']    = self::round_value( $json['dew_point_2m'] ?? null, 1 );
 		$return['humidity']    = self::round_value( $json['relative_humidity_2m'] ?? null, 1 );
 		$return['pressure']    = self::round_value( $json['pressure_msl'] ?? null, 1 );

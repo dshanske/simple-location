@@ -220,6 +220,7 @@ trait Weather_Info_Trait {
 	 * Returns the unit, name and description based on the requested property.
 	 *
 	 * @since 6.2.0 Adds the VOC and NOx indices, the snow depth and the snow rate.
+	 * @since 6.3.0 Adds the apparent temperature, the cloud base, and the lightning strikes and their distance.
 	 *
 	 * @param string|null $property Property to return. Null will return entire array.
 	 * @param boolean     $imperial Whether imperial or default units.
@@ -239,183 +240,207 @@ trait Weather_Info_Trait {
 			'icon'  => '',
 		);
 		$units    = array(
-			'temperature' => array(
+			'temperature'        => array(
 				'unit'  => __( '&deg;C', 'simple-location' ),
 				'label' => __( 'degrees celsius', 'simple-location' ),
 				'name'  => __( 'Temperature', 'simple-location' ),
 				'icon'  => 'wi-thermometer',
 			),
-			'windchill'   => array(
+			'windchill'          => array(
 				'unit'  => __( '&deg;C', 'simple-location' ),
 				'label' => __( 'degrees celsius', 'simple-location' ),
 				'name'  => __( 'Wind Chill', 'simple-location' ),
 				'icon'  => 'wi-thermometer',
 			),
-			'heatindex'   => array(
+			'heatindex'          => array(
 				'unit'  => __( '&deg;C', 'simple-location' ),
 				'label' => __( 'degrees celsius', 'simple-location' ),
 				'name'  => __( 'Heat Index', 'simple-location' ),
 				'icon'  => 'wi-thermometer',
 			),
-			'dewpoint'    => array(
+			'apptemp'            => array(
+				'unit'  => __( '&deg;C', 'simple-location' ),
+				'label' => __( 'degrees celsius', 'simple-location' ),
+				'name'  => __( 'Feels Like', 'simple-location' ),
+				'icon'  => 'wi-thermometer',
+			),
+			'dewpoint'           => array(
 				'unit'  => __( '&deg;C', 'simple-location' ),
 				'label' => __( 'degrees celsius', 'simple-location' ),
 				'name'  => __( 'Dewpoint', 'simple-location' ),
 				'icon'  => 'wi-thermometer',
 			),
-			'humidity'    => array(
+			'humidity'           => array(
 				'unit'  => __( '%', 'simple-location' ),
 				'label' => __( 'percent', 'simple-location' ),
 				'name'  => __( 'Humidity', 'simple-location' ),
 				'icon'  => 'wi-humidity',
 			),
-			'pressure'    => array(
+			'pressure'           => array(
 				'unit'  => __( 'hPa', 'simple-location' ),
 				'label' => __( 'hectopascals', 'simple-location' ),
 				'name'  => __( 'Pressure', 'simple-location' ),
 				'icon'  => 'wi-barometer',
 			),
-			'cloudiness'  => array(
+			'cloudiness'         => array(
 				'unit'  => __( '%', 'simple-location' ),
 				'label' => __( 'percent', 'simple-location' ),
 				'name'  => __( 'Cloudiness', 'simple-location' ),
 				'icon'  => 'wi-cloudy',
 			),
-			'windspeed'   => array(
+			'windspeed'          => array(
 				'unit'  => __( 'mps', 'simple-location' ),
 				'label' => __( 'meters per second', 'simple-location' ),
 				'name'  => __( 'Wind Speed', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'windgust'    => array(
+			'windgust'           => array(
 				'unit'  => __( 'mps', 'simple-location' ),
 				'label' => __( 'meters per second', 'simple-location' ),
 				'name'  => __( 'Wind Gust', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'winddegree'  => array(
+			'winddegree'         => array(
 				'unit'  => __( '&deg;', 'simple-location' ),
 				'label' => __( 'degrees', 'simple-location' ),
 				'name'  => __( 'Wind Direction', 'simple-location' ),
 				'icon'  => 'wi-windy',
 			),
-			'rain'        => array(
+			'rain'               => array(
 				'unit'  => __( 'mm', 'simple-location' ),
 				'label' => __( 'millimeters in the last hour', 'simple-location' ),
 				'name'  => __( 'Rainfall', 'simple-location' ),
 				'icon'  => 'wi-rain',
 			),
-			'rainrate'    => array(
+			'rainrate'           => array(
 				'unit'  => __( 'mm/h', 'simple-location' ),
 				'label' => __( 'millimeters per hour', 'simple-location' ),
 				'name'  => __( 'Rain Rate', 'simple-location' ),
 				'icon'  => 'wi-raindrops',
 			),
-			'snowrate'    => array(
+			'snowrate'           => array(
 				'unit'  => __( 'mm/h', 'simple-location' ),
 				'label' => __( 'millimeters per hour', 'simple-location' ),
 				'name'  => __( 'Snow Rate', 'simple-location' ),
 				'icon'  => 'wi-snow',
 			),
-			'snow'        => array(
+			'snow'               => array(
 				'unit'  => __( 'mm', 'simple-location' ),
 				'label' => __( 'millimeters in the last hour', 'simple-location' ),
 				'name'  => __( 'Snowfall', 'simple-location' ),
 				'icon'  => 'wi-snow',
 			),
-			'snowdepth'   => array(
+			'snowdepth'          => array(
 				'unit'  => __( 'mm', 'simple-location' ),
 				'label' => __( 'millimeters on the ground', 'simple-location' ),
 				'name'  => __( 'Snow Depth', 'simple-location' ),
 				'icon'  => 'wi-snowflake-cold',
 			),
-			'visibility'  => array(
+			'visibility'         => array(
 				'unit'  => __( 'm', 'simple-location' ),
 				'label' => __( 'meters', 'simple-location' ),
 				'name'  => __( 'Visibility', 'simple-location' ),
 				'icon'  => 'wi-visibility',
 			),
-			'radiation'   => array(
+			'cloudbase'          => array(
+				'unit'  => __( 'm', 'simple-location' ),
+				'label' => __( 'meters above the ground', 'simple-location' ),
+				'name'  => __( 'Cloud Base', 'simple-location' ),
+				'icon'  => 'wi-cloud-up',
+			),
+			'lightning_strikes'  => array(
+				'unit'  => '',
+				'label' => __( 'strikes in the last hour', 'simple-location' ),
+				'name'  => __( 'Lightning Strikes', 'simple-location' ),
+				'icon'  => 'wi-lightning',
+			),
+			'lightning_distance' => array(
+				'unit'  => __( 'km', 'simple-location' ),
+				'label' => __( 'kilometers to the latest strike', 'simple-location' ),
+				'name'  => __( 'Lightning Distance', 'simple-location' ),
+				'icon'  => 'wi-lightning',
+			),
+			'radiation'          => array(
 				'unit'  => __( 'W/m^2', 'simple-location' ),
 				'label' => __( 'watts per square meter', 'simple-location' ),
 				'name'  => __( 'Solar Radiation', 'simple-location' ),
 				'icon'  => 'fa-radiation',
 			),
-			'illuminance' => array(
+			'illuminance'        => array(
 				'unit'  => __( 'lx', 'simple-location' ),
 				'label' => __( 'lux', 'simple-location' ),
 				'name'  => __( 'Illuminance', 'simple-location' ),
 				'icon'  => 'sa-sun',
 			),
-			'uv'          => array(
+			'uv'                 => array(
 				'unit'  => '',
 				'label' => __( 'index', 'simple-location' ),
 				'name'  => __( 'UV Index', 'simple-location' ),
 				'icon'  => 'wi-uv',
 			),
-			'aqi'         => array(
+			'aqi'                => array(
 				'unit'  => '',
 				'label' => __( 'index', 'simple-location' ),
 				'name'  => __( 'Air Quality Index', 'simple-location' ),
 				'icon'  => 'md-aqi',
 			),
-			'pm1_0'       => array(
+			'pm1_0'              => array(
 				'unit'  => __( 'µg/m3', 'simple-location' ),
 				'label' => __( 'micrograms per cubic meter of air', 'simple-location' ),
 				'name'  => __( 'PM1.0', 'simple-location' ),
 				'icon'  => 'wi-dust',
 			),
 
-			'pm2_5'       => array(
+			'pm2_5'              => array(
 				'unit'  => __( 'µg/m3', 'simple-location' ),
 				'label' => __( 'micrograms per cubic meter of air', 'simple-location' ),
 				'name'  => __( 'PM2.5', 'simple-location' ),
 				'icon'  => 'wi-dust',
 			),
-			'pm10_0'      => array(
+			'pm10_0'             => array(
 				'unit'  => __( 'µg/m3', 'simple-location' ),
 				'label' => __( 'micrograms per cubic meter of air', 'simple-location' ),
 				'name'  => __( 'PM10', 'simple-location' ),
 				'icon'  => 'wi-dust',
 			),
-			'co'          => array(
+			'co'                 => array(
 				'unit'  => __( 'ppm', 'simple-location' ),
 				'label' => __( 'parts per million', 'simple-location' ),
 				'name'  => __( 'Carbon Monoxide', 'simple-location' ),
 			),
-			'co2'         => array(
+			'co2'                => array(
 				'unit'  => __( 'ppm', 'simple-location' ),
 				'label' => __( 'parts per million', 'simple-location' ),
 				'name'  => __( 'Carbon Dioxide', 'simple-location' ),
 			),
-			'nh3'         => array(
+			'nh3'                => array(
 				'unit'  => __( 'ppm', 'simple-location' ),
 				'label' => __( 'parts per million', 'simple-location' ),
 				'name'  => __( 'Ammonia', 'simple-location' ),
 			),
-			'o3'          => array(
+			'o3'                 => array(
 				'unit'  => __( 'ppm', 'simple-location' ),
 				'label' => __( 'parts per million', 'simple-location' ),
 				'name'  => __( 'Ozone', 'simple-location' ),
 			),
-			'pb'          => array(
+			'pb'                 => array(
 				'unit'  => __( 'ppm', 'simple-location' ),
 				'label' => __( 'parts per million', 'simple-location' ),
 				'name'  => __( 'Lead', 'simple-location' ),
 			),
-			'so2'         => array(
+			'so2'                => array(
 				'unit'  => __( 'ppm', 'simple-location' ),
 				'label' => __( 'parts per million', 'simple-location' ),
 				'name'  => __( 'Sulfur Dioxide', 'simple-location' ),
 			),
 			// Sensirion gas indices, 1 to 500: for VOC, 100 is the sensor's recent average; for NOx, 1 is the baseline.
-			'voc_index'   => array(
+			'voc_index'          => array(
 				'unit'  => '',
 				'label' => __( 'index', 'simple-location' ),
 				'name'  => __( 'VOC Index', 'simple-location' ),
 				'icon'  => 'md-aqi',
 			),
-			'nox_index'   => array(
+			'nox_index'          => array(
 				'unit'  => '',
 				'label' => __( 'index', 'simple-location' ),
 				'name'  => __( 'NOx Index', 'simple-location' ),
@@ -424,90 +449,108 @@ trait Weather_Info_Trait {
 		);
 
 			$iunits = array(
-				'temperature' => array(
+				'temperature'        => array(
 					'unit'  => __( '&deg;F', 'simple-location' ),
 					'label' => __( 'degrees fahrenheit', 'simple-location' ),
 					'name'  => __( 'Temperature', 'simple-location' ),
 					'icon'  => 'wi-thermometer',
 				),
-				'windchill'   => array(
+				'windchill'          => array(
 					'unit'  => __( '&deg;F', 'simple-location' ),
 					'label' => __( 'degrees fahrenheit', 'simple-location' ),
 					'name'  => __( 'Wind Chill', 'simple-location' ),
 					'icon'  => 'wi-thermometer',
 				),
-				'heatindex'   => array(
+				'heatindex'          => array(
 					'unit'  => __( '&deg;F', 'simple-location' ),
 					'label' => __( 'degrees fahrenheit', 'simple-location' ),
 					'name'  => __( 'Heat Index', 'simple-location' ),
 					'icon'  => 'wi-thermometer',
 				),
-				'dewpoint'    => array(
+				'apptemp'            => array(
+					'unit'  => __( '&deg;F', 'simple-location' ),
+					'label' => __( 'degrees fahrenheit', 'simple-location' ),
+					'name'  => __( 'Feels Like', 'simple-location' ),
+					'icon'  => 'wi-thermometer',
+				),
+				'dewpoint'           => array(
 					'unit'  => __( '&deg;F', 'simple-location' ),
 					'label' => __( 'degrees fahrenheit', 'simple-location' ),
 					'name'  => __( 'Dewpoint', 'simple-location' ),
 					'icon'  => 'wi-thermometer',
 				),
-				'pressure'    => array(
+				'pressure'           => array(
 					'unit'  => __( 'inHg', 'simple-location' ),
 					'label' => __( 'inches of mercury', 'simple-location' ),
 					'name'  => __( 'Pressure', 'simple-location' ),
 					'icon'  => 'wi-barometer',
 				),
-				'windspeed'   => array(
+				'windspeed'          => array(
 					'unit'  => __( 'MPH', 'simple-location' ),
 					'label' => __( 'miles per hour', 'simple-location' ),
 					'name'  => __( 'Wind Speed', 'simple-location' ),
 					'icon'  => 'wi-windy',
 				),
-				'windgust'    => array(
+				'windgust'           => array(
 					'unit'  => __( 'MPH', 'simple-location' ),
 					'label' => __( 'miles per hour', 'simple-location' ),
 					'name'  => __( 'Wind Gust', 'simple-location' ),
 					'icon'  => 'wi-windy',
 				),
-				'winddegree'  => array(
+				'winddegree'         => array(
 					'unit'  => __( '&deg;', 'simple-location' ),
 					'label' => __( 'degree', 'simple-location' ),
 					'name'  => __( 'Wind Direction', 'simple-location' ),
 					'icon'  => 'wi-windy',
 				),
 
-				'rain'        => array(
+				'rain'               => array(
 					'unit'  => __( 'in', 'simple-location' ),
 					'label' => __( 'inches in the last hour', 'simple-location' ),
 					'name'  => __( 'Rainfall', 'simple-location' ),
 					'icon'  => 'wi-rain',
 				),
-				'rainrate'    => array(
+				'rainrate'           => array(
 					'unit'  => __( 'in/h', 'simple-location' ),
 					'label' => __( 'inches per hour', 'simple-location' ),
 					'name'  => __( 'Rain Rate', 'simple-location' ),
 					'icon'  => 'wi-raindrops',
 				),
-				'snowrate'    => array(
+				'snowrate'           => array(
 					'unit'  => __( 'in/h', 'simple-location' ),
 					'label' => __( 'inches per hour', 'simple-location' ),
 					'name'  => __( 'Snow Rate', 'simple-location' ),
 					'icon'  => 'wi-snow',
 				),
-				'snow'        => array(
+				'snow'               => array(
 					'unit'  => __( 'in', 'simple-location' ),
 					'label' => __( 'inches in the last hour', 'simple-location' ),
 					'name'  => __( 'Snowfall', 'simple-location' ),
 					'icon'  => 'wi-snow',
 				),
-				'snowdepth'   => array(
+				'snowdepth'          => array(
 					'unit'  => __( 'in', 'simple-location' ),
 					'label' => __( 'inches on the ground', 'simple-location' ),
 					'name'  => __( 'Snow Depth', 'simple-location' ),
 					'icon'  => 'wi-snowflake-cold',
 				),
-				'visibility'  => array(
+				'visibility'         => array(
 					'unit'  => __( 'mi', 'simple-location' ),
 					'label' => __( 'miles', 'simple-location' ),
 					'name'  => __( 'Visibility', 'simple-location' ),
 					'icon'  => 'wi-visibility',
+				),
+				'cloudbase'          => array(
+					'unit'  => __( 'ft', 'simple-location' ),
+					'label' => __( 'feet above the ground', 'simple-location' ),
+					'name'  => __( 'Cloud Base', 'simple-location' ),
+					'icon'  => 'wi-cloud-up',
+				),
+				'lightning_distance' => array(
+					'unit'  => __( 'mi', 'simple-location' ),
+					'label' => __( 'miles to the latest strike', 'simple-location' ),
+					'name'  => __( 'Lightning Distance', 'simple-location' ),
+					'icon'  => 'wi-lightning',
 				),
 			);
 			$iunits = array_merge( $units, $iunits );

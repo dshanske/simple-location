@@ -143,6 +143,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	 *
 	 * @since 6.0.0 Visibility is converted to meters before it is rounded.
 	 * @since 6.2.0 Includes the snow depth.
+	 * @since 6.3.0 Includes the apparent temperature.
 	 *
 	 * @param string $json Raw JSON.
 	 * @return array Current Conditions in Array
@@ -150,6 +151,7 @@ class Weather_Provider_VisualCrossing extends Weather_Provider {
 	public function convert_data( $json ) {
 		$return                = array();
 		$return['temperature'] = self::round_value( $json['temp'] ?? null, 1 );
+		$return['apptemp']     = self::round_value( $json['feelslike'] ?? null, 1 );
 		$return['dewpoint']    = self::round_value( $json['dew'] ?? null, 1 );
 		$return['humidity']    = self::round_value( $json['humidity'] ?? null, 1 );
 		$return['pressure']    = self::round_value( $json['pressure'] ?? null, 1 );

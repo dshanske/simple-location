@@ -492,6 +492,7 @@ class Weather_Provider_Station extends Weather_Provider {
 		if ( isset( $json['units'] ) && 'us' === $json['units'] ) {
 			$return = self::imperial_to_metric( $return );
 		}
+		$return = Sloc_Weather_Data::without_quiet_lightning( $return );
 		$return = array_merge( $return, static::parse_condition( $observations ) );
 		if ( isset( $json['time'] ) && is_numeric( $json['time'] ) ) {
 			$return['timestamp'] = (int) $json['time'];
@@ -572,7 +573,7 @@ class Weather_Provider_Station extends Weather_Provider {
 			$return[ $key ] = $value;
 		}
 		unset( $return['code'] );
-		return array_merge( $return, static::parse_condition( $json ) );
+		return array_merge( Sloc_Weather_Data::without_quiet_lightning( $return ), static::parse_condition( $json ) );
 	}
 
 	/**

@@ -124,6 +124,7 @@ class Weather_Provider_Weatherbit extends Weather_Provider {
 			}
 			$response              = $response['data'][0];
 			$return['temperature'] = self::round_value( $response['temp'] ?? null, 1 );
+			$return['apptemp']     = self::round_value( $response['app_temp'] ?? null, 1 );
 			$return['humidity']    = self::round_value( $response['rh'] ?? null, 1 );
 			$return['dewpoint']    = self::round_value( $response['dewpt'] ?? null, 1 );
 			$return['pressure']    = self::round_value( $response['pres'] ?? null, 2 );

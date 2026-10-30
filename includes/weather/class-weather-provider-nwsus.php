@@ -204,6 +204,7 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 
 		$return['summary']    = $properties['textDescription'] ?? null;
 		$return['cloudiness'] = self::cloud_cover( $properties['cloudLayers'] ?? null );
+		$return['cloudbase']  = self::cloud_base( $properties['cloudLayers'] ?? null );
 
 		if ( ! empty( $properties['presentWeather'] ) ) {
 			$return['code'] = self::phenomenon_code_map( $properties['presentWeather'] );
@@ -263,6 +264,34 @@ class Weather_Provider_NWSUS extends Weather_Provider {
 			}
 		}
 		return $found;
+	}
+
+	/**
+	 * Returns the height of the lowest cloud layer of an observation, above the ground.
+	 *
+	 * A sky hidden by fog or other obscuration (VV) has no cloud base, nor has a clear sky.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array|null $layers Cloud layers, each with an 'amount' such as SCT and a 'base' in meters.
+	 * @return float|null Cloud base in meters, or null without a cloud layer with a height.
+	 */
+	public static function cloud_base( $layers ) {
+		if ( empty( $layers ) || ! is_array( $layers ) ) {
+			return null;
+		}
+		$lowest = null;
+		foreach ( $layers as $layer ) {
+			if ( ! is_array( $layer ) || ! in_array( $layer['amount'] ?? null, array( 'FEW', 'SCT', 'BKN', 'OVC' ), true ) ) {
+				continue;
+			}
+			$base = is_array( $layer['base'] ?? null ) ? $layer['base'] : array();
+			if ( 'wmoUnit:m' !== ( $base['unitCode'] ?? null ) || ! is_numeric( $base['value'] ?? null ) ) {
+				continue;
+			}
+			$lowest = ( null === $lowest ) ? (float) $base['value'] : min( $lowest, (float) $base['value'] );
+		}
+		return $lowest;
 	}
 
 	/**

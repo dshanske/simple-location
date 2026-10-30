@@ -122,6 +122,7 @@ class Sloc_Weather_Fill {
 	 * Returns the readings that can be filled in, and the weather properties of each.
 	 *
 	 * @since 6.2.0
+	 * @since 6.3.0 Adds the apparent temperature.
 	 *
 	 * @return array[] Arrays with 'label' and 'keys', keyed by reading.
 	 */
@@ -142,6 +143,10 @@ class Sloc_Weather_Fill {
 			'cloudiness' => array(
 				'label' => __( 'Cloud cover', 'simple-location' ),
 				'keys'  => array( 'cloudiness' ),
+			),
+			'apptemp'    => array(
+				'label' => __( 'Feels like temperature', 'simple-location' ),
+				'keys'  => array( 'apptemp' ),
 			),
 			'radiation'  => array(
 				'label' => __( 'Solar radiation', 'simple-location' ),
