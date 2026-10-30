@@ -102,7 +102,7 @@ class VenueChainTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The REST venue route and Micropub use the chain; a provider asked for by name is the only one tried.
+	 * The REST venue route and the Micropub places query use the chain; a provider asked for by name is the only one tried.
 	 */
 	public function test_callers() {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -115,14 +115,14 @@ class VenueChainTest extends WP_UnitTestCase {
 		$request->set_param( 'provider', 'sloc_test' );
 		$this->assertSame( array(), rest_do_request( $request )->get_data()['items'] );
 
-		$response = Location_Plugins::micropub_query_geo(
+		$response = Location_Plugins::micropub_query_places(
 			array(),
 			array(
-				'q'   => 'geo',
+				'q'   => 'places',
 				'lat' => self::LAT,
 				'lon' => self::LNG,
 			)
 		);
-		$this->assertSame( 'sloc_test_fallback', $response['venues']['provider'] );
+		$this->assertSame( array( 'sloc_test_fallback' ), $response['places'][0]['properties']['provider'] );
 	}
 }

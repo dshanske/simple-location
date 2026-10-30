@@ -140,7 +140,7 @@ class MicropubTest extends WP_UnitTestCase {
 	public function test_hooks() {
 		$this->assertSame( 10, has_filter( 'before_micropub', array( 'Location_Plugins', 'micropub_lookup_location' ) ) );
 		$this->assertSame( 10, has_action( 'after_micropub', array( 'Location_Plugins', 'micropub_set_location' ) ) );
-		$this->assertSame( 10, has_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_geo' ) ) );
+		$this->assertSame( 10, has_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_places' ) ) );
 		$this->assertSame( 10, has_filter( 'webmention_handler_mf2_set_properties', array( 'Location_Plugins', 'webmention_handler_mf2_set_properties' ) ) );
 	}
 
@@ -667,129 +667,162 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A geo query without usable coordinates returns the response unchanged.
+	 * A places query without a usable location is a 400 error.
 	 */
-	public function test_query_geo_without_coordinates() {
-		$resp   = array( 'resp' );
+	public function test_query_places_without_coordinates() {
 		$inputs = array(
-			'no query'         => array(),
-			'no coordinates'   => array( 'q' => 'geo' ),
-			'latitude only'    => array(
-				'q'   => 'geo',
-				'lat' => '39.95',
-			),
-			'one-part geo URI' => array(
-				'q'   => 'geo',
-				'uri' => 'geo:39.95',
-			),
+			'no coordinates'   => array(),
+			'latitude only'    => array( 'lat' => '39.95' ),
+			'one-part geo URI' => array( 'uri' => 'geo:39.95' ),
 			'not numbers'      => array(
-				'q'   => 'geo',
 				'lat' => 'north',
 				'lon' => 'west',
 			),
+			'out of range'     => array(
+				'lat' => '91',
+				'lon' => '10',
+			),
+			'arrays'           => array(
+				'lat' => array( '39.95' ),
+				'lon' => array( '-75.16' ),
+			),
 		);
 		foreach ( $inputs as $label => $input ) {
-			$this->assertSame( $resp, Location_Plugins::micropub_query_geo( $resp, $input ), $label );
+			$result = Location_Plugins::micropub_query_places( array( 'resp' ), array( 'q' => 'places' ) + $input );
+			$this->assertWPError( $result, $label );
+			$this->assertSame( 'invalid_request', $result->get_error_code(), $label );
+			$this->assertSame( 400, $result->get_error_data()['status'], $label );
 		}
 	}
 
 	/**
-	 * A geo query returns the place, nearby venues and the visibility to use.
+	 * A places query returns the places near the location as mf2 h-cards.
 	 */
-	public function test_query_geo() {
+	public function test_query_places() {
 		update_option( 'sloc_venue_provider', 'sloc_test' );
-		update_option( 'geo_public', 1 );
-		$result = Location_Plugins::micropub_query_geo(
-			array(),
+		Venue_Provider_Sloc_Test::reset();
+		$result = Location_Plugins::micropub_query_places(
+			new WP_Error( 'invalid_request', 'unknown query' ),
 			array(
-				'q'   => 'geo',
+				'q'   => 'places',
 				'uri' => 'geo:' . self::LAT . ',' . self::LNG . ';u=35',
 			)
 		);
-		$this->assertSame( array( self::LAT, self::LNG ), Geo_Provider_Sloc_Test::$last );
-		$this->assertSame( 'Philadelphia City Hall', $result['geo']['label'] );
-		$this->assertSame( self::LAT, $result['geo']['latitude'] );
-		$this->assertSame( self::LNG, $result['geo']['longitude'] );
-		$this->assertSame( 'public', $result['geo']['visibility'] );
-		$this->assertSame( 'Test Cafe', $result['venues']['items'][0]['name'] );
-		$this->assertEquals( self::LAT, $result['venues']['items'][0]['latitude'] );
-
-		// The site default applies.
-		update_option( 'geo_public', 2 );
-		$result = Location_Plugins::micropub_query_geo(
-			array(),
-			array(
-				'q'   => 'geo',
-				'lat' => self::LAT,
-				'lon' => self::LNG,
-			)
-		);
-		$this->assertSame( 'protected', $result['geo']['visibility'] );
+		$this->assertSame( array( 'places' ), array_keys( $result ) );
+		$this->assertSame( array( 'h-card' ), $result['places'][0]['type'] );
+		$this->assertSame( array( 'Test Cafe' ), $result['places'][0]['properties']['name'] );
+		$this->assertSame( array( 'sloc_test' ), $result['places'][0]['properties']['provider'] );
+		$this->assertEquals( array( self::LAT ), $result['places'][0]['properties']['latitude'] );
 	}
 
 	/**
-	 * A geo query at latitude 0 or a whole-number longitude is answered.
+	 * A places query passes on the limit and whether to list only the site's venues.
 	 */
-	public function test_query_geo_whole_numbers() {
-		$result = Location_Plugins::micropub_query_geo(
-			array(),
+	public function test_query_places_arguments() {
+		update_option( 'sloc_venue_provider', 'sloc_test' );
+		Venue_Provider_Sloc_Test::reset();
+		$venue_id = self::factory()->post->create(
 			array(
-				'q'   => 'geo',
-				'lat' => '0',
-				'lon' => '10',
+				'post_type'  => 'venue',
+				'post_title' => 'Our Cafe',
 			)
 		);
-		$this->assertSame( 0.0, $result['geo']['latitude'] );
-		$this->assertSame( 10.0, $result['geo']['longitude'] );
+		set_post_geodata(
+			$venue_id,
+			'',
+			array(
+				'latitude'   => self::LAT,
+				'longitude'  => self::LNG,
+				'visibility' => 'public',
+			)
+		);
+		$input = array(
+			'q'   => 'places',
+			'lat' => (string) self::LAT,
+			'lon' => (string) self::LNG,
+		);
+
+		$result = Location_Plugins::micropub_query_places( array(), $input );
+		$this->assertSame( array( 'Our Cafe' ), $result['places'][0]['properties']['name'] );
+		$this->assertSame( array( 'Test Cafe' ), $result['places'][1]['properties']['name'] );
+
+		$result = Location_Plugins::micropub_query_places( array(), $input + array( 'limit' => '1' ) );
+		$this->assertCount( 1, $result['places'] );
+
+		Venue_Provider_Sloc_Test::reset();
+		foreach ( array( '1', 'true', true ) as $local ) {
+			$result = Location_Plugins::micropub_query_places( array(), $input + array( 'local' => $local ) );
+			$this->assertCount( 1, $result['places'] );
+			$this->assertSame( array( 'local' ), $result['places'][0]['properties']['provider'] );
+		}
+		$this->assertSame( 0, Venue_Provider_Sloc_Test::$calls, 'Only the site is asked.' );
+
+		// A limit that isn't a number, or a local flag that isn't a value, is ignored.
+		$result = Location_Plugins::micropub_query_places(
+			array(),
+			$input + array(
+				'limit' => 'many',
+				'local' => array( '1' ),
+			)
+		);
+		$this->assertCount( 2, $result['places'] );
 	}
 
 	/**
-	 * A geo query at a private venue suggests protected, so the place shows without the coordinates.
+	 * The configuration query lists the places query once, and geo queries are no longer answered.
 	 */
-	public function test_query_geo_private_venue() {
-		update_option( 'geo_public', 1 );
-		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
-		set_post_geodata( $venue_id, 'visibility', 'private' );
-		$at_venue = function () use ( $venue_id ) {
-			return $venue_id;
-		};
-		add_filter( 'pre_at_venue', $at_venue );
-		$result = Location_Plugins::micropub_query_geo(
-			array(),
-			array(
-				'q'   => 'geo',
-				'lat' => self::LAT,
-				'lon' => self::LNG,
-			)
+	public function test_query_config_and_others() {
+		$config = array( 'q' => array( 'config', 'source' ) );
+		$result = Location_Plugins::micropub_query_places( $config, array( 'q' => 'config' ) );
+		$this->assertSame( array( 'config', 'source', 'places' ), $result['q'] );
+		$this->assertSame( $result, Location_Plugins::micropub_query_places( $result, array( 'q' => 'config' ) ) );
+		$this->assertSame( array( 'places' ), Location_Plugins::micropub_query_places( array(), array( 'q' => 'config' ) )['q'] );
+
+		$error = new WP_Error( 'forbidden', 'No' );
+		$this->assertSame( $error, Location_Plugins::micropub_query_places( $error, array( 'q' => 'config' ) ) );
+		$this->assertSame( array( 'resp' ), Location_Plugins::micropub_query_places( array( 'resp' ), array( 'q' => 'source' ) ) );
+		$this->assertSame( array( 'resp' ), Location_Plugins::micropub_query_places( array( 'resp' ), array() ) );
+		$this->assertSame(
+			array( 'resp' ),
+			Location_Plugins::micropub_query_places(
+				array( 'resp' ),
+				array(
+					'q'   => 'geo',
+					'lat' => self::LAT,
+					'lon' => self::LNG,
+				)
+			),
+			'q=geo was removed.'
 		);
-		remove_filter( 'pre_at_venue', $at_venue );
-		$this->assertSame( 'protected', $result['geo']['visibility'] );
 	}
 
 	/**
-	 * A geo query without geo or venue providers still answers with the coordinates.
+	 * The location of a query comes from lat and lon, or a geo URI, which wins.
 	 */
-	public function test_query_geo_without_providers() {
-		update_option( 'sloc_geo_provider', 'missing' );
-		update_option( 'sloc_venue_provider', 'missing' );
-		$result = Location_Plugins::micropub_query_geo(
-			array(),
-			array(
-				'q'   => 'geo',
-				'lat' => self::LAT,
-				'lon' => self::LNG,
+	public function test_micropub_coordinates() {
+		$this->assertSame(
+			array( 0.0, 10.0 ),
+			Location_Plugins::micropub_coordinates(
+				array(
+					'lat' => '0',
+					'lon' => '10',
+				)
 			)
 		);
-		$this->assertNull( $result['geo']['label'] );
-		$this->assertSame( array(), $result['venues'] );
-		$this->assertSame( self::LAT, $result['geo']['latitude'] );
-	}
-
-	/**
-	 * Only geo queries are answered.
-	 */
-	public function test_query_other() {
-		$this->assertSame( array( 'resp' ), Location_Plugins::micropub_query_geo( array( 'resp' ), array( 'q' => 'config' ) ) );
+		$this->assertSame( array( 39.9524, -75.1636 ), Location_Plugins::micropub_coordinates( array( 'uri' => 'geo:39.9524,-75.1636;u=35' ) ) );
+		$this->assertSame(
+			array( 1.0, 2.0 ),
+			Location_Plugins::micropub_coordinates(
+				array(
+					'lat' => '5',
+					'lon' => '6',
+					'uri' => 'geo:1,2',
+				)
+			)
+		);
+		$this->assertSame( array( 39.1234568, 1.0 ), Location_Plugins::micropub_coordinates( array( 'uri' => 'geo:39.12345678%2C1' ) ) );
+		$this->assertFalse( Location_Plugins::micropub_coordinates( array( 'uri' => array( 'geo:1,2' ) ) ) );
+		$this->assertFalse( Location_Plugins::micropub_coordinates( array( 'uri' => 'https://example.com/' ) ) );
 	}
 
 	/**

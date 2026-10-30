@@ -359,6 +359,17 @@ abstract class Venue_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Sets the most venues a search finds, such as for a request that asks for a number.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param mixed $limit Most venues; sanitized as the setting is.
+	 */
+	public function set_limit( $limit ) {
+		$this->limit = self::sanitize_limit( $limit );
+	}
+
+	/**
 	 * Returns the venues near the location: the provider's, within the radius, nearest first, up to the limit.
 	 *
 	 * Each venue with coordinates gets its distance from the location, in meters, as 'distance'. Venues without

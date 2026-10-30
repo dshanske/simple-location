@@ -332,16 +332,21 @@ class Sloc_Provider_Chain {
 	 * A provider that fails, or finds no venues, moves on to the next.
 	 *
 	 * @since 6.1.0
+	 * @since 6.3.0 Takes the most venues to find.
 	 *
 	 * @param float $latitude  Latitude.
 	 * @param float $longitude Longitude.
+	 * @param int   $limit     Optional. Most venues to find. Default 0, the sloc_venue_limit setting.
 	 * @return array|WP_Error Array with the venues under 'items', nearest first, and the slug of the provider that found
 	 *                        them as 'provider'; or the last error. Without any venues, an empty 'items'.
 	 */
-	public static function venues( $latitude, $longitude ) {
+	public static function venues( $latitude, $longitude, $limit = 0 ) {
 		$result = self::run(
 			'venue',
-			function ( $provider ) {
+			function ( $provider ) use ( $limit ) {
+				if ( $limit > 0 ) {
+					$provider->set_limit( $limit );
+				}
 				$venues = $provider->nearby();
 				if ( is_wp_error( $venues ) || empty( $venues['items'] ) ) {
 					return is_wp_error( $venues ) ? $venues : array();
