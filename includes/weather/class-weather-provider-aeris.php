@@ -183,6 +183,7 @@ class Weather_Provider_Aeris extends Weather_Provider {
 		$return['dewpoint']    = self::round_value( $observation['dewpointC'] ?? null, 1 );
 		$return['heatindex']   = self::round_value( $observation['heatindexC'] ?? null, 1 );
 		$return['windchill']   = self::round_value( $observation['windchillC'] ?? null, 1 );
+		$return['apptemp']     = self::round_value( $observation['feelslikeC'] ?? null, 1 );
 		$return['humidity']    = self::round_value( $observation['humidity'] ?? null, 1 );
 		$return['pressure']    = self::round_value( $observation['spressureMB'] ?? null, 1 );
 		$return['summary']     = $observation['weather'] ?? null;

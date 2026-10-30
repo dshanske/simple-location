@@ -26,6 +26,8 @@ class Sloc_Weather_Data {
 	 * @since 6.2.0 Adds voc_index and nox_index, the VOC and NOx indices of a Sensirion gas sensor.
 	 * @since 6.2.0 Adds snowdepth, the snow on the ground, apart from snow, the snowfall, and snowrate.
 	 * @since 6.2.0 Adds supplement, the provider that filled in readings; see Sloc_Weather_Fill.
+	 * @since 6.3.0 Adds apptemp, the apparent temperature; cloudbase, the height of the cloud base; and
+	 *              lightning_strikes and lightning_distance, the strikes in the last hour and how far the latest was.
 	 * @since 6.3.0 Adds derived_source, where a station took a reading it doesn't measure, such as an airport's METAR.
 	 * @var string[]
 	 */
@@ -34,6 +36,7 @@ class Sloc_Weather_Data {
 		'humidity',
 		'heatindex',
 		'windchill',
+		'apptemp',
 		'dewpoint',
 		'pressure',
 		'cloudiness',
@@ -41,6 +44,7 @@ class Sloc_Weather_Data {
 		'snow',
 		'snowdepth',
 		'visibility',
+		'cloudbase',
 		'radiation',
 		'illuminance',
 		'uv',
@@ -67,6 +71,8 @@ class Sloc_Weather_Data {
 		'derived_source',
 		'rainrate',
 		'snowrate',
+		'lightning_strikes',
+		'lightning_distance',
 		'attribution',
 		'attribution_url',
 	);
@@ -132,6 +138,7 @@ class Sloc_Weather_Data {
 	 * @since 1.0.0
 	 * @since 6.1.0 Registers the rain rate and a weather station's credit.
 	 * @since 6.2.0 Registers the VOC and NOx indices, the snow depth and the snow rate.
+	 * @since 6.3.0 Registers the apparent temperature, the cloud base, and the lightning strikes and their distance.
 	 * @since 6.3.0 Registers the source of readings a station took from elsewhere.
 	 */
 	public static function register_meta() {
@@ -149,38 +156,42 @@ class Sloc_Weather_Data {
 
 		$numerics = array(
 			// Weather Properties.
-			'temperature' => __( 'Temperature', 'simple-location' ),
-			'humidity'    => __( 'Humidity', 'simple-location' ),
-			'heatindex'   => __( 'Heat Index', 'simple-location' ),
-			'windchill'   => __( 'Wind Chill', 'simple-location' ),
-			'dewpoint'    => __( 'Dewpoint', 'simple-location' ),
-			'pressure'    => __( 'Atmospheric Pressure', 'simple-location' ),
-			'cloudiness'  => __( 'Cloudiness', 'simple-location' ),
-			'rain'        => __( 'Rainfall', 'simple-location' ),
-			'rainrate'    => __( 'Rain Rate', 'simple-location' ),
-			'snowrate'    => __( 'Snow Rate', 'simple-location' ),
-			'snow'        => __( 'Snowfall', 'simple-location' ),
-			'snowdepth'   => __( 'Snow Depth', 'simple-location' ),
-			'visibility'  => __( 'Visibility', 'simple-location' ),
-			'radiation'   => __( 'Radiation', 'simple-location' ),
-			'illuminance' => __( 'Illuminance', 'simple-location' ),
-			'uv'          => __( 'UV Index', 'simple-location' ),
-			'aqi'         => __( 'Air Quality Index', 'simple-location' ),
-			'pm1_0'       => __( 'Particulate Matter 1.0', 'simple-location' ),
-			'pm2_5'       => __( 'Particulate Matter 2.5', 'simple-location' ),
-			'pm10_0'      => __( 'Particulate Matter 10.0', 'simple-location' ),
-			'co'          => __( 'Carbon Monoxide', 'simple-location' ),
-			'co2'         => __( 'Carbon Dioxide', 'simple-location' ),
-			'nh3'         => __( 'Ammonia', 'simple-location' ),
-			'o3'          => __( 'Ozone', 'simple-location' ),
-			'pb'          => __( 'Lead', 'simple-location' ),
-			'so2'         => __( 'Sulfur Dioxide', 'simple-location' ),
-			'voc_index'   => __( 'VOC Index', 'simple-location' ),
-			'nox_index'   => __( 'NOx Index', 'simple-location' ),
-			'windspeed'   => __( 'Wind Speed', 'simple-location' ),
-			'winddegree'  => __( 'Wind Degree', 'simple-location' ),
-			'windgust'    => __( 'Wind Gust', 'simple-location' ),
-			'code'        => __( 'Weather Condition Code', 'simple-location' ),
+			'temperature'        => __( 'Temperature', 'simple-location' ),
+			'humidity'           => __( 'Humidity', 'simple-location' ),
+			'heatindex'          => __( 'Heat Index', 'simple-location' ),
+			'windchill'          => __( 'Wind Chill', 'simple-location' ),
+			'apptemp'            => __( 'Apparent Temperature', 'simple-location' ),
+			'dewpoint'           => __( 'Dewpoint', 'simple-location' ),
+			'pressure'           => __( 'Atmospheric Pressure', 'simple-location' ),
+			'cloudiness'         => __( 'Cloudiness', 'simple-location' ),
+			'rain'               => __( 'Rainfall', 'simple-location' ),
+			'rainrate'           => __( 'Rain Rate', 'simple-location' ),
+			'snowrate'           => __( 'Snow Rate', 'simple-location' ),
+			'snow'               => __( 'Snowfall', 'simple-location' ),
+			'snowdepth'          => __( 'Snow Depth', 'simple-location' ),
+			'visibility'         => __( 'Visibility', 'simple-location' ),
+			'cloudbase'          => __( 'Cloud Base', 'simple-location' ),
+			'radiation'          => __( 'Radiation', 'simple-location' ),
+			'illuminance'        => __( 'Illuminance', 'simple-location' ),
+			'uv'                 => __( 'UV Index', 'simple-location' ),
+			'aqi'                => __( 'Air Quality Index', 'simple-location' ),
+			'pm1_0'              => __( 'Particulate Matter 1.0', 'simple-location' ),
+			'pm2_5'              => __( 'Particulate Matter 2.5', 'simple-location' ),
+			'pm10_0'             => __( 'Particulate Matter 10.0', 'simple-location' ),
+			'co'                 => __( 'Carbon Monoxide', 'simple-location' ),
+			'co2'                => __( 'Carbon Dioxide', 'simple-location' ),
+			'nh3'                => __( 'Ammonia', 'simple-location' ),
+			'o3'                 => __( 'Ozone', 'simple-location' ),
+			'pb'                 => __( 'Lead', 'simple-location' ),
+			'so2'                => __( 'Sulfur Dioxide', 'simple-location' ),
+			'voc_index'          => __( 'VOC Index', 'simple-location' ),
+			'nox_index'          => __( 'NOx Index', 'simple-location' ),
+			'windspeed'          => __( 'Wind Speed', 'simple-location' ),
+			'winddegree'         => __( 'Wind Degree', 'simple-location' ),
+			'windgust'           => __( 'Wind Gust', 'simple-location' ),
+			'lightning_strikes'  => __( 'Lightning Strikes in the Last Hour', 'simple-location' ),
+			'lightning_distance' => __( 'Distance of the Latest Lightning Strike', 'simple-location' ),
+			'code'               => __( 'Weather Condition Code', 'simple-location' ),
 		);
 
 		foreach ( $numerics as $prop => $description ) {
@@ -407,6 +418,23 @@ class Sloc_Weather_Data {
 
 
 	/**
+	 * Leaves out lightning when there were no strikes.
+	 *
+	 * A count of 0 strikes, and the distance with it, isn't stored or shown, as most hours have none.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array $weather Weather.
+	 * @return array Weather, without lightning_strikes and lightning_distance when there were no strikes.
+	 */
+	public static function without_quiet_lightning( $weather ) {
+		if ( is_array( $weather ) && isset( $weather['lightning_strikes'] ) && is_numeric( $weather['lightning_strikes'] ) && 0.0 === (float) $weather['lightning_strikes'] ) {
+			unset( $weather['lightning_strikes'], $weather['lightning_distance'] );
+		}
+		return $weather;
+	}
+
+	/**
 	 * Set weather on an Object.
 	 *
 	 * @param string $type    Object type.
@@ -417,6 +445,7 @@ class Sloc_Weather_Data {
 	 *
 	 * @since 5.0.0
 	 * @since 6.0.0 Values of 0 are saved instead of deleted.
+	 * @since 6.3.0 No lightning strikes, 0, isn't saved, and removes the strikes and their distance.
 	 */
 	public static function set_object_weatherdata( $type, $id, $key, $weather ) {
 		if ( ! $type || ! is_numeric( $id ) ) {
@@ -460,10 +489,20 @@ class Sloc_Weather_Data {
 		}
 
 		if ( $key ) {
+			if ( empty( self::without_quiet_lightning( array( $key => $weather ) ) ) ) {
+				return delete_metadata( $type, $id, 'weather_' . $key );
+			}
 			return update_metadata( $type, $id, 'weather_' . $key, $weather );
 		}
 
 		$weather = wp_array_slice_assoc( $weather, static::$properties );
+		$quiet   = self::without_quiet_lightning( $weather );
+		// No strikes removes the lightning stored before.
+		if ( $quiet !== $weather ) {
+			$quiet['lightning_strikes']  = null;
+			$quiet['lightning_distance'] = null;
+		}
+		$weather = $quiet;
 
 		foreach ( $weather as $prop => $value ) {
 			if ( self::has_value( $value ) ) {
@@ -670,7 +709,7 @@ class Sloc_Weather_Data {
 				'compare' => 'IN',
 			),
 		);
-		$posts    = get_posts(
+		$posts      = get_posts(
 			array(
 				'post_type'      => 'any',
 				'post_status'    => 'any',
@@ -680,7 +719,7 @@ class Sloc_Weather_Data {
 				'meta_query'     => $meta_query,
 			)
 		);
-		$comments = get_comments(
+		$comments   = get_comments(
 			array(
 				'number'     => ( $limit > 0 ) ? (int) $limit : '',
 				'fields'     => 'ids',

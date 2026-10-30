@@ -121,6 +121,7 @@ class Weather_Provider_OpenWeatherMap extends Weather_Provider {
 			$current = $response['current'];
 
 			$return['temperature'] = round( $current['temp'], 1 );
+			$return['apptemp']     = self::round_value( $current['feels_like'] ?? null, 1 );
 			$return['dewpoint']    = round( $current['dew_point'], 1 );
 
 			$return['humidity']   = round( $current['humidity'], 1 );

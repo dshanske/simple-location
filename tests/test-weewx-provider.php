@@ -86,6 +86,31 @@ class WeewxProviderTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Saving the URL of an archive file, such as history-week.json, says to enter current.json instead (#812).
+	 */
+	public function test_saving_archive_file() {
+		global $wp_settings_errors;
+		$wp_settings_errors = array();
+		$this->mock_http(
+			array(
+				'weather.example.com' => array(
+					'body' => array(
+						'format'  => 'current-conditions-history',
+						'version' => 1,
+					),
+				),
+			)
+		);
+		Weather_Provider_Weewx::sanitize_stations( array( array( 'url' => 'https://weather.example.com/history-week.json' ) ) );
+		$errors = get_settings_errors( 'sloc_weewx_stations' );
+		$this->assertCount( 1, $errors );
+		$this->assertStringContainsString( 'https://weather.example.com/history-week.json', $errors[0]['message'] );
+		$this->assertStringContainsString( 'archive files', $errors[0]['message'] );
+		$this->assertStringContainsString( 'current.json', $errors[0]['message'] );
+		$this->assertStringNotContainsString( 'unknown format', $errors[0]['message'] );
+	}
+
+	/**
 	 * Two stations with the same ID get unique IDs, and removed rows are dropped.
 	 */
 	public function test_unique_ids() {

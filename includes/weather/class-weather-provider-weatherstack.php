@@ -131,6 +131,7 @@ class Weather_Provider_Weatherstack extends Weather_Provider {
 			}
 			$response              = $response['current'];
 			$return['temperature'] = self::round_value( $response['temperature'] ?? null, 2 );
+			$return['apptemp']     = self::round_value( $response['feelslike'] ?? null, 2 );
 			if ( isset( $response['humidity'] ) ) {
 				$return['humidity'] = round( $response['humidity'], 2 );
 			}

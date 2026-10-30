@@ -1061,14 +1061,40 @@ class Geo_Data {
 	}
 
 	/**
+	 * Returns whether to add the location and map to the current post's content.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @return bool Whether to add them.
+	 */
+	public static function add_to_content() {
+		/**
+		 * Filters whether to add the location and map to the current post's content.
+		 *
+		 * Return false where they are shown another way, such as in an email that renders them itself, instead of
+		 * removing the plugin's `the_content` callbacks.
+		 *
+		 * @since 6.3.0
+		 *
+		 * @param bool         $add  Whether to add them. Default true.
+		 * @param WP_Post|null $post The current post.
+		 */
+		return (bool) apply_filters( 'sloc_content_location', true, get_post() );
+	}
+
+	/**
 	 * Adds the map to post content. Hooked to `the_content`.
 	 *
 	 * @since 2.0.0
+	 * @since 6.3.0 Not added when the `sloc_content_location` filter returns false.
 	 *
 	 * @param string $content Post content.
 	 * @return string Post content with the map.
 	 */
 	public static function content_map( $content ) {
+		if ( ! self::add_to_content() ) {
+			return $content;
+		}
 		if ( self::show_map() ) {
 			$content .= self::get_map( 'post', get_the_ID() );
 		}
@@ -1079,11 +1105,15 @@ class Geo_Data {
 	 * Adds the location to post content. Hooked to `the_content`.
 	 *
 	 * @since 2.0.0
+	 * @since 6.3.0 Not added when the `sloc_content_location` filter returns false.
 	 *
 	 * @param string $content Post content.
 	 * @return string Post content with the location.
 	 */
 	public static function location_content( $content ) {
+		if ( ! self::add_to_content() ) {
+			return $content;
+		}
 		$loc = self::get_location( 'post', get_the_ID() );
 		if ( ! empty( $loc ) ) {
 			$content .= $loc;
