@@ -31,7 +31,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-post-venue.php:526](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L526)
+- [includes/class-post-venue.php:564](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L564)
 ```php
 apply_filters( 'pre_nearby_venue', null, $lat, $lng, $radius )
 ```

@@ -126,6 +126,24 @@ class TemplatesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A venue's location metabox has the box to leave it out of lists and matching, checked when it is (#821).
+	 */
+	public function test_location_metabox_venue_exclude() {
+		$venue_id = self::factory()->post->create( array( 'post_type' => 'venue' ) );
+		$this->edit_post( $venue_id );
+		$output = $this->render( 'loc-metabox.php' );
+		$this->assertStringContainsString( '<input type="hidden" name="venue_exclude" value="0" />', $output );
+		$this->assertMatchesRegularExpression( '/id="venue_exclude" value="1"\s+aria-describedby/', $output );
+
+		update_post_meta( $venue_id, 'venue_exclude', true );
+		// ClassicPress prints a bare checked attribute.
+		$this->assertMatchesRegularExpression( "/id=\"venue_exclude\" value=\"1\"\s+checked(='checked')?\s/", $this->render( 'loc-metabox.php' ) );
+
+		$this->edit_post( self::factory()->post->create() );
+		$this->assertStringNotContainsString( 'venue_exclude', $this->render( 'loc-metabox.php' ) );
+	}
+
+	/**
 	 * A post's location metabox can find venues; a venue's can't (#815).
 	 */
 	public function test_location_metabox_find_venues() {
