@@ -18,6 +18,12 @@
 		height: 1.5em;
 		width: 1.5em;
 	}
+	// Meteocons leave a margin within their box, so they are drawn larger to look the same size (#808).
+	&.sloc-icon-set-meteocons svg {
+		height: 2em;
+		width: 2em;
+		margin: -0.25em;
+	}
 }
 
 .sloc-weather-display {

@@ -54,6 +54,11 @@ ul.sloc-lastseen-data {
   height: 1.5em;
   width: 1.5em;
 }
+.sloc-weather-icon.sloc-icon-set-meteocons svg {
+  height: 2em;
+  width: 2em;
+  margin: -0.25em;
+}
 .sloc-weather-display {
   list-style-position: inside;
   list-style: none;

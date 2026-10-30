@@ -536,10 +536,13 @@ class Simple_Location_Plugin {
 	 *
 	 * @since 6.0.0 Allows the markup the plugin's own location and map output uses: `target` on links, `style`
 	 *               on spans (filtered by safecss_filter_attr()), `loading` on images, and `data` elements.
+	 * @since 6.3.0 Allows the SVG shapes, masks and clip paths of the Meteocons icons.
 	 *
 	 * @return array Array of HTML elements.
 	 */
 	public static function kses_clean() {
+		// Presentation attributes the weather icons' shapes use.
+		$shape = array_fill_keys( array( 'id', 'fill', 'fill-rule', 'clip-rule', 'clip-path', 'mask', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-dasharray', 'transform' ), array() );
 		return array(
 			'a'          => array(
 				'class'  => array(),
@@ -664,17 +667,13 @@ class Simple_Location_Plugin {
 				'class' => array(),
 				'id'    => array(),
 			),
-			'g'          => array(
-				'id'           => array(),
-				'stroke'       => array(),
-				'stroke-width' => array(),
-				'fill-rule'    => array(),
-				'fill'         => array(),
-			),
-			'path'       => array(
-				'd'    => array(),
-				'fill' => array(),
-			),
+			'g'          => $shape,
+			'path'       => array_merge( $shape, array( 'd' => array() ) ),
+			'circle'     => array_merge( $shape, array_fill_keys( array( 'cx', 'cy', 'r' ), array() ) ),
+			'rect'       => array_merge( $shape, array_fill_keys( array( 'x', 'y', 'width', 'height', 'rx', 'ry' ), array() ) ),
+			'defs'       => array(),
+			'clippath'   => array( 'id' => array() ),
+			'mask'       => array_fill_keys( array( 'id', 'mask-type', 'maskunits', 'x', 'y', 'width', 'height' ), array() ),
 		);
 	}
 }

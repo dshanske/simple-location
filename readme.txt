@@ -480,6 +480,7 @@ Developers can refresh the station, airport and airline files with `composer upd
 = What icons are used here? =
 
 * [Weather Icons](https://erikflowers.github.io/weather-icons/) are used for most of the weather options.
+* [Meteocons](https://meteocons.com/) by Bas Milius (MIT) can be chosen for the weather conditions instead, under Weather Icons in the settings.
 * [Font Awesome](https://fontawesome.com/) is used for the transportation icons.
 * [Simple Icons](https://simpleicons.org/) supplies the transportation brand icons.
 

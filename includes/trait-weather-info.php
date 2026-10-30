@@ -199,6 +199,7 @@ trait Weather_Info_Trait {
 	 * @return string marked up icon
 	 *
 	 * @since 6.0.0 Only loads icons from svgs/.
+	 * @since 6.3.0 Shows a condition icon from the icon set chosen; see icon_file().
 	 */
 	public static function get_icon( $icon, $summary = null ) {
 		if ( 'none' === $icon ) {
@@ -207,12 +208,92 @@ trait Weather_Info_Trait {
 		if ( ! $summary ) {
 			$summary = $icon;
 		}
-		// Only a file name, so the icon can't point outside svgs/.
-		$svg = sprintf( '%1$ssvgs/%2$s.svg', plugin_dir_path( __DIR__ ), basename( (string) $icon ) );
-		if ( sloc_file_exists( $svg ) ) {
-			return PHP_EOL . sprintf( '<span class="sloc-weather-icon sloc-icon-%1$s" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), sloc_get_contents( $svg ) );
+		$svg = self::icon_file( $icon );
+		if ( '' !== $svg ) {
+			// Meteocons are drawn smaller within their box, so their own class sizes them to match.
+			$set = false !== strpos( $svg, 'svgs/meteocons/' ) ? ' sloc-icon-set-meteocons' : '';
+			return PHP_EOL . sprintf( '<span class="sloc-weather-icon sloc-icon-%1$s%4$s" aria-hidden="true" aria-label="%2$s" title="%2$s" >%3$s</span>', esc_attr( $icon ), esc_attr( $summary ), sloc_get_contents( $svg ), $set );
 		}
 		return '';
+	}
+
+	/**
+	 * Returns the file of an icon: from the icon set chosen when it has one for it, otherwise from svgs/.
+	 *
+	 * Icons are stored by their Weather Icons name, such as wi-day-cloudy, whichever set shows them. With Meteocons,
+	 * the condition icons named in data/meteocons.json come from svgs/meteocons/; the rest, such as the moon phases,
+	 * are still Weather Icons.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param string $icon Icon name.
+	 * @return string Path, or an empty string if there is no such icon.
+	 */
+	public static function icon_file( $icon ) {
+		// Only a file name, so the icon can't point outside svgs/.
+		$name = basename( (string) $icon );
+		$dir  = plugin_dir_path( __DIR__ ) . 'svgs/';
+		if ( 'meteocons' === self::icon_set() ) {
+			$map = self::meteocons_map();
+			if ( isset( $map[ $name ] ) && sloc_file_exists( $dir . 'meteocons/' . basename( $map[ $name ] ) . '.svg' ) ) {
+				return $dir . 'meteocons/' . basename( $map[ $name ] ) . '.svg';
+			}
+		}
+		return sloc_file_exists( $dir . $name . '.svg' ) ? $dir . $name . '.svg' : '';
+	}
+
+	/**
+	 * Returns the icon sets the weather can be shown with.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @return string[] Names, keyed by set.
+	 */
+	public static function icon_sets() {
+		return array(
+			'weather-icons' => __( 'Weather Icons', 'simple-location' ),
+			'meteocons'     => __( 'Meteocons', 'simple-location' ),
+		);
+	}
+
+	/**
+	 * Returns the icon set chosen for the weather conditions.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @return string A key of icon_sets(); weather-icons by default.
+	 */
+	public static function icon_set() {
+		return self::sanitize_icon_set( get_option( 'sloc_weather_icons', 'weather-icons' ) );
+	}
+
+	/**
+	 * Sanitizes the icon set setting.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param mixed $value Setting value.
+	 * @return string A key of icon_sets(); weather-icons for anything else.
+	 */
+	public static function sanitize_icon_set( $value ) {
+		return is_string( $value ) && array_key_exists( $value, self::icon_sets() ) ? $value : 'weather-icons';
+	}
+
+	/**
+	 * Returns which Meteocons icon shows each Weather Icons condition icon, from data/meteocons.json.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @return string[] Meteocons names, keyed by Weather Icons name.
+	 */
+	public static function meteocons_map() {
+		static $map = null;
+		if ( null === $map ) {
+			$file = plugin_dir_path( __DIR__ ) . 'data/meteocons.json';
+			$json = sloc_file_exists( $file ) ? json_decode( (string) sloc_get_contents( $file ), true ) : null;
+			$map  = is_array( $json ) ? array_filter( $json, 'is_string' ) : array();
+		}
+		return $map;
 	}
 
 
