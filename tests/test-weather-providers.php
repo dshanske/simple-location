@@ -98,7 +98,7 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	 * Providers with only current weather say so, so the weather chain skips them for other times (#490).
 	 */
 	public function test_supports_time() {
-		foreach ( array( 'OpenWeatherMap', 'Weatherbit', 'Weatherstack', 'HERE', 'NWSUS', 'Station', 'Weewx', 'Metno' ) as $name ) {
+		foreach ( array( 'OpenWeatherMap', 'Weatherbit', 'Weatherstack', 'HERE', 'NWSUS', 'Station', 'Metno' ) as $name ) {
 			$provider = $this->provider( 'Weather_Provider_' . $name );
 			$this->assertTrue( $provider->supports_time(), $name );
 			$this->assertTrue( $provider->supports_time( time() - 1800 ), $name );
@@ -108,6 +108,13 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 		foreach ( array( 'PirateWeather', 'VisualCrossing', 'Meteostat', 'Aeris', 'OpenMeteo' ) as $name ) {
 			$this->assertTrue( $this->provider( 'Weather_Provider_' . $name )->supports_time( strtotime( '-2 days' ) ), $name );
 		}
+		// WeeWX reads past times from the station's history, for up to a week (#809).
+		$weewx = $this->provider( 'Weather_Provider_Weewx' );
+		$this->assertTrue( $weewx->supports_time() );
+		$this->assertTrue( $weewx->supports_time( strtotime( '-2 days' ) ) );
+		$this->assertTrue( $weewx->supports_time( time() - WEEK_IN_SECONDS ) );
+		$this->assertFalse( $weewx->supports_time( time() - WEEK_IN_SECONDS - 60 ) );
+		$this->assertFalse( $weewx->supports_time( strtotime( '+2 days' ) ) );
 	}
 
 	/**
