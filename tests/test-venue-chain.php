@@ -110,10 +110,10 @@ class VenueChainTest extends WP_UnitTestCase {
 		$request                          = new WP_REST_Request( 'GET', '/sloc_geo/1.0/venue' );
 		$request->set_param( 'latitude', self::LAT );
 		$request->set_param( 'longitude', self::LNG );
-		$this->assertSame( 'sloc_test_fallback', rest_do_request( $request )->get_data()['provider'] );
+		$this->assertSame( array( 'sloc_test_fallback' ), rest_do_request( $request )->get_data()['places'][0]['properties']['provider'] );
 
 		$request->set_param( 'provider', 'sloc_test' );
-		$this->assertSame( array(), rest_do_request( $request )->get_data()['items'] );
+		$this->assertSame( array(), rest_do_request( $request )->get_data()['places'] );
 
 		$response = Location_Plugins::micropub_query_places(
 			array(),

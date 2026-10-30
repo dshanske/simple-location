@@ -668,18 +668,76 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * /venue returns the provider's lookup.
+	 * /venue returns the places near the coordinates, the site's first, and the providers' names (#815).
 	 */
 	public function test_venue_lookup() {
-		$data = $this->request(
-			'/venue',
+		$venue_id = self::factory()->post->create(
 			array(
-				'latitude'  => '45.01',
-				'longitude' => '-75.44',
+				'post_type'  => 'venue',
+				'post_title' => 'Corner Cafe',
 			)
-		)->get_data();
-		$this->assertSame( 'Test Cafe', $data['items'][0]['name'] );
-		$this->assertSame( 45.01, $data['items'][0]['latitude'] );
+		);
+		set_post_geodata(
+			$venue_id,
+			'',
+			array(
+				'latitude'   => 45.01,
+				'longitude'  => -75.44,
+				'visibility' => 'public',
+			)
+		);
+		$params = array(
+			'latitude'  => '45.01',
+			'longitude' => '-75.44',
+		);
+		$data   = $this->request( '/venue', $params )->get_data();
+		$this->assertSame( array( 'Corner Cafe' ), $data['places'][0]['properties']['name'] );
+		$this->assertSame( array( 'local' ), $data['places'][0]['properties']['provider'] );
+		$this->assertSame( array( 'Test Cafe' ), $data['places'][1]['properties']['name'] );
+		$this->assertSame( array( 45.01 ), $data['places'][1]['properties']['latitude'] );
+		$this->assertSame( 'Test Venue', $data['providers']['sloc_test'] );
+
+		$this->assertCount( 1, $this->request( '/venue', $params + array( 'limit' => '1' ) )->get_data()['places'] );
+		$this->assertCount( 1, $this->request( '/venue', $params + array( 'local' => 'true' ) )->get_data()['places'] );
+		$data = $this->request( '/venue', $params + array( 'provider' => 'sloc_test' ) )->get_data();
+		$this->assertSame( array( 'sloc_test' ), $data['places'][1]['properties']['provider'] );
+		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/venue', $params + array( 'limit' => 'many' ) ), 400 );
+	}
+
+	/**
+	 * POST /venue returns the venue for a place, creating one for a provider's place (#815).
+	 */
+	public function test_choose_venue() {
+		$request = new WP_REST_Request( 'POST', '/sloc_geo/1.0/venue' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'place' => array(
+						'type'       => array( 'h-card' ),
+						'properties' => array(
+							'name'      => array( 'Provider Diner' ),
+							'uid'       => array( 'https://www.openstreetmap.org/node/9' ),
+							'provider'  => array( 'sloc_test' ),
+							'latitude'  => array( 45.01 ),
+							'longitude' => array( -75.44 ),
+						),
+					),
+				)
+			)
+		);
+		$data = rest_get_server()->dispatch( $request )->get_data();
+		$this->assertSame( 'venue', get_post_type( $data['venue_id'] ) );
+		$this->assertSame( 'Provider Diner', $data['title'] );
+		$this->assertSame( get_permalink( $data['venue_id'] ), $data['url'] );
+
+		$this->assertErrorResponse( 'rest_missing_callback_param', $this->request( '/venue', array(), 'POST' ), 400 );
+		$this->assertErrorResponse( 'invalid_place', $this->request( '/venue', array( 'place' => array( 'properties' => array() ) ), 'POST' ), 400 );
+
+		$routes = rest_get_server()->get_routes();
+		$this->assertSame( array( 'POST' => true ), $routes['/sloc_geo/1.0/venue'][1]['methods'] );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'contributor' ) ) );
+		$this->assertErrorResponse( 'rest_forbidden', $this->request( '/venue', array( 'place' => array( 'properties' => array() ) ), 'POST' ), 403 );
 	}
 
 	/**

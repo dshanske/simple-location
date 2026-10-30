@@ -25,7 +25,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-post-venue.php:1348](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L1348)
+- [includes/class-post-venue.php:1493](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L1493)
 ```php
 apply_filters( 'sloc_venue_type', $term_id, $venue )
 ```

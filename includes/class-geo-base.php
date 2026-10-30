@@ -315,6 +315,20 @@ class Geo_Base {
 				'api_nonce'          => wp_create_nonce( 'wp_rest' ),
 				'api_url'            => rest_url( '/sloc_geo/1.0/' ),
 				'weather'            => $weather,
+				'places'             => array(
+					'local'     => __( 'On this site', 'simple-location' ),
+					/* translators: %s: Venue provider name, such as OpenStreetMap Overpass. */
+					'provider'  => __( 'From %s', 'simple-location' ),
+					'use'       => __( 'Use', 'simple-location' ),
+					'new'       => __( 'New venue', 'simple-location' ),
+					'site'      => __( 'Site venue', 'simple-location' ),
+					'none'      => __( 'No venues found here.', 'simple-location' ),
+					'searching' => __( 'Finding venues…', 'simple-location' ),
+					'location'  => __( 'Enter or look up a latitude and longitude first.', 'simple-location' ),
+					'failed'    => __( 'The venues could not be found.', 'simple-location' ),
+					/* translators: %s: Distance in meters. */
+					'meters'    => __( '%s m', 'simple-location' ),
+				),
 			);
 
 			wp_localize_script(

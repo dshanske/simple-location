@@ -126,6 +126,19 @@ class TemplatesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A post's location metabox can find venues; a venue's can't (#815).
+	 */
+	public function test_location_metabox_find_venues() {
+		$this->edit_post( self::factory()->post->create() );
+		$output = $this->render( 'loc-metabox.php' );
+		$this->assertStringContainsString( 'class="button find-venues-button" aria-controls="sloc-places"', $output );
+		$this->assertStringContainsString( '<div id="sloc-places" class="sloc-places" aria-live="polite" hidden></div>', $output );
+
+		$this->edit_post( self::factory()->post->create( array( 'post_type' => 'venue' ) ) );
+		$this->assertStringNotContainsString( 'find-venues-button', $this->render( 'loc-metabox.php' ) );
+	}
+
+	/**
 	 * Asserts that each number field's value fits its step, as the browser requires to save the form.
 	 *
 	 * @param string $html Form.
