@@ -654,8 +654,8 @@ class Post_Venue {
 			);
 		}
 
-		// Nearest first; a venue without coordinates last.
-		usort( $local, fn( $a, $b ) => ( $a['distance'] ?? PHP_INT_MAX ) <=> ( $b['distance'] ?? PHP_INT_MAX ) );
+		// Nearest first, the oldest first at the same distance; a venue without coordinates last.
+		usort( $local, fn( $a, $b ) => array( $a['distance'] ?? PHP_INT_MAX, $a['venue']->ID ) <=> array( $b['distance'] ?? PHP_INT_MAX, $b['venue']->ID ) );
 		$cards = array_map( fn( $place ) => self::local_card( $place['venue'], $place['access'], $place['distance'] ), $local );
 		$cards = array_slice( array_merge( $cards, array_values( $items ) ), 0, $limit );
 

@@ -167,10 +167,7 @@ class PlacesTest extends WP_UnitTestCase {
 				),
 			),
 		);
-		$names = $this->names( Post_Venue::places( self::LAT, self::LNG ) );
-		$this->assertSame( array( 'Our Diner', 'Our Bar', 'Our Museum', 'Park' ), array_values( array_intersect( $names, array( 'Our Diner', 'Our Bar', 'Our Museum', 'Park' ) ) ) );
-		$this->assertCount( 4, $names );
-		$this->assertSame( 'Park', end( $names ) );
+		$this->assertSame( array( 'Our Diner', 'Our Bar', 'Our Museum', 'Park' ), $this->names( Post_Venue::places( self::LAT, self::LNG ) ) );
 	}
 
 	/**
@@ -223,7 +220,7 @@ class PlacesTest extends WP_UnitTestCase {
 		$this->assertCount( 1, Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 1 ) ) );
 		$this->assertCount( 2, Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 2 ) ) );
 		$this->assertSame( 0, Venue_Provider_Sloc_Test::$calls );
-		$this->assertSame( array( 'One', 'Two' ), array_values( array_intersect( array( 'One', 'Two' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'local' => true ) ) ) ) ) );
+		$this->assertSame( array( 'One', 'Two' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'local' => true ) ) ), 'The oldest first at the same distance.' );
 		$this->assertSame( 0, Venue_Provider_Sloc_Test::$calls );
 		$this->assertCount( 3, Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 500 ) ) );
 		$this->assertSame( 1, Venue_Provider_Sloc_Test::$calls );
