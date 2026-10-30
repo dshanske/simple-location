@@ -11,6 +11,7 @@
 ## class-geo-data.php
 
 - [`simple_location_display_defaults`](simple_location_display_defaults) Filters the default arguments for displaying a location.
+- [`sloc_content_location`](sloc_content_location) Filters whether to add the location and map to the current post's content.
 - [`sloc_geo_taxonomies`](sloc_geo_taxonomies) Filters the taxonomies whose terms get geo meta registered.
 - [`sloc_show_hidden_location`](sloc_show_hidden_location) Filters whether a hidden location is shown to the current user.
 
