@@ -243,6 +243,18 @@ class Loc_Config {
 		);
 
 		register_setting(
+			'simloc',
+			'sloc_weather_icons',
+			array(
+				'type'              => 'string',
+				'description'       => 'Icons the weather conditions are shown with',
+				'show_in_rest'      => false,
+				'default'           => 'weather-icons',
+				'sanitize_callback' => array( 'Weather_Provider', 'sanitize_icon_set' ),
+			)
+		);
+
+		register_setting(
 			'simloc', // option group.
 			'sloc_measurements', // option name.
 			array(
@@ -1072,6 +1084,18 @@ class Loc_Config {
 					'footer' => __( 'Once in the page footer, where the provider allows it', 'simple-location' ),
 				),
 				'description' => __( 'Weather providers\' terms ask for a credit where their weather is shown. Some, such as Open-Meteo, require it next to the weather, so theirs stays there either way. The footer needs a theme that calls wp_footer(). Weather saved before version 6.1.0 doesn\'t record its provider, so it has no credit.', 'simple-location' ),
+			)
+		);
+		add_settings_field(
+			'sloc_weather_icons',
+			__( 'Weather Icons', 'simple-location' ),
+			array( 'Loc_Config', 'values_callback' ),
+			'simloc',
+			'sloc_general',
+			array(
+				'label_for'   => 'sloc_weather_icons',
+				'list'        => Weather_Provider::icon_sets(),
+				'description' => __( 'The icons for the weather conditions, such as partly cloudy or rain. Meteocons are newer, in one color that follows your theme\'s text. The other weather icons, such as the moon phases, are Weather Icons either way.', 'simple-location' ),
 			)
 		);
 		add_settings_section(

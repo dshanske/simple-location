@@ -72,6 +72,7 @@
 	],
 	"update-docs": "./vendor/bin/extract-wp-hooks.php",
 	"update-data": "@php bin/update-data.php",
+	"update-meteocons": "@php bin/update-meteocons.php",
 	"phpstan": "./vendor/bin/phpstan analyse --memory-limit=1G",
       "build-css": [
       "vendor/bin/pscss --style=expanded sass/main.scss css/location.css",
