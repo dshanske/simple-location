@@ -434,6 +434,157 @@ class WidgetsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Station extras for the widget, as Weather_Provider_Weewx::parse_extras() gives them.
+	 *
+	 * @return array
+	 */
+	protected function extras() {
+		return array(
+			'today'  => array(
+				'temperature_max'      => 23.1,
+				'temperature_max_time' => 1761229800,
+				'temperature_min'      => 11.4,
+				'windgust_max'         => 8.94,
+				'windgust_max_time'    => 1761224100,
+			),
+			'trend'  => array(
+				'hours'       => 3,
+				'pressure'    => -1.2,
+				'temperature' => 4.6,
+			),
+			'rain'   => array(
+				'last_24h'    => 3.05,
+				'storm'       => 12.7,
+				'storm_start' => 1761213600,
+			),
+			'webcam' => 'https://weather.example.com/webcam.jpg',
+			'alerts' => array(
+				array(
+					'event'    => 'Heat Advisory',
+					'headline' => 'Heat Advisory until 9 PM',
+					'severity' => 'Moderate',
+					'ends'     => 1761264000,
+				),
+			),
+		);
+	}
+
+	/**
+	 * By default the station widget shows the day's high and low with their times, and nothing else (#810).
+	 */
+	public function test_station_extras_default() {
+		$html = Sloc_Station_Widget::extras_markup( $this->extras(), array() );
+		$this->assertStringStartsWith( '<ul class="sloc-station-extras">', $html );
+		$this->assertStringContainsString( 'High 23.1°C at <time datetime="2025-10-23T10:30:00-04:00">10:30 am</time>', $html );
+		$this->assertStringContainsString( 'Low 11.4°C', $html );
+		$this->assertStringContainsString( 'Highest gust 8.9 mps at', $html );
+		foreach ( array( 'Pressure', 'Storm rain', 'webcam', 'Heat Advisory' ) as $hidden ) {
+			$this->assertStringNotContainsString( $hidden, $html );
+		}
+		$this->assertSame( '', Sloc_Station_Widget::extras_markup( $this->extras(), array( 'show_today' => '0' ) ) );
+		$this->assertSame( '', Sloc_Station_Widget::extras_markup( array(), array() ) );
+		$this->assertSame( '', Sloc_Station_Widget::extras_markup( 'extras', array() ) );
+	}
+
+	/**
+	 * Each part can be shown: the trend, the rain, the alerts and the webcam.
+	 */
+	public function test_station_extras_all() {
+		$all  = array(
+			'show_today'  => '1',
+			'show_trend'  => '1',
+			'show_rain'   => '1',
+			'show_webcam' => '1',
+			'show_alerts' => '1',
+		);
+		$html = Sloc_Station_Widget::extras_markup( $this->extras(), $all );
+		$this->assertStringContainsString( 'Pressure falling, down 1.2 hPa in the last 3 hours', $html );
+		$this->assertStringContainsString( 'Temperature up 4.6°C in the last 3 hours', $html );
+		$this->assertStringContainsString( 'Storm rain 12.7 mm since <time', $html );
+		$this->assertStringContainsString( 'Rain in the last 24 hours: 3.1 mm', $html );
+		$this->assertStringContainsString( '<li class="sloc-station-alert sloc-alert-moderate"><strong>Heat Advisory</strong>: Heat Advisory until 9 PM (until <time', $html );
+		$this->assertStringContainsString( '<img src="https://weather.example.com/webcam.jpg" alt="The station&#039;s webcam" loading="lazy" />', $html );
+
+		// Imperial units, with a change converted without the offset.
+		update_option( 'sloc_measurements', 'imperial' );
+		$html = Sloc_Station_Widget::extras_markup( $this->extras(), $all );
+		$this->assertStringContainsString( 'High 73.6°F', $html );
+		$this->assertStringContainsString( 'Temperature up 8.3°F', $html );
+		$this->assertStringContainsString( 'Storm rain 0.5 in since', $html );
+
+		// A steady pressure, a trend without hours, and a storm without a start.
+		$extras          = $this->extras();
+		$extras['trend'] = array(
+			'hours'       => 1,
+			'pressure'    => 0.02,
+			'temperature' => 0.0,
+		);
+		$extras['rain']  = array( 'storm' => 2 );
+		$html            = Sloc_Station_Widget::extras_markup( $extras, $all );
+		$this->assertStringContainsString( 'Pressure steady over the last hour', $html );
+		$this->assertStringNotContainsString( 'Temperature up', $html );
+		$this->assertStringContainsString( 'Storm rain 0.1 in</li>', $html );
+		$extras['trend']['hours'] = 0;
+		$this->assertStringNotContainsString( 'Pressure', Sloc_Station_Widget::extras_markup( $extras, $all ) );
+	}
+
+	/**
+	 * Untrusted values are escaped, and a webcam that isn't a web address isn't shown.
+	 */
+	public function test_station_extras_escaped() {
+		$extras = array(
+			'alerts' => array(
+				array(
+					'event'    => '<script>x</script>',
+					'severity' => '"><b>',
+				),
+			),
+			'webcam' => 'javascript:alert(1)',
+		);
+		$html   = Sloc_Station_Widget::extras_markup(
+			$extras,
+			array(
+				'show_today'  => '0',
+				'show_alerts' => '1',
+				'show_webcam' => '1',
+			)
+		);
+		$this->assertStringNotContainsString( '<script>', $html );
+		$this->assertStringContainsString( '&lt;script&gt;', $html );
+		$this->assertStringNotContainsString( '<img', $html );
+		$this->assertStringContainsString( 'class="sloc-station-alert sloc-alert-b"', $html );
+	}
+
+	/**
+	 * The widget shows the extras after the readings, and its form has a box for each part.
+	 */
+	public function test_station_extras_widget() {
+		Weather_Provider_Sloc_Test::$conditions = array(
+			'temperature'    => 20,
+			'station_extras' => $this->extras(),
+		);
+		$html                                   = $this->render(
+			new Sloc_Station_Widget(),
+			array(
+				'title'    => '',
+				'station'  => 'backyard',
+				'provider' => 'sloc_test',
+			)
+		);
+		$this->assertStringContainsString( '<ul class="sloc-station-extras"><li class="sloc-station-temperature-max">High 23.1', $html );
+		$this->assertStringContainsString( '<time datetime=', $html, 'Times pass the allowed markup.' );
+		$this->assertStringEndsWith( '</section>', $html );
+
+		$form = $this->form( new Sloc_Station_Widget(), array( 'show_trend' => '1' ) );
+		foreach ( array_keys( Sloc_Station_Widget::EXTRAS ) as $part ) {
+			$this->assertStringContainsString( 'name="widget-sloc_station_widget[2][show_' . $part . ']" type="hidden" value="0"', $form );
+		}
+		$this->assertMatchesRegularExpression( '/id="widget-sloc_station_widget-2-show_today" type="checkbox" value="1"\s+checked/', $form, 'The high and low by default.' );
+		$this->assertMatchesRegularExpression( '/id="widget-sloc_station_widget-2-show_trend" type="checkbox" value="1"\s+checked/', $form );
+		$this->assertDoesNotMatchRegularExpression( '/id="widget-sloc_station_widget-2-show_webcam" type="checkbox" value="1"\s+checked/', $form );
+	}
+
+	/**
 	 * Without a station the widget is empty, without warnings, and still closed.
 	 */
 	public function test_station_without_station() {

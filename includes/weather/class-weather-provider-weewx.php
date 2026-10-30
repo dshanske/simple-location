@@ -62,6 +62,14 @@ class Weather_Provider_Weewx extends Weather_Provider_Station {
 	const HISTORY_TOTALS = array( 'rain', 'snow', 'lightning_strikes' );
 
 	/**
+	 * Most alerts kept from a station's file.
+	 *
+	 * @since 6.3.0
+	 * @var int
+	 */
+	const MAX_ALERTS = 5;
+
+	/**
 	 * Weather properties that aren't read from the history: the history has no wind direction, condition, cloud
 	 * cover or AQI, and the rest aren't readings.
 	 *
@@ -243,7 +251,184 @@ class Weather_Provider_Weewx extends Weather_Provider_Station {
 		if ( ! is_array( $json ) || ! array_key_exists( 'format', $json ) ) {
 			return new WP_Error( 'station_format', __( 'This is not a weewx-current-json file', 'simple-location' ) );
 		}
-		return parent::parse_document( $json );
+		$return = parent::parse_document( $json );
+		if ( is_wp_error( $return ) ) {
+			return $return;
+		}
+		$extras = static::parse_extras( $json );
+		if ( ! empty( $extras ) ) {
+			$return['station_extras'] = $extras;
+		}
+		$warnings = static::health_warnings( $json );
+		if ( ! empty( $warnings ) ) {
+			$return['station_health'] = $warnings;
+		}
+		return $return;
+	}
+
+	/**
+	 * Reads what a station's file has about the station's day, besides its current readings, for the Station widget.
+	 *
+	 * These aren't weather properties, so they are never stored with a post's weather. Only numbers, plain text and
+	 * Unix times are kept, in the plugin's metric units:
+	 *
+	 * - today: temperature_max, temperature_min and windgust_max, each with its _time.
+	 * - trend: hours, and the change in pressure, hPa, and temperature, °C, over them.
+	 * - rain: last_24h, storm and storm_start.
+	 * - webcam: the station's webcam image address as the file gives it, which may be relative to the file.
+	 * - alerts: up to MAX_ALERTS of the NWS alerts weewx-nws adds, each with event, headline, severity, ends and
+	 *   expires.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array $json Decoded file, in the current conditions format.
+	 * @return array Extras, without the sections the file doesn't have.
+	 */
+	public static function parse_extras( $json ) {
+		$us      = 'us' === ( $json['units'] ?? 'metric' );
+		$numbers = function ( $section, $keys ) {
+			$values = array();
+			foreach ( $keys as $key ) {
+				if ( is_array( $section ) && isset( $section[ $key ] ) && is_numeric( $section[ $key ] ) && is_finite( (float) $section[ $key ] ) ) {
+					$values[ $key ] = '_time' === substr( $key, -5 ) || 'storm_start' === $key ? (int) $section[ $key ] : (float) $section[ $key ];
+				}
+			}
+			return $values;
+		};
+		$extras  = array();
+
+		$today = $numbers( $json['today'] ?? null, array( 'temperature_max', 'temperature_max_time', 'temperature_min', 'temperature_min_time', 'windgust_max', 'windgust_max_time' ) );
+		if ( $us ) {
+			foreach ( array( 'temperature_max', 'temperature_min' ) as $key ) {
+				if ( isset( $today[ $key ] ) ) {
+					$today[ $key ] = self::fahrenheit_to_celsius( $today[ $key ] );
+				}
+			}
+			if ( isset( $today['windgust_max'] ) ) {
+				$today['windgust_max'] = self::miph_to_mps( $today['windgust_max'] );
+			}
+		}
+		$extras['today'] = $today;
+
+		$trend = $numbers( $json['trend'] ?? null, array( 'hours', 'pressure', 'temperature' ) );
+		if ( $us ) {
+			// Changes, so without the offset of the scales.
+			if ( isset( $trend['pressure'] ) ) {
+				$trend['pressure'] = self::inhg_to_hpa( $trend['pressure'] );
+			}
+			if ( isset( $trend['temperature'] ) ) {
+				$trend['temperature'] = round( $trend['temperature'] / 1.8, 2 );
+			}
+		}
+		$extras['trend'] = isset( $trend['pressure'] ) || isset( $trend['temperature'] ) ? $trend : array();
+
+		$rain = $numbers( $json['rain'] ?? null, array( 'last_24h', 'storm', 'storm_start' ) );
+		if ( $us ) {
+			foreach ( array( 'last_24h', 'storm' ) as $key ) {
+				if ( isset( $rain[ $key ] ) ) {
+					$rain[ $key ] = self::inches_to_mm( $rain[ $key ] );
+				}
+			}
+		}
+		$extras['rain'] = $rain;
+
+		$webcam = $json['station']['webcam'] ?? null;
+		if ( is_string( $webcam ) && '' !== trim( $webcam ) && ! preg_match( '#^(?!https?://)[a-z][a-z0-9+.-]*:#i', trim( $webcam ) ) ) {
+			$extras['webcam'] = trim( $webcam );
+		}
+
+		$alerts = array();
+		foreach ( (array) ( $json['forecast']['alerts'] ?? array() ) as $alert ) {
+			if ( ! is_array( $alert ) || ! is_string( $alert['event'] ?? null ) || '' === trim( $alert['event'] ) ) {
+				continue;
+			}
+			$item = array( 'event' => sanitize_text_field( $alert['event'] ) );
+			foreach ( array( 'headline', 'severity' ) as $key ) {
+				if ( is_string( $alert[ $key ] ?? null ) && '' !== trim( $alert[ $key ] ) ) {
+					$item[ $key ] = sanitize_text_field( $alert[ $key ] );
+				}
+			}
+			$item    += $numbers( $alert, array( 'ends', 'expires' ) );
+			$alerts[] = array_map( fn( $value ) => is_float( $value ) ? (int) $value : $value, $item );
+			if ( count( $alerts ) >= static::MAX_ALERTS ) {
+				break;
+			}
+		}
+		$extras['alerts'] = $alerts;
+
+		return array_filter( $extras );
+	}
+
+	/**
+	 * Returns the warnings a station's hardware gives, such as a low battery or a weak signal.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array $json Decoded file.
+	 * @return string[] Warnings, as plain text.
+	 */
+	public static function health_warnings( $json ) {
+		$warnings = array();
+		foreach ( (array) ( $json['health']['warnings'] ?? array() ) as $warning ) {
+			$message = is_array( $warning ) ? ( $warning['message'] ?? null ) : null;
+			if ( is_string( $message ) && '' !== trim( $message ) ) {
+				$warnings[] = sanitize_text_field( $message );
+			}
+		}
+		return array_values( array_unique( $warnings ) );
+	}
+
+	/**
+	 * Returns the current conditions of the station set, with its extras' webcam address made absolute, and keeps its
+	 * health warnings for administrators.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @return array|WP_Error Conditions, or an error. See Weather_Provider_Station::get_station_data().
+	 */
+	public function get_station_data() {
+		$return = parent::get_station_data();
+		if ( is_wp_error( $return ) ) {
+			return $return;
+		}
+		$station = $this->find_station();
+		$url     = $station ? (string) self::key( $station, 'url' ) : '';
+		if ( isset( $return['station_extras']['webcam'] ) ) {
+			$webcam = '' === $url ? $return['station_extras']['webcam'] : WP_Http::make_absolute_url( $return['station_extras']['webcam'], $url );
+			$webcam = esc_url_raw( $webcam, array( 'http', 'https' ) );
+			if ( '' === $webcam ) {
+				unset( $return['station_extras']['webcam'] );
+			} else {
+				$return['station_extras']['webcam'] = $webcam;
+			}
+		}
+		$this->record_health( $return['station_health'] ?? array(), $return['name'] ?? (string) $this->station_id );
+		unset( $return['station_health'] );
+		return $return;
+	}
+
+	/**
+	 * Shows administrators a station's health warnings, as the plugin shows provider errors, or clears them.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param string[] $warnings Warnings; see health_warnings().
+	 * @param string   $name     Station name.
+	 */
+	protected function record_health( $warnings, $name ) {
+		if ( empty( $warnings ) || ! is_array( $warnings ) ) {
+			Sloc_Provider_Errors::resolve( 'health', $this );
+			return;
+		}
+		Sloc_Provider_Errors::record(
+			'health',
+			$this,
+			new WP_Error(
+				'station_health',
+				/* translators: 1: Station name 2: Warnings, such as Wind sensor battery low. */
+				sprintf( __( '%1$s: %2$s', 'simple-location' ), $name, implode( '; ', $warnings ) )
+			)
+		);
 	}
 
 	/**
