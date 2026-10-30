@@ -115,6 +115,21 @@ class StationFormatTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * An archive file, such as history-week.json, says to enter the current conditions file instead (#812).
+	 */
+	public function test_archive_file() {
+		$archive = array(
+			'format'  => 'current-conditions-history',
+			'version' => 1,
+		);
+		foreach ( array( 'Weather_Provider_Station', 'Weather_Provider_Weewx' ) as $class ) {
+			$error = $class::parse_document( $archive );
+			$this->assertSame( 'station_archive_file', $error->get_error_code(), $class );
+			$this->assertStringContainsString( 'current.json', $error->get_error_message(), $class );
+		}
+	}
+
+	/**
 	 * The earlier format still works, and a wind object missing values doesn't warn (#674).
 	 */
 	public function test_legacy_format() {
