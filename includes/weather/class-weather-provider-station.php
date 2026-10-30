@@ -35,6 +35,14 @@ class Weather_Provider_Station extends Weather_Provider {
 	const FORMAT_VERSION = 1;
 
 	/**
+	 * Identifier of the format of a station's archive files, such as history-week.json, which aren't current conditions.
+	 *
+	 * @since 6.3.0
+	 * @var string
+	 */
+	const ARCHIVE_FORMAT = 'current-conditions-history';
+
+	/**
 	 * Furthest a station can be, in meters, to give the weather for a location.
 	 *
 	 * @since 6.1.0
@@ -453,6 +461,7 @@ class Weather_Provider_Station extends Weather_Provider {
 	 *
 	 * @since 6.1.0
 	 * @since 6.2.0 An AQI whose `derived.aqi` scale isn't us_epa isn't stored.
+	 * @since 6.3.0 An archive file, such as history-week.json, is an error that says to use the current conditions file.
 	 *
 	 * @param mixed $json Decoded JSON.
 	 * @return array|WP_Error Conditions in the plugin's units, with 'timestamp', and the station's 'station_id', 'name',
@@ -465,6 +474,9 @@ class Weather_Provider_Station extends Weather_Provider {
 		}
 		if ( ! array_key_exists( 'format', $json ) ) {
 			return static::parse_legacy( $json );
+		}
+		if ( static::ARCHIVE_FORMAT === $json['format'] ) {
+			return new WP_Error( 'station_archive_file', __( 'This is one of the station\'s archive files, such as history-week.json. Enter the URL of its current conditions file, current.json, instead.', 'simple-location' ) );
 		}
 		if ( static::FORMAT !== $json['format'] ) {
 			/* translators: %s: Format identifier. */
