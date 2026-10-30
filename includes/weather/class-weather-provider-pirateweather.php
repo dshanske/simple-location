@@ -105,6 +105,7 @@ class Weather_Provider_PirateWeather extends Weather_Provider {
 			}
 			$current               = $response['currently'] ?? null;
 			$return['temperature'] = self::round_value( $current['temperature'] ?? null, 1 );
+			$return['apptemp']     = self::round_value( $current['apparentTemperature'] ?? null, 1 );
 			if ( isset( $current['humidity'] ) ) {
 				$return['humidity'] = round( $current['humidity'] * 100, 1 );
 			}

@@ -1068,18 +1068,28 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 *  @type float $snowdepth Snow on the ground in inches.
 	 *  @type float $snowrate Snow rate in inches per hour.
 	 *  @type float $visibility Visibility in miles.
+	 *  @type float $apptemp Apparent temperature in Fahrenheit.
+	 *  @type float $cloudbase Cloud base in feet.
+	 *  @type float $lightning_distance Distance of the latest lightning strike in miles.
 	 * }
 	 *
 	 * @since 6.2.0 Converts the snow depth and snow rate.
+	 * @since 6.3.0 Converts the apparent temperature, the cloud base and the lightning distance.
 	 */
 	public static function metric_to_imperial( $conditions ) {
 		if ( ! is_array( $conditions ) ) {
 			return $conditions;
 		}
-		foreach ( array( 'temperature', 'heatindex', 'windchill', 'dewpoint' ) as $temp ) {
+		foreach ( array( 'temperature', 'heatindex', 'windchill', 'dewpoint', 'apptemp' ) as $temp ) {
 			if ( array_key_exists( $temp, $conditions ) && is_numeric( $conditions[ $temp ] ) ) {
 				$conditions[ $temp ] = self::celsius_to_fahrenheit( $conditions[ $temp ] );
 			}
+		}
+		if ( array_key_exists( 'cloudbase', $conditions ) && is_numeric( $conditions['cloudbase'] ) ) {
+			$conditions['cloudbase'] = self::meters_to_feet( $conditions['cloudbase'] );
+		}
+		if ( array_key_exists( 'lightning_distance', $conditions ) && is_numeric( $conditions['lightning_distance'] ) ) {
+			$conditions['lightning_distance'] = self::meters_to_miles( self::km_to_meters( $conditions['lightning_distance'] ) );
 		}
 
 		if ( array_key_exists( 'pressure', $conditions ) && is_numeric( $conditions['pressure'] ) ) {
@@ -1109,6 +1119,8 @@ abstract class Weather_Provider extends Sloc_Provider {
 	 * Convert array of imperial to metric measurements.
 	 *
 	 * @since 6.1.0 Converts the rain rate too.
+	 * @since 6.3.0 Converts the apparent temperature, the cloud base (feet to meters) and the lightning distance
+	 *              (miles to kilometers).
 	 *
 	 * @param array $conditions Conditions.
 	 * @return array $conditions
@@ -1117,10 +1129,16 @@ abstract class Weather_Provider extends Sloc_Provider {
 		if ( ! is_array( $conditions ) ) {
 			return $conditions;
 		}
-		foreach ( array( 'temperature', 'heatindex', 'windchill', 'dewpoint' ) as $temp ) {
+		foreach ( array( 'temperature', 'heatindex', 'windchill', 'dewpoint', 'apptemp' ) as $temp ) {
 			if ( array_key_exists( $temp, $conditions ) ) {
 				$conditions[ $temp ] = self::fahrenheit_to_celsius( $conditions[ $temp ] );
 			}
+		}
+		if ( array_key_exists( 'cloudbase', $conditions ) ) {
+			$conditions['cloudbase'] = self::feet_to_meters( $conditions['cloudbase'] );
+		}
+		if ( array_key_exists( 'lightning_distance', $conditions ) && is_numeric( $conditions['lightning_distance'] ) ) {
+			$conditions['lightning_distance'] = round( self::miles_to_meters( $conditions['lightning_distance'] ) / 1000, 2 );
 		}
 
 		if ( array_key_exists( 'pressure', $conditions ) ) {

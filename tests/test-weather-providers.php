@@ -156,6 +156,77 @@ class WeatherProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Each provider with an apparent temperature stores it, in degrees Celsius (#813).
+	 */
+	public function test_apparent_temperature() {
+		update_option( 'sloc_aeris_client_id', 'client' );
+		update_option( 'sloc_aeris_client_secret', 'secret' );
+		$cases = array(
+			'Weather_Provider_OpenWeatherMap' => array( 'openweathermap-onecall.json', 'api.openweathermap.org', fn( $f ) => $f['current']['feels_like'] ),
+			'Weather_Provider_PirateWeather'  => array( 'pirateweather-forecast.json', 'api.pirateweather.net', fn( $f ) => $f['currently']['apparentTemperature'] ),
+			'Weather_Provider_Weatherbit'     => array( 'weatherbit-current.json', 'api.weatherbit.io', fn( $f ) => $f['data'][0]['app_temp'] ),
+			'Weather_Provider_Weatherstack'   => array( 'weatherstack-current.json', 'api.weatherstack.com', fn( $f ) => $f['current']['feelslike'] ),
+			'Weather_Provider_VisualCrossing' => array( 'visualcrossing-current.json', 'weather.visualcrossing.com', fn( $f ) => $f['currentConditions']['feelslike'] ),
+			'Weather_Provider_HERE'           => array( 'here-observation.json', 'weather.hereapi.com', fn( $f ) => (float) $f['places'][0]['observations'][0]['comfort'] ),
+			'Weather_Provider_Aeris'          => array( 'aeris-observations.json', 'data.api.xweather.com', fn( $f ) => $f['response'][0]['ob']['feelslikeC'] ),
+			'Weather_Provider_OpenMeteo'      => array( 'openmeteo-current.json', 'api.open-meteo.com', fn( $f ) => $f['current']['apparent_temperature'] ),
+		);
+		foreach ( $cases as $class => $case ) {
+			$fixture = $this->fixture( 'weather/' . $case[0] );
+			$this->mock_http( array( $case[1] => array( 'body' => $fixture ) ) );
+			$conditions = $this->provider( $class, array( 'api' => 'key' ) )->get_conditions();
+			$this->assertIsNumeric( $case[2]( $fixture ), $class );
+			$this->assertEqualsWithDelta( $case[2]( $fixture ), $conditions['apptemp'], 0.01, $class );
+			remove_filter( 'pre_http_request', array( $this, 'mock_http_response' ) );
+		}
+		$this->assertContains( 'apparent_temperature', Weather_Provider_OpenMeteo::VARIABLES );
+		$this->assertArrayNotHasKey( 'apptemp', ( new Weather_Provider_OpenMeteo() )->convert_data( array( 'temperature_2m' => 5 ) ) );
+	}
+
+	/**
+	 * Open-Meteo's past weather has the apparent temperature too.
+	 */
+	public function test_openmeteo_archive_apparent_temperature() {
+		$fixture = $this->fixture( 'weather/openmeteo-archive.json' );
+		$hour    = 6;
+		$values  = array();
+		foreach ( Weather_Provider_OpenMeteo::VARIABLES as $variable ) {
+			$values[ $variable ] = $fixture['hourly'][ $variable ][ $hour ] ?? null;
+		}
+		$conditions = ( new Weather_Provider_OpenMeteo() )->convert_data( $values );
+		$this->assertEqualsWithDelta( $fixture['hourly']['apparent_temperature'][ $hour ], $conditions['apptemp'], 0.01 );
+	}
+
+	/**
+	 * NWS: the cloud base is the lowest cloud layer's base, in meters; not a sky hidden by fog, nor another unit (#813).
+	 */
+	public function test_nws_cloud_base() {
+		$layer = fn( $amount, $base, $unit = 'wmoUnit:m' ) => array(
+			'amount' => $amount,
+			'base'   => array(
+				'unitCode' => $unit,
+				'value'    => $base,
+			),
+		);
+		$this->assertSame( 760.0, Weather_Provider_NWSUS::cloud_base( array( $layer( 'BKN', 1520 ), $layer( 'FEW', 760 ), $layer( 'OVC', 3000 ) ) ) );
+		$this->assertNull( Weather_Provider_NWSUS::cloud_base( array( $layer( 'VV', 60 ), $layer( 'CLR', null ) ) ) );
+		$this->assertNull( Weather_Provider_NWSUS::cloud_base( array( $layer( 'SCT', 5000, 'wmoUnit:ft' ) ) ) );
+		$this->assertNull( Weather_Provider_NWSUS::cloud_base( array( $layer( 'SCT', null ), 'not a layer' ) ) );
+		$this->assertNull( Weather_Provider_NWSUS::cloud_base( null ) );
+
+		$observation = $this->fixture( 'weather/nws-observation.json' );
+		$this->mock_http(
+			array(
+				'api.weather.gov/stations/KPHL/observations/latest' => array( 'body' => $observation ),
+				'api.weather.gov/stations/KPHL' => array( 'body' => $this->fixture( 'weather/nws-station.json' ) ),
+			)
+		);
+		$provider = new Weather_Provider_NWSUS();
+		$provider->set( array( 'station_id' => 'KPHL' ) );
+		$this->assertEquals( $observation['properties']['cloudLayers'][0]['base']['value'], $provider->get_conditions()['cloudbase'] );
+	}
+
+	/**
 	 * OpenWeatherMap passes on request failures, returns an error with the status when it refuses a request, and
 	 * no_results for a body without current conditions (#692).
 	 */

@@ -103,6 +103,8 @@ class Weather_Provider_HERE extends Weather_Provider {
 
 			$return['temperature'] = self::round_value( $current['temperature'] ?? null, 1 );
 			$return['dewpoint']    = self::round_value( $current['dewPoint'] ?? null, 1 );
+			// The apparent temperature is a string, comfort.
+			$return['apptemp'] = self::round_value( $current['comfort'] ?? null, 1 );
 			// Humidity is a string in v3.
 			$return['humidity']   = isset( $current['humidity'] ) && is_numeric( $current['humidity'] ) ? round( (float) $current['humidity'], 1 ) : null;
 			$return['pressure']   = self::round_value( $current['barometerPressure'] ?? null, 1 );

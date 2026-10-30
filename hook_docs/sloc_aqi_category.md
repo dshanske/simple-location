@@ -25,7 +25,7 @@ add_filter(
 
 ## Files
 
-- [includes/trait-weather-info.php:576](https://github.com/dshanske/simple-location/blob/trunk/includes/trait-weather-info.php#L576)
+- [includes/trait-weather-info.php:619](https://github.com/dshanske/simple-location/blob/trunk/includes/trait-weather-info.php#L619)
 ```php
 apply_filters( 'sloc_aqi_category', $category, $aqi )
 ```
