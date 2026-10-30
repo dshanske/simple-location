@@ -498,6 +498,56 @@ class PlacesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A place is found by its page on the site or its identifier, never created, and only if the user may use it.
+	 */
+	public function test_find_place() {
+		$public  = $this->venue( 'Public Cafe' );
+		$private = $this->venue( 'Home', self::LAT, self::LNG, 'private' );
+		add_post_meta( $public, Post_Venue::UID_KEY, 'here:pds:place:1' );
+		add_post_meta( $private, Post_Venue::UID_KEY, 'here:pds:place:2' );
+		$post_id = self::factory()->post->create();
+
+		$this->assertSame( $public, Post_Venue::find_place( array( 'url' => get_permalink( $public ) ) ) );
+		$this->assertSame( $public, Post_Venue::find_place( array( 'uid' => array( 'other', ' here:pds:place:1 ' ) ) ) );
+		$this->assertSame(
+			$public,
+			Post_Venue::find_place(
+				array(
+					'type'       => array( 'h-card' ),
+					'properties' => array( 'uid' => array( 'here:pds:place:1' ) ),
+				)
+			)
+		);
+		$this->assertFalse( Post_Venue::find_place( array( 'uid' => 'here:pds:place:2' ) ), 'A private venue for a visitor.' );
+		$this->assertFalse( Post_Venue::find_place( array( 'uid' => 'here:pds:place:3' ) ) );
+		$this->assertFalse(
+			Post_Venue::find_place(
+				array(
+					'name'      => 'Public Cafe',
+					'latitude'  => self::LAT,
+					'longitude' => self::LNG,
+				)
+			),
+			'Not by name.'
+		);
+		$this->assertFalse(
+			Post_Venue::find_place(
+				array(
+					'url' => get_permalink( $post_id ),
+					'uid' => 'here:pds:place:1',
+				)
+			),
+			'Another kind of post.'
+		);
+		$this->assertFalse( Post_Venue::find_place( 'Cafe' ) );
+		$this->assertFalse( Post_Venue::find_place( array( 'uid' => array( '', 3 ) ) ) );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$this->assertSame( $private, Post_Venue::find_place( array( 'uid' => 'here:pds:place:2' ) ) );
+	}
+
+	/**
+	 * A chosen place must have a name and can't be another kind of post on the site.	/**
 	 * A chosen place must have a name and can't be another kind of post on the site.
 	 */
 	public function test_choose_invalid_place() {

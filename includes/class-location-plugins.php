@@ -273,6 +273,8 @@ class Location_Plugins {
 	 * Fires after the Micropub Request is complete to add additional location information.
 	 *
 	 * @since 6.1.0 A venue's visibility for posts made there is used, unless the client asked for one.
+	 * @since 6.3.0 A check-in or location h-card is matched to a venue by its page on the site, then its identifier;
+	 *              a private venue only for a user who can edit it.
 	 *
 	 * @param array $input The Micropub Input.
 	 * @param array $args Micropub Arguments.
@@ -370,7 +372,12 @@ class Location_Plugins {
 
 		// If this is a checkin.
 		if ( isset( $properties['checkin'] ) ) {
-			$venue = Post_Venue::add_new_venue( $location );
+			// A check-in names the place; an address label names it when there is no name.
+			if ( empty( $location['name'] ) && ! empty( $location['label'] ) ) {
+				$location['name'] = $location['label'];
+			}
+			// The venue the check-in is at, by its page, identifier or name nearby, or a new one.
+			$venue = Post_Venue::choose_place( $location );
 			if ( ! is_wp_error( $venue ) ) {
 				Post_Venue::set_post_venue( $args['ID'], $venue );
 				$visibility = Post_Venue::get_post_visibility( $venue );
@@ -392,6 +399,17 @@ class Location_Plugins {
 						Location_Taxonomy::set_location( $args['ID'], $term );
 					}
 				}
+			}
+		} elseif ( isset( $location['url'] ) || isset( $location['uid'] ) ) {
+			// A location that is a venue, by its page or identifier, such as a place from q=places.
+			$venue = Post_Venue::find_place( $location );
+			if ( $venue ) {
+				Post_Venue::set_post_venue( $args['ID'], $venue );
+				if ( ! self::requested_visibility( $properties ) ) {
+					$visibility = Post_Venue::get_post_visibility( $venue );
+					set_post_geodata( $args['ID'], 'visibility', '' === $visibility ? 'protected' : $visibility );
+				}
+				$term = $term ? $term : Location_Taxonomy::get_post_location( $args['ID'] );
 			}
 		}
 

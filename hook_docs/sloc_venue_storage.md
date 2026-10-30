@@ -29,7 +29,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-post-venue.php:1263](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L1263)
+- [includes/class-post-venue.php:1319](https://github.com/dshanske/simple-location/blob/trunk/includes/class-post-venue.php#L1319)
 ```php
 apply_filters( 'sloc_venue_storage', $storage, $venue )
 ```

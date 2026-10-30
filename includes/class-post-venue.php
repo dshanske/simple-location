@@ -983,6 +983,66 @@ class Post_Venue {
 	}
 
 	/**
+	 * Returns the site venue whose page is one of a place's identifier or URLs.
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array $place Place, as jf2, with 'uid' and 'url' as strings or lists.
+	 * @return int|WP_Error Venue ID; 0 if none is on the site; an error if one is another kind of post on the site.
+	 */
+	protected static function local_place_id( $place ) {
+		$venue_id = 0;
+		foreach ( array_merge( (array) ( $place['uid'] ?? array() ), (array) ( $place['url'] ?? array() ) ) as $url ) {
+			$id = self::url_to_postid( $url );
+			// A page on this site is only a venue's.
+			if ( $id && 'venue' !== get_post_type( $id ) ) {
+				return new WP_Error( 'invalid_place', __( 'This is not a place.', 'simple-location' ), array( 'status' => 400 ) );
+			}
+			$venue_id = $venue_id ? $venue_id : $id;
+		}
+		return $venue_id;
+	}
+
+	/**
+	 * Returns the site venue a place is, by its page on the site or the identifier it was found with, without
+	 * creating one.
+	 *
+	 * Unlike find_venue(), a place isn't matched by its name or other links. The venue must be one the current user
+	 * may use; see place_access().
+	 *
+	 * @since 6.3.0
+	 *
+	 * @param array $place Place, as an mf2 h-card or as jf2, with 'uid' and 'url'.
+	 * @return int|false Venue ID, or false.
+	 */
+	public static function find_place( $place ) {
+		$place = self::mf2_to_jf2( $place );
+		if ( ! is_array( $place ) ) {
+			return false;
+		}
+		$venue_id = self::local_place_id( $place );
+		if ( is_wp_error( $venue_id ) ) {
+			return false;
+		}
+		if ( ! $venue_id ) {
+			$uids = array_values( array_filter( (array) ( $place['uid'] ?? array() ), fn( $uid ) => is_string( $uid ) && '' !== trim( $uid ) ) );
+			if ( ! empty( $uids ) ) {
+				$venue_id = self::first_venue(
+					array(
+						array(
+							'key'     => self::UID_KEY,
+							'compare' => 'IN',
+							'value'   => array_map( 'trim', $uids ),
+						),
+					)
+				);
+			}
+		}
+		$venue = $venue_id ? get_post( $venue_id ) : null;
+		return ( $venue && 'venue' === $venue->post_type && self::place_access( $venue ) ) ? $venue->ID : false;
+	}
+
+	/**
 	 * Returns the venue for a place chosen from places(), creating one for a venue provider's place.
 	 *
 	 * A place that is one of the site's venues, by its page, is that venue. Another place is matched or created as a
@@ -1005,14 +1065,9 @@ class Post_Venue {
 			return new WP_Error( 'invalid_place', __( 'A place needs a name.', 'simple-location' ), array( 'status' => 400 ) );
 		}
 
-		// A page on this site is only a venue's.
-		$venue_id = 0;
-		foreach ( array_merge( (array) ( $place['uid'] ?? array() ), (array) ( $place['url'] ?? array() ) ) as $url ) {
-			$id = self::url_to_postid( $url );
-			if ( $id && 'venue' !== get_post_type( $id ) ) {
-				return new WP_Error( 'invalid_place', __( 'This is not a place.', 'simple-location' ), array( 'status' => 400 ) );
-			}
-			$venue_id = $venue_id ? $venue_id : $id;
+		$venue_id = self::local_place_id( $place );
+		if ( is_wp_error( $venue_id ) ) {
+			return $venue_id;
 		}
 		if ( ! $venue_id && 'local' === ( $place['provider'] ?? null ) ) {
 			return new WP_Error( 'not_found', __( 'Venue not found.', 'simple-location' ), array( 'status' => 404 ) );
@@ -1120,6 +1175,7 @@ class Post_Venue {
 	 * @since 6.1.0 Matches by identifier and by name nearby, and keeps the identifier and provider pages. Keeps
 	 *              only what the provider allows; see storage(). Gives a new venue one of the user's venue types,
 	 *              and its shared category (#729).
+	 * @since 6.3.0 A check-in URL is a local venue only if it is a venue's page, found with plain permalinks too.
 	 *
 	 * @param array $venue Check-in or address properties. Needs a name or label.
 	 * @return int|WP_Error|false The venue ID, or false without a name.
@@ -1137,8 +1193,8 @@ class Post_Venue {
 		$urls = self::venue_urls( $venue );
 		// A check-in URL that is a local venue is that venue.
 		if ( '' !== $urls['url'] ) {
-			$id = url_to_postid( $urls['url'] );
-			if ( $id ) {
+			$id = self::url_to_postid( $urls['url'] );
+			if ( $id && 'venue' === get_post_type( $id ) ) {
 				return $id;
 			}
 		}

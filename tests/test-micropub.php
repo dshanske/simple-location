@@ -569,6 +569,232 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Creates a venue at City Hall.
+	 *
+	 * @param string $title      Title.
+	 * @param string $visibility Location visibility.
+	 * @return int Venue ID.
+	 */
+	protected function venue( $title, $visibility = 'public' ) {
+		$venue_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'venue',
+				'post_title'  => $title,
+				'post_author' => self::factory()->user->create( array( 'role' => 'editor' ) ),
+			)
+		);
+		set_post_geodata(
+			$venue_id,
+			'',
+			array(
+				'latitude'   => self::LAT,
+				'longitude'  => self::LNG,
+				'visibility' => $visibility,
+			)
+		);
+		return $venue_id;
+	}
+
+	/**
+	 * Micropub input with an h-card as the check-in or the location.
+	 *
+	 * @param string $property   'checkin' or 'location'.
+	 * @param array  $properties h-card properties.
+	 * @param array  $more       Other post properties.
+	 * @return array Input.
+	 */
+	protected function card_input( $property, $properties, $more = array() ) {
+		return array(
+			'properties' => array_merge(
+				array(
+					$property => array(
+						'type'       => array( 'h-card' ),
+						'properties' => $properties,
+					),
+				),
+				$more
+			),
+		);
+	}
+
+	/**
+	 * Number of venues.
+	 *
+	 * @return int
+	 */
+	protected function venue_count() {
+		return count(
+			get_posts(
+				array(
+					'post_type'   => 'venue',
+					'post_status' => 'any',
+					'fields'      => 'ids',
+					'numberposts' => -1,
+				)
+			)
+		);
+	}
+
+	/**
+	 * A check-in whose URL is a venue's page on the site, with plain permalinks, is that venue (#816).
+	 */
+	public function test_set_location_checkin_local_page() {
+		$venue_id = $this->venue( 'Our Cafe' );
+		$this->assertStringContainsString( '?venue=', get_permalink( $venue_id ) );
+		$count = $this->venue_count();
+		$args  = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location(
+			$this->card_input(
+				'checkin',
+				array(
+					'name' => array( 'Another Name' ),
+					'url'  => array( get_permalink( $venue_id ) ),
+				)
+			),
+			$args
+		);
+		$this->assertSame( $venue_id, (int) get_post_meta( $args['ID'], 'venue_id', true ) );
+		$this->assertSame( $count, $this->venue_count(), 'No venue is created.' );
+	}
+
+	/**
+	 * A check-in whose URL is another kind of post on the site isn't linked to it, and makes no venue (#816).
+	 */
+	public function test_set_location_checkin_other_post() {
+		$post_id = self::factory()->post->create();
+		$count   = $this->venue_count();
+		$args    = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location(
+			$this->card_input(
+				'checkin',
+				array(
+					'name' => array( 'A post' ),
+					'url'  => array( get_permalink( $post_id ) ),
+				)
+			),
+			$args
+		);
+		$this->assertSame( '', get_post_meta( $args['ID'], 'venue_id', true ) );
+		$this->assertSame( $count, $this->venue_count() );
+		$this->assertNotSame(
+			$post_id,
+			Post_Venue::add_new_venue(
+				array(
+					'name' => 'A post',
+					'url'  => get_permalink( $post_id ),
+				)
+			),
+			'add_new_venue() never returns another kind of post.'
+		);
+	}
+
+	/**
+	 * A check-in at a private venue, by its identifier, is only linked for a user who can edit the venue (#816).
+	 */
+	public function test_set_location_checkin_private_venue() {
+		$venue_id = $this->venue( 'Home', 'private' );
+		add_post_meta( $venue_id, Post_Venue::UID_KEY, 'here:pds:place:home' );
+		$input = $this->card_input(
+			'checkin',
+			array(
+				'name'     => array( 'Home' ),
+				'uid'      => array( 'here:pds:place:home' ),
+				'provider' => array( 'sloc_test' ),
+			)
+		);
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
+		$args = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location( $input, $args );
+		$this->assertSame( '', get_post_meta( $args['ID'], 'venue_id', true ) );
+		$this->assertSame( array(), Post_Venue::get_venue_sources( $venue_id ), 'The venue is left as it is.' );
+
+		wp_set_current_user( get_post_field( 'post_author', $venue_id ) );
+		$args = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location( $input, $args );
+		$this->assertSame( $venue_id, (int) get_post_meta( $args['ID'], 'venue_id', true ) );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * A check-in named only by its address label makes a venue with that name.
+	 */
+	public function test_set_location_checkin_label() {
+		$args = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location(
+			$this->card_input(
+				'checkin',
+				array(
+					'label'     => array( 'Corner Shop' ),
+					'latitude'  => array( self::LAT ),
+					'longitude' => array( self::LNG ),
+				)
+			),
+			$args
+		);
+		$this->assertSame( 'Corner Shop', get_the_title( (int) get_post_meta( $args['ID'], 'venue_id', true ) ) );
+	}
+
+	/**
+	 * A location h-card whose page or identifier is a venue links it, with its visibility for posts there (#816).
+	 */
+	public function test_set_location_card_venue() {
+		$by_page = $this->venue( 'Our Cafe' );
+		update_post_meta( $by_page, 'venue_post_visibility', 'private' );
+		$by_uid = $this->venue( 'Our Bar' );
+		add_post_meta( $by_uid, Post_Venue::UID_KEY, 'https://www.openstreetmap.org/node/7' );
+		$count = $this->venue_count();
+
+		$args = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location( $this->card_input( 'location', array( 'url' => array( get_permalink( $by_page ) ) ) ), $args );
+		$this->assertSame( $by_page, (int) get_post_meta( $args['ID'], 'venue_id', true ) );
+		$this->assertSame( 'private', get_post_geodata( $args['ID'], 'visibility' ) );
+
+		$args = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location( $this->card_input( 'location', array( 'uid' => array( 'https://www.openstreetmap.org/node/7' ) ) ), $args );
+		$this->assertSame( $by_uid, (int) get_post_meta( $args['ID'], 'venue_id', true ) );
+		$this->assertSame( 'protected', get_post_geodata( $args['ID'], 'visibility' ), 'Only the name, without a visibility for posts there.' );
+
+		// The visibility the client asked for wins.
+		$args = $this->micropub_post( array() );
+		Location_Plugins::micropub_set_location(
+			$this->card_input(
+				'location',
+				array( 'url' => array( get_permalink( $by_page ) ) ),
+				array( 'location-visibility' => array( 'public' ) )
+			),
+			$args
+		);
+		$this->assertSame( $by_page, (int) get_post_meta( $args['ID'], 'venue_id', true ) );
+		$this->assertSame( 'public', get_post_geodata( $args['ID'], 'visibility' ) );
+		$this->assertSame( $count, $this->venue_count(), 'A location never creates a venue.' );
+	}
+
+	/**
+	 * A location h-card that isn't a venue, or is one the user may not use, links none and creates none (#816).
+	 */
+	public function test_set_location_card_no_venue() {
+		$private = $this->venue( 'Home', 'private' );
+		add_post_meta( $private, Post_Venue::UID_KEY, 'here:pds:place:home' );
+		$count = $this->venue_count();
+		foreach ( array( 'here:pds:place:unknown', 'here:pds:place:home' ) as $uid ) {
+			$args = $this->micropub_post( array() );
+			Location_Plugins::micropub_set_location(
+				$this->card_input(
+					'location',
+					array(
+						'name' => array( 'Somewhere' ),
+						'uid'  => array( $uid ),
+					)
+				),
+				$args
+			);
+			$this->assertSame( '', get_post_meta( $args['ID'], 'venue_id', true ), $uid );
+		}
+		$this->assertSame( $count, $this->venue_count() );
+	}
+
+	/**
 	 * A location h-adr sets the location term without a reverse lookup.
 	 */
 	public function test_set_location_address() {
