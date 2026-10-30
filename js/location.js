@@ -637,41 +637,6 @@ jQuery( document ).ready( function( $ ) {
 		.on( 'click', '.choose-place-button', function( event ) {
 			choosePlace( parseInt( $( this ).attr( 'data-place' ), 10 ) );
 			event.preventDefault();
-		} )
-		.on( 'click', '.save-venue-button', function() {
-			$.ajax( {
-				type: 'POST',
-
-				// Here we supply the endpoint url, as opposed to the action in the data object with the admin-ajax method
-				url: sloc.api_url + 'reverse/',
-				beforeSend( xhr ) {
-					// Here we set a header 'X-WP-Nonce' with the nonce as opposed to the nonce in the data object with admin-ajax
-					xhr.setRequestHeader( 'X-WP-Nonce', slocOptions.api_nonce );
-				},
-				data: {
-					action: 'save_venue_data',
-					latitude: $( '#latitude' ).val(),
-					longitude: $( '#longitude' ).val(),
-					location_name: $( '#location-name' ).val(), // eslint-disable-line camelcase
-					street_address: $( '#street-address' ).val(), // eslint-disable-line camelcase
-					extended_address: $( '#extended-address' ).val(), // eslint-disable-line camelcase
-					locality: $( '#locality' ).val(),
-					region: $( '#region' ).val(),
-					postal_code: $( '#postal-code' ).val(), // eslint-disable-line camelcase
-					country_name: $( '#country-name' ).val(), // eslint-disable-line camelcase
-					country_code: $( '#country-code' ).val(), // eslint-disable-line camelcase
-				},
-				success( response ) {
-					if ( 'undefined' !== typeof response ) {
-						if ( 'undefined' !== typeof response ) {
-						}
-					}
-					console.log( response );
-				},
-				error( request, status, error ) {
-					alert( request.responseText );
-				},
-			} );
 		} );
 
 	$postTimezoneSelect = $( '#post-timezone-select' );
