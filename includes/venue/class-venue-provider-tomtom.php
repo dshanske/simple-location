@@ -97,8 +97,10 @@ class Venue_Provider_TomTom extends Venue_Provider {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for TomTom', 'simple-location' ) );
 		}
+		// With a filter, POI Search for it near the location, which takes the same parameters as Nearby Search.
+		$url  = '' === $this->filter ? 'https://api.tomtom.com/search/2/nearbySearch/.json' : 'https://api.tomtom.com/search/2/poiSearch/' . rawurlencode( $this->filter ) . '.json';
 		$json = $this->fetch_json(
-			'https://api.tomtom.com/search/2/nearbySearch/.json',
+			$url,
 			array(
 				'key'      => $this->api,
 				'lat'      => $this->latitude,
@@ -218,5 +220,16 @@ class Venue_Provider_TomTom extends Venue_Provider {
 		}
 		$url = trim( $url );
 		return preg_match( '#^https?://#i', $url ) ? $url : 'https://' . $url;
+	}
+
+	/**
+	 * Searches for the filter with POI Search.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool True.
+	 */
+	protected function searches_by_name() {
+		return true;
 	}
 }

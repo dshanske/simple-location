@@ -333,19 +333,21 @@ class Sloc_Provider_Chain {
 	 *
 	 * @since 6.1.0
 	 * @since 6.3.0 Takes the most venues to find.
-	 * @since 6.4.0 Takes the search radius.
+	 * @since 6.4.0 Takes the search radius and a filter.
 	 *
-	 * @param float $latitude  Latitude.
-	 * @param float $longitude Longitude.
-	 * @param int   $limit     Optional. Most venues to find. Default 0, the sloc_venue_limit setting.
-	 * @param int   $radius    Optional. Search radius in meters. Default 0, the sloc_venue_radius setting.
+	 * @param float  $latitude  Latitude.
+	 * @param float  $longitude Longitude.
+	 * @param int    $limit     Optional. Most venues to find. Default 0, the sloc_venue_limit setting.
+	 * @param int    $radius    Optional. Search radius in meters. Default 0, the sloc_venue_radius setting.
+	 * @param string $filter    Optional. Text the places' names should match. Default empty, any place.
 	 * @return array|WP_Error Array with the venues under 'items', in the provider's order, and the slug of the provider
 	 *                        that found them as 'provider'; or the last error. Without any venues, an empty 'items'.
 	 */
-	public static function venues( $latitude, $longitude, $limit = 0, $radius = 0 ) {
+	public static function venues( $latitude, $longitude, $limit = 0, $radius = 0, $filter = '' ) {
 		$result = self::run(
 			'venue',
-			function ( $provider ) use ( $limit, $radius ) {
+			function ( $provider ) use ( $limit, $radius, $filter ) {
+				$provider->set_filter( $filter );
 				if ( $limit > 0 ) {
 					$provider->set_limit( $limit );
 				}

@@ -110,14 +110,17 @@ class Venue_Provider_Geoapify extends Venue_Provider {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Geoapify', 'simple-location' ) );
 		}
-		$point    = $this->longitude . ',' . $this->latitude;
-		$query    = array(
+		$point = $this->longitude . ',' . $this->latitude;
+		$query = array(
 			'categories' => implode( ',', self::CATEGORIES ),
 			'filter'     => 'circle:' . $point . ',' . $this->radius,
 			'bias'       => 'proximity:' . $point,
 			'limit'      => $this->limit,
 			'apiKey'     => $this->api,
 		);
+		if ( '' !== $this->filter ) {
+			$query['name'] = $this->filter;
+		}
 		$language = strtolower( substr( (string) get_bloginfo( 'language' ), 0, 2 ) );
 		if ( '' !== $language ) {
 			$query['lang'] = $language;
@@ -223,5 +226,16 @@ class Venue_Provider_Geoapify extends Venue_Provider {
 			$card = array_merge( $card, $tz );
 		}
 		return $card;
+	}
+
+	/**
+	 * Searches for the filter with the Places API's name parameter.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool True.
+	 */
+	protected function searches_by_name() {
+		return true;
 	}
 }
