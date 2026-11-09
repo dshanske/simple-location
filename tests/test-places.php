@@ -773,4 +773,50 @@ class PlacesTest extends WP_UnitTestCase {
 		update_option( 'geo_public', 0 );
 		$this->assertSame( 1, Post_Venue::venue_visits( array( $cafe ) )[ $cafe ]['visits'] );
 	}
+
+	/**
+	 * A radius widens or narrows the search, for the site's venues and the providers'.
+	 */
+	public function test_radius_argument() {
+		update_option( 'sloc_venue_radius', 100 );
+		$this->venue( 'Here' );
+		$this->venue( 'Far', self::LAT + 0.004 );
+		Venue_Provider_Sloc_Test::$result = array(
+			'items' => array(
+				array(
+					'name'      => 'Near Shop',
+					'latitude'  => self::LAT + 0.0001,
+					'longitude' => self::LNG,
+				),
+				array(
+					'name'      => 'Far Shop',
+					'latitude'  => self::LAT + 0.005,
+					'longitude' => self::LNG,
+				),
+			),
+		);
+
+		$this->assertSame( array( 'Here', 'Near Shop' ), $this->names( Post_Venue::places( self::LAT, self::LNG ) ), 'The setting by default.' );
+		$this->assertSame( 100, Venue_Provider_Sloc_Test::$last_radius );
+
+		$this->assertSame( array( 'Here', 'Far', 'Near Shop', 'Far Shop' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'radius' => 1000 ) ) ) );
+		$this->assertSame( 1000, Venue_Provider_Sloc_Test::$last_radius, 'The provider is asked with the radius.' );
+		$this->assertSame( array( 'Here', 'Far' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'radius' => 1000, 'local' => true ) ) ) );
+
+		// Limited as the setting is.
+		Post_Venue::places( self::LAT, self::LNG, array( 'radius' => 1 ) );
+		$this->assertSame( Venue_Provider::MIN_RADIUS, Venue_Provider_Sloc_Test::$last_radius );
+		Post_Venue::places( self::LAT, self::LNG, array( 'radius' => 99999 ) );
+		$this->assertSame( Venue_Provider::MAX_RADIUS, Venue_Provider_Sloc_Test::$last_radius );
+
+		// A provider asked for by name, and the shared provider keeps the setting.
+		$shared = Loc_Config::venue_provider()->get_radius();
+		Post_Venue::places( self::LAT, self::LNG, array( 'radius' => 700, 'provider' => 'sloc_test' ) );
+		$this->assertSame( 700, Venue_Provider_Sloc_Test::$last_radius );
+		$this->assertSame( $shared, Loc_Config::venue_provider()->get_radius() );
+
+		$provider = new Venue_Provider_Sloc_Test();
+		$provider->set_radius( 'wide' );
+		$this->assertSame( Venue_Provider::DEFAULT_RADIUS, $provider->get_radius() );
+	}
 }

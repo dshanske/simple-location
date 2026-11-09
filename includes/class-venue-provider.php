@@ -370,6 +370,20 @@ abstract class Venue_Provider extends Sloc_Provider {
 	}
 
 	/**
+	 * Sets the search radius, such as for a request that asks for one.
+	 *
+	 * A provider whose service doesn't take a radius ignores it, but the venues it finds beyond the radius are still
+	 * left out by nearby().
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param mixed $radius Radius in meters; sanitized as the setting is.
+	 */
+	public function set_radius( $radius ) {
+		$this->radius = self::sanitize_radius( $radius );
+	}
+
+	/**
 	 * Returns the venues near the location: the provider's, within the radius, nearest first, up to the limit.
 	 *
 	 * Each venue with coordinates gets its distance from the location, in meters, as 'distance'. Venues without

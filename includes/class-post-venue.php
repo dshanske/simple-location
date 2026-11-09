@@ -619,7 +619,7 @@ class Post_Venue {
 	/**
 	 * Returns the places near a location: the site's venues, then the venue providers', as mf2 h-cards.
 	 *
-	 * The site's venues within the sloc_venue_radius setting come first, nearest first, each with its page on the
+	 * The site's venues within the radius come first, nearest first, each with its page on the
 	 * site as 'url' and 'uid', and, where the current user may see any, 'visits' and 'last-visit'; see
 	 * venue_visits(). The venue providers' follow, without those the site already has, found by their identifier or
 	 * one of their links. Each place names where it came from as 'provider': 'local' for the site's,
@@ -634,7 +634,7 @@ class Post_Venue {
 	 * returns only the site's venues, or none.
 	 *
 	 * @since 6.3.0
-	 * @since 6.4.0 Takes an offset.
+	 * @since 6.4.0 Takes an offset and a search radius.
 	 *
 	 * @param float $lat  Latitude.
 	 * @param float $lng  Longitude.
@@ -643,6 +643,8 @@ class Post_Venue {
 	 *
 	 *     @type int    $limit    Most places. Default the sloc_venue_limit setting, at most Venue_Provider::MAX_LIMIT.
 	 *     @type int    $offset   How many places at the start of the list to skip. Default 0.
+	 *     @type int    $radius   Search radius in meters, for the site's venues and the providers that take one,
+	 *                            from Venue_Provider::MIN_RADIUS to MAX_RADIUS. Default the sloc_venue_radius setting.
 	 *     @type bool   $local    Only the site's venues. Default false.
 	 *     @type string $provider Slug of the only venue provider to ask, instead of the venue chain. Default empty.
 	 * }
@@ -659,17 +661,19 @@ class Post_Venue {
 			array(
 				'limit'    => get_option( 'sloc_venue_limit', Venue_Provider::DEFAULT_LIMIT ),
 				'offset'   => 0,
+				'radius'   => get_option( 'sloc_venue_radius', Venue_Provider::DEFAULT_RADIUS ),
 				'local'    => false,
 				'provider' => '',
 			)
 		);
 		$limit  = Venue_Provider::sanitize_limit( $args['limit'] );
 		$offset = is_numeric( $args['offset'] ) ? max( 0, (int) $args['offset'] ) : 0;
+		$radius = Venue_Provider::sanitize_radius( $args['radius'] );
 
-		$local = self::local_places( $lat, $lng );
+		$local = self::local_places( $lat, $lng, $radius );
 		$items = array();
 		if ( ! $args['local'] && count( $local ) < $offset + $limit ) {
-			$found = self::provider_places( $lat, $lng, Venue_Provider::sanitize_limit( $offset + $limit ), $args['provider'] );
+			$found = self::provider_places( $lat, $lng, Venue_Provider::sanitize_limit( $offset + $limit ), $args['provider'], $radius );
 			$items = ( is_array( $found ) && is_array( $found['items'] ?? null ) ) ? array_filter( $found['items'], 'is_array' ) : array();
 		}
 
@@ -714,12 +718,12 @@ class Post_Venue {
 		 * Filters the places near a location.
 		 *
 		 * @since 6.3.0
-		 * @since 6.4.0 The arguments include 'offset'.
+		 * @since 6.4.0 The arguments include 'offset' and 'radius'.
 		 *
 		 * @param array[] $places Places as mf2 h-cards, the site's venues first.
 		 * @param float   $lat    Latitude.
 		 * @param float   $lng    Longitude.
-		 * @param array   $args   Arguments: 'limit', 'offset', 'local' and 'provider'.
+		 * @param array   $args   Arguments: 'limit', 'offset', 'radius', 'local' and 'provider'.
 		 */
 		return apply_filters( 'sloc_places', array_map( array( __CLASS__, 'jf2_to_mf2' ), $cards ), $lat, $lng, $args );
 	}
@@ -728,14 +732,16 @@ class Post_Venue {
 	 * Returns the venues a venue provider, or the venue chain, finds near a location.
 	 *
 	 * @since 6.3.0
+	 * @since 6.4.0 Takes the search radius.
 	 *
-	 * @param float  $lat   Latitude.
-	 * @param float  $lng   Longitude.
-	 * @param int    $limit Most venues.
-	 * @param string $slug  Provider slug, or empty for the venue chain.
+	 * @param float  $lat    Latitude.
+	 * @param float  $lng    Longitude.
+	 * @param int    $limit  Most venues.
+	 * @param string $slug   Provider slug, or empty for the venue chain.
+	 * @param int    $radius Optional. Search radius in meters. Default 0, the sloc_venue_radius setting.
 	 * @return array|WP_Error Venues under 'items', or an error. Empty without a provider.
 	 */
-	protected static function provider_places( $lat, $lng, $limit, $slug ) {
+	protected static function provider_places( $lat, $lng, $limit, $slug, $radius = 0 ) {
 		if ( is_string( $slug ) && '' !== $slug ) {
 			$provider = Loc_Config::venue_provider( $slug );
 			if ( ! $provider instanceof Venue_Provider ) {
@@ -745,9 +751,12 @@ class Post_Venue {
 			$provider = clone $provider;
 			$provider->set( $lat, $lng );
 			$provider->set_limit( $limit );
+			if ( $radius > 0 ) {
+				$provider->set_radius( $radius );
+			}
 			return $provider->nearby();
 		}
-		return Loc_Config::venue_provider() ? Sloc_Provider_Chain::venues( $lat, $lng, $limit ) : array();
+		return Loc_Config::venue_provider() ? Sloc_Provider_Chain::venues( $lat, $lng, $limit, $radius ) : array();
 	}
 
 	/**
@@ -756,13 +765,15 @@ class Post_Venue {
 	 * At most PLACES_SCAN venues in the box around the radius are read.
 	 *
 	 * @since 6.3.0
+	 * @since 6.4.0 Takes the search radius.
 	 *
-	 * @param float $lat Latitude.
-	 * @param float $lng Longitude.
+	 * @param float    $lat    Latitude.
+	 * @param float    $lng    Longitude.
+	 * @param int|null $radius Optional. Search radius in meters. Default null, the sloc_venue_radius setting.
 	 * @return array[] Each with 'venue', the post; 'access', as place_access() returns; and 'distance' in meters.
 	 */
-	protected static function local_places( $lat, $lng ) {
-		$radius = Venue_Provider::sanitize_radius( get_option( 'sloc_venue_radius', Venue_Provider::DEFAULT_RADIUS ) );
+	protected static function local_places( $lat, $lng, $radius = null ) {
+		$radius = Venue_Provider::sanitize_radius( $radius ?? get_option( 'sloc_venue_radius', Venue_Provider::DEFAULT_RADIUS ) );
 		$box    = geo_radius_box( $lat, $lng, $radius );
 		$venues = get_posts(
 			array(

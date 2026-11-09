@@ -699,6 +699,8 @@ class RestGeoTest extends WP_UnitTestCase {
 
 		$this->assertCount( 1, $this->request( '/venue', $params + array( 'limit' => '1' ) )->get_data()['places'] );
 		$this->assertCount( 1, $this->request( '/venue', $params + array( 'local' => 'true' ) )->get_data()['places'] );
+		$this->request( '/venue', $params + array( 'radius' => '800' ) );
+		$this->assertSame( 800, Venue_Provider_Sloc_Test::$last_radius );
 		$data = $this->request( '/venue', $params + array( 'provider' => 'sloc_test' ) )->get_data();
 		$this->assertSame( array( 'sloc_test' ), $data['places'][1]['properties']['provider'] );
 		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/venue', $params + array( 'limit' => 'many' ) ), 400 );
