@@ -1009,7 +1009,7 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The configuration query lists the places query once, and geo queries are no longer answered.
+	 * The configuration query lists the places query once, and geo queries are left to micropub_query_geo().
 	 */
 	public function test_query_config_and_others() {
 		$config = array( 'q' => array( 'config', 'source' ) );
@@ -1032,7 +1032,7 @@ class MicropubTest extends WP_UnitTestCase {
 					'lon' => self::LNG,
 				)
 			),
-			'q=geo was removed.'
+			'q=geo is answered by micropub_query_geo().'
 		);
 	}
 
