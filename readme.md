@@ -493,7 +493,7 @@ Developers can refresh the station, airport and airline files with `composer upd
 
 ### 6.4.0
 
-The experimental Micropub q=geo query is back, without venues, which q=places lists: it gives a location's coordinates, Plus Code, elevation, timezone, local time, address and a static map, from coordinates, a post's URL, an airport code or a Plus Code. q=places takes an offset and a radius, and lists your own venues with how often you have been there, then your venue provider's places in its own order. A Micropub check-in at a venue keeps the location visibility the client asked for.
+The experimental Micropub q=geo query is back, without venues, which q=places lists: it gives a location's coordinates, Plus Code, elevation, timezone, local time, address and a static map, from coordinates, a post's URL, an airport code or a Plus Code. q=places takes an offset, a radius and a filter to find places by name, and lists your own venues with how often you have been there, then your venue provider's places in its own order. A Micropub check-in at a venue keeps the location visibility the client asked for.
 
 ### 6.3.0
 
@@ -522,6 +522,7 @@ Requires PHP 7.4, WordPress 6.2 or ClassicPress 2.7. The Bing providers and MapQ
 * Bring back the experimental Micropub q=geo query, without venues: a location's coordinates, Plus Code, elevation, timezone, local time, address as an h-card and a static map link that never holds your provider's API key, from coordinates, a geo URI, a post's URL, an airport's IATA code or a Plus Code
 * Add an offset to Micropub q=places, for the next page of places
 * Add a search radius to Micropub q=places and the sloc_geo/1.0/venue REST route
+* Add a filter to Micropub q=places and the venue REST route to find places by name; Foursquare, Google, HERE, TomTom, Geoapify, Pelias, Stadia Maps and Overpass search for it themselves
 * Report the visits to your own venues and the last one in q=places and the venue REST route, counting the posts the user asking may see
 * Give a venue's details in the Micropub source query for its page: its location, visits, parent and child venues, and photos
 * Keep the venue provider's own order after your own venues; Foursquare now ranks places by relevance and Google by popularity
