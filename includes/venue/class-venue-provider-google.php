@@ -56,6 +56,7 @@ class Venue_Provider_Google extends Venue_Provider {
 	 * @since 1.0.0
 	 * @since 6.0.0 Returns the venues under 'items', like the other venue providers, and an empty list when there are none.
 	 * @since 6.1.0 Uses Places API (New) Nearby Search, nearest first, within the venue search radius (#703).
+	 * @since 6.4.0 Ranked by Google's popularity instead of distance (#843).
 	 *
 	 * @return array|WP_Error h-cards under 'items', or an error.
 	 */
@@ -84,7 +85,7 @@ class Venue_Provider_Google extends Venue_Provider {
 					),
 				),
 				'maxResultCount'      => min( 20, $this->limit ),
-				'rankPreference'      => 'DISTANCE',
+				'rankPreference'      => 'POPULARITY',
 				'languageCode'        => get_bloginfo( 'language' ),
 			),
 			array(

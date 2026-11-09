@@ -42,6 +42,17 @@ class Venue_Provider_Overpass extends Venue_Provider {
 	const MAX_ELEMENTS = 100;
 
 	/**
+	 * Sorts the places nearest first, since Overpass returns them in no useful order.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool True.
+	 */
+	protected function sorts_by_distance() {
+		return true;
+	}
+
+	/**
 	 * Server URL.
 	 *
 	 * @since 6.1.0

@@ -1187,7 +1187,7 @@ class Loc_Config {
 			array(
 				'label_for'   => 'sloc_venue_radius',
 				/* translators: 1: Smallest radius in meters. 2: Largest radius in meters. */
-				'description' => sprintf( __( 'In meters, from %1$d to %2$d. Venues are listed nearest first.', 'simple-location' ), Venue_Provider::MIN_RADIUS, Venue_Provider::MAX_RADIUS ),
+				'description' => sprintf( __( 'In meters, from %1$d to %2$d. Your venues are listed nearest first, then the provider\'s in its own order, such as by relevance.', 'simple-location' ), Venue_Provider::MIN_RADIUS, Venue_Provider::MAX_RADIUS ),
 			)
 		);
 		add_settings_field(

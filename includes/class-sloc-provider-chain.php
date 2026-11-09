@@ -339,8 +339,8 @@ class Sloc_Provider_Chain {
 	 * @param float $longitude Longitude.
 	 * @param int   $limit     Optional. Most venues to find. Default 0, the sloc_venue_limit setting.
 	 * @param int   $radius    Optional. Search radius in meters. Default 0, the sloc_venue_radius setting.
-	 * @return array|WP_Error Array with the venues under 'items', nearest first, and the slug of the provider that found
-	 *                        them as 'provider'; or the last error. Without any venues, an empty 'items'.
+	 * @return array|WP_Error Array with the venues under 'items', in the provider's order, and the slug of the provider
+	 *                        that found them as 'provider'; or the last error. Without any venues, an empty 'items'.
 	 */
 	public static function venues( $latitude, $longitude, $limit = 0, $radius = 0 ) {
 		$result = self::run(

@@ -384,10 +384,13 @@ abstract class Venue_Provider extends Sloc_Provider {
 	}
 
 	/**
-	 * Returns the venues near the location: the provider's, within the radius, nearest first, up to the limit.
+	 * Returns the venues near the location: the provider's, within the radius, in the provider's order, up to the limit.
 	 *
-	 * Each venue with coordinates gets its distance from the location, in meters, as 'distance'. Venues without
-	 * coordinates come last. Each venue names the provider that found it as 'provider'.
+	 * The provider's order is its own ranking, such as relevance, so a longer list starts with a shorter one. A provider
+	 * whose service returns places in no useful order sorts them nearest first instead; see sorts_by_distance().
+	 *
+	 * Each venue with coordinates gets its distance from the location, in meters, as 'distance'. Each venue names the
+	 * provider that found it as 'provider'.
 	 *
 	 * The provider's venues are cached for cache_time() seconds, and sorted and limited for each request.
 	 *
@@ -413,22 +416,37 @@ abstract class Venue_Provider extends Sloc_Provider {
 				$items[ $key ]['provider'] = $this->slug;
 			}
 		}
-		return array( 'items' => self::sort_items( $items, $this->latitude, $this->longitude, $this->radius, $this->limit ) );
+		return array( 'items' => self::sort_items( $items, $this->latitude, $this->longitude, $this->radius, $this->limit, $this->sorts_by_distance() ) );
+	}
+
+	/**
+	 * Whether nearby() sorts the provider's venues nearest first, instead of keeping the provider's order.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool False to keep the provider's order, its own ranking. True for a service that returns places in no
+	 *              useful order.
+	 */
+	protected function sorts_by_distance() {
+		return false;
 	}
 
 	/**
 	 * Sorts venues by distance from a location, leaving out those beyond the radius.
 	 *
 	 * @since 6.1.0
+	 * @since 6.4.0 Can keep the venues' order.
 	 *
 	 * @param array $items     Venues as h-cards.
 	 * @param float $latitude  Latitude.
 	 * @param float $longitude Longitude.
 	 * @param int   $radius    Radius in meters, or 0 for any distance.
 	 * @param int   $limit     Most venues, or 0 for all.
-	 * @return array Venues, nearest first, each with 'distance' in meters if it has coordinates.
+	 * @param bool  $sort      Optional. Sort nearest first, with venues without coordinates last. False keeps the
+	 *                         venues' order. Default true.
+	 * @return array Venues, each with 'distance' in meters if it has coordinates.
 	 */
-	public static function sort_items( $items, $latitude, $longitude, $radius = 0, $limit = 0 ) {
+	public static function sort_items( $items, $latitude, $longitude, $radius = 0, $limit = 0, $sort = true ) {
 		$near = array();
 		$rest = array();
 		foreach ( (array) $items as $item ) {
@@ -436,7 +454,11 @@ abstract class Venue_Provider extends Sloc_Provider {
 				continue;
 			}
 			if ( ! is_numeric( $item['latitude'] ?? null ) || ! is_numeric( $item['longitude'] ?? null ) || ! is_numeric( $latitude ) || ! is_numeric( $longitude ) ) {
-				$rest[] = $item;
+				if ( $sort ) {
+					$rest[] = $item;
+				} else {
+					$near[] = $item;
+				}
 				continue;
 			}
 			$item['distance'] = (int) round( geo_distance( $latitude, $longitude, $item['latitude'], $item['longitude'] ) );
@@ -445,7 +467,9 @@ abstract class Venue_Provider extends Sloc_Provider {
 			}
 			$near[] = $item;
 		}
-		usort( $near, fn( $a, $b ) => $a['distance'] <=> $b['distance'] );
+		if ( $sort ) {
+			usort( $near, fn( $a, $b ) => $a['distance'] <=> $b['distance'] );
+		}
 		$items = array_merge( $near, $rest );
 		return $limit > 0 ? array_slice( $items, 0, $limit ) : $items;
 	}
