@@ -705,4 +705,72 @@ class PlacesTest extends WP_UnitTestCase {
 			$this->assertSame( array( 'One' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 1, 'offset' => $offset ) ) ) );
 		}
 	}
+
+	/**
+	 * Creates a post at a venue.
+	 *
+	 * @param int    $venue_id   Venue ID.
+	 * @param string $date       Date, in UTC.
+	 * @param array  $post       Other post fields.
+	 * @param string $visibility Location visibility, or empty for the site default.
+	 * @return int Post ID.
+	 */
+	protected function visit( $venue_id, $date, $post = array(), $visibility = '' ) {
+		$post_id = self::factory()->post->create(
+			array_merge(
+				array(
+					'post_date_gmt' => $date,
+					'post_date'     => $date,
+				),
+				$post
+			)
+		);
+		update_post_meta( $post_id, 'venue_id', $venue_id );
+		if ( $visibility ) {
+			set_post_geodata( $post_id, 'visibility', $visibility );
+		}
+		return $post_id;
+	}
+
+	/**
+	 * The site's venues report the visits the current user may see, and the latest; providers' places don't.
+	 */
+	public function test_visits() {
+		$author = self::factory()->user->create( array( 'role' => 'author' ) );
+		$cafe   = $this->venue( 'Cafe' );
+		$bar    = $this->venue( 'Bar' );
+		$this->venue( 'Never' );
+		$this->visit( $cafe, '2026-01-01 10:00:00' );
+		$this->visit( $cafe, '2026-03-01 12:30:00', array(), 'protected' );
+		$this->visit( $cafe, '2026-04-01 09:00:00', array(), 'private' );
+		$this->visit( $cafe, '2026-05-01 09:00:00', array( 'post_status' => 'draft' ) );
+		$this->visit( $cafe, '2026-06-01 09:00:00', array( 'post_password' => 'secret' ) );
+		$this->visit( $bar, '2026-02-01 20:00:00', array( 'post_status' => 'private', 'post_author' => $author ) );
+
+		$places = array_column( Post_Venue::places( self::LAT, self::LNG ), 'properties' );
+		$this->assertSame( array( 2 ), $places[0]['visits'], 'Public and protected posts, for anyone.' );
+		$this->assertSame( array( '2026-03-01T12:30:00Z' ), $places[0]['last-visit'] );
+		$this->assertArrayNotHasKey( 'visits', $places[1], 'A private post, for its author only.' );
+		$this->assertArrayNotHasKey( 'visits', $places[2], 'A venue without visits.' );
+		$this->assertArrayNotHasKey( 'last-visit', $places[2] );
+		$this->assertArrayNotHasKey( 'visits', $places[3], 'A provider\'s place.' );
+
+		wp_set_current_user( $author );
+		$places = array_column( Post_Venue::places( self::LAT, self::LNG ), 'properties' );
+		$this->assertSame( array( 2 ), $places[0]['visits'], 'Others\' private and protected-by-password posts don\'t count.' );
+		$this->assertSame( array( 1 ), $places[1]['visits'] );
+		$this->assertSame( array( '2026-02-01T20:00:00Z' ), $places[1]['last-visit'] );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$visits = Post_Venue::venue_visits( array( $cafe, $bar, $cafe, 0, 'x' ) );
+		$this->assertSame( 4, $visits[ $cafe ]['visits'], 'An editor sees published and private posts, not drafts.' );
+		$this->assertSame( '2026-06-01T09:00:00Z', $visits[ $cafe ]['last-visit'] );
+		$this->assertSame( 1, $visits[ $bar ]['visits'] );
+		$this->assertSame( array(), Post_Venue::venue_visits( array() ) );
+		wp_set_current_user( 0 );
+
+		// With private as the site default, a post without a visibility of its own doesn't count for anyone.
+		update_option( 'geo_public', 0 );
+		$this->assertSame( 1, Post_Venue::venue_visits( array( $cafe ) )[ $cafe ]['visits'] );
+	}
 }
