@@ -619,18 +619,22 @@ class Post_Venue {
 	/**
 	 * Returns the places near a location: the site's venues, then the venue providers', as mf2 h-cards.
 	 *
-	 * The site's venues within the sloc_venue_radius setting come first, nearest first, each with its page on the
-	 * site as 'url' and 'uid'. The venue providers' follow, without those the site already has, found by their
-	 * identifier or one of their links. Each place names where it came from as 'provider': 'local' for the site's,
+	 * The site's venues within the radius come first, nearest first, each with its page on the
+	 * site as 'url' and 'uid', and, where the current user may see any, 'visits' and 'last-visit'; see
+	 * venue_visits(). The venue providers' follow, without those the site already has, found by their identifier or
+	 * one of their links. Each place names where it came from as 'provider': 'local' for the site's,
 	 * or the provider's slug.
 	 *
 	 * A private, draft or password-protected venue, or one whose location is private, is left out unless the
 	 * current user can edit it. A venue whose location is protected shows without its coordinates, address or
 	 * distance. A venue excluded from venue lists is left out; see is_excluded().
 	 *
-	 * The providers aren't asked when the site's venues already fill the limit.
+	 * The providers aren't asked when the site's venues already fill the limit after the offset. Otherwise they are
+	 * asked for the offset plus the limit, at most Venue_Provider::MAX_LIMIT, so an offset past that many places
+	 * returns only the site's venues, or none.
 	 *
 	 * @since 6.3.0
+	 * @since 6.4.0 Takes an offset and a search radius.
 	 *
 	 * @param float $lat  Latitude.
 	 * @param float $lng  Longitude.
@@ -638,6 +642,9 @@ class Post_Venue {
 	 *     Optional. Arguments.
 	 *
 	 *     @type int    $limit    Most places. Default the sloc_venue_limit setting, at most Venue_Provider::MAX_LIMIT.
+	 *     @type int    $offset   How many places at the start of the list to skip. Default 0.
+	 *     @type int    $radius   Search radius in meters, for the site's venues and the providers that take one,
+	 *                            from Venue_Provider::MIN_RADIUS to MAX_RADIUS. Default the sloc_venue_radius setting.
 	 *     @type bool   $local    Only the site's venues. Default false.
 	 *     @type string $provider Slug of the only venue provider to ask, instead of the venue chain. Default empty.
 	 * }
@@ -649,20 +656,24 @@ class Post_Venue {
 		if ( false === $lat || false === $lng ) {
 			return array();
 		}
-		$args  = wp_parse_args(
+		$args   = wp_parse_args(
 			$args,
 			array(
 				'limit'    => get_option( 'sloc_venue_limit', Venue_Provider::DEFAULT_LIMIT ),
+				'offset'   => 0,
+				'radius'   => get_option( 'sloc_venue_radius', Venue_Provider::DEFAULT_RADIUS ),
 				'local'    => false,
 				'provider' => '',
 			)
 		);
-		$limit = Venue_Provider::sanitize_limit( $args['limit'] );
+		$limit  = Venue_Provider::sanitize_limit( $args['limit'] );
+		$offset = is_numeric( $args['offset'] ) ? max( 0, (int) $args['offset'] ) : 0;
+		$radius = Venue_Provider::sanitize_radius( $args['radius'] );
 
-		$local = self::local_places( $lat, $lng );
+		$local = self::local_places( $lat, $lng, $radius );
 		$items = array();
-		if ( ! $args['local'] && count( $local ) < $limit ) {
-			$found = self::provider_places( $lat, $lng, $limit, $args['provider'] );
+		if ( ! $args['local'] && count( $local ) < $offset + $limit ) {
+			$found = self::provider_places( $lat, $lng, Venue_Provider::sanitize_limit( $offset + $limit ), $args['provider'], $radius );
 			$items = ( is_array( $found ) && is_array( $found['items'] ?? null ) ) ? array_filter( $found['items'], 'is_array' ) : array();
 		}
 
@@ -696,18 +707,23 @@ class Post_Venue {
 
 		// Nearest first, the oldest first at the same distance; a venue without coordinates last.
 		usort( $local, fn( $a, $b ) => array( $a['distance'] ?? PHP_INT_MAX, $a['venue']->ID ) <=> array( $b['distance'] ?? PHP_INT_MAX, $b['venue']->ID ) );
-		$cards = array_map( fn( $place ) => self::local_card( $place['venue'], $place['access'], $place['distance'] ), $local );
-		$cards = array_slice( array_merge( $cards, array_values( $items ) ), 0, $limit );
+		// The page of the list: the site's venues within it, then the providers' places to fill it.
+		$page   = array_slice( $local, $offset, $limit );
+		$items  = array_slice( array_values( $items ), max( 0, $offset - count( $local ) ), $limit - count( $page ) );
+		$visits = self::venue_visits( wp_list_pluck( wp_list_pluck( $page, 'venue' ), 'ID' ) );
+		$cards  = array_map( fn( $place ) => self::local_card( $place['venue'], $place['access'], $place['distance'], $visits[ $place['venue']->ID ] ?? array() ), $page );
+		$cards  = array_merge( $cards, $items );
 
 		/**
 		 * Filters the places near a location.
 		 *
 		 * @since 6.3.0
+		 * @since 6.4.0 The arguments include 'offset' and 'radius'.
 		 *
 		 * @param array[] $places Places as mf2 h-cards, the site's venues first.
 		 * @param float   $lat    Latitude.
 		 * @param float   $lng    Longitude.
-		 * @param array   $args   Arguments: 'limit', 'local' and 'provider'.
+		 * @param array   $args   Arguments: 'limit', 'offset', 'radius', 'local' and 'provider'.
 		 */
 		return apply_filters( 'sloc_places', array_map( array( __CLASS__, 'jf2_to_mf2' ), $cards ), $lat, $lng, $args );
 	}
@@ -716,14 +732,16 @@ class Post_Venue {
 	 * Returns the venues a venue provider, or the venue chain, finds near a location.
 	 *
 	 * @since 6.3.0
+	 * @since 6.4.0 Takes the search radius.
 	 *
-	 * @param float  $lat   Latitude.
-	 * @param float  $lng   Longitude.
-	 * @param int    $limit Most venues.
-	 * @param string $slug  Provider slug, or empty for the venue chain.
+	 * @param float  $lat    Latitude.
+	 * @param float  $lng    Longitude.
+	 * @param int    $limit  Most venues.
+	 * @param string $slug   Provider slug, or empty for the venue chain.
+	 * @param int    $radius Optional. Search radius in meters. Default 0, the sloc_venue_radius setting.
 	 * @return array|WP_Error Venues under 'items', or an error. Empty without a provider.
 	 */
-	protected static function provider_places( $lat, $lng, $limit, $slug ) {
+	protected static function provider_places( $lat, $lng, $limit, $slug, $radius = 0 ) {
 		if ( is_string( $slug ) && '' !== $slug ) {
 			$provider = Loc_Config::venue_provider( $slug );
 			if ( ! $provider instanceof Venue_Provider ) {
@@ -733,9 +751,12 @@ class Post_Venue {
 			$provider = clone $provider;
 			$provider->set( $lat, $lng );
 			$provider->set_limit( $limit );
+			if ( $radius > 0 ) {
+				$provider->set_radius( $radius );
+			}
 			return $provider->nearby();
 		}
-		return Loc_Config::venue_provider() ? Sloc_Provider_Chain::venues( $lat, $lng, $limit ) : array();
+		return Loc_Config::venue_provider() ? Sloc_Provider_Chain::venues( $lat, $lng, $limit, $radius ) : array();
 	}
 
 	/**
@@ -744,13 +765,15 @@ class Post_Venue {
 	 * At most PLACES_SCAN venues in the box around the radius are read.
 	 *
 	 * @since 6.3.0
+	 * @since 6.4.0 Takes the search radius.
 	 *
-	 * @param float $lat Latitude.
-	 * @param float $lng Longitude.
+	 * @param float    $lat    Latitude.
+	 * @param float    $lng    Longitude.
+	 * @param int|null $radius Optional. Search radius in meters. Default null, the sloc_venue_radius setting.
 	 * @return array[] Each with 'venue', the post; 'access', as place_access() returns; and 'distance' in meters.
 	 */
-	protected static function local_places( $lat, $lng ) {
-		$radius = Venue_Provider::sanitize_radius( get_option( 'sloc_venue_radius', Venue_Provider::DEFAULT_RADIUS ) );
+	protected static function local_places( $lat, $lng, $radius = null ) {
+		$radius = Venue_Provider::sanitize_radius( $radius ?? get_option( 'sloc_venue_radius', Venue_Provider::DEFAULT_RADIUS ) );
 		$box    = geo_radius_box( $lat, $lng, $radius );
 		$venues = get_posts(
 			array(
@@ -848,6 +871,191 @@ class Post_Venue {
 	}
 
 	/**
+	 * Returns a site venue as an mf2 h-card with its details, as far as the current user may see them.
+	 *
+	 * The card has what q=places gives, with 'visits' and 'last-visit'; 'parent', the page of the venue it is inside;
+	 * 'photo', its featured image and the latest images of the posts at it that anyone could see; and the venues inside
+	 * it as h-cards under 'children'. A venue whose location is protected has no location or photos. A parent or child
+	 * venue the user may not see, or one excluded from venue lists, is left out.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param int|WP_Post $venue Venue.
+	 * @return array|null mf2 h-card, or null for a venue the user may not see, or a post that isn't a venue.
+	 */
+	public static function venue_card( $venue ) {
+		$venue = get_post( $venue );
+		if ( ! $venue instanceof WP_Post || 'venue' !== $venue->post_type ) {
+			return null;
+		}
+		$access = self::place_access( $venue );
+		if ( ! $access ) {
+			return null;
+		}
+		$visits = self::venue_visits( array( $venue->ID ) );
+		$card   = self::local_card( $venue, $access, null, $visits[ $venue->ID ] ?? array() );
+
+		$parent = get_post( (int) $venue->post_parent );
+		if ( $parent instanceof WP_Post && 'venue' === $parent->post_type && ! self::is_excluded( $parent ) && self::place_access( $parent ) ) {
+			$card['parent'] = get_permalink( $parent );
+		}
+		if ( 'full' === $access ) {
+			$card['photo'] = self::venue_photos( $venue );
+		}
+		$mf2 = self::jf2_to_mf2( $card );
+
+		$children = array();
+		foreach ( (array) self::get_venue_children( $venue ) as $child_id ) {
+			$child = get_post( $child_id );
+			if ( $child instanceof WP_Post && ! self::is_excluded( $child ) && self::place_access( $child ) ) {
+				$children[] = self::jf2_to_mf2(
+					array(
+						'type' => 'card',
+						'name' => $child->post_title,
+						'url'  => get_permalink( $child ),
+						'uid'  => get_permalink( $child ),
+					)
+				);
+			}
+		}
+		if ( $children ) {
+			$mf2['children'] = $children;
+		}
+		return $mf2;
+	}
+
+	/**
+	 * Returns the photos of a venue: its featured image, then the latest images of the posts at it that anyone could see.
+	 *
+	 * A post counts when it is published without a password and its location isn't private, as for venue_visits().
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param WP_Post $venue Venue.
+	 * @param int     $limit Optional. Most photos. Default 10.
+	 * @return string[] Image URLs.
+	 */
+	public static function venue_photos( $venue, $limit = 10 ) {
+		$ids = array();
+		if ( has_post_thumbnail( $venue ) ) {
+			$ids[] = (int) get_post_thumbnail_id( $venue );
+		}
+		$location = array(
+			'relation' => 'OR',
+			array(
+				'key'     => 'geo_public',
+				'value'   => array( '1', '2' ),
+				'compare' => 'IN',
+			),
+		);
+		if ( 'private' !== Geo_Data::get_default_visibility() ) {
+			// A post without a visibility of its own has the site default.
+			$location[] = array(
+				'key'     => 'geo_public',
+				'compare' => 'NOT EXISTS',
+			);
+		}
+		$posts = get_posts(
+			array(
+				'post_type'        => 'post',
+				'post_status'      => 'publish',
+				'has_password'     => false,
+				'fields'           => 'ids',
+				'numberposts'      => 50,
+				'suppress_filters' => false,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Posts at a venue are found by their venue ID.
+				'meta_query'       => array(
+					array(
+						'key'   => 'venue_id',
+						'value' => $venue->ID,
+					),
+					$location,
+				),
+			)
+		);
+		if ( $posts ) {
+			$ids = array_merge(
+				$ids,
+				get_posts(
+					array(
+						'post_type'       => 'attachment',
+						'post_status'     => 'inherit',
+						'post_mime_type'  => 'image',
+						'post_parent__in' => $posts,
+						'fields'          => 'ids',
+						'numberposts'     => $limit,
+					)
+				)
+			);
+		}
+		$urls = array_map( 'wp_get_attachment_url', array_slice( array_unique( array_filter( $ids ) ), 0, $limit ) );
+		return array_values( array_filter( $urls, 'is_string' ) );
+	}
+
+	/**
+	 * Returns how many times the current user may see that each venue was visited, and when last.
+	 *
+	 * A visit is a post at the venue. It counts when it is published without a password and its location isn't
+	 * private, so anyone could see it; when the current user wrote it, including a private post; or, for a user who
+	 * can edit others' posts, when it is published or private. The venues are counted in one query.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param int[] $venue_ids Venue IDs.
+	 * @return array[] By venue ID, for venues with a visit: 'visits', the number of posts, and 'last-visit', the date
+	 *                 of the latest, in ISO 8601 in UTC.
+	 */
+	public static function venue_visits( $venue_ids ) {
+		global $wpdb;
+		$venue_ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $venue_ids ) ) ) );
+		if ( empty( $venue_ids ) ) {
+			return array();
+		}
+
+		$user_id = get_current_user_id();
+		if ( current_user_can( 'edit_others_posts' ) ) {
+			$mine = "p.post_status IN ( 'publish', 'private' )";
+		} elseif ( $user_id ) {
+			$mine = $wpdb->prepare( "( p.post_status IN ( 'publish', 'private' ) AND p.post_author = %d )", $user_id );
+		} else {
+			$mine = '0 = 1';
+		}
+		// A post without a visibility of its own has the site default.
+		$default_shown = 'private' === Geo_Data::get_default_visibility() ? 0 : 1;
+
+		$placeholders = implode( ', ', array_fill( 0, count( $venue_ids ), '%s' ) );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a list of %s, and $mine is prepared above.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT m.meta_value AS venue, COUNT( DISTINCT p.ID ) AS visits, MAX( p.post_date_gmt ) AS last_visit
+				FROM {$wpdb->postmeta} m
+				INNER JOIN {$wpdb->posts} p ON p.ID = m.post_id
+				LEFT JOIN {$wpdb->postmeta} g ON g.post_id = p.ID AND g.meta_key = 'geo_public'
+				WHERE m.meta_key = 'venue_id' AND m.meta_value IN ( $placeholders ) AND p.post_type = 'post'
+				AND (
+					( p.post_status = 'publish' AND p.post_password = ''
+						AND ( g.meta_value IN ( '1', '2' ) OR ( ( g.meta_value IS NULL OR g.meta_value NOT IN ( '0', '1', '2' ) ) AND 1 = %d ) ) )
+					OR $mine
+				)
+				GROUP BY m.meta_value",
+				array_merge( array_map( 'strval', $venue_ids ), array( $default_shown ) )
+			),
+			ARRAY_A
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- One aggregate for a list of venues; posts at a venue change too often to cache.
+		// phpcs:enable
+
+		$visits = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$gmt                           = (string) ( $row['last_visit'] ?? '' );
+			$visits[ (int) $row['venue'] ] = array(
+				'visits'     => (int) $row['visits'],
+				'last-visit' => ( '' !== $gmt && '0000-00-00 00:00:00' !== $gmt ) ? mysql2date( 'Y-m-d\TH:i:s\Z', $gmt, false ) : null,
+			);
+		}
+		return $visits;
+	}
+
+	/**
 	 * Returns a venue's distance from a location.
 	 *
 	 * @since 6.3.0
@@ -891,12 +1099,15 @@ class Post_Venue {
 	 *
 	 * @since 6.3.0
 	 *
+	 * @since 6.4.0 Takes the visits to the venue.
+	 *
 	 * @param WP_Post  $venue    Venue.
 	 * @param string   $access   'full', or 'name' for the name and links only.
 	 * @param int|null $distance Distance in meters, or null.
+	 * @param array    $visits   Optional. 'visits' and 'last-visit', as venue_visits() returns. Default none.
 	 * @return array h-card.
 	 */
-	protected static function local_card( $venue, $access, $distance ) {
+	protected static function local_card( $venue, $access, $distance, $visits = array() ) {
 		$permalink = get_permalink( $venue );
 		$card      = array(
 			'type'     => 'card',
@@ -924,6 +1135,10 @@ class Post_Venue {
 					'distance'       => $distance,
 				)
 			);
+		}
+		if ( ! empty( $visits['visits'] ) ) {
+			$card['visits']     = (int) $visits['visits'];
+			$card['last-visit'] = $visits['last-visit'] ?? null;
 		}
 		return $card;
 	}
@@ -999,11 +1214,12 @@ class Post_Venue {
 	 * Core's url_to_postid() doesn't find a post of a custom post type by its plain permalink, such as ?venue=cafe.
 	 *
 	 * @since 6.3.0
+	 * @since 6.4.0 Public, for the Micropub geo query.
 	 *
 	 * @param mixed $url URL.
 	 * @return int Post ID, or 0.
 	 */
-	protected static function url_to_postid( $url ) {
+	public static function url_to_postid( $url ) {
 		if ( ! is_string( $url ) || '' === $url ) {
 			return 0;
 		}

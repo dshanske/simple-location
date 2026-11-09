@@ -153,6 +153,7 @@ class Venue_Provider_Foursquare extends Venue_Provider {
 	 * Returns the places near the location.
 	 *
 	 * @since 6.1.0
+	 * @since 6.4.0 Ranked by Foursquare's relevance instead of distance (#843).
 	 *
 	 * @return array|WP_Error h-cards under 'items', or an error.
 	 */
@@ -166,7 +167,8 @@ class Venue_Provider_Foursquare extends Venue_Provider {
 				'll'     => $this->latitude . ',' . $this->longitude,
 				'radius' => $this->radius,
 				'limit'  => $this->limit,
-				'sort'   => 'DISTANCE',
+				// Foursquare's ranking, so the places people go to come before those that are only near.
+				'sort'   => 'RELEVANCE',
 				'fields' => implode( ',', self::FIELDS ),
 			),
 			array(

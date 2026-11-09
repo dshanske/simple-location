@@ -537,6 +537,77 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A check-in or location at a venue keeps the visibility the client asked for over the venue's (#841).
+	 *
+	 * @dataProvider checkin_visibility_provider
+	 *
+	 * @param string $property    checkin or location.
+	 * @param bool   $coordinates Whether the post has coordinates.
+	 */
+	public function test_checkin_requested_visibility( $property, $coordinates ) {
+		$venue_id = self::factory()->post->create(
+			array(
+				'post_type'  => 'venue',
+				'post_title' => 'Public Cafe',
+			)
+		);
+		set_post_geodata(
+			$venue_id,
+			'',
+			array(
+				'latitude'   => self::LAT,
+				'longitude'  => self::LNG,
+				'visibility' => 'public',
+			)
+		);
+		update_post_meta( $venue_id, 'venue_post_visibility', 'public' );
+		$card = array(
+			'type'       => array( 'h-card' ),
+			'properties' => array(
+				'name' => array( 'Public Cafe' ),
+				'url'  => array( get_permalink( $venue_id ) ),
+			),
+		);
+		$meta = $coordinates ? array(
+			'geo_latitude'  => self::LAT,
+			'geo_longitude' => self::LNG,
+		) : array();
+		foreach ( array( 'private', 'protected' ) as $visibility ) {
+			$args = $this->micropub_post( $meta );
+			Location_Plugins::micropub_set_location(
+				array(
+					'properties' => array(
+						$property             => $card,
+						'location-visibility' => array( $visibility ),
+					),
+				),
+				$args
+			);
+			$this->assertSame( $venue_id, (int) get_post_meta( $args['ID'], 'venue_id', true ), 'Linked to the venue.' );
+			$this->assertSame( $visibility, get_post_geodata( $args['ID'], 'visibility' ) );
+		}
+
+		// Without a request, the venue's visibility for posts.
+		$args = $this->micropub_post( $meta );
+		Location_Plugins::micropub_set_location( array( 'properties' => array( $property => $card ) ), $args );
+		$this->assertSame( 'public', get_post_geodata( $args['ID'], 'visibility' ) );
+	}
+
+	/**
+	 * Check-ins and locations, with and without coordinates.
+	 *
+	 * @return array[]
+	 */
+	public function checkin_visibility_provider() {
+		return array(
+			'check-in with coordinates'    => array( 'checkin', true ),
+			'check-in without coordinates' => array( 'checkin', false ),
+			'location with coordinates'    => array( 'location', true ),
+			'location without coordinates' => array( 'location', false ),
+		);
+	}
+
+	/**
 	 * A check-in keeps the venue's identifier and provider, and a second check-in there finds the venue (#729).
 	 */
 	public function test_set_location_checkin_uid() {
@@ -942,7 +1013,7 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A places query passes on the limit and whether to list only the site's venues.
+	 * A places query passes on the limit, the offset, the radius and whether to list only the site's venues.
 	 */
 	public function test_query_places_arguments() {
 		update_option( 'sloc_venue_provider', 'sloc_test' );
@@ -975,6 +1046,19 @@ class MicropubTest extends WP_UnitTestCase {
 		$result = Location_Plugins::micropub_query_places( array(), $input + array( 'limit' => '1' ) );
 		$this->assertCount( 1, $result['places'] );
 
+		Location_Plugins::micropub_query_places( array(), $input + array( 'radius' => '600' ) );
+		$this->assertSame( 600, Venue_Provider_Sloc_Test::$last_radius );
+
+		$result = Location_Plugins::micropub_query_places(
+			array(),
+			$input + array(
+				'limit'  => '1',
+				'offset' => '1',
+			)
+		);
+		$this->assertSame( array( 'Test Cafe' ), $result['places'][0]['properties']['name'] );
+		$this->assertCount( 1, $result['places'] );
+
 		Venue_Provider_Sloc_Test::reset();
 		foreach ( array( '1', 'true', true ) as $local ) {
 			$result = Location_Plugins::micropub_query_places( array(), $input + array( 'local' => $local ) );
@@ -987,15 +1071,16 @@ class MicropubTest extends WP_UnitTestCase {
 		$result = Location_Plugins::micropub_query_places(
 			array(),
 			$input + array(
-				'limit' => 'many',
-				'local' => array( '1' ),
+				'limit'  => 'many',
+				'offset' => array( '1' ),
+				'local'  => array( '1' ),
 			)
 		);
 		$this->assertCount( 2, $result['places'] );
 	}
 
 	/**
-	 * The configuration query lists the places query once, and geo queries are no longer answered.
+	 * The configuration query lists the places query once, and geo queries are left to micropub_query_geo().
 	 */
 	public function test_query_config_and_others() {
 		$config = array( 'q' => array( 'config', 'source' ) );
@@ -1018,7 +1103,7 @@ class MicropubTest extends WP_UnitTestCase {
 					'lon' => self::LNG,
 				)
 			),
-			'q=geo was removed.'
+			'q=geo is answered by micropub_query_geo().'
 		);
 	}
 

@@ -331,6 +331,9 @@ class REST_Geo {
 						'limit'     => array(
 							'type' => 'integer',
 						),
+						'radius'    => array(
+							'type' => 'integer',
+						),
 						'local'     => array(
 							'type'    => 'boolean',
 							'default' => false,
@@ -450,11 +453,12 @@ class REST_Geo {
 	 * editor; someone who can only read it gets a public location only.
 	 *
 	 * @since 6.2.0
+	 * @since 6.4.0 Public, for the Micropub geo query.
 	 *
 	 * @param array $params Request parameters, with 'post_id' or 'comment_id'.
 	 * @return array|WP_Error Geo data, with the saved zoom as 'map_zoom', or an error.
 	 */
-	protected static function object_location( $params ) {
+	public static function object_location( $params ) {
 		if ( ! empty( $params['comment_id'] ) ) {
 			$type    = 'comment';
 			$id      = (int) $params['comment_id'];
@@ -684,6 +688,7 @@ class REST_Geo {
 	 * Post_Venue::places() returns them, under 'places', and the venue providers' names by slug under 'providers'.
 	 *
 	 * @since 6.3.0 Returns places, the site's venues and the providers', with 'limit' and 'local'.
+	 * @since 6.4.0 Takes 'radius'.
 	 *
 	 * @param WP_REST_Request $request REST Request.
 	 * @return array|WP_Error Response.
@@ -732,8 +737,10 @@ class REST_Geo {
 				'local'    => (bool) ( $params['local'] ?? false ),
 				'provider' => (string) $provider,
 			);
-			if ( isset( $params['limit'] ) ) {
-				$args['limit'] = $params['limit'];
+			foreach ( array( 'limit', 'radius' ) as $key ) {
+				if ( isset( $params[ $key ] ) ) {
+					$args[ $key ] = $params[ $key ];
+				}
 			}
 			return array(
 				'places'    => Post_Venue::places( $params['latitude'], $params['longitude'], $args ),
