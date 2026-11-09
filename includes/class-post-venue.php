@@ -628,9 +628,12 @@ class Post_Venue {
 	 * current user can edit it. A venue whose location is protected shows without its coordinates, address or
 	 * distance. A venue excluded from venue lists is left out; see is_excluded().
 	 *
-	 * The providers aren't asked when the site's venues already fill the limit.
+	 * The providers aren't asked when the site's venues already fill the limit after the offset. Otherwise they are
+	 * asked for the offset plus the limit, at most Venue_Provider::MAX_LIMIT, so an offset past that many places
+	 * returns only the site's venues, or none.
 	 *
 	 * @since 6.3.0
+	 * @since 6.4.0 Takes an offset.
 	 *
 	 * @param float $lat  Latitude.
 	 * @param float $lng  Longitude.
@@ -638,6 +641,7 @@ class Post_Venue {
 	 *     Optional. Arguments.
 	 *
 	 *     @type int    $limit    Most places. Default the sloc_venue_limit setting, at most Venue_Provider::MAX_LIMIT.
+	 *     @type int    $offset   How many places at the start of the list to skip. Default 0.
 	 *     @type bool   $local    Only the site's venues. Default false.
 	 *     @type string $provider Slug of the only venue provider to ask, instead of the venue chain. Default empty.
 	 * }
@@ -653,16 +657,18 @@ class Post_Venue {
 			$args,
 			array(
 				'limit'    => get_option( 'sloc_venue_limit', Venue_Provider::DEFAULT_LIMIT ),
+				'offset'   => 0,
 				'local'    => false,
 				'provider' => '',
 			)
 		);
-		$limit = Venue_Provider::sanitize_limit( $args['limit'] );
+		$limit  = Venue_Provider::sanitize_limit( $args['limit'] );
+		$offset = is_numeric( $args['offset'] ) ? max( 0, (int) $args['offset'] ) : 0;
 
 		$local = self::local_places( $lat, $lng );
 		$items = array();
-		if ( ! $args['local'] && count( $local ) < $limit ) {
-			$found = self::provider_places( $lat, $lng, $limit, $args['provider'] );
+		if ( ! $args['local'] && count( $local ) < $offset + $limit ) {
+			$found = self::provider_places( $lat, $lng, Venue_Provider::sanitize_limit( $offset + $limit ), $args['provider'] );
 			$items = ( is_array( $found ) && is_array( $found['items'] ?? null ) ) ? array_filter( $found['items'], 'is_array' ) : array();
 		}
 
@@ -697,17 +703,18 @@ class Post_Venue {
 		// Nearest first, the oldest first at the same distance; a venue without coordinates last.
 		usort( $local, fn( $a, $b ) => array( $a['distance'] ?? PHP_INT_MAX, $a['venue']->ID ) <=> array( $b['distance'] ?? PHP_INT_MAX, $b['venue']->ID ) );
 		$cards = array_map( fn( $place ) => self::local_card( $place['venue'], $place['access'], $place['distance'] ), $local );
-		$cards = array_slice( array_merge( $cards, array_values( $items ) ), 0, $limit );
+		$cards = array_slice( array_merge( $cards, array_values( $items ) ), $offset, $limit );
 
 		/**
 		 * Filters the places near a location.
 		 *
 		 * @since 6.3.0
+		 * @since 6.4.0 The arguments include 'offset'.
 		 *
 		 * @param array[] $places Places as mf2 h-cards, the site's venues first.
 		 * @param float   $lat    Latitude.
 		 * @param float   $lng    Longitude.
-		 * @param array   $args   Arguments: 'limit', 'local' and 'provider'.
+		 * @param array   $args   Arguments: 'limit', 'offset', 'local' and 'provider'.
 		 */
 		return apply_filters( 'sloc_places', array_map( array( __CLASS__, 'jf2_to_mf2' ), $cards ), $lat, $lng, $args );
 	}

@@ -25,6 +25,13 @@ class Venue_Provider_Sloc_Test extends Venue_Provider {
 	public static $calls = 0;
 
 	/**
+	 * Limit of the last lookup.
+	 *
+	 * @var int|null
+	 */
+	public static $last_limit = null;
+
+	/**
 	 * Storage level returned by storage().
 	 *
 	 * @var string
@@ -44,6 +51,7 @@ class Venue_Provider_Sloc_Test extends Venue_Provider {
 	public static function reset() {
 		static::$result     = null;
 		static::$calls      = 0;
+		static::$last_limit = null;
 		static::$storage    = Venue_Provider::STORAGE_FULL;
 		static::$cache_time = 0;
 	}
@@ -84,6 +92,7 @@ class Venue_Provider_Sloc_Test extends Venue_Provider {
 	 */
 	public function reverse_lookup() {
 		++static::$calls;
+		static::$last_limit = $this->limit;
 		if ( null !== static::$result ) {
 			return static::$result;
 		}

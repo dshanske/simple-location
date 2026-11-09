@@ -666,4 +666,43 @@ class PlacesTest extends WP_UnitTestCase {
 		$this->assertCount( 4, Sloc_Provider_Chain::venues( self::LAT, self::LNG, 4 )['items'] );
 		$this->assertCount( 5, Sloc_Provider_Chain::venues( self::LAT, self::LNG )['items'], 'The shared provider keeps its limit.' );
 	}
+
+	/**
+	 * An offset skips places at the start of the list, the site's venues and then the provider's.
+	 */
+	public function test_offset() {
+		$this->venue( 'One' );
+		$this->venue( 'Two' );
+		$items = array();
+		for ( $i = 0; $i < 5; $i++ ) {
+			$items[] = array(
+				'name'      => 'Shop ' . $i,
+				'latitude'  => self::LAT + 0.0001 * ( $i + 1 ),
+				'longitude' => self::LNG,
+			);
+		}
+		Venue_Provider_Sloc_Test::$result = array( 'items' => $items );
+
+		$this->assertSame( array( 'One', 'Two', 'Shop 0' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 3 ) ) ) );
+		$this->assertSame( array( 'Shop 1', 'Shop 2', 'Shop 3' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 3, 'offset' => 3 ) ) ) );
+		$this->assertSame( 6, Venue_Provider_Sloc_Test::$last_limit, 'The provider is asked for the offset and the limit.' );
+		$this->assertSame( array( 'Two', 'Shop 0' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 2, 'offset' => 1 ) ) ) );
+		$this->assertSame( array( 'Shop 4' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 3, 'offset' => 6 ) ) ), 'The last page can be short.' );
+		$this->assertSame( array(), Post_Venue::places( self::LAT, self::LNG, array( 'offset' => 7 ) ), 'An offset past the end, none.' );
+
+		// The site's venues alone fill the list, so the provider isn't asked.
+		Venue_Provider_Sloc_Test::reset();
+		$this->assertSame( array( 'Two' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 1, 'offset' => 1 ) ) ) );
+		$this->assertSame( array( 'Two' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'local' => true, 'offset' => 1 ) ) ) );
+		$this->assertSame( 0, Venue_Provider_Sloc_Test::$calls );
+
+		// The provider is asked for no more than its most.
+		Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 10, 'offset' => 100 ) );
+		$this->assertSame( Venue_Provider::MAX_LIMIT, Venue_Provider_Sloc_Test::$last_limit );
+
+		// An offset that isn't a number, or is negative, starts at the beginning.
+		foreach ( array( 'many', -2, null ) as $offset ) {
+			$this->assertSame( array( 'One' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 1, 'offset' => $offset ) ) ) );
+		}
+	}
 }
