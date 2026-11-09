@@ -942,7 +942,7 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A places query passes on the limit, the offset and whether to list only the site's venues.
+	 * A places query passes on the limit, the offset, the radius and whether to list only the site's venues.
 	 */
 	public function test_query_places_arguments() {
 		update_option( 'sloc_venue_provider', 'sloc_test' );
@@ -974,6 +974,9 @@ class MicropubTest extends WP_UnitTestCase {
 
 		$result = Location_Plugins::micropub_query_places( array(), $input + array( 'limit' => '1' ) );
 		$this->assertCount( 1, $result['places'] );
+
+		Location_Plugins::micropub_query_places( array(), $input + array( 'radius' => '600' ) );
+		$this->assertSame( 600, Venue_Provider_Sloc_Test::$last_radius );
 
 		$result = Location_Plugins::micropub_query_places(
 			array(),
