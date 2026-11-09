@@ -1156,4 +1156,114 @@ class VenueProvidersTest extends WP_UnitTestCase {
 		);
 		$this->assertSame( 'invalid_response', $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->reverse_lookup()->get_error_code() );
 	}
+
+	/**
+	 * Each provider that searches by name sends the filter in its own way (#817).
+	 */
+	public function test_filter_requests() {
+		$this->mock_http( array( '' => array( 'body' => array() ) ) );
+		$search = function ( $class, $args = array( 'api' => 'KEY' ) ) {
+			$provider = $this->provider( $class, $args );
+			$provider->set_filter( 'Café Rival' );
+			$provider->reverse_lookup();
+			return $this->last_request();
+		};
+
+		$this->assertSame( 'Café Rival', $search( 'Venue_Provider_Foursquare' )['query']['query'] );
+		$this->assertSame( 'Café Rival', $search( 'Venue_Provider_HERE' )['query']['name'] );
+		$this->assertSame( 'Café Rival', $search( 'Venue_Provider_Geoapify' )['query']['name'] );
+
+		$request = $search( 'Venue_Provider_TomTom' );
+		$this->assertSame( 'https://api.tomtom.com/search/2/poiSearch/Caf%C3%A9%20Rival.json', $request['base'] );
+		$this->assertSame( (string) Venue_Provider::DEFAULT_RADIUS, $request['query']['radius'] );
+
+		$request = $search( 'Venue_Provider_Google' );
+		$this->assertStringEndsWith( 'places:searchText', $request['url'] );
+		$body = json_decode( $request['args']['body'], true );
+		$this->assertSame( 'Café Rival', $body['textQuery'] );
+		$this->assertEquals( Venue_Provider::DEFAULT_RADIUS, $body['locationBias']['circle']['radius'] );
+		$this->assertArrayNotHasKey( 'locationRestriction', $body );
+
+		update_option( 'sloc_pelias_url', 'https://pelias.example.com/v1' );
+		$request = $search( 'Venue_Provider_Pelias', array( 'api' => '' ) );
+		$this->assertSame( 'https://pelias.example.com/v1/search', $request['base'] );
+		$this->assertSame( 'Café Rival', $request['query']['text'] );
+		$this->assertSame( 'venue', $request['query']['layers'] );
+		$this->assertSame( (string) self::LAT, $request['query']['boundary_circle_lat'] ?? $request['query']['boundary.circle.lat'] ?? null );
+		$this->assertSame( 'https://api.stadiamaps.com/geocoding/v1/search', $search( 'Venue_Provider_Stadia' )['base'] );
+		delete_option( 'sloc_pelias_url' );
+
+		$this->assertStringContainsString( '[name~"Café Rival",i]', $search( 'Venue_Provider_Overpass', array() )['query']['data'] );
+		$provider = $this->provider( 'Venue_Provider_Overpass' );
+		$provider->set_filter( 'A"]; out; (.*' );
+		$this->assertStringContainsString( '[name~"A... out. ...",i]', $provider->query(), 'Anything but letters, numbers and a few marks matches any character.' );
+
+		// Without a filter, the usual searches.
+		$provider = $this->provider( 'Venue_Provider_TomTom', array( 'api' => 'KEY' ) );
+		$provider->reverse_lookup();
+		$this->assertSame( 'https://api.tomtom.com/search/2/nearbySearch/.json', $this->last_request()['base'] );
+		$this->assertStringNotContainsString( 'name~', $this->provider( 'Venue_Provider_Overpass' )->query() );
+	}
+
+	/**
+	 * A filter is sanitized and matched against names ignoring case and accents; a provider that doesn't search by
+	 * name keeps only the places whose name matches, and each filter is cached apart (#817).
+	 */
+	public function test_filter() {
+		$this->assertSame( 'Rival Bros', Venue_Provider::sanitize_filter( '  <b>Rival</b> Bros ' ) );
+		$this->assertSame( '', Venue_Provider::sanitize_filter( array( 'x' ) ) );
+		$this->assertSame( '12', Venue_Provider::sanitize_filter( 12 ) );
+		$this->assertSame( 100, mb_strlen( Venue_Provider::sanitize_filter( str_repeat( 'é', 150 ) ) ) );
+
+		$this->assertTrue( Venue_Provider::name_matches( 'Café Lutecia', 'cafe' ) );
+		$this->assertTrue( Venue_Provider::name_matches( 'RIVAL BROS', 'rival b' ) );
+		$this->assertTrue( Venue_Provider::name_matches( 'Anything', '' ) );
+		$this->assertFalse( Venue_Provider::name_matches( 'Bakery', 'coffee' ) );
+		$this->assertFalse( Venue_Provider::name_matches( null, 'coffee' ) );
+
+		Venue_Provider_Sloc_Test::reset();
+		Venue_Provider_Sloc_Test::$cache_time = HOUR_IN_SECONDS;
+		Venue_Provider_Sloc_Test::$result     = array(
+			'items' => array(
+				array(
+					'name'      => 'Coffee House',
+					'latitude'  => self::LAT,
+					'longitude' => self::LNG,
+				),
+				array(
+					'name'      => 'Bakery',
+					'latitude'  => self::LAT,
+					'longitude' => self::LNG,
+				),
+			),
+		);
+		$provider                             = $this->provider( 'Venue_Provider_Sloc_Test' );
+		$provider->set_filter( 'coffee' );
+		$this->assertSame( 'coffee', $provider->get_filter() );
+		$this->assertSame( array( 'Coffee House' ), wp_list_pluck( $provider->nearby()['items'], 'name' ) );
+		$provider->set_filter( 'bak' );
+		$this->assertSame( array( 'Bakery' ), wp_list_pluck( $provider->nearby()['items'], 'name' ) );
+		$this->assertSame( 2, Venue_Provider_Sloc_Test::$calls, 'Each filter is cached apart.' );
+		$provider->set_filter( 'coffee' );
+		$provider->nearby();
+		$this->assertSame( 2, Venue_Provider_Sloc_Test::$calls );
+
+		// A provider that searches by name keeps what it found, which may match by more than the name.
+		$searching = new class( array(
+			'latitude'  => self::LAT,
+			'longitude' => self::LNG,
+		) ) extends Venue_Provider_Sloc_Test {
+			/**
+			 * Searches by name.
+			 *
+			 * @return bool
+			 */
+			protected function searches_by_name() {
+				return true;
+			}
+		};
+		$searching->set_filter( 'coffee' );
+		$this->assertSame( array( 'Coffee House', 'Bakery' ), wp_list_pluck( $searching->nearby()['items'], 'name' ) );
+		Venue_Provider_Sloc_Test::reset();
+	}
 }

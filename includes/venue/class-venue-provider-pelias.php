@@ -136,6 +136,20 @@ class Venue_Provider_Pelias extends Venue_Provider {
 			// Pelias measures the radius in kilometers.
 			'boundary.circle.radius' => $this->radius / 1000,
 		);
+		if ( '' !== $this->filter ) {
+			// The search endpoint, for the filter within the radius, nearest first.
+			$url   = preg_replace( '#/reverse$#', '/search', $url );
+			$query = array(
+				'text'                   => $this->filter,
+				'focus.point.lat'        => $this->latitude,
+				'focus.point.lon'        => $this->longitude,
+				'boundary.circle.lat'    => $this->latitude,
+				'boundary.circle.lon'    => $this->longitude,
+				'boundary.circle.radius' => $this->radius / 1000,
+				'layers'                 => 'venue',
+				'size'                   => $query['size'],
+			);
+		}
 		$language = strtolower( substr( (string) get_bloginfo( 'language' ), 0, 2 ) );
 		if ( '' !== $language ) {
 			$query['lang'] = $language;
@@ -262,5 +276,16 @@ class Venue_Provider_Pelias extends Venue_Provider {
 			$card = array_merge( $card, $tz );
 		}
 		return $card;
+	}
+
+	/**
+	 * Searches for the filter with the search endpoint.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool True.
+	 */
+	protected function searches_by_name() {
+		return true;
 	}
 }

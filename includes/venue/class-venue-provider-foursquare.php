@@ -153,7 +153,7 @@ class Venue_Provider_Foursquare extends Venue_Provider {
 	 * Returns the places near the location.
 	 *
 	 * @since 6.1.0
-	 * @since 6.4.0 Ranked by Foursquare's relevance instead of distance (#843).
+	 * @since 6.4.0 Ranked by Foursquare's relevance instead of distance (#843), and searches for the filter (#817).
 	 *
 	 * @return array|WP_Error h-cards under 'items', or an error.
 	 */
@@ -161,16 +161,21 @@ class Venue_Provider_Foursquare extends Venue_Provider {
 		if ( empty( $this->api ) ) {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for Foursquare', 'simple-location' ) );
 		}
+		$query = array(
+			'll'     => $this->latitude . ',' . $this->longitude,
+			'radius' => $this->radius,
+			'limit'  => $this->limit,
+			// Foursquare's ranking, so the places people go to come before those that are only near.
+			'sort'   => 'RELEVANCE',
+			'fields' => implode( ',', self::FIELDS ),
+		);
+		if ( '' !== $this->filter ) {
+			// Matches a place's name, category or chain.
+			$query['query'] = $this->filter;
+		}
 		$json = $this->fetch_json(
 			'https://places-api.foursquare.com/places/search',
-			array(
-				'll'     => $this->latitude . ',' . $this->longitude,
-				'radius' => $this->radius,
-				'limit'  => $this->limit,
-				// Foursquare's ranking, so the places people go to come before those that are only near.
-				'sort'   => 'RELEVANCE',
-				'fields' => implode( ',', self::FIELDS ),
-			),
+			$query,
 			array(
 				'Authorization'        => 'Bearer ' . $this->api,
 				'X-Places-Api-Version' => self::API_VERSION,
@@ -276,5 +281,16 @@ class Venue_Provider_Foursquare extends Venue_Provider {
 			$card = array_merge( $card, $tz );
 		}
 		return $card;
+	}
+
+	/**
+	 * Searches for the filter with the place search's query, which matches names, categories and chains.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool True.
+	 */
+	protected function searches_by_name() {
+		return true;
 	}
 }

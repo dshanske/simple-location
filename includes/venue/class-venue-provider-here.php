@@ -90,16 +90,17 @@ class Venue_Provider_HERE extends Venue_Provider {
 			return new WP_Error( 'missing_api_key', __( 'You have not set an API key for HERE', 'simple-location' ) );
 		}
 		$point = $this->latitude . ',' . $this->longitude;
-		$json  = $this->fetch_json(
-			'https://browse.search.hereapi.com/v1/browse',
-			array(
-				'at'     => $point,
-				'in'     => 'circle:' . $point . ';r=' . $this->radius,
-				'limit'  => min( 100, $this->limit ),
-				'lang'   => get_bloginfo( 'language' ),
-				'apiKey' => $this->api,
-			)
+		$query = array(
+			'at'     => $point,
+			'in'     => 'circle:' . $point . ';r=' . $this->radius,
+			'limit'  => min( 100, $this->limit ),
+			'lang'   => get_bloginfo( 'language' ),
+			'apiKey' => $this->api,
 		);
+		if ( '' !== $this->filter ) {
+			$query['name'] = $this->filter;
+		}
+		$json = $this->fetch_json( 'https://browse.search.hereapi.com/v1/browse', $query );
 		if ( is_wp_error( $json ) ) {
 			return $json;
 		}
@@ -217,5 +218,16 @@ class Venue_Provider_HERE extends Venue_Provider {
 			$card = array_merge( $card, $tz );
 		}
 		return $card;
+	}
+
+	/**
+	 * Searches for the filter with browse's name parameter.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool True.
+	 */
+	protected function searches_by_name() {
+		return true;
 	}
 }

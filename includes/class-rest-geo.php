@@ -334,6 +334,10 @@ class REST_Geo {
 						'radius'    => array(
 							'type' => 'integer',
 						),
+						'filter'    => array(
+							'type'              => 'string',
+							'sanitize_callback' => array( 'Venue_Provider', 'sanitize_filter' ),
+						),
 						'local'     => array(
 							'type'    => 'boolean',
 							'default' => false,
@@ -688,7 +692,7 @@ class REST_Geo {
 	 * Post_Venue::places() returns them, under 'places', and the venue providers' names by slug under 'providers'.
 	 *
 	 * @since 6.3.0 Returns places, the site's venues and the providers', with 'limit' and 'local'.
-	 * @since 6.4.0 Takes 'radius'.
+	 * @since 6.4.0 Takes 'radius' and 'filter'.
 	 *
 	 * @param WP_REST_Request $request REST Request.
 	 * @return array|WP_Error Response.
@@ -737,7 +741,7 @@ class REST_Geo {
 				'local'    => (bool) ( $params['local'] ?? false ),
 				'provider' => (string) $provider,
 			);
-			foreach ( array( 'limit', 'radius' ) as $key ) {
+			foreach ( array( 'limit', 'radius', 'filter' ) as $key ) {
 				if ( isset( $params[ $key ] ) ) {
 					$args[ $key ] = $params[ $key ];
 				}

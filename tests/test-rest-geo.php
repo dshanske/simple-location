@@ -364,7 +364,15 @@ class RestGeoTest extends WP_UnitTestCase {
 				'post_author' => self::factory()->user->create( array( 'role' => 'editor' ) ),
 			)
 		);
-		set_post_geodata( $draft, '', array( 'latitude' => 1, 'longitude' => 2, 'visibility' => 'public' ) );
+		set_post_geodata(
+			$draft,
+			'',
+			array(
+				'latitude'   => 1,
+				'longitude'  => 2,
+				'visibility' => 'public',
+			)
+		);
 		$this->assertSame( 'rest_forbidden', $this->request( '/map', array( 'post_id' => $draft ) )->as_error()->get_error_code(), 'Someone else\'s draft.' );
 
 		$this->assertErrorResponse( 'no_location', $this->request( '/map', array( 'post_id' => self::factory()->post->create() ) ), 404 );
@@ -394,7 +402,15 @@ class RestGeoTest extends WP_UnitTestCase {
 				'comment_post_ID'  => $others,
 			)
 		);
-		set_comment_geodata( $pending, '', array( 'latitude' => 1, 'longitude' => 2, 'visibility' => 'public' ) );
+		set_comment_geodata(
+			$pending,
+			'',
+			array(
+				'latitude'   => 1,
+				'longitude'  => 2,
+				'visibility' => 'public',
+			)
+		);
 		$this->assertSame( 'rest_forbidden', $this->request( '/map', array( 'comment_id' => $pending ) )->as_error()->get_error_code(), 'An unapproved comment.' );
 	}
 
@@ -701,6 +717,8 @@ class RestGeoTest extends WP_UnitTestCase {
 		$this->assertCount( 1, $this->request( '/venue', $params + array( 'local' => 'true' ) )->get_data()['places'] );
 		$this->request( '/venue', $params + array( 'radius' => '800' ) );
 		$this->assertSame( 800, Venue_Provider_Sloc_Test::$last_radius );
+		$this->request( '/venue', $params + array( 'filter' => ' <i>cafe</i> ' ) );
+		$this->assertSame( 'cafe', Venue_Provider_Sloc_Test::$last_filter );
 		$data = $this->request( '/venue', $params + array( 'provider' => 'sloc_test' ) )->get_data();
 		$this->assertSame( array( 'sloc_test' ), $data['places'][1]['properties']['provider'] );
 		$this->assertErrorResponse( 'rest_invalid_param', $this->request( '/venue', $params + array( 'limit' => 'many' ) ), 400 );

@@ -142,14 +142,22 @@ class Venue_Provider_Overpass extends Venue_Provider {
 	 * Returns the Overpass QL query for the named places within the radius.
 	 *
 	 * @since 6.1.0
+	 * @since 6.4.0 Only places whose name matches the filter, ignoring case.
 	 *
 	 * @return string Query.
 	 */
 	public function query() {
 		$around = sprintf( 'around:%1$d,%2$s,%3$s', $this->radius, self::coordinate( $this->latitude ), self::coordinate( $this->longitude ) );
+		$name   = '[name]';
+		if ( '' !== $this->filter ) {
+			// Letters, numbers, spaces and a few marks are kept; anything else matches any character, so the
+			// pattern needs no escaping.
+			$name = sprintf( '[name~"%s",i]', preg_replace( "/[^\\p{L}\\p{N} '&-]/u", '.', $this->filter ) );
+		}
 		return sprintf(
-			'[out:json][timeout:15];nwr(%1$s)[name][~"^(%2$s)$"~"."];out center tags %3$d;',
+			'[out:json][timeout:15];nwr(%1$s)%2$s[~"^(%3$s)$"~"."];out center tags %4$d;',
 			$around,
+			$name,
 			implode( '|', self::KEYS ),
 			self::MAX_ELEMENTS
 		);
@@ -267,5 +275,16 @@ class Venue_Provider_Overpass extends Venue_Provider {
 			$card = array_merge( $card, $tz );
 		}
 		return $card;
+	}
+
+	/**
+	 * Searches for the filter in the places' names in the query.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool True.
+	 */
+	protected function searches_by_name() {
+		return true;
 	}
 }

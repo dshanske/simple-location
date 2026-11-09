@@ -57,6 +57,7 @@ class Venue_Provider_Google extends Venue_Provider {
 	 * @since 6.0.0 Returns the venues under 'items', like the other venue providers, and an empty list when there are none.
 	 * @since 6.1.0 Uses Places API (New) Nearby Search, nearest first, within the venue search radius (#703).
 	 * @since 6.4.0 Ranked by Google's popularity instead of distance (#843).
+	 * @since 6.4.0 Searches for the filter with Text Search (#817).
 	 *
 	 * @return array|WP_Error h-cards under 'items', or an error.
 	 */
@@ -72,22 +73,36 @@ class Venue_Provider_Google extends Venue_Provider {
 		 * @param string[] $fields Place fields, such as 'displayName'.
 		 */
 		$fields = (array) apply_filters( 'sloc_google_venue_fields', self::FIELDS );
-		$json   = $this->post_json(
-			'https://places.googleapis.com/v1/places:searchNearby',
-			array(
-				'locationRestriction' => array(
-					'circle' => array(
-						'center' => array(
-							'latitude'  => (float) $this->latitude,
-							'longitude' => (float) $this->longitude,
-						),
-						'radius' => (float) $this->radius,
-					),
+		$circle = array(
+			'circle' => array(
+				'center' => array(
+					'latitude'  => (float) $this->latitude,
+					'longitude' => (float) $this->longitude,
 				),
+				'radius' => (float) $this->radius,
+			),
+		);
+		if ( '' === $this->filter ) {
+			$url  = 'https://places.googleapis.com/v1/places:searchNearby';
+			$body = array(
+				'locationRestriction' => $circle,
 				'maxResultCount'      => min( 20, $this->limit ),
 				'rankPreference'      => 'POPULARITY',
 				'languageCode'        => get_bloginfo( 'language' ),
-			),
+			);
+		} else {
+			// Text Search for the filter near the location; places beyond the radius are left out by nearby().
+			$url  = 'https://places.googleapis.com/v1/places:searchText';
+			$body = array(
+				'textQuery'    => $this->filter,
+				'locationBias' => $circle,
+				'pageSize'     => min( 20, $this->limit ),
+				'languageCode' => get_bloginfo( 'language' ),
+			);
+		}
+		$json = $this->post_json(
+			$url,
+			$body,
 			array(
 				'X-Goog-Api-Key'   => $this->api,
 				'X-Goog-FieldMask' => implode( ',', array_map( fn( $field ) => 'places.' . $field, $fields ) ),
@@ -279,5 +294,16 @@ class Venue_Provider_Google extends Venue_Provider {
 			'country-name'     => $long( 'country' ),
 			'country-code'     => '' === $country ? null : $country,
 		);
+	}
+
+	/**
+	 * Searches for the filter with Text Search.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool True.
+	 */
+	protected function searches_by_name() {
+		return true;
 	}
 }

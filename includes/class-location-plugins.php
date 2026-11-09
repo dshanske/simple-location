@@ -457,11 +457,12 @@ class Location_Plugins {
 	 * `q=places` takes the location as `lat` and `lon`, or as a geo URI in `uri`, and optionally `limit`, the most
 	 * places; `offset`, how many places at the start of the list to skip, as proposed for list queries in
 	 * https://github.com/indieweb/micropub-extensions/issues/36; `radius`, the search radius in meters, which
-	 * providers that don't take one ignore; and `local`, to list only the site's venues. It
+	 * providers that don't take one ignore; `filter`, text the places' names should match, as proposed in
+	 * https://github.com/indieweb/micropub-extensions/issues/34; and `local`, to list only the site's venues. It
 	 * answers with the places as mf2 h-cards under `places`; see Post_Venue::places().
 	 *
 	 * @since 6.3.0 Replaces the experimental `q=geo` query.
-	 * @since 6.4.0 Takes `offset` and `radius`.
+	 * @since 6.4.0 Takes `offset`, `radius` and `filter`.
 	 *
 	 * @param array|WP_Error $resp  The response before filtering.
 	 * @param array          $input The Micropub input.
@@ -490,6 +491,9 @@ class Location_Plugins {
 			if ( is_scalar( $input[ $key ] ?? null ) && is_numeric( $input[ $key ] ) ) {
 				$args[ $key ] = $input[ $key ];
 			}
+		}
+		if ( is_string( $input['filter'] ?? null ) ) {
+			$args['filter'] = $input['filter'];
 		}
 		return array(
 			'places' => Post_Venue::places( $coords[0], $coords[1], $args ),

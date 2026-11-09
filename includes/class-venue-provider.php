@@ -98,6 +98,14 @@ abstract class Venue_Provider extends Sloc_Provider {
 	protected $limit = self::DEFAULT_LIMIT;
 
 	/**
+	 * Text the places' names should match, or empty for any place.
+	 *
+	 * @since 6.4.0
+	 * @var string
+	 */
+	protected $filter = '';
+
+	/**
 	 * Timezone.
 	 *
 	 * @since 1.0.0
@@ -274,6 +282,9 @@ abstract class Venue_Provider extends Sloc_Provider {
 			return false;
 		}
 		$search = array( $this->slug, round( (float) $this->latitude, 4 ), round( (float) $this->longitude, 4 ), $this->radius, $this->limit, get_bloginfo( 'language' ) );
+		if ( '' !== $this->filter ) {
+			$search[] = $this->filter;
+		}
 		return 'sloc_venues_' . md5( wp_json_encode( $search ) );
 	}
 
@@ -392,9 +403,13 @@ abstract class Venue_Provider extends Sloc_Provider {
 	 * Each venue with coordinates gets its distance from the location, in meters, as 'distance'. Each venue names the
 	 * provider that found it as 'provider'.
 	 *
+	 * With a filter, a provider that searches by name is asked for it; see searches_by_name(). Another provider's
+	 * venues are left out unless their name matches it; see name_matches().
+	 *
 	 * The provider's venues are cached for cache_time() seconds, and sorted and limited for each request.
 	 *
 	 * @since 6.1.0
+	 * @since 6.4.0 Applies the filter.
 	 *
 	 * @return array|WP_Error Array with the venues as h-cards under 'items', or an error.
 	 */
@@ -416,7 +431,82 @@ abstract class Venue_Provider extends Sloc_Provider {
 				$items[ $key ]['provider'] = $this->slug;
 			}
 		}
+		if ( '' !== $this->filter && ! $this->searches_by_name() ) {
+			$filter = $this->filter;
+			$items  = array_filter( $items, fn( $item ) => is_array( $item ) && self::name_matches( $item['name'] ?? '', $filter ) );
+		}
 		return array( 'items' => self::sort_items( $items, $this->latitude, $this->longitude, $this->radius, $this->limit, $this->sorts_by_distance() ) );
+	}
+
+	/**
+	 * Whether the provider's service searches for places by text near a point, so the filter is sent to it.
+	 *
+	 * A provider that returns true uses get_filter() in reverse_lookup(), and its places are kept as it found them,
+	 * since it may match a place by more than its name, such as its category. Otherwise nearby() keeps only the places
+	 * whose name matches.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return bool
+	 */
+	protected function searches_by_name() {
+		return false;
+	}
+
+	/**
+	 * Sets the text the places' names should match, such as for a request that asks for one.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param mixed $filter Text; sanitized by sanitize_filter(). Empty for any place.
+	 */
+	public function set_filter( $filter ) {
+		$this->filter = self::sanitize_filter( $filter );
+	}
+
+	/**
+	 * Returns the text the places' names should match.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @return string Text, or empty for any place.
+	 */
+	public function get_filter() {
+		return $this->filter;
+	}
+
+	/**
+	 * Sanitizes a filter: plain text of at most 100 characters.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param mixed $value Text.
+	 * @return string Text, or empty for anything that isn't text.
+	 */
+	public static function sanitize_filter( $value ) {
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '';
+		}
+		return trim( mb_substr( sanitize_text_field( (string) $value ), 0, 100 ) );
+	}
+
+	/**
+	 * Whether a place's name matches a filter: contains it, ignoring case and accents.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param mixed  $name   Name.
+	 * @param string $filter Filter, or empty to match any name.
+	 * @return bool
+	 */
+	public static function name_matches( $name, $filter ) {
+		if ( '' === $filter ) {
+			return true;
+		}
+		if ( ! is_string( $name ) || '' === $name ) {
+			return false;
+		}
+		return false !== mb_stripos( remove_accents( $name ), remove_accents( $filter ) );
 	}
 
 	/**

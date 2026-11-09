@@ -684,25 +684,105 @@ class PlacesTest extends WP_UnitTestCase {
 		Venue_Provider_Sloc_Test::$result = array( 'items' => $items );
 
 		$this->assertSame( array( 'One', 'Two', 'Shop 0' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 3 ) ) ) );
-		$this->assertSame( array( 'Shop 1', 'Shop 2', 'Shop 3' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 3, 'offset' => 3 ) ) ) );
+		$this->assertSame(
+			array( 'Shop 1', 'Shop 2', 'Shop 3' ),
+			$this->names(
+				Post_Venue::places(
+					self::LAT,
+					self::LNG,
+					array(
+						'limit'  => 3,
+						'offset' => 3,
+					)
+				)
+			)
+		);
 		$this->assertSame( 6, Venue_Provider_Sloc_Test::$last_limit, 'The provider is asked for the offset and the limit.' );
-		$this->assertSame( array( 'Two', 'Shop 0' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 2, 'offset' => 1 ) ) ) );
-		$this->assertSame( array( 'Shop 4' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 3, 'offset' => 6 ) ) ), 'The last page can be short.' );
+		$this->assertSame(
+			array( 'Two', 'Shop 0' ),
+			$this->names(
+				Post_Venue::places(
+					self::LAT,
+					self::LNG,
+					array(
+						'limit'  => 2,
+						'offset' => 1,
+					)
+				)
+			)
+		);
+		$this->assertSame(
+			array( 'Shop 4' ),
+			$this->names(
+				Post_Venue::places(
+					self::LAT,
+					self::LNG,
+					array(
+						'limit'  => 3,
+						'offset' => 6,
+					)
+				)
+			),
+			'The last page can be short.'
+		);
 		$this->assertSame( array(), Post_Venue::places( self::LAT, self::LNG, array( 'offset' => 7 ) ), 'An offset past the end, none.' );
 
 		// The site's venues alone fill the list, so the provider isn't asked.
 		Venue_Provider_Sloc_Test::reset();
-		$this->assertSame( array( 'Two' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 1, 'offset' => 1 ) ) ) );
-		$this->assertSame( array( 'Two' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'local' => true, 'offset' => 1 ) ) ) );
+		$this->assertSame(
+			array( 'Two' ),
+			$this->names(
+				Post_Venue::places(
+					self::LAT,
+					self::LNG,
+					array(
+						'limit'  => 1,
+						'offset' => 1,
+					)
+				)
+			)
+		);
+		$this->assertSame(
+			array( 'Two' ),
+			$this->names(
+				Post_Venue::places(
+					self::LAT,
+					self::LNG,
+					array(
+						'local'  => true,
+						'offset' => 1,
+					)
+				)
+			)
+		);
 		$this->assertSame( 0, Venue_Provider_Sloc_Test::$calls );
 
 		// The provider is asked for no more than its most.
-		Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 10, 'offset' => 100 ) );
+		Post_Venue::places(
+			self::LAT,
+			self::LNG,
+			array(
+				'limit'  => 10,
+				'offset' => 100,
+			)
+		);
 		$this->assertSame( Venue_Provider::MAX_LIMIT, Venue_Provider_Sloc_Test::$last_limit );
 
 		// An offset that isn't a number, or is negative, starts at the beginning.
 		foreach ( array( 'many', -2, null ) as $offset ) {
-			$this->assertSame( array( 'One' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'limit' => 1, 'offset' => $offset ) ) ) );
+			$this->assertSame(
+				array( 'One' ),
+				$this->names(
+					Post_Venue::places(
+						self::LAT,
+						self::LNG,
+						array(
+							'limit'  => 1,
+							'offset' => $offset,
+						)
+					)
+				)
+			);
 		}
 	}
 
@@ -745,7 +825,14 @@ class PlacesTest extends WP_UnitTestCase {
 		$this->visit( $cafe, '2026-04-01 09:00:00', array(), 'private' );
 		$this->visit( $cafe, '2026-05-01 09:00:00', array( 'post_status' => 'draft' ) );
 		$this->visit( $cafe, '2026-06-01 09:00:00', array( 'post_password' => 'secret' ) );
-		$this->visit( $bar, '2026-02-01 20:00:00', array( 'post_status' => 'private', 'post_author' => $author ) );
+		$this->visit(
+			$bar,
+			'2026-02-01 20:00:00',
+			array(
+				'post_status' => 'private',
+				'post_author' => $author,
+			)
+		);
 
 		$places = array_column( Post_Venue::places( self::LAT, self::LNG ), 'properties' );
 		$this->assertSame( array( 2 ), $places[0]['visits'], 'Public and protected posts, for anyone.' );
@@ -801,7 +888,19 @@ class PlacesTest extends WP_UnitTestCase {
 
 		$this->assertSame( array( 'Here', 'Far', 'Near Shop', 'Far Shop' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'radius' => 1000 ) ) ) );
 		$this->assertSame( 1000, Venue_Provider_Sloc_Test::$last_radius, 'The provider is asked with the radius.' );
-		$this->assertSame( array( 'Here', 'Far' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'radius' => 1000, 'local' => true ) ) ) );
+		$this->assertSame(
+			array( 'Here', 'Far' ),
+			$this->names(
+				Post_Venue::places(
+					self::LAT,
+					self::LNG,
+					array(
+						'radius' => 1000,
+						'local'  => true,
+					)
+				)
+			)
+		);
 
 		// Limited as the setting is.
 		Post_Venue::places( self::LAT, self::LNG, array( 'radius' => 1 ) );
@@ -811,12 +910,87 @@ class PlacesTest extends WP_UnitTestCase {
 
 		// A provider asked for by name, and the shared provider keeps the setting.
 		$shared = Loc_Config::venue_provider()->get_radius();
-		Post_Venue::places( self::LAT, self::LNG, array( 'radius' => 700, 'provider' => 'sloc_test' ) );
+		Post_Venue::places(
+			self::LAT,
+			self::LNG,
+			array(
+				'radius'   => 700,
+				'provider' => 'sloc_test',
+			)
+		);
 		$this->assertSame( 700, Venue_Provider_Sloc_Test::$last_radius );
 		$this->assertSame( $shared, Loc_Config::venue_provider()->get_radius() );
 
 		$provider = new Venue_Provider_Sloc_Test();
 		$provider->set_radius( 'wide' );
 		$this->assertSame( Venue_Provider::DEFAULT_RADIUS, $provider->get_radius() );
+	}
+
+	/**
+	 * A filter matches the site's venues by title, and is passed to the provider, whose places are matched by name (#817).
+	 */
+	public function test_filter_argument() {
+		$this->venue( 'Rival Bros Coffee' );
+		$this->venue( 'Café Lutecia' );
+		$this->venue( 'City Hall' );
+		Venue_Provider_Sloc_Test::$result = array(
+			'items' => array(
+				array(
+					'name'      => 'Coffee House',
+					'latitude'  => self::LAT,
+					'longitude' => self::LNG,
+				),
+				array(
+					'name'      => 'Bakery',
+					'latitude'  => self::LAT,
+					'longitude' => self::LNG,
+				),
+			),
+		);
+
+		$this->assertSame( array( 'Rival Bros Coffee', 'Coffee House' ), $this->names( Post_Venue::places( self::LAT, self::LNG, array( 'filter' => 'coffee' ) ) ) );
+		$this->assertSame( 'coffee', Venue_Provider_Sloc_Test::$last_filter );
+		$this->assertSame(
+			array( 'Café Lutecia' ),
+			$this->names(
+				Post_Venue::places(
+					self::LAT,
+					self::LNG,
+					array(
+						'filter' => 'cafe',
+						'local'  => true,
+					)
+				)
+			)
+		);
+		$this->assertSame(
+			array( 'Coffee House' ),
+			$this->names(
+				Post_Venue::places(
+					self::LAT,
+					self::LNG,
+					array(
+						'filter' => 'coffee',
+						'offset' => 1,
+					)
+				)
+			),
+			'With an offset.'
+		);
+		$this->assertSame( array(), Post_Venue::places( self::LAT, self::LNG, array( 'filter' => 'zoo' ) ) );
+		$this->assertCount( 5, Post_Venue::places( self::LAT, self::LNG, array( 'filter' => array( 'x' ) ) ), 'A filter that isn\'t text is ignored.' );
+		$this->assertSame( '', Venue_Provider_Sloc_Test::$last_filter );
+
+		// A provider asked for by name gets it too, and the shared provider keeps none.
+		Post_Venue::places(
+			self::LAT,
+			self::LNG,
+			array(
+				'filter'   => 'bak',
+				'provider' => 'sloc_test',
+			)
+		);
+		$this->assertSame( 'bak', Venue_Provider_Sloc_Test::$last_filter );
+		$this->assertSame( '', Loc_Config::venue_provider()->get_filter() );
 	}
 }
