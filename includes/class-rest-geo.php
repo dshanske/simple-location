@@ -453,11 +453,12 @@ class REST_Geo {
 	 * editor; someone who can only read it gets a public location only.
 	 *
 	 * @since 6.2.0
+	 * @since 6.4.0 Public, for the Micropub geo query.
 	 *
 	 * @param array $params Request parameters, with 'post_id' or 'comment_id'.
 	 * @return array|WP_Error Geo data, with the saved zoom as 'map_zoom', or an error.
 	 */
-	protected static function object_location( $params ) {
+	public static function object_location( $params ) {
 		if ( ! empty( $params['comment_id'] ) ) {
 			$type    = 'comment';
 			$id      = (int) $params['comment_id'];

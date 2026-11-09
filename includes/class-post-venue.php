@@ -1092,11 +1092,12 @@ class Post_Venue {
 	 * Core's url_to_postid() doesn't find a post of a custom post type by its plain permalink, such as ?venue=cafe.
 	 *
 	 * @since 6.3.0
+	 * @since 6.4.0 Public, for the Micropub geo query.
 	 *
 	 * @param mixed $url URL.
 	 * @return int Post ID, or 0.
 	 */
-	protected static function url_to_postid( $url ) {
+	public static function url_to_postid( $url ) {
 		if ( ! is_string( $url ) || '' === $url ) {
 			return 0;
 		}
