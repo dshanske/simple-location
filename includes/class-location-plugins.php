@@ -24,6 +24,7 @@ class Location_Plugins {
 		add_action( 'after_micropub', array( 'Location_Plugins', 'micropub_set_location' ), 10, 2 );
 		add_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_places' ), 10, 2 );
 		add_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_geo' ), 10, 2 );
+		add_filter( 'micropub_query', array( 'Location_Plugins', 'micropub_query_source' ), 10, 2 );
 		add_filter( 'webmention_handler_mf2_set_properties', array( 'Location_Plugins', 'webmention_handler_mf2_set_properties' ), 10, 2 );
 		add_filter( 'activitypub_post_location', array( 'Location_Plugins', 'activitypub_post_location' ), 10, 3 );
 		add_action( 'activitypub_before_get_content', array( 'Location_Plugins', 'activitypub_before_get_content' ) );
@@ -491,6 +492,44 @@ class Location_Plugins {
 		return array(
 			'places' => Post_Venue::places( $coords[0], $coords[1], $args ),
 		);
+	}
+
+	/**
+	 * Adds a venue's details to the Micropub source query for its page.
+	 *
+	 * The Micropub plugin answers `q=source&url=` for a venue with little more than its name and content. This makes
+	 * the answer an h-card with the venue's details; see Post_Venue::venue_card(). It also answers for a venue's page
+	 * that the Micropub plugin doesn't find, such as one with plain permalinks. `properties` limits the properties, as
+	 * it does for other posts. A venue the user may not see is left to the Micropub plugin's answer.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param mixed $resp  The response before filtering: an array, or the Micropub plugin's error.
+	 * @param array $input The Micropub input.
+	 * @return mixed The response, with the venue's details for a venue.
+	 */
+	public static function micropub_query_source( $resp, $input ) {
+		if ( 'source' !== ( $input['q'] ?? null ) || ! is_string( $input['url'] ?? null ) || is_wp_error( $resp ) ) {
+			return $resp;
+		}
+		$card = Post_Venue::venue_card( Post_Venue::url_to_postid( $input['url'] ) );
+		if ( ! $card ) {
+			return $resp;
+		}
+		$resp = is_array( $resp ) ? $resp : array();
+
+		$properties = array_merge( is_array( $resp['properties'] ?? null ) ? $resp['properties'] : array(), $card['properties'] );
+		$wanted     = $input['properties'] ?? null;
+		if ( null !== $wanted ) {
+			$wanted = array_filter( (array) $wanted, 'is_string' );
+			return array( 'properties' => array_intersect_key( $properties, array_flip( $wanted ) ) );
+		}
+		$resp['type']       = array( 'h-card' );
+		$resp['properties'] = $properties;
+		if ( ! empty( $card['children'] ) ) {
+			$resp['children'] = $card['children'];
+		}
+		return $resp;
 	}
 
 	/**

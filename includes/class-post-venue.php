@@ -871,6 +871,128 @@ class Post_Venue {
 	}
 
 	/**
+	 * Returns a site venue as an mf2 h-card with its details, as far as the current user may see them.
+	 *
+	 * The card has what q=places gives, with 'visits' and 'last-visit'; 'parent', the page of the venue it is inside;
+	 * 'photo', its featured image and the latest images of the posts at it that anyone could see; and the venues inside
+	 * it as h-cards under 'children'. A venue whose location is protected has no location or photos. A parent or child
+	 * venue the user may not see, or one excluded from venue lists, is left out.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param int|WP_Post $venue Venue.
+	 * @return array|null mf2 h-card, or null for a venue the user may not see, or a post that isn't a venue.
+	 */
+	public static function venue_card( $venue ) {
+		$venue = get_post( $venue );
+		if ( ! $venue instanceof WP_Post || 'venue' !== $venue->post_type ) {
+			return null;
+		}
+		$access = self::place_access( $venue );
+		if ( ! $access ) {
+			return null;
+		}
+		$visits = self::venue_visits( array( $venue->ID ) );
+		$card   = self::local_card( $venue, $access, null, $visits[ $venue->ID ] ?? array() );
+
+		$parent = get_post( (int) $venue->post_parent );
+		if ( $parent instanceof WP_Post && 'venue' === $parent->post_type && ! self::is_excluded( $parent ) && self::place_access( $parent ) ) {
+			$card['parent'] = get_permalink( $parent );
+		}
+		if ( 'full' === $access ) {
+			$card['photo'] = self::venue_photos( $venue );
+		}
+		$mf2 = self::jf2_to_mf2( $card );
+
+		$children = array();
+		foreach ( (array) self::get_venue_children( $venue ) as $child_id ) {
+			$child = get_post( $child_id );
+			if ( $child instanceof WP_Post && ! self::is_excluded( $child ) && self::place_access( $child ) ) {
+				$children[] = self::jf2_to_mf2(
+					array(
+						'type' => 'card',
+						'name' => $child->post_title,
+						'url'  => get_permalink( $child ),
+						'uid'  => get_permalink( $child ),
+					)
+				);
+			}
+		}
+		if ( $children ) {
+			$mf2['children'] = $children;
+		}
+		return $mf2;
+	}
+
+	/**
+	 * Returns the photos of a venue: its featured image, then the latest images of the posts at it that anyone could see.
+	 *
+	 * A post counts when it is published without a password and its location isn't private, as for venue_visits().
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param WP_Post $venue Venue.
+	 * @param int     $limit Optional. Most photos. Default 10.
+	 * @return string[] Image URLs.
+	 */
+	public static function venue_photos( $venue, $limit = 10 ) {
+		$ids = array();
+		if ( has_post_thumbnail( $venue ) ) {
+			$ids[] = (int) get_post_thumbnail_id( $venue );
+		}
+		$location = array(
+			'relation' => 'OR',
+			array(
+				'key'     => 'geo_public',
+				'value'   => array( '1', '2' ),
+				'compare' => 'IN',
+			),
+		);
+		if ( 'private' !== Geo_Data::get_default_visibility() ) {
+			// A post without a visibility of its own has the site default.
+			$location[] = array(
+				'key'     => 'geo_public',
+				'compare' => 'NOT EXISTS',
+			);
+		}
+		$posts = get_posts(
+			array(
+				'post_type'        => 'post',
+				'post_status'      => 'publish',
+				'has_password'     => false,
+				'fields'           => 'ids',
+				'numberposts'      => 50,
+				'suppress_filters' => false,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Posts at a venue are found by their venue ID.
+				'meta_query'       => array(
+					array(
+						'key'   => 'venue_id',
+						'value' => $venue->ID,
+					),
+					$location,
+				),
+			)
+		);
+		if ( $posts ) {
+			$ids = array_merge(
+				$ids,
+				get_posts(
+					array(
+						'post_type'       => 'attachment',
+						'post_status'     => 'inherit',
+						'post_mime_type'  => 'image',
+						'post_parent__in' => $posts,
+						'fields'          => 'ids',
+						'numberposts'     => $limit,
+					)
+				)
+			);
+		}
+		$urls = array_map( 'wp_get_attachment_url', array_slice( array_unique( array_filter( $ids ) ), 0, $limit ) );
+		return array_values( array_filter( $urls, 'is_string' ) );
+	}
+
+	/**
 	 * Returns how many times the current user may see that each venue was visited, and when last.
 	 *
 	 * A visit is a post at the venue. It counts when it is published without a password and its location isn't
