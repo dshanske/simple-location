@@ -620,8 +620,9 @@ class Post_Venue {
 	 * Returns the places near a location: the site's venues, then the venue providers', as mf2 h-cards.
 	 *
 	 * The site's venues within the sloc_venue_radius setting come first, nearest first, each with its page on the
-	 * site as 'url' and 'uid'. The venue providers' follow, without those the site already has, found by their
-	 * identifier or one of their links. Each place names where it came from as 'provider': 'local' for the site's,
+	 * site as 'url' and 'uid', and, where the current user may see any, 'visits' and 'last-visit'; see
+	 * venue_visits(). The venue providers' follow, without those the site already has, found by their identifier or
+	 * one of their links. Each place names where it came from as 'provider': 'local' for the site's,
 	 * or the provider's slug.
 	 *
 	 * A private, draft or password-protected venue, or one whose location is private, is left out unless the
@@ -653,7 +654,7 @@ class Post_Venue {
 		if ( false === $lat || false === $lng ) {
 			return array();
 		}
-		$args  = wp_parse_args(
+		$args   = wp_parse_args(
 			$args,
 			array(
 				'limit'    => get_option( 'sloc_venue_limit', Venue_Provider::DEFAULT_LIMIT ),
@@ -702,8 +703,12 @@ class Post_Venue {
 
 		// Nearest first, the oldest first at the same distance; a venue without coordinates last.
 		usort( $local, fn( $a, $b ) => array( $a['distance'] ?? PHP_INT_MAX, $a['venue']->ID ) <=> array( $b['distance'] ?? PHP_INT_MAX, $b['venue']->ID ) );
-		$cards = array_map( fn( $place ) => self::local_card( $place['venue'], $place['access'], $place['distance'] ), $local );
-		$cards = array_slice( array_merge( $cards, array_values( $items ) ), $offset, $limit );
+		// The page of the list: the site's venues within it, then the providers' places to fill it.
+		$page   = array_slice( $local, $offset, $limit );
+		$items  = array_slice( array_values( $items ), max( 0, $offset - count( $local ) ), $limit - count( $page ) );
+		$visits = self::venue_visits( wp_list_pluck( wp_list_pluck( $page, 'venue' ), 'ID' ) );
+		$cards  = array_map( fn( $place ) => self::local_card( $place['venue'], $place['access'], $place['distance'], $visits[ $place['venue']->ID ] ?? array() ), $page );
+		$cards  = array_merge( $cards, $items );
 
 		/**
 		 * Filters the places near a location.
@@ -855,6 +860,69 @@ class Post_Venue {
 	}
 
 	/**
+	 * Returns how many times the current user may see that each venue was visited, and when last.
+	 *
+	 * A visit is a post at the venue. It counts when it is published without a password and its location isn't
+	 * private, so anyone could see it; when the current user wrote it, including a private post; or, for a user who
+	 * can edit others' posts, when it is published or private. The venues are counted in one query.
+	 *
+	 * @since 6.4.0
+	 *
+	 * @param int[] $venue_ids Venue IDs.
+	 * @return array[] By venue ID, for venues with a visit: 'visits', the number of posts, and 'last-visit', the date
+	 *                 of the latest, in ISO 8601 in UTC.
+	 */
+	public static function venue_visits( $venue_ids ) {
+		global $wpdb;
+		$venue_ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $venue_ids ) ) ) );
+		if ( empty( $venue_ids ) ) {
+			return array();
+		}
+
+		$user_id = get_current_user_id();
+		if ( current_user_can( 'edit_others_posts' ) ) {
+			$mine = "p.post_status IN ( 'publish', 'private' )";
+		} elseif ( $user_id ) {
+			$mine = $wpdb->prepare( "( p.post_status IN ( 'publish', 'private' ) AND p.post_author = %d )", $user_id );
+		} else {
+			$mine = '0 = 1';
+		}
+		// A post without a visibility of its own has the site default.
+		$default_shown = 'private' === Geo_Data::get_default_visibility() ? 0 : 1;
+
+		$placeholders = implode( ', ', array_fill( 0, count( $venue_ids ), '%s' ) );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a list of %s, and $mine is prepared above.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT m.meta_value AS venue, COUNT( DISTINCT p.ID ) AS visits, MAX( p.post_date_gmt ) AS last_visit
+				FROM {$wpdb->postmeta} m
+				INNER JOIN {$wpdb->posts} p ON p.ID = m.post_id
+				LEFT JOIN {$wpdb->postmeta} g ON g.post_id = p.ID AND g.meta_key = 'geo_public'
+				WHERE m.meta_key = 'venue_id' AND m.meta_value IN ( $placeholders ) AND p.post_type = 'post'
+				AND (
+					( p.post_status = 'publish' AND p.post_password = ''
+						AND ( g.meta_value IN ( '1', '2' ) OR ( ( g.meta_value IS NULL OR g.meta_value NOT IN ( '0', '1', '2' ) ) AND 1 = %d ) ) )
+					OR $mine
+				)
+				GROUP BY m.meta_value",
+				array_merge( array_map( 'strval', $venue_ids ), array( $default_shown ) )
+			),
+			ARRAY_A
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- One aggregate for a list of venues; posts at a venue change too often to cache.
+		// phpcs:enable
+
+		$visits = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$gmt                           = (string) ( $row['last_visit'] ?? '' );
+			$visits[ (int) $row['venue'] ] = array(
+				'visits'     => (int) $row['visits'],
+				'last-visit' => ( '' !== $gmt && '0000-00-00 00:00:00' !== $gmt ) ? mysql2date( 'Y-m-d\TH:i:s\Z', $gmt, false ) : null,
+			);
+		}
+		return $visits;
+	}
+
+	/**
 	 * Returns a venue's distance from a location.
 	 *
 	 * @since 6.3.0
@@ -898,12 +966,15 @@ class Post_Venue {
 	 *
 	 * @since 6.3.0
 	 *
+	 * @since 6.4.0 Takes the visits to the venue.
+	 *
 	 * @param WP_Post  $venue    Venue.
 	 * @param string   $access   'full', or 'name' for the name and links only.
 	 * @param int|null $distance Distance in meters, or null.
+	 * @param array    $visits   Optional. 'visits' and 'last-visit', as venue_visits() returns. Default none.
 	 * @return array h-card.
 	 */
-	protected static function local_card( $venue, $access, $distance ) {
+	protected static function local_card( $venue, $access, $distance, $visits = array() ) {
 		$permalink = get_permalink( $venue );
 		$card      = array(
 			'type'     => 'card',
@@ -931,6 +1002,10 @@ class Post_Venue {
 					'distance'       => $distance,
 				)
 			);
+		}
+		if ( ! empty( $visits['visits'] ) ) {
+			$card['visits']     = (int) $visits['visits'];
+			$card['last-visit'] = $visits['last-visit'] ?? null;
 		}
 		return $card;
 	}
