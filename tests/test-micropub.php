@@ -537,6 +537,77 @@ class MicropubTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A check-in or location at a venue keeps the visibility the client asked for over the venue's (#841).
+	 *
+	 * @dataProvider checkin_visibility_provider
+	 *
+	 * @param string $property    checkin or location.
+	 * @param bool   $coordinates Whether the post has coordinates.
+	 */
+	public function test_checkin_requested_visibility( $property, $coordinates ) {
+		$venue_id = self::factory()->post->create(
+			array(
+				'post_type'  => 'venue',
+				'post_title' => 'Public Cafe',
+			)
+		);
+		set_post_geodata(
+			$venue_id,
+			'',
+			array(
+				'latitude'   => self::LAT,
+				'longitude'  => self::LNG,
+				'visibility' => 'public',
+			)
+		);
+		update_post_meta( $venue_id, 'venue_post_visibility', 'public' );
+		$card = array(
+			'type'       => array( 'h-card' ),
+			'properties' => array(
+				'name' => array( 'Public Cafe' ),
+				'url'  => array( get_permalink( $venue_id ) ),
+			),
+		);
+		$meta = $coordinates ? array(
+			'geo_latitude'  => self::LAT,
+			'geo_longitude' => self::LNG,
+		) : array();
+		foreach ( array( 'private', 'protected' ) as $visibility ) {
+			$args = $this->micropub_post( $meta );
+			Location_Plugins::micropub_set_location(
+				array(
+					'properties' => array(
+						$property             => $card,
+						'location-visibility' => array( $visibility ),
+					),
+				),
+				$args
+			);
+			$this->assertSame( $venue_id, (int) get_post_meta( $args['ID'], 'venue_id', true ), 'Linked to the venue.' );
+			$this->assertSame( $visibility, get_post_geodata( $args['ID'], 'visibility' ) );
+		}
+
+		// Without a request, the venue's visibility for posts.
+		$args = $this->micropub_post( $meta );
+		Location_Plugins::micropub_set_location( array( 'properties' => array( $property => $card ) ), $args );
+		$this->assertSame( 'public', get_post_geodata( $args['ID'], 'visibility' ) );
+	}
+
+	/**
+	 * Check-ins and locations, with and without coordinates.
+	 *
+	 * @return array[]
+	 */
+	public function checkin_visibility_provider() {
+		return array(
+			'check-in with coordinates'    => array( 'checkin', true ),
+			'check-in without coordinates' => array( 'checkin', false ),
+			'location with coordinates'    => array( 'location', true ),
+			'location without coordinates' => array( 'location', false ),
+		);
+	}
+
+	/**
 	 * A check-in keeps the venue's identifier and provider, and a second check-in there finds the venue (#729).
 	 */
 	public function test_set_location_checkin_uid() {

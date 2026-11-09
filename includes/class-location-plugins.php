@@ -273,6 +273,7 @@ class Location_Plugins {
 	 * Fires after the Micropub Request is complete to add additional location information.
 	 *
 	 * @since 6.1.0 A venue's visibility for posts made there is used, unless the client asked for one.
+	 * @since 6.4.0 A check-in at a venue keeps the visibility the client asked for, with or without coordinates (#841).
 	 * @since 6.3.0 A check-in or location h-card is matched to a venue by its page on the site, then its identifier;
 	 *              a private venue only for a user who can edit it.
 	 *
@@ -380,7 +381,9 @@ class Location_Plugins {
 			$venue = Post_Venue::choose_place( $location );
 			if ( ! is_wp_error( $venue ) ) {
 				Post_Venue::set_post_venue( $args['ID'], $venue );
-				$visibility = Post_Venue::get_post_visibility( $venue );
+				// The visibility the client asked for, or the venue's for posts made there, or the venue's own.
+				$visibility = self::requested_visibility( $properties );
+				$visibility = $visibility ? $visibility : Post_Venue::get_post_visibility( $venue );
 				set_post_geodata( $args['ID'], 'visibility', '' === $visibility ? get_post_geodata( $venue, 'visibility' ) : $visibility );
 				update_post_meta(
 					$args['ID'],
@@ -405,10 +408,9 @@ class Location_Plugins {
 			$venue = Post_Venue::find_place( $location );
 			if ( $venue ) {
 				Post_Venue::set_post_venue( $args['ID'], $venue );
-				if ( ! self::requested_visibility( $properties ) ) {
-					$visibility = Post_Venue::get_post_visibility( $venue );
-					set_post_geodata( $args['ID'], 'visibility', '' === $visibility ? 'protected' : $visibility );
-				}
+				$visibility = self::requested_visibility( $properties );
+				$visibility = $visibility ? $visibility : Post_Venue::get_post_visibility( $venue );
+				set_post_geodata( $args['ID'], 'visibility', '' === $visibility ? 'protected' : $visibility );
 				$term = $term ? $term : Location_Taxonomy::get_post_location( $args['ID'] );
 			}
 		}
