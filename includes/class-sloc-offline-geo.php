@@ -143,7 +143,8 @@ class Sloc_Offline_Geo {
 	 * Returns the country of a location.
 	 *
 	 * The country whose borders the location is within; or, at sea, or in a place Natural Earth gives no code, the
-	 * country of a place within 15 km.
+	 * country of a place within 15 km; or else the country of the timezone, whose boundaries include territorial
+	 * waters and small islands the borders leave out.
 	 *
 	 * @since 6.5.0
 	 *
@@ -167,8 +168,29 @@ class Sloc_Offline_Geo {
 			$nearest = self::nearest_place( $latitude, $longitude, self::COAST_DISTANCE );
 			$code    = $nearest ? $nearest['country'] : '';
 		}
+		if ( '' === $code ) {
+			$code = self::timezone_country( self::timezone( $latitude, $longitude ) );
+		}
 		wp_cache_set( $key, $code, self::CACHE_GROUP );
 		return $code;
+	}
+
+	/**
+	 * Returns the country of a timezone.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param string $timezone Timezone name, such as America/New_York.
+	 * @return string Two-letter country code, or an empty string for a nautical timezone such as Etc/GMT+5, or one
+	 *                without a country.
+	 */
+	public static function timezone_country( $timezone ) {
+		if ( '' === $timezone || 0 === strpos( $timezone, 'Etc/' ) || ! in_array( $timezone, timezone_identifiers_list(), true ) ) {
+			return '';
+		}
+		$location = ( new DateTimeZone( $timezone ) )->getLocation();
+		$country  = is_array( $location ) ? (string) ( $location['country_code'] ?? '' ) : '';
+		return ( 2 === strlen( $country ) && '??' !== $country ) ? $country : '';
 	}
 
 	/**

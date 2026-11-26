@@ -240,12 +240,25 @@ class OfflineGeoTest extends WP_UnitTestCase {
 		$this->assertSame( 'CA', Sloc_Offline_Geo::country( 42.3149, -83.0364 ), 'Windsor, across the river.' );
 		$this->assertSame( 'FR', Sloc_Offline_Geo::country( 48.8566, 2.3522 ) );
 		$this->assertSame( 'PT', Sloc_Offline_Geo::country( 38.69, -9.25 ), 'In the Tagus estuary, near Lisbon.' );
+		$this->assertSame( 'US', Sloc_Offline_Geo::country( 44.055454, -68.423863 ), 'Swan\'s Island, Maine, outside the borders, from its timezone.' );
 		$this->assertSame( '', Sloc_Offline_Geo::country( 30, -40 ), 'The mid-Atlantic.' );
 		$this->assertSame( '', Sloc_Offline_Geo::country( 95, 0 ) );
 		$this->assertSame( '', Sloc_Offline_Geo::country( null, 0 ) );
 
 		// Cached.
 		$this->assertSame( 'US', wp_cache_get( 'country:39.9524,-75.1636', Sloc_Offline_Geo::CACHE_GROUP ) );
+	}
+
+	/**
+	 * A timezone's country, and none for nautical or unknown timezones.
+	 */
+	public function test_timezone_country() {
+		$this->assertSame( 'US', Sloc_Offline_Geo::timezone_country( 'America/New_York' ) );
+		$this->assertSame( 'MC', Sloc_Offline_Geo::timezone_country( 'Europe/Monaco' ) );
+		$this->assertSame( '', Sloc_Offline_Geo::timezone_country( 'Etc/GMT+5' ) );
+		$this->assertSame( '', Sloc_Offline_Geo::timezone_country( 'UTC' ) );
+		$this->assertSame( '', Sloc_Offline_Geo::timezone_country( 'Not/AZone' ) );
+		$this->assertSame( '', Sloc_Offline_Geo::timezone_country( '' ) );
 	}
 
 	/**
