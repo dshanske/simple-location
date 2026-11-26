@@ -480,6 +480,10 @@ Countries come from the provider, or from the bundled borders when it gives none
 
 Some providers, such as Traccar Geocoder, give names in the local language, such as "ישראל" or "Бургас". Country and region names are shown in your site's language when the bundled names have them, and the provider's names are kept: under `local` in a lookup's result, and as the `local_name` of new location terms. The `sloc_address_language` filter chooses another language. Town names stay as the provider gives them.
 
+### How do I repair locations saved by earlier versions?
+
+Tools > Location Repair, or `wp location repair --user=admin`, brings older location data up to date: region codes stored as names or numbers, duplicate regions and towns, towns stored straight under their country, broken locations, and posts with coordinates but no location. Preview first; nothing changes until you choose Repair, or add `--apply`. Merged locations redirect to the ones kept. Posts are looked up from the data that comes with the plugin unless you choose your geocoding providers, and posts whose location isn't public are left out. Stored addresses are counted but never changed.
+
 ### Where does the bundled data come from?
 
 The plugin includes data files in its `data` folder, so these lookups don't need an online service:

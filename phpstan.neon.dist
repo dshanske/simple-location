@@ -10,6 +10,9 @@ parameters:
 		- lib
 	bootstrapFiles:
 		- tests/phpstan-bootstrap.php
+	# WP-CLI's classes and functions, for the `wp location repair` command.
+	scanFiles:
+		- vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
 	ignoreErrors:
 		# The vendor traits add map settings only when the class using them is a map provider; PHPStan analyses the
 		# traits in every class that uses them and can't follow that check.

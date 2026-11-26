@@ -47,7 +47,8 @@
       "akirk/extract-wp-hooks": "^1.0",
       "phpstan/phpstan": "^2.1",
       "szepeviktor/phpstan-wordpress": "^2.0",
-      "symfony/yaml": "^5.4 || ^6.0 || ^7.0"
+      "symfony/yaml": "^5.4 || ^6.0 || ^7.0",
+      "php-stubs/wp-cli-stubs": "^2.12"
     },
     "prefer-stable" : true,
     "scripts": {
