@@ -249,6 +249,9 @@ class Simple_Location_Plugin {
 			'class-weather-data.php', // Register Weather Metadata Functions.
 			'class-sloc-weather-archive.php', // Weather views of archives.
 			'trait-geolocation-trait.php', // Geolocation Trait.
+			'trait-sloc-osm-address.php', // Nominatim-style OpenStreetMap address parsing.
+			'trait-sloc-osm-geo.php', // The same, for geo providers.
+			'trait-sloc-osm-venue.php', // The same, for venue providers.
 			'data-functions.php', // Global Data Functions to retrieve and store data.
 			'class-sloc-media-metadata.php', // Media Metadata Functions.
 			'class-post-venue.php', // Venue CPT.

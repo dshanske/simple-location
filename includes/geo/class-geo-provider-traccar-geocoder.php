@@ -20,6 +20,8 @@ defined( 'ABSPATH' ) || exit;
  * @since 6.5.0
  */
 class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
+	use Sloc_OSM_Geo;
+
 
 	/**
 	 * Setting holding the servers.
@@ -366,10 +368,7 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 	}
 
 	/**
-	 * Converts an answer to microformats2 address properties.
-	 *
-	 * A server built from extracts smaller than a country, such as US states, doesn't have the country's boundary,
-	 * so its answers have no country. The country code then comes from the location instead.
+	 * Converts an answer to microformats2 address properties, with the parser shared with Nominatim.
 	 *
 	 * @since 6.5.0
 	 *
@@ -377,38 +376,6 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 	 * @return array Microformats2 address elements.
 	 */
 	protected function address_to_mf( $json ) {
-		$address      = $json['address'];
-		$country_code = strtoupper( (string) ( $address['country_code'] ?? '' ) );
-		if ( '' === $country_code ) {
-			$country_code = self::country_for_location( $this->latitude, $this->longitude );
-		}
-		$number       = (string) ( $address['house_number'] ?? '' );
-		$street       = (string) ( $address['road'] ?? '' );
-		$street_addr  = self::house_number( $country_code ) ? $number . ' ' . $street : $street . ' ' . $number;
-		$region       = self::ifnot( $address, array( 'state', 'county' ) );
-
-		$addr                 = array(
-			'street-number'    => $number,
-			'street'           => $street,
-			'street-address'   => trim( $street_addr ),
-			'extended-address' => $address['suburb'] ?? null,
-			'locality'         => $address['city'] ?? null,
-			'region'           => $region,
-			'region-code'      => empty( $region ) ? null : self::region_code( $region, $country_code ),
-			'country-name'     => $address['country'] ?? self::country_name( $country_code ),
-			'postal-code'      => $address['postcode'] ?? null,
-			'country-code'     => $country_code,
-			'latitude'         => $this->latitude,
-			'longitude'        => $this->longitude,
-			'altitude'         => $this->altitude,
-			'raw'              => $json,
-		);
-		$addr                 = array_filter( $addr );
-		$addr['display-name'] = $this->display_name( $addr );
-		$tz                   = $this->timezone();
-		if ( $tz ) {
-			$addr = array_merge( $addr, $tz );
-		}
-		return $addr;
+		return $this->osm_address_to_mf( $json );
 	}
 }
