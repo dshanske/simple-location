@@ -1,21 +1,52 @@
 name: Plugin asset/readme update
-# Only for readme and asset changes: the action refuses to deploy when code has changed since the last release.
+# Deploys the readme and assets to WordPress.org between releases, e.g. a new "Tested up to".
+# It only deploys a push that changes nothing but these files, and only when the readme's stable tag is released.
 on:
   push:
     branches:
     - trunk
     paths:
     - 'readme.txt'
+    - 'readme.md'
     - '.wordpress-org/**'
 jobs:
   master:
     name: Push to trunk
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+    - name: Check that only the readme and assets changed
+      id: check
+      env:
+        BEFORE: ${{ github.event.before }}
+        AFTER: ${{ github.sha }}
+      run: |
+        changed="$(git diff --name-only "$BEFORE" "$AFTER")"
+        echo "Changed files:"
+        echo "$changed"
+        other="$(echo "$changed" | grep -Ev '^(readme\.txt|readme\.md|\.wordpress-org/.*)$' || true)"
+        if [ -n "$other" ]; then
+          echo "::notice::Not deployed: this push also changes other files. The readme goes out with the next release."
+          echo "deploy=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        # A merged release PR sets a stable tag that isn't on WordPress.org until it is deployed.
+        stable="$(grep -m1 -i '^Stable tag:' readme.txt | sed 's/^[^:]*:[[:space:]]*//' | tr -d '\r[:space:]')"
+        status="$(curl -s -o /dev/null -w '%{http_code}' "https://plugins.svn.wordpress.org/simple-location/tags/${stable}/readme.txt")"
+        if [ "$status" != "200" ]; then
+          echo "::notice::Not deployed: version ${stable} isn't released on WordPress.org yet."
+          echo "deploy=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        echo "deploy=true" >> "$GITHUB_OUTPUT"
     - name: WordPress.org plugin asset/readme update
+      if: steps.check.outputs.deploy == 'true'
       uses: 10up/action-wordpress-plugin-asset-update@stable
       env:
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
         SLUG: simple-location
+        # Trunk usually has unreleased code. The check above made sure this push is only the readme and assets.
+        IGNORE_OTHER_FILES: true
