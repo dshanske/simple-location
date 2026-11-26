@@ -297,6 +297,119 @@ class OsmAddressTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The state is the region by default; the county in the United Kingdom and Italy; and the filter can change it.
+	 */
+	public function test_region_order() {
+		$addr = $this->parse(
+			array(
+				'road'         => 'Braubachstraße',
+				'city'         => 'Frankfurt am Main',
+				'county'       => 'Frankfurt am Main',
+				'state'        => 'Hessen',
+				'country'      => 'Deutschland',
+				'country_code' => 'de',
+			),
+			50.1109,
+			8.6821
+		);
+		$this->assertSame( 'Hessen', $addr['region'] );
+		$this->assertSame( 'HE', $addr['region-code'] );
+
+		// Sofia: a city district comes back as the county.
+		$addr = $this->parse(
+			array(
+				'city'         => 'София',
+				'county'       => 'Район Оборище',
+				'state'        => 'София-град',
+				'country'      => 'България',
+				'country_code' => 'bg',
+			),
+			42.6977,
+			23.3219
+		);
+		$this->assertSame( 'София-град', $addr['region'] );
+
+		$this->assertSame( array( 'county', 'state', 'region', 'state_district' ), Geo_Provider_Nominatim::osm_region_keys( 'GB' ) );
+		$this->assertSame( array( 'county', 'state', 'region', 'state_district' ), Geo_Provider_Nominatim::osm_region_keys( 'IT' ) );
+		$this->assertSame( array( 'state', 'region', 'state_district', 'county' ), Geo_Provider_Nominatim::osm_region_keys( '' ) );
+
+		$filter = function ( $keys, $country ) {
+			return 'DE' === $country ? array( 'county' ) : $keys;
+		};
+		add_filter( 'sloc_osm_region_keys', $filter, 10, 2 );
+		$this->assertSame( array( 'county' ), Geo_Provider_Nominatim::osm_region_keys( 'DE' ) );
+		add_filter( 'sloc_osm_region_keys', '__return_null', 20 );
+		$this->assertSame( array(), Geo_Provider_Nominatim::osm_region_keys( 'DE' ), 'A broken filter gives no keys rather than an error.' );
+		remove_filter( 'sloc_osm_region_keys', '__return_null', 20 );
+		remove_filter( 'sloc_osm_region_keys', $filter, 10 );
+	}
+
+	/**
+	 * A bilingual region name keeps the part with a known code.
+	 */
+	public function test_bilingual_region() {
+		$this->assertSame( array( 'Northern Ireland', 'NIR' ), Geo_Provider_Nominatim::osm_region_name_code( 'Northern Ireland / Tuaisceart Éireann', 'GB' ) );
+		$this->assertSame( array( 'Pennsylvania', 'PA' ), Geo_Provider_Nominatim::osm_region_name_code( 'Pennsylvania', 'US' ) );
+		$this->assertSame( array( 'Nowhere | Nulle part', null ), Geo_Provider_Nominatim::osm_region_name_code( 'Nowhere | Nulle part', 'US' ) );
+
+		// Belfast, from an extract without the United Kingdom's boundary.
+		$addr = $this->parse(
+			array(
+				'house_number' => '9',
+				'road'         => 'Donegall Square North',
+				'suburb'       => 'Town Parks',
+				'city'         => 'Belfast',
+				'state'        => 'Northern Ireland / Tuaisceart Éireann',
+				'postcode'     => 'BT1 5GJ',
+			),
+			54.5973,
+			-5.9301
+		);
+		$this->assertSame( 'GB', $addr['country-code'] );
+		$this->assertSame( 'Northern Ireland', $addr['region'] );
+		$this->assertSame( 'NIR', $addr['region-code'] );
+	}
+
+	/**
+	 * A council district given as the city is replaced by a town from the place data.
+	 */
+	public function test_district_as_city() {
+		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'Kenmare Municipal District' ) );
+		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'The Metropolitan District of Limerick City' ) );
+		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'Inns Quay A Ward 1986' ) );
+		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'מועצה אזורית תמר' ) );
+		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'Tamar Regional Council' ) );
+		$this->assertFalse( Geo_Provider_Nominatim::osm_is_district( 'Kenmare' ) );
+
+		$addr = $this->parse(
+			array(
+				'city'         => 'Kenmare Municipal District',
+				'county'       => 'County Kerry',
+				'country'      => 'Éire / Ireland',
+				'country_code' => 'ie',
+			),
+			51.8801,
+			-9.5835
+		);
+		$this->assertSame( 'Kenmare', $addr['locality'] );
+		$this->assertSame( 'County Kerry', $addr['region'] );
+		$this->assertSame( 'KY', $addr['region-code'] );
+
+		// In the Negev, with no town nearby, the regional council is better than nothing.
+		$addr = $this->parse(
+			array(
+				'city'         => 'מועצה אזורית תמר',
+				'state'        => 'מחוז הדרום',
+				'country'      => 'ישראל',
+				'country_code' => 'il',
+			),
+			31.069013,
+			35.286249
+		);
+		$this->assertSame( 'מועצה אזורית תמר', $addr['locality'] );
+	}
+
+	/**
 	 * Without an address there is nothing to parse.
 	 */
 	public function test_no_address() {

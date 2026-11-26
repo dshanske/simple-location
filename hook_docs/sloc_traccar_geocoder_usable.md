@@ -39,7 +39,7 @@ add_filter(
 
 ## Files
 
-- [includes/geo/class-geo-provider-traccar-geocoder.php:386](https://github.com/dshanske/simple-location/blob/trunk/includes/geo/class-geo-provider-traccar-geocoder.php#L386)
+- [includes/geo/class-geo-provider-traccar-geocoder.php:322](https://github.com/dshanske/simple-location/blob/trunk/includes/geo/class-geo-provider-traccar-geocoder.php#L322)
 ```php
 apply_filters( 'sloc_traccar_geocoder_usable', $usable, $address, $json, $url, $this->latitude, $this->longitude )
 ```

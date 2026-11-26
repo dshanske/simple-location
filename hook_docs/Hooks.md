@@ -111,6 +111,10 @@
 
 - [`sloc_enqueue_styles`](sloc_enqueue_styles) Filters whether the front-end stylesheet is enqueued in the head of the current page.
 
+## trait-sloc-osm-address.php
+
+- [`sloc_osm_region_keys`](sloc_osm_region_keys) Filters the address keys a Nominatim-format answer's region is taken from, in order.
+
 ## trait-weather-info.php
 
 - [`sloc_aqi_category`](sloc_aqi_category) Filters the category of an air quality index, such as for another scale or other colors.

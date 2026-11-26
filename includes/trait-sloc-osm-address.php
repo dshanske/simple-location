@@ -58,15 +58,18 @@ trait Sloc_OSM_Address {
 			$country_code = $place ? (string) $place['country'] : '';
 		}
 
-		$region_keys = in_array( $country_code, array( 'US', 'FR' ), true ) ? array( 'state', 'county' ) : array( 'region', 'county', 'state', 'state_district' );
-		$region_key  = null;
-		foreach ( $region_keys as $key ) {
-			if ( ! empty( $address[ $key ] ) ) {
+		$region_key = null;
+		foreach ( self::osm_region_keys( $country_code ) as $key ) {
+			if ( is_string( $key ) && ! empty( $address[ $key ] ) ) {
 				$region_key = $key;
 				break;
 			}
 		}
-		$region = $region_key ? $address[ $region_key ] : null;
+		$region      = $region_key ? $address[ $region_key ] : null;
+		$region_code = self::osm_region_code( $json['address'], $region_key, $country_code );
+		if ( empty( $region_code ) && ! empty( $region ) ) {
+			list( $region, $region_code ) = self::osm_region_name_code( $region, $country_code );
+		}
 
 		$number = self::ifnot( $address, array( 'house_number', 'house_name' ) );
 		if ( isset( $json['address']['house_number'] ) && $number === $address['house_number'] ) {
@@ -85,6 +88,12 @@ trait Sloc_OSM_Address {
 		}
 
 		$locality = self::ifnot( $address, array( 'hamlet', 'village', 'town', 'city', 'municipality', 'croft', 'isolated_dwelling' ) );
+		$district = null;
+		if ( $locality && self::osm_is_district( $locality ) ) {
+			// A council district, such as Ireland's "Kenmare Municipal District", isn't a town; it's used only when nothing else is.
+			$district = $locality;
+			$locality = null;
+		}
 		if ( $locality && 'US' === $country_code ) {
 			$locality = self::osm_strip_prefix( $locality );
 		}
@@ -97,7 +106,7 @@ trait Sloc_OSM_Address {
 			'extended-address' => self::ifnot( $address, array( 'boro', 'borough', 'neighbourhood', 'neighborhood', 'city_district', 'district', 'subdivision', 'allotments', 'quarter' ) ),
 			'locality'         => $locality,
 			'region'           => $region,
-			'region-code'      => self::osm_region_code( $json['address'], $region_key, $country_code ),
+			'region-code'      => $region_code,
 			'country-name'     => $address['country'] ?? null,
 			'postal-code'      => self::osm_postcode( $address['postcode'] ?? '', $country_code ),
 			'country-code'     => $country_code,
@@ -106,10 +115,7 @@ trait Sloc_OSM_Address {
 			'altitude'         => $this->altitude,
 			'raw'              => $json,
 		);
-		if ( empty( $addr['region-code'] ) && ! empty( $region ) ) {
-			$addr['region-code'] = self::region_code( $region, $country_code );
-		}
-		$addr = $this->osm_fill_place( $addr );
+		$addr = $this->osm_fill_place( $addr, $address['state'] ?? '' );
 
 		// A suburb names the part of the city, or stands in for a city the answer and the place data don't have.
 		if ( $suburb ) {
@@ -118,6 +124,9 @@ trait Sloc_OSM_Address {
 			} elseif ( empty( $addr['extended-address'] ) && ! self::same_name( $suburb, $addr['locality'] ) ) {
 				$addr['extended-address'] = $suburb;
 			}
+		}
+		if ( empty( $addr['locality'] ) && $district ) {
+			$addr['locality'] = $district;
 		}
 		if ( empty( $addr['country-name'] ) ) {
 			$addr['country-name'] = self::country_name( $country_code );
@@ -140,15 +149,17 @@ trait Sloc_OSM_Address {
 	/**
 	 * Fills a missing city and region from the bundled place data.
 	 *
-	 * The place is the nearest one, weighted by population, in the same country. It is used as the city only when it is
-	 * in the answer's region, so a town across a state line isn't named.
+	 * The place is the nearest one, weighted by population, in the same country. It isn't used as the city when it is
+	 * in another state than the answer's, so a town across a state line isn't named. The place data's regions are
+	 * first-level ones, such as US states or Irish provinces, so an answer without a state can't contradict it.
 	 *
 	 * @since 6.5.0
 	 *
-	 * @param array $addr Address properties.
+	 * @param array  $addr  Address properties.
+	 * @param string $state Optional. The answer's state, or other first-level division.
 	 * @return array Address properties.
 	 */
-	protected function osm_fill_place( $addr ) {
+	protected function osm_fill_place( $addr, $state = '' ) {
 		if ( ( ! empty( $addr['locality'] ) && ! empty( $addr['region'] ) ) || empty( $addr['country-code'] ) || ! class_exists( 'Sloc_Offline_Geo' ) ) {
 			return $addr;
 		}
@@ -161,28 +172,32 @@ trait Sloc_OSM_Address {
 		if ( empty( $addr['region'] ) && '' !== $region ) {
 			$addr['region']      = $region;
 			$addr['region-code'] = self::region_code( $region, $addr['country-code'] );
+			$state               = '';
 		}
-		if ( empty( $addr['locality'] ) && ( empty( $addr['region'] ) || '' === $region || self::osm_same_region( $region, $addr ) ) ) {
+		if ( empty( $addr['locality'] ) && ! self::osm_other_region( $region, (string) $state, $addr['country-code'] ) ) {
 			$addr['locality'] = $place['name'];
 		}
 		return $addr;
 	}
 
 	/**
-	 * Returns whether a region name is the address's region, by name or by its ISO 3166-2 code.
+	 * Returns whether two region names are known to be different regions: both have an ISO 3166-2 code, and the codes
+	 * differ. Names in different languages, such as "Southern District" and "מחוז הדרום", aren't a contradiction.
 	 *
 	 * @since 6.5.0
 	 *
-	 * @param string $region Region name.
-	 * @param array  $addr   Address properties, with 'region' and maybe 'region-code' and 'country-code'.
-	 * @return bool Whether they are the same.
+	 * @param string $region       Region name.
+	 * @param string $other        Other region name, which may be bilingual, such as "Northern Ireland / Tuaisceart Éireann".
+	 * @param string $country_code Country code.
+	 * @return bool Whether they are different regions.
 	 */
-	protected static function osm_same_region( $region, $addr ) {
-		if ( self::same_name( $region, $addr['region'] ) ) {
-			return true;
+	protected static function osm_other_region( $region, $other, $country_code ) {
+		if ( '' === $region || '' === $other || self::same_name( $region, $other ) ) {
+			return false;
 		}
-		$code = self::region_code( $region, $addr['country-code'] ?? '' );
-		return ! empty( $code ) && ! empty( $addr['region-code'] ) && strtoupper( $code ) === strtoupper( $addr['region-code'] );
+		$code       = self::region_code( $region, $country_code );
+		$other_code = self::osm_region_name_code( $other, $country_code )[1];
+		return ! empty( $code ) && ! empty( $other_code ) && strtoupper( $code ) !== strtoupper( $other_code );
 	}
 
 	/**
@@ -239,16 +254,66 @@ trait Sloc_OSM_Address {
 	}
 
 	/**
-	 * Returns whether a suburb is a numbered administrative district rather than a neighborhood, such as
-	 * "Manhattan Community Board 5" or "Ward 3".
+	 * Returns the address keys to take the region from, in order, for a country.
+	 *
+	 * The state, or its equivalent, comes first. In the United Kingdom and Italy, whose addresses customarily name the
+	 * county or province, the county comes first.
 	 *
 	 * @since 6.5.0
 	 *
-	 * @param string $name Suburb.
+	 * @param string $country_code Country code.
+	 * @return string[] Address keys.
+	 */
+	public static function osm_region_keys( $country_code ) {
+		$keys = in_array( $country_code, array( 'GB', 'IT' ), true ) ? array( 'county', 'state', 'region', 'state_district' ) : array( 'state', 'region', 'state_district', 'county' );
+
+		/**
+		 * Filters the address keys a Nominatim-format answer's region is taken from, in order.
+		 *
+		 * @since 6.5.0
+		 *
+		 * @param string[] $keys         Address keys, such as state, region, state_district and county.
+		 * @param string   $country_code Two-letter country code, or an empty string if it isn't known.
+		 */
+		$keys = apply_filters( 'sloc_osm_region_keys', $keys, $country_code );
+		return is_array( $keys ) ? array_values( $keys ) : array();
+	}
+
+	/**
+	 * Returns a region name and its code, choosing the name in a bilingual one, such as
+	 * "Northern Ireland / Tuaisceart Éireann", whose code is known.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param string $region       Region name.
+	 * @param string $country_code Country code.
+	 * @return array Region name and code, which is null if it isn't known.
+	 */
+	public static function osm_region_name_code( $region, $country_code ) {
+		$parts = preg_split( '/\s+[\/|]\s+/u', $region );
+		if ( count( $parts ) > 1 ) {
+			foreach ( $parts as $part ) {
+				$code = self::region_code( $part, $country_code );
+				if ( ! empty( $code ) ) {
+					return array( $part, $code );
+				}
+			}
+		}
+		$code = self::region_code( $region, $country_code );
+		return array( $region, empty( $code ) ? null : $code );
+	}
+
+	/**
+	 * Returns whether a suburb or city is an administrative district rather than a neighborhood or town, such as
+	 * "Manhattan Community Board 5", "Ward 3", Ireland's "Kenmare Municipal District" or an Israeli regional council.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param string $name Suburb or city.
 	 * @return bool Whether it is a district.
 	 */
 	public static function osm_is_district( $name ) {
-		return (bool) preg_match( '/(^|\s)(Community (Board|District)|Ward|District|Council District)\s+\d+[A-Z]?$/i', $name );
+		return (bool) preg_match( '/(^|\s)(Community (Board|District)|Ward|District|Council District)\s+\d+[A-Z]?$|\b(Municipal|Metropolitan) District\b|\bRegional Council\b|^מועצה אזורית\s/iu', $name );
 	}
 
 	/**
