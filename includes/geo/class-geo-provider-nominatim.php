@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class Geo_Provider_Nominatim extends Geo_Provider {
 	use Sloc_API_Nominatim;
+	use Sloc_OSM_Address;
 
 	/**
 	 * Constructor for the Abstract Class.
@@ -73,171 +74,14 @@ class Geo_Provider_Nominatim extends Geo_Provider {
 	/**
 	 * Convert address properties to mf2
 	 *
+	 * @since 1.0.0
+	 * @since 6.5.0 Uses the parser shared with other Nominatim-format providers, Sloc_OSM_Address.
+	 *
 	 * @param  array $json Raw JSON.
 	 * @return array $reverse microformats2 address elements in an array.
 	 */
 	protected function address_to_mf( $json ) {
-		if ( ! array_key_exists( 'address', $json ) ) {
-			return array();
-		}
-
-		$address      = $json['address'];
-		$country_code = strtoupper( $address['country_code'] ?? '' );
-
-		if ( in_array( $country_code, array( 'US', 'FR' ), true ) ) {
-			$region = self::ifnot(
-				$address,
-				array(
-					'state',
-					'county',
-				)
-			);
-		} else {
-			$region = self::ifnot(
-				$address,
-				array(
-					'region',
-					'county',
-					'state',
-					'state_district',
-				)
-			);
-		}
-
-		// Some places, such as Singapore, have no region.
-		$region_code = null;
-		if ( ! empty( $region ) ) {
-			$region_code = self::region_code( $region, $country_code );
-		}
-
-		$number = self::ifnot(
-			$address,
-			array(
-				'house_number',
-				'house_name',
-			)
-		);
-
-		$street = self::ifnot(
-			$address,
-			array(
-				'road',
-				'highway',
-				'footway',
-				'pedestrian',
-			)
-		);
-		// Adjust position of house number/name based on country practice.
-		if ( self::house_number( $country_code ) ) {
-			$street_address = $number . ' ' . $street;
-		} else {
-			$street_address = $street . ' ' . $number;
-		}
-		$street_address = trim( $street_address );
-
-		$addr = array(
-			'name'             => self::ifnot(
-				$address,
-				array(
-					'attraction',
-					'library',
-					'parking',
-					'tourism',
-					'place_of_worship',
-					'building',
-					'hotel',
-					'historic',
-					'military',
-					'office',
-					'club',
-					'craft',
-					'leisure',
-					'shop',
-					'address29',
-					'address26',
-					'emergency',
-					'natural',
-					'landuse',
-					'place',
-					'railway',
-					'man_made',
-					'aerialway',
-					'boundary',
-					'amenity',
-					'aeroway',
-					'mountain_pass',
-					'bridge',
-					'tunnel',
-					'waterway',
-				)
-			),
-			'street-number'    => $number,
-			'street'           => $street,
-			'street-address'   => $street_address,
-			'extended-address' => self::ifnot(
-				$address,
-				array(
-					'boro',
-					'borough',
-					'neighbourhood',
-					'neighborhood',
-					'city_district',
-					'district',
-					'subdivision',
-					'allotments',
-					'quarter',
-				)
-			),
-			'locality'         => self::ifnot(
-				$address,
-				array(
-					'hamlet',
-					'village',
-					'town',
-					'city',
-					'municipality',
-					'croft',
-					'isolated_dwelling',
-					'suburb',
-				)
-			),
-			'region'           => $region,
-			'region-code'      => array_key_exists( 'state_code', $address ) ? strtoupper( $address['state_code'] ) : $region_code,
-			'country-name'     => self::ifnot(
-				$address,
-				array(
-					'country',
-				)
-			),
-			'postal-code'      => self::ifnot(
-				$address,
-				array(
-					'postcode',
-				)
-			),
-			'country-code'     => $country_code,
-
-			'latitude'         => $this->latitude,
-			'longitude'        => $this->longitude,
-			'altitude'         => $this->altitude,
-			'raw'              => $json,
-		);
-		if ( is_null( $addr['country-name'] ) ) {
-			$addr['country-name'] = self::country_name( $addr['country-code'] );
-		}
-		if ( isset( $json['extratags'] ) ) {
-			$addr['url']   = $json['extratags']['website'] ?? null;
-			$addr['photo'] = $json['extratags']['image'] ?? null;
-		}
-		$addr = array_filter( $addr );
-		if ( ! array_key_exists( 'display-name', $addr ) ) {
-			$addr['display-name'] = $this->display_name( $addr );
-		}
-		$tz = $this->timezone();
-		if ( $tz ) {
-			$addr = array_merge( $addr, $tz );
-		}
-		return $addr;
+		return $this->osm_address_to_mf( $json );
 	}
 
 
