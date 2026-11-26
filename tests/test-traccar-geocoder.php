@@ -39,7 +39,6 @@ class TraccarGeocoderTest extends WP_UnitTestCase {
 		update_option( 'sloc_elevation_provider', 'sloc_test' );
 		delete_option( Sloc_Provider_Errors::OPTION );
 		delete_option( Geo_Provider_Traccar_Geocoder::OPTION );
-		delete_option( Geo_Provider_Traccar_Geocoder::DISTANCE_OPTION );
 		// Core treats the documentation range as not external, so allow it explicitly.
 		add_filter( 'http_request_host_is_external', '__return_true' );
 		$this->registered = Loc_Config::geo_provider( 'traccar_geocoder' );
@@ -133,7 +132,7 @@ class TraccarGeocoderTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * An answer is parsed into the address, with the first server's key and no distance by default.
+	 * An answer is parsed into the address, with the first server's key and no search distance, which servers up to 1.1.2 don't apply as documented.
 	 */
 	public function test_reverse_lookup() {
 		$this->mock_http( array( self::TRAVEL . '/reverse' => array( 'body' => $this->city_hall() ) ) );
@@ -206,19 +205,27 @@ class TraccarGeocoderTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The search distance setting is sent, and kept between 0 and the maximum.
+	 * An answer without a country, as from a server built from US state extracts, gets the country from the location,
+	 * so the region code and country name are filled in.
 	 */
-	public function test_distance() {
-		update_option( Geo_Provider_Traccar_Geocoder::DISTANCE_OPTION, 30 );
-		$this->mock_http( array( '' => array( 'body' => $this->city_hall() ) ) );
-		$this->provider()->reverse_lookup();
-		$this->assertSame( '30', $this->last_request()['query']['distance'] );
-
-		$this->assertSame( 0, Geo_Provider_Traccar_Geocoder::sanitize_distance( 'far' ) );
-		$this->assertSame( 0, Geo_Provider_Traccar_Geocoder::sanitize_distance( -5 ) );
-		$this->assertSame( 75, Geo_Provider_Traccar_Geocoder::sanitize_distance( '75' ) );
-		$this->assertSame( Geo_Provider_Traccar_Geocoder::MAX_DISTANCE, Geo_Provider_Traccar_Geocoder::sanitize_distance( 50000 ) );
-		$this->assertSame( 0, Geo_Provider_Traccar_Geocoder::sanitize_distance( null ) );
+	public function test_country_from_location() {
+		$answer = array(
+			'display_name' => 'John F Kennedy Boulevard 1400, 19107 Philadelphia',
+			'address'      => array(
+				'house_number' => '1400',
+				'road'         => 'John F Kennedy Boulevard',
+				'city'         => 'Philadelphia',
+				'state'        => 'Pennsylvania',
+				'county'       => 'Philadelphia County',
+				'postcode'     => '19107',
+			),
+		);
+		$this->mock_http( array( '' => array( 'body' => $answer ) ) );
+		$addr = $this->provider()->reverse_lookup();
+		$this->assertSame( 'US', $addr['country-code'] );
+		$this->assertSame( 'United States', $addr['country-name'] );
+		$this->assertSame( 'PA', $addr['region-code'] );
+		$this->assertSame( '1400 John F Kennedy Boulevard', $addr['street-address'] );
 	}
 
 	/**
@@ -534,7 +541,7 @@ class TraccarGeocoderTest extends WP_UnitTestCase {
 		global $wp_registered_settings, $wp_settings_fields;
 		Geo_Provider_Traccar_Geocoder::init();
 		$this->assertArrayHasKey( Geo_Provider_Traccar_Geocoder::OPTION, $wp_registered_settings );
-		$this->assertArrayHasKey( Geo_Provider_Traccar_Geocoder::DISTANCE_OPTION, $wp_registered_settings );
+		$this->assertArrayNotHasKey( 'sloc_traccar_geocoder_distance', $wp_registered_settings );
 		$this->assertFalse( $wp_registered_settings[ Geo_Provider_Traccar_Geocoder::OPTION ]['show_in_rest'], 'Keys stay out of REST.' );
 
 		Geo_Provider_Traccar_Geocoder::admin_init();
