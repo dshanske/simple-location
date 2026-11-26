@@ -557,7 +557,8 @@ abstract class Sloc_Provider {
 	 *
 	 * @since 6.1.0
 	 * @since 6.5.0 Read from the country borders bundled in data/geo/, and at sea from a place within 15 km; from the
-	 *              timezone only if that data is missing. See Sloc_Offline_Geo::country().
+	 *              timezone only if that data is missing. See Sloc_Offline_Geo::country(). The site's country choices
+	 *              apply; see Sloc_Address_Finisher::country().
 	 *
 	 * @param float $latitude  Latitude.
 	 * @param float $longitude Longitude.
@@ -565,7 +566,7 @@ abstract class Sloc_Provider {
 	 */
 	public static function country_for_location( $latitude, $longitude ) {
 		if ( Sloc_Offline_Geo::has_countries() ) {
-			return Sloc_Offline_Geo::country( $latitude, $longitude );
+			return Sloc_Address_Finisher::country( Sloc_Offline_Geo::country( $latitude, $longitude ), $latitude, $longitude );
 		}
 		$timezone = Loc_Timezone::timezone_for_location( $latitude, $longitude );
 		if ( ! $timezone instanceof Timezone_Result || ! $timezone->timezone instanceof DateTimeZone ) {
@@ -573,7 +574,7 @@ abstract class Sloc_Provider {
 		}
 		$location = $timezone->timezone->getLocation();
 		$country  = is_array( $location ) ? (string) ( $location['country_code'] ?? '' ) : '';
-		return ( 2 === strlen( $country ) && '??' !== $country ) ? $country : '';
+		return Sloc_Address_Finisher::country( ( 2 === strlen( $country ) && '??' !== $country ) ? $country : '', $latitude, $longitude );
 	}
 
 	/**

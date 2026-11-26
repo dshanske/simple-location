@@ -25,12 +25,12 @@ add_filter(
 
 ## Files
 
-- [includes/class-geo-provider.php:198](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L198)
+- [includes/class-geo-provider.php:210](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L210)
 ```php
 apply_filters( 'location_display_name', $reverse['display_name'], $reverse )
 ```
 
-- [includes/class-geo-provider.php:239](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L239)
+- [includes/class-geo-provider.php:251](https://github.com/dshanske/simple-location/blob/trunk/includes/class-geo-provider.php#L251)
 ```php
 apply_filters( 'location_display_name', $return, $reverse )
 ```

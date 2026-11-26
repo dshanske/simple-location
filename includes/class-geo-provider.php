@@ -182,6 +182,18 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @return string|boolean Return Display Name or False if Failed.
 	 */
 	public function display_name( $reverse ) {
+		return self::format_display_name( $reverse );
+	}
+
+	/**
+	 * Generates the display name for an address, as display_name() does, without a provider.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param array $reverse Microformats2 address properties.
+	 * @return string|boolean Display name, or false if it isn't an address.
+	 */
+	public static function format_display_name( $reverse ) {
 		if ( ! is_array( $reverse ) ) {
 			return false;
 		}

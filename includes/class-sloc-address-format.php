@@ -35,6 +35,14 @@ class Sloc_Address_Format {
 	protected static $names = null;
 
 	/**
+	 * Country and region names by language, once read.
+	 *
+	 * @since 6.5.0
+	 * @var array
+	 */
+	protected static $localized = array();
+
+	/**
 	 * Returns the path of the table.
 	 *
 	 * @since 6.5.0
@@ -58,8 +66,9 @@ class Sloc_Address_Format {
 	 * @since 6.5.0
 	 */
 	public static function reset() {
-		self::$table = null;
-		self::$names = null;
+		self::$table     = null;
+		self::$names     = null;
+		self::$localized = array();
 	}
 
 	/**
@@ -67,7 +76,7 @@ class Sloc_Address_Format {
 	 *
 	 * @since 6.5.0
 	 *
-	 * @return array 'names' (country => lowercased name => code) and 'english' (country => code => English name).
+	 * @return array 'names': country => lowercased name => code.
 	 */
 	protected static function names() {
 		if ( null === self::$names ) {
@@ -80,10 +89,7 @@ class Sloc_Address_Format {
 			 */
 			$file        = (string) apply_filters( 'sloc_region_names_file', plugin_dir_path( __DIR__ ) . 'data/region-names.json' );
 			$json        = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- A local file.
-			self::$names = array(
-				'names'   => is_array( $json['names'] ?? null ) ? $json['names'] : array(),
-				'english' => is_array( $json['english'] ?? null ) ? $json['english'] : array(),
-			);
+			self::$names = array( 'names' => is_array( $json['names'] ?? null ) ? $json['names'] : array() );
 		}
 		return self::$names;
 	}
@@ -207,17 +213,86 @@ class Sloc_Address_Format {
 	}
 
 	/**
-	 * Returns the English name of a region, from Wikidata, such as Southern District for IL-D.
+	 * Returns the site's language, as the names data has it: the language part of the locale, such as fr for fr_CA.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @return string Language code, such as en.
+	 */
+	public static function site_language() {
+		$locale   = function_exists( 'determine_locale' ) ? determine_locale() : get_locale();
+		$language = strtolower( (string) strtok( (string) $locale, '_-' ) );
+
+		/**
+		 * Filters the language country and region names are shown in.
+		 *
+		 * @since 6.5.0
+		 *
+		 * @param string $language Language code, such as en, from the site's locale.
+		 * @param string $locale   The site's locale, such as en_US.
+		 */
+		return (string) apply_filters( 'sloc_address_language', '' === $language ? 'en' : $language, (string) $locale );
+	}
+
+	/**
+	 * Returns the country and region names in a language, built from Wikidata in data/names/{language}.json.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param string $language Language code.
+	 * @return array 'countries' (code => name) and 'regions' (ISO 3166-2 code => name), empty without data.
+	 */
+	protected static function localized( $language ) {
+		$language = strtolower( (string) $language );
+		if ( ! isset( self::$localized[ $language ] ) ) {
+			$json = null;
+			if ( preg_match( '/^[a-z]{2,3}$/', $language ) ) {
+				/**
+				 * Filters the folder of the country and region names by language.
+				 *
+				 * @since 6.5.0
+				 *
+				 * @param string $dir Path of data/names/, with a trailing slash.
+				 */
+				$file = trailingslashit( (string) apply_filters( 'sloc_address_names_dir', plugin_dir_path( __DIR__ ) . 'data/names/' ) ) . $language . '.json';
+				$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- A local file.
+			}
+			self::$localized[ $language ] = array(
+				'countries' => is_array( $json['countries'] ?? null ) ? $json['countries'] : array(),
+				'regions'   => is_array( $json['regions'] ?? null ) ? $json['regions'] : array(),
+			);
+		}
+		return self::$localized[ $language ];
+	}
+
+	/**
+	 * Returns a country's name in a language, such as Israël for IL in French.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param string $country_code Country code.
+	 * @param string $language     Optional. Language code. Default the site's language.
+	 * @return string|null Name, or null if it isn't known.
+	 */
+	public static function country_name( $country_code, $language = '' ) {
+		$names = self::localized( '' === $language ? self::site_language() : $language )['countries'];
+		$name  = $names[ strtoupper( (string) $country_code ) ] ?? null;
+		return is_string( $name ) && '' !== $name ? $name : null;
+	}
+
+	/**
+	 * Returns a region's name in a language, such as Southern District for IL-D in English.
 	 *
 	 * @since 6.5.0
 	 *
 	 * @param string $country_code Country code.
 	 * @param string $code         Region code without the country, such as D.
-	 * @return string|null English name, or null if it isn't known.
+	 * @param string $language     Optional. Language code. Default the site's language.
+	 * @return string|null Name, or null if it isn't known.
 	 */
-	public static function english_region( $country_code, $code ) {
-		$names = self::names()['english'][ strtoupper( (string) $country_code ) ] ?? array();
-		$code  = strtoupper( (string) $code );
-		return is_array( $names ) && isset( $names[ $code ] ) && is_string( $names[ $code ] ) ? $names[ $code ] : null;
+	public static function region_name( $country_code, $code, $language = '' ) {
+		$names = self::localized( '' === $language ? self::site_language() : $language )['regions'];
+		$name  = $names[ strtoupper( $country_code . '-' . $code ) ] ?? null;
+		return is_string( $name ) && '' !== $name ? $name : null;
 	}
 }

@@ -410,6 +410,7 @@ abstract class Venue_Provider extends Sloc_Provider {
 	 *
 	 * @since 6.1.0
 	 * @since 6.4.0 Applies the filter.
+	 * @since 6.5.0 Venues get the site's country choices and names in its language; see Sloc_Address_Finisher.
 	 *
 	 * @return array|WP_Error Array with the venues as h-cards under 'items', or an error.
 	 */
@@ -430,6 +431,8 @@ abstract class Venue_Provider extends Sloc_Provider {
 			if ( is_array( $item ) && ! empty( $item ) && empty( $item['provider'] ) ) {
 				$items[ $key ]['provider'] = $this->slug;
 			}
+			// The site's country choices, and names in its language.
+			$items[ $key ] = Sloc_Address_Finisher::finish( $items[ $key ] );
 		}
 		if ( '' !== $this->filter && ! $this->searches_by_name() ) {
 			$filter = $this->filter;

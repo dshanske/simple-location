@@ -472,6 +472,14 @@ The plugin offers providers for:
 * Weather - Retrieves weather based on location or station ID
 * Map - Provides maps for display
 
+### How do I choose a location's country?
+
+Countries come from the provider, or from the bundled borders when it gives none. To use one country code instead of another everywhere, add a map to wp-config.php, such as `define( 'SLOC_COUNTRY_CODES', array( 'PS' => 'IL' ) );`. The `sloc_country_codes` filter changes the map, and `sloc_country_for_location`, given the code, latitude and longitude, can decide by location. When the country changes, its name follows and a region code the new country doesn't have is dropped. This applies to every lookup from then on; saved posts keep their locations.
+
+### Why are country and region names in my site's language?
+
+Some providers, such as Traccar Geocoder, give names in the local language, such as "ישראל" or "Бургас". Country and region names are shown in your site's language when the bundled names have them, and the provider's names are kept: under `local` in a lookup's result, and as the `local_name` of new location terms. The `sloc_address_language` filter chooses another language. Town names stay as the provider gives them.
+
 ### Where does the bundled data come from?
 
 The plugin includes data files in its `data` folder, so these lookups don't need an online service:
@@ -479,11 +487,11 @@ The plugin includes data files in its `data` folder, so these lookups don't need
 * Airports: [OurAirports](https://ourairports.com/data/), public domain.
 * Airlines: [OpenFlights](https://openflights.org/data), licensed under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/).
 * Countries and regions: ISO 3166 data from [php-isocodes](https://github.com/sokil/php-isocodes).
-* Country borders, for the offline lookup and for regional providers: [Natural Earth](https://www.naturalearthdata.com/) 1:10m countries, public domain. Natural Earth draws some disputed areas, such as Crimea, by who controls them.
+* Country borders, for the offline lookup and for regional providers: [Natural Earth](https://www.naturalearthdata.com/) 1:10m countries, public domain. Natural Earth draws some disputed areas, such as Crimea, by who controls them. The same goes for Jerusalem, the West Bank and Gaza, where the bundled data and the geocoders follow who controls an area, or ISO 3166, without taking a position. A site can choose otherwise; see "How do I choose a location's country?"
 * Timezone borders: [timezone-boundary-builder](https://github.com/evansiroky/timezone-boundary-builder), with oceans, from [OpenStreetMap](https://www.openstreetmap.org/copyright) data, licensed under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/). The grid built from it in `data/geo/timezones.*` is offered under the same license.
 * Places of at least 1000 people and their regions: [GeoNames](https://www.geonames.org/), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 * Address conventions by country, such as whether the house number comes before the street and which region an address names: [address-formatting](https://github.com/OpenCageData/address-formatting) by OpenCage, licensed under the [MIT License](https://opensource.org/license/mit). `data/address-formats.json` records the version used.
-* Region names in each country's languages, and their English names: [Wikidata](https://www.wikidata.org/), under [CC0](https://creativecommons.org/publicdomain/zero/1.0/), in `data/region-names.json`.
+* Region names in each country's languages, and country and region names by language: [Wikidata](https://www.wikidata.org/), under [CC0](https://creativecommons.org/publicdomain/zero/1.0/), in `data/region-names.json` and `data/names/`.
 
 Developers can refresh the station, airport, airline, border, place and address format files with `composer update-data`.
 

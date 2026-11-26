@@ -59,9 +59,16 @@
 - [~~`sloc_local_api_protected`~~](sloc_local_api_protected) **DEPRECATED** Use `sloc_local_api_public` instead
 - [`sloc_local_api_public`](sloc_local_api_public) Filters whether the local airport and timezone lookup endpoints are open to everyone.
 
+## class-sloc-address-finisher.php
+
+- [`sloc_country_codes`](sloc_country_codes) Filters the country codes used instead of others.
+- [`sloc_country_for_location`](sloc_country_for_location) Filters the country of a location.
+
 ## class-sloc-address-format.php
 
 - [`sloc_address_format_file`](sloc_address_format_file) Filters the path of the address format table.
+- [`sloc_address_language`](sloc_address_language) Filters the language country and region names are shown in.
+- [`sloc_address_names_dir`](sloc_address_names_dir) Filters the folder of the country and region names by language.
 - [`sloc_region_names_file`](sloc_region_names_file) Filters the path of the region names built from Wikidata.
 
 ## class-sloc-geojson.php
