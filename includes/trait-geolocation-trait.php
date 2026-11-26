@@ -155,55 +155,83 @@ trait GeoLocation_Trait {
 	/**
 	 * Return Data on a Region by Name
 	 *
+	 * @since 6.5.0 The inexact match only counts ISO names found as whole words, and picks the longest, so
+	 *              "Sofia City" isn't given Sofia Province (#872).
+	 *
 	 * @param string $name Region Name.
 	 * @param string $country ISO2 Country Code.
+	 * @param bool   $inexact Optional. Whether to fall back to an ISO name contained in the name. Default true.
 	 * @return array|boolean Region Data or false if failed.
 	 */
-	public static function region_data_name( $name, $country ) {
-		$name    = trim( $name );
-		$country = strtoupper( trim( $country ) );
-		$codes   = array();
+	public static function region_data_name( $name, $country, $inexact = true ) {
+		$name    = trim( (string) $name );
+		$country = strtoupper( trim( (string) $country ) );
 
 		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/iso_3166-2/' . $country . '.json';
-		if ( ! sloc_file_exists( $file ) ) {
+		if ( '' === $name || ! sloc_file_exists( $file ) ) {
 			return false;
 		}
 
 		$codes = json_decode( sloc_get_contents( $file ), true );
+		if ( ! is_array( $codes ) ) {
+			return false;
+		}
 
 		$match = wp_filter_object_list( $codes, array( 'name' => $name ) );
 
 		if ( is_array( $match ) && 1 === count( $match ) ) {
 			return array_shift( $match );
 		}
+		if ( ! $inexact ) {
+			return false;
+		}
 
-		// If it cannot find a match, try to find an inexact match.
+		// Otherwise the longest ISO name contained in the name as whole words, also without accents.
+		$best   = false;
+		$length = 0;
 		foreach ( $codes as $code ) {
-			if ( str_contains( $name, $code['name'] ) ) {
-				return $code;
+			if ( ! is_array( $code ) || empty( $code['name'] ) ) {
+				continue;
 			}
-			// To cover non-latin characters do a string comparison.
-			if ( str_contains( $name, iconv( 'UTF-8', 'ASCII//TRANSLIT', $code['name'] ) ) ) {
-				return $code;
+			foreach ( array_unique( array( $code['name'], remove_accents( $code['name'] ) ) ) as $candidate ) {
+				$pattern = '/(?<![\p{L}\p{N}])' . preg_quote( $candidate, '/' ) . '(?![\p{L}\p{N}])/iu';
+				if ( mb_strlen( $candidate ) > $length && ( preg_match( $pattern, $name ) || preg_match( $pattern, remove_accents( $name ) ) ) ) {
+					$best   = $code;
+					$length = mb_strlen( $candidate );
+				}
 			}
 		}
 
-		return false;
+		return $best;
 	}
 
 	/**
 	 * Turn a Region Name into a Region Code.
+	 *
+	 * @since 6.5.0 An exact ISO name first, then names in other languages from Sloc_Address_Format::code(), then an
+	 *              inexact ISO match (#872).
 	 *
 	 * @param string $name Region Name.
 	 * @param string $country Country Code.
 	 * @return string|boolean Region Code or false if failed.
 	 */
 	public static function region_code( $name, $country ) {
-		$name    = trim( $name );
-		$country = strtoupper( trim( $country ) );
+		$name    = trim( (string) $name );
+		$country = strtoupper( trim( (string) $country ) );
+
+		$match = self::region_data_name( $name, $country, false );
+		if ( is_array( $match ) ) {
+			return str_replace( $country . '-', '', $match['code'] );
+		}
+
+		if ( class_exists( 'Sloc_Address_Format' ) ) {
+			$code = Sloc_Address_Format::code( $country, $name );
+			if ( $code ) {
+				return $code;
+			}
+		}
 
 		$match = self::region_data_name( $name, $country );
-
 		if ( is_array( $match ) ) {
 			return str_replace( $country . '-', '', $match['code'] );
 		}
