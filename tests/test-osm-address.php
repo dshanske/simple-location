@@ -378,6 +378,8 @@ class OsmAddressTest extends WP_UnitTestCase {
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'Kenmare Municipal District' ) );
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'The Metropolitan District of Limerick City' ) );
 		$this->assertSame( 'Limerick', Sloc_Address_Format::clean( 'IE', 'city', 'The Metropolitan District of Limerick City' ) );
+		$this->assertSame( 'Cobh', Sloc_Address_Format::clean( 'IE', 'city', 'Municipal District of Cobh' ), 'Not "of Cobh".' );
+		$this->assertSame( 'Cahir — Cashel', Sloc_Address_Format::clean( 'IE', 'city', 'The Municipal District of Cahir — Cashel' ) );
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'Inns Quay A Ward 1986' ) );
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'מועצה אזורית תמר' ) );
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'Tamar Regional Council' ) );

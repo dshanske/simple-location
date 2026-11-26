@@ -42,6 +42,21 @@ class Sloc_Address_Format_Builder {
 	);
 
 	/**
+	 * Cleanup rules of our own, run before OpenCage's: component, PHP regular expression and replacement, by country.
+	 *
+	 * Ireland's comes first so "Municipal District of Cobh" becomes Cobh, not "of Cobh" after OpenCage's rule that
+	 * removes "Municipal District".
+	 *
+	 * @since 6.5.0
+	 * @var array
+	 */
+	const FIRST_RULES = array(
+		'IE' => array(
+			array( '', '/^(The )?(Municipal|Metropolitan) District of\s+/iu', '' ),
+		),
+	);
+
+	/**
 	 * Cleanup rules of our own, added to OpenCage's: component, PHP regular expression and replacement, by country.
 	 *
 	 * @since 6.5.0
@@ -215,7 +230,7 @@ class Sloc_Address_Format_Builder {
 				$rules[] = array( $component, $regex, $replacement );
 			}
 		}
-		return array_merge( $rules, self::EXTRA_RULES[ $code ] ?? array() );
+		return array_merge( self::FIRST_RULES[ $code ] ?? array(), $rules, self::EXTRA_RULES[ $code ] ?? array() );
 	}
 
 	/**
