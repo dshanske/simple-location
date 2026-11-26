@@ -277,6 +277,8 @@ class Simple_Location_Plugin {
 			'class-sloc-provider-errors.php', // Provider errors for administrators.
 			'class-loc-config.php', // Configuration and Settings Page.
 			'class-sloc-track-tool.php', // Tools > Location Track.
+			'class-sloc-location-repair.php', // Repairs location data saved by earlier versions.
+			'class-sloc-location-repair-tool.php', // Tools > Location Repair, and wp location repair.
 			'class-sloc-weather-fill.php', // Readings filled in from Open-Meteo, and Tools > Weather Fill.
 			'class-timezone-result.php',
 			'class-astronomical-calculator.php', // Calculates sunrise sunset etc.
