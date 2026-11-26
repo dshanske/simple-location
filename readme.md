@@ -482,7 +482,7 @@ Some providers, such as Traccar Geocoder, give names in the local language, such
 
 ### How do I repair locations saved by earlier versions?
 
-Tools > Location Repair, or `wp location repair --user=admin`, brings older location data up to date: region codes stored as names or numbers, duplicate regions and towns, towns stored straight under their country, broken locations, and posts with coordinates but no location. Preview first; nothing changes until you choose Repair, or add `--apply`. Merged locations redirect to the ones kept. Posts are looked up from the data that comes with the plugin unless you choose your geocoding providers, and posts whose location isn't public are left out. Stored addresses are counted but never changed.
+Tools > Location Repair, or `wp location repair --user=admin`, brings older location data up to date: region codes stored as names or numbers, duplicate regions and towns, towns stored straight under their country, broken locations, and posts with coordinates but no location. Preview first; nothing changes until you choose Repair, or add `--apply`. Merged locations redirect to the ones kept. Posts are looked up from the data that comes with the plugin, or through your geocoding providers, or from that data first and through your providers only when it finds no town or region, so paid lookups are made only where they add something; the preview says how many posts would be sent to your providers without asking them. Posts whose location is only a country or region can be moved to their town, and posts whose location isn't public are left out. Stored addresses are counted but never changed.
 
 ### Where does the bundled data come from?
 

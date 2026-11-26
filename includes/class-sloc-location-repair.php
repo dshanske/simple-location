@@ -69,6 +69,11 @@ class Sloc_Location_Repair {
 				'description' => __( 'Gives posts with public coordinates but no location term one, looked up from their coordinates.', 'simple-location' ),
 				'default'     => true,
 			),
+			'coarse'              => array(
+				'label'       => __( 'Coarse locations', 'simple-location' ),
+				'description' => __( 'Looks up posts with public coordinates whose location is only a country or a region, and moves them to the town found in the same country.', 'simple-location' ),
+				'default'     => false,
+			),
 			'relookup'            => array(
 				'label'       => __( 'Regions without a code', 'simple-location' ),
 				'description' => __( 'Looks up again, through your geocoding providers, the posts in regions that have no code, such as districts stored as regions, and removes the regions left empty.', 'simple-location' ),
@@ -97,8 +102,9 @@ class Sloc_Location_Repair {
 	 * @param array    $args  {
 	 *     Optional. Arguments.
 	 *
-	 *     @type string $lookup 'offline' to look up posts from the bundled data, or 'chain' through the geocoding
-	 *                          providers. Default 'offline'.
+	 *     @type string $lookup 'offline' to look up posts from the bundled data; 'auto' from the bundled data, and through
+	 *                          the geocoding providers only when its answer is thin; or 'chain' through the providers.
+	 *                          Default 'offline'.
 	 *     @type int    $limit  Most posts to look up in a run. Default 50.
 	 * }
 	 * @return array Step => list of changes, each with 'object' ('term' or 'post'), 'id', 'name' and 'change'.
@@ -545,32 +551,143 @@ class Sloc_Location_Repair {
 	}
 
 	/**
-	 * Looks up the address of a location.
+	 * Returns whether an address from the bundled data is too thin to keep, so a provider is worth asking: it has no
+	 * town, or no region where the country's addresses name one.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param array $address Address.
+	 * @return bool Whether it is.
+	 */
+	public static function is_thin( $address ) {
+		if ( empty( $address['locality'] ) ) {
+			return true;
+		}
+		return null !== Sloc_Address_Format::region_key( (string) ( $address['country-code'] ?? '' ) ) && empty( $address['region-code'] );
+	}
+
+	/**
+	 * Looks up a location's address from the bundled data.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param float $latitude  Latitude.
+	 * @param float $longitude Longitude.
+	 * @return array|null Address, or null if none was found.
+	 */
+	protected static function offline_address( $latitude, $longitude ) {
+		$provider = Loc_Config::geo_provider( 'offline' );
+		if ( ! $provider ) {
+			return null;
+		}
+		$provider->set( $latitude, $longitude );
+		$address = Sloc_Address_Finisher::finish( $provider->reverse_lookup() );
+		return is_array( $address ) && ! empty( $address['country-code'] ) ? $address : null;
+	}
+
+	/**
+	 * Looks up a location's address, the way the lookup setting says, without asking providers in a preview.
+	 *
+	 * 'offline' uses the bundled data; 'chain' the geocoding providers; 'auto' the bundled data, and the providers only
+	 * when its answer is thin (see is_thin()), so paid lookups are made only where they add something.
 	 *
 	 * @since 6.5.0
 	 *
 	 * @param float  $latitude  Latitude.
 	 * @param float  $longitude Longitude.
-	 * @param string $lookup    'offline' or 'chain'.
-	 * @return array|null Address, or null if none was found.
+	 * @param string $lookup    'offline', 'auto' or 'chain'.
+	 * @param bool   $apply     Whether this is a run; a preview never asks the providers.
+	 * @return array 'address' (array, or null if none, or not yet in a preview) and 'provider' (whether the providers
+	 *               are, or in a preview would be, asked).
 	 */
-	protected static function lookup( $latitude, $longitude, $lookup ) {
-		if ( 'chain' === $lookup ) {
-			$address = Sloc_Provider_Chain::reverse_lookup( $latitude, $longitude );
-		} else {
-			$provider = Loc_Config::geo_provider( 'offline' );
-			if ( ! $provider ) {
-				return null;
-			}
-			$provider->set( $latitude, $longitude );
-			$address = Sloc_Address_Finisher::finish( $provider->reverse_lookup() );
+	protected static function lookup( $latitude, $longitude, $lookup, $apply ) {
+		$offline = 'chain' === $lookup ? null : self::offline_address( $latitude, $longitude );
+		if ( 'offline' === $lookup || ( 'auto' === $lookup && $offline && ! self::is_thin( $offline ) ) ) {
+			return array(
+				'address'  => $offline,
+				'provider' => false,
+			);
 		}
-		return is_array( $address ) && ! empty( $address['country-code'] ) ? $address : null;
+		if ( ! $apply ) {
+			return array(
+				'address'  => null,
+				'provider' => true,
+			);
+		}
+		$address = Sloc_Provider_Chain::reverse_lookup( $latitude, $longitude );
+		return array(
+			'address'  => ( is_array( $address ) && ! empty( $address['country-code'] ) ) ? $address : $offline,
+			'provider' => true,
+		);
+	}
+
+	/**
+	 * Returns a short name for an address: its town, region and country, as known.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param array $address Address.
+	 * @return string Name.
+	 */
+	protected static function address_label( $address ) {
+		return implode( ', ', array_filter( array( $address['locality'] ?? '', $address['region'] ?? '', $address['country-code'] ?? '' ) ) );
+	}
+
+	/**
+	 * Returns a post's coordinates, if it has them and its location is public; location terms are public, so posts
+	 * whose location is private or protected are left out.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param int $post_id Post ID.
+	 * @return array|false Latitude and longitude, 'private' if the location isn't public, or false without coordinates.
+	 */
+	protected static function post_coordinates( $post_id ) {
+		if ( 'public' !== get_post_geodata( $post_id, 'visibility' ) ) {
+			return 'private';
+		}
+		$latitude  = get_post_meta( $post_id, 'geo_latitude', true );
+		$longitude = get_post_meta( $post_id, 'geo_longitude', true );
+		if ( ! is_numeric( $latitude ) || ! is_numeric( $longitude ) ) {
+			return false;
+		}
+		return array( (float) $latitude, (float) $longitude );
+	}
+
+	/**
+	 * Adds the summary lines of a lookup step: posts left out, and posts sent, or that would be sent, to the providers.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param array $changes  Changes.
+	 * @param int   $private  Posts left out because their location isn't public.
+	 * @param int   $provider Posts the providers were, or would be, asked about.
+	 * @param bool  $apply    Whether this is a run.
+	 * @return array Changes.
+	 */
+	protected static function lookup_summary( $changes, $private, $provider, $apply ) {
+		if ( $private ) {
+			/* translators: %d: Number of posts. */
+			$changes[] = self::change( 'post', 0, '', sprintf( _n( '%d post left out because its location isn\'t public', '%d posts left out because their location isn\'t public', $private, 'simple-location' ), $private ) );
+		}
+		if ( $provider ) {
+			$changes[] = self::change(
+				'post',
+				0,
+				'',
+				$apply
+					/* translators: %d: Number of posts. */
+					? sprintf( _n( '%d post was looked up through your geocoding providers', '%d posts were looked up through your geocoding providers', $provider, 'simple-location' ), $provider )
+					/* translators: %d: Number of posts. */
+					: sprintf( _n( '%d post would be sent to your geocoding providers', '%d posts would be sent to your geocoding providers', $provider, 'simple-location' ), $provider )
+			);
+		}
+		return $changes;
 	}
 
 	/**
 	 * Posts without a location: posts with public coordinates but no location term get one, from their coordinates.
-	 * Posts whose location is private or protected are left out, since location terms are public.
+	 * A preview shows the location each would get from the bundled data, or that it would be sent to the providers.
 	 *
 	 * @since 6.5.0
 	 *
@@ -579,38 +696,140 @@ class Sloc_Location_Repair {
 	 * @return array Changes.
 	 */
 	protected static function untagged( $apply, $args ) {
-		$changes = array();
-		$skipped = 0;
+		$changes  = array();
+		$private  = 0;
+		$provider = 0;
 		foreach ( self::untagged_posts( (int) $args['limit'] ) as $post_id ) {
-			if ( 'public' !== get_post_geodata( $post_id, 'visibility' ) ) {
-				++$skipped;
+			$where = self::post_coordinates( $post_id );
+			if ( 'private' === $where ) {
+				++$private;
 				continue;
 			}
-			$latitude  = get_post_meta( $post_id, 'geo_latitude', true );
-			$longitude = get_post_meta( $post_id, 'geo_longitude', true );
-			if ( ! is_numeric( $latitude ) || ! is_numeric( $longitude ) ) {
+			if ( ! $where ) {
 				continue;
 			}
+			$found    = self::lookup( $where[0], $where[1], $args['lookup'], $apply );
+			$provider += $found['provider'] ? 1 : 0;
+			$title    = get_the_title( $post_id );
 			if ( ! $apply ) {
-				$changes[] = self::change( 'post', $post_id, get_the_title( $post_id ), __( 'Will be given a location from its coordinates', 'simple-location' ) );
+				if ( $found['address'] ) {
+					/* translators: %s: Location, such as Philadelphia, Pennsylvania, US. */
+					$changes[] = self::change( 'post', $post_id, $title, sprintf( __( 'Will be given the location %s', 'simple-location' ), self::address_label( $found['address'] ) ) );
+				} elseif ( $found['provider'] ) {
+					$changes[] = self::change( 'post', $post_id, $title, __( 'Will be looked up through your geocoding providers', 'simple-location' ) );
+				} else {
+					$changes[] = self::change( 'post', $post_id, $title, __( 'No location found', 'simple-location' ) );
+				}
 				continue;
 			}
-			$address = self::lookup( (float) $latitude, (float) $longitude, $args['lookup'] );
-			$term    = $address ? Location_Taxonomy::get_location( $address, true ) : false;
+			$term = $found['address'] ? Location_Taxonomy::get_location( $found['address'], true ) : false;
 			if ( ! $term ) {
-				$changes[] = self::change( 'post', $post_id, get_the_title( $post_id ), __( 'No location found', 'simple-location' ) );
+				$changes[] = self::change( 'post', $post_id, $title, __( 'No location found', 'simple-location' ) );
 				continue;
 			}
 			Location_Taxonomy::set_location( $post_id, (int) $term );
 			$location  = get_term( (int) $term, 'location' );
 			/* translators: %s: Location name. */
-			$changes[] = self::change( 'post', $post_id, get_the_title( $post_id ), sprintf( __( 'Given the location %s', 'simple-location' ), $location instanceof WP_Term ? $location->name : (string) $term ) );
+			$changes[] = self::change( 'post', $post_id, $title, sprintf( __( 'Given the location %s', 'simple-location' ), $location instanceof WP_Term ? $location->name : (string) $term ) );
 		}
-		if ( $skipped ) {
-			/* translators: %d: Number of posts. */
-			$changes[] = self::change( 'post', 0, '', sprintf( _n( '%d post left out because its location isn\'t public', '%d posts left out because their location isn\'t public', $skipped, 'simple-location' ), $skipped ) );
+		return self::lookup_summary( $changes, $private, $provider, $apply );
+	}
+
+	/**
+	 * Coarse locations: posts with public coordinates whose location is only a country or a region are looked up, and
+	 * moved to the town found when it is in the same country.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param bool  $apply Whether to change anything.
+	 * @param array $args  Arguments: 'lookup' and 'limit'. See run().
+	 * @return array Changes.
+	 */
+	protected static function coarse( $apply, $args ) {
+		$coarse = array();
+		foreach ( self::terms() as $id => $item ) {
+			if ( $item['depth'] <= 1 && 'locality' !== $item['type'] && $item['term']->count > 0 ) {
+				$coarse[ $id ] = $item;
+			}
 		}
-		return $changes;
+		if ( empty( $coarse ) ) {
+			return array();
+		}
+		$taxonomy = get_taxonomy( 'location' );
+		$posts    = get_posts(
+			array(
+				'post_type'      => $taxonomy ? $taxonomy->object_type : 'post',
+				'post_status'    => array( 'publish', 'private', 'future', 'draft', 'pending' ),
+				'posts_per_page' => (int) $args['limit'],
+				'fields'         => 'ids',
+				'orderby'        => 'ID',
+				'order'          => 'ASC',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- An admin tool, run on demand.
+				'meta_query'     => array(
+					array(
+						'key'     => 'geo_latitude',
+						'compare' => 'EXISTS',
+					),
+				),
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- An admin tool, run on demand.
+				'tax_query'      => array(
+					array(
+						'taxonomy'         => 'location',
+						'terms'            => array_keys( $coarse ),
+						'include_children' => false,
+					),
+				),
+			)
+		);
+		$changes  = array();
+		$private  = 0;
+		$provider = 0;
+		foreach ( $posts as $post_id ) {
+			$where = self::post_coordinates( $post_id );
+			if ( 'private' === $where ) {
+				++$private;
+				continue;
+			}
+			if ( ! $where ) {
+				continue;
+			}
+			$current = null;
+			foreach ( wp_get_object_terms( $post_id, 'location', array( 'fields' => 'ids' ) ) as $term_id ) {
+				if ( isset( $coarse[ $term_id ] ) ) {
+					$current = $coarse[ $term_id ];
+					break;
+				}
+			}
+			if ( ! $current ) {
+				continue;
+			}
+			$found    = self::lookup( $where[0], $where[1], $args['lookup'], $apply );
+			$provider += $found['provider'] ? 1 : 0;
+			$title    = get_the_title( $post_id );
+			$address  = $found['address'];
+			if ( ! $apply && ! $address && $found['provider'] ) {
+				/* translators: %s: Current location name. */
+				$changes[] = self::change( 'post', $post_id, $title, sprintf( __( 'Now in %s; will be looked up through your geocoding providers', 'simple-location' ), $current['term']->name ) );
+				continue;
+			}
+			if ( ! $address || empty( $address['locality'] ) || strtoupper( (string) ( $address['country-code'] ?? '' ) ) !== $current['country'] ) {
+				continue;
+			}
+			if ( ! $apply ) {
+				/* translators: 1: Current location name, 2: Location found, such as Philadelphia, Pennsylvania, US. */
+				$changes[] = self::change( 'post', $post_id, $title, sprintf( __( 'Will move from %1$s to %2$s', 'simple-location' ), $current['term']->name, self::address_label( $address ) ) );
+				continue;
+			}
+			$term = Location_Taxonomy::get_location( $address, true );
+			if ( ! $term || (int) $term === (int) $current['term']->term_id ) {
+				continue;
+			}
+			Location_Taxonomy::set_location( $post_id, (int) $term );
+			$location  = get_term( (int) $term, 'location' );
+			/* translators: 1: Old location name, 2: New location name. */
+			$changes[] = self::change( 'post', $post_id, $title, sprintf( __( 'Moved from %1$s to %2$s', 'simple-location' ), $current['term']->name, $location instanceof WP_Term ? $location->name : (string) $term ) );
+		}
+		return self::lookup_summary( $changes, $private, $provider, $apply );
 	}
 
 	/**
@@ -626,6 +845,7 @@ class Sloc_Location_Repair {
 	protected static function relookup( $apply, $args ) {
 		$changes = array();
 		$budget  = (int) $args['limit'];
+		$sent    = 0;
 		foreach ( self::terms() as $id => $item ) {
 			if ( 'region' !== $item['type'] || self::is_region_code( $item['code'], $item['country'] ) || $budget <= 0 ) {
 				continue;
@@ -651,13 +871,15 @@ class Sloc_Location_Repair {
 			$changes[] = self::change( 'term', $id, $item['term']->name, sprintf( _n( 'Has no region code; %d post looked up again', 'Has no region code; %d posts looked up again', count( $posts ), 'simple-location' ), count( $posts ) ) );
 			if ( ! $apply ) {
 				$budget -= count( $posts );
+				$sent   += count( $posts );
 				continue;
 			}
 			foreach ( $posts as $post_id ) {
 				--$budget;
+				++$sent;
 				$latitude  = get_post_meta( $post_id, 'geo_latitude', true );
 				$longitude = get_post_meta( $post_id, 'geo_longitude', true );
-				$address   = ( is_numeric( $latitude ) && is_numeric( $longitude ) ) ? self::lookup( (float) $latitude, (float) $longitude, 'chain' ) : null;
+				$address   = ( is_numeric( $latitude ) && is_numeric( $longitude ) ) ? self::lookup( (float) $latitude, (float) $longitude, 'chain', true )['address'] : null;
 				$term      = $address ? Location_Taxonomy::get_location( $address, true ) : false;
 				if ( $term && ! in_array( (int) $term, $term_ids, true ) ) {
 					Location_Taxonomy::set_location( $post_id, (int) $term );
@@ -671,7 +893,7 @@ class Sloc_Location_Repair {
 				}
 			}
 		}
-		return $changes;
+		return self::lookup_summary( $changes, 0, $sent, $apply );
 	}
 
 	/**

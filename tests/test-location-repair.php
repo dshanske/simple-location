@@ -9,6 +9,7 @@
  * Location repair tests.
  */
 class LocationRepairTest extends WP_UnitTestCase {
+	use Sloc_Http_Mock;
 
 	/**
 	 * An administrator, since merging locations checks capabilities.
@@ -214,6 +215,100 @@ class LocationRepairTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * An answer from the bundled data is thin without a town, or without a region where addresses name one.
+	 */
+	public function test_is_thin() {
+		$this->assertTrue( Sloc_Location_Repair::is_thin( array( 'country-code' => 'US' ) ) );
+		$this->assertTrue(
+			Sloc_Location_Repair::is_thin(
+				array(
+					'locality'     => 'Somewhere',
+					'country-code' => 'US',
+				)
+			),
+			'US addresses name the state.'
+		);
+		$this->assertFalse(
+			Sloc_Location_Repair::is_thin(
+				array(
+					'locality'     => 'Philadelphia',
+					'region-code'  => 'PA',
+					'country-code' => 'US',
+				)
+			)
+		);
+		$this->assertFalse(
+			Sloc_Location_Repair::is_thin(
+				array(
+					'locality'     => 'Monaco',
+					'country-code' => 'MC',
+				)
+			),
+			'Monaco\'s addresses name no region.'
+		);
+	}
+
+	/**
+	 * With 'auto', the providers are asked only when the bundled data's answer is thin; a preview never asks them.
+	 */
+	public function test_auto_lookup() {
+		update_option( 'sloc_geo_provider', 'nominatim' );
+		$this->mock_http( array( 'nominatim' => array( 'body' => $this->fixture( 'geo/nominatim-reverse.json' ) ) ) );
+		$city  = $this->post( null, 39.9524, -75.1636 );
+		$rural = $this->post( null, 44.738728, -74.762763 );
+
+		$preview = Sloc_Location_Repair::run( array( 'untagged' ), false, array( 'lookup' => 'auto' ) )['untagged'];
+		$this->assertEmpty( $this->http_requests, 'A preview never asks the providers.' );
+		$this->assertStringStartsWith( 'Will be given the location Philadelphia', $preview[0]['change'] );
+		$this->assertSame( 'Will be looked up through your geocoding providers', $preview[1]['change'] );
+		$this->assertSame( '1 post would be sent to your geocoding providers', end( $preview )['change'] );
+
+		$report = Sloc_Location_Repair::run( array( 'untagged' ), true, array( 'lookup' => 'auto' ) )['untagged'];
+		$this->assertCount( 1, $this->http_requests, 'Only the post the bundled data couldn\'t place.' );
+		$this->assertSame( '1 post was looked up through your geocoding providers', end( $report )['change'] );
+		$this->assertNotFalse( get_the_terms( $city, 'location' ) );
+		$this->assertNotFalse( get_the_terms( $rural, 'location' ) );
+	}
+
+	/**
+	 * With 'chain', a preview counts every post as sent to the providers without asking them.
+	 */
+	public function test_chain_preview() {
+		update_option( 'sloc_geo_provider', 'nominatim' );
+		$this->mock_http( array() );
+		$this->post( null, 39.9524, -75.1636 );
+		$this->post( null, 40.7128, -74.006 );
+		$preview = Sloc_Location_Repair::run( array( 'untagged' ), false, array( 'lookup' => 'chain' ) )['untagged'];
+		$this->assertEmpty( $this->http_requests );
+		$this->assertSame( '2 posts would be sent to your geocoding providers', end( $preview )['change'] );
+	}
+
+	/**
+	 * Posts whose location is only a region or country move to the town found in the same country.
+	 */
+	public function test_coarse() {
+		$us     = $this->term( 'United States', 'country', 'US' );
+		$penn   = $this->term( 'Pennsylvania', 'region', 'PA', $us );
+		$de     = $this->term( 'Germany', 'country', 'DE' );
+		$philly = $this->post( $penn, 39.9524, -75.1636 );
+		$wrong  = $this->post( $de, 39.9524, -75.1636 );
+		$this->post( $us, 39.9524, -75.1636, 'private' );
+
+		$preview = Sloc_Location_Repair::run( array( 'coarse' ), false )['coarse'];
+		$this->assertSame( array( $philly, 0 ), $this->ids( $preview ), 'Not the post whose country doesn\'t match, nor the private one.' );
+		$this->assertStringStartsWith( 'Will move from Pennsylvania to Philadelphia', $preview[0]['change'] );
+		$this->assertSame( array( $penn ), wp_list_pluck( get_the_terms( $philly, 'location' ), 'term_id' ) );
+
+		Sloc_Location_Repair::run( array( 'coarse' ), true );
+		$term = get_the_terms( $philly, 'location' )[0];
+		$this->assertSame( 'Philadelphia', $term->name );
+		$this->assertSame( $penn, $term->parent, 'The town goes under the region it was in.' );
+		$this->assertSame( array( $de ), wp_list_pluck( get_the_terms( $wrong, 'location' ), 'term_id' ) );
+		$again = Sloc_Location_Repair::run( array( 'coarse' ), false )['coarse'];
+		$this->assertSame( array( 0 ), $this->ids( $again ), 'Only the note about the private post is left.' );
+	}
+
+	/**
 	 * Posts in regions without a code are looked up again, and the emptied region removed.
 	 */
 	public function test_relookup() {
@@ -223,7 +318,8 @@ class LocationRepairTest extends WP_UnitTestCase {
 		$post    = $this->post( $town, 51.8801, -9.5835 );
 
 		$preview = Sloc_Location_Repair::run( array( 'relookup' ), false )['relookup'];
-		$this->assertSame( array( $kenmare ), $this->ids( $preview ) );
+		$this->assertSame( array( $kenmare, 0 ), $this->ids( $preview ) );
+		$this->assertSame( '1 post would be sent to your geocoding providers', end( $preview )['change'] );
 
 		Sloc_Location_Repair::run( array( 'relookup' ), true );
 		$terms = get_the_terms( $post, 'location' );
@@ -275,11 +371,13 @@ class LocationRepairTest extends WP_UnitTestCase {
 		);
 		$this->assertSame( array( 'types', 'names' ), $choices['steps'] );
 		$this->assertSame( 'chain', $choices['lookup'] );
+		$this->assertSame( 'auto', Sloc_Location_Repair_Tool::choices( array( 'lookup' => 'auto' ) )['lookup'] );
 		$this->assertSame( 500, $choices['limit'] );
 
 		$defaults = Sloc_Location_Repair_Tool::choices( array( 'lookup' => 'other' ) );
 		$this->assertNotContains( 'relookup', $defaults['steps'] );
 		$this->assertNotContains( 'names', $defaults['steps'] );
+		$this->assertNotContains( 'coarse', $defaults['steps'] );
 		$this->assertContains( 'untagged', $defaults['steps'] );
 		$this->assertSame( 'offline', $defaults['lookup'] );
 		$this->assertSame( 50, $defaults['limit'] );

@@ -55,8 +55,8 @@ class Sloc_Location_Repair_Tool {
 	 * @since 6.5.0
 	 *
 	 * @param array $input Steps (list), lookup and limit.
-	 * @return array Steps (known ones, or the default steps without any), lookup ('offline' or 'chain') and limit
-	 *               (1 to 500).
+	 * @return array Steps (known ones, or the default steps without any), lookup ('offline', 'auto' or 'chain') and
+	 *               limit (1 to 500).
 	 */
 	public static function choices( $input ) {
 		$known = Sloc_Location_Repair::steps();
@@ -67,7 +67,7 @@ class Sloc_Location_Repair_Tool {
 		$limit = isset( $input['limit'] ) && is_numeric( $input['limit'] ) ? (int) $input['limit'] : 50;
 		return array(
 			'steps'  => $steps,
-			'lookup' => ( 'chain' === ( $input['lookup'] ?? '' ) ) ? 'chain' : 'offline',
+			'lookup' => in_array( $input['lookup'] ?? '', array( 'auto', 'chain' ), true ) ? $input['lookup'] : 'offline',
 			'limit'  => max( 1, min( 500, $limit ) ),
 		);
 	}
@@ -122,7 +122,9 @@ class Sloc_Location_Repair_Tool {
 						<th><?php esc_html_e( 'Look up posts', 'simple-location' ); ?></th>
 						<td>
 							<label><input type="radio" name="sloc_repair_lookup" value="offline" <?php checked( 'offline', $choices['lookup'] ); ?> /> <?php esc_html_e( 'From the data that comes with the plugin, without sending anything (towns, regions and countries)', 'simple-location' ); ?></label><br />
+							<label><input type="radio" name="sloc_repair_lookup" value="auto" <?php checked( 'auto', $choices['lookup'] ); ?> /> <?php esc_html_e( 'From that data first, and through your geocoding providers only when it finds no town, or no region where addresses name one', 'simple-location' ); ?></label><br />
 							<label><input type="radio" name="sloc_repair_lookup" value="chain" <?php checked( 'chain', $choices['lookup'] ); ?> /> <?php esc_html_e( 'Through your geocoding providers (more detail; some providers charge for lookups)', 'simple-location' ); ?></label>
+							<p class="description"><?php esc_html_e( 'The preview never asks your providers; it says how many posts would be sent to them.', 'simple-location' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -196,14 +198,16 @@ class Sloc_Location_Repair_Tool {
 	 *
 	 * [--steps=<steps>]
 	 * : Comma-separated steps: region_codes, region_duplicates, types, orphan_localities, locality_duplicates, broken,
-	 * untagged, relookup, names, addresses. Default: all but relookup and names.
+	 * untagged, coarse, relookup, names, addresses. Default: all but coarse, relookup and names.
 	 *
 	 * [--lookup=<lookup>]
-	 * : How to look up posts: offline, from the bundled data, or chain, through the geocoding providers.
+	 * : How to look up posts: offline, from the bundled data; auto, from the bundled data and through the geocoding
+	 * providers only when it finds no town, or no region where addresses name one; or chain, through the providers.
 	 * ---
 	 * default: offline
 	 * options:
 	 *   - offline
+	 *   - auto
 	 *   - chain
 	 * ---
 	 *
@@ -217,7 +221,7 @@ class Sloc_Location_Repair_Tool {
 	 *
 	 *     wp location repair --user=admin
 	 *     wp location repair --user=admin --apply
-	 *     wp location repair --user=admin --steps=untagged --lookup=chain --limit=200 --apply
+	 *     wp location repair --user=admin --steps=untagged,coarse --lookup=auto --limit=200 --apply
 	 *
 	 * @since 6.5.0
 	 *
