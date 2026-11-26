@@ -32,7 +32,7 @@ add_filter(
 apply_filters( 'sloc_venue_cache_time', self::CACHE_TIME, $this )
 ```
 
-- [includes/class-venue-provider.php:260](https://github.com/dshanske/simple-location/blob/trunk/includes/class-venue-provider.php#L260)
+- [includes/class-venue-provider.php:268](https://github.com/dshanske/simple-location/blob/trunk/includes/class-venue-provider.php#L268)
 ```php
 apply_filters( 'sloc_venue_cache_time', $seconds, $this )
 ```

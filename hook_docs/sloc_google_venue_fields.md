@@ -19,7 +19,7 @@ add_filter(
 
 ## Files
 
-- [includes/venue/class-venue-provider-google.php:73](https://github.com/dshanske/simple-location/blob/trunk/includes/venue/class-venue-provider-google.php#L73)
+- [includes/venue/class-venue-provider-google.php:75](https://github.com/dshanske/simple-location/blob/trunk/includes/venue/class-venue-provider-google.php#L75)
 ```php
 apply_filters( 'sloc_google_venue_fields', self::FIELDS )
 ```

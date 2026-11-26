@@ -39,6 +39,7 @@ class Sloc_Provider_Errors {
 	 * Error codes an administrator can fix, whichever provider returns them.
 	 *
 	 * @since 6.1.0
+	 * @since 6.5.0 Adds missing_traccar_geocoder_url.
 	 * @var string[]
 	 */
 	const CODES = array(
@@ -46,6 +47,7 @@ class Sloc_Provider_Errors {
 		'no_username_set',
 		'missing_username',
 		'missing_pelias_url',
+		'missing_traccar_geocoder_url',
 		'station_format',
 		'station_format_version',
 		'station_empty',
@@ -198,6 +200,26 @@ class Sloc_Provider_Errors {
 		 * @param array  $record  The error that was recorded. See `sloc_provider_error`.
 		 */
 		do_action( 'sloc_provider_error_resolved', self::message( $record, true ), $record );
+		return true;
+	}
+
+	/**
+	 * Removes a recorded error without saying the provider works again, such as for a server no longer used.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param string $type Provider type.
+	 * @param string $slug Slug the error was recorded under.
+	 * @return bool Whether an error was removed.
+	 */
+	public static function forget( $type, $slug ) {
+		$errors = self::get_errors();
+		$key    = $type . ':' . $slug;
+		if ( ! isset( $errors[ $key ] ) ) {
+			return false;
+		}
+		unset( $errors[ $key ] );
+		update_option( self::OPTION, $errors, false );
 		return true;
 	}
 
@@ -377,11 +399,11 @@ class Sloc_Provider_Errors {
 		foreach ( $errors as $record ) {
 			$items .= '<li>' . esc_html( self::describe( $record ) ) . '</li>';
 		}
-		$result['label']       = __( 'Simple Location providers need attention', 'simple-location' );
-		$result['status']      = 'recommended';
+		$result['label']          = __( 'Simple Location providers need attention', 'simple-location' );
+		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
-		$result['description'] = '<p>' . esc_html__( 'These providers failed with errors you can fix, such as a missing or rejected API key. Other providers in the chain were tried instead. Each one clears when the provider works again.', 'simple-location' ) . '</p><ul>' . $items . '</ul>';
-		$result['actions']     = sprintf( '<p><a href="%1$s">%2$s</a></p>', esc_url( admin_url( 'admin.php?page=simloc&tab=api' ) ), esc_html__( 'Check the settings', 'simple-location' ) );
+		$result['description']    = '<p>' . esc_html__( 'These providers failed with errors you can fix, such as a missing or rejected API key. Other providers in the chain were tried instead. Each one clears when the provider works again.', 'simple-location' ) . '</p><ul>' . $items . '</ul>';
+		$result['actions']        = sprintf( '<p><a href="%1$s">%2$s</a></p>', esc_url( admin_url( 'admin.php?page=simloc&tab=api' ) ), esc_html__( 'Check the settings', 'simple-location' ) );
 		return $result;
 	}
 }
