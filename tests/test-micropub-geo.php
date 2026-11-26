@@ -213,7 +213,18 @@ class MicropubGeoTest extends WP_UnitTestCase {
 				'lon' => '-160',
 			)
 		)['geo'];
-		$this->assertSame( array( 'latitude', 'longitude', 'plus-code' ), array_keys( $geo ), 'No timezone in the open ocean, and no address, elevation or map.' );
+		$this->assertSame( array( 'latitude', 'longitude', 'plus-code', 'timezone', 'localtime' ), array_keys( $geo ), 'The open ocean has only its nautical timezone, and no address, elevation or map.' );
+		$this->assertSame( 'Etc/GMT+11', $geo['timezone'] );
+
+		add_filter( 'sloc_offline_geo_dir', fn() => __DIR__ . '/data/missing-geo-data/' );
+		wp_cache_flush();
+		$geo = $this->query(
+			array(
+				'lat' => '0',
+				'lon' => '-160',
+			)
+		)['geo'];
+		$this->assertSame( array( 'latitude', 'longitude', 'plus-code' ), array_keys( $geo ), 'Without the timezone data, no timezone.' );
 	}
 
 	/**

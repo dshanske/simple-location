@@ -10,6 +10,12 @@
  *   data/meteostat-stations.csv. Needs the pdo_sqlite extension.
  * - airports: OurAirports (https://ourairports.com/data/, public domain), copied to data/airports.csv.
  * - airlines: OpenFlights (https://openflights.org/data, ODbL), copied to data/airlines.csv.
+ * - countries: Natural Earth 1:10m countries (https://www.naturalearthdata.com/, public domain), built into the
+ *   country grid in data/geo/countries.*.
+ * - timezones: timezone-boundary-builder zones with oceans (https://github.com/evansiroky/timezone-boundary-builder,
+ *   ODbL), built into the timezone grid in data/geo/timezones.*. Needs the zip extension, and about 3 GB of memory.
+ * - places: GeoNames places of at least 1000 people and first-level divisions (https://www.geonames.org/, CC BY 4.0),
+ *   built into data/geo/places.csv, places.cells and regions.csv. Needs the zip extension.
  *
  * Updating airports or airlines also rebuilds their indexes in data/index/. `php bin/update-data.php indexes`
  * rebuilds the indexes from the current files without downloading anything.
@@ -26,6 +32,9 @@ if ( 'cli' !== PHP_SAPI ) {
 // The index class is shared with the plugin, whose files only load when ABSPATH is defined.
 define( 'ABSPATH', dirname( __DIR__ ) . '/' );
 require dirname( __DIR__ ) . '/includes/class-sloc-data-index.php';
+require dirname( __DIR__ ) . '/includes/class-sloc-geo-grid.php';
+require dirname( __DIR__ ) . '/includes/class-sloc-offline-geo.php';
+require dirname( __DIR__ ) . '/includes/class-sloc-geo-data-builder.php';
 
 $sloc_data_dir = dirname( __DIR__ ) . '/data';
 
@@ -33,7 +42,15 @@ $sloc_sources = array(
 	'meteostat' => 'https://data.meteostat.net/stations.db',
 	'airports'  => 'https://davidmegginson.github.io/ourairports-data/airports.csv',
 	'airlines'  => 'https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat',
+	'countries' => 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson',
+	'timezones' => 'https://github.com/evansiroky/timezone-boundary-builder/releases/latest/download/timezones-with-oceans.geojson.zip',
+	'places'    => 'https://download.geonames.org/export/dump/cities1000.zip',
 );
+
+/**
+ * GeoNames first-level divisions, downloaded with the places.
+ */
+const SLOC_GEONAMES_ADMIN1 = 'https://download.geonames.org/export/dump/admin1CodesASCII.txt';
 
 /**
  * Indexes of the airport and airline files: index name => CSV file, column, whether it has a header row.
@@ -143,6 +160,57 @@ function sloc_url_path( $url ) {
 }
 
 /**
+ * Extracts the one file in a zip archive with an extension.
+ *
+ * @param string $zip       Archive.
+ * @param string $extension File extension, such as .txt.
+ * @param string $dir       Directory to extract to.
+ * @return string Extracted file.
+ */
+function sloc_unzip( $zip, $extension, $dir ) {
+	$archive = new ZipArchive();
+	if ( true !== $archive->open( $zip ) ) {
+		fwrite( STDERR, "Could not open $zip\n" );
+		exit( 1 );
+	}
+	for ( $i = 0; $i < $archive->numFiles; $i++ ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- ZipArchive property.
+		$name = $archive->getNameIndex( $i );
+		if ( substr( $name, -strlen( $extension ) ) === $extension && false === strpos( $name, '/' ) ) {
+			$archive->extractTo( $dir, $name );
+			$archive->close();
+			return $dir . '/' . $name;
+		}
+	}
+	fwrite( STDERR, "No $extension file in $zip\n" );
+	exit( 1 );
+}
+
+/**
+ * Builds a grid in data/geo/ from a GeoJSON file.
+ *
+ * @param string   $geojson GeoJSON file.
+ * @param string   $prefix  Output path without extension.
+ * @param callable $label   Names file entry for a feature's properties.
+ */
+function sloc_build_grid( $geojson, $prefix, $label ) {
+	ini_set( 'memory_limit', '-1' ); // phpcs:ignore WordPress.PHP.IniSet.memory_limit_Disallowed -- The timezone boundaries are large.
+	$start  = microtime( true );
+	$counts = Sloc_Geo_Data_Builder::build_grid( json_decode( file_get_contents( $geojson ), true ), $label, $prefix );
+	fwrite(
+		STDOUT,
+		sprintf(
+			"Built %s: %d areas, %d uniform and %d border cells, %d KB, in %.0f s\n",
+			$prefix,
+			$counts['names'],
+			$counts['uniform'],
+			$counts['border'],
+			( $counts['idx'] + $counts['dat'] ) / 1024,
+			microtime( true ) - $start
+		)
+	);
+}
+
+/**
  * Builds the indexes of a CSV file in data/index/.
  *
  * @param string $data_dir Data directory.
@@ -183,6 +251,10 @@ if ( $sloc_unknown ) {
 	exit( 1 );
 }
 
+if ( ! is_dir( $sloc_data_dir . '/geo' ) ) {
+	mkdir( $sloc_data_dir . '/geo' );
+}
+
 $sloc_temp = sys_get_temp_dir() . '/sloc-data-' . getmypid();
 if ( ! is_dir( $sloc_temp ) && ! mkdir( $sloc_temp, 0700 ) ) {
 	fwrite( STDERR, "Could not create $sloc_temp\n" );
@@ -205,6 +277,23 @@ foreach ( $sloc_selected as $sloc_source ) {
 			copy( $sloc_download, $sloc_data_dir . '/airlines.csv' );
 			fwrite( STDOUT, "Updated $sloc_data_dir/airlines.csv\n" );
 			sloc_build_indexes( $sloc_data_dir, 'airlines.csv' );
+			break;
+		case 'countries':
+			sloc_build_grid( $sloc_download, $sloc_data_dir . '/geo/countries', array( 'Sloc_Geo_Data_Builder', 'country_label' ) );
+			break;
+		case 'timezones':
+			$sloc_file = sloc_unzip( $sloc_download, '.json', $sloc_temp );
+			sloc_build_grid( $sloc_file, $sloc_data_dir . '/geo/timezones', array( 'Sloc_Geo_Data_Builder', 'timezone_label' ) );
+			unlink( $sloc_file );
+			break;
+		case 'places':
+			$sloc_file   = sloc_unzip( $sloc_download, '.txt', $sloc_temp );
+			$sloc_admin1 = $sloc_temp . '/admin1CodesASCII.txt';
+			sloc_download( SLOC_GEONAMES_ADMIN1, $sloc_admin1 );
+			$sloc_counts = Sloc_Geo_Data_Builder::build_places( $sloc_file, $sloc_admin1, $sloc_data_dir . '/geo' );
+			fwrite( STDOUT, sprintf( "Built %s/geo/places.csv with %d places and regions.csv with %d regions\n", $sloc_data_dir, $sloc_counts['places'], $sloc_counts['regions'] ) );
+			unlink( $sloc_file );
+			unlink( $sloc_admin1 );
 			break;
 	}
 	unlink( $sloc_download );

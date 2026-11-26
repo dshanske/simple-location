@@ -90,25 +90,28 @@ class Loc_Timezone {
 
 
 	/**
-	 * Returns the timezone of the nearest listed city within 200 km.
+	 * Returns the timezone of a location.
 	 *
 	 * @since 4.0.0
 	 * @since 6.0.0 Results are cached per coordinate rounded to 2 decimal places (about 1 km), and the lookup uses
 	 *               those rounded coordinates.
+	 * @since 6.5.0 Looks the location up in the timezone boundaries bundled in data/geo/ instead of taking the
+	 *               nearest listed city's, so it is right near borders, and gives the nautical zone at sea, such as
+	 *               Etc/GMT+3. Coordinates are rounded to 3 decimal places (about 110 m). See Sloc_Offline_Geo.
 	 *
 	 * @param float                    $lat  Latitude.
 	 * @param float                    $lng  Longitude.
 	 * @param string|int|DateTime|bool $date Optional. Date to report the offset at. Default now.
-	 * @return Timezone_Result|null The timezone, or null if no listed city is within 200 km.
+	 * @return Timezone_Result|null The timezone, or null if there is none, such as for coordinates out of range.
 	 */
 	public static function timezone_for_location( $lat, $lng, $date = false ) {
-		$lat   = round( (float) $lat, 2 );
-		$lng   = round( (float) $lng, 2 );
-		$key   = sprintf( '%.2f,%.2f', $lat, $lng );
+		$lat   = round( (float) $lat, 3 );
+		$lng   = round( (float) $lng, 3 );
+		$key   = sprintf( '%.3f,%.3f', $lat, $lng );
 		$found = false;
 		$name  = wp_cache_get( $key, 'sloc_timezone', false, $found );
 		if ( ! $found ) {
-			$name = self::nearest_timezone( $lat, $lng );
+			$name = Sloc_Offline_Geo::timezone( $lat, $lng );
 			// An empty string caches that there is no timezone here.
 			wp_cache_set( $key, $name, 'sloc_timezone' );
 		}
@@ -117,54 +120,6 @@ class Loc_Timezone {
 			return new Timezone_Result( $name, $date );
 		}
 		return null;
-	}
-
-	/**
-	 * Returns the timezone name of the nearest listed city within 200 km.
-	 *
-	 * @since 6.0.0
-	 *
-	 * @param float $lat Latitude.
-	 * @param float $lng Longitude.
-	 * @return string Timezone name, or an empty string if no listed city is within 200 km.
-	 */
-	private static function nearest_timezone( $lat, $lng ) {
-		$tzfile = self::tz_data();
-		if ( ! is_array( $tzfile ) ) {
-			return '';
-		}
-
-		$nearest = '';
-		$min     = 200000;
-		// A city further away in latitude alone than this can't be within range.
-		$max_lat = rad2deg( $min / 6378100 );
-		foreach ( $tzfile as $line ) {
-			$tz = explode( ' ', trim( $line ) );
-			if ( count( $tz ) < 3 || abs( (float) $tz[0] - $lat ) > $max_lat ) {
-				continue;
-			}
-			$distance = geo_distance( (float) $tz[0], (float) $tz[1], $lat, $lng );
-			if ( $distance < $min ) {
-				$min     = $distance;
-				$nearest = $tz[2];
-			}
-		}
-		return $nearest;
-	}
-
-	/**
-	 * Reads the bundled list of cities and their timezones.
-	 *
-	 * @since 3.0.1
-	 *
-	 * @return array|WP_Error|false Lines of data/tz_cities.txt, or an error if the file is missing.
-	 */
-	private static function tz_data() {
-		$file = trailingslashit( plugin_dir_path( __DIR__ ) ) . 'data/tz_cities.txt';
-		if ( ! sloc_file_exists( $file ) ) {
-			return new WP_Error( 'filesystem_error', "File doesn't exist" );
-		}
-		return sloc_get_contents_array( $file );
 	}
 
 	/**

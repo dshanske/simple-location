@@ -533,11 +533,11 @@ abstract class Sloc_Provider {
 	/**
 	 * Returns whether the provider covers the location it is set to, from its region.
 	 *
-	 * A provider without a region covers everywhere. A regional provider covers the countries in its region; the
-	 * country is that of the nearest timezone, so it can be wrong close to a border. Without a location, or when
-	 * the country can't be told, it is assumed to cover it.
+	 * A provider without a region covers everywhere. A regional provider covers the countries in its region. Without
+	 * a location, or when the country can't be told, it is assumed to cover it.
 	 *
 	 * @since 6.1.0
+	 * @since 6.5.0 The country is read from borders. See country_for_location().
 	 *
 	 * @return bool Whether to try the provider here.
 	 */
@@ -553,15 +553,20 @@ abstract class Sloc_Provider {
 	}
 
 	/**
-	 * Returns the country of a location, from the nearest timezone, without a request.
+	 * Returns the country of a location, without a request.
 	 *
 	 * @since 6.1.0
+	 * @since 6.5.0 Read from the country borders bundled in data/geo/, and at sea from a place within 15 km; from the
+	 *              timezone only if that data is missing. See Sloc_Offline_Geo::country().
 	 *
 	 * @param float $latitude  Latitude.
 	 * @param float $longitude Longitude.
 	 * @return string Two-letter country code, or an empty string if it can't be told.
 	 */
 	public static function country_for_location( $latitude, $longitude ) {
+		if ( Sloc_Offline_Geo::has_countries() ) {
+			return Sloc_Offline_Geo::country( $latitude, $longitude );
+		}
 		$timezone = Loc_Timezone::timezone_for_location( $latitude, $longitude );
 		if ( ! $timezone instanceof Timezone_Result || ! $timezone->timezone instanceof DateTimeZone ) {
 			return '';

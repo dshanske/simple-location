@@ -71,7 +71,10 @@
 	                 "cp -u -r vendor/sokil/php-isocodes/databases/iso_3166-1.json data/"
 	],
 	"update-docs": "./vendor/bin/extract-wp-hooks.php",
-	"update-data": "@php bin/update-data.php",
+	"update-data": [
+		"Composer\\Config::disableProcessTimeout",
+		"@php bin/update-data.php"
+	],
 	"update-meteocons": "@php bin/update-meteocons.php",
 	"phpstan": "./vendor/bin/phpstan analyse --memory-limit=1G",
       "build-css": [

@@ -28,12 +28,18 @@ class AstronomicalTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The calculator uses the timezone of the coordinates, or the site's when none is found.
+	 * The calculator uses the timezone of the coordinates, at sea the nautical one, or the site's when none is found.
 	 */
 	public function test_timezone() {
 		$this->assertSame( '-04:00', $this->philadelphia()->get_datetime( strtotime( '2025-07-01T16:00:00Z' ) )->format( 'P' ) );
 
 		update_option( 'timezone_string', 'Europe/Berlin' );
+		$calc = new Astronomical_Calculator( 30.0, -40.0 );
+		$this->assertSame( 'Etc/GMT+3', $calc->get_datetime( strtotime( '2025-07-01T16:00:00Z' ) )->getTimezone()->getName(), 'The mid-Atlantic is three hours behind UTC.' );
+
+		// Without the timezone data.
+		add_filter( 'sloc_offline_geo_dir', fn() => __DIR__ . '/data/missing-geo-data/' );
+		wp_cache_flush();
 		$calc = new Astronomical_Calculator( 30.0, -40.0 );
 		$this->assertSame( 'Europe/Berlin', $calc->get_datetime( strtotime( '2025-07-01T16:00:00Z' ) )->getTimezone()->getName() );
 	}

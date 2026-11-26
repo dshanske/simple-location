@@ -68,7 +68,7 @@ class TimezoneTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The nearest listed city within 200 km gives the timezone.
+	 * The timezone boundaries give the timezone, right on both sides of a border, and the nautical zone at sea.
 	 */
 	public function test_timezone_for_location() {
 		$result = Loc_Timezone::timezone_for_location( 39.9524, -75.1636 );
@@ -80,33 +80,47 @@ class TimezoneTest extends WP_UnitTestCase {
 		$this->assertSame( 'Europe/London', Loc_Timezone::timezone_for_location( 51.5072, -0.1276 )->name );
 		$this->assertSame( 'Australia/Sydney', Loc_Timezone::timezone_for_location( -33.8568, 151.2153 )->name );
 
-		// The middle of the Atlantic has no city within 200 km.
-		$this->assertNull( Loc_Timezone::timezone_for_location( 30.0, -40.0 ) );
+		// Detroit and Windsor face each other across the Detroit River; the nearest-city lookup gave one zone to both.
+		$this->assertSame( 'America/Detroit', Loc_Timezone::timezone_for_location( 42.3314, -83.0458 )->name );
+		$this->assertSame( 'America/Toronto', Loc_Timezone::timezone_for_location( 42.3149, -83.0364 )->name );
+		// Phoenix has no daylight saving time; Denver and the Navajo Nation do.
+		$this->assertSame( 'America/Phoenix', Loc_Timezone::timezone_for_location( 33.4484, -112.074 )->name );
+		$this->assertSame( 'America/Denver', Loc_Timezone::timezone_for_location( 36.1, -109.5 )->name );
+
+		// The middle of the Atlantic is in the nautical zone three hours behind UTC.
+		$this->assertSame( 'Etc/GMT+3', Loc_Timezone::timezone_for_location( 30.0, -40.0 )->name );
+
+		// Without the timezone data, there is none.
+		add_filter( 'sloc_offline_geo_dir', fn() => __DIR__ . '/data/missing-geo-data/' );
+		wp_cache_flush();
+		$this->assertNull( Loc_Timezone::timezone_for_location( 40.0, -40.0 ) );
 	}
 
 	/**
-	 * Lookups, including ones that find nothing, are cached per coordinate rounded to 2 decimal places.
+	 * Lookups, including ones that find nothing, are cached per coordinate rounded to 3 decimal places.
 	 */
 	public function test_timezone_for_location_caches_result() {
 		Loc_Timezone::timezone_for_location( 39.9524, -75.1636 );
-		$this->assertSame( 'America/New_York', wp_cache_get( '39.95,-75.16', 'sloc_timezone' ) );
+		$this->assertSame( 'America/New_York', wp_cache_get( '39.952,-75.164', 'sloc_timezone' ) );
 
+		add_filter( 'sloc_offline_geo_dir', fn() => __DIR__ . '/data/missing-geo-data/' );
+		wp_cache_flush();
 		Loc_Timezone::timezone_for_location( 30.0, -40.0 );
 		$found = false;
-		$this->assertSame( '', wp_cache_get( '30.00,-40.00', 'sloc_timezone', false, $found ) );
+		$this->assertSame( '', wp_cache_get( '30.000,-40.000', 'sloc_timezone', false, $found ) );
 		$this->assertTrue( $found );
 	}
 
 	/**
-	 * A cached result is used without reading the city list.
+	 * A cached result is used without reading the timezone data.
 	 */
 	public function test_timezone_for_location_uses_cache() {
-		wp_cache_set( '12.35,45.68', 'Pacific/Auckland', 'sloc_timezone' );
+		wp_cache_set( '12.346,45.679', 'Pacific/Auckland', 'sloc_timezone' );
 		$result = Loc_Timezone::timezone_for_location( 12.3456, 45.6789 );
 		$this->assertSame( 'Pacific/Auckland', $result->name );
 
-		// A cached miss returns null even where the list has a city.
-		wp_cache_set( '51.51,-0.13', '', 'sloc_timezone' );
+		// A cached miss returns null even where the data has a timezone.
+		wp_cache_set( '51.507,-0.128', '', 'sloc_timezone' );
 		$this->assertNull( Loc_Timezone::timezone_for_location( 51.5072, -0.1276 ) );
 	}
 

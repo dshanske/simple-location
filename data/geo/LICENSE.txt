@@ -1,0 +1,19 @@
+Data in this folder, built by bin/update-data.php (composer update-data):
+
+countries.idx, countries.dat, countries.json
+  Built from Natural Earth 1:10m admin-0 countries, https://www.naturalearthdata.com/
+  Public domain.
+
+timezones.idx, timezones.dat, timezones.json
+  Built from timezone-boundary-builder (timezones with oceans),
+  https://github.com/evansiroky/timezone-boundary-builder
+  Contains information from OpenStreetMap, https://www.openstreetmap.org/copyright,
+  which is made available under the Open Database License (ODbL) 1.0,
+  https://opendatacommons.org/licenses/odbl/1-0/
+  These files are a derivative database, also made available under the ODbL 1.0.
+
+places.csv, places.cells, regions.csv
+  Built from GeoNames cities1000 and admin1CodesASCII, https://www.geonames.org/
+  Licensed under Creative Commons Attribution 4.0, https://creativecommons.org/licenses/by/4.0/
+
+The file formats are described in includes/class-sloc-geo-grid.php and includes/class-sloc-geo-data-builder.php.
