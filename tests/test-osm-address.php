@@ -87,12 +87,12 @@ class OsmAddressTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * "Village of" style prefixes come off.
+	 * "Village of" style prefixes come off US names, through the address format table's rules.
 	 */
 	public function test_strip_prefix() {
-		$this->assertSame( 'Speculator', Geo_Provider_Nominatim::osm_strip_prefix( 'Village of Speculator' ) );
-		$this->assertSame( 'New York', Geo_Provider_Nominatim::osm_strip_prefix( 'City of New York' ) );
-		$this->assertSame( 'Townsend', Geo_Provider_Nominatim::osm_strip_prefix( 'Townsend' ) );
+		$this->assertSame( 'Speculator', Sloc_Address_Format::clean( 'US', 'city', 'Village of Speculator' ) );
+		$this->assertSame( 'New York', Sloc_Address_Format::clean( 'US', 'city', 'City of New York' ) );
+		$this->assertSame( 'Townsend', Sloc_Address_Format::clean( 'US', 'city', 'Townsend' ) );
 	}
 
 	/**
@@ -371,11 +371,15 @@ class OsmAddressTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A council district given as the city is replaced by a town from the place data.
+	 * A council district given as the city is replaced by a town from the place data, or used, cleaned by the address
+	 * format table's rules, when there is none.
 	 */
 	public function test_district_as_city() {
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'Kenmare Municipal District' ) );
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'The Metropolitan District of Limerick City' ) );
+		$this->assertSame( 'Limerick', Sloc_Address_Format::clean( 'IE', 'city', 'The Metropolitan District of Limerick City' ) );
+		$this->assertSame( 'Cobh', Sloc_Address_Format::clean( 'IE', 'city', 'Municipal District of Cobh' ), 'Not "of Cobh".' );
+		$this->assertSame( 'Cahir — Cashel', Sloc_Address_Format::clean( 'IE', 'city', 'The Municipal District of Cahir — Cashel' ) );
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'Inns Quay A Ward 1986' ) );
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'מועצה אזורית תמר' ) );
 		$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( 'Tamar Regional Council' ) );
@@ -394,6 +398,9 @@ class OsmAddressTest extends WP_UnitTestCase {
 		$this->assertSame( 'Kenmare', $addr['locality'] );
 		$this->assertSame( 'County Kerry', $addr['region'] );
 		$this->assertSame( 'KY', $addr['region-code'] );
+
+		// Without a town nearby, the district would be used, cleaned like this.
+		$this->assertSame( 'Kenmare', Sloc_Address_Format::clean( 'IE', 'city', 'Kenmare Municipal District' ) );
 
 		// In the Negev, with no town nearby, the regional council is better than nothing.
 		$addr = $this->parse(

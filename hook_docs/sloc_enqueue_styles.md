@@ -22,7 +22,7 @@ add_filter(
 
 ## Files
 
-- [simple-location.php:515](https://github.com/dshanske/simple-location/blob/trunk/simple-location.php#L515)
+- [simple-location.php:518](https://github.com/dshanske/simple-location/blob/trunk/simple-location.php#L518)
 ```php
 apply_filters( 'sloc_enqueue_styles', $needs )
 ```
