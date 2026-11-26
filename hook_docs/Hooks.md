@@ -15,6 +15,10 @@
 - [`sloc_geo_taxonomies`](sloc_geo_taxonomies) Filters the taxonomies whose terms get geo meta registered.
 - [`sloc_show_hidden_location`](sloc_show_hidden_location) Filters whether a hidden location is shown to the current user.
 
+## class-geo-provider-traccar-geocoder.php
+
+- [`sloc_traccar_geocoder_usable`](sloc_traccar_geocoder_usable) Filters whether a Traccar Geocoder server's answer is used, or the next server asked.
+
 ## class-geo-provider.php
 
 - [`location_display_name`](location_display_name) This filter is documented in includes/class-geo-provider.php
