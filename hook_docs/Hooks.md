@@ -69,6 +69,10 @@
 - [`sloc_map_cache_directory`](sloc_map_cache_directory) Filters where stored map images are kept.
 - [`sloc_map_cache_max_age`](sloc_map_cache_max_age) Filters how many days a stored map image is used before it is fetched again from the provider.
 
+## class-sloc-offline-geo.php
+
+- [`sloc_offline_geo_dir`](sloc_offline_geo_dir) Filters the directory of the offline geographic data: the country and timezone grids, places and regions.
+
 ## class-sloc-provider-chain.php
 
 - [`sloc_provider_chain`](sloc_provider_chain) Filters the providers a lookup tries, in order.

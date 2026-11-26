@@ -278,6 +278,8 @@ class Simple_Location_Plugin {
 			'class-location-plugins.php',
 			'class-loc-timezone.php',
 			'class-sloc-data-index.php', // Sorted indexes of the bundled data files.
+			'class-sloc-geo-grid.php', // Offline lookup in grids of areas.
+			'class-sloc-offline-geo.php', // Offline country, place and timezone lookup.
 			'class-airport-location.php',
 		);
 
@@ -372,6 +374,7 @@ class Simple_Location_Plugin {
 			'class-geo-provider-nominatim.php', // Nominatim.
 			'class-geo-provider-photon.php', // Photon.
 			'class-geo-provider-traccar-geocoder.php', // Traccar Geocoder.
+			'class-geo-provider-offline.php', // Offline, from the bundled data.
 			'class-geo-provider-pelias.php', // Pelias.
 			'class-geo-provider-mapquest.php', // MapQuest.
 			'class-geo-provider-google.php', // Google.

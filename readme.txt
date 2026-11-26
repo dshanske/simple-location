@@ -145,7 +145,7 @@ In order to access private location information, the following custom capabiliti
 The plugin is designed to be extensible and anyone could write a plugin that would add additional providers.
 
 * Map Providers are services that offer an API to retrieve maps, which are displayed on posts with a location. Providers include MapBox, Google, Mapquest, HERE, LocationIQ, Geoapify, TomTom, and Stadia Maps, as well as your own map server: a custom Static Maps API server, or TileServer GL.
-* Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, which can use the public OpenStreetMap server, your own server or another host, Photon, HERE, MapQuest, Google, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses. Photon needs no key, and you can use komoot's public server or run your own. Traccar Geocoder, which you run yourself or use as Traccar's hosted service, can list several servers, each with its own key, asked in order; it only looks up coordinates, so add another provider after it for addresses
+* Geocoding Providers take geo coordinates and look up the actual location/address for textual display. Geocoding Providers include Nominatim, which can use the public OpenStreetMap server, your own server or another host, Photon, HERE, MapQuest, Google, LocationIQ, OpenRoute and Geonames. They also support looking up coordinate for physical addresses. Photon needs no key, and you can use komoot's public server or run your own. Traccar Geocoder, which you run yourself or use as Traccar's hosted service, can list several servers, each with its own key, asked in order; it only looks up coordinates, so add another provider after it for addresses. The Offline provider needs no key and sends nothing anywhere: it gives the town, region and country from data that comes with the plugin, on its own or as the last provider in the chain
 * Venue providers, similar to Geocoding providers, search for locations from coordinates, however, instead of returning street addresses, or municipality, it returns a list of places or venues. Providers include Google, Foursquare, HERE, TomTom, LocationIQ, Geoapify, Stadia Maps, Nominatim, OpenStreetMap Overpass, which needs no key, and your own Pelias server.
 * Elevation Providers optionally derive the elevation from an API when not available. Elevation is used to estimate altitude and adjust estimated sunrise/sunset levels accordingly. Providers include GeoNames, Google, OpenRoute and Open Topo Data, whose public API needs no key and which you can also host yourself.
 * Location Providers attempt to determine your location to add it to a post. Providers include  HTML5 Browser Geolocation, a Provider that takes the location setting out of the author profile, a provider that returns the exact
@@ -478,8 +478,11 @@ The plugin includes data files in its `data` folder, so these lookups don't need
 * Airports: [OurAirports](https://ourairports.com/data/), public domain.
 * Airlines: [OpenFlights](https://openflights.org/data), licensed under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/).
 * Countries and regions: ISO 3166 data from [php-isocodes](https://github.com/sokil/php-isocodes).
+* Country borders, for the offline lookup and for regional providers: [Natural Earth](https://www.naturalearthdata.com/) 1:10m countries, public domain. Natural Earth draws some disputed areas, such as Crimea, by who controls them.
+* Timezone borders: [timezone-boundary-builder](https://github.com/evansiroky/timezone-boundary-builder), with oceans, from [OpenStreetMap](https://www.openstreetmap.org/copyright) data, licensed under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/). The grid built from it in `data/geo/timezones.*` is offered under the same license.
+* Places of at least 1000 people and their regions: [GeoNames](https://www.geonames.org/), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-Developers can refresh the station, airport and airline files with `composer update-data`.
+Developers can refresh the station, airport, airline, border and place files with `composer update-data`.
 
 = What icons are used here? =
 

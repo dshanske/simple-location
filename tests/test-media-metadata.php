@@ -156,7 +156,12 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	 * The altitude reference marks below sea level whether it is a byte string or a number.
 	 */
 	public function test_exif_altitude_reference_forms() {
-		foreach ( array( "\x01" => -430, "\x00" => 430, '1' => -430, '0' => 430 ) as $ref => $expected ) {
+		foreach ( array(
+			"\x01" => -430,
+			"\x00" => 430,
+			'1'    => -430,
+			'0'    => 430,
+		) as $ref => $expected ) {
 			$meta = Sloc_Media_Metadata::exif_data(
 				array(),
 				'',
@@ -274,9 +279,11 @@ class MediaMetadataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Without a location, or far from any known place, the site timezone is used.
+	 * Without a location, or without a timezone for it, the site timezone is used.
 	 */
 	public function test_exif_data_site_timezone() {
+		add_filter( 'sloc_offline_geo_dir', fn() => __DIR__ . '/data/missing-geo-data/' );
+		wp_cache_flush();
 		$meta = $this->read(
 			array(
 				'version'  => '0300',

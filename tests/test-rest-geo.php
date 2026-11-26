@@ -1130,10 +1130,12 @@ class RestGeoTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * /timezone errors without coordinates, and far from any known city.
+	 * /timezone errors without coordinates, and without a timezone for them.
 	 */
 	public function test_timezone_errors() {
 		$this->assertErrorResponse( 'location_not_provided', $this->request( '/timezone' ) );
+		add_filter( 'sloc_offline_geo_dir', fn() => __DIR__ . '/data/missing-geo-data/' );
+		wp_cache_flush();
 		$response = $this->request(
 			'/timezone',
 			array(
