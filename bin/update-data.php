@@ -16,6 +16,8 @@
  *   ODbL), built into the timezone grid in data/geo/timezones.*. Needs the zip extension, and about 3 GB of memory.
  * - places: GeoNames places of at least 1000 people and first-level divisions (https://www.geonames.org/, CC BY 4.0),
  *   built into data/geo/places.csv, places.cells and regions.csv. Needs the zip extension.
+ * - addresses: OpenCage address-formatting (https://github.com/OpenCageData/address-formatting, MIT), its current
+ *   commit, built into data/address-formats.json, which records the commit. Needs symfony/yaml (composer install).
  *
  * Updating airports or airlines also rebuilds their indexes in data/index/. `php bin/update-data.php indexes`
  * rebuilds the indexes from the current files without downloading anything.
@@ -35,6 +37,7 @@ require dirname( __DIR__ ) . '/includes/class-sloc-data-index.php';
 require dirname( __DIR__ ) . '/includes/class-sloc-geo-grid.php';
 require dirname( __DIR__ ) . '/includes/class-sloc-offline-geo.php';
 require dirname( __DIR__ ) . '/includes/class-sloc-geo-data-builder.php';
+require dirname( __DIR__ ) . '/includes/class-sloc-address-format-builder.php';
 
 $sloc_data_dir = dirname( __DIR__ ) . '/data';
 
@@ -45,7 +48,13 @@ $sloc_sources = array(
 	'countries' => 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson',
 	'timezones' => 'https://github.com/evansiroky/timezone-boundary-builder/releases/latest/download/timezones-with-oceans.geojson.zip',
 	'places'    => 'https://download.geonames.org/export/dump/cities1000.zip',
+	'addresses' => 'https://api.github.com/repos/OpenCageData/address-formatting/commits/master',
 );
+
+/**
+ * OpenCage address-formatting files, at a commit, as a sprintf() pattern for the commit and path.
+ */
+const SLOC_ADDRESS_FORMATTING_FILE = 'https://raw.githubusercontent.com/OpenCageData/address-formatting/%s/%s';
 
 /**
  * GeoNames first-level divisions, downloaded with the places.
@@ -235,6 +244,63 @@ function sloc_build_indexes( $data_dir, $csv ) {
 	}
 }
 
+/**
+ * Builds data/address-formats.json from OpenCage address-formatting at the commit described in a GitHub API answer.
+ *
+ * @param string $commit_file GitHub API answer for the branch's latest commit.
+ * @param string $temp        Temporary directory.
+ * @param string $file        Destination path.
+ */
+function sloc_build_addresses( $commit_file, $temp, $file ) {
+	$autoload = dirname( __DIR__ ) . '/vendor/autoload.php';
+	if ( ! is_readable( $autoload ) ) {
+		fwrite( STDERR, "Run composer install first; the addresses source needs symfony/yaml.\n" );
+		exit( 1 );
+	}
+	require_once $autoload;
+	$commit = json_decode( (string) file_get_contents( $commit_file ), true );
+	$sha    = is_array( $commit ) && is_string( $commit['sha'] ?? null ) && preg_match( '/^[0-9a-f]{40}$/', $commit['sha'] ) ? $commit['sha'] : '';
+	if ( '' === $sha ) {
+		fwrite( STDERR, "Could not read the address-formatting commit\n" );
+		exit( 1 );
+	}
+	$parsed = array();
+	foreach ( array(
+		'worldwide' => 'conf/countries/worldwide.yaml',
+		'states'    => 'conf/state_codes.yaml',
+		'counties'  => 'conf/county_codes.yaml',
+	) as $key => $path ) {
+		$local = $temp . '/' . basename( $path );
+		sloc_download( sprintf( SLOC_ADDRESS_FORMATTING_FILE, $sha, $path ), $local );
+		$parsed[ $key ] = Symfony\Component\Yaml\Yaml::parseFile( $local );
+		unlink( $local );
+	}
+	// Keep only region codes that are ISO 3166-2 codes in the plugin's own data.
+	$iso = array();
+	foreach ( glob( dirname( $file ) . '/iso_3166-2/*.json' ) as $iso_file ) {
+		foreach ( (array) json_decode( (string) file_get_contents( $iso_file ), true ) as $subdivision ) {
+			if ( is_array( $subdivision ) && isset( $subdivision['code'] ) && false !== strpos( $subdivision['code'], '-' ) ) {
+				list( $country, $code ) = explode( '-', $subdivision['code'], 2 );
+				$iso[ $country ][]      = $code;
+			}
+		}
+	}
+	$table = Sloc_Address_Format_Builder::build(
+		$parsed['worldwide'],
+		$parsed['states'],
+		$parsed['counties'],
+		array(
+			'repository' => 'https://github.com/OpenCageData/address-formatting',
+			'license'    => 'MIT',
+			'commit'     => $sha,
+			'date'       => (string) ( $commit['commit']['committer']['date'] ?? '' ),
+		),
+		$iso
+	);
+	file_put_contents( $file, json_encode( $table, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . "\n" );
+	fwrite( STDOUT, sprintf( "Built %s with %d countries from address-formatting %s\n", $file, count( $table['countries'] ), substr( $sha, 0, 7 ) ) );
+}
+
 $sloc_selected = array_slice( $argv, 1 );
 // "indexes" rebuilds the airport and airline indexes from the current files, without downloading.
 if ( array( 'indexes' ) === $sloc_selected ) {
@@ -285,6 +351,9 @@ foreach ( $sloc_selected as $sloc_source ) {
 			$sloc_file = sloc_unzip( $sloc_download, '.json', $sloc_temp );
 			sloc_build_grid( $sloc_file, $sloc_data_dir . '/geo/timezones', array( 'Sloc_Geo_Data_Builder', 'timezone_label' ) );
 			unlink( $sloc_file );
+			break;
+		case 'addresses':
+			sloc_build_addresses( $sloc_download, $sloc_temp, $sloc_data_dir . '/address-formats.json' );
 			break;
 		case 'places':
 			$sloc_file   = sloc_unzip( $sloc_download, '.txt', $sloc_temp );

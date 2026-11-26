@@ -59,6 +59,10 @@
 - [~~`sloc_local_api_protected`~~](sloc_local_api_protected) **DEPRECATED** Use `sloc_local_api_public` instead
 - [`sloc_local_api_public`](sloc_local_api_public) Filters whether the local airport and timezone lookup endpoints are open to everyone.
 
+## class-sloc-address-format.php
+
+- [`sloc_address_format_file`](sloc_address_format_file) Filters the path of the address format table.
+
 ## class-sloc-geojson.php
 
 - [`sloc_geojson`](sloc_geojson) Filters the GeoJSON FeatureCollection of a feed.

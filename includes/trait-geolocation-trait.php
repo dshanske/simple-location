@@ -16,34 +16,14 @@ trait GeoLocation_Trait {
 	/**
 	 * Is Country One Where the Street Number Comes First.
 	 *
+	 * @since 6.5.0 Read from the address format table built from OpenCage address-formatting, which covers about 240
+	 *              countries, instead of a list of 18 where the number follows the street.
+	 *
 	 * @param string $code Country Code.
 	 * @return boolean True if yes.
 	 */
 	public static function house_number( $code ) {
-		return ! in_array(
-			$code,
-			array(
-				'BE',
-				'BG',
-				'BR',
-				'CH',
-				'CL',
-				'CN',
-				'CZ',
-				'DE',
-				'DK',
-				'ES',
-				'FI',
-				'HR',
-				'IT',
-				'NL',
-				'NO',
-				'PL',
-				'SE',
-				'SK',
-			),
-			true
-		);
+		return Sloc_Address_Format::number_first( (string) $code );
 	}
 
 	/**

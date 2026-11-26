@@ -65,6 +65,15 @@ trait Sloc_OSM_Address {
 			$country_code = $place ? (string) $place['country'] : '';
 		}
 
+		// Clean names with the country's rules, such as "London Borough of Camden". Districts are recognized by their
+		// names as given, since cleaning "Kenmare Municipal District" leaves what looks like a town.
+		$given = $address;
+		foreach ( $address as $key => $value ) {
+			if ( ! in_array( $key, array( 'country_code', 'postcode', 'house_number' ), true ) ) {
+				$address[ $key ] = Sloc_Address_Format::clean( $country_code, $key, $value );
+			}
+		}
+
 		$region_key = null;
 		foreach ( self::osm_region_keys( $country_code ) as $key ) {
 			if ( is_string( $key ) && ! empty( $address[ $key ] ) ) {
@@ -75,7 +84,7 @@ trait Sloc_OSM_Address {
 		$region      = $region_key ? $address[ $region_key ] : null;
 		$region_code = self::osm_region_code( $json['address'], $region_key, $country_code );
 		if ( empty( $region_code ) && ! empty( $region ) ) {
-			list( $region, $region_code ) = self::osm_region_name_code( $region, $country_code );
+			list( $region, $region_code ) = self::osm_region_name_code( $region, $country_code, 'county' === $region_key ? 'county' : 'state' );
 		}
 
 		$number = self::ifnot( $address, array( 'house_number', 'house_name' ) );
@@ -90,19 +99,18 @@ trait Sloc_OSM_Address {
 		}
 
 		$suburb = $address['suburb'] ?? null;
-		if ( $suburb && self::osm_is_district( $suburb ) ) {
+		if ( $suburb && self::osm_is_district( $given['suburb'] ) ) {
 			$suburb = null;
 		}
 
-		$locality = self::ifnot( $address, array( 'hamlet', 'village', 'town', 'city', 'municipality', 'croft', 'isolated_dwelling' ) );
-		$district = null;
-		if ( $locality && self::osm_is_district( $locality ) ) {
-			// A council district, such as Ireland's "Kenmare Municipal District", isn't a town; it's used only when nothing else is.
+		$locality_keys = array( 'hamlet', 'village', 'town', 'city', 'municipality', 'croft', 'isolated_dwelling' );
+		$locality      = self::ifnot( $address, $locality_keys );
+		$district      = null;
+		if ( $locality && self::osm_is_district( (string) self::ifnot( $given, $locality_keys ) ) ) {
+			// A council district, such as Ireland's "Kenmare Municipal District", isn't a town; it's used, cleaned, only
+			// when nothing else is.
 			$district = $locality;
 			$locality = null;
-		}
-		if ( $locality && 'US' === $country_code ) {
-			$locality = self::osm_strip_prefix( $locality );
 		}
 
 		$addr = array(
@@ -249,8 +257,8 @@ trait Sloc_OSM_Address {
 	/**
 	 * Returns the address keys to take the region from, in order, for a country.
 	 *
-	 * The state, or its equivalent, comes first. In the United Kingdom and Italy, whose addresses customarily name the
-	 * county or province, the county comes first.
+	 * The division the country's addresses name, from the address format table, such as the county in the United
+	 * Kingdom and Italy, comes first; then the state, or its equivalent, region, state_district and county.
 	 *
 	 * @since 6.5.0
 	 *
@@ -258,7 +266,11 @@ trait Sloc_OSM_Address {
 	 * @return string[] Address keys.
 	 */
 	public static function osm_region_keys( $country_code ) {
-		$keys = in_array( $country_code, array( 'GB', 'IT' ), true ) ? array( 'county', 'state', 'region', 'state_district' ) : array( 'state', 'region', 'state_district', 'county' );
+		$keys = array( 'state', 'region', 'state_district', 'county' );
+		$own  = Sloc_Address_Format::region_key( $country_code );
+		if ( $own ) {
+			$keys = array_values( array_unique( array_merge( array( $own ), $keys ) ) );
+		}
 
 		/**
 		 * Filters the address keys a Nominatim-format answer's region is taken from, in order.
@@ -276,23 +288,32 @@ trait Sloc_OSM_Address {
 	 * Returns a region name and its code, choosing the name in a bilingual one, such as
 	 * "Northern Ireland / Tuaisceart Éireann", whose code is known.
 	 *
+	 * The code comes from the ISO 3166-2 data, or else from the address format table's names in other languages, such
+	 * as Bavaria for Bayern.
+	 *
 	 * @since 6.5.0
 	 *
 	 * @param string $region       Region name.
 	 * @param string $country_code Country code.
+	 * @param string $kind         Optional. 'state' or 'county', which list of the address format table to use.
+	 *                             Default 'state'.
 	 * @return array Region name and code, which is null if it isn't known.
 	 */
-	public static function osm_region_name_code( $region, $country_code ) {
-		$parts = preg_split( '/\s+[\/|]\s+/u', $region );
+	public static function osm_region_name_code( $region, $country_code, $kind = 'state' ) {
+		$lookup = function ( $name ) use ( $country_code, $kind ) {
+			$code = self::region_code( $name, $country_code );
+			return empty( $code ) ? Sloc_Address_Format::code( $country_code, $name, $kind ) : $code;
+		};
+		$parts  = preg_split( '/\s+[\/|]\s+/u', $region );
 		if ( count( $parts ) > 1 ) {
 			foreach ( $parts as $part ) {
-				$code = self::region_code( $part, $country_code );
+				$code = $lookup( $part );
 				if ( ! empty( $code ) ) {
 					return array( $part, $code );
 				}
 			}
 		}
-		$code = self::region_code( $region, $country_code );
+		$code = $lookup( $region );
 		return array( $region, empty( $code ) ? null : $code );
 	}
 
@@ -309,18 +330,6 @@ trait Sloc_OSM_Address {
 		return (bool) preg_match( '/(^|\s)(Community (Board|District)|Ward|District|Council District)\s+\d+[A-Z]?$|\b(Municipal|Metropolitan) District\b|\bRegional Council\b|^מועצה אזורית\s/iu', $name );
 	}
 
-	/**
-	 * Removes a "Village of", "Town of", "City of" or "Borough of" prefix from a US place name.
-	 *
-	 * @since 6.5.0
-	 *
-	 * @param string $name Place name.
-	 * @return string Name.
-	 */
-	public static function osm_strip_prefix( $name ) {
-		$stripped = preg_replace( '/^(Village|Town|City|Borough) of\s+/i', '', $name );
-		return '' === $stripped ? $name : $stripped;
-	}
 
 	/**
 	 * Returns the region code from Nominatim's ISO 3166-2 keys, such as "ISO3166-2-lvl4": "US-PA".
