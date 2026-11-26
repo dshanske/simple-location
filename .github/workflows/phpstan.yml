@@ -1,11 +1,20 @@
 name: PHPStan
-on: push
+# Pull requests, and trunk after a merge. Branch pushes used to start a second, identical run.
+on:
+  push:
+    branches:
+    - trunk
+  pull_request:
+# A new push to a pull request cancels the runs for the push before it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   phpstan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -13,6 +22,6 @@ jobs:
           coverage: none
           tools: composer:v2
       - name: Install Composer dependencies for PHP
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@v4"
       - name: Analyse PHP code
         run: composer phpstan -- --no-progress --error-format=github

@@ -1,19 +1,29 @@
 name: WordPress Unit Testing
+# Pull requests, and trunk after a merge. Branch pushes used to start a second, identical run next to the PR's.
 on:
-    push:
-    pull_request:
+  push:
+    branches:
+    - trunk
+  pull_request:
+# A new push to a pull request cancels the runs for the push before it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   phpunit:
     name: WP ${{ matrix.wp-version }} / PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-latest
+    # Jobs marked experimental report problems without failing the run.
+    continue-on-error: ${{ matrix.experimental == true }}
     services:
      mysql:
-       image: mariadb:10.4
+       # MariaDB 10.4 is end of life. Newer images have no mysqladmin, so the health check uses their own script.
+       image: mariadb:11.4
        env:
          MYSQL_ROOT_PASSWORD: root
        ports:
          - 3306:3306
-       options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
+       options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=10s --health-retries=10
     strategy:
       fail-fast: false
       matrix:
@@ -30,9 +40,14 @@ jobs:
             php-versions: '8.5'
           - wp-version: '6.2'
             php-versions: '8.6'
+        include:
+          # The next WordPress, to catch problems before it is released.
+          - wp-version: 'trunk'
+            php-versions: '8.6'
+            experimental: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -41,7 +56,7 @@ jobs:
           tools: composer
           extensions: mysql
       - name: Install Composer dependencies for PHP
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@v4"
       - name: Setup Test Environment
         run: |
           sudo apt update
@@ -55,15 +70,16 @@ jobs:
     runs-on: ubuntu-latest
     services:
      mysql:
-       image: mariadb:10.4
+       # MariaDB 10.4 is end of life. Newer images have no mysqladmin, so the health check uses their own script.
+       image: mariadb:11.4
        env:
          MYSQL_ROOT_PASSWORD: root
        ports:
          - 3306:3306
-       options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
+       options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=10s --health-timeout=10s --health-retries=10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -72,7 +88,7 @@ jobs:
           tools: composer
           extensions: mysql
       - name: Install Composer dependencies for PHP
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@v4"
       - name: Setup Test Environment
         run: |
           sudo apt update
@@ -88,7 +104,7 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
       - name: Upload Coverage Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: |

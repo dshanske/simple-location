@@ -4,13 +4,16 @@ on: # rebuild any PRs and trunk branch changes
   push:
     branches:
     - trunk
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Run plugin check
       uses: wordpress/plugin-check-action@v1
