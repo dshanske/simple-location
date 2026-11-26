@@ -417,6 +417,61 @@ class OsmAddressTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Where addresses name the state but an answer has none, as from a Southern California extract without the
+	 * state's boundary, the state comes from the place data, not the county (#875).
+	 */
+	public function test_missing_state() {
+		$addr = $this->parse(
+			array(
+				'road'   => 'East Greenville Drive',
+				'city'   => 'West Covina',
+				'county' => 'Los Angeles County',
+			),
+			34.0686,
+			-117.9390
+		);
+		$this->assertSame( 'California', $addr['region'] );
+		$this->assertSame( 'CA', $addr['region-code'] );
+		$this->assertSame( 'US', $addr['country-code'] );
+
+		// Where the county is what addresses name, it stays.
+		$addr = $this->parse(
+			array(
+				'city'         => 'Maidstone',
+				'county'       => 'Kent',
+				'country'      => 'United Kingdom',
+				'country_code' => 'gb',
+			),
+			51.2704,
+			0.5227
+		);
+		$this->assertSame( 'Kent', $addr['region'] );
+
+		// With no place data for the location, the county is better than nothing.
+		$addr = $this->parse(
+			array(
+				'road'   => 'Ocean Road',
+				'county' => 'Somewhere County',
+			),
+			33.0,
+			-125.0
+		);
+		$this->assertSame( 'Somewhere County', $addr['region'] ?? null );
+	}
+
+	/**
+	 * South African municipalities, Kenyan wards and Indian city corporations aren't towns (#875).
+	 */
+	public function test_more_districts() {
+		foreach ( array( 'Kai !Garib Local Municipality', 'Namakwa District Municipality', 'City of Johannesburg Metropolitan Municipality', 'Kilimani ward', 'Railways ward', 'Bengaluru Central City Corporation', 'Greater Chennai Municipal Corporation' ) as $name ) {
+			$this->assertTrue( Geo_Provider_Nominatim::osm_is_district( $name ), $name );
+		}
+		foreach ( array( 'Edward', 'Hayward', 'Cape Town', 'Municipality of Monaco Beach' ) as $name ) {
+			$this->assertFalse( Geo_Provider_Nominatim::osm_is_district( $name ), $name );
+		}
+	}
+
+	/**
 	 * Without an address there is nothing to parse.
 	 */
 	public function test_no_address() {

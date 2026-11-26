@@ -312,6 +312,23 @@ function sloc_build_addresses( $commit_file, $temp, $file ) {
 }
 
 /**
+ * Returns a Wikidata query for the items with a code property, such as ISO 3166-2 codes (P300), best first.
+ *
+ * A code can be on several items, such as a region dissolved in 2015 whose code went to its successor. Current ones
+ * come first: statements without an end time on items not dissolved, preferred rank before normal. Ended ones follow,
+ * so a code whose only item has ended, as after a country reorganizes its provinces, still gets a name. Deprecated
+ * statements are left out. The first item for each code is the one used.
+ *
+ * @param string $property Property, such as P300 or P297.
+ * @return string SPARQL query, returning ?item and ?code.
+ */
+function sloc_wikidata_code_query( $property ) {
+	return 'SELECT ?item ?code WHERE { ?item p:' . $property . ' ?statement . ?statement ps:' . $property . ' ?code ; wikibase:rank ?rank . '
+		. 'FILTER ( ?rank != wikibase:DeprecatedRank ) OPTIONAL { ?statement pq:P582 ?end } OPTIONAL { ?item wdt:P576 ?dissolved } '
+		. 'BIND ( IF( BOUND( ?end ) || BOUND( ?dissolved ), 1, 0 ) AS ?old ) } ORDER BY ?old DESC( STR( ?rank ) )';
+}
+
+/**
  * Runs a Wikidata query and returns its rows.
  *
  * @param string $query SPARQL query.
@@ -375,7 +392,7 @@ function sloc_build_localized_names( $regions, $languages, $iso, $temp, $dir ) {
 		}
 	}
 	$countries = array();
-	foreach ( sloc_wikidata_query( 'SELECT ?item ?code WHERE { ?item p:P297 ?statement . ?statement ps:P297 ?code . FILTER NOT EXISTS { ?statement wikibase:rank wikibase:DeprecatedRank } }', $temp ) as $row ) {
+	foreach ( sloc_wikidata_query( sloc_wikidata_code_query( 'P297' ), $temp ) as $row ) {
 		$id = basename( $row['item'] ?? '' );
 		if ( isset( $iso_countries[ $row['code'] ?? '' ] ) && preg_match( '/^Q\d+$/', $id ) && ! isset( $countries[ $row['code'] ] ) ) {
 			$countries[ $row['code'] ] = $id;
@@ -407,7 +424,7 @@ function sloc_build_localized_names( $regions, $languages, $iso, $temp, $dir ) {
  * @return array ISO 3166-2 code => Wikidata item ID.
  */
 function sloc_build_region_names( $languages, $iso, $temp, $file ) {
-	$query = 'SELECT ?item ?code WHERE { ?item p:P300 ?statement . ?statement ps:P300 ?code . FILTER NOT EXISTS { ?statement wikibase:rank wikibase:DeprecatedRank } }';
+	$query = sloc_wikidata_code_query( 'P300' );
 	$local = $temp . '/iso-items.json';
 	sloc_download( 'https://query.wikidata.org/sparql?format=json&query=' . rawurlencode( $query ), $local );
 	$result = json_decode( (string) file_get_contents( $local ), true );

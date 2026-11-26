@@ -283,6 +283,8 @@ class Sloc_Address_Format {
 	/**
 	 * Returns a region's name in a language, such as Southern District for IL-D in English.
 	 *
+	 * The name starts with a capital, such as Province of Perugia for Wikidata's "province of Perugia".
+	 *
 	 * @since 6.5.0
 	 *
 	 * @param string $country_code Country code.
@@ -293,6 +295,10 @@ class Sloc_Address_Format {
 	public static function region_name( $country_code, $code, $language = '' ) {
 		$names = self::localized( '' === $language ? self::site_language() : $language )['regions'];
 		$name  = $names[ strtoupper( $country_code . '-' . $code ) ] ?? null;
-		return is_string( $name ) && '' !== $name ? $name : null;
+		if ( ! is_string( $name ) || '' === $name ) {
+			return null;
+		}
+		// Wikidata labels some regions in lowercase, such as "province of Perugia"; as a name, it starts with a capital.
+		return mb_strtoupper( mb_substr( $name, 0, 1 ) ) . mb_substr( $name, 1 );
 	}
 }

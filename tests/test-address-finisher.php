@@ -145,6 +145,14 @@ class AddressFinisherTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Region names start with a capital, though Wikidata labels some in lowercase (#875).
+	 */
+	public function test_region_name_capital() {
+		$this->assertSame( 'Province of Perugia', Sloc_Address_Format::region_name( 'IT', 'PG', 'en' ) );
+		$this->assertSame( 'Marrakesh-Safi', Sloc_Address_Format::region_name( 'MA', '07', 'en' ), 'The current region, not the one its code had before.' );
+	}
+
+	/**
 	 * A name already in the site's language changes nothing, and names kept earlier aren't replaced.
 	 */
 	public function test_nothing_to_change() {
