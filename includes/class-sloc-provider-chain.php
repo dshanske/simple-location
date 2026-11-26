@@ -253,18 +253,21 @@ class Sloc_Provider_Chain {
 	 * Looks up the address of a location with the geocoding chain.
 	 *
 	 * @since 6.1.0
+	 * @since 6.5.0 The address gets the site's country choices and names in its language; see Sloc_Address_Finisher.
 	 *
 	 * @param float $latitude  Latitude.
 	 * @param float $longitude Longitude.
 	 * @return array|WP_Error Address, or the last error.
 	 */
 	public static function reverse_lookup( $latitude, $longitude ) {
-		return self::run(
-			'geo',
-			fn( $provider ) => $provider->reverse_lookup(),
-			array(
-				'latitude'  => $latitude,
-				'longitude' => $longitude,
+		return Sloc_Address_Finisher::finish(
+			self::run(
+				'geo',
+				fn( $provider ) => $provider->reverse_lookup(),
+				array(
+					'latitude'  => $latitude,
+					'longitude' => $longitude,
+				)
 			)
 		);
 	}
@@ -275,6 +278,7 @@ class Sloc_Provider_Chain {
 	 * A Plus Code, such as "87F6XR2P+WH" or "XR2P+WH Philadelphia", is decoded, and its address looked up (#197).
 	 *
 	 * @since 6.1.0
+	 * @since 6.5.0 The location gets the site's country choices and names in its language; see Sloc_Address_Finisher.
 	 *
 	 * @param string $address Address.
 	 * @return array|WP_Error Location, or the last error.
@@ -296,7 +300,7 @@ class Sloc_Provider_Chain {
 				)
 			);
 		}
-		return self::run( 'geo', fn( $provider ) => $provider->geocode( $address ), array() );
+		return Sloc_Address_Finisher::finish( self::run( 'geo', fn( $provider ) => $provider->geocode( $address ), array() ) );
 	}
 
 	/**

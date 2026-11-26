@@ -96,9 +96,9 @@ class AddressFormatTest extends WP_UnitTestCase {
 		$this->assertSame( 'D', Sloc_Address_Format::code( 'IL', 'מחוז הדרום' ) );
 		$this->assertSame( 'TN', Sloc_Address_Format::code( 'IN', 'தமிழ்நாடு' ) );
 		$this->assertNull( Sloc_Address_Format::code( 'PS', 'قطاع غزة' ), 'The Gaza Strip has no ISO 3166-2 code; the governorates do.' );
-		$this->assertSame( 'Southern District', Sloc_Address_Format::english_region( 'IL', 'D' ) );
-		$this->assertSame( 'Burgas Province', Sloc_Address_Format::english_region( 'bg', '02' ) );
-		$this->assertNull( Sloc_Address_Format::english_region( 'BG', 'ZZ' ) );
+		$this->assertSame( 'Southern District', Sloc_Address_Format::region_name( 'IL', 'D', 'en' ) );
+		$this->assertSame( 'Burgas Province', Sloc_Address_Format::region_name( 'bg', '02', 'en' ) );
+		$this->assertNull( Sloc_Address_Format::region_name( 'BG', 'ZZ', 'en' ) );
 
 		$json = json_decode( file_get_contents( dirname( __DIR__ ) . '/data/region-names.json' ), true );
 		$this->assertSame( 'CC0-1.0', $json['source']['license'] );
@@ -153,7 +153,7 @@ class AddressFormatTest extends WP_UnitTestCase {
 		$this->assertNull( Sloc_Address_Format::region_key( 'GB' ) );
 		$this->assertSame( 'London Borough of Camden', Sloc_Address_Format::clean( 'GB', 'city', 'London Borough of Camden' ) );
 		$this->assertNull( Sloc_Address_Format::code( 'DE', 'Bavaria' ) );
-		$this->assertNull( Sloc_Address_Format::english_region( 'IL', 'D' ) );
+		$this->assertSame( 'Southern District', Sloc_Address_Format::region_name( 'IL', 'D', 'en' ), 'Names by language are separate files.' );
 		$this->assertTrue( Sloc_Address_Format::shows_region_code( 'DE' ), 'As before the table existed.' );
 	}
 
@@ -303,13 +303,45 @@ class AddressFormatTest extends WP_UnitTestCase {
 			$names['names']['BG'],
 			'Names in other languages are left out, and a name for two codes is dropped.'
 		);
-		$this->assertSame( array( '02' => 'Burgas Province' ), $names['english']['BG'] );
 		$this->assertSame(
-			array(
-				'names'   => array(),
-				'english' => array(),
-			),
+			array( 'names' => array() ),
 			Sloc_Address_Format_Builder::region_names( array( 'BG-02' => 'Q1' ), array( 'Q1' => array( 'aliases' => array( 'bg' => array( array( 'value' => 'а' ) ) ) ) ), array(), array( 'BG' => array() ) )
 		);
+
+		$localized = Sloc_Address_Format_Builder::localized_names(
+			array(
+				'BG'  => 'Q9',
+				'bad' => 'Q8',
+			),
+			$items,
+			array_merge(
+				$entities,
+				array(
+					'Q9' => array(
+						'labels' => array(
+							'en' => array( 'value' => 'Bulgaria' ),
+							'fr' => array( 'value' => 'Bulgarie' ),
+						),
+					),
+				)
+			),
+			array( 'en', 'fr', 'de' ),
+			array( 'BG' => array( '02', '03' ) )
+		);
+		$this->assertSame(
+			array(
+				'countries' => array( 'BG' => 'Bulgaria' ),
+				'regions'   => array( 'BG-02' => 'Burgas Province' ),
+			),
+			$localized['en']
+		);
+		$this->assertSame(
+			array(
+				'countries' => array( 'BG' => 'Bulgarie' ),
+				'regions'   => array( 'BG-02' => 'Province de Bourgas' ),
+			),
+			$localized['fr']
+		);
+		$this->assertArrayNotHasKey( 'de', $localized, 'A language without names is left out.' );
 	}
 }

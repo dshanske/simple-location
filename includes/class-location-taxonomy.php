@@ -544,6 +544,7 @@ final class Location_Taxonomy {
 	 *
 	 * @since 4.0.0
 	 * @since 6.0.0 A country code fills in the country name, and region codes are no longer lost.
+	 * @since 6.5.0 A region name in another language, such as Bavaria, gets its code; see Sloc_Address_Format::code().
 	 *
 	 * @param array $address Address data.
 	 * @return array Normalized Address Data.
@@ -571,7 +572,11 @@ final class Location_Taxonomy {
 			$address['region'] = $address['region-name'];
 		}
 		if ( array_key_exists( 'region', $address ) && ! array_key_exists( 'region-code', $address ) ) {
-			$code                   = empty( $address['country-code'] ) ? false : Geo_Provider::region_code( $address['region'], $address['country-code'] );
+			$code = empty( $address['country-code'] ) ? false : Geo_Provider::region_code( $address['region'], $address['country-code'] );
+			if ( ! $code && ! empty( $address['country-code'] ) ) {
+				// Names in other languages, such as Bavaria for BY or Бургас for BG-02.
+				$code = Sloc_Address_Format::code( $address['country-code'], $address['region'] );
+			}
 			$address['region-code'] = $code ? $code : $address['region'];
 		}
 		if ( ! array_key_exists( 'region', $address ) && ! empty( $address['region-code'] ) && ! empty( $address['country-code'] ) ) {
@@ -903,6 +908,7 @@ final class Location_Taxonomy {
 	 * Returns an existing term or creates a new one based on returned address data.
 	 *
 	 * @since 4.4.0
+	 * @since 6.5.0 A country or region named in the site's language keeps the provider's name as local_name term meta.
 	 *
 	 * @param array   $addr Address data.
 	 * @param boolean $term If Term is True Return a New Term if One Does Not Exist.
@@ -938,6 +944,7 @@ final class Location_Taxonomy {
 				if ( is_array( $return ) ) {
 					$country = $return['term_id'];
 					add_term_meta( $country, 'country', $addr['country-code'] );
+					self::add_local_name( $country, $addr['local']['country-name'] ?? '', $addr['country-name'] );
 				}
 			}
 			$region_code = self::region_return( $addr );
@@ -953,6 +960,7 @@ final class Location_Taxonomy {
 				if ( is_array( $return ) ) {
 					$region = $return['term_id'];
 					add_term_meta( $region, 'region', $region_code );
+					self::add_local_name( $region, $addr['local']['region'] ?? '', $addr['region'] ?? '' );
 				}
 			} else {
 				return $country;
@@ -978,6 +986,21 @@ final class Location_Taxonomy {
 			return $locality;
 		}
 		return false;
+	}
+
+	/**
+	 * Keeps the name a provider gave a location, when the term is named in the site's language instead.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param int    $term_id Term ID.
+	 * @param string $local   Name the provider gave, such as ישראל.
+	 * @param string $name    Name of the term, such as Israel.
+	 */
+	protected static function add_local_name( $term_id, $local, $name ) {
+		if ( is_string( $local ) && '' !== $local && $local !== $name ) {
+			add_term_meta( $term_id, 'local_name', sanitize_text_field( $local ), true );
+		}
 	}
 
 	/**

@@ -19,7 +19,8 @@
  * - addresses: OpenCage address-formatting (https://github.com/OpenCageData/address-formatting, MIT), its current
  *   commit, built into data/address-formats.json, which records the commit. Needs symfony/yaml (composer install).
  *   Also builds data/region-names.json from Wikidata (https://www.wikidata.org/, CC0): the names, in each country's
- *   languages, and English labels of the regions with ISO 3166-2 codes.
+ *   languages, of the regions with ISO 3166-2 codes; and data/names/{language}.json, country and region names in
+ *   English and each language of OpenCage's country list, to show them in a site's language.
  *
  * Updating airports or airlines also rebuilds their indexes in data/index/. `php bin/update-data.php indexes`
  * rebuilds the indexes from the current files without downloading anything.
@@ -306,7 +307,93 @@ function sloc_build_addresses( $commit_file, $temp, $file ) {
 	sloc_download( sprintf( SLOC_ADDRESS_FORMATTING_FILE, $sha, 'conf/country2lang.yaml' ), $local );
 	$languages = Sloc_Address_Format_Builder::languages( Symfony\Component\Yaml\Yaml::parseFile( $local ) );
 	unlink( $local );
-	sloc_build_region_names( $languages, $iso, $temp, dirname( $file ) . '/region-names.json' );
+	$items = sloc_build_region_names( $languages, $iso, $temp, dirname( $file ) . '/region-names.json' );
+	sloc_build_localized_names( $items, array_values( array_unique( array_merge( ...array_values( $languages ) ) ) ), $iso, $temp, dirname( $file ) . '/names' );
+}
+
+/**
+ * Runs a Wikidata query and returns its rows.
+ *
+ * @param string $query SPARQL query.
+ * @param string $temp  Temporary directory.
+ * @return array Rows, each variable => value.
+ */
+function sloc_wikidata_query( $query, $temp ) {
+	$local = $temp . '/query.json';
+	sloc_download( 'https://query.wikidata.org/sparql?format=json&query=' . rawurlencode( $query ), $local );
+	$result = json_decode( (string) file_get_contents( $local ), true );
+	unlink( $local );
+	$rows = array();
+	foreach ( $result['results']['bindings'] ?? array() as $binding ) {
+		$rows[] = array_map( fn( $cell ) => (string) ( $cell['value'] ?? '' ), $binding );
+	}
+	return $rows;
+}
+
+/**
+ * Fetches Wikidata entities, 50 to a request and at most 50 languages to a request.
+ *
+ * @param string[] $ids       Item IDs.
+ * @param string[] $languages Language codes.
+ * @param string   $props     Properties, such as labels|aliases.
+ * @param string   $temp      Temporary directory.
+ * @return array Item ID => entity; for several language groups, merged.
+ */
+function sloc_wikidata_entities( $ids, $languages, $props, $temp ) {
+	$entities = array();
+	foreach ( array_chunk( array_values( array_unique( $ids ) ), 50 ) as $batch ) {
+		foreach ( array_chunk( $languages, 50 ) as $group ) {
+			$url   = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&props=' . rawurlencode( $props ) . '&ids=' . implode( '%7C', $batch ) . '&languages=' . implode( '%7C', $group );
+			$local = $temp . '/entities.json';
+			sloc_download( $url, $local );
+			$answer = json_decode( (string) file_get_contents( $local ), true );
+			unlink( $local );
+			foreach ( $answer['entities'] ?? array() as $id => $entity ) {
+				$entities[ $id ] = array_replace_recursive( $entities[ $id ] ?? array(), $entity );
+			}
+			usleep( 200000 );
+		}
+	}
+	return $entities;
+}
+
+/**
+ * Builds data/names/{language}.json: Wikidata's labels of countries and regions in each language.
+ *
+ * @param array    $regions   ISO 3166-2 code => Wikidata item ID.
+ * @param string[] $languages Language codes.
+ * @param array    $iso       ISO 3166-2 codes without the country prefix, by country.
+ * @param string   $temp      Temporary directory.
+ * @param string   $dir       Destination directory.
+ */
+function sloc_build_localized_names( $regions, $languages, $iso, $temp, $dir ) {
+	// Every ISO 3166-1 country, including those without regions, such as Monaco.
+	$iso_countries = array();
+	foreach ( (array) ( json_decode( (string) file_get_contents( dirname( $dir ) . '/iso_3166-1.json' ), true )['3166-1'] ?? array() ) as $country ) {
+		if ( is_array( $country ) && isset( $country['alpha_2'] ) ) {
+			$iso_countries[ $country['alpha_2'] ] = true;
+		}
+	}
+	$countries = array();
+	foreach ( sloc_wikidata_query( 'SELECT ?item ?code WHERE { ?item p:P297 ?statement . ?statement ps:P297 ?code . FILTER NOT EXISTS { ?statement wikibase:rank wikibase:DeprecatedRank } }', $temp ) as $row ) {
+		$id = basename( $row['item'] ?? '' );
+		if ( isset( $iso_countries[ $row['code'] ?? '' ] ) && preg_match( '/^Q\d+$/', $id ) && ! isset( $countries[ $row['code'] ] ) ) {
+			$countries[ $row['code'] ] = $id;
+		}
+	}
+	sort( $languages );
+	$entities = sloc_wikidata_entities( array_merge( array_values( $countries ), array_values( $regions ) ), $languages, 'labels', $temp );
+	$names    = Sloc_Address_Format_Builder::localized_names( $countries, $regions, $entities, $languages, $iso );
+	if ( ! is_dir( $dir ) ) {
+		mkdir( $dir );
+	}
+	foreach ( glob( $dir . '/*.json' ) as $old ) {
+		unlink( $old );
+	}
+	foreach ( $names as $language => $list ) {
+		file_put_contents( $dir . '/' . $language . '.json', json_encode( $list, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . "\n" );
+	}
+	fwrite( STDOUT, sprintf( "Built %s with names in %d languages for %d countries and %d regions\n", $dir, count( $names ), count( $countries ), count( $regions ) ) );
 }
 
 /**
@@ -317,6 +404,7 @@ function sloc_build_addresses( $commit_file, $temp, $file ) {
  * @param array  $iso       ISO 3166-2 codes without the country prefix, by country.
  * @param string $temp      Temporary directory.
  * @param string $file      Destination path.
+ * @return array ISO 3166-2 code => Wikidata item ID.
  */
 function sloc_build_region_names( $languages, $iso, $temp, $file ) {
 	$query = 'SELECT ?item ?code WHERE { ?item p:P300 ?statement . ?statement ps:P300 ?code . FILTER NOT EXISTS { ?statement wikibase:rank wikibase:DeprecatedRank } }';
@@ -382,6 +470,7 @@ function sloc_build_region_names( $languages, $iso, $temp, $file ) {
 	);
 	file_put_contents( $file, json_encode( $names, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . "\n" );
 	fwrite( STDOUT, sprintf( "Built %s with names for %d countries from %d Wikidata items\n", $file, count( $names['names'] ), count( $entities ) ) );
+	return $items;
 }
 
 $sloc_selected = array_slice( $argv, 1 );

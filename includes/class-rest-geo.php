@@ -880,7 +880,7 @@ class REST_Geo {
 				if ( $provider ) {
 					// A provider asked for by name is the only one tried.
 					$reverse->set( $params );
-					$reverse_adr = $reverse->reverse_lookup();
+					$reverse_adr = Sloc_Address_Finisher::finish( $reverse->reverse_lookup() );
 				} else {
 					$reverse_adr = Sloc_Provider_Chain::reverse_lookup( $params['latitude'], $params['longitude'] );
 				}

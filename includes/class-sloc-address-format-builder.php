@@ -321,7 +321,7 @@ class Sloc_Address_Format_Builder {
 
 	/**
 	 * Builds region names from Wikidata: every label and alias, in each country's languages, of the items with an
-	 * ISO 3166-2 code, and each code's English label.
+	 * ISO 3166-2 code.
 	 *
 	 * A name that stands for more than one code in a country is left out.
 	 *
@@ -333,12 +333,10 @@ class Sloc_Address_Format_Builder {
 	 * @param array      $languages Country code => language codes. See languages().
 	 * @param array|null $iso       Optional. ISO 3166-2 codes without the country prefix, by country; others are left
 	 *                              out. Default keeps all.
-	 * @return array 'names' (country => lowercased name => code) and 'english' (country => code => English label), with
-	 *               codes without the country prefix.
+	 * @return array 'names': country => lowercased name => code without the country prefix.
 	 */
 	public static function region_names( $items, $entities, $languages, $iso = null ) {
-		$found   = array();
-		$english = array();
+		$found = array();
 		foreach ( $items as $iso_code => $id ) {
 			if ( ! is_string( $iso_code ) || ! preg_match( '/^([A-Z]{2})-([A-Z0-9]{1,3})$/', $iso_code, $match ) ) {
 				continue;
@@ -367,9 +365,6 @@ class Sloc_Address_Format_Builder {
 					}
 				}
 			}
-			if ( isset( $entity['labels']['en']['value'] ) && is_string( $entity['labels']['en']['value'] ) ) {
-				$english[ $country ][ $code ] = $entity['labels']['en']['value'];
-			}
 		}
 		$names = array();
 		foreach ( $found as $country => $list ) {
@@ -383,13 +378,52 @@ class Sloc_Address_Format_Builder {
 			}
 		}
 		ksort( $names );
-		foreach ( $english as $country => $list ) {
-			ksort( $english[ $country ] );
+		return array( 'names' => $names );
+	}
+
+	/**
+	 * Builds country and region names by language from Wikidata labels, for showing them in a site's language.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param array      $countries ISO 3166-1 alpha-2 code => Wikidata item ID.
+	 * @param array      $regions   ISO 3166-2 code, such as BG-02, => Wikidata item ID.
+	 * @param array      $entities  Item ID => entity, with 'labels' (language => array with 'value').
+	 * @param string[]   $languages Language codes to build.
+	 * @param array|null $iso       Optional. ISO 3166-2 codes without the country prefix, by country; regions not among
+	 *                              them, and countries without an entry, are left out. Default keeps all.
+	 * @return array Language => 'countries' (code => name) and 'regions' (ISO 3166-2 code => name); languages without
+	 *               any name are left out.
+	 */
+	public static function localized_names( $countries, $regions, $entities, $languages, $iso = null ) {
+		$names = array();
+		foreach ( $languages as $language ) {
+			$list = array(
+				'countries' => array(),
+				'regions'   => array(),
+			);
+			foreach ( $countries as $code => $id ) {
+				$label = $entities[ $id ]['labels'][ $language ]['value'] ?? null;
+				if ( is_string( $label ) && '' !== $label && preg_match( '/^[A-Z]{2}$/', (string) $code ) ) {
+					$list['countries'][ $code ] = $label;
+				}
+			}
+			foreach ( $regions as $code => $id ) {
+				$label = $entities[ $id ]['labels'][ $language ]['value'] ?? null;
+				if ( ! is_string( $label ) || '' === $label || ! preg_match( '/^([A-Z]{2})-([A-Z0-9]{1,3})$/', (string) $code, $match ) ) {
+					continue;
+				}
+				if ( is_array( $iso ) && ! in_array( $match[2], $iso[ $match[1] ] ?? array(), true ) ) {
+					continue;
+				}
+				$list['regions'][ $code ] = $label;
+			}
+			if ( $list['countries'] || $list['regions'] ) {
+				ksort( $list['countries'] );
+				ksort( $list['regions'] );
+				$names[ $language ] = $list;
+			}
 		}
-		ksort( $english );
-		return array(
-			'names'   => $names,
-			'english' => $english,
-		);
+		return $names;
 	}
 }

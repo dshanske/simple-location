@@ -250,6 +250,7 @@ class Simple_Location_Plugin {
 			'class-sloc-weather-archive.php', // Weather views of archives.
 			'trait-geolocation-trait.php', // Geolocation Trait.
 			'class-sloc-address-format.php', // Per-country address conventions.
+			'class-sloc-address-finisher.php', // The site's country choices and names in its language, for every address.
 			'trait-sloc-osm-address.php', // Nominatim-style OpenStreetMap address parsing.
 			'trait-sloc-osm-geo.php', // The same, for geo providers.
 			'trait-sloc-osm-venue.php', // The same, for venue providers.

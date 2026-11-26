@@ -25,7 +25,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-venue-provider.php:698](https://github.com/dshanske/simple-location/blob/trunk/includes/class-venue-provider.php#L698)
+- [includes/class-venue-provider.php:701](https://github.com/dshanske/simple-location/blob/trunk/includes/class-venue-provider.php#L701)
 ```php
 apply_filters( 'sloc_venue_category', $match, $card )
 ```

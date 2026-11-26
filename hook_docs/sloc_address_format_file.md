@@ -19,7 +19,7 @@ add_filter(
 
 ## Files
 
-- [includes/class-sloc-address-format.php:52](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-address-format.php#L52)
+- [includes/class-sloc-address-format.php:60](https://github.com/dshanske/simple-location/blob/trunk/includes/class-sloc-address-format.php#L60)
 ```php
 apply_filters( 'sloc_address_format_file', plugin_dir_path( __DIR__ ) . 'data/address-formats.json' )
 ```
