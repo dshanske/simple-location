@@ -30,36 +30,12 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 	const OPTION = 'sloc_traccar_geocoder_servers';
 
 	/**
-	 * Setting holding the search distance, in meters.
-	 *
-	 * @since 6.5.0
-	 * @var string
-	 */
-	const DISTANCE_OPTION = 'sloc_traccar_geocoder_distance';
-
-	/**
-	 * Largest search distance accepted, in meters.
-	 *
-	 * @since 6.5.0
-	 * @var int
-	 */
-	const MAX_DISTANCE = 1000;
-
-	/**
 	 * Servers to ask, in order.
 	 *
 	 * @since 6.5.0
 	 * @var array[] Each has 'url', without a trailing slash, and 'key'.
 	 */
 	protected array $servers = array();
-
-	/**
-	 * Search distance in meters, or 0 for the server's default.
-	 *
-	 * @since 6.5.0
-	 * @var int
-	 */
-	protected int $distance = 0;
 
 	/**
 	 * Constructor.
@@ -69,8 +45,7 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 	 * @param array $args {
 	 *     Arguments. See Geo_Provider::__construct() for the others.
 	 *
-	 *     @type array[] $servers  Servers, each with 'url' and 'key'. Default the servers setting.
-	 *     @type int     $distance Search distance in meters, or 0 for the server's default. Default the setting.
+	 *     @type array[] $servers Servers, each with 'url' and 'key'. Default the servers setting.
 	 * }
 	 */
 	public function __construct( $args = array() ) {
@@ -79,8 +54,7 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 		$this->url         = 'https://www.traccar.org/product/geocoder/';
 		$this->description = __( 'Traccar Geocoder is an open source reverse geocoder for OpenStreetMap data, which you run yourself or use as Traccar\'s paid hosted service. List several servers, each with its own API key, and they are asked in order. It can\'t look up an address, so add another provider after it for that.', 'simple-location' );
 
-		$this->servers  = self::sanitize_servers( $args['servers'] ?? get_option( self::OPTION ) );
-		$this->distance = self::sanitize_distance( $args['distance'] ?? get_option( self::DISTANCE_OPTION ) );
+		$this->servers = self::sanitize_servers( $args['servers'] ?? get_option( self::OPTION ) );
 
 		parent::__construct( $args );
 	}
@@ -102,17 +76,6 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 				'sanitize_callback' => array( __CLASS__, 'save_servers' ),
 			)
 		);
-		register_setting(
-			'sloc_api',
-			self::DISTANCE_OPTION,
-			array(
-				'type'              => 'integer',
-				'description'       => 'Traccar Geocoder Search Distance',
-				'show_in_rest'      => false,
-				'default'           => 0,
-				'sanitize_callback' => array( __CLASS__, 'sanitize_distance' ),
-			)
-		);
 	}
 
 	/**
@@ -129,17 +92,6 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 			'sloc_api',
 			'sloc_api',
 			array( 'label_for' => self::OPTION )
-		);
-		add_settings_field(
-			self::DISTANCE_OPTION,
-			__( 'Traccar Geocoder Search Distance', 'simple-location' ),
-			array( 'Loc_Config', 'number_callback' ),
-			'sloc_api',
-			'sloc_api',
-			array(
-				'label_for'   => self::DISTANCE_OPTION,
-				'description' => __( 'Optional. How far from a location to look for a street or address, in meters. 0 uses the server\'s default, 75 meters.', 'simple-location' ),
-			)
 		);
 	}
 
@@ -251,21 +203,6 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 	}
 
 	/**
-	 * Sanitizes the search distance.
-	 *
-	 * @since 6.5.0
-	 *
-	 * @param mixed $value Distance in meters.
-	 * @return int Distance from 0, for the server's default, to MAX_DISTANCE.
-	 */
-	public static function sanitize_distance( $value ) {
-		if ( ! is_numeric( $value ) ) {
-			return 0;
-		}
-		return max( 0, min( self::MAX_DISTANCE, (int) $value ) );
-	}
-
-	/**
 	 * Returns the saved servers.
 	 *
 	 * @since 6.5.0
@@ -335,9 +272,6 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 				'lon' => $this->longitude,
 				'key' => $server['key'],
 			);
-			if ( $this->distance > 0 ) {
-				$query['distance'] = $this->distance;
-			}
 			$json = $this->fetch_json( $server['url'] . '/reverse', $query );
 			if ( is_wp_error( $json ) ) {
 				Sloc_Provider_Errors::record( 'geo', $this->for_server( $server ), $json );
@@ -434,6 +368,9 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 	/**
 	 * Converts an answer to microformats2 address properties.
 	 *
+	 * A server built from extracts smaller than a country, such as US states, doesn't have the country's boundary,
+	 * so its answers have no country. The country code then comes from the location instead.
+	 *
 	 * @since 6.5.0
 	 *
 	 * @param array $json Answer, with 'address'.
@@ -442,6 +379,9 @@ class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
 	protected function address_to_mf( $json ) {
 		$address      = $json['address'];
 		$country_code = strtoupper( (string) ( $address['country_code'] ?? '' ) );
+		if ( '' === $country_code ) {
+			$country_code = self::country_for_location( $this->latitude, $this->longitude );
+		}
 		$number       = (string) ( $address['house_number'] ?? '' );
 		$street       = (string) ( $address['road'] ?? '' );
 		$street_addr  = self::house_number( $country_code ) ? $number . ' ' . $street : $street . ' ' . $number;
