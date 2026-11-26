@@ -62,6 +62,7 @@
 ## class-sloc-address-format.php
 
 - [`sloc_address_format_file`](sloc_address_format_file) Filters the path of the address format table.
+- [`sloc_region_names_file`](sloc_region_names_file) Filters the path of the region names built from Wikidata.
 
 ## class-sloc-geojson.php
 

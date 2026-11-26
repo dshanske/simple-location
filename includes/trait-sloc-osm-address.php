@@ -172,7 +172,7 @@ trait Sloc_OSM_Address {
 		$region = ( '00' !== ( $place['region_code'] ?? '' ) ) ? (string) ( $place['region'] ?? '' ) : '';
 		if ( empty( $addr['region'] ) && '' !== $region ) {
 			$addr['region']      = $region;
-			$addr['region-code'] = self::region_code( $region, $addr['country-code'] );
+			$addr['region-code'] = self::osm_region_name_code( $region, $addr['country-code'] )[1];
 			$state               = '';
 		}
 		if ( empty( $addr['locality'] ) && ! self::osm_other_region( $region, (string) $state, $addr['country-code'] ) ) {

@@ -65,7 +65,8 @@ class Sloc_Address_Format_Builder {
 	 * @param array $iso          Optional. ISO 3166-2 codes without the country prefix, by country; region and county
 	 *                            codes not among them are left out, so codes are always ISO codes. Default keeps all.
 	 * @return array Table: 'source', and 'countries', keyed by country code (left out when there's nothing to say), each with 'number_first' (bool, or absent
-	 *               when the template doesn't say), 'region' (address key, or absent), 'rules' (each component, pattern
+	 *               when the template doesn't say), 'region' (address key, or absent), 'region_code' (true when addresses
+	 *               show the region's code, such as NY, rather than its name), 'rules' (each component, pattern
 	 *               and replacement), 'states' and 'counties' (lowercased name => code).
 	 */
 	public static function build( $worldwide, $state_codes, $county_codes, $source = array(), $iso = null ) {
@@ -82,6 +83,7 @@ class Sloc_Address_Format_Builder {
 				array(
 					'number_first' => $number,
 					'region'       => $region ?? self::region_component( is_string( $config['fallback_template'] ?? null ) ? $config['fallback_template'] : '' ),
+					'region_code'  => $region && self::region_component( $main, true ) ? true : null,
 					'rules'        => self::rules( $config, $code ),
 					'states'       => self::codes( $state_codes[ $code ] ?? array(), is_array( $iso ) ? ( $iso[ $code ] ?? array() ) : null ),
 					'counties'     => self::codes( $county_codes[ $code ] ?? array(), is_array( $iso ) ? ( $iso[ $code ] ?? array() ) : null ),
@@ -150,9 +152,11 @@ class Sloc_Address_Format_Builder {
 	 * @since 6.5.0
 	 *
 	 * @param string $template Template.
+	 * @param bool   $code     Optional. Whether to return the key only when the template shows the region's code, such
+	 *                         as state_code for "Albany, NY". Default false.
 	 * @return string|null Address key, such as state or county, or null if the template names none.
 	 */
-	public static function region_component( $template ) {
+	public static function region_component( $template, $code = false ) {
 		$template = preg_replace_callback(
 			'/\{\{#first\}\}(.*?)\{\{\/first\}\}/s',
 			function ( $match ) {
@@ -164,7 +168,7 @@ class Sloc_Address_Format_Builder {
 		preg_match_all( '/\{\{\{([a-z_]+)\}\}\}/', (string) $template, $names );
 		foreach ( $names[1] as $name ) {
 			if ( isset( self::REGION_COMPONENTS[ $name ] ) ) {
-				return self::REGION_COMPONENTS[ $name ];
+				return ! $code || '_code' === substr( $name, -5 ) ? self::REGION_COMPONENTS[ $name ] : null;
 			}
 		}
 		return null;
@@ -249,5 +253,128 @@ class Sloc_Address_Format_Builder {
 	 */
 	public static function normalize( $name ) {
 		return function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $name ), 'UTF-8' ) : strtolower( trim( $name ) );
+	}
+
+	/**
+	 * Language codes to add to, or correct in, OpenCage's country languages, for region names.
+	 *
+	 * OpenCage lists Japan as jp and Belarus as by, and gives India and Morocco fewer languages than their place names
+	 * use in OpenStreetMap.
+	 *
+	 * @since 6.5.0
+	 * @var array
+	 */
+	const EXTRA_LANGUAGES = array(
+		'IN' => array( 'ta', 'te', 'kn', 'ml', 'bn', 'mr', 'gu' ),
+		'MA' => array( 'zgh' ),
+		'DZ' => array( 'zgh' ),
+	);
+
+	/**
+	 * Returns the languages to read region names in, by country: OpenCage's country languages, corrected and added to,
+	 * and English.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param array $country2lang Parsed conf/country2lang.yaml: country code => comma-separated language codes.
+	 * @return array Country code => language codes.
+	 */
+	public static function languages( $country2lang ) {
+		$fix       = array(
+			'jp' => 'ja',
+			'by' => 'be',
+		);
+		$languages = array();
+		foreach ( is_array( $country2lang ) ? $country2lang : array() as $code => $list ) {
+			if ( ! is_string( $code ) || ! preg_match( '/^[A-Z]{2}$/', $code ) ) {
+				continue;
+			}
+			$codes = array();
+			foreach ( explode( ',', is_scalar( $list ) ? (string) $list : '' ) as $language ) {
+				$language = strtolower( trim( $language, " \t\"'" ) );
+				if ( preg_match( '/^[a-z]{2,3}$/', $language ) ) {
+					$codes[] = $fix[ $language ] ?? $language;
+				}
+			}
+			$codes = array_merge( $codes, self::EXTRA_LANGUAGES[ $code ] ?? array(), array( 'en' ) );
+			$codes = array_values( array_unique( $codes ) );
+			sort( $codes );
+			$languages[ $code ] = $codes;
+		}
+		return $languages;
+	}
+
+	/**
+	 * Builds region names from Wikidata: every label and alias, in each country's languages, of the items with an
+	 * ISO 3166-2 code, and each code's English label.
+	 *
+	 * A name that stands for more than one code in a country is left out.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param array      $items     ISO 3166-2 code, such as BG-02, => Wikidata item ID.
+	 * @param array      $entities  Item ID => entity, with 'labels' (language => array with 'value') and 'aliases'
+	 *                              (language => list of arrays with 'value').
+	 * @param array      $languages Country code => language codes. See languages().
+	 * @param array|null $iso       Optional. ISO 3166-2 codes without the country prefix, by country; others are left
+	 *                              out. Default keeps all.
+	 * @return array 'names' (country => lowercased name => code) and 'english' (country => code => English label), with
+	 *               codes without the country prefix.
+	 */
+	public static function region_names( $items, $entities, $languages, $iso = null ) {
+		$found   = array();
+		$english = array();
+		foreach ( $items as $iso_code => $id ) {
+			if ( ! is_string( $iso_code ) || ! preg_match( '/^([A-Z]{2})-([A-Z0-9]{1,3})$/', $iso_code, $match ) ) {
+				continue;
+			}
+			list( , $country, $code ) = $match;
+			if ( is_array( $iso ) && ! in_array( $code, $iso[ $country ] ?? array(), true ) ) {
+				continue;
+			}
+			$entity = $entities[ $id ] ?? null;
+			if ( ! is_array( $entity ) ) {
+				continue;
+			}
+			foreach ( $languages[ $country ] ?? array( 'en' ) as $language ) {
+				$values = array();
+				if ( isset( $entity['labels'][ $language ]['value'] ) ) {
+					$values[] = $entity['labels'][ $language ]['value'];
+				}
+				foreach ( $entity['aliases'][ $language ] ?? array() as $alias ) {
+					if ( isset( $alias['value'] ) ) {
+						$values[] = $alias['value'];
+					}
+				}
+				foreach ( $values as $value ) {
+					if ( is_string( $value ) && '' !== trim( $value ) ) {
+						$found[ $country ][ self::normalize( $value ) ][ $code ] = true;
+					}
+				}
+			}
+			if ( isset( $entity['labels']['en']['value'] ) && is_string( $entity['labels']['en']['value'] ) ) {
+				$english[ $country ][ $code ] = $entity['labels']['en']['value'];
+			}
+		}
+		$names = array();
+		foreach ( $found as $country => $list ) {
+			foreach ( $list as $name => $codes ) {
+				if ( 1 === count( $codes ) ) {
+					$names[ $country ][ $name ] = (string) key( $codes );
+				}
+			}
+			if ( isset( $names[ $country ] ) ) {
+				ksort( $names[ $country ] );
+			}
+		}
+		ksort( $names );
+		foreach ( $english as $country => $list ) {
+			ksort( $english[ $country ] );
+		}
+		ksort( $english );
+		return array(
+			'names'   => $names,
+			'english' => $english,
+		);
 	}
 }

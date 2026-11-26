@@ -483,6 +483,7 @@ The plugin includes data files in its `data` folder, so these lookups don't need
 * Timezone borders: [timezone-boundary-builder](https://github.com/evansiroky/timezone-boundary-builder), with oceans, from [OpenStreetMap](https://www.openstreetmap.org/copyright) data, licensed under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/). The grid built from it in `data/geo/timezones.*` is offered under the same license.
 * Places of at least 1000 people and their regions: [GeoNames](https://www.geonames.org/), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 * Address conventions by country, such as whether the house number comes before the street and which region an address names: [address-formatting](https://github.com/OpenCageData/address-formatting) by OpenCage, licensed under the [MIT License](https://opensource.org/license/mit). `data/address-formats.json` records the version used.
+* Region names in each country's languages, and their English names: [Wikidata](https://www.wikidata.org/), under [CC0](https://creativecommons.org/publicdomain/zero/1.0/), in `data/region-names.json`.
 
 Developers can refresh the station, airport, airline, border, place and address format files with `composer update-data`.
 

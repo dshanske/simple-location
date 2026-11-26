@@ -175,6 +175,8 @@ abstract class Geo_Provider extends Sloc_Provider {
 	 * @since 1.0.0
 	 * @since 6.1.0 A region with the same name as the locality, such as Berlin, and repeated names are left out (#240),
 	 *              except where the region code is customary, such as New York, NY.
+	 * @since 6.5.0 The region code is used only in countries whose addresses show it, such as the United States;
+	 *              elsewhere the region's name, such as Hessen rather than HE.
 	 *
 	 * @param array $reverse Array of MF2 Address Properties.
 	 * @return string|boolean Return Display Name or False if Failed.
@@ -211,8 +213,9 @@ abstract class Geo_Provider extends Sloc_Provider {
 		} elseif ( self::same_name( $reverse['locality'] ?? '', $reverse['region'] ?? '' ) && ! self::keeps_region( $reverse ) ) {
 			// A city that is its own region, such as Berlin, is named once.
 			$text[] = '';
-		} elseif ( array_key_exists( 'region-code', $reverse ) ) {
-				$text[] = $reverse['region-code'];
+		} elseif ( array_key_exists( 'region-code', $reverse ) && ( ! array_key_exists( 'region', $reverse ) || Sloc_Address_Format::shows_region_code( $reverse['country-code'] ?? '' ) ) ) {
+			// The code where addresses use it, such as Albany, NY; elsewhere the name, such as Hessen.
+			$text[] = $reverse['region-code'];
 		} else {
 			$text[] = $reverse['region'] ?? '';
 		}

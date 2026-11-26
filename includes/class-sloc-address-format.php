@@ -27,6 +27,14 @@ class Sloc_Address_Format {
 	protected static $table = null;
 
 	/**
+	 * The region names, once read.
+	 *
+	 * @since 6.5.0
+	 * @var array|null
+	 */
+	protected static $names = null;
+
+	/**
 	 * Returns the path of the table.
 	 *
 	 * @since 6.5.0
@@ -51,6 +59,33 @@ class Sloc_Address_Format {
 	 */
 	public static function reset() {
 		self::$table = null;
+		self::$names = null;
+	}
+
+	/**
+	 * Returns the region names built from Wikidata in data/region-names.json, read only when needed.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @return array 'names' (country => lowercased name => code) and 'english' (country => code => English name).
+	 */
+	protected static function names() {
+		if ( null === self::$names ) {
+			/**
+			 * Filters the path of the region names built from Wikidata.
+			 *
+			 * @since 6.5.0
+			 *
+			 * @param string $file Path of data/region-names.json.
+			 */
+			$file        = (string) apply_filters( 'sloc_region_names_file', plugin_dir_path( __DIR__ ) . 'data/region-names.json' );
+			$json        = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- A local file.
+			self::$names = array(
+				'names'   => is_array( $json['names'] ?? null ) ? $json['names'] : array(),
+				'english' => is_array( $json['english'] ?? null ) ? $json['english'] : array(),
+			);
+		}
+		return self::$names;
 	}
 
 	/**
@@ -82,6 +117,25 @@ class Sloc_Address_Format {
 	public static function number_first( $country_code ) {
 		$entry = self::country( $country_code );
 		return isset( $entry['number_first'] ) ? (bool) $entry['number_first'] : true;
+	}
+
+	/**
+	 * Returns whether addresses show the region's code, such as NY in "Albany, NY", rather than its name.
+	 *
+	 * True for the United States, Canada, Australia, Brazil, Mexico, Italy (province codes such as RM) and a few
+	 * others. Without the table, true, as before it existed.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param string $country_code Country code.
+	 * @return bool Whether they do.
+	 */
+	public static function shows_region_code( $country_code ) {
+		$entry = self::country( $country_code );
+		if ( empty( self::$table ) ) {
+			return true;
+		}
+		return ! empty( $entry['region_code'] );
 	}
 
 	/**
@@ -124,19 +178,46 @@ class Sloc_Address_Format {
 	}
 
 	/**
-	 * Returns the code of a region or county by name, in any of the languages the table has.
+	 * Returns the ISO 3166-2 code of a region or county by name, in the country's languages or English.
+	 *
+	 * OpenCage's names come first, then Wikidata's, which cover the regions of about 200 countries in their own
+	 * languages, such as Бургас for BG-02 or מחוז הדרום for IL-D.
 	 *
 	 * @since 6.5.0
 	 *
 	 * @param string $country_code Country code.
 	 * @param string $name         Name, such as Bavaria or Bayern.
-	 * @param string $kind         Optional. 'state' or 'county'. Default 'state'.
-	 * @return string|null Code, such as BY, or null if it isn't known.
+	 * @param string $kind         Optional. 'state' or 'county', which of OpenCage's lists to look in first. Default
+	 *                             'state'.
+	 * @return string|null Code without the country, such as BY, or null if it isn't known.
 	 */
 	public static function code( $country_code, $name, $kind = 'state' ) {
-		$entry = self::country( $country_code );
-		$list  = 'county' === $kind ? ( $entry['counties'] ?? array() ) : ( $entry['states'] ?? array() );
-		$key   = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( (string) $name ), 'UTF-8' ) : strtolower( trim( (string) $name ) );
-		return is_array( $list ) && isset( $list[ $key ] ) ? (string) $list[ $key ] : null;
+		$country = strtoupper( (string) $country_code );
+		$entry   = self::country( $country );
+		$list    = 'county' === $kind ? ( $entry['counties'] ?? array() ) : ( $entry['states'] ?? array() );
+		$key     = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( (string) $name ), 'UTF-8' ) : strtolower( trim( (string) $name ) );
+		if ( '' === $key ) {
+			return null;
+		}
+		if ( is_array( $list ) && isset( $list[ $key ] ) ) {
+			return (string) $list[ $key ];
+		}
+		$names = self::names()['names'][ $country ] ?? array();
+		return is_array( $names ) && isset( $names[ $key ] ) ? (string) $names[ $key ] : null;
+	}
+
+	/**
+	 * Returns the English name of a region, from Wikidata, such as Southern District for IL-D.
+	 *
+	 * @since 6.5.0
+	 *
+	 * @param string $country_code Country code.
+	 * @param string $code         Region code without the country, such as D.
+	 * @return string|null English name, or null if it isn't known.
+	 */
+	public static function english_region( $country_code, $code ) {
+		$names = self::names()['english'][ strtoupper( (string) $country_code ) ] ?? array();
+		$code  = strtoupper( (string) $code );
+		return is_array( $names ) && isset( $names[ $code ] ) && is_string( $names[ $code ] ) ? $names[ $code ] : null;
 	}
 }
