@@ -8,15 +8,15 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Converts a Nominatim-style `address` object to microformats2 address properties.
+ * Reads a Nominatim-style `address` object into microformats2 address properties.
  *
- * Nominatim, LocationIQ and Traccar Geocoder all answer with OpenStreetMap data in this format, so they share one
- * parser. It cleans what OpenStreetMap data holds as entered: several values separated by semicolons, US postcodes
- * that lost a leading zero, administrative districts given as a suburb, and "Village of" style names. What an answer
- * leaves out, such as the country from a server built from US state extracts, or the city in New York City's
- * boroughs, is filled in from the location and the bundled place data.
+ * Nominatim, LocationIQ and Traccar Geocoder all answer with OpenStreetMap data in this format, for addresses and for
+ * venues, so they share one parser. It cleans what OpenStreetMap data holds as entered: several values separated by
+ * semicolons, US postcodes that lost a leading zero, administrative districts given as a suburb or city, and
+ * "Village of" style names. What an answer leaves out, such as the country from a server built from US state extracts,
+ * or the city in New York City's boroughs, is filled in from the location and the bundled place data.
  *
- * Used by classes extending Geo_Provider.
+ * Used through Sloc_OSM_Geo by geo providers and Sloc_OSM_Venue by venue providers.
  *
  * @since 6.5.0
  */
@@ -34,27 +34,34 @@ trait Sloc_OSM_Address {
 	}
 
 	/**
-	 * Converts an answer to microformats2 address properties.
+	 * Reads the address of an answer.
 	 *
-	 * @since 6.5.0 Moved from Geo_Provider_Nominatim::address_to_mf() and shared with Traccar Geocoder.
+	 * @since 6.5.0
 	 *
-	 * @param array $json Answer, with 'address'.
-	 * @return array Microformats2 address elements, or an empty array without an address.
+	 * @param array      $json      Answer, with 'address'.
+	 * @param float|null $latitude  Optional. Latitude of the place, to fill in what the answer leaves out. Default the
+	 *                              provider's.
+	 * @param float|null $longitude Optional. Longitude of the place. Default the provider's.
+	 * @return array Address properties: name, street-number, street, street-address, extended-address, locality, region,
+	 *               region-code, country-name, postal-code and country-code, each only when known. Empty without an
+	 *               address.
 	 */
-	protected function osm_address_to_mf( $json ) {
+	protected function osm_address( $json, $latitude = null, $longitude = null ) {
 		if ( ! is_array( $json ) || ! isset( $json['address'] ) || ! is_array( $json['address'] ) ) {
 			return array();
 		}
-		$address = array_map( array( __CLASS__, 'osm_value' ), array_filter( $json['address'], 'is_scalar' ) );
+		$latitude  = $latitude ?? $this->latitude;
+		$longitude = $longitude ?? $this->longitude;
+		$address   = array_map( array( __CLASS__, 'osm_value' ), array_filter( $json['address'], 'is_scalar' ) );
 
 		$country_code = strtoupper( $address['country_code'] ?? '' );
 		if ( '' === $country_code ) {
 			// A server built from extracts smaller than a country, such as US states, has no country boundary.
-			$country_code = self::country_for_location( $this->latitude, $this->longitude );
+			$country_code = self::country_for_location( $latitude, $longitude );
 		}
 		if ( '' === $country_code && class_exists( 'Sloc_Offline_Geo' ) ) {
 			// Small islands and coastal waters can fall outside the bundled country borders.
-			$place        = Sloc_Offline_Geo::place( $this->latitude, $this->longitude );
+			$place        = Sloc_Offline_Geo::place( $latitude, $longitude );
 			$country_code = $place ? (string) $place['country'] : '';
 		}
 
@@ -110,18 +117,14 @@ trait Sloc_OSM_Address {
 			'country-name'     => $address['country'] ?? null,
 			'postal-code'      => self::osm_postcode( $address['postcode'] ?? '', $country_code ),
 			'country-code'     => $country_code,
-			'latitude'         => $this->latitude,
-			'longitude'        => $this->longitude,
-			'altitude'         => $this->altitude,
-			'raw'              => $json,
 		);
-		$addr = $this->osm_fill_place( $addr, $address['state'] ?? '' );
+		$addr = $this->osm_fill_place( $addr, $address['state'] ?? '', $latitude, $longitude );
 
 		// A suburb names the part of the city, or stands in for a city the answer and the place data don't have.
 		if ( $suburb ) {
 			if ( empty( $addr['locality'] ) ) {
 				$addr['locality'] = $suburb;
-			} elseif ( empty( $addr['extended-address'] ) && ! self::same_name( $suburb, $addr['locality'] ) ) {
+			} elseif ( empty( $addr['extended-address'] ) && ! Geo_Provider::same_name( $suburb, $addr['locality'] ) ) {
 				$addr['extended-address'] = $suburb;
 			}
 		}
@@ -131,19 +134,7 @@ trait Sloc_OSM_Address {
 		if ( empty( $addr['country-name'] ) ) {
 			$addr['country-name'] = self::country_name( $country_code );
 		}
-		if ( isset( $json['extratags'] ) && is_array( $json['extratags'] ) ) {
-			$addr['url']   = $json['extratags']['website'] ?? null;
-			$addr['photo'] = $json['extratags']['image'] ?? null;
-		}
-		$addr = array_filter( $addr );
-		if ( ! array_key_exists( 'display-name', $addr ) ) {
-			$addr['display-name'] = $this->display_name( $addr );
-		}
-		$tz = $this->timezone();
-		if ( $tz ) {
-			$addr = array_merge( $addr, $tz );
-		}
-		return $addr;
+		return array_filter( $addr );
 	}
 
 	/**
@@ -155,15 +146,17 @@ trait Sloc_OSM_Address {
 	 *
 	 * @since 6.5.0
 	 *
-	 * @param array  $addr  Address properties.
-	 * @param string $state Optional. The answer's state, or other first-level division.
+	 * @param array      $addr      Address properties.
+	 * @param string     $state     Optional. The answer's state, or other first-level division.
+	 * @param float|null $latitude  Optional. Latitude. Default the provider's.
+	 * @param float|null $longitude Optional. Longitude. Default the provider's.
 	 * @return array Address properties.
 	 */
-	protected function osm_fill_place( $addr, $state = '' ) {
+	protected function osm_fill_place( $addr, $state = '', $latitude = null, $longitude = null ) {
 		if ( ( ! empty( $addr['locality'] ) && ! empty( $addr['region'] ) ) || empty( $addr['country-code'] ) || ! class_exists( 'Sloc_Offline_Geo' ) ) {
 			return $addr;
 		}
-		$place = Sloc_Offline_Geo::place( $this->latitude, $this->longitude, $addr['country-code'] );
+		$place = Sloc_Offline_Geo::place( $latitude ?? $this->latitude, $longitude ?? $this->longitude, $addr['country-code'] );
 		if ( ! $place ) {
 			return $addr;
 		}
@@ -192,7 +185,7 @@ trait Sloc_OSM_Address {
 	 * @return bool Whether they are different regions.
 	 */
 	protected static function osm_other_region( $region, $other, $country_code ) {
-		if ( '' === $region || '' === $other || self::same_name( $region, $other ) ) {
+		if ( '' === $region || '' === $other || Geo_Provider::same_name( $region, $other ) ) {
 			return false;
 		}
 		$code       = self::region_code( $region, $country_code );

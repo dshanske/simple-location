@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 6.5.0
  */
 class Geo_Provider_Traccar_Geocoder extends Geo_Provider {
-	use Sloc_OSM_Address;
+	use Sloc_OSM_Geo;
 
 
 	/**

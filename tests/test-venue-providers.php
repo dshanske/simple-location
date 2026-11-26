@@ -437,6 +437,44 @@ class VenueProvidersTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Venues share the Nominatim-format address parser: multiple values are cleaned, and what the place leaves out is
+	 * filled in from its own location (#863).
+	 */
+	public function test_venue_shared_parser() {
+		$fixture        = $this->fixture( 'geo/nominatim-reverse.json' );
+		$fixture['lat'] = '40.6731';
+		$fixture['lon'] = '-73.8174';
+		$fixture['address'] = array(
+			'shop'         => 'Corner Store',
+			'house_number' => '115;117',
+			'road'         => '121st Street',
+			'suburb'       => 'Queens Community Board 10',
+			'state'        => 'New York',
+			'county'       => 'Queens County',
+			'postcode'     => '11420;11421',
+		);
+		unset( $fixture['name'] );
+		$this->mock_http( array( 'nominatim.openstreetmap.org/reverse' => array( 'body' => $fixture ) ) );
+		$card = $this->provider( 'Venue_Provider_Nominatim' )->reverse_lookup()['items'][0];
+		$this->assertSame( 'card', $card['type'] );
+		$this->assertSame( 'Corner Store', $card['name'] );
+		$this->assertSame( '115-117 121st Street', $card['street-address'] );
+		$this->assertSame( '11420', $card['postal-code'] );
+		$this->assertSame( 'US', $card['country-code'] );
+		$this->assertSame( 'NY', $card['region-code'] );
+		$this->assertSame( 'Queens', $card['locality'] );
+		$this->assertArrayNotHasKey( 'extended-address', $card );
+		$this->assertSame( 40.6731, $card['latitude'] );
+		$this->assertArrayNotHasKey( 'display-name', $card, 'Venues have no display name.' );
+
+		// Without an address there is no venue card, and no error.
+		$fixture = $this->fixture( 'venue/locationiq-nearby.json' );
+		unset( $fixture[0]['address'] );
+		$this->mock_http( array( 'us1.locationiq.com/v1/nearby' => array( 'body' => $fixture ) ) );
+		$this->assertIsArray( $this->provider( 'Venue_Provider_LocationIQ', array( 'api' => 'KEY' ) )->reverse_lookup() );
+	}
+
+	/**
 	 * LocationIQ needs a key, and error objects or malformed items don't cause errors.
 	 */
 	public function test_locationiq_errors() {

@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class Geo_Provider_Nominatim extends Geo_Provider {
 	use Sloc_API_Nominatim;
-	use Sloc_OSM_Address;
+	use Sloc_OSM_Geo;
 
 	/**
 	 * Constructor for the Abstract Class.
