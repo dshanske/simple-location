@@ -3,7 +3,7 @@ Contributors: dshanske
 Tags: geolocation, timezones, maps, location, weather
 Requires at least: 6.2
 Tested up to: 7.1
-Stable tag: 6.4.0
+Stable tag: 6.5.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -507,6 +507,10 @@ Developers can refresh the station, airport, airline, border, place and address 
 
 == Upgrade Notice ==
 
+= 6.5.0 =
+
+Adds Traccar Geocoder and an Offline provider. Addresses follow each country's conventions: house number order, region and names in your site's language. Tools > Location Repair brings older location data up to date; preview before repairing.
+
 = 6.4.0 =
 
 The experimental Micropub q=geo query is back, without venues, which q=places lists: it gives a location's coordinates, Plus Code, elevation, timezone, local time, address and a static map, from coordinates, a post's URL, an airport code or a Plus Code. q=places takes an offset, a radius and a filter to find places by name, and lists your own venues with how often you have been there, then your venue provider's places in its own order. A Micropub check-in at a venue keeps the location visibility the client asked for.
@@ -532,6 +536,18 @@ The Met Office provider has been removed; if you used it, choose another weather
 Requires PHP 7.4, WordPress 6.2 or ClassicPress 2.7. The Bing providers and MapQuest elevation have been removed because their services were retired; if you used one, choose another provider in Settings. Many fixes to location visibility and permissions.
 
 == Changelog ==
+
+= 6.5.0 ( 2026-11-26 ) =
+* Add the Traccar Geocoder provider, with several servers asked in order (#859)
+* Add an offline country, place and timezone lookup from bundled data, and an Offline geo provider that sends nothing anywhere (#861)
+* Fill a missing country, region or town from the location, for answers from partial extracts and places such as New York City's boroughs (#863, #875)
+* Share one parser for Nominatim, LocationIQ and Traccar Geocoder addresses and venues, cleaning multiple values, district names and postcodes (#863)
+* Follow each country's address conventions from OpenCage address-formatting: the house number now follows the street in about 120 countries, and the region is the one addresses name (#865)
+* Show region codes in display names only where addresses use them, such as the United States; elsewhere the region's name (#865)
+* Show country and region names in the site's language, keeping the provider's names (#868)
+* Let a site choose a location's country with the SLOC_COUNTRY_CODES constant and the sloc_country_codes and sloc_country_for_location filters (#867)
+* Add Tools > Location Repair and wp location repair, to bring older location data up to date with a preview first (#870)
+* Fix a region name containing a shorter region's name getting that region's code, such as Sofia City (#872)
 
 = 6.4.0 ( 2026-11-09 ) =
 * Bring back the experimental Micropub q=geo query, without venues: a location's coordinates, Plus Code, elevation, timezone, local time, address as an h-card and a static map link that never holds your provider's API key, from coordinates, a geo URI, a post's URL, an airport's IATA code or a Plus Code
